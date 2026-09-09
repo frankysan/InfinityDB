@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Infinity: Build dataset",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": [
+        "-m",
+        "infinity_army_data",
+        "build",
+        "${input:armySource}",
+        "--output-dir",
+        "${workspaceFolder}/data/generated",
+        "--compact"
+      ],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: Tests",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["-m", "pytest", "-q"],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: Ruff",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["-m", "ruff", "check", "src", "tests"],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "armySource",
+      "type": "promptString",
+      "description": "Path to Infinity Army JSON directory or ZIP archive",
+      "default": "${workspaceFolder}/data/raw/JSON 20260909.zip"
+    }
+  ]
+}

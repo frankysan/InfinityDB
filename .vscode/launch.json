@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Infinity: Build dataset",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "infinity_army_data",
+      "args": [
+        "build",
+        "${workspaceFolder}/data/raw/JSON 20260909.zip",
+        "--output-dir",
+        "${workspaceFolder}/data/generated",
+        "--compact"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
