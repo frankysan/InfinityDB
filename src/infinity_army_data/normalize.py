@@ -164,11 +164,11 @@ def main_army_id(canonical_faction_id: Any, faction_ids: set[int]) -> int | None
     """Resolve canonical ownership to its whole-army group ID (``xx01``)."""
     if not isinstance(canonical_faction_id, int):
         return None
-    # The legacy top-level faction IDs (1 through 9) precede the modern army
-    # namespace: PanOceania's canonical 1, for example, is army group 101.
+    # Canonical 1 is the legacy mercenary designation, which corresponds to
+    # Non-Aligned Armies rather than PanOceania.  Other canonical IDs use the
+    # current hundred-based army namespace.
     candidate = (
-        canonical_faction_id * 100 + 1
-        if 0 < canonical_faction_id < 100
+        901 if canonical_faction_id == 1
         else canonical_faction_id - canonical_faction_id % 100 + 1
     )
     return candidate if candidate in faction_ids and candidate % 100 == 1 else None

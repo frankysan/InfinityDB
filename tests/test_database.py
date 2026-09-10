@@ -169,7 +169,7 @@ def test_main_army_resolves_canonical_sectorials_to_whole_armies(normalized: dic
     # A sectorial canonical ID resolves to its parent xx01 list, not the
     # sectorial itself.
     assert main_army_id(202, {101, 201, 202}) == 201
-    assert main_army_id(1, {101, 201}) == 101
+    assert main_army_id(1, {101, 201, 901}) == 901
     assert main_army_id(998, {901, 998}) == 901
     assert main_army_id(999, {101, 201}) is None
 
