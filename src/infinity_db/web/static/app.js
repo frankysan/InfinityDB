@@ -1,5 +1,6 @@
 import { getArmies, getUnits } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
+import { unitSymbol } from "./unit-symbols.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -90,7 +91,10 @@ function renderUnits(data) {
     const nameLink = document.createElement("a");
     nameLink.href = `/units/${unit.id}`;
     nameLink.textContent = unit.name;
-    nameCell.append(nameLink);
+    const nameContent = document.createElement("span");
+    nameContent.className = "unit-name-content";
+    nameContent.append(unitSymbol(unit.slug || unit.isc || unit.name), nameLink);
+    nameCell.append(nameContent);
     const armyCell = document.createElement("td");
     const armyList = document.createElement("div");
     armyList.className = "army-tags";

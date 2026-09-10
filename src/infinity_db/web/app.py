@@ -20,11 +20,48 @@ ASSETS = {
     "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
     "/static/army-symbols.js": ("army-symbols.js", "text/javascript; charset=utf-8"),
+    "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
 }
 ARMY_SYMBOL_PATH = re.compile(
     r"/static/army-symbols/(?:[A-Za-z0-9 ._-]+/)*[A-Za-z0-9 ._-]+\.svg"
 )
+UNIT_SYMBOL_PATH = re.compile(r"/static/unit-symbols/([a-z0-9-]+)\.svg")
+
+
+def _unit_symbol_paths(directory) -> dict[str, object]:
+    """Index symbol files without exposing their source directory structure."""
+    paths: dict[str, str] = {}
+    for asset in directory.iterdir():
+        if asset.is_dir():
+            paths.update(_unit_symbol_paths(asset))
+        elif asset.name.endswith(".svg"):
+            stem = asset.name.removesuffix(".svg")
+            slug = re.sub(r"-(?:[0-9]+|null)-1$", "", stem)
+            paths.setdefault(slug, asset)
+    return paths
+
+
+UNIT_SYMBOLS = _unit_symbol_paths(files("infinity_db.web").joinpath("static", "unit-symbols"))
+
+
+def _singular_slug(slug: str) -> str:
+    return "-".join(part.removesuffix("s") if len(part) > 3 else part for part in slug.split("-"))
+
+
+def _unit_symbol_asset(slug: str):
+    """Find a supplied symbol for a display name or its more specific variant."""
+    if asset := UNIT_SYMBOLS.get(slug):
+        return asset
+    singular = _singular_slug(slug)
+    if asset := UNIT_SYMBOLS.get(singular):
+        return asset
+    candidates = [
+        (key, asset) for key, asset in UNIT_SYMBOLS.items()
+        if singular.startswith(_singular_slug(key) + "-")
+        or _singular_slug(key).startswith(singular + "-")
+    ]
+    return max(candidates, key=lambda item: len(item[0]))[1] if candidates else None
 
 
 def _integer(params: dict, key: str, default: int | None, low: int, high: int) -> int | None:
@@ -83,6 +120,14 @@ class Application:
             asset = files("infinity_db.web").joinpath("static", "army-symbols", filename)
             body = asset.read_bytes()
             content_type = "image/svg+xml"
+        elif match := UNIT_SYMBOL_PATH.fullmatch(path):
+            asset = _unit_symbol_asset(match.group(1))
+            if asset is None:
+                status = HTTPStatus.NOT_FOUND
+                payload = {"error": "Resource not found"}
+            else:
+                body = asset.read_bytes()
+                content_type = "image/svg+xml"
         elif re.fullmatch(r"/units/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
             body = files("infinity_db.web").joinpath("static", "unit.html").read_bytes()

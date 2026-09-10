@@ -110,8 +110,11 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: 18px 26px; verti
 tbody tr:last-child > * { border-bottom: 0; }
 tbody tr:hover { background: #f8f9f3; }
 .unit-name { font-size: 13px; font-weight: 550; line-height: 1.6; overflow-wrap: anywhere; color: #2d4134; }
+.unit-name-content { display: inline-flex; align-items: center; gap: 8px; }
 .unit-name a { color: inherit; text-decoration: none; }
 .unit-name a:hover, .unit-name a:focus-visible { color: #087b62; text-decoration: underline; }
+.unit-symbol { width: 24px; height: 24px; flex: 0 0 auto; object-fit: contain; }
+.unit-symbol-detail { width: 42px; height: 42px; margin-right: 12px; vertical-align: -6px; }
 .army-tags { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
 .army-tag { display: inline-block; border: 1px solid #dbe2d1; background: #f1f4e9; color: #536b42; padding: 4px 7px; border-radius: 4px; font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
 .army-symbol { width: 30px; height: 30px; object-fit: contain; border-radius: 4px; }
@@ -181,6 +184,8 @@ tbody tr:hover { background: #f8f9f3; }
   tbody th, tbody td { padding: 16px 17px; }
   .id-column { display: none; }
   .unit-name { font-size: 12px; }
+  .unit-symbol { width: 21px; height: 21px; }
+  .unit-symbol-detail { width: 34px; height: 34px; margin-right: 9px; }
   .army-tag { font-size: 9px; padding: 3px 5px; }
   .army-symbol { width: 26px; height: 26px; }
   .pagination { padding: 15px 17px; }

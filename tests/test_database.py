@@ -149,7 +149,8 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     assert database.list_units(search="missing")["items"] == []
     assert database.list_units(limit=1, offset=1) == {
         "items": [{
-            "id": 1, "name": "Álpha", "source_ids": [1], "army_ids": [101, 201],
+            "id": 1, "name": "Álpha", "isc": None, "slug": "alpha", "source_ids": [1],
+            "army_ids": [101, 201],
             "armies": [
                 {"id": 101, "name": "First Army"},
                 {"id": 201, "name": "Second Army"},
@@ -264,10 +265,14 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
         "100%_Guard", "Álpha", "A-l.p/h+a", "Beta", "Béta", "C.A.T.!", "Unit 4", "Unit 5",
     ]
     assert database.list_units(search="UNIT 4")["items"] == [{
-        "id": 4, "name": "Unit 4", "source_ids": [4], "army_ids": [], "armies": [],
+        "id": 4, "name": "Unit 4", "isc": None, "slug": None, "source_ids": [4],
+        "army_ids": [], "armies": [],
     }]
     assert database.list_units(search="unit", limit=1, offset=1) == {
-        "items": [{"id": 5, "name": "Unit 5", "source_ids": [5], "army_ids": [], "armies": []}],
+        "items": [{
+            "id": 5, "name": "Unit 5", "isc": None, "slug": None, "source_ids": [5], "army_ids": [],
+            "armies": [],
+        }],
         "total": 2, "limit": 1, "offset": 1,
     }
 

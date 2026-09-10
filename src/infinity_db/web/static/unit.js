@@ -1,5 +1,6 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
+import { unitSymbol } from "./unit-symbols.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
@@ -175,6 +176,7 @@ function renderArmyProfile(army, generalByName) {
 function render(unit) {
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
+  name.prepend(unitSymbol(unit.slug || unit.isc || unit.name, "unit-symbol-detail"));
   meta.textContent = [
     unit.isc,
     unit.isc_abbr && `(${unit.isc_abbr})`,

@@ -202,6 +202,18 @@ def test_army_symbol_is_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body
+    status, _, body = request(app, "/static/unit-symbols/clipper-dronbots.svg")
+    assert status == 200
+    assert b"<svg" in body
+
+
+def test_unit_symbol_is_served(app: Callable) -> None:
+    status, headers, body = request(app, "/static/unit-symbols/fusiliers.svg")
+    assert status == 200
+    assert headers["content-type"] == "image/svg+xml"
+    assert b"<svg" in body
+    status, _, _ = request(app, "/static/unit-symbols/not-a-unit.svg")
+    assert status == 404
     status, headers, body = request(
         app, "/static/army-symbols/JSA/hayabusa-reconstructed-transparent.svg"
     )
