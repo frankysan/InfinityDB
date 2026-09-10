@@ -73,6 +73,11 @@ h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.2px; }
 .filters { display: flex; align-items: end; gap: 18px; padding: 24px 26px 25px; }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .field label { font-size: 11px; font-weight: 550; color: #566452; }
+.availability-field { border: 0; padding: 0; margin: 0; min-width: 0; }
+.availability-field legend { padding: 0; font-size: 11px; font-weight: 550; color: #566452; }
+.availability-options { display: flex; gap: 12px; min-height: 42px; align-items: center; }
+.availability-options label { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.availability-options input { width: auto; min-height: 0; accent-color: var(--green); }
 .army-field { flex: 0 1 260px; min-width: 190px; }
 .search-field { flex: 1; min-width: 130px; }
 select, input { min-height: 42px; width: 100%; border: 1px solid #d6ddd1; border-radius: 5px; color: #34443a; background: #fffefa; font-size: 12px; }
@@ -110,6 +115,7 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: 18px 26px; verti
 .unit-detail .army-profile tbody td { padding: 11px 14px; font-size: 11px; }
 .unit-detail .army-profile .stat-different { box-shadow: inset 2px 0 #d79b2d; }
 .unit-detail .army-profile .statline .profile-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
+.unit-detail .army-profile .loadout-table { width: calc(100% - 18px); margin-left: 18px; }
 tbody tr:last-child > * { border-bottom: 0; }
 tbody tr:hover { background: #f8f9f3; }
 .unit-name { font-size: 13px; font-weight: 550; line-height: 1.6; overflow-wrap: anywhere; color: #2d4134; }

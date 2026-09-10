@@ -18,6 +18,7 @@ from .schema import APPLICATION_ID, METADATA_TABLE, ROW_JSON, SCHEMA_VERSION, TA
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
 UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
+AVAILABILITY_FLAGS = ("mercs", "specops", "teamops")
 # Source records whose IDs differ without following either of the general
 # duplicate patterns.  The value is the preferred representative ID.
 UNIT_MERGE_ALIASES = {1345: 1345, 1875: 1345, 11345: 1345}
@@ -70,6 +71,9 @@ def logical_unit_groups(
         group = groups.setdefault(key, {
             "id": row["id"], "name": row["name"], "isc": row["isc"],
             "slug": row["slug"] if "slug" in row.keys() else None,
+            "canonical_faction_id": (
+                row["canonical_faction_id"] if "canonical_faction_id" in row.keys() else None
+            ),
             # The lowest source ID is the logical unit's representative.  This
             # prevents a merged reinforcement/duplicate from replacing the
             # canonical army of the ordinary unit.
@@ -108,6 +112,39 @@ def army_name(row: sqlite3.Row) -> str:
         if derived_name:
             return derived_name
     return f"Army {row['id']}"
+
+
+def unit_optional_modes(group: dict[str, Any]) -> set[str]:
+    """Return optional modes encoded in a dedicated unit's name or slug."""
+    labels = [*group["names"], group.get("slug") or ""]
+    normalized = " ".join(
+        re.sub(r"[^a-z0-9]+", "-", label.casefold()).strip("-")
+        for label in labels
+    )
+    modes = set()
+    if "spec-ops" in normalized or "specops" in normalized:
+        modes.add("specops")
+    if "team-ops" in normalized or "teamops" in normalized:
+        modes.add("teamops")
+    return modes
+
+
+def army_is_available(
+    army: dict[str, Any], group: dict[str, Any], selected_flags: set[str]
+) -> bool:
+    """Return whether an army occurrence needs only enabled optional modes."""
+    if not unit_optional_modes(group) <= selected_flags:
+        return False
+    if (
+        group["canonical_faction_id"] == 1
+        and army["id"] not in group["normal_army_ids"]
+        and "mercs" not in selected_flags
+    ):
+        return False
+    filters = army.get("filters")
+    return not isinstance(filters, dict) or not any(
+        filters.get(flag) for flag in AVAILABILITY_FLAGS if flag not in selected_flags
+    )
 
 
 class Database:
@@ -167,7 +204,7 @@ class Database:
                 "FROM army_lists AS a "
                 "LEFT JOIN army_units AS au ON au.army_id = a.id "
                 "LEFT JOIN units AS u ON u.id = au.unit_id AND u.source_defined = 1 "
-                "GROUP BY a.id ORDER BY casefold(COALESCE(a.name, a.slug, '')), a.id"
+                "GROUP BY a.id ORDER BY a.id"
             ).fetchall()
             return [
                 {
@@ -178,7 +215,8 @@ class Database:
             ]
 
     def list_units(
-        self, army_id: int | None = None, search: str = "", limit: int = 50, offset: int = 0
+        self, army_id: int | None = None, search: str = "", limit: int = 50, offset: int = 0,
+        mercs: bool = False, specops: bool = False, teamops: bool = False,
     ) -> dict[str, Any]:
         if army_id is not None and (
             type(army_id) is not int or not SQLITE_INTEGER_MIN <= army_id <= SQLITE_INTEGER_MAX
@@ -190,30 +228,55 @@ class Database:
             raise ValueError("limit must be an integer between 1 and 500")
         if type(offset) is not int or not 0 <= offset <= SQLITE_INTEGER_MAX:
             raise ValueError("offset must be a nonnegative integer at most 9223372036854775807")
+        selected_flags = {flag for flag, enabled in {
+            "mercs": mercs, "specops": specops, "teamops": teamops,
+        }.items() if enabled}
         with self._connect() as connection:
             rows = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.slug, u.main_army_id "
+                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.slug, u.main_army_id, "
+                "u.canonical_faction_id "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
             if rows:
                 army_rows = connection.execute(
-                    "SELECT au.unit_id, a.id, a.name, a.slug FROM army_units AS au "
+                    "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
                     "JOIN army_lists AS a ON a.id = au.army_id "
                     "ORDER BY a.id"
                 )
                 for army in army_rows:
                     if army["unit_id"] in memberships:
-                        memberships[army["unit_id"]].append(
-                        {"id": army["id"], "name": army_name(army)}
-                        )
+                        try:
+                            filters = json.loads(army["filters"]) if army["filters"] else {}
+                        except (TypeError, json.JSONDecodeError):
+                            filters = {}
+                        memberships[army["unit_id"]].append({
+                            "id": army["id"], "name": army_name(army), "filters": filters,
+                        })
+            normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in rows}
+            faction_rows = connection.execute("SELECT unit_id, faction_id FROM unit_factions")
+            for faction in faction_rows:
+                if faction["unit_id"] in normal_armies_by_unit:
+                    normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
             groups = logical_unit_groups(rows, memberships)
+            for group in groups:
+                group["normal_army_ids"] = set().union(
+                    *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
+                )
             search_key = search.casefold()
-            grouped = [
-                group for group in groups
-                if (army_id is None or army_id in group["armies"])
-                and (not search or any(search_key in name.casefold() for name in group["names"]))
-            ]
+            grouped = []
+            for group in groups:
+                visible_armies = {
+                    id: army for id, army in group["armies"].items()
+                    if army_is_available(army, group, selected_flags)
+                }
+                if group["armies"] and not visible_armies:
+                    continue
+                if army_id is not None and army_id not in visible_armies:
+                    continue
+                if search and not any(search_key in name.casefold() for name in group["names"]):
+                    continue
+                grouped.append({**group, "armies": visible_armies})
             grouped.sort(key=lambda group: (unit_sort_key(group["name"]), group["id"]))
             total = len(grouped)
             items = [
@@ -222,7 +285,11 @@ class Database:
                     "slug": group["slug"],
                     "main_army_id": group["main_army_id"],
                     "source_ids": group["source_ids"],
-                    "army_ids": list(group["armies"]), "armies": list(group["armies"].values()),
+                    "army_ids": list(group["armies"]),
+                    "armies": [
+                        {"id": army["id"], "name": army["name"]}
+                        for army in group["armies"].values()
+                    ],
                 }
                 for group in grouped[offset:offset + limit]
             ]
@@ -288,14 +355,28 @@ class Database:
                 for army in armies
                 for profile in army["profiles"]
             }
-            for occurrence_table, catalog_table, property_name in (
-                ("profile_skills", "skills", "skills"),
-                ("profile_equipment", "equipment", "equipment"),
-                ("profile_weapons", "weapons", "weapons"),
+            for occurrence_table, catalog_table, property_name, extras_table in (
+                ("profile_skills", "skills", "skills", "profile_skill_extras"),
+                ("profile_equipment", "equipment", "equipment", "profile_equipment_extras"),
+                ("profile_weapons", "weapons", "weapons", "profile_weapon_extras"),
             ):
+                extras_by_occurrence: dict[Any, list[dict[str, Any]]] = {}
+                extra_rows = connection.execute(
+                    "SELECT e.occurrence_id, e.extra_id, x.name "
+                    f"FROM {extras_table} AS e "
+                    f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
+                    "LEFT JOIN extras AS x ON x.id = e.extra_id "
+                    f"WHERE o.unit_id IN ({placeholders}) "
+                    "ORDER BY e.occurrence_id, e.position",
+                    source_ids,
+                )
+                for extra in extra_rows:
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append({
+                        "id": extra["extra_id"], "name": extra["name"],
+                    })
                 occurrence_rows = connection.execute(
-                    "SELECT o.army_id, o.group_id, o.profile_id, o.item_id, o.quantity, "
-                    "o.position, c.name "
+                    "SELECT o.occurrence_id, o.army_id, o.group_id, o.profile_id, o.item_id, "
+                    "o.quantity, o.position, c.name "
                     f"FROM {occurrence_table} AS o "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
                     f"WHERE o.unit_id IN ({placeholders}) "
@@ -310,6 +391,7 @@ class Database:
                         profile[property_name].append({
                             "id": occurrence["item_id"], "name": occurrence["name"],
                             "quantity": occurrence["quantity"],
+                            "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
                         })
             loadout_rows = connection.execute(
                 "SELECT o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
@@ -333,14 +415,28 @@ class Database:
                 for army in armies
                 for loadout in army["loadouts"]
             }
-            for occurrence_table, catalog_table, property_name in (
-                ("option_skills", "skills", "skills"),
-                ("option_equipment", "equipment", "equipment"),
-                ("option_weapons", "weapons", "weapons"),
+            for occurrence_table, catalog_table, property_name, extras_table in (
+                ("option_skills", "skills", "skills", "option_skill_extras"),
+                ("option_equipment", "equipment", "equipment", "option_equipment_extras"),
+                ("option_weapons", "weapons", "weapons", "option_weapon_extras"),
             ):
+                extras_by_occurrence = {}
+                extra_rows = connection.execute(
+                    "SELECT e.occurrence_id, e.extra_id, x.name "
+                    f"FROM {extras_table} AS e "
+                    f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
+                    "LEFT JOIN extras AS x ON x.id = e.extra_id "
+                    f"WHERE o.unit_id IN ({placeholders}) "
+                    "ORDER BY e.occurrence_id, e.position",
+                    source_ids,
+                )
+                for extra in extra_rows:
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append({
+                        "id": extra["extra_id"], "name": extra["name"],
+                    })
                 occurrence_rows = connection.execute(
-                    "SELECT o.army_id, o.group_id, o.option_id, o.item_id, o.quantity, "
-                    "o.position, c.name "
+                    "SELECT o.occurrence_id, o.army_id, o.group_id, o.option_id, o.item_id, "
+                    "o.quantity, o.position, c.name "
                     f"FROM {occurrence_table} AS o "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
                     f"WHERE o.unit_id IN ({placeholders}) "
@@ -355,6 +451,7 @@ class Database:
                         loadout[property_name].append({
                             "id": occurrence["item_id"], "name": occurrence["name"],
                             "quantity": occurrence["quantity"],
+                            "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
                         })
         return {
             "id": unit["id"], "name": unit["name"], "isc": unit["isc"], "slug": unit["slug"],

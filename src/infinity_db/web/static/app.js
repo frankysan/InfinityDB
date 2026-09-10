@@ -7,6 +7,7 @@ const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
 const elements = {
   filters: byId("filters"), army: byId("army-filter"), search: byId("unit-search"),
+  mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
   summary: byId("results-summary"), results: byId("results"), loading: byId("loading-state"),
   error: byId("error-state"), errorMessage: byId("error-message"), empty: byId("empty-state"),
@@ -21,6 +22,10 @@ let requestNumber = 0;
 let controller;
 let searchTimer;
 
+function hasActiveFilters() {
+  return state.armyId || state.search || state.mercs || !state.specops || state.teamops;
+}
+
 function isReinforcementArmy(armyId) {
   return [98, 99].includes(armyId % 100);
 }
@@ -32,6 +37,9 @@ function readLocation() {
   return {
     armyId: /^\d+$/.test(armyId) ? armyId : "",
     search: (params.get("search") || "").trim().slice(0, 200),
+    mercs: params.get("mercs") === "1",
+    specops: params.get("specops") !== "0",
+    teamops: params.get("teamops") === "1",
     offset: Number.isSafeInteger(offset) && offset >= 0 ? Math.floor(offset / PAGE_SIZE) * PAGE_SIZE : 0,
     limit: PAGE_SIZE,
   };
@@ -39,10 +47,13 @@ function readLocation() {
 
 function writeLocation(replace = false) {
   const url = new URL(window.location.href);
-  for (const key of ["army_id", "search", "offset"]) url.searchParams.delete(key);
+  for (const key of ["army_id", "search", "offset", "mercs", "specops", "teamops"]) url.searchParams.delete(key);
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
   if (state.search) url.searchParams.set("search", state.search);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
+  if (state.mercs) url.searchParams.set("mercs", "1");
+  if (!state.specops) url.searchParams.set("specops", "0");
+  if (state.teamops) url.searchParams.set("teamops", "1");
   if (url.href !== window.location.href) {
     window.history[replace ? "replaceState" : "pushState"](null, "", url);
   }
@@ -51,7 +62,10 @@ function writeLocation(replace = false) {
 function syncFilters() {
   elements.army.value = state.armyId;
   elements.search.value = state.search;
-  elements.clear.disabled = !state.armyId && !state.search;
+  elements.mercs.checked = state.mercs;
+  elements.specops.checked = state.specops;
+  elements.teamops.checked = state.teamops;
+  elements.clear.disabled = !hasActiveFilters();
 }
 
 function showPanel(panel) {
@@ -139,7 +153,7 @@ function renderUnits(data) {
   }
   elements.list.replaceChildren(fragment);
   elements.unitCount.textContent = number.format(data.total);
-  const hasFilters = Boolean(state.armyId || state.search);
+  const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {
     elements.summary.textContent = "0 units found";
     elements.emptyTitle.textContent = hasFilters ? "No matching units" : "Your catalog is ready for data";
@@ -196,18 +210,22 @@ async function load() {
 
 function applyFilters() {
   clearTimeout(searchTimer);
-  const armyId = elements.army.value;
-  const search = elements.search.value.trim();
-  if (armyId === state.armyId && search === state.search) return;
-  state = { ...state, armyId, search, offset: 0 };
-  elements.clear.disabled = !armyId && !search;
+  const next = {
+    armyId: elements.army.value, search: elements.search.value.trim(),
+    mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
+  };
+  if (Object.entries(next).every(([key, value]) => state[key] === value)) return;
+  state = { ...state, ...next, offset: 0 };
+  elements.clear.disabled = !hasActiveFilters();
   writeLocation();
   load();
 }
 
 function clearFilters() {
   clearTimeout(searchTimer);
-  state = { ...state, armyId: "", search: "", offset: 0 };
+  state = {
+    ...state, armyId: "", search: "", mercs: false, specops: true, teamops: false, offset: 0,
+  };
   syncFilters();
   writeLocation();
   load();
@@ -222,9 +240,12 @@ function changePage(direction) {
 
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
+for (const filter of [elements.mercs, elements.specops, elements.teamops]) {
+  filter.addEventListener("change", applyFilters);
+}
 elements.search.addEventListener("input", () => {
   clearTimeout(searchTimer);
-  elements.clear.disabled = !elements.army.value && !elements.search.value;
+  elements.clear.disabled = !hasActiveFilters();
   searchTimer = setTimeout(applyFilters, 250);
 });
 elements.clear.addEventListener("click", clearFilters);

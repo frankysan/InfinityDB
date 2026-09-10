@@ -66,6 +66,14 @@
               <input id="unit-search" type="search" name="search" placeholder="Search units…" autocomplete="off" maxlength="200">
             </div>
           </div>
+          <fieldset class="field availability-field">
+            <legend>Include optional units</legend>
+            <div class="availability-options">
+              <label><input id="mercs-filter" type="checkbox"> Mercenaries</label>
+              <label><input id="specops-filter" type="checkbox" checked> Spec-Ops</label>
+              <label><input id="teamops-filter" type="checkbox"> Team Operations</label>
+            </div>
+          </fieldset>
           <button id="clear-filters" class="button button-quiet" type="button" disabled>Clear filters</button>
           <button class="sr-only" type="submit">Apply filters</button>
         </form>

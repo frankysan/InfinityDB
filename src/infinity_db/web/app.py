@@ -77,10 +77,18 @@ def _integer(params: dict, key: str, default: int | None, low: int, high: int) -
     return value
 
 
+def _flag(params: dict, key: str) -> bool:
+    if key not in params:
+        return False
+    if params[key][0] not in {"0", "1"}:
+        raise ValueError(f"{key} must be 0 or 1")
+    return params[key][0] == "1"
+
+
 def _unit_query(query: str) -> dict:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=10)
     for key, values in params.items():
-        if key not in {"army_id", "search", "limit", "offset"}:
+        if key not in {"army_id", "search", "limit", "offset", "mercs", "specops", "teamops"}:
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
             raise ValueError(f"Provide {key} only once")
@@ -92,6 +100,9 @@ def _unit_query(query: str) -> dict:
         "search": search,
         "limit": _integer(params, "limit", 50, 1, 200),
         "offset": _integer(params, "offset", 0, 0, 2**63 - 1),
+        "mercs": _flag(params, "mercs"),
+        "specops": _flag(params, "specops"),
+        "teamops": _flag(params, "teamops"),
     }
 
 

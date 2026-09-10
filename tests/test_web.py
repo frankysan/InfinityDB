@@ -48,21 +48,34 @@ def app(tmp_path: Path) -> Callable:
         "profileGroups": [{
             "id": 1,
             "profiles": [{
-                "id": 1, "name": "Ranger", "skills": [{"id": 11}],
-                "equip": [{"id": 21, "q": 2}], "weapons": [{"id": 31}],
+                "id": 1, "name": "Ranger", "skills": [{"id": 11, "extra": [41]}],
+                "equip": [{"id": 21, "q": 2, "extra": [42]}],
+                "weapons": [{"id": 31, "extra": [43]}],
             }],
             "options": [{
                 "id": 1, "name": "Rifle loadout", "points": 20, "swc": "0",
-                "skills": [{"id": 11}], "equip": [{"id": 21}], "weapons": [{"id": 31, "q": 2}],
+                "skills": [{"id": 11, "extra": [41]}],
+                "equip": [{"id": 21, "extra": [42]}],
+                "weapons": [{"id": 31, "q": 2, "extra": [43]}],
             }],
         }],
     }
     # Declared factions and canonical ownership deliberately differ from actual occurrences.
-    blue_only = {"id": 3, "name": "100%_Guard", "canonical": 101, "factions": [201]}
-    red_only = {"id": 2, "name": "Beta Scout", "canonical": 101, "factions": [101]}
+    blue_only = {
+        "id": 3, "name": "100%_Guard", "canonical": 1, "factions": [201],
+    }
+    red_only = {"id": 2, "name": "Beta Scout", "canonical": 1, "factions": [201]}
+    specops_only = {
+        "id": 4, "name": "Alpha Spec-Ops", "slug": "alpha-spec-ops",
+        "canonical": 101, "factions": [101],
+    }
+    teamops_only = {
+        "id": 5, "name": "Alpha Team Ops", "slug": "alpha-team-ops",
+        "canonical": 101, "factions": [101],
+    }
     documents = [
-        ("101-blue_company.json", [shared, blue_only]),
-        ("201-red_company.json", [shared, red_only]),
+        ("101-zulu_company.json", [shared, blue_only, specops_only, teamops_only]),
+        ("201-alpha_company.json", [shared, red_only]),
     ]
     sources = []
     for filename, units in documents:
@@ -72,6 +85,10 @@ def app(tmp_path: Path) -> Callable:
                 "skills": [{"id": 11, "name": "Stealth"}],
                 "equip": [{"id": 21, "name": "Medikit"}],
                 "weapons": [{"id": 31, "name": "Combi Rifle"}],
+                "extras": [
+                    {"id": 41, "name": "+3"}, {"id": 42, "name": "Mimetism"},
+                    {"id": 43, "name": "AP"},
+                ],
             },
         }
         if filename.startswith("101-"):
@@ -93,15 +110,18 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert headers["content-type"].startswith("application/json")
     armies = {item["id"]: item for item in json.loads(body)["items"]}
     assert set(armies) == {101, 201}
-    assert armies[101]["slug"] == "blue_company"
+    assert [army["id"] for army in json.loads(body)["items"]] == [101, 201]
+    assert armies[101]["slug"] == "zulu_company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
-    assert {army["unit_count"] for army in armies.values()} == {2}
+    assert {army["unit_count"] for army in armies.values()} == {2, 4}
 
 
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
     for army_id, expected in [(101, {1, 3}), (201, {1, 2})]:
-        status, _, body = request(app, "/api/units", query=urlencode({"army_id": army_id}))
+        status, _, body = request(
+            app, "/api/units", query=urlencode({"army_id": army_id, "mercs": 1})
+        )
         assert status == 200
         payload = json.loads(body)
         assert payload["total"] == 2
@@ -115,20 +135,48 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
     status, _, body = request(app, "/api/units")
     assert status == 200
     all_units = json.loads(body)
-    assert all_units["total"] == 3
+    assert all_units["total"] == 2
     assert all_units["limit"] == 50
     assert all_units["offset"] == 0
     expected_ids = [item["id"] for item in all_units["items"]]
-    assert len(set(expected_ids)) == 3
+    assert len(set(expected_ids)) == 2
 
     paged_ids = []
-    for offset in range(4):
+    for offset in range(3):
         status, _, body = request(app, "/api/units", query=f"limit=1&offset={offset}")
         assert status == 200
         page = json.loads(body)
-        assert (page["total"], page["limit"], page["offset"]) == (3, 1, offset)
+        assert (page["total"], page["limit"], page["offset"]) == (2, 1, offset)
         paged_ids.extend(item["id"] for item in page["items"])
     assert paged_ids == expected_ids
+
+
+def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
+    status, _, body = request(app, "/api/units", query="army_id=101")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {1}
+
+    status, _, body = request(app, "/api/units", query="army_id=101&mercs=1")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {1, 3}
+
+    status, _, body = request(app, "/api/units", query="army_id=101&specops=1")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {1, 4}
+
+    status, _, body = request(app, "/api/units", query="army_id=101&teamops=1")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {1, 5}
+
+    status, _, body = request(
+        app, "/api/units", query="army_id=101&mercs=1&specops=1&teamops=1"
+    )
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {1, 3, 4, 5}
+
+    status, _, body = request(app, "/api/units", query="army_id=201")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {1, 2}
 
 
 def test_unit_details_are_available_by_id(app: Callable) -> None:
@@ -138,14 +186,28 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert unit["name"] == "Alpha Ranger"
     assert {army["id"] for army in unit["armies"]} == {101, 201}
     for army in unit["armies"]:
-        assert army["profiles"][0]["skills"] == [{"id": 11, "name": "Stealth", "quantity": None}]
-        assert army["profiles"][0]["equipment"] == [{"id": 21, "name": "Medikit", "quantity": 2}]
+        assert army["profiles"][0]["skills"] == [{
+            "id": 11, "name": "Stealth", "quantity": None, "extras": [{"id": 41, "name": "+3"}],
+        }]
+        assert army["profiles"][0]["equipment"] == [{
+            "id": 21, "name": "Medikit", "quantity": 2, "extras": [{"id": 42, "name": "Mimetism"}],
+        }]
         assert army["profiles"][0]["weapons"] == [
-            {"id": 31, "name": "Combi Rifle", "quantity": None}
+            {
+                "id": 31, "name": "Combi Rifle", "quantity": None,
+                "extras": [{"id": 43, "name": "AP"}],
+            }
         ]
-        assert army["loadouts"][0]["skills"] == [{"id": 11, "name": "Stealth", "quantity": None}]
-        assert army["loadouts"][0]["equipment"] == [{"id": 21, "name": "Medikit", "quantity": None}]
-        assert army["loadouts"][0]["weapons"] == [{"id": 31, "name": "Combi Rifle", "quantity": 2}]
+        assert army["loadouts"][0]["skills"] == [{
+            "id": 11, "name": "Stealth", "quantity": None, "extras": [{"id": 41, "name": "+3"}],
+        }]
+        assert army["loadouts"][0]["equipment"] == [{
+            "id": 21, "name": "Medikit", "quantity": None,
+            "extras": [{"id": 42, "name": "Mimetism"}],
+        }]
+        assert army["loadouts"][0]["weapons"] == [{
+            "id": 31, "name": "Combi Rifle", "quantity": 2, "extras": [{"id": 43, "name": "AP"}],
+        }]
     status, headers, body = request(app, "/units/1")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
@@ -159,8 +221,8 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     ("query", "expected_ids"),
     [
         ({"search": "ALPHA"}, {1}),
-        ({"search": "%"}, {3}),
-        ({"search": "_"}, {3}),
+        ({"search": "%", "mercs": 1}, {3}),
+        ({"search": "_", "mercs": 1}, {3}),
         ({"search": "' OR 1=1 --"}, set()),
         ({"search": "beta", "army_id": 101}, set()),
         ({"search": "beta", "army_id": 201}, {2}),
