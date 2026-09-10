@@ -224,6 +224,112 @@ def test_explicit_unit_merge_alias_is_one_logical_unit() -> None:
     assert list(groups[0]["armies"]) == [101, 201, 301]
 
 
+def test_unit_300_merge_alias_is_one_logical_unit() -> None:
+    rows = [
+        {"id": 300, "name": "First record", "isc": "First ISC", "main_army_id": 101},
+        {"id": 1690, "name": "Second record", "isc": "Second ISC", "main_army_id": 201},
+        {"id": 10300, "name": "Third record", "isc": "Third ISC", "main_army_id": 301},
+    ]
+    memberships = {
+        300: [{"id": 101, "name": "First Army"}],
+        1690: [{"id": 201, "name": "Second Army"}],
+        10300: [{"id": 301, "name": "Third Army"}],
+    }
+
+    groups = logical_unit_groups(rows, memberships)
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == 300
+    assert groups[0]["source_ids"] == [300, 1690, 10300]
+
+
+def test_merged_source_profiles_do_not_repeat_identical_items(
+    tmp_path: Path, normalized: dict
+) -> None:
+    """Merged IDs can share an army and local profile/option IDs."""
+    duplicate_id = 10_001
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    duplicate = copy.deepcopy(original)
+    duplicate["id"] = duplicate_id
+    normalized["tables"]["units"].append(duplicate)
+
+    for table in ("army_units", "profile_groups", "profiles", "loadout_options"):
+        for row in list(normalized["tables"][table]):
+            if row.get("unit_id") == 1 and row.get("army_id") == 101:
+                duplicate = copy.deepcopy(row)
+                duplicate["unit_id"] = duplicate_id
+                if table == "profiles":
+                    # An overlapping source may carry a conflicting AVA while
+                    # omitting the profile's skills and equipment.
+                    duplicate["ava"] = 1
+                normalized["tables"][table].append(duplicate)
+
+    for prefix in ("profile", "option"):
+        if prefix == "profile":
+            # The overlapping profile is deliberately sparse.
+            continue
+        occurrence_ids: dict[object, object] = {}
+        for suffix in ("skills", "equipment", "weapons"):
+            table = f"{prefix}_{suffix}"
+            for row in list(normalized["tables"][table]):
+                if row.get("unit_id") == 1 and row.get("army_id") == 101:
+                    duplicate = copy.deepcopy(row)
+                    duplicate["unit_id"] = duplicate_id
+                    duplicate["occurrence_id"] = f"merged-{duplicate['occurrence_id']}"
+                    occurrence_ids[row["occurrence_id"]] = duplicate["occurrence_id"]
+                    normalized["tables"][table].append(duplicate)
+        for suffix in ("skill_extras", "equipment_extras", "weapon_extras"):
+            table = f"{prefix}_{suffix}"
+            for row in list(normalized["tables"][table]):
+                if row["occurrence_id"] in occurrence_ids:
+                    duplicate = copy.deepcopy(row)
+                    duplicate["occurrence_id"] = occurrence_ids[row["occurrence_id"]]
+                    normalized["tables"][table].append(duplicate)
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    details = Database(path).get_unit(1)
+
+    assert details is not None
+    first_army = next(army for army in details["armies"] if army["id"] == 101)
+    assert len(first_army["profiles"]) == 1
+    assert [item["id"] for item in first_army["profiles"][0]["skills"]] == [1]
+    assert [item["id"] for item in first_army["profiles"][0]["equipment"]] == [1]
+    assert [item["id"] for item in first_army["profiles"][0]["weapons"]] == [1]
+    assert [item["id"] for item in first_army["loadouts"][0]["skills"]] == [1]
+    assert [item["id"] for item in first_army["loadouts"][0]["equipment"]] == [1]
+    assert [item["id"] for item in first_army["loadouts"][0]["weapons"]] == [1]
+
+
+def test_details_keep_normal_and_mercenary_army_occurrences_separate(
+    tmp_path: Path, normalized: dict
+) -> None:
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    duplicate_id = 10_001
+    duplicate = copy.deepcopy(original)
+    duplicate.update(id=duplicate_id, canonical_faction_id=1)
+    normalized["tables"]["units"].append(duplicate)
+    normalized["tables"]["factions"].append({
+        "id": 1, "has_army_list": False, "canonical_reference_count": 1,
+        "unit_membership_reference_count": 0,
+    })
+    for table in ("army_units", "profile_groups", "profiles"):
+        for row in list(normalized["tables"][table]):
+            if row.get("unit_id") == 1 and row.get("army_id") == 101:
+                duplicate = copy.deepcopy(row)
+                duplicate["unit_id"] = duplicate_id
+                normalized["tables"][table].append(duplicate)
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    details = Database(path).get_unit(1)
+
+    assert details is not None
+    first_army_occurrences = [army for army in details["armies"] if army["id"] == 101]
+    assert [army["availability_flags"] for army in first_army_occurrences] == [[], ["mercs"]]
+    assert all(len(army["profiles"]) == 1 for army in first_army_occurrences)
+
+
 def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     rows = [
         {

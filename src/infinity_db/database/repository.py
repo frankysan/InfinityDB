@@ -21,7 +21,10 @@ UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops")
 # Source records whose IDs differ without following either of the general
 # duplicate patterns.  The value is the preferred representative ID.
-UNIT_MERGE_ALIASES = {1345: 1345, 1875: 1345, 11345: 1345}
+UNIT_MERGE_ALIASES = {
+    300: 300, 1690: 300, 10300: 300,
+    1345: 1345, 1875: 1345, 11345: 1345,
+}
 REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
 
 
@@ -53,6 +56,31 @@ def unit_base_identity(row: sqlite3.Row) -> str:
     return re.sub(r"^reinf\.\s*", "", identity, flags=re.IGNORECASE).casefold()
 
 
+def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> None:
+    """Add an item unless a merged source already contributed the same one."""
+    if item not in items:
+        items.append(item)
+
+
+def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
+    """Combine complementary metadata from duplicate source profiles."""
+    for key, value in duplicate.items():
+        if key in {"skills", "equipment", "weapons", "ava"}:
+            continue
+        if profile.get(key) in (None, "") and value not in (None, ""):
+            profile[key] = value
+    # Duplicate source records can disagree on AVA.  The lower non-negative
+    # value is the restrictive availability and avoids advertising an option
+    # that is not present in every source record for the same profile.
+    ava = duplicate.get("ava")
+    if ava is not None and (profile.get("ava") is None or (
+        isinstance(ava, (int, float)) and ava >= 0
+        and isinstance(profile["ava"], (int, float)) and profile["ava"] >= 0
+        and ava < profile["ava"]
+    )):
+        profile["ava"] = ava
+
+
 def logical_unit_groups(
     rows: list[sqlite3.Row], memberships: dict[int, list[dict[str, Any]]]
 ) -> list[dict[str, Any]]:
@@ -79,13 +107,14 @@ def logical_unit_groups(
             # canonical army of the ordinary unit.
             "main_army_id": row["main_army_id"] if "main_army_id" in row.keys() else None,
             "source_ids": [],
-            "names": [], "armies": {},
+            "names": [], "armies": {}, "army_occurrences": [],
             "base_identity": base_identity, "reinforcement_only": reinforcement_only,
         })
         group["source_ids"].append(row["id"])
         group["names"].append(row["name"])
         for army in armies:
             group["armies"][army["id"]] = army
+            group["army_occurrences"].append({**army, "source_id": row["id"]})
 
     standard_groups: dict[str, list[dict[str, Any]]] = {}
     for group in groups.values():
@@ -98,6 +127,7 @@ def logical_unit_groups(
             target["source_ids"].extend(group["source_ids"])
             target["names"].extend(group["names"])
             target["armies"].update(group["armies"])
+            target["army_occurrences"].extend(group["army_occurrences"])
             del groups[key]
     return list(groups.values())
 
@@ -133,18 +163,23 @@ def army_is_available(
     army: dict[str, Any], group: dict[str, Any], selected_flags: set[str]
 ) -> bool:
     """Return whether an army occurrence needs only enabled optional modes."""
-    if not unit_optional_modes(group) <= selected_flags:
-        return False
-    if (
-        group["canonical_faction_id"] == 1
-        and army["id"] not in group["normal_army_ids"]
-        and "mercs" not in selected_flags
-    ):
-        return False
+    return army_required_flags(army, group) <= selected_flags
+
+
+def army_required_flags(
+    army: dict[str, Any], group: dict[str, Any],
+    canonical_faction_id: int | None = None, normal_army_ids: set[int] | None = None,
+) -> set[str]:
+    """Return the optional availability categories required by an occurrence."""
+    required = unit_optional_modes(group)
+    faction_id = group["canonical_faction_id"] if canonical_faction_id is None else canonical_faction_id
+    normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
+    if faction_id == 1 and army["id"] not in normal_armies:
+        required.add("mercs")
     filters = army.get("filters")
-    return not isinstance(filters, dict) or not any(
-        filters.get(flag) for flag in AVAILABILITY_FLAGS if flag not in selected_flags
-    )
+    if isinstance(filters, dict):
+        required.update(flag for flag in AVAILABILITY_FLAGS if filters.get(flag))
+    return required
 
 
 class Database:
@@ -309,17 +344,22 @@ class Database:
                 return None
             siblings = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
+                "u.main_army_id, u.canonical_faction_id "
+                "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in siblings}
             membership_rows = connection.execute(
-                "SELECT au.unit_id, a.id, a.name, a.slug FROM army_units AS au "
+                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
                 "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
             )
             for army in membership_rows:
                 if army["unit_id"] in memberships:
+                    try:
+                        filters = json.loads(army["filters"]) if army["filters"] else {}
+                    except (TypeError, json.JSONDecodeError):
+                        filters = {}
                     memberships[army["unit_id"]].append(
-                        {"id": army["id"], "name": army_name(army)}
+                        {"id": army["id"], "name": army_name(army), "filters": filters}
                     )
             group = next(
                 group for group in logical_unit_groups(siblings, memberships)
@@ -327,34 +367,65 @@ class Database:
             )
             source_ids = group["source_ids"]
             unit = next(sibling for sibling in siblings if sibling["id"] == group["id"])
+            normal_army_ids: dict[int, set[int]] = {row["id"]: set() for row in siblings}
+            for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
+                if faction["unit_id"] in normal_army_ids:
+                    normal_army_ids[faction["unit_id"]].add(faction["faction_id"])
+            group["normal_army_ids"] = set().union(
+                *(normal_army_ids[source_id] for source_id in source_ids)
+            )
+            canonical_factions = {
+                row["id"]: row["canonical_faction_id"] for row in siblings
+            }
             placeholders = ", ".join("?" for _ in source_ids)
-            armies = [
-                {"id": army["id"], "name": army["name"], "profiles": [], "loadouts": []}
-                for army in group["armies"].values()
-            ]
-            by_army = {army["id"]: army for army in armies}
+            armies_by_occurrence: dict[tuple[int, tuple[str, ...]], dict[str, Any]] = {}
+            by_source_army: dict[tuple[int, int], dict[str, Any]] = {}
+            for occurrence in group["army_occurrences"]:
+                source_id = occurrence["source_id"]
+                flags = tuple(sorted(army_required_flags(
+                    occurrence, group, canonical_factions[source_id], normal_army_ids[source_id],
+                )))
+                occurrence_key = (occurrence["id"], flags)
+                army = armies_by_occurrence.setdefault(occurrence_key, {
+                    "id": occurrence["id"], "name": occurrence["name"],
+                    "availability_flags": list(flags), "profiles": [], "loadouts": [],
+                    "_occurrence_key": occurrence_key,
+                })
+                by_source_army[(source_id, occurrence["id"])] = army
+            armies = list(armies_by_occurrence.values())
             profile_rows = connection.execute(
-                "SELECT p.army_id, p.group_id, p.profile_id, p.name, p.move_1, p.move_2, "
+                "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, p.name, p.move_1, p.move_2, "
                 "p.cc, p.bs, p.ph, p.wip, p.arm, p.bts, p.vitality, p.silhouette, p.ava "
                 f"FROM profiles AS p WHERE p.unit_id IN ({placeholders}) "
                 "ORDER BY p.army_id, p.group_id, p.position, p.profile_id", source_ids
             )
+            profile_items: dict[tuple[Any, ...], dict[str, Any]] = {}
+            profile_keys_by_source: dict[tuple[int, int, int, int], tuple[Any, ...]] = {}
             for profile in profile_rows:
+                army = by_source_army.get((profile["unit_id"], profile["army_id"]))
+                if army is None:
+                    continue
                 item = {
-                    key: profile[key] for key in profile.keys() if key != "army_id"
+                    key: profile[key] for key in profile.keys() if key not in {"army_id", "unit_id"}
                 }
                 item["skills"] = []
                 item["equipment"] = []
                 item["weapons"] = []
-                if item not in by_army[profile["army_id"]]["profiles"]:
-                    by_army[profile["army_id"]]["profiles"].append(item)
-            profile_items = {
-                (
-                    army["id"], profile["group_id"], profile["profile_id"]
-                ): profile
-                for army in armies
-                for profile in army["profiles"]
-            }
+                profile_key = (
+                    army["_occurrence_key"], profile["group_id"], profile["profile_id"], profile["name"],
+                    profile["move_1"], profile["move_2"], profile["cc"], profile["bs"], profile["ph"],
+                    profile["wip"], profile["arm"], profile["bts"], profile["vitality"],
+                    profile["silhouette"],
+                )
+                profile_keys_by_source[(
+                    profile["unit_id"], profile["army_id"], profile["group_id"], profile["profile_id"],
+                )] = profile_key
+                existing = profile_items.get(profile_key)
+                if existing is None:
+                    army["profiles"].append(item)
+                    profile_items[profile_key] = item
+                else:
+                    merge_profile(existing, item)
             for occurrence_table, catalog_table, property_name, extras_table in (
                 ("profile_skills", "skills", "skills", "profile_skill_extras"),
                 ("profile_equipment", "equipment", "equipment", "profile_equipment_extras"),
@@ -375,7 +446,7 @@ class Database:
                         "id": extra["extra_id"], "name": extra["name"],
                     })
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.army_id, o.group_id, o.profile_id, o.item_id, "
+                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, o.item_id, "
                     "o.quantity, o.position, c.name "
                     f"FROM {occurrence_table} AS o "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
@@ -384,37 +455,46 @@ class Database:
                     source_ids,
                 )
                 for occurrence in occurrence_rows:
-                    profile = profile_items.get(
-                        (occurrence["army_id"], occurrence["group_id"], occurrence["profile_id"])
-                    )
+                    profile_key = profile_keys_by_source.get((
+                        occurrence["unit_id"], occurrence["army_id"], occurrence["group_id"],
+                        occurrence["profile_id"],
+                    ))
+                    profile = profile_items.get(profile_key) if profile_key is not None else None
                     if profile is not None:
-                        profile[property_name].append({
+                        append_unique_item(profile[property_name], {
                             "id": occurrence["item_id"], "name": occurrence["name"],
                             "quantity": occurrence["quantity"],
                             "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
                         })
             loadout_rows = connection.execute(
-                "SELECT o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
+                "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
                 "o.minis, o.disabled "
                 f"FROM loadout_options AS o WHERE o.unit_id IN ({placeholders}) "
                 "ORDER BY o.army_id, o.group_id, o.position, o.option_id", source_ids
             )
+            loadout_items: dict[tuple[Any, ...], dict[str, Any]] = {}
+            loadout_keys_by_source: dict[tuple[int, int, int, int], tuple[Any, ...]] = {}
             for loadout in loadout_rows:
+                army = by_source_army.get((loadout["unit_id"], loadout["army_id"]))
+                if army is None:
+                    continue
                 item = {
-                    key: loadout[key] for key in loadout.keys() if key != "army_id"
+                    key: loadout[key] for key in loadout.keys() if key not in {"army_id", "unit_id"}
                 }
                 item["skills"] = []
                 item["equipment"] = []
                 item["weapons"] = []
-                if item not in by_army[loadout["army_id"]]["loadouts"]:
-                    by_army[loadout["army_id"]]["loadouts"].append(item)
-            loadout_items = {
-                (
-                    army["id"], loadout["group_id"], loadout["option_id"]
-                ): loadout
-                for army in armies
-                for loadout in army["loadouts"]
-            }
+                loadout_key = (
+                    army["_occurrence_key"], loadout["group_id"], loadout["option_id"],
+                    loadout["name"], loadout["points"], loadout["swc"], loadout["minis"],
+                    loadout["disabled"],
+                )
+                loadout_keys_by_source[(
+                    loadout["unit_id"], loadout["army_id"], loadout["group_id"], loadout["option_id"],
+                )] = loadout_key
+                if loadout_key not in loadout_items:
+                    army["loadouts"].append(item)
+                    loadout_items[loadout_key] = item
             for occurrence_table, catalog_table, property_name, extras_table in (
                 ("option_skills", "skills", "skills", "option_skill_extras"),
                 ("option_equipment", "equipment", "equipment", "option_equipment_extras"),
@@ -435,7 +515,7 @@ class Database:
                         "id": extra["extra_id"], "name": extra["name"],
                     })
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.army_id, o.group_id, o.option_id, o.item_id, "
+                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.option_id, o.item_id, "
                     "o.quantity, o.position, c.name "
                     f"FROM {occurrence_table} AS o "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
@@ -444,15 +524,19 @@ class Database:
                     source_ids,
                 )
                 for occurrence in occurrence_rows:
-                    loadout = loadout_items.get(
-                        (occurrence["army_id"], occurrence["group_id"], occurrence["option_id"])
-                    )
+                    loadout_key = loadout_keys_by_source.get((
+                        occurrence["unit_id"], occurrence["army_id"], occurrence["group_id"],
+                        occurrence["option_id"],
+                    ))
+                    loadout = loadout_items.get(loadout_key) if loadout_key is not None else None
                     if loadout is not None:
-                        loadout[property_name].append({
+                        append_unique_item(loadout[property_name], {
                             "id": occurrence["item_id"], "name": occurrence["name"],
                             "quantity": occurrence["quantity"],
                             "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
                         })
+            for army in armies:
+                del army["_occurrence_key"]
         return {
             "id": unit["id"], "name": unit["name"], "isc": unit["isc"], "slug": unit["slug"],
             "isc_abbr": unit["isc_abbr"], "notes": unit["notes"],

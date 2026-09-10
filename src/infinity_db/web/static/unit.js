@@ -44,7 +44,11 @@ function groupArmiesByFaction(armies) {
     .sort((left, right) => left.order - right.order)
     .map((group) => ({
       ...group,
-      armies: group.armies.sort((left, right) => Number(left.id) - Number(right.id)),
+      armies: group.armies.sort((left, right) => (
+        Number(left.id) - Number(right.id)
+        || Number((left.availability_flags || []).includes("mercs"))
+          - Number((right.availability_flags || []).includes("mercs"))
+      )),
     }));
 }
 
@@ -137,15 +141,26 @@ function generalStatline(stats) {
   return statColumns.map(([, read]) => read(stats));
 }
 
+function displayStatlineValue(value) {
+  return (typeof value === "number" && value < 0)
+    || (typeof value === "string" && /^-\d+(?:\.\d+)?$/.test(value.trim()))
+    ? "—"
+    : value;
+}
+
 function identicalStatline(left, right) {
   const rightStatline = generalStatline(right);
   return generalStatline(left).every((value, index) => value === rightStatline[index]);
 }
 
-function generalProfiles(profiles) {
+function baseProfileName(profileName) {
+  return String(profileName || "").replace(/^REINF:\s*/i, "");
+}
+
+function generalProfiles(profiles, loadouts) {
   const byName = new Map();
   for (const profile of profiles) {
-    const profileName = profile.name || "";
+    const profileName = baseProfileName(profile.name);
     if (!byName.has(profileName)) byName.set(profileName, []);
     byName.get(profileName).push(profile);
   }
@@ -153,21 +168,38 @@ function generalProfiles(profiles) {
   const generalByName = new Map();
   for (const [profileName, matchingProfiles] of byName) {
     const stats = generalStats(matchingProfiles);
-    rows.push({
+    const matchingGroupKeys = new Set(matchingProfiles.map(
+      (profile) => `${profile.armyId}:${profile.group_id}`,
+    ));
+    const matchingLoadouts = loadouts.filter(
+      (loadout) => matchingGroupKeys.has(`${loadout.armyId}:${loadout.group_id}`),
+    );
+    const row = {
       profileName,
       stats,
       occurrenceCount: matchingProfiles.length,
       reinforcement: matchingProfiles.every((profile) => isReinforcementArmy(profile.armyId)),
-    });
-    generalByName.set(profileName, stats);
+      sharedItems: {
+        skills: commonProfileItems(matchingProfiles, "skills"),
+        equipment: commonProfileItems(matchingProfiles, "equipment"),
+        weapons: commonProfileItems(matchingLoadouts, "weapons"),
+      },
+    };
+    rows.push(row);
+    for (const profile of matchingProfiles) {
+      generalByName.set(profile.name || "", row);
+    }
   }
   return { rows, generalByName };
 }
 
 function itemIdentity(item) {
+  const quantity = item.quantity == null || Number(item.quantity) === 1
+    ? null
+    : item.quantity;
   return JSON.stringify([
     item.id,
-    item.quantity ?? null,
+    quantity,
     (item.extras || []).map((extra) => extra.id).sort(),
   ]);
 }
@@ -194,6 +226,7 @@ function withoutSharedItems(items, sharedItems) {
 function visibleGeneralProfiles(rows) {
   return rows.filter((profile) => !rows.some((candidate) => (
     candidate !== profile
+    && candidate.profileName === profile.profileName
     && identicalStatline(profile.stats, candidate.stats)
     && (
       (profile.reinforcement && !candidate.reinforcement)
@@ -224,20 +257,23 @@ function profileItems(items, fallbackLabel) {
   }).join(", ");
 }
 
-function generalProfileTableRows(profiles, sharedItems) {
-  const rows = profiles.map((profile) => [
-    profile.profileName, ...generalStatline(profile.stats),
-  ]);
-  for (const [label, property, fallbackLabel] of [
-    ["Skills", "skills", "Skill"],
-    ["Equipment", "equipment", "Equipment"],
-    ["Weapons", "weapons", "Weapon"],
-  ]) {
-    if (sharedItems[property].length) {
+function generalProfileTableRows(profiles) {
+  const rows = [];
+  for (const profile of profiles) {
+    rows.push([
+      profile.profileName,
+      ...generalStatline(profile.stats).map(displayStatlineValue),
+    ]);
+    for (const [label, property, fallbackLabel] of [
+      ["Skills", "skills", "Skill"],
+      ["Equipment", "equipment", "Equipment"],
+      ["Weapons", "weapons", "Weapon"],
+    ]) {
+      if (!profile.sharedItems[property].length) continue;
       rows.push([
         { value: label, className: "general-item-label" },
         {
-          value: profileItems(sharedItems[property], fallbackLabel),
+          value: profileItems(profile.sharedItems[property], fallbackLabel),
           className: "general-item-list",
           colSpan: statColumns.length,
         },
@@ -247,16 +283,19 @@ function generalProfileTableRows(profiles, sharedItems) {
   return rows;
 }
 
-function profileTableRows(profiles, generalByName, sharedItems) {
+function profileTableRows(profiles, generalByName) {
   return profiles.map((profile) => {
-    const generalStatsForProfile = generalByName.get(profile.name || "");
+    const generalProfile = generalByName.get(profile.name || "");
+    const generalStatsForProfile = generalProfile.stats;
+    const sharedItems = generalProfile.sharedItems;
     return [profile.name, ...statColumns.map(([label, read]) => ({
-      value: read(profile), highlight: differsFromGeneral(profile, generalStatsForProfile, label),
+      value: displayStatlineValue(read(profile)),
+      highlight: differsFromGeneral(profile, generalStatsForProfile, label),
     })),
     { value: profileItems(withoutSharedItems(profile.skills, sharedItems.skills), "Skill"), className: "profile-item-list" },
     { value: profileItems(withoutSharedItems(profile.equipment, sharedItems.equipment), "Equipment"), className: "profile-item-list" },
     { value: profileItems(withoutSharedItems(profile.weapons, sharedItems.weapons), "Weapon"), className: "profile-item-list" },
-    profile.ava];
+    displayStatlineValue(profile.ava)];
   });
 }
 
@@ -273,6 +312,21 @@ function loadoutTable(loadouts, sharedItems) {
   );
 }
 
+function sharedItemsForProfileGroup(profiles, generalByName) {
+  const items = { skills: [], equipment: [], weapons: [] };
+  for (const profile of profiles) {
+    const sharedItems = generalByName.get(profile.name || "").sharedItems;
+    for (const property of Object.keys(items)) {
+      for (const item of sharedItems[property]) {
+        if (!items[property].some((candidate) => itemIdentity(candidate) === itemIdentity(item))) {
+          items[property].push(item);
+        }
+      }
+    }
+  }
+  return items;
+}
+
 function profileLoadoutGroups(army) {
   const groups = new Map();
   for (const profile of army.profiles) {
@@ -286,7 +340,26 @@ function profileLoadoutGroups(army) {
   return [...groups.values()];
 }
 
-function renderArmyProfile(army, generalByName, sharedItems) {
+const availabilityLabels = {
+  mercs: "Mercenary",
+  specops: "Spec-Ops",
+  teamops: "Team Operations",
+};
+
+function availabilityBadges(flags = []) {
+  const badges = document.createElement("span");
+  badges.className = "availability-badges";
+  for (const flag of flags) {
+    if (!availabilityLabels[flag]) continue;
+    const badge = document.createElement("span");
+    badge.className = `availability-badge availability-badge-${flag}`;
+    badge.textContent = availabilityLabels[flag];
+    badges.append(badge);
+  }
+  return badges;
+}
+
+function renderArmyProfile(army, generalByName) {
   const section = document.createElement("section");
   section.className = "explorer army-profile";
   const armyHeading = document.createElement("h3");
@@ -301,19 +374,23 @@ function renderArmyProfile(army, generalByName, sharedItems) {
     icon.title = army.name;
     armyHeading.prepend(icon);
   }
+  armyHeading.append(availabilityBadges(army.availability_flags));
   section.append(armyHeading);
   for (const group of profileLoadoutGroups(army)) {
     if (group.profiles.length) {
       section.append(subheading("Profiles"));
       section.append(table(
         ["Name", ...statColumns.map(([label]) => label), "Skills", "Equipment", "Weapons", "AVA"],
-        profileTableRows(group.profiles, generalByName, sharedItems),
+        profileTableRows(group.profiles, generalByName),
         "statline",
       ));
     }
     if (group.loadouts.length) {
       section.append(subheading("Loadouts"));
-      section.append(loadoutTable(group.loadouts, sharedItems));
+      section.append(loadoutTable(
+        group.loadouts,
+        sharedItemsForProfileGroup(group.profiles, generalByName),
+      ));
     }
   }
   return section;
@@ -342,19 +419,16 @@ function render(unit) {
   const allProfiles = unit.armies.flatMap((army) => army.profiles.map((profile) => ({
     ...profile, armyId: army.id,
   })));
-  const allLoadouts = unit.armies.flatMap((army) => army.loadouts);
-  const { rows: generalProfileRows, generalByName } = generalProfiles(allProfiles);
-  const sharedProfileItems = {
-    skills: commonProfileItems(allProfiles, "skills"),
-    equipment: commonProfileItems(allProfiles, "equipment"),
-    weapons: commonProfileItems(allLoadouts, "weapons"),
-  };
+  const allLoadouts = unit.armies.flatMap((army) => army.loadouts.map((loadout) => ({
+    ...loadout, armyId: army.id,
+  })));
+  const { rows: generalProfileRows, generalByName } = generalProfiles(allProfiles, allLoadouts);
   const general = document.createElement("section");
   general.className = "explorer general-profile";
   general.append(heading("General profile"));
   general.append(table(
     ["Name", ...statColumns.map(([label]) => label)],
-    generalProfileTableRows(visibleGeneralProfiles(generalProfileRows), sharedProfileItems),
+    generalProfileTableRows(visibleGeneralProfiles(generalProfileRows)),
     "statline",
   ));
   content.append(general);
@@ -367,7 +441,7 @@ function render(unit) {
     const profiles = document.createElement("div");
     profiles.className = "faction-profile-grid";
     for (const army of group.armies) profiles.append(
-      renderArmyProfile(army, generalByName, sharedProfileItems),
+      renderArmyProfile(army, generalByName),
     );
     section.append(profiles);
     content.append(section);

@@ -217,6 +217,18 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert json.loads(body)["error"] == "Unit not found"
 
 
+@pytest.mark.parametrize(("unit_id", "expected_flags"), [
+    (3, ["mercs"]), (4, ["specops"]), (5, ["teamops"]),
+])
+def test_unit_details_include_occurrence_availability_categories(
+    app: Callable, unit_id: int, expected_flags: list[str],
+) -> None:
+    status, _, body = request(app, f"/api/units/{unit_id}")
+    assert status == 200
+    unit = json.loads(body)
+    assert unit["armies"][0]["availability_flags"] == expected_flags
+
+
 @pytest.mark.parametrize(
     ("query", "expected_ids"),
     [
