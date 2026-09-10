@@ -2,16 +2,53 @@ from __future__ import annotations
 
 import argparse
 import sys
+import zipfile
 from pathlib import Path
 
 from . import __version__
-from .merge import load_sources, merge_sources, validate_master, write_json as write_master
-from .normalize import normalize_master, validate_normalized, write_json as write_normalized
+from .merge import load_sources, merge_sources, validate_master
+from .merge import write_json as write_master
+from .metadata import MetadataError, decode_metadata, load_metadata
+from .normalize import normalize_master, validate_normalized
+from .normalize import write_json as write_normalized
 
 
-def _merge(source: Path, output: Path, *, compact: bool, verify: bool = True) -> dict:
+def discover_metadata(source: Path, explicit: Path | None, disabled: bool) -> dict | None:
+    """Find the optional API metadata beside a snapshot or within its ZIP."""
+    if disabled:
+        return None
+    if explicit is not None:
+        return load_metadata(explicit)
+    sidecar = (source / "metadata.json") if source.is_dir() else source.with_name("metadata.json")
+    if sidecar.is_file():
+        return load_metadata(sidecar)
+    if source.is_file() and zipfile.is_zipfile(source):
+        with zipfile.ZipFile(source) as archive:
+            members = [
+                name for name in archive.namelist() if Path(name).name.lower() == "metadata.json"
+            ]
+            if len(members) > 1:
+                raise MetadataError(
+                    "Multiple metadata.json files in ZIP; use --metadata to select one"
+                )
+            if members:
+                member = members[0]
+                return decode_metadata(archive.read(member), member)
+    return None
+
+
+def _merge(
+    source: Path,
+    output: Path,
+    *,
+    compact: bool,
+    verify: bool = True,
+    metadata: dict | None = None,
+) -> dict:
     sources, skipped = load_sources(source)
     master = merge_sources(sources)
+    if metadata is not None:
+        master["armyMetadata"] = metadata
     if verify:
         validate_master(master, sources)
     write_master(output, master, compact)
@@ -22,6 +59,8 @@ def _merge(source: Path, output: Path, *, compact: bool, verify: bool = True) ->
         f"Units: {meta['unitOccurrenceCount']} occurrences, "
         f"{meta['distinctUnitCount']} distinct IDs"
     )
+    if metadata is not None:
+        print(f"Army metadata: {metadata['sourceFile']}")
     print(f"Lossless verification: {'passed' if verify else 'skipped'}")
     if skipped:
         print("Skipped non-Army JSON files: " + ", ".join(skipped), file=sys.stderr)
@@ -46,7 +85,14 @@ def _normalize(master: dict, output: Path, report: Path, *, compact: bool) -> di
 
 
 def cmd_merge(args: argparse.Namespace) -> int:
-    _merge(args.source, args.output, compact=args.compact, verify=not args.no_verify)
+    metadata = discover_metadata(args.source, args.metadata, args.no_metadata)
+    _merge(
+        args.source,
+        args.output,
+        compact=args.compact,
+        verify=not args.no_verify,
+        metadata=metadata,
+    )
     return 0
 
 
@@ -66,15 +112,61 @@ def cmd_build(args: argparse.Namespace) -> int:
     normalized_path = output_dir / "normalized.json"
     report_path = output_dir / "normalized-validation.json"
 
+    metadata = discover_metadata(args.source, args.metadata, args.no_metadata)
     master = _merge(
         args.source,
         master_path,
         compact=args.compact,
         verify=not args.no_verify,
+        metadata=metadata,
     )
     _normalize(master, normalized_path, report_path, compact=args.compact)
     print(f"Build complete: {output_dir}")
     return 0
+
+
+def add_data_commands(sub, *, build_handler=cmd_build) -> None:
+    """Register ingestion commands for both the standalone tools and application CLI."""
+    p_merge = sub.add_parser("merge", help="Merge raw Army JSON files into lossless master.json")
+    p_merge.add_argument("source", type=Path, help="Source directory or ZIP archive")
+    p_merge.add_argument("output", nargs="?", type=Path, default=Path("data/generated/master.json"))
+    p_merge.add_argument("--compact", action="store_true", help="Minify JSON output")
+    p_merge.add_argument(
+        "--no-verify", action="store_true", help="Skip lossless reconstruction verification"
+    )
+    metadata_group = p_merge.add_mutually_exclusive_group()
+    metadata_group.add_argument(
+        "--metadata", type=Path, help="Supplementary Army API metadata JSON"
+    )
+    metadata_group.add_argument(
+        "--no-metadata", action="store_true", help="Do not load metadata.json"
+    )
+    p_merge.set_defaults(func=cmd_merge)
+
+    p_norm = sub.add_parser("normalize", help="Normalize master.json into relational-style tables")
+    p_norm.add_argument("input", type=Path, help="master.json input")
+    p_norm.add_argument(
+        "output", nargs="?", type=Path, default=Path("data/generated/normalized.json")
+    )
+    p_norm.add_argument("--report", type=Path, default=None, help="Validation report output path")
+    p_norm.add_argument("--compact", action="store_true", help="Minify normalized JSON")
+    p_norm.set_defaults(func=cmd_normalize)
+
+    p_build = sub.add_parser("build", help="Run merge, verification, normalization and validation")
+    p_build.add_argument("source", type=Path, help="Source directory or ZIP archive")
+    p_build.add_argument("--output-dir", type=Path, default=Path("data/generated"))
+    p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
+    p_build.add_argument(
+        "--no-verify", action="store_true", help="Skip lossless reconstruction verification"
+    )
+    metadata_group = p_build.add_mutually_exclusive_group()
+    metadata_group.add_argument(
+        "--metadata", type=Path, help="Supplementary Army API metadata JSON"
+    )
+    metadata_group.add_argument(
+        "--no-metadata", action="store_true", help="Do not load metadata.json"
+    )
+    p_build.set_defaults(func=build_handler)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -84,28 +176,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
-
-    p_merge = sub.add_parser("merge", help="Merge raw Army JSON files into lossless master.json")
-    p_merge.add_argument("source", type=Path, help="Source directory or ZIP archive")
-    p_merge.add_argument("output", nargs="?", type=Path, default=Path("data/generated/master.json"))
-    p_merge.add_argument("--compact", action="store_true", help="Minify JSON output")
-    p_merge.add_argument("--no-verify", action="store_true", help="Skip lossless reconstruction verification")
-    p_merge.set_defaults(func=cmd_merge)
-
-    p_norm = sub.add_parser("normalize", help="Normalize master.json into relational-style tables")
-    p_norm.add_argument("input", type=Path, help="master.json input")
-    p_norm.add_argument("output", nargs="?", type=Path, default=Path("data/generated/normalized.json"))
-    p_norm.add_argument("--report", type=Path, default=None, help="Validation report output path")
-    p_norm.add_argument("--compact", action="store_true", help="Minify normalized JSON")
-    p_norm.set_defaults(func=cmd_normalize)
-
-    p_build = sub.add_parser("build", help="Run merge, verification, normalization and validation")
-    p_build.add_argument("source", type=Path, help="Source directory or ZIP archive")
-    p_build.add_argument("--output-dir", type=Path, default=Path("data/generated"))
-    p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
-    p_build.add_argument("--no-verify", action="store_true", help="Skip lossless reconstruction verification")
-    p_build.set_defaults(func=cmd_build)
-
+    add_data_commands(sub)
     return parser
 
 

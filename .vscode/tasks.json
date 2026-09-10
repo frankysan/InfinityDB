@@ -2,12 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Infinity: Build dataset",
+      "label": "Infinity: Build database",
       "type": "shell",
       "command": "${workspaceFolder}/.venv/Scripts/python.exe",
       "args": [
         "-m",
-        "infinity_army_data",
+        "infinity_db",
         "build",
         "${input:armySource}",
         "--output-dir",
@@ -15,6 +15,13 @@
         "--compact"
       ],
       "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Infinity: Serve web UI",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["-m", "infinity_db", "serve"],
       "problemMatcher": []
     },
     {
@@ -29,7 +36,7 @@
       "label": "Python: Ruff",
       "type": "shell",
       "command": "${workspaceFolder}/.venv/Scripts/python.exe",
-      "args": ["-m", "ruff", "check", "src", "tests"],
+      "args": ["-m", "ruff", "check", "src/infinity_db", "src/infinity_army_data/cli.py", "tests"],
       "problemMatcher": []
     }
   ],

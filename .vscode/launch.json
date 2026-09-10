@@ -2,10 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Infinity: Build dataset",
+      "name": "Infinity: Build database",
       "type": "debugpy",
       "request": "launch",
-      "module": "infinity_army_data",
+      "module": "infinity_db",
       "args": [
         "build",
         "${workspaceFolder}/data/raw/JSON 20260909.zip",
@@ -13,6 +13,15 @@
         "${workspaceFolder}/data/generated",
         "--compact"
       ],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Infinity: Serve web UI",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "infinity_db",
+      "args": ["serve"],
       "console": "integratedTerminal",
       "justMyCode": true
     }

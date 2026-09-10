@@ -38,6 +38,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
 
+from .metadata import METADATA_TABLES, MetadataError, normalize_metadata, validate_metadata_envelope
+
 
 FORMAT_NAME = "Infinity Army normalized JSON"
 FORMAT_VERSION = 1
@@ -524,6 +526,20 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
     army_lists = master["armyLists"]
     units = master["units"]
 
+    metadata = master.get("armyMetadata")
+    metadata_rows: dict[str, list[dict[str, Any]]] = {}
+    metadata_faction_names: dict[int, str] = {}
+    if metadata is not None:
+        try:
+            validate_metadata_envelope(metadata)
+            metadata_rows = normalize_metadata(metadata)
+        except MetadataError as exc:
+            raise NormalizationError(f"Invalid Army metadata: {exc}") from exc
+        for row in metadata_rows["metadata_factions"]:
+            metadata_faction_names[row["id"]] = row["name"]
+    for table_name, _ in METADATA_TABLES.values():
+        metadata_rows.setdefault(table_name, [])
+
     # Relations occasionally point at legitimate Army unit IDs that are not
     # present as ordinary unit records in the supplied source files.  Collect
     # them up front so they can be represented by explicit placeholder units.
@@ -564,6 +580,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
         b.add(
             "army_lists",
             id=army_id,
+            name=metadata_faction_names.get(army_id),
             slug=meta.get("slug"),
             kind=meta.get("kind"),
             version=army.get("version"),
@@ -1054,6 +1071,8 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         )
 
     tables = dict(sorted(b.tables.items()))
+    tables.update(metadata_rows)
+    tables = dict(sorted(tables.items()))
     result = {
         "_meta": {
             "format": FORMAT_NAME,
@@ -1069,6 +1088,8 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
         "tables": tables,
         "warnings": b.warnings,
     }
+    if metadata is not None:
+        result["armyMetadata"] = metadata
     return result
 
 
@@ -1085,6 +1106,11 @@ def _unique(rows: list[dict[str, Any]], fields: tuple[str, ...], table: str) -> 
 def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     """Validate primary-key uniqueness and generated foreign-key relationships."""
     t = data["tables"]
+    if "armyMetadata" in data:
+        try:
+            validate_metadata_envelope(data["armyMetadata"])
+        except MetadataError as exc:
+            raise NormalizationError(f"Invalid Army metadata: {exc}") from exc
     checks: list[dict[str, Any]] = []
 
     def check(name: str, ok: bool, detail: str) -> None:

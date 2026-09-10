@@ -3,9 +3,9 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "infinity-army-data"
+name = "infinity-db"
 version = "0.1.0"
-description = "Lossless merge and normalization tools for Infinity Army JSON data"
+description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -19,10 +19,14 @@ dev = [
 ]
 
 [project.scripts]
+infinity-db = "infinity_db.cli:main"
 infinity-army = "infinity_army_data.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/army-symbols/**/*.svg"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
