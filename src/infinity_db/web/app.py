@@ -21,6 +21,7 @@ ASSETS = {
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
     "/static/army-symbols.js": ("army-symbols.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
+    "/static/unit-symbol-map.js": ("unit-symbol-map.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
 }
 ARMY_SYMBOL_PATH = re.compile(

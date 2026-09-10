@@ -10,7 +10,8 @@ function slugify(name) {
 
 export function unitSymbolPath(unitName) {
   const slug = slugify(unitName);
-  return slug && `/static/unit-symbols/${encodeURIComponent(slug)}.svg`;
+  const symbol = unitSymbolSlug(slug) || slug;
+  return symbol && `/static/unit-symbols/${encodeURIComponent(symbol)}.svg`;
 }
 
 export function unitSymbol(unitName, className = "") {
@@ -21,3 +22,4 @@ export function unitSymbol(unitName, className = "") {
   icon.addEventListener("error", () => icon.remove(), { once: true });
   return icon;
 }
+import { unitSymbolSlug } from "./unit-symbol-map.js";

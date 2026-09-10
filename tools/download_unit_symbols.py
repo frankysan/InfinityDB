@@ -36,6 +36,45 @@ def primary_logos(master_list: dict) -> set[str]:
     return set(by_unit.values())
 
 
+def primary_symbol_slugs(master_list: dict) -> dict[str, str]:
+    """Map each source unit slug to its primary profile-logo filename stem."""
+    by_unit: dict[int, tuple[str, str]] = {}
+    for army in master_list.values():
+        for unit in army.get("units", []):
+            unit_id = unit.get("id")
+            slug = unit.get("slug")
+            if not isinstance(unit_id, int) or not isinstance(slug, str) or unit_id in by_unit:
+                continue
+            logo = next(
+                (
+                    profile["logo"]
+                    for group in unit.get("profileGroups", [])
+                    for profile in group.get("profiles", [])
+                    if isinstance(profile.get("logo"), str)
+                ),
+                None,
+            )
+            if logo is not None:
+                by_unit[unit_id] = (slug, destination_name(logo).removesuffix(".svg"))
+    return dict(sorted({slug: symbol for slug, symbol in by_unit.values()}.items()))
+
+
+def write_manifest(master_list: dict, path: Path) -> None:
+    """Write a browser module mapping database slugs to canonical icon slugs."""
+    mappings = primary_symbol_slugs(master_list)
+    entries = ",\n".join(
+        f"  [{json.dumps(slug)}, {json.dumps(symbol)}]" for slug, symbol in mappings.items()
+    )
+    path.write_text(
+        "const unitSymbolSlugs = new Map([\n" + entries + "\n]);\n\n"
+        "export function unitSymbolSlug(unitSlug) {\n"
+        "  return unitSymbolSlugs.get(unitSlug);\n"
+        "}\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def destination_name(url: str) -> str:
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.netloc != ASSET_HOST:
@@ -52,12 +91,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("master_list", type=Path)
     parser.add_argument("destination", type=Path)
+    parser.add_argument("--manifest", type=Path, help="Write a browser symbol-slug map")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     master_list = json.loads(args.master_list.read_text(encoding="utf-8"))
     if not isinstance(master_list, dict):
         raise ValueError("master list must be an object keyed by Army source filename")
+    if args.manifest:
+        write_manifest(master_list, args.manifest)
     urls = sorted(primary_logos(master_list))
     existing = {path.name for path in args.destination.rglob("*.svg")}
     pending = []
