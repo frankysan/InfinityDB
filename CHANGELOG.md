@@ -23,6 +23,9 @@ All notable changes to this project are documented in this file.
 - Manual tools to download Army JSON snapshots and unit symbols.
 - Architecture and data-model documentation, VS Code tasks/debug profiles, and
   automated coverage for the pipeline, database, API, and web interface.
+- Repeatable Linux deployment using Docker Compose, Gunicorn, and Caddy, with
+  a production WSGI entry point and an image that embeds a validated SQLite
+  snapshot.
 
 ### Changed
 

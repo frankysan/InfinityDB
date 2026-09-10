@@ -101,7 +101,24 @@ data, so keep future user-authored data separately. On Windows, stop the server
 before rebuilding if active readers prevent database replacement.
 
 The bundled server is for local development. For other hosting arrangements,
-use the WSGI application factory `infinity_db.web.create_app(Path(...))`.
+use the WSGI application factory `infinity_db.web.create_app(Path(...))`. A
+repeatable Docker Compose deployment with Gunicorn and Caddy is provided in the
+[Linux deployment guide](docs/deployment.md).
+
+## Linux deployment
+
+The supplied Docker Compose configuration packages the application and its
+validated SQLite snapshot in an immutable image, while Caddy provides HTTPS
+and reverse-proxying. Build the database before building the image:
+
+```sh
+infinity-db build --compact
+DOMAIN=infinity.example.com IMAGE_TAG=2026-09-10 docker compose up -d --build
+```
+
+Replace the hostname with the public domain whose DNS points at the server.
+See the [Linux deployment guide](docs/deployment.md) for prerequisites,
+updates, rollback behavior, and operational commands.
 
 ## Project layout
 
