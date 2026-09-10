@@ -204,6 +204,26 @@ def test_duplicate_10000_id_family_is_one_logical_unit(
     assert {army["id"] for army in details["armies"]} == {101, 201, 301}
 
 
+def test_explicit_unit_merge_alias_is_one_logical_unit() -> None:
+    rows = [
+        {"id": 1345, "name": "First record", "isc": "First ISC", "main_army_id": 101},
+        {"id": 1875, "name": "Second record", "isc": "Second ISC", "main_army_id": 201},
+        {"id": 11345, "name": "Third record", "isc": "Third ISC", "main_army_id": 301},
+    ]
+    memberships = {
+        1345: [{"id": 101, "name": "First Army"}],
+        1875: [{"id": 201, "name": "Second Army"}],
+        11345: [{"id": 301, "name": "Third Army"}],
+    }
+
+    groups = logical_unit_groups(rows, memberships)
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == 1345
+    assert groups[0]["source_ids"] == [1345, 1875, 11345]
+    assert list(groups[0]["armies"]) == [101, 201, 301]
+
+
 def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     rows = [
         {

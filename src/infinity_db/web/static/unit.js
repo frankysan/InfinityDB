@@ -145,6 +145,7 @@ function generalProfiles(profiles) {
     rows.push({
       profileName,
       stats,
+      occurrenceCount: matchingProfiles.length,
       reinforcement: matchingProfiles.every((profile) => Number(profile.armyId) % 100 === 99),
     });
     generalByName.set(profileName, stats);
@@ -153,13 +154,15 @@ function generalProfiles(profiles) {
 }
 
 function visibleGeneralProfiles(rows) {
-  return rows.filter((profile) => {
-    if (!profile.reinforcement) return true;
-    return !rows.some((ordinaryProfile) => (
-      !ordinaryProfile.reinforcement
-      && identicalStatline(profile.stats, ordinaryProfile.stats)
-    ));
-  });
+  return rows.filter((profile) => !rows.some((candidate) => (
+    candidate !== profile
+    && identicalStatline(profile.stats, candidate.stats)
+    && (
+      (profile.reinforcement && !candidate.reinforcement)
+      || (profile.reinforcement === candidate.reinforcement
+        && candidate.occurrenceCount > profile.occurrenceCount)
+    )
+  )));
 }
 
 function differsFromGeneral(profile, general, label) {

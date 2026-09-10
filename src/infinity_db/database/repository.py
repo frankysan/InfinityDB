@@ -18,6 +18,9 @@ from .schema import APPLICATION_ID, METADATA_TABLE, ROW_JSON, SCHEMA_VERSION, TA
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
 UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
+# Source records whose IDs differ without following either of the general
+# duplicate patterns.  The value is the preferred representative ID.
+UNIT_MERGE_ALIASES = {1345: 1345, 1875: 1345, 11345: 1345}
 
 
 def unit_sort_key(value: object) -> str:
@@ -27,9 +30,12 @@ def unit_sort_key(value: object) -> str:
 
 
 def unit_group_key(row: sqlite3.Row) -> tuple[int, str]:
-    """Identify duplicate unit records that belong to the same 10,000-ID family."""
+    """Identify duplicate unit records that belong to one logical unit."""
+    unit_id = row["id"]
+    if unit_id in UNIT_MERGE_ALIASES:
+        return (UNIT_MERGE_ALIASES[unit_id], "")
     return (
-        row["id"] % 10_000,
+        unit_id % 10_000,
         (row["isc"] or row["name"]).casefold(),
     )
 
