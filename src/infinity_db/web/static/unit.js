@@ -126,6 +126,11 @@ function generalStatline(stats) {
   return statColumns.map(([, read]) => read(stats));
 }
 
+function identicalStatline(left, right) {
+  const rightStatline = generalStatline(right);
+  return generalStatline(left).every((value, index) => value === rightStatline[index]);
+}
+
 function generalProfiles(profiles) {
   const byName = new Map();
   for (const profile of profiles) {
@@ -133,9 +138,28 @@ function generalProfiles(profiles) {
     if (!byName.has(profileName)) byName.set(profileName, []);
     byName.get(profileName).push(profile);
   }
-  return new Map([...byName].map(([profileName, matchingProfiles]) => [
-    profileName, generalStats(matchingProfiles),
-  ]));
+  const rows = [];
+  const generalByName = new Map();
+  for (const [profileName, matchingProfiles] of byName) {
+    const stats = generalStats(matchingProfiles);
+    rows.push({
+      profileName,
+      stats,
+      reinforcement: matchingProfiles.every((profile) => Number(profile.armyId) % 100 === 99),
+    });
+    generalByName.set(profileName, stats);
+  }
+  return { rows, generalByName };
+}
+
+function visibleGeneralProfiles(rows) {
+  return rows.filter((profile) => {
+    if (!profile.reinforcement) return true;
+    return !rows.some((ordinaryProfile) => (
+      !ordinaryProfile.reinforcement
+      && identicalStatline(profile.stats, ordinaryProfile.stats)
+    ));
+  });
 }
 
 function differsFromGeneral(profile, general, label) {
@@ -176,19 +200,31 @@ function renderArmyProfile(army, generalByName) {
 function render(unit) {
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
-  name.prepend(unitSymbol(unit.slug || unit.isc || unit.name, "unit-symbol-detail"));
+  const icon = unitSymbol(unit.slug || unit.isc || unit.name, "unit-symbol-detail");
+  name.prepend(icon);
+  const mainArmySymbol = armySymbolPath(unit.main_army_id);
+  if (mainArmySymbol) {
+    const mainIcon = document.createElement("img");
+    mainIcon.className = "army-symbol main-army-symbol main-army-symbol-detail";
+    mainIcon.src = mainArmySymbol;
+    mainIcon.alt = "";
+    mainIcon.title = "Main army";
+    name.prepend(mainIcon);
+  }
   meta.textContent = [
     unit.isc,
     unit.isc_abbr && `(${unit.isc_abbr})`,
     `Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`,
   ].filter(Boolean).join(" · ");
   status.hidden = true;
-  const allProfiles = unit.armies.flatMap((army) => army.profiles);
-  const generalByName = generalProfiles(allProfiles);
+  const allProfiles = unit.armies.flatMap((army) => army.profiles.map((profile) => ({
+    ...profile, armyId: army.id,
+  })));
+  const { rows: generalProfileRows, generalByName } = generalProfiles(allProfiles);
   const general = document.createElement("section");
   general.className = "explorer general-profile";
   general.append(heading("General profile"));
-  general.append(table(["Name", ...statColumns.map(([label]) => label)], [...generalByName].map(([profileName, stats]) => [profileName, ...generalStatline(stats)]), "statline"));
+  general.append(table(["Name", ...statColumns.map(([label]) => label)], visibleGeneralProfiles(generalProfileRows).map(({ profileName, stats }) => [profileName, ...generalStatline(stats)]), "statline"));
   content.append(general);
   for (const group of groupArmiesByFaction(unit.armies)) {
     const section = document.createElement("section");

@@ -66,12 +66,14 @@ units in `army_units`.
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
 Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each item
-has `id`, `name`, `army_ids`, and `armies` (`id` and `name` per membership).
+has `id`, `name`, `main_army_id`, `army_ids`, and `armies` (`id` and `name` per membership).
 The zero total above illustrates the response shape.
 
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
 - Army membership comes from `army_units`, not canonical faction or declared
   faction references.
+- `main_army_id` is derived from canonical ownership and always references a
+  whole-army faction group (`xx01`); it is null when that mapping is unavailable.
 - Search matches literal, case-insensitive name substrings, including Unicode.
 - Results sort by display name after case-folding, removing diacritics, and ignoring
   punctuation and other non-alphanumeric characters; unit ID breaks ties for stable

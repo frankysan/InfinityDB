@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from infinity_army_data.normalize import normalize_master, validate_normalized
+from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_db.database import Database, export_database
 from infinity_db.database.repository import logical_unit_groups
 from infinity_db.database.schema import METADATA_TABLE, ROW_JSON, TABLES, quote
@@ -137,6 +137,7 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     first_army = database.list_units(army_id=101)
     assert {unit["id"] for unit in first_army["items"]} == {1, 3}
     shared = next(unit for unit in first_army["items"] if unit["id"] == 1)
+    assert shared["main_army_id"] is None
     assert shared["army_ids"] == [101, 201]
     assert shared["armies"] == [
         {"id": 101, "name": "First Army"}, {"id": 201, "name": "Second Army"},
@@ -149,7 +150,8 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     assert database.list_units(search="missing")["items"] == []
     assert database.list_units(limit=1, offset=1) == {
         "items": [{
-            "id": 1, "name": "Álpha", "isc": None, "slug": "alpha", "source_ids": [1],
+            "id": 1, "name": "Álpha", "isc": None, "slug": "alpha", "main_army_id": None,
+            "source_ids": [1],
             "army_ids": [101, 201],
             "armies": [
                 {"id": 101, "name": "First Army"},
@@ -158,6 +160,18 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
         }],
         "total": 3, "limit": 1, "offset": 1,
     }
+
+
+def test_main_army_resolves_canonical_sectorials_to_whole_armies(normalized: dict) -> None:
+    beta = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 2)
+    assert beta["main_army_id"] == 101
+
+    # A sectorial canonical ID resolves to its parent xx01 list, not the
+    # sectorial itself.
+    assert main_army_id(202, {101, 201, 202}) == 201
+    assert main_army_id(1, {101, 201}) == 101
+    assert main_army_id(998, {901, 998}) == 901
+    assert main_army_id(999, {101, 201}) is None
 
 
 def test_duplicate_10000_id_family_is_one_logical_unit(
@@ -177,6 +191,7 @@ def test_duplicate_10000_id_family_is_one_logical_unit(
     database = Database(path)
 
     alpha = next(unit for unit in database.list_units()["items"] if unit["id"] == 1)
+    assert alpha["main_army_id"] is None
     assert alpha["source_ids"] == [1, 10_001]
     assert alpha["army_ids"] == [101, 201, 301]
     assert database.list_units()["total"] == 3
@@ -184,17 +199,24 @@ def test_duplicate_10000_id_family_is_one_logical_unit(
     details = database.get_unit(10_001)
     assert details is not None
     assert details["id"] == 1
+    assert details["main_army_id"] is None
     assert details["source_ids"] == [1, 10_001]
     assert {army["id"] for army in details["armies"]} == {101, 201, 301}
 
 
 def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     rows = [
-        {"id": 265, "isc": "Wardrivers, Mercenary Hackers", "name": "WARDRIVERS"},
-        {"id": 1635, "isc": "Reinf. Wardrivers, Mercenary Hackers", "name": "REINF: WARDRIVERS"},
+        {
+            "id": 265, "isc": "Wardrivers, Mercenary Hackers", "name": "WARDRIVERS",
+            "main_army_id": 301,
+        },
+        {
+            "id": 1635, "isc": "Reinf. Wardrivers, Mercenary Hackers",
+            "name": "REINF: WARDRIVERS", "main_army_id": 401,
+        },
         {
             "id": 1691, "isc": "Reinf. Wardrivers, Mercenary Hackers",
-            "name": "REFUERZOS: WARDRIVERS",
+            "name": "REFUERZOS: WARDRIVERS", "main_army_id": 501,
         },
     ]
     memberships = {
@@ -207,6 +229,7 @@ def test_reinforcement_only_variants_join_their_standard_unit() -> None:
 
     assert len(groups) == 1
     assert groups[0]["id"] == 265
+    assert groups[0]["main_army_id"] == 301
     assert groups[0]["source_ids"] == [265, 1635, 1691]
     assert list(groups[0]["armies"]) == [301, 399, 999]
 
@@ -265,12 +288,14 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
         "100%_Guard", "Álpha", "A-l.p/h+a", "Beta", "Béta", "C.A.T.!", "Unit 4", "Unit 5",
     ]
     assert database.list_units(search="UNIT 4")["items"] == [{
-        "id": 4, "name": "Unit 4", "isc": None, "slug": None, "source_ids": [4],
+        "id": 4, "name": "Unit 4", "isc": None, "slug": None, "main_army_id": None,
+        "source_ids": [4],
         "army_ids": [], "armies": [],
     }]
     assert database.list_units(search="unit", limit=1, offset=1) == {
         "items": [{
-            "id": 5, "name": "Unit 5", "isc": None, "slug": None, "source_ids": [5], "army_ids": [],
+            "id": 5, "name": "Unit 5", "isc": None, "slug": None, "main_army_id": None,
+            "source_ids": [5], "army_ids": [],
             "armies": [],
         }],
         "total": 2, "limit": 1, "offset": 1,

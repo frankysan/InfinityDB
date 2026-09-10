@@ -160,6 +160,20 @@ def collect_faction_ids(master: dict[str, Any]) -> tuple[set[int], Counter[int],
     return ids, canonical_refs, membership_refs
 
 
+def main_army_id(canonical_faction_id: Any, faction_ids: set[int]) -> int | None:
+    """Resolve canonical ownership to its whole-army group ID (``xx01``)."""
+    if not isinstance(canonical_faction_id, int):
+        return None
+    # The legacy top-level faction IDs (1 through 9) precede the modern army
+    # namespace: PanOceania's canonical 1, for example, is army group 101.
+    candidate = (
+        canonical_faction_id * 100 + 1
+        if 0 < canonical_faction_id < 100
+        else canonical_faction_id - canonical_faction_id % 100 + 1
+    )
+    return candidate if candidate in faction_ids and candidate % 100 == 1 else None
+
+
 def build_catalogs(master: dict[str, Any], b: Builder) -> dict[str, set[Any]]:
     identities: dict[str, dict[Any, dict[str, Any]]] = {
         source_name: {} for source_name in GLOBAL_CATALOGS
@@ -614,6 +628,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
             id=unit_id,
             id_army=shared.get("idArmy"),
             canonical_faction_id=shared.get("canonical"),
+            main_army_id=main_army_id(shared.get("canonical"), faction_ids),
             isc=shared.get("isc"),
             isc_abbr=shared.get("iscAbbr"),
             name=shared.get("name"),
@@ -680,6 +695,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
             id=unit_id,
             id_army=None,
             canonical_faction_id=None,
+            main_army_id=None,
             isc=None,
             isc_abbr=None,
             name=None,
@@ -1147,6 +1163,11 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     check("army_list -> faction", all((row["id"],) in faction_ids for row in t.get("army_lists", [])), "all army-list IDs exist as faction references")
     check("army_list reinforcement -> faction", all(row.get("reinforcement_id") is None or row["reinforcement_id"] in faction_ids_scalar for row in t.get("army_lists", [])), "all reinforcement IDs exist in faction references")
     check("unit canonical -> faction", all(row.get("canonical_faction_id") is None or row["canonical_faction_id"] in faction_ids_scalar for row in t.get("units", [])), "all canonical faction references resolve")
+    check("unit main army -> whole army group", all(
+        row.get("main_army_id") is None
+        or row["main_army_id"] in faction_ids_scalar and row["main_army_id"] % 100 == 1
+        for row in t.get("units", [])
+    ), "all main-army references resolve to whole-army group IDs")
     check("unit_factions -> unit/faction", all(row["unit_id"] in unit_ids_scalar and row["faction_id"] in faction_ids_scalar for row in t.get("unit_factions", [])), "all unit faction memberships resolve")
     check("army_units -> army/unit", all(row["army_id"] in army_ids_scalar and row["unit_id"] in unit_ids_scalar for row in t.get("army_units", [])), "all army-unit rows resolve")
     check("profile_groups -> army_unit", all((row["army_id"], row["unit_id"]) in army_unit_keys for row in t.get("profile_groups", [])), "all profile groups have an army-unit parent")

@@ -1,6 +1,6 @@
 # InfinityDB
 
-InfinityDB is the database project for Corvus Belli's Infinity. It brings together
+InfinityDB is a database project for Corvus Belli's Infinity. It brings together
 data ingestion, a database backend, and a web interface. The existing merge and
 normalization tools are part of this project: they supply the database with
 validated data.

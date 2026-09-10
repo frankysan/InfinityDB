@@ -56,6 +56,10 @@ def logical_unit_groups(
         group = groups.setdefault(key, {
             "id": row["id"], "name": row["name"], "isc": row["isc"],
             "slug": row["slug"] if "slug" in row.keys() else None,
+            # The lowest source ID is the logical unit's representative.  This
+            # prevents a merged reinforcement/duplicate from replacing the
+            # canonical army of the ordinary unit.
+            "main_army_id": row["main_army_id"] if "main_army_id" in row.keys() else None,
             "source_ids": [],
             "names": [], "armies": {},
             "base_identity": base_identity, "reinforcement_only": reinforcement_only,
@@ -174,7 +178,7 @@ class Database:
             raise ValueError("offset must be a nonnegative integer at most 9223372036854775807")
         with self._connect() as connection:
             rows = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.slug, u.canonical_faction_id "
+                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.slug, u.main_army_id "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
@@ -202,6 +206,7 @@ class Database:
                 {
                     "id": group["id"], "name": group["name"], "isc": group["isc"],
                     "slug": group["slug"],
+                    "main_army_id": group["main_army_id"],
                     "source_ids": group["source_ids"],
                     "army_ids": list(group["armies"]), "armies": list(group["armies"].values()),
                 }
@@ -216,14 +221,14 @@ class Database:
         with self._connect() as connection:
             selected = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.canonical_faction_id "
+                "u.main_army_id "
                 "FROM units AS u WHERE u.id = ? AND u.source_defined = 1", (unit_id,)
             ).fetchone()
             if selected is None:
                 return None
             siblings = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.canonical_faction_id FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
+                "u.main_army_id FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in siblings}
             membership_rows = connection.execute(
@@ -273,6 +278,7 @@ class Database:
                     by_army[loadout["army_id"]]["loadouts"].append(item)
         return {
             "id": unit["id"], "name": unit["name"], "isc": unit["isc"], "slug": unit["slug"],
-            "isc_abbr": unit["isc_abbr"], "notes": unit["notes"], "source_ids": source_ids,
+            "isc_abbr": unit["isc_abbr"], "notes": unit["notes"],
+            "main_army_id": group["main_army_id"], "source_ids": source_ids,
             "armies": armies,
         }

@@ -93,6 +93,15 @@ function renderUnits(data) {
     nameLink.textContent = unit.name;
     const nameContent = document.createElement("span");
     nameContent.className = "unit-name-content";
+    const mainArmySymbol = armySymbolPath(unit.main_army_id);
+    if (mainArmySymbol) {
+      const icon = document.createElement("img");
+      icon.className = "army-symbol main-army-symbol";
+      icon.src = mainArmySymbol;
+      icon.alt = "";
+      icon.title = "Main army";
+      nameContent.append(icon);
+    }
     nameContent.append(unitSymbol(unit.slug || unit.isc || unit.name), nameLink);
     nameCell.append(nameContent);
     const armyCell = document.createElement("td");

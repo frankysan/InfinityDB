@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 4
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 METADATA_TABLE = "__infinity_metadata"
@@ -46,9 +46,10 @@ TABLES = {
     ),
     "units": table(
         "id",
-        "id_army canonical_faction_id isc isc_abbr name slug notes spectables source_defined "
+        "id_army canonical_faction_id main_army_id isc isc_abbr name slug notes spectables source_defined "
         "relation_reference_count",
         ref("canonical_faction_id", "factions", "id"),
+        ref("main_army_id", "factions", "id"),
     ),
     "unit_factions": table(
         "unit_id faction_id", "position",
