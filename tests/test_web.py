@@ -43,7 +43,20 @@ def request(
 
 @pytest.fixture
 def app(tmp_path: Path) -> Callable:
-    shared = {"id": 1, "name": "Alpha Ranger", "canonical": 999, "factions": [101]}
+    shared = {
+        "id": 1, "name": "Alpha Ranger", "canonical": 999, "factions": [101],
+        "profileGroups": [{
+            "id": 1,
+            "profiles": [{
+                "id": 1, "name": "Ranger", "skills": [{"id": 11}],
+                "equip": [{"id": 21, "q": 2}], "weapons": [{"id": 31}],
+            }],
+            "options": [{
+                "id": 1, "name": "Rifle loadout", "points": 20, "swc": "0",
+                "skills": [{"id": 11}], "equip": [{"id": 21}], "weapons": [{"id": 31, "q": 2}],
+            }],
+        }],
+    }
     # Declared factions and canonical ownership deliberately differ from actual occurrences.
     blue_only = {"id": 3, "name": "100%_Guard", "canonical": 101, "factions": [201]}
     red_only = {"id": 2, "name": "Beta Scout", "canonical": 101, "factions": [101]}
@@ -53,7 +66,14 @@ def app(tmp_path: Path) -> Callable:
     ]
     sources = []
     for filename, units in documents:
-        document = {"version": "test", "reinforcements": None, "units": units}
+        document = {
+            "version": "test", "reinforcements": None, "units": units,
+            "filters": {
+                "skills": [{"id": 11, "name": "Stealth"}],
+                "equip": [{"id": 21, "name": "Medikit"}],
+                "weapons": [{"id": 31, "name": "Combi Rifle"}],
+            },
+        }
         if filename.startswith("101-"):
             # This unresolved reference becomes a placeholder, not a browsable unit.
             document["relations"] = [{"units": [{"unit": 9099}]}]
@@ -117,6 +137,15 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     unit = json.loads(body)
     assert unit["name"] == "Alpha Ranger"
     assert {army["id"] for army in unit["armies"]} == {101, 201}
+    for army in unit["armies"]:
+        assert army["profiles"][0]["skills"] == [{"id": 11, "name": "Stealth", "quantity": None}]
+        assert army["profiles"][0]["equipment"] == [{"id": 21, "name": "Medikit", "quantity": 2}]
+        assert army["profiles"][0]["weapons"] == [
+            {"id": 31, "name": "Combi Rifle", "quantity": None}
+        ]
+        assert army["loadouts"][0]["skills"] == [{"id": 11, "name": "Stealth", "quantity": None}]
+        assert army["loadouts"][0]["equipment"] == [{"id": 21, "name": "Medikit", "quantity": None}]
+        assert army["loadouts"][0]["weapons"] == [{"id": 31, "name": "Combi Rifle", "quantity": 2}]
     status, headers, body = request(app, "/units/1")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
@@ -208,6 +237,21 @@ def test_army_symbol_is_served(app: Callable) -> None:
     status, _, body = request(app, "/static/unit-symbols/clipper-dronbots.svg")
     assert status == 200
     assert b"<svg" in body
+    for path in [
+        "/static/army-symbols/Combined Army/next-wave.svg",
+        "/static/army-symbols/NA2/contracted-back-up.svg",
+    ]:
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-type"] == "image/svg+xml"
+        assert b"<svg" in body
+
+
+def test_frontend_recognizes_98_and_99_as_reinforcement_armies(app: Callable) -> None:
+    for asset in ["/static/app.js", "/static/unit.js"]:
+        status, _, body = request(app, asset)
+        assert status == 200
+        assert b"[98, 99]" in body
 
 
 def test_unit_symbol_is_served(app: Callable) -> None:
@@ -219,6 +263,14 @@ def test_unit_symbol_is_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body
+    for path in [
+        "/static/unit-symbols/blur-spec-ops-1-1.svg",
+        "/static/unit-symbols/next-wave-team-ops-1-1.svg",
+    ]:
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-type"] == "image/svg+xml"
+        assert b"<svg" in body
     status, _, _ = request(app, "/static/unit-symbols/not-a-unit.svg")
     assert status == 404
     status, headers, body = request(

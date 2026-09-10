@@ -50,8 +50,15 @@ function groupArmiesByFaction(armies) {
 
 function cell(value) {
   const element = document.createElement("td");
-  const highlighted = value && typeof value === "object" && "highlight" in value;
-  element.textContent = text(highlighted ? value.value : value);
+  const structured = value && typeof value === "object";
+  const highlighted = structured && "highlight" in value;
+  element.textContent = text(structured && "value" in value ? value.value : value);
+  if (value && typeof value === "object" && value.className) {
+    element.classList.add(value.className);
+  }
+  if (value && typeof value === "object" && value.colSpan) {
+    element.colSpan = value.colSpan;
+  }
   if (highlighted && value.highlight) {
     element.className = "stat-different";
     element.title = "Differs from the general profile";
@@ -84,6 +91,10 @@ const statColumns = [
   ["ARM", (profile) => profile.arm], ["BTS", (profile) => profile.bts],
   ["W", (profile) => profile.vitality], ["S", (profile) => profile.silhouette],
 ];
+
+function isReinforcementArmy(armyId) {
+  return [98, 99].includes(Number(armyId) % 100);
+}
 const statProperties = {
   CC: "cc", BS: "bs", PH: "ph", WIP: "wip", ARM: "arm", BTS: "bts",
   W: "vitality", S: "silhouette",
@@ -145,12 +156,32 @@ function generalProfiles(profiles) {
     rows.push({
       profileName,
       stats,
+      skills: commonProfileItems(matchingProfiles, "skills"),
+      equipment: commonProfileItems(matchingProfiles, "equipment"),
+      weapons: commonProfileItems(matchingProfiles, "weapons"),
       occurrenceCount: matchingProfiles.length,
-      reinforcement: matchingProfiles.every((profile) => Number(profile.armyId) % 100 === 99),
+      reinforcement: matchingProfiles.every((profile) => isReinforcementArmy(profile.armyId)),
     });
     generalByName.set(profileName, stats);
   }
   return { rows, generalByName };
+}
+
+function commonProfileItems(profiles, property) {
+  if (!profiles.length) return [];
+  return (profiles[0][property] || []).flatMap((item) => {
+    const matches = profiles.map((profile) => (
+      (profile[property] || []).find((candidate) => candidate.id === item.id)
+    ));
+    if (matches.some((match) => !match)) return [];
+    const quantities = matches.map((match) => match.quantity);
+    return [{
+      ...item,
+      quantity: quantities.every((quantity) => quantity === quantities[0])
+        ? quantities[0]
+        : null,
+    }];
+  });
 }
 
 function visibleGeneralProfiles(rows) {
@@ -172,6 +203,39 @@ function differsFromGeneral(profile, general, label) {
   return profile[statProperties[label]] !== general[statProperties[label]];
 }
 
+function profileItems(items, fallbackLabel) {
+  if (!items.length) return "—";
+  return items.map((item) => {
+    const name = item.name || `${fallbackLabel} #${text(item.id)}`;
+    return item.quantity != null && Number(item.quantity) !== 1
+      ? `${name} ×${item.quantity}`
+      : name;
+  }).join(", ");
+}
+
+function generalProfileTableRows(profiles) {
+  return profiles.flatMap((profile) => {
+    const rows = [[profile.profileName, ...generalStatline(profile.stats)]];
+    for (const [label, property, fallbackLabel] of [
+      ["Skills", "skills", "Skill"],
+      ["Equipment", "equipment", "Equipment"],
+      ["Weapons", "weapons", "Weapon"],
+    ]) {
+      if (profile[property].length) {
+        rows.push([
+          { value: label, className: "general-item-label" },
+          {
+            value: profileItems(profile[property], fallbackLabel),
+            className: "general-item-list",
+            colSpan: statColumns.length,
+          },
+        ]);
+      }
+    }
+    return rows;
+  });
+}
+
 function renderArmyProfile(army, generalByName) {
   const section = document.createElement("section");
   section.className = "explorer army-profile";
@@ -189,14 +253,26 @@ function renderArmyProfile(army, generalByName) {
   }
   section.append(armyHeading);
   section.append(subheading("Profiles"));
-  section.append(table(["Name", ...statColumns.map(([label]) => label), "AVA"], army.profiles.map((p) => {
+  section.append(table(["Name", ...statColumns.map(([label]) => label), "Skills", "Equipment", "Weapons", "AVA"], army.profiles.map((p) => {
     const generalStatsForProfile = generalByName.get(p.name || "");
     return [p.name, ...statColumns.map(([label, read]) => ({
       value: read(p), highlight: differsFromGeneral(p, generalStatsForProfile, label),
-    })), p.ava];
+    })),
+    { value: profileItems(p.skills, "Skill"), className: "profile-item-list" },
+    { value: profileItems(p.equipment, "Equipment"), className: "profile-item-list" },
+    { value: profileItems(p.weapons, "Weapon"), className: "profile-item-list" },
+    p.ava];
   }), "statline"));
   section.append(subheading("Loadouts"));
-  section.append(table(["Name", "Points", "SWC", "Minis"], army.loadouts.map((o) => [o.name, o.points, o.swc, o.minis])));
+  section.append(table(
+    ["Name", "Points", "SWC", "Minis", "Skills", "Equipment", "Weapons"],
+    army.loadouts.map((o) => [
+      o.name, o.points, o.swc, o.minis,
+      { value: profileItems(o.skills, "Skill"), className: "profile-item-list" },
+      { value: profileItems(o.equipment, "Equipment"), className: "profile-item-list" },
+      { value: profileItems(o.weapons, "Weapon"), className: "profile-item-list" },
+    ]),
+  ));
   return section;
 }
 
@@ -227,7 +303,11 @@ function render(unit) {
   const general = document.createElement("section");
   general.className = "explorer general-profile";
   general.append(heading("General profile"));
-  general.append(table(["Name", ...statColumns.map(([label]) => label)], visibleGeneralProfiles(generalProfileRows).map(({ profileName, stats }) => [profileName, ...generalStatline(stats)]), "statline"));
+  general.append(table(
+    ["Name", ...statColumns.map(([label]) => label)],
+    generalProfileTableRows(visibleGeneralProfiles(generalProfileRows)),
+    "statline",
+  ));
   content.append(general);
   for (const group of groupArmiesByFaction(unit.armies)) {
     const section = document.createElement("section");

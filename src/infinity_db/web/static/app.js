@@ -21,6 +21,10 @@ let requestNumber = 0;
 let controller;
 let searchTimer;
 
+function isReinforcementArmy(armyId) {
+  return [98, 99].includes(armyId % 100);
+}
+
 function readLocation() {
   const params = new URLSearchParams(window.location.search);
   const offset = Number(params.get("offset") || 0);
@@ -76,7 +80,7 @@ function populateArmies(armies) {
 }
 
 function displayArmies(armies) {
-  const regularArmies = armies.filter((army) => army.id % 100 !== 99);
+  const regularArmies = armies.filter((army) => !isReinforcementArmy(army.id));
   const visibleArmies = regularArmies.length ? regularArmies : armies;
   return [...visibleArmies].sort((left, right) => left.id - right.id);
 }

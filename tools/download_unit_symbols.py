@@ -5,6 +5,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
+import zipfile
+from collections.abc import Iterable
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -14,10 +17,10 @@ ASSET_PATH = "/army/img/logo/units/"
 SVG_NAME = re.compile(r"[a-z0-9-]+\.svg$")
 
 
-def primary_logos(master_list: dict) -> set[str]:
+def primary_logos(armies: Iterable[dict]) -> set[str]:
     """Return one deterministic profile-logo URL for every referenced unit ID."""
     by_unit: dict[int, str] = {}
-    for army in master_list.values():
+    for army in armies:
         for unit in army.get("units", []):
             unit_id = unit.get("id")
             if not isinstance(unit_id, int) or unit_id in by_unit:
@@ -36,10 +39,10 @@ def primary_logos(master_list: dict) -> set[str]:
     return set(by_unit.values())
 
 
-def primary_symbol_slugs(master_list: dict) -> dict[str, str]:
+def primary_symbol_slugs(armies: Iterable[dict]) -> dict[str, str]:
     """Map each source unit slug to its primary profile-logo filename stem."""
     by_unit: dict[int, tuple[str, str]] = {}
-    for army in master_list.values():
+    for army in armies:
         for unit in army.get("units", []):
             unit_id = unit.get("id")
             slug = unit.get("slug")
@@ -59,9 +62,9 @@ def primary_symbol_slugs(master_list: dict) -> dict[str, str]:
     return dict(sorted({slug: symbol for slug, symbol in by_unit.values()}.items()))
 
 
-def write_manifest(master_list: dict, path: Path) -> None:
+def write_manifest(armies: Iterable[dict], path: Path) -> None:
     """Write a browser module mapping database slugs to canonical icon slugs."""
-    mappings = primary_symbol_slugs(master_list)
+    mappings = primary_symbol_slugs(armies)
     entries = ",\n".join(
         f"  [{json.dumps(slug)}, {json.dumps(symbol)}]" for slug, symbol in mappings.items()
     )
@@ -87,20 +90,41 @@ def destination_name(url: str) -> str:
     return name
 
 
+def load_armies(path: Path) -> list[dict]:
+    """Load Army documents from either a legacy master list or a raw API ZIP."""
+    if zipfile.is_zipfile(path):
+        with zipfile.ZipFile(path) as archive:
+            armies = []
+            for name in sorted(archive.namelist()):
+                if not name.lower().endswith(".json"):
+                    continue
+                data = json.loads(archive.read(name))
+                if isinstance(data, dict) and isinstance(data.get("units"), list):
+                    armies.append(data)
+            return armies
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("master list must be an object keyed by Army source filename")
+    return [army for army in data.values() if isinstance(army, dict)]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("master_list", type=Path)
+    parser.add_argument("source", type=Path, help="Raw Army ZIP or legacy master-list JSON")
     parser.add_argument("destination", type=Path)
     parser.add_argument("--manifest", type=Path, help="Write a browser symbol-slug map")
+    parser.add_argument(
+        "--delay", type=float, default=0.2, help="Seconds to wait between downloads (default: 0.2)"
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    master_list = json.loads(args.master_list.read_text(encoding="utf-8"))
-    if not isinstance(master_list, dict):
-        raise ValueError("master list must be an object keyed by Army source filename")
+    if args.delay < 0:
+        raise ValueError("--delay must not be negative")
+    armies = load_armies(args.source)
     if args.manifest:
-        write_manifest(master_list, args.manifest)
-    urls = sorted(primary_logos(master_list))
+        write_manifest(armies, args.manifest)
+    urls = sorted(primary_logos(armies))
     existing = {path.name for path in args.destination.rglob("*.svg")}
     pending = []
     for url in urls:
@@ -120,6 +144,8 @@ def main() -> int:
             raise ValueError(f"Expected an SVG response: {url}")
         (args.destination / name).write_bytes(body)
         print(f"[{index}/{len(pending)}] {name}")
+        if index < len(pending) and args.delay:
+            time.sleep(args.delay)
     print(f"Downloaded: {len(pending)}")
     return 0
 

@@ -28,9 +28,23 @@ Select `.venv` as the Python interpreter in VS Code.
 Place the downloaded Army JSON files or ZIP archive in `data/raw/`, then run:
 
 ```powershell
-infinity-db build "data/raw/JSON 20260909.zip" --compact
+infinity-db build --compact
 infinity-db serve
 ```
+
+Or download a fresh raw snapshot directly from the official Army API (metadata
+is saved first, followed by every faction listed in that metadata):
+
+```powershell
+python tools/download_army_json.py data/raw
+infinity-db build --compact
+```
+
+The downloader is intentionally a standalone manual script: normal application
+and build commands never initiate API requests. It writes a date-and-time-tagged
+`JSON YYYYMMDD-HHMMSS.zip` archive and removes its temporary loose files. When
+no source is supplied, `infinity-db build` imports the newest ZIP in `data/raw/`;
+provide a source path explicitly to select a different snapshot.
 
 Open **http://127.0.0.1:8000**. Stop the local server with `Ctrl+C`.
 The army selector includes source army/sectorial and reinforcement lists. Display

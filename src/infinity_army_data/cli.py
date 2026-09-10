@@ -12,6 +12,18 @@ from .metadata import MetadataError, decode_metadata, load_metadata
 from .normalize import normalize_master, validate_normalized
 from .normalize import write_json as write_normalized
 
+DEFAULT_RAW_DIRECTORY = Path("data/raw")
+
+
+def latest_snapshot(directory: Path = DEFAULT_RAW_DIRECTORY) -> Path:
+    """Return the newest raw ZIP snapshot, preferring file modification time."""
+    archives = [path for path in directory.glob("*.zip") if path.is_file()]
+    if not archives:
+        raise ValueError(
+            f"No ZIP snapshots found in {directory}; provide a source path or run the downloader"
+        )
+    return max(archives, key=lambda path: (path.stat().st_mtime_ns, path.name.casefold()))
+
 
 def discover_metadata(source: Path, explicit: Path | None, disabled: bool) -> dict | None:
     """Find the optional API metadata beside a snapshot or within its ZIP."""
@@ -106,6 +118,8 @@ def cmd_normalize(args: argparse.Namespace) -> int:
 
 
 def cmd_build(args: argparse.Namespace) -> int:
+    if args.source is None:
+        args.source = latest_snapshot()
     output_dir: Path = args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     master_path = output_dir / "master.json"
@@ -153,7 +167,13 @@ def add_data_commands(sub, *, build_handler=cmd_build) -> None:
     p_norm.set_defaults(func=cmd_normalize)
 
     p_build = sub.add_parser("build", help="Run merge, verification, normalization and validation")
-    p_build.add_argument("source", type=Path, help="Source directory or ZIP archive")
+    p_build.add_argument(
+        "source",
+        nargs="?",
+        type=Path,
+        default=None,
+        help="Source directory or ZIP archive (default: newest ZIP in data/raw)",
+    )
     p_build.add_argument("--output-dir", type=Path, default=Path("data/generated"))
     p_build.add_argument("--compact", action="store_true", help="Minify generated data files")
     p_build.add_argument(

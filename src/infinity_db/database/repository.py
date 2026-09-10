@@ -21,6 +21,12 @@ UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
 # Source records whose IDs differ without following either of the general
 # duplicate patterns.  The value is the preferred representative ID.
 UNIT_MERGE_ALIASES = {1345: 1345, 1875: 1345, 11345: 1345}
+REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
+
+
+def is_reinforcement_army_id(army_id: int) -> bool:
+    """Return whether an army ID denotes a reinforcement-only army."""
+    return army_id % 100 in REINFORCEMENT_ARMY_SUFFIXES
 
 
 def unit_sort_key(value: object) -> str:
@@ -53,7 +59,9 @@ def logical_unit_groups(
     groups: dict[tuple[Any, ...], dict[str, Any]] = {}
     for row in rows:
         armies = memberships[row["id"]]
-        reinforcement_only = bool(armies) and all(army["id"] % 100 == 99 for army in armies)
+        reinforcement_only = bool(armies) and all(
+            is_reinforcement_army_id(army["id"]) for army in armies
+        )
         base_identity = unit_base_identity(row)
         key = (
             ("reinforcement", base_identity) if reinforcement_only
@@ -268,8 +276,41 @@ class Database:
                 item = {
                     key: profile[key] for key in profile.keys() if key != "army_id"
                 }
+                item["skills"] = []
+                item["equipment"] = []
+                item["weapons"] = []
                 if item not in by_army[profile["army_id"]]["profiles"]:
                     by_army[profile["army_id"]]["profiles"].append(item)
+            profile_items = {
+                (
+                    army["id"], profile["group_id"], profile["profile_id"]
+                ): profile
+                for army in armies
+                for profile in army["profiles"]
+            }
+            for occurrence_table, catalog_table, property_name in (
+                ("profile_skills", "skills", "skills"),
+                ("profile_equipment", "equipment", "equipment"),
+                ("profile_weapons", "weapons", "weapons"),
+            ):
+                occurrence_rows = connection.execute(
+                    "SELECT o.army_id, o.group_id, o.profile_id, o.item_id, o.quantity, "
+                    "o.position, c.name "
+                    f"FROM {occurrence_table} AS o "
+                    f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
+                    f"WHERE o.unit_id IN ({placeholders}) "
+                    "ORDER BY o.army_id, o.group_id, o.profile_id, o.position, o.occurrence_id",
+                    source_ids,
+                )
+                for occurrence in occurrence_rows:
+                    profile = profile_items.get(
+                        (occurrence["army_id"], occurrence["group_id"], occurrence["profile_id"])
+                    )
+                    if profile is not None:
+                        profile[property_name].append({
+                            "id": occurrence["item_id"], "name": occurrence["name"],
+                            "quantity": occurrence["quantity"],
+                        })
             loadout_rows = connection.execute(
                 "SELECT o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
                 "o.minis, o.disabled "
@@ -280,8 +321,41 @@ class Database:
                 item = {
                     key: loadout[key] for key in loadout.keys() if key != "army_id"
                 }
+                item["skills"] = []
+                item["equipment"] = []
+                item["weapons"] = []
                 if item not in by_army[loadout["army_id"]]["loadouts"]:
                     by_army[loadout["army_id"]]["loadouts"].append(item)
+            loadout_items = {
+                (
+                    army["id"], loadout["group_id"], loadout["option_id"]
+                ): loadout
+                for army in armies
+                for loadout in army["loadouts"]
+            }
+            for occurrence_table, catalog_table, property_name in (
+                ("option_skills", "skills", "skills"),
+                ("option_equipment", "equipment", "equipment"),
+                ("option_weapons", "weapons", "weapons"),
+            ):
+                occurrence_rows = connection.execute(
+                    "SELECT o.army_id, o.group_id, o.option_id, o.item_id, o.quantity, "
+                    "o.position, c.name "
+                    f"FROM {occurrence_table} AS o "
+                    f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
+                    f"WHERE o.unit_id IN ({placeholders}) "
+                    "ORDER BY o.army_id, o.group_id, o.option_id, o.position, o.occurrence_id",
+                    source_ids,
+                )
+                for occurrence in occurrence_rows:
+                    loadout = loadout_items.get(
+                        (occurrence["army_id"], occurrence["group_id"], occurrence["option_id"])
+                    )
+                    if loadout is not None:
+                        loadout[property_name].append({
+                            "id": occurrence["item_id"], "name": occurrence["name"],
+                            "quantity": occurrence["quantity"],
+                        })
         return {
             "id": unit["id"], "name": unit["name"], "isc": unit["isc"], "slug": unit["slug"],
             "isc_abbr": unit["isc_abbr"], "notes": unit["notes"],

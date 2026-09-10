@@ -238,11 +238,16 @@ def test_reinforcement_only_variants_join_their_standard_unit() -> None:
             "id": 1691, "isc": "Reinf. Wardrivers, Mercenary Hackers",
             "name": "REFUERZOS: WARDRIVERS", "main_army_id": 501,
         },
+        {
+            "id": 2691, "isc": "Reinf. Wardrivers, Mercenary Hackers",
+            "name": "REINF: WARDRIVERS", "main_army_id": 901,
+        },
     ]
     memberships = {
         265: [{"id": 301, "name": "Ariadna"}],
         1635: [{"id": 399, "name": "Reinforcements"}],
         1691: [{"id": 999, "name": "Reinforcements"}],
+        2691: [{"id": 998, "name": "Reinforcements"}],
     }
 
     groups = logical_unit_groups(rows, memberships)
@@ -250,8 +255,8 @@ def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     assert len(groups) == 1
     assert groups[0]["id"] == 265
     assert groups[0]["main_army_id"] == 301
-    assert groups[0]["source_ids"] == [265, 1635, 1691]
-    assert list(groups[0]["armies"]) == [301, 399, 999]
+    assert groups[0]["source_ids"] == [265, 1635, 1691, 2691]
+    assert list(groups[0]["armies"]) == [301, 399, 999, 998]
 
 
 @pytest.mark.parametrize("mutation", [
