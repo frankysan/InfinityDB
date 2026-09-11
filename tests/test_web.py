@@ -58,6 +58,7 @@ def app(tmp_path: Path) -> Callable:
                 "skills": [{"id": 11, "extra": [41]}],
                 "equip": [{"id": 21, "extra": [42]}],
                 "weapons": [{"id": 31, "q": 2, "extra": [43]}],
+                "orders": [{"type": "regular", "list": 1, "total": 1}],
             }],
         }],
     }
@@ -218,6 +219,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
                 "extras": [{"id": 43, "name": "AP"}],
             }
         ]
+        assert army["loadouts"][0]["orders"] == [{"type": "regular", "list": 1, "total": 1}]
         assert army["loadouts"][0]["skills"] == [{
             "id": 11, "name": "Stealth", "quantity": None, "extras": [{"id": 41, "name": "+3"}],
         }]
@@ -391,9 +393,10 @@ def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable
     assert status == 200
     assert b'function attributeStatline(stats, generalStats = null, includeAvailability = false)' in body
     assert b'{ value: "Attributes", header: true, className: "profile-attributes-label" }' in body
-    assert b'["Name", "Type", "Classification"]' in body
+    assert b'{ value: "Type", header: true, className: "general-item-label" }' in body
+    assert b'{ value: "Classification", header: true, className: "general-item-label" }' in body
     assert b'"profile-details-table"' in body
-    assert b'["Name", "Points", "SWC", "Minis"]' in body
+    assert b'["Name", "Points", "SWC"]' in body
     assert b'attributeStatline(profile, generalStatsForProfile, true)' in body
 
 
@@ -414,6 +417,39 @@ def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable)
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert body.count(b"if (!items.length) continue;") == 2
+
+
+def test_unit_details_frontend_promotes_sole_loadout_skills_to_general_profile(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function generalProfileSkills(profiles, loadouts)" in body
+    assert b"if (loadouts.length !== 1) return skills;" in body
+
+
+@pytest.mark.parametrize("symbol", ["regular", "irregular", "peripheral", "impetuous", "tactical", "lieutenant", "hackable", "cube", "cube-2"])
+def test_order_symbols_are_served(app: Callable, symbol: str) -> None:
+    status, headers, body = request(app, f"/static/order-symbols/{symbol}.svg")
+    assert status == 200
+    assert headers["content-type"] == "image/svg+xml"
+    assert b"<svg" in body
+
+
+def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'function profileTitle(profile)' in body
+    assert b'generalProfile.append(profileTitle(profile), table(' in body
+    assert b"nameWithOrderSymbols(loadout.name, symbolTypes)" in body
+    assert b'function generalProfileOrderType(profiles, loadouts)' in body
+    assert b'hasSkill(loadouts, "regular")' in body
+    assert b'.startsWith("peripheral")' in body
+    assert b'hasSkill([loadout], "impetuous")' in body
+    assert b'hasSkill([loadout], "tactical awareness")' in body
+    assert b'function lieutenantOrderCount(items)' in body
+    assert b'function generalLieutenantOrderCount(profiles, loadouts)' in body
+    assert b'Array(lieutenantOrderCount([loadout])).fill("lieutenant")' in body
+    assert b'function characteristicSymbolTypes(profiles)' in body
+    assert b'symbol.title = symbolLabels[symbolType]' in body
 
 
 def test_distance_preference_script_is_served(app: Callable) -> None:

@@ -35,6 +35,7 @@ ARMY_SYMBOL_PATH = re.compile(
     r"/static/army-symbols/(?:[A-Za-z0-9 ._-]+/)*[A-Za-z0-9 ._-]+\.svg"
 )
 UNIT_SYMBOL_PATH = re.compile(r"/static/unit-symbols/([a-z0-9-]+)\.svg")
+ORDER_SYMBOL_PATH = re.compile(r"/static/order-symbols/(regular|irregular|peripheral|impetuous|tactical|lieutenant|hackable|cube|cube-2)\.svg")
 
 
 def _unit_symbol_paths(directory) -> dict[str, object]:
@@ -178,6 +179,12 @@ class Application:
         elif ARMY_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/army-symbols/")
             asset = files("infinity_db.web").joinpath("static", "army-symbols", filename)
+            body = asset.read_bytes()
+            content_type = "image/svg+xml"
+        elif match := ORDER_SYMBOL_PATH.fullmatch(path):
+            asset = files("infinity_db.web").joinpath(
+                "static", "order-symbols", f"{match.group(1)}.svg"
+            )
             body = asset.read_bytes()
             content_type = "image/svg+xml"
         elif match := UNIT_SYMBOL_PATH.fullmatch(path):

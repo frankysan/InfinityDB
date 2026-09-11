@@ -1052,6 +1052,7 @@ class Database:
                 item["skills"] = []
                 item["equipment"] = []
                 item["weapons"] = []
+                item["characteristics"] = []
                 profile_key = (
                     army["_occurrence_key"], profile["group_id"], profile["profile_id"], profile["name"],
                     profile["move_1"], profile["move_2"], profile["cc"], profile["bs"], profile["ph"],
@@ -1110,6 +1111,22 @@ class Database:
                             "quantity": occurrence["quantity"],
                             "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
                         })
+            characteristic_rows = connection.execute(
+                "SELECT o.unit_id, o.army_id, o.group_id, o.profile_id, c.name "
+                "FROM profile_characteristics AS o "
+                "JOIN characteristics AS c ON c.id = o.characteristic_id "
+                f"WHERE o.unit_id IN ({placeholders}) "
+                "ORDER BY o.army_id, o.group_id, o.profile_id, o.position",
+                source_ids,
+            )
+            for characteristic in characteristic_rows:
+                profile_key = profile_keys_by_source.get((
+                    characteristic["unit_id"], characteristic["army_id"],
+                    characteristic["group_id"], characteristic["profile_id"],
+                ))
+                profile = profile_items.get(profile_key) if profile_key is not None else None
+                if profile is not None:
+                    profile["characteristics"].append({"name": characteristic["name"]})
             loadout_rows = connection.execute(
                 "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
                 "o.minis, o.disabled "
@@ -1128,6 +1145,7 @@ class Database:
                 item["skills"] = []
                 item["equipment"] = []
                 item["weapons"] = []
+                item["orders"] = []
                 loadout_key = (
                     army["_occurrence_key"], loadout["group_id"], loadout["option_id"],
                     loadout["name"], loadout["points"], loadout["swc"], loadout["minis"],
@@ -1139,6 +1157,25 @@ class Database:
                 if loadout_key not in loadout_items:
                     army["loadouts"].append(item)
                     loadout_items[loadout_key] = item
+            order_rows = connection.execute(
+                "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.order_type, "
+                "o.list_count, o.total_count "
+                f"FROM option_orders AS o WHERE o.unit_id IN ({placeholders}) "
+                "ORDER BY o.army_id, o.group_id, o.option_id, o.position",
+                source_ids,
+            )
+            for order in order_rows:
+                loadout_key = loadout_keys_by_source.get((
+                    order["unit_id"], order["army_id"], order["group_id"], order["option_id"],
+                ))
+                loadout = loadout_items.get(loadout_key) if loadout_key is not None else None
+                if loadout is not None:
+                    order_type = order["order_type"]
+                    loadout["orders"].append({
+                        "type": order_type.lower() if isinstance(order_type, str) else order_type,
+                        "list": order["list_count"],
+                        "total": order["total_count"],
+                    })
             for occurrence_table, catalog_table, property_name, extras_table in (
                 ("option_skills", "skills", "skills", "option_skill_extras"),
                 ("option_equipment", "equipment", "equipment", "option_equipment_extras"),

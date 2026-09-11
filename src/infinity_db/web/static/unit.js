@@ -110,22 +110,25 @@ function attributeStatline(stats, generalStats = null, includeAvailability = fal
 function table(headers, rows, className = "") {
   const element = document.createElement("table");
   element.className = className;
-  const head = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  for (const header of headers) { const th = document.createElement("th"); th.textContent = header; headerRow.append(th); }
-  head.append(headerRow);
+  if (headers.length) {
+    const head = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    for (const header of headers) { const th = document.createElement("th"); th.textContent = header; headerRow.append(th); }
+    head.append(headerRow);
+    element.append(head);
+  }
   const body = document.createElement("tbody");
   for (const row of rows) {
     const tr = document.createElement("tr");
     if (row.className) tr.className = row.className;
     row.forEach((value, index) => {
       const item = cell(value);
-      item.dataset.label = headers[index];
+      if (headers[index]) item.dataset.label = headers[index];
       tr.append(item);
     });
     body.append(tr);
   }
-  element.append(head, body);
+  element.append(body);
   return element;
 }
 
@@ -231,6 +234,124 @@ function profileIdentity(profileName) {
   }).sort().join(" ");
 }
 
+const orderTypes = ["regular", "irregular"];
+const symbolLabels = {
+  regular: "Regular Order",
+  irregular: "Irregular Order",
+  peripheral: "Peripheral",
+  impetuous: "Impetuous",
+  tactical: "Tactical Awareness",
+  lieutenant: "Lieutenant Order",
+  hackable: "Hackable",
+  cube: "Cube",
+  "cube-2": "Cube 2.0",
+};
+
+function prominentOrderType(loadouts) {
+  const counts = new Map(orderTypes.map((type) => [type, 0]));
+  for (const loadout of loadouts) {
+    for (const order of loadout.orders || []) {
+      const type = String(order.type || "").toLowerCase();
+      if (!counts.has(type)) continue;
+      const count = Number(order.list) || Number(order.total) || 1;
+      counts.set(type, counts.get(type) + count);
+    }
+  }
+  const prominent = orderTypes.reduce((prominent, type) => (
+    counts.get(type) > counts.get(prominent) ? type : prominent
+  ), orderTypes[0]);
+  return counts.get(prominent) ? prominent : null;
+}
+
+function hasSkill(items, skillName) {
+  return items.some((item) => (
+    (item.skills || []).some((skill) => String(skill.name || "").toLowerCase() === skillName)
+  ));
+}
+
+function normalizedSkillName(value) {
+  return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function lieutenantSkills(items) {
+  return items.flatMap((item) => (item.skills || []).filter((skill) => (
+    normalizedSkillName(skill.name).startsWith("lieutenant")
+  )));
+}
+
+function hasLieutenantPlusOne(items) {
+  return lieutenantSkills(items).some((skill) => (
+    normalizedSkillName(skill.name) === "lieutenant (+1 order)"
+    || (normalizedSkillName(skill.name) === "lieutenant"
+      && (skill.extras || []).some((extra) => normalizedSkillName(extra.name) === "+1 order"))
+  ));
+}
+
+function lieutenantOrderCount(items) {
+  const skills = lieutenantSkills(items);
+  if (!skills.length) return 0;
+  return hasLieutenantPlusOne(items) ? 2 : 1;
+}
+
+function characteristicSymbolTypes(profiles) {
+  const names = new Set(profiles.flatMap((profile) => (
+    (profile.characteristics || []).map((characteristic) => (
+      String(characteristic.name || "").toLowerCase()
+    ))
+  )));
+  return [
+    ...(names.has("hackable") ? ["hackable"] : []),
+    ...(names.has("cube") ? ["cube"] : []),
+    ...(names.has("cube 2.0") ? ["cube-2"] : []),
+  ];
+}
+
+function generalLieutenantOrderCount(profiles, loadouts) {
+  if (hasLieutenantPlusOne(profiles)) return 2;
+  if (lieutenantSkills(profiles).length) return 1;
+  return loadouts.length && loadouts.every((loadout) => lieutenantSkills([loadout]).length)
+    ? 1
+    : 0;
+}
+
+function generalProfileOrderType(profiles, loadouts) {
+  if (hasSkill(loadouts, "regular")) return "irregular";
+  const orderType = prominentOrderType(loadouts);
+  if (orderType) return orderType;
+  return [...profiles, ...loadouts].some((item) => (
+    (item.skills || []).some((skill) => (
+      String(skill.name || "").toLowerCase().startsWith("peripheral")
+    ))
+  )) ? "peripheral" : null;
+}
+
+function nameWithOrderSymbols(nameText, symbolTypes) {
+  if (!symbolTypes.length) return nameText;
+  const name = document.createElement("span");
+  name.className = "order-symbol-name";
+  for (const symbolType of symbolTypes) {
+    const symbol = document.createElement("img");
+    symbol.className = "order-symbol";
+    symbol.src = `/static/order-symbols/${symbolType}.svg`;
+    symbol.alt = symbolLabels[symbolType];
+    symbol.title = symbolLabels[symbolType];
+    name.append(symbol);
+  }
+  name.append(document.createTextNode(nameText));
+  return name;
+}
+
+function generalProfileName(profile) {
+  return nameWithOrderSymbols(profile.profileName, profile.symbolTypes);
+}
+
+function profileTitle(profile) {
+  const title = document.createElement("h3");
+  title.className = "profile-title";
+  title.append(generalProfileName(profile));
+  return title;
+}
+
 function generalProfiles(profiles, loadouts) {
   const byName = new Map();
   for (const profile of profiles) {
@@ -254,16 +375,24 @@ function generalProfiles(profiles, loadouts) {
     const row = {
       profileName,
       stats,
+      orderType: generalProfileOrderType(matchingProfiles, matchingLoadouts),
       type: mostCommon(matchingProfiles, "type"),
       classification: mostCommon(matchingProfiles, "classification"),
       occurrenceCount: matchingProfiles.length,
       reinforcement: matchingProfiles.every((profile) => isReinforcementArmy(profile.armyId)),
       sharedItems: {
-        skills: commonProfileItems(matchingProfiles, "skills"),
+        skills: generalProfileSkills(matchingProfiles, matchingLoadouts),
         equipment: commonProfileItems(matchingProfiles, "equipment"),
         weapons: commonProfileItems(matchingLoadouts, "weapons"),
       },
     };
+    row.symbolTypes = [
+      row.orderType,
+      ...(hasSkill([...matchingProfiles, ...matchingLoadouts], "impetuous") ? ["impetuous"] : []),
+      ...(hasSkill([...matchingProfiles, ...matchingLoadouts], "tactical awareness") ? ["tactical"] : []),
+      ...Array(generalLieutenantOrderCount(matchingProfiles, matchingLoadouts)).fill("lieutenant"),
+      ...characteristicSymbolTypes(matchingProfiles),
+    ].filter(Boolean);
     rows.push(row);
     for (const profile of matchingProfiles) {
       generalByName.set(profile.name || "", row);
@@ -295,6 +424,17 @@ function commonProfileItems(profiles, property) {
     if (appearsEverywhere) shared.add(identity);
     return appearsEverywhere;
   });
+}
+
+function generalProfileSkills(profiles, loadouts) {
+  const skills = commonProfileItems(profiles, "skills");
+  if (loadouts.length !== 1) return skills;
+  for (const skill of loadouts[0].skills || []) {
+    if (!skills.some((candidate) => itemIdentity(candidate) === itemIdentity(skill))) {
+      skills.push(skill);
+    }
+  }
+  return skills;
 }
 
 function withoutSharedItems(items, sharedItems) {
@@ -344,16 +484,19 @@ function profileItems(items, fallbackLabel) {
 function generalProfileTableRows(profiles) {
   const rows = [];
   for (const profile of profiles) {
-    const profileRow = [
-      profile.profileName,
-      profile.type,
-      profile.classification,
-    ];
-    profileRow.className = "profile-summary";
-    rows.push(profileRow);
+    rows.push(
+      [
+        { value: "Type", header: true, className: "general-item-label" },
+        { value: profile.type, className: "general-item-list" },
+      ],
+      [
+        { value: "Classification", header: true, className: "general-item-label" },
+        { value: profile.classification, className: "general-item-list" },
+      ],
+    );
     rows.push([
       { value: "Attributes", header: true, className: "profile-attributes-label" },
-      { content: attributeStatline(profile.stats), colSpan: 2, className: "profile-attributes" },
+      { content: attributeStatline(profile.stats), className: "profile-attributes" },
     ]);
     for (const [label, property, fallbackLabel] of [
       ["Skills", "skills", "Skill"],
@@ -366,7 +509,6 @@ function generalProfileTableRows(profiles) {
         {
           value: profileItems(profile.sharedItems[property], fallbackLabel),
           className: "general-item-list",
-          colSpan: 2,
         },
       ]);
     }
@@ -407,11 +549,19 @@ function profileTableRows(profiles, generalByName) {
   });
 }
 
-function loadoutTable(loadouts, sharedItems) {
+function loadoutTable(loadouts, sharedItems, generalOrderType) {
   return table(
-    ["Name", "Points", "SWC", "Minis"],
+    ["Name", "Points", "SWC"],
     loadouts.flatMap((loadout) => {
-      const loadoutRow = [loadout.name, loadout.points, loadout.swc, loadout.minis];
+      const loadoutOrderType = prominentOrderType([loadout]);
+      const symbolTypes = [
+        loadoutOrderType && loadoutOrderType !== generalOrderType ? loadoutOrderType : null,
+        ...(hasSkill([loadout], "impetuous") ? ["impetuous"] : []),
+        ...(hasSkill([loadout], "tactical awareness") ? ["tactical"] : []),
+        ...Array(lieutenantOrderCount([loadout])).fill("lieutenant"),
+      ].filter(Boolean);
+      const loadoutName = nameWithOrderSymbols(loadout.name, symbolTypes);
+      const loadoutRow = [{ content: loadoutName }, loadout.points, loadout.swc];
       loadoutRow.className = "profile-summary";
       const rows = [loadoutRow];
       for (const [label, property, fallbackLabel] of [
@@ -426,7 +576,7 @@ function loadoutTable(loadouts, sharedItems) {
           {
             value: profileItems(items, fallbackLabel),
             className: "profile-item-list",
-            colSpan: 3,
+            colSpan: 2,
           },
         ]);
       }
@@ -525,6 +675,7 @@ function renderArmyProfile(army, generalByName, expanded) {
       section.append(loadoutTable(
         group.loadouts,
         sharedItemsForProfileGroup(group.profiles, generalByName),
+        generalByName.get(group.profiles[0]?.name || "")?.orderType,
       ));
     }
   }
@@ -568,8 +719,8 @@ function render(unit) {
   for (const profile of displayedGeneralProfiles) {
     const generalProfile = document.createElement("section");
     generalProfile.className = "explorer general-profile";
-    generalProfile.append(table(
-      ["Name", "Type", "Classification"],
+    generalProfile.append(profileTitle(profile), table(
+      [],
       generalProfileTableRows([profile]),
       "statline",
     ));
