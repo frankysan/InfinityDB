@@ -13,7 +13,7 @@ All notable changes to this project are documented in this file.
   `infinity-army` entry point.
 - Local WSGI browser and read-only JSON API for armies and units.
 - Unit catalog with army filtering, name search, pagination, and availability
-  filters for mercenaries, Spec-Ops, and Team Operations.
+  filters for mercenaries, Spec-Ops, Team Operations, and reinforcements.
 - Unit-detail pages that show shared/general profiles and faction- and
   army-specific profiles, loadouts, skills, equipment, weapons, and AVA.
 - API metadata import for faction names and ammunition, weapon, skill,

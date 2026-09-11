@@ -172,12 +172,15 @@ function generalProfiles(profiles, loadouts) {
   const byName = new Map();
   for (const profile of profiles) {
     const profileName = baseProfileName(profile.name);
-    if (!byName.has(profileName)) byName.set(profileName, []);
-    byName.get(profileName).push(profile);
+    const profileKey = profileName.toLowerCase();
+    if (!byName.has(profileKey)) byName.set(profileKey, {
+      profileName, profiles: [],
+    });
+    byName.get(profileKey).profiles.push(profile);
   }
   const rows = [];
   const generalByName = new Map();
-  for (const [profileName, matchingProfiles] of byName) {
+  for (const { profileName, profiles: matchingProfiles } of byName.values()) {
     const stats = generalStats(matchingProfiles);
     const matchingGroupKeys = new Set(matchingProfiles.map(
       (profile) => `${profile.armyId}:${profile.group_id}`,
@@ -368,6 +371,7 @@ const availabilityLabels = {
   mercs: "Mercenary",
   specops: "Spec-Ops",
   teamops: "Team Operations",
+  reinforcement: "Reinforcements",
 };
 
 function availabilityBadges(flags = []) {
@@ -383,10 +387,18 @@ function availabilityBadges(flags = []) {
   return badges;
 }
 
-function renderArmyProfile(army, generalByName) {
-  const section = document.createElement("section");
+function isStandardArmy(army) {
+  const flags = army.availability_flags || [];
+  return !flags.includes("mercs")
+    && !flags.includes("reinforcement")
+    && !isReinforcementArmy(army.id);
+}
+
+function renderArmyProfile(army, generalByName, expanded) {
+  const section = document.createElement("details");
   section.className = "explorer army-profile";
-  const armyHeading = document.createElement("h3");
+  section.open = expanded;
+  const armyHeading = document.createElement("summary");
   armyHeading.className = "army-profile-title";
   armyHeading.textContent = army.name;
   const symbol = armySymbolPath(army.id);
@@ -457,6 +469,7 @@ function render(unit) {
     "statline",
   ));
   content.append(general);
+  let standardArmyExpanded = false;
   for (const group of groupArmiesByFaction(unit.armies)) {
     const section = document.createElement("section");
     section.className = "faction-profile-group";
@@ -465,9 +478,11 @@ function render(unit) {
     section.append(groupHeading);
     const profiles = document.createElement("div");
     profiles.className = "faction-profile-grid";
-    for (const army of group.armies) profiles.append(
-      renderArmyProfile(army, generalByName),
-    );
+    for (const army of group.armies) {
+      const expanded = !standardArmyExpanded && isStandardArmy(army);
+      if (expanded) standardArmyExpanded = true;
+      profiles.append(renderArmyProfile(army, generalByName, expanded));
+    }
     section.append(profiles);
     content.append(section);
   }

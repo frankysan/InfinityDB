@@ -103,7 +103,7 @@ def _flag(params: dict, key: str) -> bool:
 def _unit_query(query: str) -> dict:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=10)
     for key, values in params.items():
-        if key not in {"army_id", "search", "limit", "offset", "mercs", "specops", "teamops"}:
+        if key not in {"army_id", "search", "limit", "offset", "mercs", "specops", "teamops", "reinforcement"}:
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
             raise ValueError(f"Provide {key} only once")
@@ -118,6 +118,7 @@ def _unit_query(query: str) -> dict:
         "mercs": _flag(params, "mercs"),
         "specops": _flag(params, "specops"),
         "teamops": _flag(params, "teamops"),
+        "reinforcement": _flag(params, "reinforcement"),
     }
 
 

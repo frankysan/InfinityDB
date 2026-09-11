@@ -11,13 +11,14 @@ export function getArmies(signal) {
   return get("/api/armies", signal);
 }
 
-export function getUnits({ armyId, search, limit, offset, mercs, specops, teamops }, signal) {
+export function getUnits({ armyId, search, limit, offset, mercs, specops, teamops, reinforcement }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
   if (search) params.set("search", search);
   if (mercs) params.set("mercs", "1");
   if (specops) params.set("specops", "1");
   if (teamops) params.set("teamops", "1");
+  if (reinforcement) params.set("reinforcement", "1");
   return get(`/api/units?${params}`, signal);
 }
 

@@ -419,7 +419,7 @@ def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     assert groups[0]["id"] == 265
     assert groups[0]["main_army_id"] == 301
     assert groups[0]["source_ids"] == [265, 1635, 1691, 2691]
-    assert list(groups[0]["armies"]) == [301, 399, 999, 998]
+    assert list(groups[0]["armies"]) == [301, 399, 999]
 
 
 @pytest.mark.parametrize("mutation", [

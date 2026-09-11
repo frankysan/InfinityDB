@@ -74,14 +74,18 @@ def app(tmp_path: Path) -> Callable:
         "id": 5, "name": "Alpha Team Ops", "slug": "alpha-team-ops",
         "canonical": 101, "factions": [101],
     }
+    reinforcement_only = {
+        "id": 6, "name": "Alpha Reinforcement", "canonical": 101, "factions": [101],
+    }
     documents = [
-        ("101-zulu_company.json", [shared, blue_only, specops_only, teamops_only]),
-        ("201-alpha_company.json", [shared, red_only]),
+        ("101-zulu_company.json", [shared, blue_only, specops_only, teamops_only], True),
+        ("201-alpha_company.json", [shared, red_only], True),
+        ("198-zulu_reinforcements.json", [reinforcement_only], False),
     ]
     sources = []
-    for filename, units in documents:
+    for filename, units, is_army in documents:
         document = {
-            "version": "test", "reinforcements": None, "units": units,
+            "version": "test", "units": units,
             "filters": {
                 "category": [{"id": 1, "name": "Light Infantry"}],
                 "type": [{"id": 1, "name": "Line Trooper"}],
@@ -94,6 +98,8 @@ def app(tmp_path: Path) -> Callable:
                 ],
             },
         }
+        if is_army:
+            document["reinforcements"] = None
         if filename.startswith("101-"):
             # This unresolved reference becomes a placeholder, not a browsable unit.
             document["relations"] = [{"units": [{"unit": 9099}]}]
@@ -112,12 +118,12 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("application/json")
     armies = {item["id"]: item for item in json.loads(body)["items"]}
-    assert set(armies) == {101, 201}
-    assert [army["id"] for army in json.loads(body)["items"]] == [101, 201]
+    assert set(armies) == {101, 198, 201}
+    assert [army["id"] for army in json.loads(body)["items"]] == [101, 198, 201]
     assert armies[101]["slug"] == "zulu_company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
-    assert {army["unit_count"] for army in armies.values()} == {2, 4}
+    assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
 
 
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
@@ -181,6 +187,14 @@ def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     assert status == 200
     assert {item["id"] for item in json.loads(body)["items"]} == {1, 2}
 
+    status, _, body = request(app, "/api/units", query="army_id=198")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == set()
+
+    status, _, body = request(app, "/api/units", query="army_id=198&reinforcement=1")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {6}
+
 
 def test_unit_details_are_available_by_id(app: Callable) -> None:
     status, _, body = request(app, "/api/units/1")
@@ -225,7 +239,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
 
 
 @pytest.mark.parametrize(("unit_id", "expected_flags"), [
-    (3, ["mercs"]), (4, ["specops"]), (5, ["teamops"]),
+    (3, ["mercs"]), (4, ["specops"]), (5, ["teamops"]), (6, ["reinforcement"]),
 ])
 def test_unit_details_include_occurrence_availability_categories(
     app: Callable, unit_id: int, expected_flags: list[str],
@@ -335,6 +349,14 @@ def test_frontend_recognizes_98_and_99_as_reinforcement_armies(app: Callable) ->
         status, _, body = request(app, asset)
         assert status == 200
         assert b"[98, 99]" in body
+
+
+def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'document.createElement("details")' in body
+    assert b"function isStandardArmy(army)" in body
+    assert b"section.open = expanded" in body
 
 
 def test_distance_preference_script_is_served(app: Callable) -> None:

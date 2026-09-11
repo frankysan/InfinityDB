@@ -14,7 +14,8 @@ interface and API on top of the resulting database.
   a working database when an import fails.
 - Browses units by army, name search, and paginated results.
 - Shows a unit's general profile plus faction- and army-specific profiles,
-  loadouts, availability, skills, equipment, and weapons.
+  loadouts, availability (including reinforcement profiles), skills, equipment,
+  and weapons.
 - Bundles army and unit SVG symbols for the browser.
 - Includes standalone scripts for downloading Army JSON snapshots and unit
   symbols; normal build commands do not make network requests.

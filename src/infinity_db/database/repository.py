@@ -19,13 +19,14 @@ from .schema import APPLICATION_ID, METADATA_TABLE, ROW_JSON, SCHEMA_VERSION, TA
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
 UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
-AVAILABILITY_FLAGS = ("mercs", "specops", "teamops")
+AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
 # Source records whose IDs differ without following either of the general
 # duplicate patterns.  The value is the preferred representative ID.
 UNIT_MERGE_ALIASES = {
     300: 300, 1690: 300, 10300: 300,
     1345: 1345, 1875: 1345, 11345: 1345,
 }
+ARMY_MERGE_ALIASES = {998: 999}
 REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
 NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
 DISTANCE_DIVISOR = Decimal("2.5")
@@ -35,6 +36,11 @@ NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
 def is_reinforcement_army_id(army_id: int) -> bool:
     """Return whether an army ID denotes a reinforcement-only army."""
     return army_id % 100 in REINFORCEMENT_ARMY_SUFFIXES
+
+
+def canonical_army_id(army_id: int) -> int:
+    """Return the preferred ID for army lists that represent one force."""
+    return ARMY_MERGE_ALIASES.get(army_id, army_id)
 
 
 def unit_sort_key(value: object) -> str:
@@ -146,8 +152,17 @@ def logical_unit_groups(
         group["source_ids"].append(row["id"])
         group["names"].append(row["name"])
         for army in armies:
-            group["armies"][army["id"]] = army
-            group["army_occurrences"].append({**army, "source_id": row["id"]})
+            source_army_id = army["id"]
+            preferred_army_id = canonical_army_id(source_army_id)
+            preferred_army = {**army, "id": preferred_army_id}
+            if (
+                preferred_army_id not in group["armies"]
+                or source_army_id == preferred_army_id
+            ):
+                group["armies"][preferred_army_id] = preferred_army
+            group["army_occurrences"].append({
+                **preferred_army, "source_id": row["id"], "source_army_id": source_army_id,
+            })
 
     standard_groups: dict[str, list[dict[str, Any]]] = {}
     for group in groups.values():
@@ -209,6 +224,8 @@ def army_required_flags(
     normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
     if faction_id == 1 and army["id"] not in normal_armies:
         required.add("mercs")
+    if is_reinforcement_army_id(army["id"]):
+        required.add("reinforcement")
     filters = army.get("filters")
     if isinstance(filters, dict):
         required.update(flag for flag in AVAILABILITY_FLAGS if filters.get(flag))
@@ -268,18 +285,33 @@ class Database:
     def list_armies(self) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT a.id, a.name, a.slug, a.kind, COUNT(u.id) AS unit_count "
+                "SELECT a.id, a.name, a.slug, a.kind, u.id AS unit_id "
                 "FROM army_lists AS a "
                 "LEFT JOIN army_units AS au ON au.army_id = a.id "
                 "LEFT JOIN units AS u ON u.id = au.unit_id AND u.source_defined = 1 "
-                "GROUP BY a.id ORDER BY a.id"
+                "ORDER BY a.id"
             ).fetchall()
+            armies: dict[int, dict[str, Any]] = {}
+            for row in rows:
+                source_army_id = row["id"]
+                preferred_army_id = canonical_army_id(source_army_id)
+                if (
+                    preferred_army_id not in armies
+                    or source_army_id == preferred_army_id
+                ):
+                    armies[preferred_army_id] = {
+                        "id": preferred_army_id, "name": army_name(row), "slug": row["slug"],
+                        "kind": row["kind"],
+                        "unit_ids": armies.get(preferred_army_id, {}).get("unit_ids", set()),
+                    }
+                if row["unit_id"] is not None:
+                    armies[preferred_army_id]["unit_ids"].add(row["unit_id"])
             return [
                 {
-                    "id": row["id"], "name": army_name(row), "slug": row["slug"],
-                    "kind": row["kind"], "unit_count": row["unit_count"],
+                    "id": army["id"], "name": army["name"], "slug": army["slug"],
+                    "kind": army["kind"], "unit_count": len(army["unit_ids"]),
                 }
-                for row in rows
+                for army in sorted(armies.values(), key=lambda army: army["id"])
             ]
 
     def list_skill_extras(self) -> list[dict[str, Any]]:
@@ -330,11 +362,14 @@ class Database:
     def list_units(
         self, army_id: int | None = None, search: str = "", limit: int = 50, offset: int = 0,
         mercs: bool = False, specops: bool = False, teamops: bool = False,
+        reinforcement: bool = False,
     ) -> dict[str, Any]:
         if army_id is not None and (
             type(army_id) is not int or not SQLITE_INTEGER_MIN <= army_id <= SQLITE_INTEGER_MAX
         ):
             raise ValueError("army_id must be an integer within SQLite's signed 64-bit range")
+        if army_id is not None:
+            army_id = canonical_army_id(army_id)
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(limit) is not int or not 1 <= limit <= 500:
@@ -343,6 +378,7 @@ class Database:
             raise ValueError("offset must be a nonnegative integer at most 9223372036854775807")
         selected_flags = {flag for flag, enabled in {
             "mercs": mercs, "specops": specops, "teamops": teamops,
+            "reinforcement": reinforcement,
         }.items() if enabled}
         with self._connect() as connection:
             rows = connection.execute(
@@ -469,7 +505,7 @@ class Database:
                     "availability_flags": list(flags), "profiles": [], "loadouts": [],
                     "_occurrence_key": occurrence_key,
                 })
-                by_source_army[(source_id, occurrence["id"])] = army
+                by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
             profile_rows = connection.execute(
                 "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, p.name, "
