@@ -57,6 +57,21 @@ def contains_distance_multiple(value: object) -> bool:
     return False
 
 
+def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
+    """Normalize sign conventions that are specific to a distance skill."""
+    skill = str(skill_name or "")
+    extra = str(extra_name or "")
+    if skill == "Super-Jump":
+        return extra.removeprefix("+")
+    if skill == "Forward Deployment" and not extra.startswith("+"):
+        try:
+            if NUMBER_PATTERN.fullmatch(extra) and Decimal(extra) > 0:
+                return f"+{extra}"
+        except InvalidOperation:
+            pass
+    return extra
+
+
 def unit_group_key(row: sqlite3.Row) -> tuple[int, str]:
     """Identify duplicate unit records that belong to one logical unit."""
     unit_id = row["id"]
@@ -273,23 +288,44 @@ class Database:
             rows = connection.execute(
                 "SELECT combinations.skill_id, COALESCE(NULLIF(s.name, ''), "
                 "'Skill #' || combinations.skill_id) AS skill_name, combinations.extra_id, "
-                "COALESCE(NULLIF(e.name, ''), 'Extra #' || combinations.extra_id) AS extra_name "
+                "COALESCE(NULLIF(e.name, ''), 'Extra #' || combinations.extra_id) AS extra_name, "
+                f"u.id AS unit_id, {UNIT_NAME_SQL} AS unit_name "
                 "FROM ("
-                "SELECT ps.item_id AS skill_id, pse.extra_id FROM profile_skills AS ps "
+                "SELECT ps.item_id AS skill_id, pse.extra_id, ps.unit_id FROM profile_skills AS ps "
                 "JOIN profile_skill_extras AS pse ON pse.occurrence_id = ps.occurrence_id "
                 "UNION "
-                "SELECT os.item_id AS skill_id, ose.extra_id FROM option_skills AS os "
+                "SELECT os.item_id AS skill_id, ose.extra_id, os.unit_id FROM option_skills AS os "
                 "JOIN option_skill_extras AS ose ON ose.occurrence_id = os.occurrence_id "
                 "UNION "
-                "SELECT uos.item_id AS skill_id, uose.extra_id FROM unit_option_skills AS uos "
+                "SELECT uos.item_id AS skill_id, uose.extra_id, uos.unit_id FROM unit_option_skills AS uos "
                 "JOIN unit_option_skill_extras AS uose ON uose.occurrence_id = uos.occurrence_id"
                 ") AS combinations "
                 "LEFT JOIN skills AS s ON s.id = combinations.skill_id "
                 "LEFT JOIN extras AS e ON e.id = combinations.extra_id "
+                "JOIN units AS u ON u.id = combinations.unit_id AND u.source_defined = 1 "
                 "ORDER BY casefold(skill_name), casefold(extra_name), combinations.skill_id, "
-                "combinations.extra_id"
+                "combinations.extra_id, unit_sort_key(unit_name), u.id"
             ).fetchall()
-            return [dict(row) for row in rows if contains_distance_multiple(row["extra_name"])]
+            combinations: dict[tuple[Any, Any], dict[str, Any]] = {}
+            for row in rows:
+                if not contains_distance_multiple(row["extra_name"]):
+                    continue
+                display_extra_name = canonical_skill_extra_name(
+                    row["skill_name"], row["extra_name"]
+                )
+                # The normalized display text is the semantic pair identity.
+                # This retains ordinary sign differences while applying the
+                # known Super-Jump and Forward Deployment conventions.
+                key = (row["skill_id"], display_extra_name)
+                item = combinations.setdefault(key, {
+                    "skill_id": row["skill_id"], "skill_name": row["skill_name"],
+                    "extra_id": row["extra_id"], "extra_name": display_extra_name,
+                    "is_distance": True, "units": [],
+                })
+                unit = {"id": row["unit_id"], "name": row["unit_name"]}
+                if unit not in item["units"]:
+                    item["units"].append(unit)
+            return list(combinations.values())
 
     def list_units(
         self, army_id: int | None = None, search: str = "", limit: int = 50, offset: int = 0,
@@ -436,9 +472,15 @@ class Database:
                 by_source_army[(source_id, occurrence["id"])] = army
             armies = list(armies_by_occurrence.values())
             profile_rows = connection.execute(
-                "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, p.name, p.move_1, p.move_2, "
+                "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, p.name, "
+                "t.name AS type, c.name AS classification, p.move_1, p.move_2, "
                 "p.cc, p.bs, p.ph, p.wip, p.arm, p.bts, p.vitality, p.silhouette, p.ava "
-                f"FROM profiles AS p WHERE p.unit_id IN ({placeholders}) "
+                "FROM profiles AS p "
+                "LEFT JOIN troop_types AS t ON t.id = p.type_id "
+                "JOIN profile_groups AS pg ON pg.army_id = p.army_id "
+                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id "
+                "LEFT JOIN categories AS c ON c.id = pg.category_id "
+                f"WHERE p.unit_id IN ({placeholders}) "
                 "ORDER BY p.army_id, p.group_id, p.position, p.profile_id", source_ids
             )
             profile_items: dict[tuple[Any, ...], dict[str, Any]] = {}
@@ -457,7 +499,7 @@ class Database:
                     army["_occurrence_key"], profile["group_id"], profile["profile_id"], profile["name"],
                     profile["move_1"], profile["move_2"], profile["cc"], profile["bs"], profile["ph"],
                     profile["wip"], profile["arm"], profile["bts"], profile["vitality"],
-                    profile["silhouette"],
+                    profile["silhouette"], profile["type"], profile["classification"],
                 )
                 profile_keys_by_source[(
                     profile["unit_id"], profile["army_id"], profile["group_id"], profile["profile_id"],

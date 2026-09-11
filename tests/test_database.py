@@ -9,7 +9,7 @@ import pytest
 
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_db.database import Database, export_database
-from infinity_db.database.repository import logical_unit_groups
+from infinity_db.database.repository import canonical_skill_extra_name, logical_unit_groups
 from infinity_db.database.schema import METADATA_TABLE, ROW_JSON, TABLES, quote
 
 
@@ -169,6 +169,7 @@ def test_list_skill_extras_returns_distinct_sorted_pairs(
         {"id": 2, "name": "+5", "source_defined": True},
         {"id": 3, "name": "PS=5", "source_defined": True},
         {"id": 4, "name": "+5 CC", "source_defined": True},
+        {"id": 5, "name": "-5", "source_defined": True},
     ])
     profile_extra = normalized["tables"]["profile_skill_extras"][0]
     normalized["tables"]["profile_skill_extras"].append({
@@ -180,12 +181,29 @@ def test_list_skill_extras_returns_distinct_sorted_pairs(
     normalized["tables"]["profile_skill_extras"].append({
         "occurrence_id": profile_extra["occurrence_id"], "position": 4, "extra_id": 4,
     })
+    normalized["tables"]["profile_skill_extras"].append({
+        "occurrence_id": profile_extra["occurrence_id"], "position": 5, "extra_id": 5,
+    })
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
 
-    assert Database(path).list_skill_extras() == [{
-        "skill_id": 1, "skill_name": "skills", "extra_id": 2, "extra_name": "+5",
-    }]
+    assert Database(path).list_skill_extras() == [
+        {
+            "skill_id": 1, "skill_name": "skills", "extra_id": 2, "extra_name": "+5",
+            "is_distance": True, "units": [{"id": 1, "name": "Álpha"}],
+        },
+        {
+            "skill_id": 1, "skill_name": "skills", "extra_id": 5, "extra_name": "-5",
+            "is_distance": True, "units": [{"id": 1, "name": "Álpha"}],
+        },
+    ]
+
+
+def test_skill_extra_grouping_uses_skill_specific_sign_conventions() -> None:
+    assert canonical_skill_extra_name("Super-Jump", "+7.5") == "7.5"
+    assert canonical_skill_extra_name("Forward Deployment", "20") == "+20"
+    assert canonical_skill_extra_name("Dodge", "+5") == "+5"
+    assert canonical_skill_extra_name("Dodge", "-5") == "-5"
 
 
 def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:

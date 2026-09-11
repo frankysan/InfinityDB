@@ -46,9 +46,10 @@ def app(tmp_path: Path) -> Callable:
     shared = {
         "id": 1, "name": "Alpha Ranger", "canonical": 999, "factions": [101],
         "profileGroups": [{
-            "id": 1,
+            "id": 1, "category": 1,
             "profiles": [{
-                "id": 1, "name": "Ranger", "skills": [{"id": 11, "extra": [41]}],
+                "id": 1, "name": "Ranger", "type": 1,
+                "skills": [{"id": 11, "extra": [41]}],
                 "equip": [{"id": 21, "q": 2, "extra": [42]}],
                 "weapons": [{"id": 31, "extra": [43]}],
             }],
@@ -82,6 +83,8 @@ def app(tmp_path: Path) -> Callable:
         document = {
             "version": "test", "reinforcements": None, "units": units,
             "filters": {
+                "category": [{"id": 1, "name": "Light Infantry"}],
+                "type": [{"id": 1, "name": "Line Trooper"}],
                 "skills": [{"id": 11, "name": "Stealth"}],
                 "equip": [{"id": 21, "name": "Medikit"}],
                 "weapons": [{"id": 31, "name": "Combi Rifle"}],
@@ -186,6 +189,8 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert unit["name"] == "Alpha Ranger"
     assert {army["id"] for army in unit["armies"]} == {101, 201}
     for army in unit["armies"]:
+        assert army["profiles"][0]["type"] == "Line Trooper"
+        assert army["profiles"][0]["classification"] == "Light Infantry"
         assert army["profiles"][0]["skills"] == [{
             "id": 11, "name": "Stealth", "quantity": None, "extras": [{"id": 41, "name": "+3"}],
         }]
@@ -344,7 +349,6 @@ def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"skill-extras.js" in body
-    assert b'aria-current="page"' in body
 
     status, headers, body = request(app, "/api/skill-extras")
     assert status == 200

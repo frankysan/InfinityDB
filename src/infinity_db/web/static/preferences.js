@@ -1,7 +1,17 @@
 const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
+const DISTANCE_NUMBER_PATTERN = /[+-]?\d+(?:\.\d+)?/g;
 
 export function distanceUnit() {
   return document.documentElement.dataset.distanceUnit === "in" ? "in" : "cm";
+}
+
+export function formatDistanceExtra(value, { showPositiveSign = true, forcePositiveSign = false } = {}) {
+  return String(value).replace(DISTANCE_NUMBER_PATTERN, (number) => {
+    const converted = distanceUnit() === "in" ? Number(number) / 2.5 : Number(number);
+    const sign = converted >= 0 && (forcePositiveSign || (showPositiveSign && number.startsWith("+")))
+      ? "+" : "";
+    return `${sign}${converted}${distanceUnit() === "in" ? '"' : " cm"}`;
+  });
 }
 
 export function initializeDistanceUnitToggle() {

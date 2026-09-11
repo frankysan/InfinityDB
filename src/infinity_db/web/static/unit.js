@@ -1,14 +1,13 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
 import { unitSymbol } from "./unit-symbols.js";
-import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
+import { distanceUnit, formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
 const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
 const unitId = /^\/units\/(\d+)$/.exec(window.location.pathname)?.[1];
-const distanceNumberPattern = /[+-]?\d+(?:\.\d+)?/g;
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
@@ -189,6 +188,8 @@ function generalProfiles(profiles, loadouts) {
     const row = {
       profileName,
       stats,
+      type: mostCommon(matchingProfiles, "type"),
+      classification: mostCommon(matchingProfiles, "classification"),
       occurrenceCount: matchingProfiles.length,
       reinforcement: matchingProfiles.every((profile) => isReinforcementArmy(profile.armyId)),
       sharedItems: {
@@ -262,9 +263,9 @@ function profileItems(items, fallbackLabel) {
     const extras = (item.extras || []).map((extra) => {
       const extraName = extra.name || `Extra #${text(extra.id)}`;
       if (!extra.is_distance) return extraName;
-      return extraName.replace(distanceNumberPattern, (value) => {
-        const converted = distanceUnit() === "in" ? Number(value) / 2.5 : Number(value);
-        return `${converted}${distanceUnit() === "in" ? '"' : " cm"}`;
+      return formatDistanceExtra(extraName, {
+        showPositiveSign: item.name !== "Super-Jump",
+        forcePositiveSign: item.name === "Forward Deployment",
       });
     });
     const decoratedName = extras.length ? `${name} (${extras.join(", ")})` : name;
@@ -279,6 +280,8 @@ function generalProfileTableRows(profiles) {
   for (const profile of profiles) {
     const statline = [
       profile.profileName,
+      profile.type,
+      profile.classification,
       ...generalStatline(profile.stats).map(displayStatlineValue),
     ];
     statline.className = "profile-statline";
@@ -449,7 +452,7 @@ function render(unit) {
   general.className = "explorer general-profile";
   general.append(heading("General profile"));
   general.append(table(
-    ["Name", ...statColumns.map(([label]) => label)],
+    ["Name", "Type", "Classification", ...statColumns.map(([label]) => label)],
     generalProfileTableRows(visibleGeneralProfiles(generalProfileRows)),
     "statline",
   ));

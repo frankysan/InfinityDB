@@ -147,6 +147,9 @@ tbody tr:hover { background: #f8f9f3; }
 .army-profile-symbol { width: 34px; height: 34px; }
 .id-column { text-align: right; }
 .unit-id { font-family: Consolas, "Courier New", monospace; font-size: 10px; color: #64725c; overflow-wrap: anywhere; }
+.modifier-unit-links { font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.modifier-unit-links a { color: #245e4c; }
+.modifier-unit-links a:hover, .modifier-unit-links a:focus-visible { color: #087b62; }
 .pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 26px; border-top: 1px solid var(--border); }
 .pagination > span { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .page-controls { display: flex; gap: 8px; }
