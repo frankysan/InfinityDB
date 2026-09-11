@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "0.1.2"
+version = "0.2.0"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -29,7 +29,7 @@ infinity-army = "infinity_army_data.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/army-symbols/**/*.svg", "static/order-symbols/*.svg", "static/unit-symbols/**/*.svg"]
+"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/armies/**/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -41,3 +41,7 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# SQL clauses are intentionally kept as complete strings for easier query review.
+"src/infinity_db/database/repository.py" = ["E501"]

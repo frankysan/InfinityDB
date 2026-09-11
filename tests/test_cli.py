@@ -24,13 +24,17 @@ def test_latest_snapshot_requires_an_archive(tmp_path: Path) -> None:
         latest_snapshot(tmp_path)
 
 
-@pytest.mark.parametrize(("filename", "expected"), [
-    ("JSON 20260910.zip", "2026-09-10"),
-    ("JSON 20260910-123456-2.zip", "2026-09-10"),
-    ("army.zip", None),
-    ("JSON 20261310.zip", None),
-])
+@pytest.mark.parametrize(
+    ("filename", "expected"),
+    [
+        ("JSON 20260910.zip", "2026-09-10"),
+        ("JSON 20260910-123456-2.zip", "2026-09-10"),
+        ("army.zip", None),
+        ("JSON 20261310.zip", None),
+    ],
+)
 def test_snapshot_downloaded_on_is_derived_from_downloader_archive_name(
-    filename: str, expected: str | None,
+    filename: str,
+    expected: str | None,
 ) -> None:
     assert snapshot_downloaded_on(Path(filename)) == expected

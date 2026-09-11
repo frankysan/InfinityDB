@@ -16,6 +16,10 @@ raw Army JSON
 - Unit `profileGroups` and unit-level `filters` are army-list-specific variants.
 - Profile group, profile and loadout option IDs are local to their army/unit hierarchy and use composite keys in normalized data.
 - Skills, weapons, equipment, ammunition, characteristics, troop types, categories and extras use stable global lookup IDs.
+- Skill, equipment, and weapon occurrences retain their owning profile,
+  loadout, or unit option, display order, quantity, and linked extras. This
+  supports both unit details and reverse lookup from the rules-reference
+  catalogs.
 - Peripheral IDs are army-local.
 - Referenced but undefined factions/units/categories are retained as explicit placeholder records rather than discarded.
 
@@ -40,6 +44,12 @@ from normalized JSON for now.
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,
 preserving the distinction between list membership and canonical identity.
+
+The rules-reference browsers query the global `skills`, `equipment`, and
+`weapons` catalogs together with their `profile_*`, `option_*`, and
+`unit_option_*` occurrence tables. Equivalent source labels can be merged for
+display, but the underlying source IDs and individual occurrences remain
+available for validation and detail rendering.
 
 ## Supplementary Army API metadata
 

@@ -11,7 +11,7 @@ function slugify(name) {
 export function unitSymbolPath(unitName) {
   const slug = slugify(unitName);
   const symbol = unitSymbolSlug(slug) || slug;
-  return symbol && `/static/unit-symbols/${encodeURIComponent(symbol)}.svg`;
+  return symbol && `/static/units/${encodeURI(symbol)}.svg`;
 }
 
 export function unitSymbol(unitName, className = "") {

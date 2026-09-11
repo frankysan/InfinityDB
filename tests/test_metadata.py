@@ -22,7 +22,8 @@ def metadata_source() -> dict:
         ],
         "ammunitions": [{"id": 1, "name": "Ammo", "wiki": "https://example.test/ammo"}],
         "weapons": [
-            {"id": 7, "name": "Mode one"}, {"id": 7, "name": "Mode two"},
+            {"id": 7, "name": "Mode one"},
+            {"id": 7, "name": "Mode two"},
         ],
         "skills": [{"id": 2, "name": "Skill"}],
         "equips": [{"id": 3, "name": "Equipment"}],

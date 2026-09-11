@@ -4,8 +4,8 @@
 
 1. **Database backend:** maintain validated, queryable Infinity data, including
    army-specific variants and the source metadata needed to trace it.
-2. **Extensible web UI:** begin with a unit list filterable by army, then add
-   functionality through focused API endpoints and views.
+2. **Extensible web UI:** provide a unit explorer and rules-reference catalogs
+   through focused API endpoints and views.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots.
@@ -33,12 +33,16 @@ Army directory / ZIP
 | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
 | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
 | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
-| `infinity_db.web.static` | UI, URL state, loading and error handling | New screens and filters |
+| `infinity_db.web.static` | UI, URL state, loading and error handling | New screens, filters, and catalogs |
 
 Only the importer consumes normalized JSON. HTTP routes query the repository;
 browser code calls the API. Neither web layer parses raw Army files. Browser
-requests live in `api.js`; page state and rendering live in `app.js`. The current
-UI uses native modules and requires no JavaScript build step.
+requests live in `api.js`; shared unit-row rendering lives in `unit-list.js`;
+page-specific state and rendering live in the corresponding module (for
+example, `app.js` or `catalog-detail.js`). The current UI uses native modules
+and requires no JavaScript build step. Bundled army and unit symbols are
+addressed by stable ID-and-slug paths, while JavaScript maps source identities
+to those paths.
 
 The optional API `metadata.json` is a supplemental snapshot. Its records are
 preserved separately and enrich display names for matching army IDs. It never
@@ -102,11 +106,22 @@ Returns `{ "items": [...] }` of distinct skill/extra combinations whose extra
 contains a distance value, together with the units using each combination.
 The Skill Modifiers browser page consumes this endpoint.
 
+### Rules-reference endpoints
+
+`GET /api/skills`, `GET /api/equipment`, and `GET /api/weapons` return
+`{ "items": [...] }` for their searchable catalogs. Catalog records combine
+equivalent source labels where appropriate and include an ID, display name, and
+reference link when the metadata snapshot provides one.
+
+`GET /api/skills/{id}`, `GET /api/equipment/{id}`, and
+`GET /api/weapons/{id}` return one catalog item and its distinct usage variants.
+Each variant includes the relevant extras and logical units that use it. Weapon
+details additionally include metadata weapon profiles, such as ammunition,
+traits, and range data, when present in the supplied metadata snapshot.
+
 ## Next increments
 
-1. Add equipment and weapon reference pages using existing normalized catalog
-   and occurrence tables.
-2. Expose fireteams and relationships while showing unresolved source references
+1. Expose fireteams and relationships while showing unresolved source references
    explicitly.
-3. Add migrations and another database adapter when their requirements
+2. Add migrations and another database adapter when their requirements
    are known. Keep user-owned data separate from replaceable imported snapshots.

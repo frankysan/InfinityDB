@@ -35,23 +35,41 @@ def normalized() -> dict:
     """Exercise the real normalizer, including every table it can generate."""
     reference = {"id": 1, "order": 2, "q": 1, "extra": [1], "future": {"enabled": True}}
     nested = {
-        "skills": [reference], "equip": [reference], "weapons": [reference],
-        "peripheral": [{"id": 1, "q": 1}], "chars": [1],
+        "skills": [reference],
+        "equip": [reference],
+        "weapons": [reference],
+        "peripheral": [{"id": 1, "q": 1}],
+        "chars": [1],
         "includes": [{"group": 1, "option": 1, "q": 1}],
         "orders": [{"type": "regular", "list": 1, "total": 1}],
     }
     group = {
-        "id": 1, "category": 1, "isc": "Infantry",
-        "profiles": [{
-            "id": 1, "name": "Trooper", "type": 1, "move": [4, 4], "ava": "T",
-            **nested,
-        }],
+        "id": 1,
+        "category": 1,
+        "isc": "Infantry",
+        "profiles": [
+            {
+                "id": 1,
+                "name": "Trooper",
+                "type": 1,
+                "move": [4, 4],
+                "ava": "T",
+                **nested,
+            }
+        ],
         "options": [{"id": 1, "name": "Rifle", "points": 10, "swc": "0.5", **nested}],
     }
     filters = {
         key: [{"id": 1, "name": key, "mercs": False, "future_field": {"value": [1, None]}}]
         for key in (
-            "category", "chars", "type", "equip", "skills", "weapons", "ammunition", "extras"
+            "category",
+            "chars",
+            "type",
+            "equip",
+            "skills",
+            "weapons",
+            "ammunition",
+            "extras",
         )
     }
     filters["peripheral"] = [{"id": 1, "name": "Drone"}]
@@ -59,31 +77,50 @@ def normalized() -> dict:
         "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
         "armyLists": {
             "101": {
-                "_meta": {"slug": "first_army", "kind": "faction"}, "unitIds": [1, 3],
-                "filters": filters, "reinforcements": 999,
+                "_meta": {"slug": "first_army", "kind": "faction"},
+                "unitIds": [1, 3],
+                "filters": filters,
+                "reinforcements": 999,
                 "resume": {"future": [True, "text"]},
                 "fireteamChart": {
-                    "spec": {"max": 2}, "teams": [{
-                        "name": "Team", "type": ["Core"],
-                        "units": [{"slug": "alpha", "name": "Alpha", "min": 1}],
-                    }],
+                    "spec": {"max": 2},
+                    "teams": [
+                        {
+                            "name": "Team",
+                            "type": ["Core"],
+                            "units": [{"slug": "alpha", "name": "Alpha", "min": 1}],
+                        }
+                    ],
                 },
-                "relations": [{"min": 1, "units": [{
-                    "unit": 1, "profile": 1,
-                    "depends": [{"unit": 9999, "options": [1], "future": "preserved"}],
-                }]}],
+                "relations": [
+                    {
+                        "min": 1,
+                        "units": [
+                            {
+                                "unit": 1,
+                                "profile": 1,
+                                "depends": [{"unit": 9999, "options": [1], "future": "preserved"}],
+                            }
+                        ],
+                    }
+                ],
             },
             "201": {
                 "_meta": {"slug": "second-army", "kind": "sectorial"},
-                "unitIds": [1, 2], "filters": filters,
+                "unitIds": [1, 2],
+                "filters": filters,
             },
             "301": {"_meta": {"slug": "empty_army"}, "unitIds": []},
         },
         "units": {
             "1": {
                 "shared": {
-                    "id": 1, "name": "Álpha", "slug": "alpha", "canonical": 999,
-                    "factions": [101], "notes": {"language": "日本語"},
+                    "id": 1,
+                    "name": "Álpha",
+                    "slug": "alpha",
+                    "canonical": 999,
+                    "factions": [101],
+                    "notes": {"language": "日本語"},
                     "options": [{"id": 1, "name": "Global", **nested}],
                 },
                 "byArmy": {
@@ -126,9 +163,9 @@ def test_database_preserves_every_normalized_table_and_field(
         assert connection.execute(
             "SELECT army_id, ava FROM profiles ORDER BY army_id"
         ).fetchall() == [(101, "T"), (201, 1)]
-        assert json.loads(connection.execute(
-            "SELECT future_field FROM skills WHERE id = 1"
-        ).fetchone()[0]) == {"value": [1, None]}
+        assert json.loads(
+            connection.execute("SELECT future_field FROM skills WHERE id = 1").fetchone()[0]
+        ) == {"value": [1, None]}
         stored_warnings = connection.execute(
             f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = 'warnings'"
         ).fetchone()[0]
@@ -149,53 +186,108 @@ def test_database_preserves_every_normalized_table_and_field(
 def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: dict) -> None:
     data = copy.deepcopy(normalized)
     data["tables"]["metadata_ammunitions"] = [{"id": 2, "name": "Normal"}]
-    data["tables"]["metadata_weapons"] = [{
-        "position": 1, "id": 1, "type": "BS", "name": "Combi Rifle",
-        "mode": "Standard", "ammunition": 2, "burst": "3", "damage": "7",
-        "saving": "ARM", "savingNum": "1", "properties": ["Suppressive Fire"],
-        "profile": "ARM=0, BTS=0, STR=1, S=1",
-        "distance": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
-    }]
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "mode": "Standard",
+            "ammunition": 2,
+            "burst": "3",
+            "damage": "7",
+            "saving": "ARM",
+            "savingNum": "1",
+            "properties": ["Suppressive Fire"],
+            "profile": "ARM=0, BTS=0, STR=1, S=1",
+            "distance": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
+        }
+    ]
     path = tmp_path / "army.sqlite3"
     export_database(data, path)
 
     detail = Database(path).get_catalog_item("weapons", 1)
 
     assert detail is not None
-    assert detail["profiles"] == [{
-        "id": 1, "name": "Combi Rifle", "mode": "Standard", "type": "BS",
-        "ammunition": "Normal", "burst": "3", "damage": "7", "saving": "ARM",
-        "saving_num": "1", "profile": "ARM=0, BTS=0, STR=1, S=1",
-        "traits": ["Suppressive Fire"],
-        "ranges": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
-    }]
-    assert detail["weapon_variants"] == [{
-        "id": 1, "name": "weapons", "profiles": detail["profiles"],
-    }]
+    assert detail["profiles"] == [
+        {
+            "id": 1,
+            "name": "Combi Rifle",
+            "mode": "Standard",
+            "type": "BS",
+            "ammunition": "Normal",
+            "burst": "3",
+            "damage": "7",
+            "saving": "ARM",
+            "saving_num": "1",
+            "profile": "ARM=0, BTS=0, STR=1, S=1",
+            "traits": ["Suppressive Fire"],
+            "ranges": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
+        }
+    ]
+    assert detail["weapon_variants"] == [
+        {
+            "id": 1,
+            "name": "weapons",
+            "profiles": detail["profiles"],
+        }
+    ]
 
 
 def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
     tmp_path: Path, normalized: dict
 ) -> None:
     data = copy.deepcopy(normalized)
-    data["tables"]["weapons"].extend([
-        {"id": 209, "name": "Armed Turret (Combi R.)", "source_defined": True, "category": "Uncategorized"},
-        {"id": 226, "name": "Armed Turret", "source_defined": True, "category": "Uncategorized"},
-    ])
+    data["tables"]["weapons"].extend(
+        [
+            {
+                "id": 209,
+                "name": "Armed Turret (Combi R.)",
+                "source_defined": True,
+                "category": "Uncategorized",
+            },
+            {
+                "id": 226,
+                "name": "Armed Turret",
+                "source_defined": True,
+                "category": "Uncategorized",
+            },
+        ]
+    )
     data["tables"]["metadata_weapons"] = [
         {"position": 1, "id": 226, "name": "Armed Turret", "burst": "-", "damage": "-"},
-        {"position": 2, "id": 226, "name": "Armed Turret", "mode": "Combi Rifle", "burst": "3", "damage": "7"},
-        {"position": 3, "id": 226, "name": "Armed Turret", "mode": "PARA CC Weapon", "burst": "1", "damage": "-"},
+        {
+            "position": 2,
+            "id": 226,
+            "name": "Armed Turret",
+            "mode": "Combi Rifle",
+            "burst": "3",
+            "damage": "7",
+        },
+        {
+            "position": 3,
+            "id": 226,
+            "name": "Armed Turret",
+            "mode": "PARA CC Weapon",
+            "burst": "1",
+            "damage": "-",
+        },
     ]
     path = tmp_path / "army.sqlite3"
     export_database(data, path)
 
     database = Database(path)
 
-    assert [item for item in database.list_catalog_items("weapons") if item["id"] == 226] == [{
-        "id": 226, "name": "Armed Turret", "category": "Uncategorized",
-        "type": None, "ammunition": None, "properties": None,
-    }]
+    assert [item for item in database.list_catalog_items("weapons") if item["id"] == 226] == [
+        {
+            "id": 226,
+            "name": "Armed Turret",
+            "category": "Uncategorized",
+            "type": None,
+            "ammunition": None,
+            "properties": None,
+        }
+    ]
     detail = database.get_catalog_item("weapons", 226)
     assert detail is not None
     assert [(profile["name"], profile["mode"]) for profile in detail["profiles"]] == [
@@ -203,8 +295,15 @@ def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
     ]
     assert detail["special_profile"] == {
         "stats": [
-            ["MOV", "--"], ["CC", "5"], ["BS", "10"], ["PH", "--"], ["WIP", "--"],
-            ["ARM", "2"], ["BTS", "3"], ["STR", "1"], ["S", "2"],
+            ["MOV", "--"],
+            ["CC", "5"],
+            ["BS", "10"],
+            ["PH", "--"],
+            ["WIP", "--"],
+            ["ARM", "2"],
+            ["BTS", "3"],
+            ["STR", "1"],
+            ["S", "2"],
         ],
         "equipment": ["360º Visor"],
         "skills": ["Total Reaction"],
@@ -228,7 +327,8 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     assert shared["main_army_id"] is None
     assert shared["army_ids"] == [101, 201]
     assert shared["armies"] == [
-        {"id": 101, "name": "First Army"}, {"id": 201, "name": "Second Army"},
+        {"id": 101, "name": "First Army"},
+        {"id": 201, "name": "Second Army"},
     ]
     assert database.list_units(army_id=301)["items"] == []
     assert database.list_units(army_id=999)["total"] == 0
@@ -238,52 +338,84 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     assert database.list_units(search="' OR 1 = 1 --")["total"] == 0
     assert database.list_units(search="missing")["items"] == []
     assert database.list_units(limit=1, offset=1) == {
-        "items": [{
-            "id": 1, "name": "Álpha", "isc": None, "slug": "alpha", "main_army_id": None,
-            "source_ids": [1],
-            "army_ids": [101, 201],
-            "armies": [
-                {"id": 101, "name": "First Army"},
-                {"id": 201, "name": "Second Army"},
-            ],
-        }],
-        "total": 3, "limit": 1, "offset": 1,
+        "items": [
+            {
+                "id": 1,
+                "name": "Álpha",
+                "isc": None,
+                "slug": "alpha",
+                "main_army_id": None,
+                "source_ids": [1],
+                "army_ids": [101, 201],
+                "armies": [
+                    {"id": 101, "name": "First Army"},
+                    {"id": 201, "name": "Second Army"},
+                ],
+            }
+        ],
+        "total": 3,
+        "limit": 1,
+        "offset": 1,
     }
 
 
-def test_list_skill_extras_returns_distinct_sorted_pairs(
-    tmp_path: Path, normalized: dict
-) -> None:
-    normalized["tables"]["extras"].extend([
-        {"id": 2, "name": "+5", "source_defined": True},
-        {"id": 3, "name": "PS=5", "source_defined": True},
-        {"id": 4, "name": "+5 CC", "source_defined": True},
-        {"id": 5, "name": "-5", "source_defined": True},
-    ])
+def test_list_skill_extras_returns_distinct_sorted_pairs(tmp_path: Path, normalized: dict) -> None:
+    normalized["tables"]["extras"].extend(
+        [
+            {"id": 2, "name": "+5", "source_defined": True},
+            {"id": 3, "name": "PS=5", "source_defined": True},
+            {"id": 4, "name": "+5 CC", "source_defined": True},
+            {"id": 5, "name": "-5", "source_defined": True},
+        ]
+    )
     profile_extra = normalized["tables"]["profile_skill_extras"][0]
-    normalized["tables"]["profile_skill_extras"].append({
-        "occurrence_id": profile_extra["occurrence_id"], "position": 2, "extra_id": 2,
-    })
-    normalized["tables"]["profile_skill_extras"].append({
-        "occurrence_id": profile_extra["occurrence_id"], "position": 3, "extra_id": 3,
-    })
-    normalized["tables"]["profile_skill_extras"].append({
-        "occurrence_id": profile_extra["occurrence_id"], "position": 4, "extra_id": 4,
-    })
-    normalized["tables"]["profile_skill_extras"].append({
-        "occurrence_id": profile_extra["occurrence_id"], "position": 5, "extra_id": 5,
-    })
+    normalized["tables"]["profile_skill_extras"].append(
+        {
+            "occurrence_id": profile_extra["occurrence_id"],
+            "position": 2,
+            "extra_id": 2,
+        }
+    )
+    normalized["tables"]["profile_skill_extras"].append(
+        {
+            "occurrence_id": profile_extra["occurrence_id"],
+            "position": 3,
+            "extra_id": 3,
+        }
+    )
+    normalized["tables"]["profile_skill_extras"].append(
+        {
+            "occurrence_id": profile_extra["occurrence_id"],
+            "position": 4,
+            "extra_id": 4,
+        }
+    )
+    normalized["tables"]["profile_skill_extras"].append(
+        {
+            "occurrence_id": profile_extra["occurrence_id"],
+            "position": 5,
+            "extra_id": 5,
+        }
+    )
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
 
     assert Database(path).list_skill_extras() == [
         {
-            "skill_id": 1, "skill_name": "skills", "extra_id": 2, "extra_name": "+5",
-            "is_distance": True, "units": [{"id": 1, "name": "Álpha"}],
+            "skill_id": 1,
+            "skill_name": "skills",
+            "extra_id": 2,
+            "extra_name": "+5",
+            "is_distance": True,
+            "units": [{"id": 1, "name": "Álpha"}],
         },
         {
-            "skill_id": 1, "skill_name": "skills", "extra_id": 5, "extra_name": "-5",
-            "is_distance": True, "units": [{"id": 1, "name": "Álpha"}],
+            "skill_id": 1,
+            "skill_name": "skills",
+            "extra_id": 5,
+            "extra_name": "-5",
+            "is_distance": True,
+            "units": [{"id": 1, "name": "Álpha"}],
         },
     ]
 
@@ -295,10 +427,24 @@ def test_skill_extra_grouping_uses_skill_specific_sign_conventions() -> None:
     assert canonical_skill_extra_name("Dodge", "-5") == "-5"
 
 
-@pytest.mark.parametrize(("skill_id", "expected"), [
-    (19, 19), (20, 19), (21, 19), (22, 19), (23, 19), (69, 69), (70, 69), (201, 201),
-    (278, 201), (279, 201), (240, 240), (274, 240), (24, 24),
-])
+@pytest.mark.parametrize(
+    ("skill_id", "expected"),
+    [
+        (19, 19),
+        (20, 19),
+        (21, 19),
+        (22, 19),
+        (23, 19),
+        (69, 69),
+        (70, 69),
+        (201, 201),
+        (278, 201),
+        (279, 201),
+        (240, 240),
+        (274, 240),
+        (24, 24),
+    ],
+)
 def test_skill_variants_use_a_shared_catalog_identity(skill_id: int, expected: int) -> None:
     assert canonical_skill_id(skill_id) == expected
 
@@ -317,10 +463,15 @@ def test_catalog_merge_key_treats_colon_suffixes_as_variants() -> None:
     assert merged_catalog_name("TinBot: Discover") == "TinBot"
 
 
-@pytest.mark.parametrize(("name", "category"), [
-    ("Boarding Shotgun", "Shotguns"), ("MULTI Rifle", "Rifles"),
-    ("Heavy Machine Gun", "Heavy Machine Guns"), ("Unknown Prototype", "Uncategorized"),
-])
+@pytest.mark.parametrize(
+    ("name", "category"),
+    [
+        ("Boarding Shotgun", "Shotguns"),
+        ("MULTI Rifle", "Rifles"),
+        ("Heavy Machine Gun", "Heavy Machine Guns"),
+        ("Unknown Prototype", "Uncategorized"),
+    ],
+)
 def test_weapon_categories_are_assigned_by_declarative_rules(name: str, category: str) -> None:
     assert weapon_category(name) == category
     assert category in WEAPON_CATEGORIES
@@ -330,10 +481,15 @@ def test_normalization_persists_weapon_categories(normalized: dict) -> None:
     assert all("category" in weapon for weapon in normalized["tables"]["weapons"])
 
 
-@pytest.mark.parametrize(("weapon_id", "category"), [
-    (177, "CC Weapons"), (1, "Disposable Support Weapons"),
-    (174, "Mines"), (18, "Uncategorized"),
-])
+@pytest.mark.parametrize(
+    ("weapon_id", "category"),
+    [
+        (177, "CC Weapons"),
+        (1, "Disposable Support Weapons"),
+        (174, "Mines"),
+        (18, "Uncategorized"),
+    ],
+)
 def test_manual_weapon_category_overrides_take_precedence(weapon_id: int, category: str) -> None:
     assert weapon_category("Rifle", weapon_id) == category
 
@@ -344,10 +500,12 @@ def test_missing_mine_profiles_have_import_overrides(weapon_id: int) -> None:
 
 
 def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normalized: dict) -> None:
-    normalized["tables"]["skills"].extend([
-        {"id": 69, "name": "Strategos L1", "source_defined": True},
-        {"id": 70, "name": "Strategos L2", "source_defined": True},
-    ])
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 69, "name": "Strategos L1", "source_defined": True},
+            {"id": 70, "name": "Strategos L2", "source_defined": True},
+        ]
+    )
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
 
@@ -355,7 +513,10 @@ def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normal
     strategos = [item for item in database.list_catalog_items("skills") if item["id"] == 69]
     assert strategos == [{"id": 69, "name": "Strategos", "wiki": None}]
     assert database.get_skill(70) == {
-        "id": 69, "name": "Strategos", "wiki": None, "variants": [],
+        "id": 69,
+        "name": "Strategos",
+        "wiki": None,
+        "variants": [],
     }
 
 
@@ -367,9 +528,13 @@ def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dic
 
     details = Database(path).get_unit(1)
     assert details is not None
-    assert details["armies"][0]["profiles"][0]["skills"][0]["extras"] == [{
-        "id": 2, "name": "+5", "is_distance": True,
-    }]
+    assert details["armies"][0]["profiles"][0]["skills"][0]["extras"] == [
+        {
+            "id": 2,
+            "name": "+5",
+            "is_distance": True,
+        }
+    ]
 
 
 def test_main_army_resolves_canonical_sectorials_to_whole_armies(normalized: dict) -> None:
@@ -384,17 +549,17 @@ def test_main_army_resolves_canonical_sectorials_to_whole_armies(normalized: dic
     assert main_army_id(999, {101, 201}) is None
 
 
-def test_duplicate_10000_id_family_is_one_logical_unit(
-    tmp_path: Path, normalized: dict
-) -> None:
+def test_duplicate_10000_id_family_is_one_logical_unit(tmp_path: Path, normalized: dict) -> None:
     original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
-    normalized["tables"]["units"].append({
-        "id": 10_001,
-        "name": original["name"],
-        "isc": original["isc"],
-        "canonical_faction_id": None,
-        "source_defined": True,
-    })
+    normalized["tables"]["units"].append(
+        {
+            "id": 10_001,
+            "name": original["name"],
+            "isc": original["isc"],
+            "canonical_faction_id": None,
+            "source_defined": True,
+        }
+    )
     normalized["tables"]["army_units"].append({"army_id": 301, "unit_id": 10_001})
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
@@ -519,10 +684,14 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
     duplicate = copy.deepcopy(original)
     duplicate.update(id=duplicate_id, canonical_faction_id=1)
     normalized["tables"]["units"].append(duplicate)
-    normalized["tables"]["factions"].append({
-        "id": 1, "has_army_list": False, "canonical_reference_count": 1,
-        "unit_membership_reference_count": 0,
-    })
+    normalized["tables"]["factions"].append(
+        {
+            "id": 1,
+            "has_army_list": False,
+            "canonical_reference_count": 1,
+            "unit_membership_reference_count": 0,
+        }
+    )
     for table in ("army_units", "profile_groups", "profiles"):
         for row in list(normalized["tables"][table]):
             if row.get("unit_id") == 1 and row.get("army_id") == 101:
@@ -543,20 +712,28 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
 def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     rows = [
         {
-            "id": 265, "isc": "Wardrivers, Mercenary Hackers", "name": "WARDRIVERS",
+            "id": 265,
+            "isc": "Wardrivers, Mercenary Hackers",
+            "name": "WARDRIVERS",
             "main_army_id": 301,
         },
         {
-            "id": 1635, "isc": "Reinf. Wardrivers, Mercenary Hackers",
-            "name": "REINF: WARDRIVERS", "main_army_id": 401,
+            "id": 1635,
+            "isc": "Reinf. Wardrivers, Mercenary Hackers",
+            "name": "REINF: WARDRIVERS",
+            "main_army_id": 401,
         },
         {
-            "id": 1691, "isc": "Reinf. Wardrivers, Mercenary Hackers",
-            "name": "REFUERZOS: WARDRIVERS", "main_army_id": 501,
+            "id": 1691,
+            "isc": "Reinf. Wardrivers, Mercenary Hackers",
+            "name": "REFUERZOS: WARDRIVERS",
+            "main_army_id": 501,
         },
         {
-            "id": 2691, "isc": "Reinf. Wardrivers, Mercenary Hackers",
-            "name": "REINF: WARDRIVERS", "main_army_id": 901,
+            "id": 2691,
+            "isc": "Reinf. Wardrivers, Mercenary Hackers",
+            "name": "REINF: WARDRIVERS",
+            "main_army_id": 901,
         },
     ]
     memberships = {
@@ -578,12 +755,16 @@ def test_reinforcement_only_variants_join_their_standard_unit() -> None:
 def test_reinforcement_variant_matches_reordered_pluralized_identity() -> None:
     rows = [
         {
-            "id": 35, "isc": "Armbots: Bulleteer", "name": "BULLETEER ARMBOTS",
+            "id": 35,
+            "isc": "Armbots: Bulleteer",
+            "name": "BULLETEER ARMBOTS",
             "main_army_id": 101,
         },
         {
-            "id": 1649, "isc": "Reinf. Bulleteers Armbots",
-            "name": "REINF: ARMBOTS BULLETEERS", "main_army_id": 101,
+            "id": 1649,
+            "isc": "Reinf. Bulleteers Armbots",
+            "name": "REINF: ARMBOTS BULLETEERS",
+            "main_army_id": 101,
         },
     ]
     memberships = {
@@ -602,11 +783,14 @@ def test_reinforcement_variant_matches_reordered_pluralized_identity() -> None:
 def test_reinforcement_variant_uses_display_name_when_isc_is_abbreviated() -> None:
     rows = [
         {
-            "id": 1751, "isc": "Blade-Ops, Neoterran Unified Commando Regiment",
-            "name": "BLADE-OPS, Neoterran Unified Commando Regiment", "main_army_id": 101,
+            "id": 1751,
+            "isc": "Blade-Ops, Neoterran Unified Commando Regiment",
+            "name": "BLADE-OPS, Neoterran Unified Commando Regiment",
+            "main_army_id": 101,
         },
         {
-            "id": 1642, "isc": "Reinf. Blade-Ops",
+            "id": 1642,
+            "isc": "Reinf. Blade-Ops",
             "name": "REINF: BLADE-OPS, Unified Neoterran Commando Regiment",
             "main_army_id": 101,
         },
@@ -623,28 +807,39 @@ def test_reinforcement_variant_uses_display_name_when_isc_is_abbreviated() -> No
     assert groups[0]["source_ids"] == [1751, 1642]
 
 
-@pytest.mark.parametrize(("standard", "reinforcement"), [
-    (
-        {
-            "id": 1624, "isc": "Caskuda WCD Armored Jump Operator", "name": "CASKUDA",
-            "main_army_id": 601,
-        },
-        {
-            "id": 1618, "isc": "Reinf. Caskuda WCD Armoured Jump Operator",
-            "name": "REINF. CASKUDA", "main_army_id": 601,
-        },
-    ),
-    (
-        {
-            "id": 1610, "isc": "Ŝarko, Naval Reconaissance Special Unit", "name": "ŜARKO",
-            "main_army_id": 1001,
-        },
-        {
-            "id": 1700, "isc": "Reinf. Ŝarko, Naval Recon Special Unit",
-            "name": "REINF: ŜARKO", "main_army_id": 1001,
-        },
-    ),
-])
+@pytest.mark.parametrize(
+    ("standard", "reinforcement"),
+    [
+        (
+            {
+                "id": 1624,
+                "isc": "Caskuda WCD Armored Jump Operator",
+                "name": "CASKUDA",
+                "main_army_id": 601,
+            },
+            {
+                "id": 1618,
+                "isc": "Reinf. Caskuda WCD Armoured Jump Operator",
+                "name": "REINF. CASKUDA",
+                "main_army_id": 601,
+            },
+        ),
+        (
+            {
+                "id": 1610,
+                "isc": "Ŝarko, Naval Reconaissance Special Unit",
+                "name": "ŜARKO",
+                "main_army_id": 1001,
+            },
+            {
+                "id": 1700,
+                "isc": "Reinf. Ŝarko, Naval Recon Special Unit",
+                "name": "REINF: ŜARKO",
+                "main_army_id": 1001,
+            },
+        ),
+    ],
+)
 def test_reinforcement_variant_matches_known_spelling_aliases(
     standard: dict, reinforcement: dict
 ) -> None:
@@ -660,19 +855,20 @@ def test_reinforcement_variant_matches_known_spelling_aliases(
     assert groups[0]["source_ids"] == [standard["id"], reinforcement["id"]]
 
 
-@pytest.mark.parametrize("mutation", [
-    lambda data: data["_meta"].update(format="not normalized"),
-    lambda data: data["_meta"].update(formatVersion=2),
-    lambda data: data.update(tables=[]),
-    lambda data: data["tables"].update(units=["invalid"]),
-    lambda data: data["tables"]["army_units"][0].update(unit_id=404),
-    lambda data: data["tables"]["profile_skills"].append(data["tables"]["profile_skills"][0]),
-    lambda data: data["tables"]["profiles"][0].update(profile_id=None),
-    lambda data: data["tables"].update(unexpected_table=[]),
-])
-def test_invalid_import_keeps_existing_database(
-    tmp_path: Path, normalized: dict, mutation
-) -> None:
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda data: data["_meta"].update(format="not normalized"),
+        lambda data: data["_meta"].update(formatVersion=2),
+        lambda data: data.update(tables=[]),
+        lambda data: data["tables"].update(units=["invalid"]),
+        lambda data: data["tables"]["army_units"][0].update(unit_id=404),
+        lambda data: data["tables"]["profile_skills"].append(data["tables"]["profile_skills"][0]),
+        lambda data: data["tables"]["profiles"][0].update(profile_id=None),
+        lambda data: data["tables"].update(unexpected_table=[]),
+    ],
+)
+def test_invalid_import_keeps_existing_database(tmp_path: Path, normalized: dict, mutation) -> None:
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
     original = path.read_bytes()
@@ -686,10 +882,13 @@ def test_invalid_import_keeps_existing_database(
 def test_empty_import_replaces_previous_database(tmp_path: Path, normalized: dict) -> None:
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
-    empty = normalize_master({
-        "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
-        "armyLists": {}, "units": {},
-    })
+    empty = normalize_master(
+        {
+            "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
+            "armyLists": {},
+            "units": {},
+        }
+    )
     export_database(empty, path)
     database = Database(path)
     database.validate()
@@ -700,36 +899,62 @@ def test_empty_import_replaces_previous_database(tmp_path: Path, normalized: dic
 def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
     tmp_path: Path, normalized: dict
 ) -> None:
-    normalized["tables"]["units"].extend([
-        {"id": 4, "name": None, "source_defined": True},
-        {"id": 5, "name": "", "source_defined": True},
-        {"id": 6, "name": "A-l.p/h+a", "source_defined": True},
-        {"id": 7, "name": "Béta", "source_defined": True},
-        {"id": 8, "name": "C.A.T.!", "source_defined": True},
-        {"id": 237, "name": "S.A.S.", "source_defined": True},
-        {"id": 1610, "name": "Ŝarko", "source_defined": True},
-    ])
+    normalized["tables"]["units"].extend(
+        [
+            {"id": 4, "name": None, "source_defined": True},
+            {"id": 5, "name": "", "source_defined": True},
+            {"id": 6, "name": "A-l.p/h+a", "source_defined": True},
+            {"id": 7, "name": "Béta", "source_defined": True},
+            {"id": 8, "name": "C.A.T.!", "source_defined": True},
+            {"id": 237, "name": "S.A.S.", "source_defined": True},
+            {"id": 1610, "name": "Ŝarko", "source_defined": True},
+        ]
+    )
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
     database = Database(path)
     assert [unit["name"] for unit in database.list_units()["items"]] == [
-        "100%_Guard", "Álpha", "A-l.p/h+a", "Beta", "Béta", "C.A.T.!", "Ŝarko", "S.A.S.",
-        "Unit 4", "Unit 5",
+        "100%_Guard",
+        "Álpha",
+        "A-l.p/h+a",
+        "Beta",
+        "Béta",
+        "C.A.T.!",
+        "Ŝarko",
+        "S.A.S.",
+        "Unit 4",
+        "Unit 5",
     ]
     assert database.list_units(search="sarko")["items"][0]["id"] == 1610
     assert database.list_units(search="sas")["items"][0]["id"] == 237
-    assert database.list_units(search="UNIT 4")["items"] == [{
-        "id": 4, "name": "Unit 4", "isc": None, "slug": None, "main_army_id": None,
-        "source_ids": [4],
-        "army_ids": [], "armies": [],
-    }]
-    assert database.list_units(search="unit", limit=1, offset=1) == {
-        "items": [{
-            "id": 5, "name": "Unit 5", "isc": None, "slug": None, "main_army_id": None,
-            "source_ids": [5], "army_ids": [],
+    assert database.list_units(search="UNIT 4")["items"] == [
+        {
+            "id": 4,
+            "name": "Unit 4",
+            "isc": None,
+            "slug": None,
+            "main_army_id": None,
+            "source_ids": [4],
+            "army_ids": [],
             "armies": [],
-        }],
-        "total": 2, "limit": 1, "offset": 1,
+        }
+    ]
+    assert database.list_units(search="unit", limit=1, offset=1) == {
+        "items": [
+            {
+                "id": 5,
+                "name": "Unit 5",
+                "isc": None,
+                "slug": None,
+                "main_army_id": None,
+                "source_ids": [5],
+                "army_ids": [],
+                "armies": [],
+            }
+        ],
+        "total": 2,
+        "limit": 1,
+        "offset": 1,
     }
 
 
@@ -763,11 +988,21 @@ def test_database_with_different_compatibility_revision_requires_rebuild(
         Database(path).validate()
 
 
-@pytest.mark.parametrize("arguments", [
-    {"limit": 0}, {"limit": 501}, {"limit": True}, {"offset": -1}, {"offset": 0.5},
-    {"army_id": "101"}, {"search": None}, {"army_id": 2**63}, {"army_id": -(2**63) - 1},
-    {"offset": 2**63},
-])
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        {"limit": 0},
+        {"limit": 501},
+        {"limit": True},
+        {"offset": -1},
+        {"offset": 0.5},
+        {"army_id": "101"},
+        {"search": None},
+        {"army_id": 2**63},
+        {"army_id": -(2**63) - 1},
+        {"offset": 2**63},
+    ],
+)
 def test_repository_rejects_invalid_query_arguments(tmp_path: Path, arguments: dict) -> None:
     with pytest.raises(ValueError, match=next(iter(arguments))):
         Database(tmp_path / "missing.sqlite3").list_units(**arguments)

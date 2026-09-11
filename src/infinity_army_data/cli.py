@@ -19,9 +19,7 @@ DEFAULT_RAW_DIRECTORY = Path("data/raw")
 
 def snapshot_downloaded_on(source: Path) -> str | None:
     """Return the ISO download date encoded by a downloader-created ZIP name."""
-    match = re.fullmatch(
-        r"JSON (\d{8})(?:-\d{6}(?:-\d+)?)?\.zip", source.name, re.IGNORECASE
-    )
+    match = re.fullmatch(r"JSON (\d{8})(?:-\d{6}(?:-\d+)?)?\.zip", source.name, re.IGNORECASE)
     if match is None:
         return None
     try:

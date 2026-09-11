@@ -31,78 +31,66 @@ ASSETS = {
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
 }
-ARMY_SYMBOL_PATH = re.compile(
-    r"/static/army-symbols/(?:[A-Za-z0-9 ._-]+/)*[A-Za-z0-9 ._-]+\.svg"
+ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
+UNIT_SYMBOL_PATH = re.compile(r"/static/units/[a-z0-9-]+/[a-z0-9-]+\.svg")
+ORDER_SYMBOL_PATH = re.compile(
+    r"/static/orders/(regular|irregular|peripheral|impetuous|tactical|lieutenant|hackable|cube|cube-2)\.svg"
 )
-UNIT_SYMBOL_PATH = re.compile(r"/static/unit-symbols/([a-z0-9-]+)\.svg")
-ORDER_SYMBOL_PATH = re.compile(r"/static/order-symbols/(regular|irregular|peripheral|impetuous|tactical|lieutenant|hackable|cube|cube-2)\.svg")
-
-
-def _unit_symbol_paths(directory) -> dict[str, object]:
-    """Index symbol files without exposing their source directory structure."""
-    paths: dict[str, str] = {}
-    for asset in directory.iterdir():
-        if asset.is_dir():
-            paths.update(_unit_symbol_paths(asset))
-        elif asset.name.endswith(".svg"):
-            stem = asset.name.removesuffix(".svg")
-            slug = re.sub(r"-(?:[0-9]+|null)-1$", "", stem)
-            paths.setdefault(slug, asset)
-    return paths
-
-
-UNIT_SYMBOLS = _unit_symbol_paths(files("infinity_db.web").joinpath("static", "unit-symbols"))
 
 
 def _page(
-    filename: str, *, active_page: str | None = None, snapshot_downloaded_on: date | None = None,
+    filename: str,
+    *,
+    active_page: str | None = None,
+    snapshot_downloaded_on: date | None = None,
 ) -> bytes:
     """Render a page with the project-wide navigation shell."""
     static = files("infinity_db.web").joinpath("static")
     navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
-    navigation = navigation.replace(
-        "{{UNIT_EXPLORER_CURRENT}}", ' aria-current="page"' if active_page == "units" else "",
-    ).replace(
-        "{{SKILLS_CURRENT}}", ' aria-current="page"' if active_page == "skills" else "",
-    ).replace(
-        "{{EQUIPMENT_CURRENT}}", ' aria-current="page"' if active_page == "equipment" else "",
-    ).replace(
-        "{{WEAPONS_CURRENT}}", ' aria-current="page"' if active_page == "weapons" else "",
-    ).replace(
-        "{{SKILL_EXTRAS_CURRENT}}", ' aria-current="page"' if active_page == "skill-extras" else "",
-    ).replace(
-        "{{ABOUT_CURRENT}}", ' aria-current="page"' if active_page == "about" else "",
-    ).replace(
-        "{{SNAPSHOT_DOWNLOAD_DATE}}",
-        (
-            '<p class="snapshot-date">Army snapshot downloaded '
-            f'<time datetime="{snapshot_downloaded_on.isoformat()}">'
-            f"{snapshot_downloaded_on:%B} {snapshot_downloaded_on.day}, {snapshot_downloaded_on:%Y}"
-            "</time></p>"
-        ) if snapshot_downloaded_on else "",
+    navigation = (
+        navigation.replace(
+            "{{UNIT_EXPLORER_CURRENT}}",
+            ' aria-current="page"' if active_page == "units" else "",
+        )
+        .replace(
+            "{{SKILLS_CURRENT}}",
+            ' aria-current="page"' if active_page == "skills" else "",
+        )
+        .replace(
+            "{{EQUIPMENT_CURRENT}}",
+            ' aria-current="page"' if active_page == "equipment" else "",
+        )
+        .replace(
+            "{{WEAPONS_CURRENT}}",
+            ' aria-current="page"' if active_page == "weapons" else "",
+        )
+        .replace(
+            "{{SKILL_EXTRAS_CURRENT}}",
+            ' aria-current="page"' if active_page == "skill-extras" else "",
+        )
+        .replace(
+            "{{ABOUT_CURRENT}}",
+            ' aria-current="page"' if active_page == "about" else "",
+        )
+        .replace(
+            "{{SNAPSHOT_DOWNLOAD_DATE}}",
+            (
+                '<p class="snapshot-date">Army snapshot downloaded '
+                f'<time datetime="{snapshot_downloaded_on.isoformat()}">'
+                f"{snapshot_downloaded_on:%B} {snapshot_downloaded_on.day}, "
+                f"{snapshot_downloaded_on:%Y}"
+                "</time></p>"
+            )
+            if snapshot_downloaded_on
+            else "",
+        )
     )
-    return static.joinpath(filename).read_text(encoding="utf-8").replace(
-        "<!-- navigation -->", navigation
-    ).encode("utf-8")
-
-
-def _singular_slug(slug: str) -> str:
-    return "-".join(part.removesuffix("s") if len(part) > 3 else part for part in slug.split("-"))
-
-
-def _unit_symbol_asset(slug: str):
-    """Find a supplied symbol for a display name or its more specific variant."""
-    if asset := UNIT_SYMBOLS.get(slug):
-        return asset
-    singular = _singular_slug(slug)
-    if asset := UNIT_SYMBOLS.get(singular):
-        return asset
-    candidates = [
-        (key, asset) for key, asset in UNIT_SYMBOLS.items()
-        if singular.startswith(_singular_slug(key) + "-")
-        or _singular_slug(key).startswith(singular + "-")
-    ]
-    return max(candidates, key=lambda item: len(item[0]))[1] if candidates else None
+    return (
+        static.joinpath(filename)
+        .read_text(encoding="utf-8")
+        .replace("<!-- navigation -->", navigation)
+        .encode("utf-8")
+    )
 
 
 def _integer(params: dict, key: str, default: int | None, low: int, high: int) -> int | None:
@@ -128,7 +116,16 @@ def _flag(params: dict, key: str) -> bool:
 def _unit_query(query: str) -> dict:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=10)
     for key, values in params.items():
-        if key not in {"army_id", "search", "limit", "offset", "mercs", "specops", "teamops", "reinforcement"}:
+        if key not in {
+            "army_id",
+            "search",
+            "limit",
+            "offset",
+            "mercs",
+            "specops",
+            "teamops",
+            "reinforcement",
+        }:
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
             raise ValueError(f"Provide {key} only once")
@@ -177,24 +174,31 @@ class Application:
             filename, content_type = ASSETS[path]
             body = files("infinity_db.web").joinpath("static", filename).read_bytes()
         elif ARMY_SYMBOL_PATH.fullmatch(path):
-            filename = path.removeprefix("/static/army-symbols/")
-            asset = files("infinity_db.web").joinpath("static", "army-symbols", filename)
-            body = asset.read_bytes()
-            content_type = "image/svg+xml"
-        elif match := ORDER_SYMBOL_PATH.fullmatch(path):
-            asset = files("infinity_db.web").joinpath(
-                "static", "order-symbols", f"{match.group(1)}.svg"
-            )
-            body = asset.read_bytes()
-            content_type = "image/svg+xml"
-        elif match := UNIT_SYMBOL_PATH.fullmatch(path):
-            asset = _unit_symbol_asset(match.group(1))
-            if asset is None:
-                status = HTTPStatus.NOT_FOUND
-                payload = {"error": "Resource not found"}
-            else:
+            filename = path.removeprefix("/static/armies/")
+            asset = files("infinity_db.web").joinpath("static", "armies", filename)
+            if asset.is_file():
                 body = asset.read_bytes()
                 content_type = "image/svg+xml"
+            else:
+                status = HTTPStatus.NOT_FOUND
+                payload = {"error": "Resource not found"}
+        elif match := ORDER_SYMBOL_PATH.fullmatch(path):
+            asset = files("infinity_db.web").joinpath("static", "orders", f"{match.group(1)}.svg")
+            if asset.is_file():
+                body = asset.read_bytes()
+                content_type = "image/svg+xml"
+            else:
+                status = HTTPStatus.NOT_FOUND
+                payload = {"error": "Resource not found"}
+        elif UNIT_SYMBOL_PATH.fullmatch(path):
+            filename = path.removeprefix("/static/units/")
+            asset = files("infinity_db.web").joinpath("static", "units", filename)
+            if asset.is_file():
+                body = asset.read_bytes()
+                content_type = "image/svg+xml"
+            else:
+                status = HTTPStatus.NOT_FOUND
+                payload = {"error": "Resource not found"}
         elif re.fullmatch(r"/units/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
             body = _page("unit.html", snapshot_downloaded_on=self.snapshot_downloaded_on)
@@ -209,19 +213,22 @@ class Application:
             content_type = "text/html; charset=utf-8"
             catalog = path.removeprefix("/")
             body = _page(
-                f"{catalog}.html", active_page=catalog,
+                f"{catalog}.html",
+                active_page=catalog,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
             )
         elif re.fullmatch(r"/skills/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
             body = _page(
-                "skill.html", active_page="skills",
+                "skill.html",
+                active_page="skills",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
             )
         elif match := re.fullmatch(r"/(equipment|weapons)/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
             body = _page(
-                f"{match.group(1)}-detail.html", active_page=match.group(1),
+                f"{match.group(1)}-detail.html",
+                active_page=match.group(1),
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
             )
         elif path == "/about":

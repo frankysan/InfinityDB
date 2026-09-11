@@ -179,8 +179,8 @@ table { width: 100%; border-collapse: collapse; text-align: left; table-layout: 
 .unit-detail .profile-summary > :first-child { width: 30%; }
 .profile-summary th, .profile-summary td { white-space: nowrap; }
 .unit-detail .general-profile .general-item-label { width: 30%; }
-.unit-detail .general-profile .profile-title { margin: 0; padding: 15px 26px 12px; color: #2d4134; font-size: 15px; font-weight: 600; }
-.unit-detail .general-profile .profile-title .order-symbol { width: 20px; height: 20px; }
+.unit-detail .general-profile .profile-title { margin: 0; padding: 16px 26px 13px; color: #2d4134; font-size: 17px; font-weight: 600; }
+.unit-detail .general-profile .profile-title .order-symbol { width: 23px; height: 23px; }
 thead th { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: #64715d; font-weight: 550; padding: 16px 26px; border-bottom: 1px solid var(--border); }
 thead th:first-child { width: 43%; }
 thead th:last-child { width: 115px; }
@@ -188,6 +188,9 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: 18px 26px; verti
 .stat-different { background: #fff3d5; color: #704d00; font-weight: 700; box-shadow: inset 3px 0 #d79b2d; }
 .unit-detail .army-profile thead th { padding: 10px 14px; font-size: 8px; letter-spacing: 1px; }
 .unit-detail .army-profile tbody td { padding: 11px 14px; font-size: 11px; }
+.unit-detail .army-profile .loadout-table tbody th,
+.unit-detail .army-profile .loadout-table tbody td { padding-block: 8px; }
+.unit-detail .army-profile .loadout-table tr.loadout-start > * { border-top: 2px solid #3a5547; }
 .unit-detail .army-profile .profile-details-table thead { display: none; }
 .unit-detail .army-profile .profile-details-table .profile-summary > th { width: auto; padding: 11px 14px; font-size: 11px; font-weight: 400; }
 .unit-detail .army-profile .army-profiles-heading:not(:first-of-type) { margin-top: 6px; border-top: 2px solid #405b4d; }
@@ -315,10 +318,14 @@ tbody tr:hover { background: #f8f9f3; }
   .unit-detail .profile-summary > * { min-width: 0; padding: 8px 4px; font-size: 10px; overflow-wrap: anywhere; }
   .unit-detail .profile-summary > :first-child { grid-column: 1 / -1; padding-top: 15px; color: #2d4134; font-size: 12px; }
   .unit-detail .profile-summary > td::before { content: attr(data-label); display: block; margin-bottom: 3px; color: #64715d; font-size: 8px; font-weight: 550; letter-spacing: .6px; line-height: 1.2; text-transform: uppercase; }
-  .unit-detail .general-profile .profile-title { padding: 15px 16px 8px; font-size: 13px; }
+  .unit-detail .general-profile .profile-title { padding: 16px 16px 9px; font-size: 15px; }
+  .unit-detail .general-profile .profile-title .order-symbol { width: 20px; height: 20px; }
   .unit-detail .army-profile .loadout-table, .unit-detail .army-profile .loadout-table tbody { display: block; width: 100%; }
   .unit-detail .army-profile .loadout-table thead { display: none; }
   .unit-detail .army-profile .loadout-table tbody tr { display: grid; grid-template-columns: 30% minmax(0, 1fr); width: 100%; box-sizing: border-box; }
+  .unit-detail .army-profile .loadout-table tr.loadout-start { position: relative; }
+  .unit-detail .army-profile .loadout-table tr.loadout-start::before { content: ""; position: absolute; z-index: 1; inset: 0 0 auto; height: 2px; background: #3a5547; pointer-events: none; }
+  .unit-detail .army-profile .loadout-table tr.loadout-start > * { border-top: 0; }
   .unit-detail .army-profile .loadout-table .profile-summary { grid-template-columns: minmax(0, 1fr) auto auto; }
   .unit-detail .army-profile .loadout-table .profile-summary > :first-child { grid-column: auto; padding-top: 8px; color: inherit; font-size: 10px; }
   .profile-attributes-label { width: auto; padding: 10px 16px; }

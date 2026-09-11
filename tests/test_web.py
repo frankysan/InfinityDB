@@ -44,39 +44,66 @@ def request(
 @pytest.fixture
 def app(tmp_path: Path) -> Callable:
     shared = {
-        "id": 1, "name": "Alpha Ranger", "canonical": 999, "factions": [101],
-        "profileGroups": [{
-            "id": 1, "category": 1,
-            "profiles": [{
-                "id": 1, "name": "Ranger", "type": 1,
-                "skills": [{"id": 11, "extra": [41]}],
-                "equip": [{"id": 21, "q": 2, "extra": [42]}],
-                "weapons": [{"id": 31, "extra": [43]}],
-            }],
-            "options": [{
-                "id": 1, "name": "Rifle loadout", "points": 20, "swc": "0",
-                "skills": [{"id": 11, "extra": [41]}],
-                "equip": [{"id": 21, "extra": [42]}],
-                "weapons": [{"id": 31, "q": 2, "extra": [43]}],
-                "orders": [{"type": "regular", "list": 1, "total": 1}],
-            }],
-        }],
+        "id": 1,
+        "name": "Alpha Ranger",
+        "canonical": 999,
+        "factions": [101],
+        "profileGroups": [
+            {
+                "id": 1,
+                "category": 1,
+                "profiles": [
+                    {
+                        "id": 1,
+                        "name": "Ranger",
+                        "type": 1,
+                        "skills": [{"id": 11, "extra": [41]}],
+                        "equip": [{"id": 21, "q": 2, "extra": [42]}],
+                        "weapons": [{"id": 31, "extra": [43]}],
+                    }
+                ],
+                "options": [
+                    {
+                        "id": 1,
+                        "name": "Rifle loadout",
+                        "points": 20,
+                        "swc": "0",
+                        "skills": [{"id": 11, "extra": [41]}],
+                        "equip": [{"id": 21, "extra": [42]}],
+                        "weapons": [{"id": 31, "q": 2, "extra": [43]}],
+                        "orders": [{"type": "regular", "list": 1, "total": 1}],
+                    }
+                ],
+            }
+        ],
     }
     # Declared factions and canonical ownership deliberately differ from actual occurrences.
     blue_only = {
-        "id": 3, "name": "100%_Guard", "canonical": 1, "factions": [201],
+        "id": 3,
+        "name": "100%_Guard",
+        "canonical": 1,
+        "factions": [201],
     }
     red_only = {"id": 2, "name": "Beta Scout", "canonical": 1, "factions": [201]}
     specops_only = {
-        "id": 4, "name": "Alpha Spec-Ops", "slug": "alpha-spec-ops",
-        "canonical": 101, "factions": [101],
+        "id": 4,
+        "name": "Alpha Spec-Ops",
+        "slug": "alpha-spec-ops",
+        "canonical": 101,
+        "factions": [101],
     }
     teamops_only = {
-        "id": 5, "name": "Alpha Team Ops", "slug": "alpha-team-ops",
-        "canonical": 101, "factions": [101],
+        "id": 5,
+        "name": "Alpha Team Ops",
+        "slug": "alpha-team-ops",
+        "canonical": 101,
+        "factions": [101],
     }
     reinforcement_only = {
-        "id": 6, "name": "Alpha Reinforcement", "canonical": 101, "factions": [101],
+        "id": 6,
+        "name": "Alpha Reinforcement",
+        "canonical": 101,
+        "factions": [101],
     }
     documents = [
         ("101-zulu_company.json", [shared, blue_only, specops_only, teamops_only], True),
@@ -86,7 +113,8 @@ def app(tmp_path: Path) -> Callable:
     sources = []
     for filename, units, is_army in documents:
         document = {
-            "version": "test", "units": units,
+            "version": "test",
+            "units": units,
             "filters": {
                 "category": [{"id": 1, "name": "Light Infantry"}],
                 "type": [{"id": 1, "name": "Line Trooper"}],
@@ -94,7 +122,8 @@ def app(tmp_path: Path) -> Callable:
                 "equip": [{"id": 21, "name": "Medikit"}],
                 "weapons": [{"id": 31, "name": "Combi Rifle"}],
                 "extras": [
-                    {"id": 41, "name": "+3"}, {"id": 42, "name": "Mimetism"},
+                    {"id": 41, "name": "+3"},
+                    {"id": 42, "name": "Mimetism"},
                     {"id": 43, "name": "AP"},
                 ],
             },
@@ -179,9 +208,7 @@ def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     assert status == 200
     assert {item["id"] for item in json.loads(body)["items"]} == {1, 5}
 
-    status, _, body = request(
-        app, "/api/units", query="army_id=101&mercs=1&specops=1&teamops=1"
-    )
+    status, _, body = request(app, "/api/units", query="army_id=101&mercs=1&specops=1&teamops=1")
     assert status == 200
     assert {item["id"] for item in json.loads(body)["items"]} == {1, 3, 4, 5}
 
@@ -207,29 +234,55 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     for army in unit["armies"]:
         assert army["profiles"][0]["type"] == "Line Trooper"
         assert army["profiles"][0]["classification"] == "Light Infantry"
-        assert army["profiles"][0]["skills"] == [{
-            "id": 11, "name": "Stealth", "quantity": None, "extras": [{"id": 41, "name": "+3"}],
-        }]
-        assert army["profiles"][0]["equipment"] == [{
-            "id": 21, "name": "Medikit", "quantity": 2, "extras": [{"id": 42, "name": "Mimetism"}],
-        }]
+        assert army["profiles"][0]["skills"] == [
+            {
+                "id": 11,
+                "name": "Stealth",
+                "quantity": None,
+                "extras": [{"id": 41, "name": "+3"}],
+            }
+        ]
+        assert army["profiles"][0]["equipment"] == [
+            {
+                "id": 21,
+                "name": "Medikit",
+                "quantity": 2,
+                "extras": [{"id": 42, "name": "Mimetism"}],
+            }
+        ]
         assert army["profiles"][0]["weapons"] == [
             {
-                "id": 31, "name": "Combi Rifle", "quantity": None,
+                "id": 31,
+                "name": "Combi Rifle",
+                "quantity": None,
                 "extras": [{"id": 43, "name": "AP"}],
             }
         ]
         assert army["loadouts"][0]["orders"] == [{"type": "regular", "list": 1, "total": 1}]
-        assert army["loadouts"][0]["skills"] == [{
-            "id": 11, "name": "Stealth", "quantity": None, "extras": [{"id": 41, "name": "+3"}],
-        }]
-        assert army["loadouts"][0]["equipment"] == [{
-            "id": 21, "name": "Medikit", "quantity": None,
-            "extras": [{"id": 42, "name": "Mimetism"}],
-        }]
-        assert army["loadouts"][0]["weapons"] == [{
-            "id": 31, "name": "Combi Rifle", "quantity": 2, "extras": [{"id": 43, "name": "AP"}],
-        }]
+        assert army["loadouts"][0]["skills"] == [
+            {
+                "id": 11,
+                "name": "Stealth",
+                "quantity": None,
+                "extras": [{"id": 41, "name": "+3"}],
+            }
+        ]
+        assert army["loadouts"][0]["equipment"] == [
+            {
+                "id": 21,
+                "name": "Medikit",
+                "quantity": None,
+                "extras": [{"id": 42, "name": "Mimetism"}],
+            }
+        ]
+        assert army["loadouts"][0]["weapons"] == [
+            {
+                "id": 31,
+                "name": "Combi Rifle",
+                "quantity": 2,
+                "extras": [{"id": 43, "name": "AP"}],
+            }
+        ]
     status, headers, body = request(app, "/units/1")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
@@ -241,11 +294,19 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert json.loads(body)["error"] == "Unit not found"
 
 
-@pytest.mark.parametrize(("unit_id", "expected_flags"), [
-    (3, ["mercs"]), (4, ["specops"]), (5, ["teamops"]), (6, ["reinforcement"]),
-])
+@pytest.mark.parametrize(
+    ("unit_id", "expected_flags"),
+    [
+        (3, ["mercs"]),
+        (4, ["specops"]),
+        (5, ["teamops"]),
+        (6, ["reinforcement"]),
+    ],
+)
 def test_unit_details_include_occurrence_availability_categories(
-    app: Callable, unit_id: int, expected_flags: list[str],
+    app: Callable,
+    unit_id: int,
+    expected_flags: list[str],
 ) -> None:
     status, _, body = request(app, f"/api/units/{unit_id}")
     assert status == 200
@@ -331,6 +392,7 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
+    assert b"Version 0.2.0" in body
     assert b"mailto:johannes@haglund.info" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
@@ -343,24 +405,28 @@ def test_army_symbol_is_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
     assert b"armySymbolPath" in body
-    status, headers, body = request(app, "/static/army-symbols/PanOceania/panoceania-1.1.svg")
+    status, headers, body = request(app, "/static/armies/panoceania/101-panoceania.svg")
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body
-    status, _, body = request(app, "/static/unit-symbols/yojimbo-sword-for-hire-1-1.svg")
+    status, _, body = request(
+        app, "/static/units/unassigned/224-yojimbo-motorized-sword-for-hire.svg"
+    )
     assert status == 200
     assert b"<svg" in body
-    status, _, body = request(app, "/static/unit-symbols/clipper-dronbots.svg")
+    status, _, body = request(app, "/static/units/panoceania/18-clipper-dronbot.svg")
     assert status == 200
     assert b"<svg" in body
     for path in [
-        "/static/army-symbols/Combined Army/next-wave.svg",
-        "/static/army-symbols/NA2/contracted-back-up.svg",
+        "/static/armies/combined-army/605-next-wave.svg",
+        "/static/armies/na2/998-contracted-back-up.svg",
     ]:
         status, headers, body = request(app, path)
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
+    status, _, _ = request(app, "/static/armies/panoceania/not-an-army.svg")
+    assert status == 404
 
 
 def test_frontend_recognizes_98_and_99_as_reinforcement_armies(app: Callable) -> None:
@@ -377,34 +443,37 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b"function isStandardArmy(army)" in body
     assert b"section.open = expanded" in body
     assert b"function profileIdentity(profileName)" in body
-    assert b"reconaissance: \"recon\"" in body
+    assert b'reconaissance: "recon"' in body
     assert b'"troops", "autonomous", "intervention", "unit"' in body
 
 
 def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b'function displayAvailability(value)' in body
+    assert b"function displayAvailability(value)" in body
     assert b'return Number(value) >= 100 ? "Total" : displayStatlineValue(value)' in body
 
 
 def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b'function attributeStatline(stats, generalStats = null, includeAvailability = false)' in body
+    assert (
+        b"function attributeStatline(stats, generalStats = null, includeAvailability = false)"
+        in body
+    )
     assert b'{ value: "Attributes", header: true, className: "profile-attributes-label" }' in body
     assert b'{ value: "Type", header: true, className: "general-item-label" }' in body
     assert b'{ value: "Classification", header: true, className: "general-item-label" }' in body
     assert b'"profile-details-table"' in body
     assert b'["Name", "Points", "SWC"]' in body
-    assert b'attributeStatline(profile, generalStatsForProfile, true)' in body
+    assert b"attributeStatline(profile, generalStatsForProfile, true)" in body
 
 
 def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert b'displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles"' in body
-    assert b'generalProfileTableRows([profile])' in body
+    assert b"generalProfileTableRows([profile])" in body
 
 
 def test_unit_details_frontend_marks_army_profile_section_headings(app: Callable) -> None:
@@ -419,16 +488,31 @@ def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable)
     assert body.count(b"if (!items.length) continue;") == 2
 
 
-def test_unit_details_frontend_promotes_sole_loadout_skills_to_general_profile(app: Callable) -> None:
+def test_unit_details_frontend_promotes_sole_loadout_skills_to_general_profile(
+    app: Callable,
+) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert b"function generalProfileSkills(profiles, loadouts)" in body
     assert b"if (loadouts.length !== 1) return skills;" in body
 
 
-@pytest.mark.parametrize("symbol", ["regular", "irregular", "peripheral", "impetuous", "tactical", "lieutenant", "hackable", "cube", "cube-2"])
+@pytest.mark.parametrize(
+    "symbol",
+    [
+        "regular",
+        "irregular",
+        "peripheral",
+        "impetuous",
+        "tactical",
+        "lieutenant",
+        "hackable",
+        "cube",
+        "cube-2",
+    ],
+)
 def test_order_symbols_are_served(app: Callable, symbol: str) -> None:
-    status, headers, body = request(app, f"/static/order-symbols/{symbol}.svg")
+    status, headers, body = request(app, f"/static/orders/{symbol}.svg")
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body
@@ -437,19 +521,20 @@ def test_order_symbols_are_served(app: Callable, symbol: str) -> None:
 def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b'function profileTitle(profile)' in body
-    assert b'generalProfile.append(profileTitle(profile), table(' in body
+    assert b"function profileTitle(profile)" in body
+    assert b"generalProfile.append(profileTitle(profile), table(" in body
     assert b"nameWithOrderSymbols(loadout.name, symbolTypes)" in body
-    assert b'function generalProfileOrderType(profiles, loadouts)' in body
+    assert b"function generalProfileOrderType(profiles, loadouts)" in body
     assert b'hasSkill(loadouts, "regular")' in body
     assert b'.startsWith("peripheral")' in body
     assert b'hasSkill([loadout], "impetuous")' in body
     assert b'hasSkill([loadout], "tactical awareness")' in body
-    assert b'function lieutenantOrderCount(items)' in body
-    assert b'function generalLieutenantOrderCount(profiles, loadouts)' in body
+    assert b"function lieutenantOrderCount(items)" in body
+    assert b"function generalLieutenantOrderCount(profiles, loadouts)" in body
     assert b'Array(lieutenantOrderCount([loadout])).fill("lieutenant")' in body
-    assert b'function characteristicSymbolTypes(profiles)' in body
-    assert b'symbol.title = symbolLabels[symbolType]' in body
+    assert b"function characteristicSymbolTypes(profiles)" in body
+    assert b"symbol.title = symbolLabels[symbolType]" in body
+    assert b'"profile-summary loadout-start"' in body
 
 
 def test_distance_preference_script_is_served(app: Callable) -> None:
@@ -486,8 +571,12 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
         "skills": {"id": 11, "name": "Stealth", "wiki": None},
         "equipment": {"id": 21, "name": "Medikit", "wiki": None},
         "weapons": {
-            "id": 31, "name": "Combi Rifle", "type": None,
-            "category": "Rifles", "ammunition": None, "properties": None,
+            "id": 31,
+            "name": "Combi Rifle",
+            "type": None,
+            "category": "Rifles",
+            "ammunition": None,
+            "properties": None,
         },
     }
     assert json.loads(body)["items"] == [expected[catalog]]
@@ -505,16 +594,31 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert headers["content-type"].startswith("application/json")
     skill = json.loads(body)
     assert skill == {
-        "id": 11, "name": "Stealth", "wiki": None,
-        "variants": [{
-            "skill_id": 11, "skill_name": "Stealth",
-            "extras": [{"id": 41, "name": "+3"}],
-            "units": [{
-                "id": 1, "name": "Alpha Ranger", "isc": None, "slug": None,
-                "main_army_id": None, "source_ids": [1], "army_ids": [101, 201],
-                "armies": [{"id": 101, "name": "Zulu Company"}, {"id": 201, "name": "Alpha Company"}],
-            }],
-        }],
+        "id": 11,
+        "name": "Stealth",
+        "wiki": None,
+        "variants": [
+            {
+                "skill_id": 11,
+                "skill_name": "Stealth",
+                "extras": [{"id": 41, "name": "+3"}],
+                "units": [
+                    {
+                        "id": 1,
+                        "name": "Alpha Ranger",
+                        "isc": None,
+                        "slug": None,
+                        "main_army_id": None,
+                        "source_ids": [1],
+                        "army_ids": [101, 201],
+                        "armies": [
+                            {"id": 101, "name": "Zulu Company"},
+                            {"id": 201, "name": "Alpha Company"},
+                        ],
+                    }
+                ],
+            }
+        ],
     }
 
     status, _, body = request(app, "/api/units")
@@ -527,11 +631,18 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body)["error"] == "Skill not found"
 
 
-@pytest.mark.parametrize(("catalog", "item_id", "name"), [
-    ("equipment", 21, "Medikit"), ("weapons", 31, "Combi Rifle"),
-])
+@pytest.mark.parametrize(
+    ("catalog", "item_id", "name"),
+    [
+        ("equipment", 21, "Medikit"),
+        ("weapons", 31, "Combi Rifle"),
+    ],
+)
 def test_equipment_and_weapon_details_are_served(
-    app: Callable, catalog: str, item_id: int, name: str,
+    app: Callable,
+    catalog: str,
+    item_id: int,
+    name: str,
 ) -> None:
     status, headers, body = request(app, f"/{catalog}/{item_id}")
     assert status == 200
@@ -551,23 +662,21 @@ def test_unit_symbol_is_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
     assert b"unitSymbolSlug" in body
-    status, headers, body = request(app, "/static/unit-symbols/fusiliers.svg")
+    status, headers, body = request(app, "/static/units/panoceania/1-fusiliers.svg")
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body
     for path in [
-        "/static/unit-symbols/blur-spec-ops-1-1.svg",
-        "/static/unit-symbols/next-wave-team-ops-1-1.svg",
+        "/static/units/next-wave/1921-blur-spec-ops.svg",
+        "/static/units/next-wave/1935-next-wave-team-ops.svg",
     ]:
         status, headers, body = request(app, path)
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
-    status, _, _ = request(app, "/static/unit-symbols/not-a-unit.svg")
+    status, _, _ = request(app, "/static/units/unassigned/not-a-unit.svg")
     assert status == 404
-    status, headers, body = request(
-        app, "/static/army-symbols/JSA/hayabusa-reconstructed-transparent.svg"
-    )
+    status, headers, body = request(app, "/static/armies/jsa/1199-hayabusa.svg")
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body

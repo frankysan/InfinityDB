@@ -50,9 +50,7 @@ def test_build_creates_verified_json_and_queryable_database(
     master = json.loads((output_dir / "master.json").read_text(encoding="utf-8"))
     normalized_text = (output_dir / "normalized.json").read_text(encoding="utf-8")
     normalized = json.loads(normalized_text)
-    validation = json.loads(
-        (output_dir / "normalized-validation.json").read_text(encoding="utf-8")
-    )
+    validation = json.loads((output_dir / "normalized-validation.json").read_text(encoding="utf-8"))
     assert "\n" not in normalized_text
     assert validation["passed"] is True
     assert normalized["_meta"]["validationPassed"] is True

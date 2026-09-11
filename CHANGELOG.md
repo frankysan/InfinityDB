@@ -2,6 +2,37 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.2.0] - 2026-09-11
+
+### Added
+
+- Searchable Skills, Equipment, and Weapons reference catalogs with detail
+  pages that link each rule item to the unit profiles and loadouts that use it.
+- Weapon-reference details for profiles, ammunition, traits, range modifiers,
+  and the available special weapon data.
+- Order and characteristic icons in unit details, including loadout-specific
+  order markers.
+- A maintenance tool to reorganize bundled SVG symbols from an Army snapshot.
+
+### Changed
+
+- Reworked unit-detail rendering to group shared and army-specific data more
+  clearly and separate successive loadouts visually.
+- Normalization and repository queries now preserve and expose catalog-item
+  occurrences and their extras across profiles, loadouts, and unit options.
+- Bundled army, unit, and order symbols now use stable, ID-addressed static
+  paths; asset requests no longer depend on server-side directory scanning.
+- Database schema version increased to 6 and compatibility revision increased
+  to 5; rebuild existing databases before starting this release.
+
+### Fixed
+
+- Corrected the total AVA displayed in unit details.
+- Preserved literal punctuation-only unit searches instead of treating them as
+  empty queries.
+- Return HTTP 404 for unknown army and order-symbol asset paths.
+- Include reorganized army, unit, and order SVG assets in built packages.
+
 ## [0.1.2] - 2026-09-11
 
 ### Added

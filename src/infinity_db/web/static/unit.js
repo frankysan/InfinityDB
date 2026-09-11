@@ -332,7 +332,7 @@ function nameWithOrderSymbols(nameText, symbolTypes) {
   for (const symbolType of symbolTypes) {
     const symbol = document.createElement("img");
     symbol.className = "order-symbol";
-    symbol.src = `/static/order-symbols/${symbolType}.svg`;
+    symbol.src = `/static/orders/${symbolType}.svg`;
     symbol.alt = symbolLabels[symbolType];
     symbol.title = symbolLabels[symbolType];
     name.append(symbol);
@@ -552,7 +552,7 @@ function profileTableRows(profiles, generalByName) {
 function loadoutTable(loadouts, sharedItems, generalOrderType) {
   return table(
     ["Name", "Points", "SWC"],
-    loadouts.flatMap((loadout) => {
+    loadouts.flatMap((loadout, index) => {
       const loadoutOrderType = prominentOrderType([loadout]);
       const symbolTypes = [
         loadoutOrderType && loadoutOrderType !== generalOrderType ? loadoutOrderType : null,
@@ -562,7 +562,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
       ].filter(Boolean);
       const loadoutName = nameWithOrderSymbols(loadout.name, symbolTypes);
       const loadoutRow = [{ content: loadoutName }, loadout.points, loadout.swc];
-      loadoutRow.className = "profile-summary";
+      loadoutRow.className = index ? "profile-summary loadout-start" : "profile-summary";
       const rows = [loadoutRow];
       for (const [label, property, fallbackLabel] of [
         ["Skills", "skills", "Skill"],

@@ -96,9 +96,7 @@ def test_archive_snapshot_uses_timestamp_and_only_downloaded_files(tmp_path: Pat
     army.write_text('{"units": []}', encoding="utf-8")
     unrelated.write_text("not archived", encoding="utf-8")
 
-    archive = archive_snapshot(
-        [army, metadata], tmp_path, now=datetime(2026, 9, 10, 12, 34, 56)
-    )
+    archive = archive_snapshot([army, metadata], tmp_path, now=datetime(2026, 9, 10, 12, 34, 56))
 
     assert archive.name == "JSON 20260910-123456.zip"
     with zipfile.ZipFile(archive) as output:

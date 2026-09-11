@@ -51,22 +51,29 @@ TABLES = {
     ),
     "units": table(
         "id",
-        "id_army canonical_faction_id main_army_id isc isc_abbr name slug notes spectables source_defined "
+        "id_army canonical_faction_id main_army_id isc isc_abbr name slug notes spectables "
+        "source_defined "
         "relation_reference_count",
         ref("canonical_faction_id", "factions", "id"),
         ref("main_army_id", "factions", "id"),
     ),
     "unit_factions": table(
-        "unit_id faction_id", "position",
-        ref("unit_id", "units", "id"), ref("faction_id", "factions", "id"),
+        "unit_id faction_id",
+        "position",
+        ref("unit_id", "units", "id"),
+        ref("faction_id", "factions", "id"),
     ),
     "army_units": table(
-        "army_id unit_id", "position filters",
-        ref("army_id", "army_lists", "id"), ref("unit_id", "units", "id"),
+        "army_id unit_id",
+        "position filters",
+        ref("army_id", "army_lists", "id"),
+        ref("unit_id", "units", "id"),
     ),
     "profile_groups": table(
-        "army_id unit_id group_id", "position category_id isc notes",
-        ref("army_id unit_id", "army_units"), ref("category_id", "categories", "id"),
+        "army_id unit_id group_id",
+        "position category_id isc notes",
+        ref("army_id unit_id", "army_units"),
+        ref("category_id", "categories", "id"),
     ),
     "profiles": table(
         "army_id unit_id group_id profile_id",
@@ -76,16 +83,16 @@ TABLES = {
         ref("type_id", "troop_types", "id"),
     ),
     "loadout_options": table(
-        "army_id unit_id group_id option_id", "position name points swc minis disabled",
+        "army_id unit_id group_id option_id",
+        "position name points swc minis disabled",
         ref("army_id unit_id group_id", "profile_groups"),
     ),
     "unit_options": table(
-        "unit_id option_id", "position name points swc minis disabled compatible habilities raw",
+        "unit_id option_id",
+        "position name points swc minis disabled compatible habilities raw",
         ref("unit_id", "units", "id"),
     ),
-    "peripherals": table(
-        "army_id id", "position name mercs", ref("army_id", "army_lists", "id")
-    ),
+    "peripherals": table("army_id id", "position name mercs", ref("army_id", "army_lists", "id")),
     "fireteams": table(
         "army_id fireteam_id", "position name observation", ref("army_id", "army_lists", "id")
     ),
@@ -95,15 +102,19 @@ TABLES = {
     "fireteam_members": table(
         "army_id fireteam_id member_id",
         "position slug name comment min_count max_count required resolved_unit_id resolution",
-        ref("army_id fireteam_id", "fireteams"), ref("resolved_unit_id", "units", "id"),
+        ref("army_id fireteam_id", "fireteams"),
+        ref("resolved_unit_id", "units", "id"),
     ),
     "relations": table(
-        "army_id relation_id", "position min_count max_count is_group",
+        "army_id relation_id",
+        "position min_count max_count is_group",
         ref("army_id", "army_lists", "id"),
     ),
     "relation_units": table(
-        "army_id relation_id relation_unit_id", "position unit_id profile_id per_parent",
-        ref("army_id relation_id", "relations"), ref("unit_id", "units", "id"),
+        "army_id relation_id relation_unit_id",
+        "position unit_id profile_id per_parent",
+        ref("army_id relation_id", "relations"),
+        ref("unit_id", "units", "id"),
     ),
     "relation_dependencies": table(
         "army_id relation_id relation_unit_id dependency_id",
@@ -133,14 +144,22 @@ TABLES.update(
 )
 
 for catalog in (
-    "categories", "characteristics", "troop_types", "equipment", "skills", "weapons",
-    "ammunition", "extras",
+    "categories",
+    "characteristics",
+    "troop_types",
+    "equipment",
+    "skills",
+    "weapons",
+    "ammunition",
+    "extras",
 ):
     fields = "name source_defined category" if catalog == "weapons" else "name source_defined"
     TABLES[catalog] = table("id", fields)
     TABLES[f"army_{catalog}"] = table(
-        "army_id item_id", "position mercs specops teamops",
-        ref("army_id", "army_lists", "id"), ref("item_id", catalog, "id"),
+        "army_id item_id",
+        "position mercs specops teamops",
+        ref("army_id", "army_lists", "id"),
+        ref("item_id", catalog, "id"),
     )
 
 for prefix, parent, parent_key in (
@@ -156,26 +175,37 @@ for prefix, parent, parent_key in (
     ):
         occurrence_table = f"{prefix}_{suffix}"
         TABLES[occurrence_table] = table(
-            "occurrence_id", f"{parent_key} position item_id display_order quantity raw",
-            parent_ref, ref("item_id", catalog, "id"),
+            "occurrence_id",
+            f"{parent_key} position item_id display_order quantity raw",
+            parent_ref,
+            ref("item_id", catalog, "id"),
         )
         TABLES[f"{prefix}_{extra_suffix}"] = table(
-            "occurrence_id position", "extra_id",
-            ref("occurrence_id", occurrence_table), ref("extra_id", "extras", "id"),
+            "occurrence_id position",
+            "extra_id",
+            ref("occurrence_id", occurrence_table),
+            ref("extra_id", "extras", "id"),
         )
     TABLES[f"{prefix}_characteristics"] = table(
-        f"{parent_key} position", "characteristic_id",
-        parent_ref, ref("characteristic_id", "characteristics", "id"),
+        f"{parent_key} position",
+        "characteristic_id",
+        parent_ref,
+        ref("characteristic_id", "characteristics", "id"),
     )
     include_refs = [parent_ref]
     if prefix != "unit_option":
-        include_refs.append(ref(
-            "army_id unit_id target_group_id target_option_id", "loadout_options",
-            "army_id unit_id group_id option_id",
-        ))
+        include_refs.append(
+            ref(
+                "army_id unit_id target_group_id target_option_id",
+                "loadout_options",
+                "army_id unit_id group_id option_id",
+            )
+        )
         TABLES[f"{prefix}_peripherals"] = table(
-            "occurrence_id", f"{parent_key} position item_id display_order quantity raw",
-            parent_ref, ref("army_id item_id", "peripherals", "army_id id"),
+            "occurrence_id",
+            f"{parent_key} position item_id display_order quantity raw",
+            parent_ref,
+            ref("army_id item_id", "peripherals", "army_id id"),
         )
     TABLES[f"{prefix}_includes"] = table(
         f"{parent_key} position", "target_group_id target_option_id quantity raw", *include_refs
@@ -191,7 +221,8 @@ TABLES["option_weapon_templates"] = table(
     "id", "item_id display_order quantity raw", ref("item_id", "weapons", "id")
 )
 TABLES["option_weapons"] = table(
-    "occurrence_id", "army_id unit_id group_id option_id position template_id",
+    "occurrence_id",
+    "army_id unit_id group_id option_id position template_id",
     ref("army_id unit_id group_id option_id", "loadout_options"),
     ref("template_id", "option_weapon_templates", "id"),
 )
@@ -233,16 +264,18 @@ def create_schema(connection: sqlite3.Connection, tables: dict[str, list[dict]])
     for name, definition in TABLES.items():
         columns = columns_for(name, tables.get(name, []))
         parts = [
-            quote(field) + (" NOT NULL" if field in definition.key else "")
-            for field in columns
+            quote(field) + (" NOT NULL" if field in definition.key else "") for field in columns
         ]
         parts.append(f"{quote(ROW_JSON)} TEXT NOT NULL")
         parts.append("PRIMARY KEY (" + ", ".join(map(quote, definition.key)) + ")")
         for reference in definition.references:
             parts.append(
                 "FOREIGN KEY (" + ", ".join(map(quote, reference.fields)) + ") "
-                "REFERENCES " + quote(reference.table)
-                + " (" + ", ".join(map(quote, reference.target)) + ") "
+                "REFERENCES "
+                + quote(reference.table)
+                + " ("
+                + ", ".join(map(quote, reference.target))
+                + ") "
                 "DEFERRABLE INITIALLY DEFERRED"
             )
         connection.execute(f"CREATE TABLE {quote(name)} ({', '.join(parts)})")

@@ -5,7 +5,7 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.1.2** (2026-09-11).
+Current release: **0.2.0** (2026-09-11).
 
 ## Current features
 
@@ -29,9 +29,14 @@ Current release: **0.1.2** (2026-09-11).
   download date recorded for a downloader-created Army snapshot.
 - Includes a Skill Modifiers page for browsing distance-related skill extras
   and the units that use them.
+- Includes searchable Skills, Equipment, and Weapons reference catalogs. Their
+  detail pages show the matching unit profiles and loadouts; weapon pages also
+  show available profiles, traits, range bands, and special weapon data.
 - Includes an About page with project background, maintainer contact details,
   the GitHub repository, and an LLM code-use disclosure.
-- Bundles army and unit SVG symbols for the browser.
+- Bundles army, unit, order, and characteristic SVG symbols for the browser.
+  Army and unit assets use stable ID-and-slug paths, so the browser can serve
+  an exact asset without scanning a symbol directory.
 - Includes standalone scripts for downloading Army JSON snapshots and unit
   symbols; normal build commands do not make network requests.
 
@@ -174,8 +179,9 @@ python -m ruff check src/infinity_db src/infinity_army_data/cli.py tests
 
 Tests cover the ingestion and import pipeline, preservation of normalized
 records, safe database replacement, army membership, pagination, search, API
-validation, unit details, and profile data. VS Code includes build, serve, test,
-and lint tasks, plus build and web-server debug configurations.
+validation, reference catalogs, unit details, profile data, and static-symbol
+delivery. VS Code includes build, serve, test, and lint tasks, plus build and
+web-server debug configurations.
 
 ## LLM code disclosure
 
