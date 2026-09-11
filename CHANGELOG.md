@@ -2,6 +2,32 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.1] - 2026-09-11
+
+### Added
+
+- Persistent centimetre/inch display preference in the shared sidebar, applied
+  to movement values and distance-based skill modifiers.
+- Skill Modifiers page and API for browsing distance-related skill extras and
+  linking directly to the units that use them.
+- Reinforcement filter and nested reinforcement-list display in the army
+  selector, including reinforcement availability badges on unit details.
+- Profile type and classification in general unit profiles.
+
+### Changed
+
+- Army-list aliases are consolidated so equivalent force lists display and
+  filter as one army.
+- General profiles now group profile names without case sensitivity.
+- Army-specific profile and loadout tables are collapsible; only the first
+  displayed non-mercenary, non-reinforcement army is expanded initially.
+
+### Fixed
+
+- Normalized distance-modifier signs and conversions for Super-Jump and
+  Forward Deployment.
+- Kept profile and loadout rows accessible and readable on narrow screens.
+
 ## [0.1.0] - 2026-09-10
 
 ### Added
