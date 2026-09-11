@@ -2,6 +2,6 @@
 
 from .importer import export_database
 from .repository import Database
-from .schema import SCHEMA_VERSION
+from .schema import DATABASE_COMPATIBILITY_VERSION, SCHEMA_VERSION
 
-__all__ = ["SCHEMA_VERSION", "Database", "export_database"]
+__all__ = ["DATABASE_COMPATIBILITY_VERSION", "SCHEMA_VERSION", "Database", "export_database"]

@@ -14,7 +14,16 @@ from typing import Any
 
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
 
-from .schema import APPLICATION_ID, METADATA_TABLE, ROW_JSON, SCHEMA_VERSION, TABLES, quote
+from .schema import (
+    APPLICATION_ID,
+    DATABASE_COMPATIBILITY_KEY,
+    DATABASE_COMPATIBILITY_VERSION,
+    METADATA_TABLE,
+    ROW_JSON,
+    SCHEMA_VERSION,
+    TABLES,
+    quote,
+)
 
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
@@ -277,6 +286,21 @@ class Database:
                 or meta.get("formatVersion") != FORMAT_VERSION
             ):
                 raise ValueError("Database has invalid normalized format metadata")
+            compatibility = connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                (DATABASE_COMPATIBILITY_KEY,),
+            ).fetchone()
+            try:
+                compatibility_version = (
+                    json.loads(compatibility["value"]) if compatibility else None
+                )
+            except (json.JSONDecodeError, TypeError) as exc:
+                raise ValueError("Database has invalid compatibility metadata") from exc
+            if compatibility_version != DATABASE_COMPATIBILITY_VERSION:
+                raise ValueError(
+                    "Database compatibility revision does not match this application; "
+                    "rebuild the database"
+                )
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:

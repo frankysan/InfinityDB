@@ -6,9 +6,14 @@ import sqlite3
 from dataclasses import dataclass
 
 SCHEMA_VERSION = 4
+# Increment this revision whenever a code change requires rebuilding an existing
+# database, even if the SQLite schema itself is unchanged.  It deliberately
+# does not track the user-facing application release version.
+DATABASE_COMPATIBILITY_VERSION = 1
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 METADATA_TABLE = "__infinity_metadata"
+DATABASE_COMPATIBILITY_KEY = "database_compatibility_version"
 
 
 @dataclass(frozen=True)

@@ -10,7 +10,14 @@ import pytest
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_db.database import Database, export_database
 from infinity_db.database.repository import canonical_skill_extra_name, logical_unit_groups
-from infinity_db.database.schema import METADATA_TABLE, ROW_JSON, TABLES, quote
+from infinity_db.database.schema import (
+    DATABASE_COMPATIBILITY_KEY,
+    DATABASE_COMPATIBILITY_VERSION,
+    METADATA_TABLE,
+    ROW_JSON,
+    TABLES,
+    quote,
+)
 
 
 @pytest.fixture
@@ -116,6 +123,11 @@ def test_database_preserves_every_normalized_table_and_field(
             f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = 'warnings'"
         ).fetchone()[0]
         assert json.loads(stored_warnings) == normalized["warnings"]
+        compatibility = connection.execute(
+            f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+            (DATABASE_COMPATIBILITY_KEY,),
+        ).fetchone()[0]
+        assert json.loads(compatibility) == DATABASE_COMPATIBILITY_VERSION
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
         connection.execute("PRAGMA foreign_keys = ON")
         with pytest.raises(sqlite3.IntegrityError), connection:
@@ -498,6 +510,25 @@ def test_reading_missing_or_unsupported_database_does_not_create_it(tmp_path: Pa
     connection = sqlite3.connect(path)
     connection.close()
     with pytest.raises(ValueError, match="Unsupported"):
+        Database(path).validate()
+
+
+def test_database_with_different_compatibility_revision_requires_rebuild(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            f"UPDATE {quote(METADATA_TABLE)} SET value = ? WHERE key = ?",
+            (json.dumps(DATABASE_COMPATIBILITY_VERSION + 1), DATABASE_COMPATIBILITY_KEY),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(ValueError, match="compatibility revision"):
         Database(path).validate()
 
 

@@ -110,6 +110,12 @@ failed import leaves the prior database available. Rebuilding replaces imported
 data, so keep future user-authored data separately. On Windows, stop the server
 before rebuilding if active readers prevent database replacement.
 
+The application also records a database compatibility revision in every build
+and verifies it at startup. This is independent of the release version: bump
+`DATABASE_COMPATIBILITY_VERSION` whenever a code change requires rebuilding the
+database, even if the SQLite schema did not change. An incompatible database
+causes startup to fail with a rebuild instruction rather than serving stale data.
+
 The bundled server is for local development. For other hosting arrangements,
 use the WSGI application factory `infinity_db.web.create_app(Path(...))`. A
 repeatable Docker Compose deployment with Gunicorn and Caddy is provided in the

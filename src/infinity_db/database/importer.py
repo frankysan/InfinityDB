@@ -11,7 +11,16 @@ from typing import Any
 
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
 
-from .schema import METADATA_TABLE, ROW_JSON, TABLES, columns_for, create_schema, quote
+from .schema import (
+    DATABASE_COMPATIBILITY_KEY,
+    DATABASE_COMPATIBILITY_VERSION,
+    METADATA_TABLE,
+    ROW_JSON,
+    TABLES,
+    columns_for,
+    create_schema,
+    quote,
+)
 
 
 def json_text(value: Any) -> str:
@@ -91,6 +100,7 @@ def export_database(data: dict[str, Any], path: Path) -> None:
                 create_schema(connection, data["tables"])
                 metadata = {key: value for key, value in data.items() if key != "tables"}
                 metadata["imported_tables"] = list(data["tables"])
+                metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
                 connection.executemany(
                     f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
                     [(key, json_text(value)) for key, value in metadata.items()],
