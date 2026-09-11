@@ -159,6 +159,10 @@ function displayStatlineValue(value) {
     : value;
 }
 
+function displayAvailability(value) {
+  return Number(value) >= 100 ? "Total" : displayStatlineValue(value);
+}
+
 function identicalStatline(left, right) {
   const rightStatline = generalStatline(right);
   return generalStatline(left).every((value, index) => value === rightStatline[index]);
@@ -343,7 +347,7 @@ function profileTableRows(profiles, generalByName) {
     { value: profileItems(withoutSharedItems(profile.skills, sharedItems.skills), "Skill"), className: "profile-item-list" },
     { value: profileItems(withoutSharedItems(profile.equipment, sharedItems.equipment), "Equipment"), className: "profile-item-list" },
     { value: profileItems(withoutSharedItems(profile.weapons, sharedItems.weapons), "Weapon"), className: "profile-item-list" },
-    displayStatlineValue(profile.ava)];
+    displayAvailability(profile.ava)];
     statline.className = "profile-statline";
     return statline;
   });

@@ -379,6 +379,13 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b'"troops", "autonomous", "intervention", "unit"' in body
 
 
+def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'function displayAvailability(value)' in body
+    assert b'return Number(value) >= 100 ? "Total" : displayStatlineValue(value)' in body
+
+
 def test_distance_preference_script_is_served(app: Callable) -> None:
     status, headers, body = request(app, "/static/preferences.js")
     assert status == 200
