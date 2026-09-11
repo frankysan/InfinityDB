@@ -362,7 +362,7 @@ def test_army_symbol_is_served(app: Callable) -> None:
 
 
 def test_frontend_recognizes_98_and_99_as_reinforcement_armies(app: Callable) -> None:
-    for asset in ["/static/app.js", "/static/unit.js"]:
+    for asset in ["/static/unit-list.js", "/static/unit.js"]:
         status, _, body = request(app, asset)
         assert status == 200
         assert b"[98, 99]" in body
@@ -403,6 +403,81 @@ def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("application/json")
     assert json.loads(body) == {"items": []}
+
+
+@pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
+def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str) -> None:
+    status, headers, body = request(app, f"/{catalog}")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"catalog-list.js" in body
+    assert f'href="/{catalog}" aria-current="page"'.encode() in body
+
+    status, headers, body = request(app, f"/api/{catalog}")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    expected = {
+        "skills": {"id": 11, "name": "Stealth", "wiki": None},
+        "equipment": {"id": 21, "name": "Medikit", "wiki": None},
+        "weapons": {
+            "id": 31, "name": "Combi Rifle", "type": None,
+            "category": "Rifles", "ammunition": None, "properties": None,
+        },
+    }
+    assert json.loads(body)["items"] == [expected[catalog]]
+
+
+def test_skill_details_page_and_api_are_served(app: Callable) -> None:
+    status, headers, body = request(app, "/skills/11")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"skill.js" in body
+    assert b'href="/skills" aria-current="page"' in body
+
+    status, headers, body = request(app, "/api/skills/11")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    skill = json.loads(body)
+    assert skill == {
+        "id": 11, "name": "Stealth", "wiki": None,
+        "variants": [{
+            "skill_id": 11, "skill_name": "Stealth",
+            "extras": [{"id": 41, "name": "+3"}],
+            "units": [{
+                "id": 1, "name": "Alpha Ranger", "isc": None, "slug": None,
+                "main_army_id": None, "source_ids": [1], "army_ids": [101, 201],
+                "armies": [{"id": 101, "name": "Zulu Company"}, {"id": 201, "name": "Alpha Company"}],
+            }],
+        }],
+    }
+
+    status, _, body = request(app, "/api/units")
+    assert status == 200
+    unit = next(item for item in json.loads(body)["items"] if item["id"] == 1)
+    assert skill["variants"][0]["units"] == [unit]
+
+    status, _, body = request(app, "/api/skills/999")
+    assert status == 404
+    assert json.loads(body)["error"] == "Skill not found"
+
+
+@pytest.mark.parametrize(("catalog", "item_id", "name"), [
+    ("equipment", 21, "Medikit"), ("weapons", 31, "Combi Rifle"),
+])
+def test_equipment_and_weapon_details_are_served(
+    app: Callable, catalog: str, item_id: int, name: str,
+) -> None:
+    status, headers, body = request(app, f"/{catalog}/{item_id}")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"catalog-detail.js" in body
+
+    status, headers, body = request(app, f"/api/{catalog}/{item_id}")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    payload = json.loads(body)
+    assert payload["name"] == name
+    assert payload["variants"][0]["units"][0]["id"] == 1
 
 
 def test_unit_symbol_is_served(app: Callable) -> None:

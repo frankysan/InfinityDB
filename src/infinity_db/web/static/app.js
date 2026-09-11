@@ -1,7 +1,6 @@
 import { getArmies, getUnits } from "./api.js";
-import { armySymbolPath } from "./army-symbols.js";
-import { unitSymbol } from "./unit-symbols.js";
 import { initializeDistanceUnitToggle } from "./preferences.js";
+import { renderUnitRows } from "./unit-list.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -26,10 +25,6 @@ let searchTimer;
 
 function hasActiveFilters() {
   return state.armyId || state.search || state.mercs || !state.specops || state.teamops || state.reinforcement;
-}
-
-function isReinforcementArmy(armyId) {
-  return [98, 99].includes(armyId % 100);
 }
 
 function readLocation() {
@@ -107,72 +102,8 @@ function populateArmies(armies) {
   syncFilters();
 }
 
-function displayArmies(armies) {
-  const regularArmies = armies.filter((army) => !isReinforcementArmy(army.id));
-  const visibleArmies = regularArmies.length ? regularArmies : armies;
-  return [...visibleArmies].sort((left, right) => left.id - right.id);
-}
-
 function renderUnits(data) {
-  const fragment = document.createDocumentFragment();
-  for (const unit of data.items) {
-    const row = document.createElement("tr");
-    row.className = "unit-row";
-    row.addEventListener("click", (event) => {
-      // Let the unit-name link retain its standard browser interactions,
-      // including opening in a new tab.
-      if (event.target.closest("a")) return;
-      window.location.href = `/units/${unit.id}`;
-    });
-    const nameCell = document.createElement("th");
-    nameCell.scope = "row";
-    nameCell.className = "unit-name";
-    const nameLink = document.createElement("a");
-    nameLink.href = `/units/${unit.id}`;
-    nameLink.textContent = unit.name;
-    const nameContent = document.createElement("span");
-    nameContent.className = "unit-name-content";
-    const mainArmySymbol = armySymbolPath(unit.main_army_id);
-    if (mainArmySymbol) {
-      const icon = document.createElement("img");
-      icon.className = "army-symbol main-army-symbol";
-      icon.src = mainArmySymbol;
-      icon.alt = "";
-      icon.title = "Main army";
-      nameContent.append(icon);
-    }
-    nameContent.append(unitSymbol(unit.slug || unit.isc || unit.name), nameLink);
-    nameCell.append(nameContent);
-    const armyCell = document.createElement("td");
-    const armyList = document.createElement("div");
-    armyList.className = "army-tags";
-    const armies = displayArmies(unit.armies);
-    for (const army of armies) {
-      const symbol = armySymbolPath(army.id);
-      if (symbol) {
-        const icon = document.createElement("img");
-        icon.className = "army-symbol";
-        icon.src = symbol;
-        icon.alt = army.name;
-        icon.title = army.name;
-        armyList.append(icon);
-      } else {
-        const tag = document.createElement("span");
-        tag.className = "army-tag";
-        tag.title = army.name;
-        tag.textContent = army.name;
-        armyList.append(tag);
-      }
-    }
-    if (!unit.armies.length) armyList.textContent = "—";
-    armyCell.append(armyList);
-    const idCell = document.createElement("td");
-    idCell.className = "unit-id id-column";
-    idCell.textContent = unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ");
-    row.append(nameCell, armyCell, idCell);
-    fragment.append(row);
-  }
-  elements.list.replaceChildren(fragment);
+  renderUnitRows(elements.list, data.items);
   elements.unitCount.textContent = number.format(data.total);
   const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {

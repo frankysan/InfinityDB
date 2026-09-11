@@ -8,8 +8,18 @@ from pathlib import Path
 import pytest
 
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
+from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
+from infinity_army_data.weapon_profiles import weapon_profile_override
 from infinity_db.database import Database, export_database
-from infinity_db.database.repository import canonical_skill_extra_name, logical_unit_groups
+from infinity_db.database.repository import (
+    canonical_skill_extra_name,
+    canonical_skill_id,
+    catalog_merge_key,
+    logical_unit_groups,
+    merged_catalog_name,
+    merged_skill_name,
+    skill_merge_key,
+)
 from infinity_db.database.schema import (
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
@@ -136,6 +146,72 @@ def test_database_preserves_every_normalized_table_and_field(
         connection.close()
 
 
+def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: dict) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_ammunitions"] = [{"id": 2, "name": "Normal"}]
+    data["tables"]["metadata_weapons"] = [{
+        "position": 1, "id": 1, "type": "BS", "name": "Combi Rifle",
+        "mode": "Standard", "ammunition": 2, "burst": "3", "damage": "7",
+        "saving": "ARM", "savingNum": "1", "properties": ["Suppressive Fire"],
+        "profile": "ARM=0, BTS=0, STR=1, S=1",
+        "distance": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
+    }]
+    path = tmp_path / "army.sqlite3"
+    export_database(data, path)
+
+    detail = Database(path).get_catalog_item("weapons", 1)
+
+    assert detail is not None
+    assert detail["profiles"] == [{
+        "id": 1, "name": "Combi Rifle", "mode": "Standard", "type": "BS",
+        "ammunition": "Normal", "burst": "3", "damage": "7", "saving": "ARM",
+        "saving_num": "1", "profile": "ARM=0, BTS=0, STR=1, S=1",
+        "traits": ["Suppressive Fire"],
+        "ranges": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
+    }]
+    assert detail["weapon_variants"] == [{
+        "id": 1, "name": "weapons", "profiles": detail["profiles"],
+    }]
+
+
+def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["weapons"].extend([
+        {"id": 209, "name": "Armed Turret (Combi R.)", "source_defined": True, "category": "Uncategorized"},
+        {"id": 226, "name": "Armed Turret", "source_defined": True, "category": "Uncategorized"},
+    ])
+    data["tables"]["metadata_weapons"] = [
+        {"position": 1, "id": 226, "name": "Armed Turret", "burst": "-", "damage": "-"},
+        {"position": 2, "id": 226, "name": "Armed Turret", "mode": "Combi Rifle", "burst": "3", "damage": "7"},
+        {"position": 3, "id": 226, "name": "Armed Turret", "mode": "PARA CC Weapon", "burst": "1", "damage": "-"},
+    ]
+    path = tmp_path / "army.sqlite3"
+    export_database(data, path)
+
+    database = Database(path)
+
+    assert [item for item in database.list_catalog_items("weapons") if item["id"] == 226] == [{
+        "id": 226, "name": "Armed Turret", "category": "Uncategorized",
+        "type": None, "ammunition": None, "properties": None,
+    }]
+    detail = database.get_catalog_item("weapons", 226)
+    assert detail is not None
+    assert [(profile["name"], profile["mode"]) for profile in detail["profiles"]] == [
+        ("Armed Turret", "Combi Rifle"),
+    ]
+    assert detail["special_profile"] == {
+        "stats": [
+            ["MOV", "--"], ["CC", "5"], ["BS", "10"], ["PH", "--"], ["WIP", "--"],
+            ["ARM", "2"], ["BTS", "3"], ["STR", "1"], ["S", "2"],
+        ],
+        "equipment": ["360º Visor"],
+        "skills": ["Total Reaction"],
+        "cc_weapon": "PARA CC Weapon (-3)",
+    }
+
+
 def test_queries_use_actual_army_membership_and_unique_source_units(
     tmp_path: Path, normalized: dict
 ) -> None:
@@ -217,6 +293,70 @@ def test_skill_extra_grouping_uses_skill_specific_sign_conventions() -> None:
     assert canonical_skill_extra_name("Forward Deployment", "20") == "+20"
     assert canonical_skill_extra_name("Dodge", "+5") == "+5"
     assert canonical_skill_extra_name("Dodge", "-5") == "-5"
+
+
+@pytest.mark.parametrize(("skill_id", "expected"), [
+    (19, 19), (20, 19), (21, 19), (22, 19), (23, 19), (69, 69), (70, 69), (201, 201),
+    (278, 201), (279, 201), (240, 240), (274, 240), (24, 24),
+])
+def test_skill_variants_use_a_shared_catalog_identity(skill_id: int, expected: int) -> None:
+    assert canonical_skill_id(skill_id) == expected
+
+
+def test_skill_merge_key_collapses_any_numeric_name_variants() -> None:
+    assert skill_merge_key("Strategos L1") == skill_merge_key("Strategos L2")
+    assert skill_merge_key("BS=11") == skill_merge_key("BS=12")
+    assert skill_merge_key("Martial Arts L3") == skill_merge_key("Martial Arts L5")
+    assert skill_merge_key("Stealth") is None
+    assert merged_skill_name("Strategos L1") == "Strategos"
+    assert merged_skill_name("BS=12") == "BS"
+
+
+def test_catalog_merge_key_treats_colon_suffixes_as_variants() -> None:
+    assert catalog_merge_key("TinBot: Discover") == catalog_merge_key("TinBot: Firewall")
+    assert merged_catalog_name("TinBot: Discover") == "TinBot"
+
+
+@pytest.mark.parametrize(("name", "category"), [
+    ("Boarding Shotgun", "Shotguns"), ("MULTI Rifle", "Rifles"),
+    ("Heavy Machine Gun", "Heavy Machine Guns"), ("Unknown Prototype", "Uncategorized"),
+])
+def test_weapon_categories_are_assigned_by_declarative_rules(name: str, category: str) -> None:
+    assert weapon_category(name) == category
+    assert category in WEAPON_CATEGORIES
+
+
+def test_normalization_persists_weapon_categories(normalized: dict) -> None:
+    assert all("category" in weapon for weapon in normalized["tables"]["weapons"])
+
+
+@pytest.mark.parametrize(("weapon_id", "category"), [
+    (177, "CC Weapons"), (1, "Disposable Support Weapons"),
+    (174, "Mines"), (18, "Uncategorized"),
+])
+def test_manual_weapon_category_overrides_take_precedence(weapon_id: int, category: str) -> None:
+    assert weapon_category("Rifle", weapon_id) == category
+
+
+@pytest.mark.parametrize("weapon_id", [62, 63, 196, 197, 199, 220])
+def test_missing_mine_profiles_have_import_overrides(weapon_id: int) -> None:
+    assert weapon_profile_override(weapon_id) == "ARM=0, BTS=0, STR=1, S=1"
+
+
+def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normalized: dict) -> None:
+    normalized["tables"]["skills"].extend([
+        {"id": 69, "name": "Strategos L1", "source_defined": True},
+        {"id": 70, "name": "Strategos L2", "source_defined": True},
+    ])
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    database = Database(path)
+    strategos = [item for item in database.list_catalog_items("skills") if item["id"] == 69]
+    assert strategos == [{"id": 69, "name": "Strategos", "wiki": None}]
+    assert database.get_skill(70) == {
+        "id": 69, "name": "Strategos", "wiki": None, "variants": [],
+    }
 
 
 def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:

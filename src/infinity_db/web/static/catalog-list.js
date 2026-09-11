@@ -1,0 +1,86 @@
+import { initializeDistanceUnitToggle } from "./preferences.js";
+
+const page = document.body.dataset.catalog;
+const title = page === "equipment" ? "equipment" : page;
+const byId = (id) => document.getElementById(id);
+const elements = {
+  count: byId("catalog-count"), results: byId("catalog-results"), loading: byId("catalog-loading"),
+  error: byId("catalog-error"), errorMessage: byId("catalog-error-message"), empty: byId("catalog-empty"),
+  table: byId("catalog-table-container"), list: byId("catalog-list"), search: byId("catalog-search"),
+};
+let items = [];
+
+function show(panel) {
+  for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
+    element.hidden = element !== panel;
+  }
+  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
+}
+
+function render() {
+  const query = elements.search.value.trim().toLocaleLowerCase();
+  const visible = items.filter((item) => Object.values(item).some(
+    (value) => String(value || "").toLocaleLowerCase().includes(query),
+  ));
+  elements.count.textContent = `${visible.length} ${title}${visible.length === 1 ? "" : " entries"}`;
+  if (!visible.length) return show(elements.empty);
+  const fragment = document.createDocumentFragment();
+  const sorted = [...visible].sort((left, right) => (
+    `${left.category || "Uncategorized"}\u0000${left.name}`.localeCompare(
+      `${right.category || "Uncategorized"}\u0000${right.name}`, undefined, { numeric: true },
+    )
+  ));
+  let category;
+  for (const item of sorted) {
+    const itemCategory = item.category || "Uncategorized";
+    if (page === "weapons" && itemCategory !== category) {
+      category = itemCategory;
+      const categoryRow = document.createElement("tr");
+      categoryRow.className = "catalog-category-row";
+      const categoryCell = document.createElement("th");
+      categoryCell.colSpan = 3;
+      categoryCell.scope = "rowgroup";
+      categoryCell.textContent = category;
+      categoryRow.append(categoryCell);
+      fragment.append(categoryRow);
+    }
+    const row = document.createElement("tr");
+    const name = document.createElement("th");
+    name.scope = "row";
+    if (["skills", "equipment", "weapons"].includes(page)) {
+      const link = document.createElement("a");
+      link.href = `/${page}/${item.id}`;
+      link.textContent = item.name;
+      name.append(link);
+    } else {
+      name.textContent = item.name;
+    }
+    const details = document.createElement("td");
+    details.textContent = [item.type, item.ammunition, item.properties, item.wiki].filter(Boolean).join(" · ") || "—";
+    const id = document.createElement("td");
+    id.className = "id-column unit-id";
+    id.textContent = item.id;
+    row.append(name, details, id);
+    fragment.append(row);
+  }
+  elements.list.replaceChildren(fragment);
+  show(elements.table);
+}
+
+async function load() {
+  show(elements.loading);
+  try {
+    const response = await fetch(`/api/${page}`);
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || `Could not load ${title}.`);
+    items = payload.items;
+    render();
+  } catch (error) {
+    elements.errorMessage.textContent = error.message || `Could not load ${title}.`;
+    show(elements.error);
+  }
+}
+
+elements.search.addEventListener("input", render);
+initializeDistanceUnitToggle();
+load();

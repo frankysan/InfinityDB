@@ -62,6 +62,16 @@ def test_metadata_preserves_api_records_and_enriches_only_matching_armies() -> N
     assert data["armyMetadata"]["data"]["future_collection"] == [{"kept": True}]
 
 
+def test_missing_mine_profile_is_supplied_during_normalization() -> None:
+    envelope = decode_metadata(json.dumps(metadata_source()).encode(), "metadata.json")
+    envelope["data"]["weapons"].append({"id": 199, "name": "AP Mine"})
+
+    data = normalize_master(master(envelope))
+
+    mine = next(row for row in data["tables"]["metadata_weapons"] if row["id"] == 199)
+    assert mine["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+
+
 def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> None:
     envelope = decode_metadata(json.dumps(metadata_source()).encode(), "metadata.json")
     normalized = normalize_master(master(envelope))

@@ -26,6 +26,10 @@ ASSETS = {
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
     "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
+    "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
+    "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
+    "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
+    "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
 }
 ARMY_SYMBOL_PATH = re.compile(
     r"/static/army-symbols/(?:[A-Za-z0-9 ._-]+/)*[A-Za-z0-9 ._-]+\.svg"
@@ -57,6 +61,12 @@ def _page(
     navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
     navigation = navigation.replace(
         "{{UNIT_EXPLORER_CURRENT}}", ' aria-current="page"' if active_page == "units" else "",
+    ).replace(
+        "{{SKILLS_CURRENT}}", ' aria-current="page"' if active_page == "skills" else "",
+    ).replace(
+        "{{EQUIPMENT_CURRENT}}", ' aria-current="page"' if active_page == "equipment" else "",
+    ).replace(
+        "{{WEAPONS_CURRENT}}", ' aria-current="page"' if active_page == "weapons" else "",
     ).replace(
         "{{SKILL_EXTRAS_CURRENT}}", ' aria-current="page"' if active_page == "skill-extras" else "",
     ).replace(
@@ -188,6 +198,25 @@ class Application:
                 active_page="skill-extras",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
             )
+        elif path in {"/skills", "/equipment", "/weapons"}:
+            content_type = "text/html; charset=utf-8"
+            catalog = path.removeprefix("/")
+            body = _page(
+                f"{catalog}.html", active_page=catalog,
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+            )
+        elif re.fullmatch(r"/skills/[0-9]+", path):
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "skill.html", active_page="skills",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+            )
+        elif match := re.fullmatch(r"/(equipment|weapons)/[0-9]+", path):
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                f"{match.group(1)}-detail.html", active_page=match.group(1),
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+            )
         elif path == "/about":
             content_type = "text/html; charset=utf-8"
             body = _page(
@@ -202,6 +231,40 @@ class Application:
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The skill modifiers are unavailable. Please try again."}
+        elif path in {"/api/skills", "/api/equipment", "/api/weapons"}:
+            try:
+                payload = {"items": self.database.list_catalog_items(path.removeprefix("/api/"))}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read catalog")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The catalog is unavailable. Please try again."}
+        elif match := re.fullmatch(r"/api/skills/([0-9]+)", path):
+            try:
+                skill_id = int(match.group(1))
+                payload = self.database.get_skill(skill_id)
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Skill not found"}
+            except ValueError as exc:
+                status = HTTPStatus.BAD_REQUEST
+                payload = {"error": str(exc)}
+            except (OSError, sqlite3.Error):
+                LOGGER.exception("Could not read skill")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The skill is unavailable. Please try again."}
+        elif match := re.fullmatch(r"/api/(equipment|weapons)/([0-9]+)", path):
+            try:
+                payload = self.database.get_catalog_item(match.group(1), int(match.group(2)))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Reference item not found"}
+            except ValueError as exc:
+                status = HTTPStatus.BAD_REQUEST
+                payload = {"error": str(exc)}
+            except (OSError, sqlite3.Error):
+                LOGGER.exception("Could not read reference item")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The reference item is unavailable. Please try again."}
         elif path == "/api/armies":
             try:
                 payload = {"items": self.database.list_armies()}

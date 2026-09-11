@@ -39,6 +39,8 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .metadata import METADATA_TABLES, MetadataError, normalize_metadata, validate_metadata_envelope
+from .weapon_categories import weapon_category
+from .weapon_profiles import weapon_profile_override
 
 
 FORMAT_NAME = "Infinity Army normalized JSON"
@@ -198,6 +200,8 @@ def build_catalogs(master: dict[str, Any], b: Builder) -> dict[str, set[Any]]:
         for item_id in sorted(identities[source_name], key=lambda x: (str(type(x)), str(x))):
             item = identities[source_name][item_id]
             row = dict(item)
+            if source_name == "weapons":
+                row["category"] = weapon_category(row.get("name"), item_id)
             row["source_defined"] = True
             b.tables[global_table].append(row)
 
@@ -547,6 +551,11 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
         try:
             validate_metadata_envelope(metadata)
             metadata_rows = normalize_metadata(metadata)
+            for row in metadata_rows["metadata_weapons"]:
+                if not row.get("profile"):
+                    profile = weapon_profile_override(row["id"])
+                    if profile is not None:
+                        row["profile"] = profile
         except MetadataError as exc:
             raise NormalizationError(f"Invalid Army metadata: {exc}") from exc
         for row in metadata_rows["metadata_factions"]:

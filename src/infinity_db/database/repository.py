@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
+from infinity_army_data.weapon_profiles import special_weapon_detail
 
 from .schema import (
     APPLICATION_ID,
@@ -36,6 +37,36 @@ UNIT_MERGE_ALIASES = {
     300: 300, 1690: 300, 10300: 300,
     1345: 1345, 1875: 1345, 11345: 1345,
 }
+SKILL_MERGE_ALIASES = {
+    19: 19, 20: 19, 21: 19, 22: 19, 23: 19,
+    69: 69, 70: 69,
+    201: 201, 278: 201, 279: 201,
+    240: 240, 274: 240,
+}
+SKILL_NAME_EXCEPTION_ALIASES = {
+    201: 201, 278: 201, 279: 201,
+    240: 240, 274: 240,
+}
+CATALOG_NAME_EXCEPTION_ALIASES = {
+    ("equipment", 169): 235,
+    ("equipment", 188): 235,
+    ("equipment", 193): 235,
+    ("equipment", 235): 235,
+    ("equipment", 244): 235,
+    ("equipment", 247): 235,
+    ("equipment", 248): 235,
+    ("weapons", 209): 226,
+    ("weapons", 215): 226,
+    ("weapons", 219): 226,
+    ("weapons", 222): 226,
+    ("weapons", 226): 226,
+    ("weapons", 228): 226,
+}
+# These metadata rows describe the deployable rather than a weapon mode.
+WEAPON_PROFILE_PLACEHOLDERS = frozenset({
+    (226, "Armed Turret", None),
+    (226, "Armed Turret", "PARA CC Weapon"),
+})
 ARMY_MERGE_ALIASES = {998: 999}
 REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
 NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
@@ -56,6 +87,42 @@ def is_reinforcement_army_id(army_id: int) -> bool:
 def canonical_army_id(army_id: int) -> int:
     """Return the preferred ID for army lists that represent one force."""
     return ARMY_MERGE_ALIASES.get(army_id, army_id)
+
+
+def canonical_skill_id(skill_id: int) -> int:
+    """Return the representative ID for synonymous skill variants."""
+    return SKILL_MERGE_ALIASES.get(skill_id, skill_id)
+
+
+def skill_merge_key(name: object) -> str | None:
+    """Identify skill labels that differ only by a numeric level or value."""
+    text = str(name or "").strip()
+    if not re.search(r"\d", text):
+        return None
+    return re.sub(r"\s+", " ", re.sub(r"\d+", "", text)).casefold()
+
+
+def merged_skill_name(name: object) -> str:
+    """Turn a numeric skill variant label into its shared display label."""
+    text = re.sub(r"\s+", " ", re.sub(r"\d+", "", str(name or "")).strip())
+    text = re.sub(r"\s+L$", "", text, flags=re.IGNORECASE)
+    return text.rstrip(" =:-()").strip()
+
+
+def catalog_merge_key(name: object) -> str | None:
+    """Identify catalog labels that differ only by a numeric level or value."""
+    text = str(name or "").strip()
+    if ":" in text:
+        return text.split(":", 1)[0].strip().casefold() or None
+    return skill_merge_key(text)
+
+
+def merged_catalog_name(name: object) -> str:
+    """Turn a numeric catalog variant label into its shared display label."""
+    text = str(name or "").strip()
+    if ":" in text:
+        return text.split(":", 1)[0].strip()
+    return merged_skill_name(text)
 
 
 def unit_sort_key(value: object) -> str:
@@ -446,6 +513,361 @@ class Database:
                 if unit not in item["units"]:
                     item["units"].append(unit)
             return list(combinations.values())
+
+    def list_catalog_items(self, catalog: str) -> list[dict[str, Any]]:
+        """Return the named records in one of the public rules reference catalogs."""
+        metadata_tables = {
+            "skills": "metadata_skills",
+            "equipment": "metadata_equipment",
+            "weapons": "metadata_weapons",
+        }
+        try:
+            metadata_table = metadata_tables[catalog]
+        except KeyError as exc:
+            raise ValueError(f"Unknown catalog: {catalog}") from exc
+
+        with self._connect() as connection:
+            if catalog == "weapons":
+                rows = connection.execute(
+                    "SELECT c.id, COALESCE(NULLIF(c.name, ''), MIN(NULLIF(m.name, '')), "
+                    "'Weapon #' || c.id) AS name, "
+                    "c.category, "
+                    "GROUP_CONCAT(DISTINCT NULLIF(m.type, '')) AS type, "
+                    "GROUP_CONCAT(DISTINCT NULLIF(m.ammunition, '')) AS ammunition, "
+                    "GROUP_CONCAT(DISTINCT NULLIF(m.properties, '')) AS properties "
+                    "FROM weapons AS c LEFT JOIN metadata_weapons AS m ON m.id = c.id "
+                    "GROUP BY c.id, c.name "
+                    "ORDER BY casefold(c.name), c.id"
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    f"SELECT c.id, COALESCE(NULLIF(c.name, ''), NULLIF(m.name, ''), "
+                    f"'{catalog[:-1].title()} #' || c.id) AS name, m.wiki "
+                    f"FROM {catalog} AS c LEFT JOIN {metadata_table} AS m ON m.id = c.id "
+                    "ORDER BY casefold(c.name), c.id"
+                ).fetchall()
+            items = [dict(row) for row in rows]
+            if catalog not in {"skills", "equipment", "weapons"}:
+                return items
+            groups: dict[str, list[dict[str, Any]]] = {}
+            for item in items:
+                if catalog == "skills":
+                    canonical_id = SKILL_NAME_EXCEPTION_ALIASES.get(item["id"])
+                    merge_key = skill_merge_key(item["name"])
+                else:
+                    canonical_id = CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"]))
+                    merge_key = catalog_merge_key(item["name"])
+                key = f"alias:{canonical_id}" if canonical_id is not None else merge_key
+                groups.setdefault(key or f"id:{item['id']}", []).append(item)
+            merged = []
+            for group in groups.values():
+                canonical_id = next(
+                    (CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"])) for item in group
+                     if CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"])) is not None),
+                    None,
+                )
+                representative = next(
+                    (item for item in group if item["id"] == canonical_id),
+                    min(group, key=lambda item: item["id"]),
+                )
+                if len(group) > 1:
+                    representative = {
+                        **representative,
+                        "name": merged_catalog_name(representative["name"]),
+                    }
+                merged.append(representative)
+            return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
+
+    def get_catalog_item(self, catalog: str, item_id: int) -> dict[str, Any] | None:
+        """Return an equipment or weapon item and its extra-specific unit usage."""
+        tables = {
+            "equipment": ("equipment", "metadata_equipment", "equipment"),
+            "weapons": ("weapons", "metadata_weapons", "weapon"),
+        }
+        if catalog not in tables:
+            raise ValueError(f"Unknown catalog: {catalog}")
+        if type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX:
+            raise ValueError("item_id must be an integer within SQLite's signed 64-bit range")
+        item_table, metadata_table, suffix = tables[catalog]
+        with self._connect() as connection:
+            catalog_items = connection.execute(
+                f"SELECT id, COALESCE(NULLIF(name, ''), '{catalog[:-1].title()} #' || id) AS name "
+                f"FROM {item_table}"
+            ).fetchall()
+            selected = next((row for row in catalog_items if row["id"] == item_id), None)
+            if selected is None:
+                return None
+            canonical_id = CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item_id))
+            if canonical_id is not None:
+                source_ids = tuple(
+                    row["id"] for row in catalog_items
+                    if CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, row["id"])) == canonical_id
+                )
+                if canonical_id not in source_ids:
+                    canonical_id = min(source_ids)
+            else:
+                merge_key = catalog_merge_key(selected["name"])
+                source_ids = tuple(
+                    row["id"] for row in catalog_items
+                    if merge_key is not None and catalog_merge_key(row["name"]) == merge_key
+                ) or (item_id,)
+                canonical_id = min(source_ids)
+            placeholders = ", ".join("?" for _ in source_ids)
+            item = connection.execute(
+                f"SELECT c.id, COALESCE(NULLIF(c.name, ''), NULLIF(m.name, ''), "
+                f"'{catalog[:-1].title()} #' || c.id) AS name "
+                f"FROM {item_table} AS c LEFT JOIN {metadata_table} AS m ON m.id = c.id "
+                "WHERE c.id = ?",
+                (canonical_id,),
+            ).fetchone()
+            rows = connection.execute(
+                "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, " + UNIT_NAME_SQL
+                + " AS unit_name, links.position AS extra_position, e.id AS extra_id, e.name AS extra_name "
+                "FROM units AS u JOIN ("
+                f"SELECT 'profile' AS source, item_id, occurrence_id, unit_id FROM profile_{catalog} WHERE item_id IN ({placeholders}) "
+                f"UNION ALL SELECT 'option', item_id, occurrence_id, unit_id FROM option_{catalog} WHERE item_id IN ({placeholders}) "
+                f"UNION ALL SELECT 'unit_option', item_id, occurrence_id, unit_id FROM unit_option_{catalog} WHERE item_id IN ({placeholders})"
+                ") AS uses ON uses.unit_id = u.id LEFT JOIN ("
+                f"SELECT 'profile' AS source, occurrence_id, position, extra_id FROM profile_{suffix}_extras "
+                f"UNION ALL SELECT 'option', occurrence_id, position, extra_id FROM option_{suffix}_extras "
+                f"UNION ALL SELECT 'unit_option', occurrence_id, position, extra_id FROM unit_option_{suffix}_extras"
+                ") AS links ON links.source = uses.source AND links.occurrence_id = uses.occurrence_id "
+                "LEFT JOIN extras AS e ON e.id = links.extra_id WHERE u.source_defined = 1 "
+                "ORDER BY uses.source, uses.occurrence_id, links.position, unit_sort_key(unit_name), u.id",
+                source_ids * 3,
+            ).fetchall()
+            occurrences: dict[tuple[str, Any], dict[str, Any]] = {}
+            for row in rows:
+                occurrence = occurrences.setdefault((row["source"], row["occurrence_id"]), {
+                    "item_id": row["item_id"],
+                    "unit": {"id": row["unit_id"], "name": row["unit_name"]}, "extras": [],
+                })
+                if row["extra_id"] is not None:
+                    occurrence["extras"].append({"id": row["extra_id"], "name": row["extra_name"]})
+            units = []
+            offset = 0
+            while True:
+                page = self.list_units(limit=500, offset=offset, specops=True)
+                units.extend(page["items"])
+                offset += len(page["items"])
+                if offset >= page["total"]:
+                    break
+            units_by_source = {
+                source_id: unit for unit in units for source_id in unit["source_ids"]
+            }
+            item_names = {row["id"]: row["name"] for row in catalog_items}
+            variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
+            for occurrence in occurrences.values():
+                extras = occurrence["extras"]
+                key = (occurrence["item_id"], tuple((extra["id"], extra["name"]) for extra in extras))
+                variant = variants.setdefault(key, {
+                    "item_id": occurrence["item_id"],
+                    "item_name": item_names[occurrence["item_id"]],
+                    "extras": extras, "units": [],
+                })
+                unit = units_by_source.get(occurrence["unit"]["id"])
+                if unit is not None and unit not in variant["units"]:
+                    variant["units"].append(unit)
+            for variant in variants.values():
+                variant["units"].sort(key=lambda unit: (unit_sort_key(unit["name"]), unit["id"]))
+            result = {
+                **dict(item), "id": canonical_id,
+                "name": merged_catalog_name(item["name"]) if len(source_ids) > 1 else item["name"],
+                "variants": list(variants.values()),
+            }
+            if catalog == "weapons":
+                profile_rows = connection.execute(
+                    "SELECT m.position, m.id, m.type, m.name, m.ammunition, m.burst, m.damage, "
+                    "m.saving, m.savingNum, m.properties, m.distance, m.__row_json, "
+                    "a.name AS ammunition_name "
+                    "FROM metadata_weapons AS m "
+                    "LEFT JOIN metadata_ammunitions AS a ON a.id = m.ammunition "
+                    f"WHERE m.id IN ({placeholders}) ORDER BY m.position",
+                    source_ids,
+                ).fetchall()
+
+                def decoded(value: Any, default: Any) -> Any:
+                    if value is None:
+                        return default
+                    if not isinstance(value, str):
+                        return value
+                    try:
+                        return json.loads(value)
+                    except json.JSONDecodeError:
+                        return value
+
+                profiles = []
+                for profile in profile_rows:
+                    source = decoded(profile[ROW_JSON], {})
+                    item = {
+                        "id": profile["id"],
+                        "name": profile["name"],
+                        "mode": source.get("mode") if isinstance(source, dict) else None,
+                        "type": profile["type"],
+                        "ammunition": profile["ammunition_name"] or profile["ammunition"],
+                        "burst": profile["burst"],
+                        "damage": profile["damage"],
+                        "saving": profile["saving"],
+                        "saving_num": profile["savingNum"],
+                        "profile": source.get("profile") if isinstance(source, dict) else None,
+                        "traits": decoded(profile["properties"], []),
+                        "ranges": decoded(profile["distance"], {}),
+                    }
+                    if (item["id"], item["name"], item["mode"]) not in WEAPON_PROFILE_PLACEHOLDERS:
+                        profiles.append(item)
+                result["profiles"] = profiles
+                profiles_by_id: dict[int, list[dict[str, Any]]] = {}
+                for profile in profiles:
+                    profiles_by_id.setdefault(profile["id"], []).append(profile)
+                result["weapon_variants"] = [
+                    {"id": source_id, "name": item_names[source_id], "profiles": profiles_by_id[source_id]}
+                    for source_id in sorted(
+                        profiles_by_id, key=lambda value: (unit_sort_key(item_names[value]), value)
+                    )
+                ]
+                result["special_profile"] = special_weapon_detail(canonical_id)
+            return result
+
+    def get_skill(self, skill_id: int) -> dict[str, Any] | None:
+        """Return one skill together with the units that use it."""
+        if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
+            raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+        with self._connect() as connection:
+            skills = connection.execute(
+                "SELECT s.id, COALESCE(NULLIF(s.name, ''), NULLIF(m.name, ''), "
+                "'Skill #' || s.id) AS name, m.wiki "
+                "FROM skills AS s LEFT JOIN metadata_skills AS m ON m.id = s.id"
+            ).fetchall()
+            skill = next((row for row in skills if row["id"] == skill_id), None)
+            if skill is None:
+                return None
+            canonical_id = SKILL_NAME_EXCEPTION_ALIASES.get(skill_id)
+            if canonical_id is not None:
+                source_ids = tuple(
+                    row["id"] for row in skills
+                    if SKILL_NAME_EXCEPTION_ALIASES.get(row["id"]) == canonical_id
+                )
+                if canonical_id not in source_ids:
+                    canonical_id = min(source_ids)
+            else:
+                merge_key = skill_merge_key(skill["name"])
+                source_ids = tuple(
+                    row["id"] for row in skills
+                    if merge_key is not None and skill_merge_key(row["name"]) == merge_key
+                ) or (skill_id,)
+                canonical_id = min(source_ids)
+            representative = next(row for row in skills if row["id"] == canonical_id)
+            placeholders = ", ".join("?" for _ in source_ids)
+            rows = connection.execute(
+                "SELECT uses.source, uses.skill_id, uses.occurrence_id, uses.unit_id, "
+                + UNIT_NAME_SQL + " AS unit_name, extra_links.position AS extra_position, "
+                "e.id AS extra_id, e.name AS extra_name "
+                "FROM units AS u JOIN ("
+                f"SELECT 'profile' AS source, item_id AS skill_id, occurrence_id, unit_id FROM profile_skills WHERE item_id IN ({placeholders}) "
+                f"UNION ALL SELECT 'option', item_id, occurrence_id, unit_id FROM option_skills WHERE item_id IN ({placeholders}) "
+                f"UNION ALL SELECT 'unit_option', item_id, occurrence_id, unit_id FROM unit_option_skills WHERE item_id IN ({placeholders})"
+                ") AS uses ON uses.unit_id = u.id "
+                "LEFT JOIN ("
+                "SELECT 'profile' AS source, occurrence_id, position, extra_id FROM profile_skill_extras "
+                "UNION ALL SELECT 'option', occurrence_id, position, extra_id FROM option_skill_extras "
+                "UNION ALL SELECT 'unit_option', occurrence_id, position, extra_id FROM unit_option_skill_extras"
+                ") AS extra_links ON extra_links.source = uses.source "
+                "AND extra_links.occurrence_id = uses.occurrence_id "
+                "LEFT JOIN extras AS e ON e.id = extra_links.extra_id "
+                "WHERE u.source_defined = 1 "
+                "ORDER BY uses.skill_id, uses.source, uses.occurrence_id, extra_links.position, "
+                "unit_sort_key(unit_name), u.id",
+                source_ids * 3,
+            ).fetchall()
+            occurrences: dict[tuple[str, Any], dict[str, Any]] = {}
+            for row in rows:
+                key = (row["source"], row["occurrence_id"])
+                occurrence = occurrences.setdefault(key, {
+                    "skill_id": row["skill_id"], "unit": {
+                        "id": row["unit_id"], "name": row["unit_name"],
+                    }, "extras": [],
+                })
+                if row["extra_id"] is not None:
+                    extra = {
+                        "id": row["extra_id"], "name": row["extra_name"],
+                    }
+                    if contains_distance_multiple(row["extra_name"]):
+                        extra["is_distance"] = True
+                    occurrence["extras"].append(extra)
+            variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
+            skill_names = {row["id"]: row["name"] for row in skills}
+            for occurrence in occurrences.values():
+                extras = occurrence["extras"]
+                key = (occurrence["skill_id"], tuple((extra["id"], extra["name"]) for extra in extras))
+                variant = variants.setdefault(key, {
+                    "skill_id": occurrence["skill_id"],
+                    "skill_name": skill_names[occurrence["skill_id"]],
+                    "extras": extras, "units": [],
+                })
+                if occurrence["unit"] not in variant["units"]:
+                    variant["units"].append(occurrence["unit"])
+            unit_rows = connection.execute(
+                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.slug, u.main_army_id, "
+                "u.canonical_faction_id FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
+            ).fetchall()
+            memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in unit_rows}
+            membership_rows = connection.execute(
+                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
+                "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
+            )
+            for army in membership_rows:
+                if army["unit_id"] not in memberships:
+                    continue
+                try:
+                    filters = json.loads(army["filters"]) if army["filters"] else {}
+                except (TypeError, json.JSONDecodeError):
+                    filters = {}
+                memberships[army["unit_id"]].append({
+                    "id": army["id"], "name": army_name(army), "filters": filters,
+                })
+            normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in unit_rows}
+            for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
+                if faction["unit_id"] in normal_armies_by_unit:
+                    normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
+            unit_items_by_source: dict[int, dict[str, Any]] = {}
+            for group in logical_unit_groups(unit_rows, memberships):
+                group["normal_army_ids"] = set().union(
+                    *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
+                )
+                visible_armies = {
+                    army_id: army for army_id, army in group["armies"].items()
+                    if army_is_available(army, group, {"specops"})
+                }
+                if group["armies"] and not visible_armies:
+                    continue
+                item = {
+                    "id": group["id"], "name": group["name"], "isc": group["isc"],
+                    "slug": group["slug"], "main_army_id": group["main_army_id"],
+                    "source_ids": group["source_ids"],
+                    "army_ids": list(visible_armies),
+                    "armies": [
+                        {"id": army["id"], "name": army["name"]}
+                        for army in visible_armies.values()
+                    ],
+                }
+                for source_id in group["source_ids"]:
+                    unit_items_by_source[source_id] = item
+            for variant in variants.values():
+                items = {
+                    item["id"]: item for unit in variant["units"]
+                    if (item := unit_items_by_source.get(unit["id"])) is not None
+                }
+                variant["units"] = sorted(
+                    items.values(), key=lambda item: (unit_sort_key(item["name"]), item["id"])
+                )
+            return {
+                **dict(representative), "id": canonical_id,
+                "name": (
+                    merged_skill_name(representative["name"])
+                    if len(source_ids) > 1 else representative["name"]
+                ),
+                "variants": list(variants.values()),
+            }
 
     def list_units(
         self, army_id: int | None = None, search: str = "", limit: int = 50, offset: int = 0,

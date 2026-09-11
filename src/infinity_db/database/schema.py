@@ -5,11 +5,11 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 2
+DATABASE_COMPATIBILITY_VERSION = 4
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 METADATA_TABLE = "__infinity_metadata"
@@ -136,7 +136,8 @@ for catalog in (
     "categories", "characteristics", "troop_types", "equipment", "skills", "weapons",
     "ammunition", "extras",
 ):
-    TABLES[catalog] = table("id", "name source_defined")
+    fields = "name source_defined category" if catalog == "weapons" else "name source_defined"
+    TABLES[catalog] = table("id", fields)
     TABLES[f"army_{catalog}"] = table(
         "army_id item_id", "position mercs specops teamops",
         ref("army_id", "army_lists", "id"), ref("item_id", catalog, "id"),

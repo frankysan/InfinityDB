@@ -113,6 +113,28 @@ h1 > span { color: #8caa60; }
 .availability-badge-teamops { border-color: #d2bed9; background: #f6edf7; color: #65406d; }
 .availability-badge-reinforcement { border-color: #e1b9a7; background: #fff0e8; color: #87452c; }
 .unit-detail .army-profile > h4 { margin: 0; padding: 12px 18px 0; font-size: 12px; color: #596a5b; }
+.weapon-variants { display: grid; gap: 18px; margin-bottom: 24px; }
+.weapon-variants > h2 { padding: 0 2px 2px; color: #3a5547; }
+.weapon-variant { display: grid; gap: 8px; }
+.weapon-variant > h3 { margin: 0; padding: 0 2px; color: #3a5547; font-size: 13px; font-weight: 600; }
+.weapon-profile > h4 { margin: 0; padding: 12px 18px; border-bottom: 1px solid var(--border); background: #f3f6ef; color: #2d4134; font-size: 12px; font-weight: 600; }
+.weapon-profile table { table-layout: auto; }
+.weapon-profile thead th { width: auto; padding: 10px 18px; font-size: 8px; }
+.weapon-profile tbody td { padding: 11px 18px; font-size: 11px; }
+.weapon-ranges { border-top: 1px solid #e9ece3; }
+.weapon-profile .weapon-ranges { width: 100%; table-layout: fixed; }
+.weapon-ranges th, .weapon-ranges td { width: calc(100% / 7); }
+.weapon-profile .weapon-ranges th:first-child,
+.weapon-profile .weapon-ranges th:last-child { width: calc(100% / 7); }
+.weapon-ranges thead th { background: #fafbf8; }
+.weapon-ranges th, .weapon-ranges td { text-align: center; }
+.weapon-ranges tbody td { color: #405b4d; font-variant-numeric: tabular-nums; }
+.weapon-ranges tbody td.range-modifier-0 { background: #009fe3; color: #fff; }
+.weapon-ranges tbody td.range-modifier-plus-3 { background: #3fa535; color: #fff; }
+.weapon-ranges tbody td.range-modifier-minus-3 { background: #fcc002; color: #263a38; }
+.weapon-ranges tbody td.range-modifier-minus-6 { background: #cd171a; color: #fff; }
+.weapon-profile-stats { margin: 0; padding: 12px 18px; border-top: 1px solid #e9ece3; color: #405b4d; font-size: 11px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.weapon-traits { margin: 0; padding: 12px 18px 14px; border-top: 1px solid #e9ece3; color: #52634c; font-size: 11px; line-height: 1.6; }
 .section-heading { display: flex; justify-content: space-between; align-items: center; padding: 23px 26px 0; }
 h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.2px; }
 .section-index { font-size: 9px; color: #62725e; letter-spacing: 1.2px; font-family: Consolas, "Courier New", monospace; }
@@ -164,6 +186,8 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: 18px 26px; verti
 .unit-detail .army-profile .loadout-table { width: calc(100% - 18px); margin-left: 18px; }
 tbody tr:last-child > * { border-bottom: 0; }
 tbody tr:hover { background: #f8f9f3; }
+.catalog-category-row:hover { background: transparent; }
+.catalog-category-row th { padding-block: 10px; background: #edf4e7; color: #3a5547; font-size: 10px; letter-spacing: .8px; text-transform: uppercase; }
 .unit-row { cursor: pointer; }
 .unit-name { font-size: 13px; font-weight: 550; line-height: 1.6; overflow-wrap: anywhere; color: #2d4134; }
 .unit-name-content { display: inline-flex; align-items: center; gap: 8px; }
@@ -309,6 +333,19 @@ tbody tr:hover { background: #f8f9f3; }
     margin-right: 6px;
   }
   .unit-detail .statline tbody tr.profile-statline > .stat-different { box-shadow: inset 2px 0 #d79b2d; }
+  .weapon-profile table { display: block; }
+  .weapon-profile thead, .weapon-profile tbody, .weapon-profile tr { display: block; }
+  .weapon-profile thead { display: none; }
+  .weapon-profile tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px 12px; }
+  .weapon-profile tbody td { min-width: 0; padding: 8px 6px; border-bottom: 1px solid #e9ece3; font-size: 10px; overflow-wrap: anywhere; }
+  .weapon-profile tbody td::before { content: attr(data-label); display: block; margin-bottom: 3px; color: #64715d; font-size: 8px; font-weight: 550; letter-spacing: .6px; line-height: 1.2; text-transform: uppercase; }
+  .weapon-profile .weapon-ranges tbody tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .weapon-profile .weapon-ranges { display: table; table-layout: fixed; }
+  .weapon-profile .weapon-ranges thead { display: table-header-group; }
+  .weapon-profile .weapon-ranges tbody { display: table-row-group; }
+  .weapon-profile .weapon-ranges tr { display: table-row; }
+  .weapon-profile .weapon-ranges th, .weapon-profile .weapon-ranges td { display: table-cell; width: calc(100% / 7); padding: 9px 2px; font-size: 9px; text-align: center; }
+  .weapon-profile .weapon-ranges td::before { display: none; }
   .pagination { padding: 15px 17px; }
   .button-page { padding: 8px; gap: 6px; }
   .page-footer { font-size: 9px; }
