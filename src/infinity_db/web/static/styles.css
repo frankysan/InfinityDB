@@ -93,10 +93,11 @@ h1 > span { color: #8caa60; }
 .stat-label { font-size: 10px; color: var(--muted); }
 .explorer { background: #fffefa; border: 1px solid var(--border); border-radius: 9px; box-shadow: 0 3px 6px #203b3503; overflow: hidden; }
 .unit-detail #unit-content { display: grid; gap: 20px; padding-bottom: 40px; }
+.unit-detail .general-profile-group { display: grid; gap: 10px; }
+.unit-detail .general-profile-group > h2 { padding: 4px 2px 8px; border-bottom: 2px solid #9bb48a; color: #244438; font-size: 16px; }
 .unit-detail .general-profile { border: 2px solid #9bb48a; box-shadow: 0 8px 20px #203b3512; }
-.unit-detail .general-profile > h2 { padding: 17px 26px; background: #edf4e7; border-bottom: 1px solid #cbd9c0; color: #244438; }
 .unit-detail .general-profile .general-item-label { padding-left: 46px; color: #596a5b; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; }
-.unit-detail .general-profile .statline .general-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; color: #405b4d; }
+.unit-detail .general-profile .general-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; color: #405b4d; }
 .unit-detail .faction-profile-group { display: grid; gap: 9px; }
 .unit-detail .faction-profile-group-title { padding: 4px 2px 8px; border-bottom: 2px solid #9bb48a; color: #244438; font-size: 16px; }
 .unit-detail .faction-profile-grid { display: grid; gap: 10px; }
@@ -172,8 +173,11 @@ input::placeholder { color: #677261; }
 .spinner { width: 26px; height: 26px; border: 2px solid #e3e9dc; border-top-color: #62874c; border-radius: 50%; animation: spin .85s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
-.unit-detail .statline th:first-child { width: 30%; }
-.statline th, .statline td { white-space: nowrap; }
+.unit-detail .profile-summary > :first-child { width: 30%; }
+.profile-summary th, .profile-summary td { white-space: nowrap; }
+.unit-detail .general-profile .statline th:first-child { width: 30%; }
+.unit-detail .general-profile .statline th:nth-child(2) { width: 20%; }
+.unit-detail .general-profile .statline th:last-child { width: auto; }
 thead th { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: #64715d; font-weight: 550; padding: 16px 26px; border-bottom: 1px solid var(--border); }
 thead th:first-child { width: 43%; }
 thead th:last-child { width: 115px; }
@@ -181,8 +185,23 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: 18px 26px; verti
 .stat-different { background: #fff3d5; color: #704d00; font-weight: 700; box-shadow: inset 3px 0 #d79b2d; }
 .unit-detail .army-profile thead th { padding: 10px 14px; font-size: 8px; letter-spacing: 1px; }
 .unit-detail .army-profile tbody td { padding: 11px 14px; font-size: 11px; }
+.unit-detail .army-profile .profile-details-table thead { display: none; }
+.unit-detail .army-profile .profile-details-table .profile-summary > th { width: auto; padding: 11px 14px; font-size: 11px; font-weight: 400; }
+.unit-detail .army-profile .army-profiles-heading:not(:first-of-type) { margin-top: 6px; border-top: 2px solid #405b4d; }
 .unit-detail .army-profile .stat-different { box-shadow: inset 2px 0 #d79b2d; }
-.unit-detail .army-profile .statline .profile-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
+.unit-detail .army-profile .profile-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
+.profile-attributes-label { width: 30%; padding-left: 46px; color: #596a5b; font-size: 10px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; }
+.profile-item-label { width: 30%; padding-left: 46px; color: #596a5b; font-size: 10px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; }
+.profile-attributes { padding: 10px 26px; }
+.attribute-statline { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); }
+.attribute-statline-with-availability { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.attribute-statline > div { min-width: 0; padding: 4px 8px; border-left: 1px solid #e9ece3; text-align: center; font-variant-numeric: tabular-nums; }
+.attribute-statline > div:first-child { border-left: 0; }
+.attribute-statline .attribute-label { display: block; margin-bottom: 3px; color: #64715d; font-size: 9px; font-weight: 550; letter-spacing: 1.2px; line-height: 1.2; text-transform: uppercase; }
+.attribute-statline .attribute-value { font-size: inherit; }
+.attribute-statline .stat-different { color: #704d00; box-shadow: inset 2px 0 #d79b2d; }
+.unit-detail .army-profile .profile-attributes { padding-inline: 6px; }
+.unit-detail .army-profile .attribute-statline .attribute-label { font-size: 8px; letter-spacing: 1px; }
 .unit-detail .army-profile .loadout-table { width: calc(100% - 18px); margin-left: 18px; }
 tbody tr:last-child > * { border-bottom: 0; }
 tbody tr:hover { background: #f8f9f3; }
@@ -289,50 +308,15 @@ tbody tr:hover { background: #f8f9f3; }
   .army-symbol.main-army-symbol-detail { width: 39px; height: 39px; margin-right: 7px; }
   .army-tag { font-size: 9px; padding: 3px 5px; }
   .army-symbol { width: 26px; height: 26px; }
-  .unit-detail .statline { display: block; }
-  .unit-detail .statline thead { display: none; }
-  .unit-detail .statline tbody { display: block; }
-  .unit-detail .statline tbody tr.profile-statline {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0;
-    padding: 0 12px 12px;
-  }
-  .unit-detail .statline tbody tr.profile-statline > * {
-    min-width: 0;
-    padding: 8px 4px;
-    border-bottom: 1px solid #e9ece3;
-    font-size: 10px;
-    text-align: center;
-    overflow-wrap: anywhere;
-  }
-  .unit-detail .statline tbody tr.profile-statline > th {
-    grid-column: 1 / -1;
-    padding: 15px 5px 10px;
-    color: #2d4134;
-    font-size: 12px;
-    text-align: left;
-  }
-  .unit-detail .statline tbody tr.profile-statline > td::before {
-    content: attr(data-label);
-    display: block;
-    margin-bottom: 3px;
-    color: #64715d;
-    font-size: 8px;
-    font-weight: 550;
-    letter-spacing: .6px;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-  .unit-detail .statline tbody tr.profile-statline > td:nth-child(n + 12) {
-    grid-column: 1 / -1;
-    text-align: left;
-  }
-  .unit-detail .statline tbody tr.profile-statline > td:nth-child(n + 12)::before {
-    display: inline;
-    margin-right: 6px;
-  }
-  .unit-detail .statline tbody tr.profile-statline > .stat-different { box-shadow: inset 2px 0 #d79b2d; }
+  .unit-detail .profile-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 12px; }
+  .unit-detail .profile-summary > * { min-width: 0; padding: 8px 4px; font-size: 10px; overflow-wrap: anywhere; }
+  .unit-detail .profile-summary > :first-child { grid-column: 1 / -1; padding-top: 15px; color: #2d4134; font-size: 12px; }
+  .unit-detail .profile-summary > td::before { content: attr(data-label); display: block; margin-bottom: 3px; color: #64715d; font-size: 8px; font-weight: 550; letter-spacing: .6px; line-height: 1.2; text-transform: uppercase; }
+  .profile-attributes-label { width: auto; padding: 10px 16px; }
+  .profile-attributes { padding: 8px 12px; }
+  .attribute-statline { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .attribute-statline-with-availability { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .attribute-statline > div { padding: 7px 4px; }
   .weapon-profile table { display: block; }
   .weapon-profile thead, .weapon-profile tbody, .weapon-profile tr { display: block; }
   .weapon-profile thead { display: none; }

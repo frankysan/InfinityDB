@@ -386,6 +386,36 @@ def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None
     assert b'return Number(value) >= 100 ? "Total" : displayStatlineValue(value)' in body
 
 
+def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'function attributeStatline(stats, generalStats = null, includeAvailability = false)' in body
+    assert b'{ value: "Attributes", header: true, className: "profile-attributes-label" }' in body
+    assert b'["Name", "Type", "Classification"]' in body
+    assert b'"profile-details-table"' in body
+    assert b'["Name", "Points", "SWC", "Minis"]' in body
+    assert b'attributeStatline(profile, generalStatsForProfile, true)' in body
+
+
+def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles"' in body
+    assert b'generalProfileTableRows([profile])' in body
+
+
+def test_unit_details_frontend_marks_army_profile_section_headings(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'profilesHeading.className = "army-profiles-heading"' in body
+
+
+def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert body.count(b"if (!items.length) continue;") == 2
+
+
 def test_distance_preference_script_is_served(app: Callable) -> None:
     status, headers, body = request(app, "/static/preferences.js")
     assert status == 200

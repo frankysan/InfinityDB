@@ -54,10 +54,12 @@ function groupArmiesByFaction(armies) {
 }
 
 function cell(value) {
-  const element = document.createElement("td");
   const structured = value && typeof value === "object";
+  const element = document.createElement(structured && value.header ? "th" : "td");
   const highlighted = structured && "highlight" in value;
-  element.textContent = text(structured && "value" in value ? value.value : value);
+  if (structured && value.content) element.append(value.content);
+  else element.textContent = text(structured && "value" in value ? value.value : value);
+  if (structured && value.header) element.scope = "row";
   if (value && typeof value === "object" && value.className) {
     element.classList.add(value.className);
   }
@@ -69,6 +71,40 @@ function cell(value) {
     element.title = "Differs from the general profile";
   }
   return element;
+}
+
+function attributeStatline(stats, generalStats = null, includeAvailability = false) {
+  const attributes = document.createElement("div");
+  attributes.className = "attribute-statline";
+  for (const [label, read] of statColumns) {
+    const attribute = document.createElement("div");
+    const attributeLabel = document.createElement("span");
+    attributeLabel.className = "attribute-label";
+    const attributeValue = document.createElement("span");
+    attributeValue.className = "attribute-value";
+    const value = displayStatlineValue(read(stats));
+    attributeLabel.textContent = label;
+    attributeValue.textContent = text(value);
+    attribute.append(attributeLabel, attributeValue);
+    if (generalStats && differsFromGeneral(stats, generalStats, label)) {
+      attribute.classList.add("stat-different");
+      attribute.title = "Differs from the general profile";
+    }
+    attributes.append(attribute);
+  }
+  if (includeAvailability) {
+    attributes.classList.add("attribute-statline-with-availability");
+    const attribute = document.createElement("div");
+    const attributeLabel = document.createElement("span");
+    const attributeValue = document.createElement("span");
+    attributeLabel.className = "attribute-label";
+    attributeValue.className = "attribute-value";
+    attributeLabel.textContent = "AVA";
+    attributeValue.textContent = text(displayAvailability(stats.ava));
+    attribute.append(attributeLabel, attributeValue);
+    attributes.append(attribute);
+  }
+  return attributes;
 }
 
 function table(headers, rows, className = "") {
@@ -308,14 +344,17 @@ function profileItems(items, fallbackLabel) {
 function generalProfileTableRows(profiles) {
   const rows = [];
   for (const profile of profiles) {
-    const statline = [
+    const profileRow = [
       profile.profileName,
       profile.type,
       profile.classification,
-      ...generalStatline(profile.stats).map(displayStatlineValue),
     ];
-    statline.className = "profile-statline";
-    rows.push(statline);
+    profileRow.className = "profile-summary";
+    rows.push(profileRow);
+    rows.push([
+      { value: "Attributes", header: true, className: "profile-attributes-label" },
+      { content: attributeStatline(profile.stats), colSpan: 2, className: "profile-attributes" },
+    ]);
     for (const [label, property, fallbackLabel] of [
       ["Skills", "skills", "Skill"],
       ["Equipment", "equipment", "Equipment"],
@@ -327,7 +366,7 @@ function generalProfileTableRows(profiles) {
         {
           value: profileItems(profile.sharedItems[property], fallbackLabel),
           className: "general-item-list",
-          colSpan: statColumns.length,
+          colSpan: 2,
         },
       ]);
     }
@@ -336,32 +375,63 @@ function generalProfileTableRows(profiles) {
 }
 
 function profileTableRows(profiles, generalByName) {
-  return profiles.map((profile) => {
+  return profiles.flatMap((profile) => {
     const generalProfile = generalByName.get(profile.name || "");
     const generalStatsForProfile = generalProfile.stats;
     const sharedItems = generalProfile.sharedItems;
-    const statline = [profile.name, ...statColumns.map(([label, read]) => ({
-      value: displayStatlineValue(read(profile)),
-      highlight: differsFromGeneral(profile, generalStatsForProfile, label),
-    })),
-    { value: profileItems(withoutSharedItems(profile.skills, sharedItems.skills), "Skill"), className: "profile-item-list" },
-    { value: profileItems(withoutSharedItems(profile.equipment, sharedItems.equipment), "Equipment"), className: "profile-item-list" },
-    { value: profileItems(withoutSharedItems(profile.weapons, sharedItems.weapons), "Weapon"), className: "profile-item-list" },
-    displayAvailability(profile.ava)];
-    statline.className = "profile-statline";
-    return statline;
+    const profileRow = [{ value: profile.name, header: true, colSpan: 2 }];
+    profileRow.className = "profile-summary";
+    const rows = [profileRow, [
+      { value: "Attributes", header: true, className: "profile-attributes-label" },
+      {
+        content: attributeStatline(profile, generalStatsForProfile, true),
+        className: "profile-attributes",
+      },
+    ]];
+    for (const [label, property, fallbackLabel] of [
+      ["Skills", "skills", "Skill"],
+      ["Equipment", "equipment", "Equipment"],
+      ["Weapons", "weapons", "Weapon"],
+    ]) {
+      const items = withoutSharedItems(profile[property], sharedItems[property]);
+      if (!items.length) continue;
+      rows.push([
+        { value: label, header: true, className: "profile-item-label" },
+        {
+          value: profileItems(items, fallbackLabel),
+          className: "profile-item-list",
+        },
+      ]);
+    }
+    return rows;
   });
 }
 
 function loadoutTable(loadouts, sharedItems) {
   return table(
-    ["Name", "Points", "SWC", "Minis", "Skills", "Equipment", "Weapons"],
-    loadouts.map((loadout) => [
-      loadout.name, loadout.points, loadout.swc, loadout.minis,
-      { value: profileItems(withoutSharedItems(loadout.skills, sharedItems.skills), "Skill"), className: "profile-item-list" },
-      { value: profileItems(withoutSharedItems(loadout.equipment, sharedItems.equipment), "Equipment"), className: "profile-item-list" },
-      { value: profileItems(withoutSharedItems(loadout.weapons, sharedItems.weapons), "Weapon"), className: "profile-item-list" },
-    ]),
+    ["Name", "Points", "SWC", "Minis"],
+    loadouts.flatMap((loadout) => {
+      const loadoutRow = [loadout.name, loadout.points, loadout.swc, loadout.minis];
+      loadoutRow.className = "profile-summary";
+      const rows = [loadoutRow];
+      for (const [label, property, fallbackLabel] of [
+        ["Skills", "skills", "Skill"],
+        ["Equipment", "equipment", "Equipment"],
+        ["Weapons", "weapons", "Weapon"],
+      ]) {
+        const items = withoutSharedItems(loadout[property], sharedItems[property]);
+        if (!items.length) continue;
+        rows.push([
+          { value: label, header: true, className: "profile-item-label" },
+          {
+            value: profileItems(items, fallbackLabel),
+            className: "profile-item-list",
+            colSpan: 3,
+          },
+        ]);
+      }
+      return rows;
+    }),
     "loadout-table",
   );
 }
@@ -441,11 +511,13 @@ function renderArmyProfile(army, generalByName, expanded) {
   section.append(armyHeading);
   for (const group of profileLoadoutGroups(army)) {
     if (group.profiles.length) {
-      section.append(subheading("Profiles"));
+      const profilesHeading = subheading("Profiles");
+      profilesHeading.className = "army-profiles-heading";
+      section.append(profilesHeading);
       section.append(table(
-        ["Name", ...statColumns.map(([label]) => label), "Skills", "Equipment", "Weapons", "AVA"],
+        [],
         profileTableRows(group.profiles, generalByName),
-        "statline",
+        "profile-details-table",
       ));
     }
     if (group.loadouts.length) {
@@ -487,15 +559,23 @@ function render(unit) {
     ...loadout, armyId: army.id,
   })));
   const { rows: generalProfileRows, generalByName } = generalProfiles(allProfiles, allLoadouts);
-  const general = document.createElement("section");
-  general.className = "explorer general-profile";
-  general.append(heading("General profile"));
-  general.append(table(
-    ["Name", "Type", "Classification", ...statColumns.map(([label]) => label)],
-    generalProfileTableRows(visibleGeneralProfiles(generalProfileRows)),
-    "statline",
+  const displayedGeneralProfiles = visibleGeneralProfiles(generalProfileRows);
+  const generalProfilesSection = document.createElement("section");
+  generalProfilesSection.className = "general-profile-group";
+  generalProfilesSection.append(heading(
+    displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",
   ));
-  content.append(general);
+  for (const profile of displayedGeneralProfiles) {
+    const generalProfile = document.createElement("section");
+    generalProfile.className = "explorer general-profile";
+    generalProfile.append(table(
+      ["Name", "Type", "Classification"],
+      generalProfileTableRows([profile]),
+      "statline",
+    ));
+    generalProfilesSection.append(generalProfile);
+  }
+  content.append(generalProfilesSection);
   let standardArmyExpanded = false;
   for (const group of groupArmiesByFaction(unit.armies)) {
     const section = document.createElement("section");

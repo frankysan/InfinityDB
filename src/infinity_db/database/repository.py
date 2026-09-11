@@ -620,12 +620,21 @@ class Database:
                 "WHERE c.id = ?",
                 (canonical_id,),
             ).fetchone()
+            option_usage = (
+                "SELECT 'option', t.item_id, o.occurrence_id, o.unit_id "
+                "FROM option_weapons AS o JOIN option_weapon_templates AS t "
+                "ON t.id = o.template_id "
+                f"WHERE t.item_id IN ({placeholders}) "
+                if catalog == "weapons" else
+                f"SELECT 'option', item_id, occurrence_id, unit_id FROM option_{catalog} "
+                f"WHERE item_id IN ({placeholders}) "
+            )
             rows = connection.execute(
                 "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, " + UNIT_NAME_SQL
                 + " AS unit_name, links.position AS extra_position, e.id AS extra_id, e.name AS extra_name "
                 "FROM units AS u JOIN ("
                 f"SELECT 'profile' AS source, item_id, occurrence_id, unit_id FROM profile_{catalog} WHERE item_id IN ({placeholders}) "
-                f"UNION ALL SELECT 'option', item_id, occurrence_id, unit_id FROM option_{catalog} WHERE item_id IN ({placeholders}) "
+                f"UNION ALL {option_usage}"
                 f"UNION ALL SELECT 'unit_option', item_id, occurrence_id, unit_id FROM unit_option_{catalog} WHERE item_id IN ({placeholders})"
                 ") AS uses ON uses.unit_id = u.id LEFT JOIN ("
                 f"SELECT 'profile' AS source, occurrence_id, position, extra_id FROM profile_{suffix}_extras "
@@ -1152,11 +1161,18 @@ class Database:
                     if property_name == "skills" and contains_distance_multiple(extra["name"]):
                         item["is_distance"] = True
                     extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(item)
+                item_column = "o.item_id"
+                quantity_column = "o.quantity"
+                occurrence_source = f"FROM {occurrence_table} AS o"
+                if occurrence_table == "option_weapons":
+                    item_column = "t.item_id"
+                    quantity_column = "t.quantity"
+                    occurrence_source += " JOIN option_weapon_templates AS t ON t.id = o.template_id"
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.option_id, o.item_id, "
-                    "o.quantity, o.position, c.name "
-                    f"FROM {occurrence_table} AS o "
-                    f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
+                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.option_id, "
+                    f"{item_column} AS item_id, {quantity_column} AS quantity, o.position, c.name "
+                    f"{occurrence_source} "
+                    f"LEFT JOIN {catalog_table} AS c ON c.id = {item_column} "
                     f"WHERE o.unit_id IN ({placeholders}) "
                     "ORDER BY o.army_id, o.group_id, o.option_id, o.position, o.occurrence_id",
                     source_ids,

@@ -539,6 +539,36 @@ def normalize_option_nested(
     )
 
 
+OPTION_WEAPON_LINK_FIELDS = (
+    "occurrence_id", "army_id", "unit_id", "group_id", "option_id", "position",
+)
+
+
+def deduplicate_option_weapons(tables: dict[str, list[dict[str, Any]]]) -> None:
+    """Replace repeated option-weapon payloads with reusable templates.
+
+    Occurrence identity, parentage, and ordering remain on the link rows, so
+    the original table can be reconstructed exactly by joining the two tables.
+    """
+    templates_by_payload: dict[str, int] = {}
+    templates: list[dict[str, Any]] = []
+    links: list[dict[str, Any]] = []
+    for row in tables.get("option_weapons", []):
+        payload = {key: value for key, value in row.items() if key not in OPTION_WEAPON_LINK_FIELDS}
+        fingerprint = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        template_id = templates_by_payload.get(fingerprint)
+        if template_id is None:
+            template_id = len(templates) + 1
+            templates_by_payload[fingerprint] = template_id
+            templates.append({"id": template_id, **payload})
+        links.append({
+            **{key: row[key] for key in OPTION_WEAPON_LINK_FIELDS},
+            "template_id": template_id,
+        })
+    tables["option_weapons"] = links
+    tables["option_weapon_templates"] = templates
+
+
 def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
     b = Builder()
     army_lists = master["armyLists"]
@@ -1096,6 +1126,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         )
 
     tables = dict(sorted(b.tables.items()))
+    deduplicate_option_weapons(tables)
     tables.update(metadata_rows)
     tables = dict(sorted(tables.items()))
     result = {
@@ -1154,6 +1185,7 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     profile_group_keys = _unique(t.get("profile_groups", []), ("army_id", "unit_id", "group_id"), "profile_groups")
     profile_keys = _unique(t.get("profiles", []), ("army_id", "unit_id", "group_id", "profile_id"), "profiles")
     option_keys = _unique(t.get("loadout_options", []), ("army_id", "unit_id", "group_id", "option_id"), "loadout_options")
+    _unique(t.get("option_weapon_templates", []), ("id",), "option_weapon_templates")
     unit_option_keys = _unique(t.get("unit_options", []), ("unit_id", "option_id"), "unit_options")
     peripheral_keys = _unique(t.get("peripherals", []), ("army_id", "id"), "peripherals")
     fireteam_keys = _unique(t.get("fireteams", []), ("army_id", "fireteam_id"), "fireteams")
@@ -1232,13 +1264,29 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
         )
 
     # Item refs (null is allowed only for source anomalies intentionally preserved).
+    option_weapon_templates = {
+        row["id"]: row for row in t.get("option_weapon_templates", [])
+    }
+    check(
+        "option_weapon_templates -> weapons",
+        all(
+            row.get("item_id") is None or row["item_id"] in catalog_table_ids["weapons"]
+            for row in option_weapon_templates.values()
+        ),
+        "all non-null option-weapon template item IDs resolve",
+    )
+    check(
+        "option_weapons -> option_weapon_templates",
+        all(row.get("template_id") in option_weapon_templates for row in t.get("option_weapons", [])),
+        "all option-weapon rows resolve a template",
+    )
+
     item_tables = {
         "profile_skills": "skills",
         "profile_equipment": "equip",
         "profile_weapons": "weapons",
         "option_skills": "skills",
         "option_equipment": "equip",
-        "option_weapons": "weapons",
         "unit_option_skills": "skills",
         "unit_option_equipment": "equip",
         "unit_option_weapons": "weapons",

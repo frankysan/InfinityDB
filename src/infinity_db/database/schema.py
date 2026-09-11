@@ -5,11 +5,11 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 4
+DATABASE_COMPATIBILITY_VERSION = 5
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 METADATA_TABLE = "__infinity_metadata"
@@ -184,6 +184,17 @@ for prefix, parent, parent_key in (
         TABLES[f"{prefix}_orders"] = table(
             f"{parent_key} position", "order_type list_count total_count raw", parent_ref
         )
+
+# Option weapon payloads recur heavily across army-specific loadouts. Keep the
+# occurrence (its parent and display position) separate from reusable payload.
+TABLES["option_weapon_templates"] = table(
+    "id", "item_id display_order quantity raw", ref("item_id", "weapons", "id")
+)
+TABLES["option_weapons"] = table(
+    "occurrence_id", "army_id unit_id group_id option_id position template_id",
+    ref("army_id unit_id group_id option_id", "loadout_options"),
+    ref("template_id", "option_weapon_templates", "id"),
+)
 
 
 def quote(identifier: str) -> str:
