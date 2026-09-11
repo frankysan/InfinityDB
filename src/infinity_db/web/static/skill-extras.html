@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#162323">
+    <meta name="description" content="Browse every skill modifier used by InfinityDB.">
+    <title>Skill modifiers · InfinityDB</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="/static/skill-extras.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to skill modifiers</a>
+    <!-- navigation -->
+    <main id="main" class="main" tabindex="-1">
+      <header class="topbar">
+        <div class="breadcrumb">Database <span aria-hidden="true">/</span> <strong>Skill modifiers</strong></div>
+        <span class="catalog-tag"><span aria-hidden="true"></span> Reference data</span>
+      </header>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Data review</p>
+          <h1 id="page-title">Skill modifiers<span>.</span></h1>
+          <p class="intro-copy">Pairs whose extra contains a number divisible by 2.5, to help identify distance values.</p>
+        </div>
+      </section>
+      <section class="explorer modifier-explorer" aria-labelledby="modifier-heading">
+        <div class="section-heading"><h2 id="modifier-heading">Distance candidates</h2><span id="modifier-count" class="section-index">Loading…</span></div>
+        <div id="modifier-results" class="results" aria-busy="true">
+          <div id="modifier-loading" class="state-panel"><span class="spinner" aria-hidden="true"></span><h3>Loading modifiers</h3><p>Gathering skill and extra combinations.</p></div>
+          <div id="modifier-error" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">!</span><h3>Modifiers could not be loaded</h3><p id="modifier-error-message">Please try again.</p></div>
+          <div id="modifier-empty" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">⌕</span><h3>No distance candidates found</h3><p>No skill-plus-extra combinations contain a number divisible by 2.5.</p></div>
+          <div id="modifier-table-container" class="table-container" hidden>
+            <table><caption class="sr-only">Unique skill and extra combinations</caption><thead><tr><th scope="col">Skill</th><th scope="col">Extra</th></tr></thead><tbody id="modifier-list"></tbody></table>
+          </div>
+        </div>
+      </section>
+      <footer class="page-footer"><span>InfinityDB</span><span>A growing reference for your next game.</span></footer>
+    </main>
+  </body>
+</html>

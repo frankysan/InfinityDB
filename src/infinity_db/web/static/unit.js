@@ -1,12 +1,14 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
 import { unitSymbol } from "./unit-symbols.js";
+import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
 const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
 const unitId = /^\/units\/(\d+)$/.exec(window.location.pathname)?.[1];
+const distanceNumberPattern = /[+-]?\d+(?:\.\d+)?/g;
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
@@ -78,7 +80,16 @@ function table(headers, rows, className = "") {
   for (const header of headers) { const th = document.createElement("th"); th.textContent = header; headerRow.append(th); }
   head.append(headerRow);
   const body = document.createElement("tbody");
-  for (const row of rows) { const tr = document.createElement("tr"); row.forEach((value) => tr.append(cell(value))); body.append(tr); }
+  for (const row of rows) {
+    const tr = document.createElement("tr");
+    if (row.className) tr.className = row.className;
+    row.forEach((value, index) => {
+      const item = cell(value);
+      item.dataset.label = headers[index];
+      tr.append(item);
+    });
+    body.append(tr);
+  }
   element.append(head, body);
   return element;
 }
@@ -88,8 +99,9 @@ function heading(label) { const value = document.createElement("h2"); value.text
 function subheading(label) { const value = document.createElement("h4"); value.textContent = label; return value; }
 
 const statColumns = [
-  ["MOV (cm)", (profile) => `${text(profile.move_1)}-${text(profile.move_2)}`],
-  ["MOV (in)", (profile) => `${inches(profile.move_1)}-${inches(profile.move_2)}`],
+  ["MOV", (profile) => distanceUnit() === "in"
+    ? `${inches(profile.move_1)}-${inches(profile.move_2)}`
+    : `${text(profile.move_1)}-${text(profile.move_2)}`],
   ["CC", (profile) => profile.cc], ["BS", (profile) => profile.bs],
   ["PH", (profile) => profile.ph], ["WIP", (profile) => profile.wip],
   ["ARM", (profile) => profile.arm], ["BTS", (profile) => profile.bts],
@@ -247,9 +259,14 @@ function profileItems(items, fallbackLabel) {
   if (!items.length) return "—";
   return items.map((item) => {
     const name = item.name || `${fallbackLabel} #${text(item.id)}`;
-    const extras = (item.extras || []).map((extra) => (
-      extra.name || `Extra #${text(extra.id)}`
-    ));
+    const extras = (item.extras || []).map((extra) => {
+      const extraName = extra.name || `Extra #${text(extra.id)}`;
+      if (!extra.is_distance) return extraName;
+      return extraName.replace(distanceNumberPattern, (value) => {
+        const converted = distanceUnit() === "in" ? Number(value) / 2.5 : Number(value);
+        return `${converted}${distanceUnit() === "in" ? '"' : " cm"}`;
+      });
+    });
     const decoratedName = extras.length ? `${name} (${extras.join(", ")})` : name;
     return item.quantity != null && Number(item.quantity) !== 1
       ? `${decoratedName} ×${item.quantity}`
@@ -260,10 +277,12 @@ function profileItems(items, fallbackLabel) {
 function generalProfileTableRows(profiles) {
   const rows = [];
   for (const profile of profiles) {
-    rows.push([
+    const statline = [
       profile.profileName,
       ...generalStatline(profile.stats).map(displayStatlineValue),
-    ]);
+    ];
+    statline.className = "profile-statline";
+    rows.push(statline);
     for (const [label, property, fallbackLabel] of [
       ["Skills", "skills", "Skill"],
       ["Equipment", "equipment", "Equipment"],
@@ -288,7 +307,7 @@ function profileTableRows(profiles, generalByName) {
     const generalProfile = generalByName.get(profile.name || "");
     const generalStatsForProfile = generalProfile.stats;
     const sharedItems = generalProfile.sharedItems;
-    return [profile.name, ...statColumns.map(([label, read]) => ({
+    const statline = [profile.name, ...statColumns.map(([label, read]) => ({
       value: displayStatlineValue(read(profile)),
       highlight: differsFromGeneral(profile, generalStatsForProfile, label),
     })),
@@ -296,6 +315,8 @@ function profileTableRows(profiles, generalByName) {
     { value: profileItems(withoutSharedItems(profile.equipment, sharedItems.equipment), "Equipment"), className: "profile-item-list" },
     { value: profileItems(withoutSharedItems(profile.weapons, sharedItems.weapons), "Weapon"), className: "profile-item-list" },
     displayStatlineValue(profile.ava)];
+    statline.className = "profile-statline";
+    return statline;
   });
 }
 
@@ -397,6 +418,7 @@ function renderArmyProfile(army, generalByName) {
 }
 
 function render(unit) {
+  content.replaceChildren();
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
   const icon = unitSymbol(unit.slug || unit.isc || unit.name, "unit-symbol-detail");
@@ -449,10 +471,15 @@ function render(unit) {
   content.hidden = false;
 }
 
+initializeDistanceUnitToggle();
+
 if (!unitId) {
   status.textContent = "The requested unit address is invalid.";
 } else {
-  getUnit(unitId).then(render).catch((error) => {
+  getUnit(unitId).then((unit) => {
+    render(unit);
+    window.addEventListener("distanceunitchange", () => render(unit));
+  }).catch((error) => {
     name.textContent = "Unit unavailable";
     status.textContent = error.message || "Could not load this unit.";
   });

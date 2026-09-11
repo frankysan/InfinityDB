@@ -8,6 +8,7 @@ import sqlite3
 import unicodedata
 from collections.abc import Iterator
 from contextlib import contextmanager
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,9 @@ UNIT_MERGE_ALIASES = {
     1345: 1345, 1875: 1345, 11345: 1345,
 }
 REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
+NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
+DISTANCE_DIVISOR = Decimal("2.5")
+NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
 
 
 def is_reinforcement_army_id(army_id: int) -> bool:
@@ -37,6 +41,20 @@ def unit_sort_key(value: object) -> str:
     """Return a case-insensitive, punctuation-free key for unit-name ordering."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
     return "".join(character for character in decomposed if character.isalnum())
+
+
+def contains_distance_multiple(value: object) -> bool:
+    """Whether text has no assignment and contains a number divisible by 2.5."""
+    text = str(value or "")
+    if "=" in text or text.upper() in NON_DISTANCE_EXTRAS:
+        return False
+    for number in NUMBER_PATTERN.findall(text):
+        try:
+            if Decimal(number) % DISTANCE_DIVISOR == 0:
+                return True
+        except InvalidOperation:
+            continue
+    return False
 
 
 def unit_group_key(row: sqlite3.Row) -> tuple[int, str]:
@@ -249,6 +267,30 @@ class Database:
                 for row in rows
             ]
 
+    def list_skill_extras(self) -> list[dict[str, Any]]:
+        """Return candidate distance-related skill and extra pairings."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT combinations.skill_id, COALESCE(NULLIF(s.name, ''), "
+                "'Skill #' || combinations.skill_id) AS skill_name, combinations.extra_id, "
+                "COALESCE(NULLIF(e.name, ''), 'Extra #' || combinations.extra_id) AS extra_name "
+                "FROM ("
+                "SELECT ps.item_id AS skill_id, pse.extra_id FROM profile_skills AS ps "
+                "JOIN profile_skill_extras AS pse ON pse.occurrence_id = ps.occurrence_id "
+                "UNION "
+                "SELECT os.item_id AS skill_id, ose.extra_id FROM option_skills AS os "
+                "JOIN option_skill_extras AS ose ON ose.occurrence_id = os.occurrence_id "
+                "UNION "
+                "SELECT uos.item_id AS skill_id, uose.extra_id FROM unit_option_skills AS uos "
+                "JOIN unit_option_skill_extras AS uose ON uose.occurrence_id = uos.occurrence_id"
+                ") AS combinations "
+                "LEFT JOIN skills AS s ON s.id = combinations.skill_id "
+                "LEFT JOIN extras AS e ON e.id = combinations.extra_id "
+                "ORDER BY casefold(skill_name), casefold(extra_name), combinations.skill_id, "
+                "combinations.extra_id"
+            ).fetchall()
+            return [dict(row) for row in rows if contains_distance_multiple(row["extra_name"])]
+
     def list_units(
         self, army_id: int | None = None, search: str = "", limit: int = 50, offset: int = 0,
         mercs: bool = False, specops: bool = False, teamops: bool = False,
@@ -442,9 +484,12 @@ class Database:
                     source_ids,
                 )
                 for extra in extra_rows:
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append({
+                    item = {
                         "id": extra["extra_id"], "name": extra["name"],
-                    })
+                    }
+                    if property_name == "skills" and contains_distance_multiple(extra["name"]):
+                        item["is_distance"] = True
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(item)
                 occurrence_rows = connection.execute(
                     "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, o.item_id, "
                     "o.quantity, o.position, c.name "
@@ -511,9 +556,12 @@ class Database:
                     source_ids,
                 )
                 for extra in extra_rows:
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append({
+                    item = {
                         "id": extra["extra_id"], "name": extra["name"],
-                    })
+                    }
+                    if property_name == "skills" and contains_distance_multiple(extra["name"]):
+                        item["is_distance"] = True
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(item)
                 occurrence_rows = connection.execute(
                     "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.option_id, o.item_id, "
                     "o.quantity, o.position, c.name "

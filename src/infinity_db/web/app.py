@@ -15,7 +15,6 @@ from infinity_db.database import Database
 
 LOGGER = logging.getLogger(__name__)
 ASSETS = {
-    "/": ("index.html", "text/html; charset=utf-8"),
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
@@ -23,6 +22,8 @@ ASSETS = {
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbol-map.js": ("unit-symbol-map.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
+    "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
+    "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
 }
 ARMY_SYMBOL_PATH = re.compile(
     r"/static/army-symbols/(?:[A-Za-z0-9 ._-]+/)*[A-Za-z0-9 ._-]+\.svg"
@@ -44,6 +45,20 @@ def _unit_symbol_paths(directory) -> dict[str, object]:
 
 
 UNIT_SYMBOLS = _unit_symbol_paths(files("infinity_db.web").joinpath("static", "unit-symbols"))
+
+
+def _page(filename: str, *, active_page: str | None = None) -> bytes:
+    """Render a page with the project-wide navigation shell."""
+    static = files("infinity_db.web").joinpath("static")
+    navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
+    navigation = navigation.replace(
+        "{{UNIT_EXPLORER_CURRENT}}", ' aria-current="page"' if active_page == "units" else "",
+    ).replace(
+        "{{SKILL_EXTRAS_CURRENT}}", ' aria-current="page"' if active_page == "skill-extras" else "",
+    )
+    return static.joinpath(filename).read_text(encoding="utf-8").replace(
+        "<!-- navigation -->", navigation
+    ).encode("utf-8")
 
 
 def _singular_slug(slug: str) -> str:
@@ -124,6 +139,9 @@ class Application:
             status = HTTPStatus.METHOD_NOT_ALLOWED
             payload = {"error": "Use GET or HEAD for this resource"}
             extra_headers.append(("Allow", "GET, HEAD"))
+        elif path == "/":
+            content_type = "text/html; charset=utf-8"
+            body = _page("index.html", active_page="units")
         elif path in ASSETS:
             filename, content_type = ASSETS[path]
             body = files("infinity_db.web").joinpath("static", filename).read_bytes()
@@ -142,7 +160,17 @@ class Application:
                 content_type = "image/svg+xml"
         elif re.fullmatch(r"/units/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
-            body = files("infinity_db.web").joinpath("static", "unit.html").read_bytes()
+            body = _page("unit.html")
+        elif path == "/skill-extras":
+            content_type = "text/html; charset=utf-8"
+            body = _page("skill-extras.html", active_page="skill-extras")
+        elif path == "/api/skill-extras":
+            try:
+                payload = {"items": self.database.list_skill_extras()}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read skill modifiers")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The skill modifiers are unavailable. Please try again."}
         elif path == "/api/armies":
             try:
                 payload = {"items": self.database.list_armies()}

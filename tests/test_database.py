@@ -162,6 +162,45 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     }
 
 
+def test_list_skill_extras_returns_distinct_sorted_pairs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["extras"].extend([
+        {"id": 2, "name": "+5", "source_defined": True},
+        {"id": 3, "name": "PS=5", "source_defined": True},
+        {"id": 4, "name": "+5 CC", "source_defined": True},
+    ])
+    profile_extra = normalized["tables"]["profile_skill_extras"][0]
+    normalized["tables"]["profile_skill_extras"].append({
+        "occurrence_id": profile_extra["occurrence_id"], "position": 2, "extra_id": 2,
+    })
+    normalized["tables"]["profile_skill_extras"].append({
+        "occurrence_id": profile_extra["occurrence_id"], "position": 3, "extra_id": 3,
+    })
+    normalized["tables"]["profile_skill_extras"].append({
+        "occurrence_id": profile_extra["occurrence_id"], "position": 4, "extra_id": 4,
+    })
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    assert Database(path).list_skill_extras() == [{
+        "skill_id": 1, "skill_name": "skills", "extra_id": 2, "extra_name": "+5",
+    }]
+
+
+def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:
+    normalized["tables"]["extras"].append({"id": 2, "name": "+5", "source_defined": True})
+    normalized["tables"]["profile_skill_extras"][0]["extra_id"] = 2
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    assert details["armies"][0]["profiles"][0]["skills"][0]["extras"] == [{
+        "id": 2, "name": "+5", "is_distance": True,
+    }]
+
+
 def test_main_army_resolves_canonical_sectorials_to_whole_armies(normalized: dict) -> None:
     beta = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 2)
     assert beta["main_army_id"] == 101

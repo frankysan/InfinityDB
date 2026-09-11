@@ -1,6 +1,7 @@
 import { getArmies, getUnits } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
 import { unitSymbol } from "./unit-symbols.js";
+import { initializeDistanceUnitToggle } from "./preferences.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -260,6 +261,7 @@ window.addEventListener("popstate", () => {
   load();
 });
 
+initializeDistanceUnitToggle();
 syncFilters();
 writeLocation(true);
 load();

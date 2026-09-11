@@ -212,6 +212,8 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"unit.js" in body
+    assert b'aria-label="Project navigation"' in body
+    assert b"Skip to unit details" in body
     status, _, body = request(app, "/api/units/9099")
     assert status == 404
     assert json.loads(body)["error"] == "Unit not found"
@@ -283,6 +285,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"Infinity" in body
+    assert b'aria-label="Project navigation"' in body
+    assert b'aria-current="page"' in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
@@ -326,6 +330,26 @@ def test_frontend_recognizes_98_and_99_as_reinforcement_armies(app: Callable) ->
         status, _, body = request(app, asset)
         assert status == 200
         assert b"[98, 99]" in body
+
+
+def test_distance_preference_script_is_served(app: Callable) -> None:
+    status, headers, body = request(app, "/static/preferences.js")
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert b"distanceunitchange" in body
+
+
+def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
+    status, headers, body = request(app, "/skill-extras")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"skill-extras.js" in body
+    assert b'aria-current="page"' in body
+
+    status, headers, body = request(app, "/api/skill-extras")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    assert json.loads(body) == {"items": []}
 
 
 def test_unit_symbol_is_served(app: Callable) -> None:
