@@ -157,6 +157,7 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     assert database.list_units(army_id=301)["items"] == []
     assert database.list_units(army_id=999)["total"] == 0
     assert database.list_units(search="ÁLPHA")["items"][0]["id"] == 1
+    assert database.list_units(search="alpha")["items"][0]["id"] == 1
     assert database.list_units(search="%_")["items"][0]["id"] == 3
     assert database.list_units(search="' OR 1 = 1 --")["total"] == 0
     assert database.list_units(search="missing")["items"] == []
@@ -434,6 +435,91 @@ def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     assert list(groups[0]["armies"]) == [301, 399, 999]
 
 
+def test_reinforcement_variant_matches_reordered_pluralized_identity() -> None:
+    rows = [
+        {
+            "id": 35, "isc": "Armbots: Bulleteer", "name": "BULLETEER ARMBOTS",
+            "main_army_id": 101,
+        },
+        {
+            "id": 1649, "isc": "Reinf. Bulleteers Armbots",
+            "name": "REINF: ARMBOTS BULLETEERS", "main_army_id": 101,
+        },
+    ]
+    memberships = {
+        35: [{"id": 101, "name": "PanOceania"}],
+        1649: [{"id": 199, "name": "Reinforcements"}],
+    }
+
+    groups = logical_unit_groups(rows, memberships)
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == 35
+    assert groups[0]["source_ids"] == [35, 1649]
+    assert list(groups[0]["armies"]) == [101, 199]
+
+
+def test_reinforcement_variant_uses_display_name_when_isc_is_abbreviated() -> None:
+    rows = [
+        {
+            "id": 1751, "isc": "Blade-Ops, Neoterran Unified Commando Regiment",
+            "name": "BLADE-OPS, Neoterran Unified Commando Regiment", "main_army_id": 101,
+        },
+        {
+            "id": 1642, "isc": "Reinf. Blade-Ops",
+            "name": "REINF: BLADE-OPS, Unified Neoterran Commando Regiment",
+            "main_army_id": 101,
+        },
+    ]
+    memberships = {
+        1751: [{"id": 101, "name": "PanOceania"}],
+        1642: [{"id": 199, "name": "Reinforcements"}],
+    }
+
+    groups = logical_unit_groups(rows, memberships)
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == 1751
+    assert groups[0]["source_ids"] == [1751, 1642]
+
+
+@pytest.mark.parametrize(("standard", "reinforcement"), [
+    (
+        {
+            "id": 1624, "isc": "Caskuda WCD Armored Jump Operator", "name": "CASKUDA",
+            "main_army_id": 601,
+        },
+        {
+            "id": 1618, "isc": "Reinf. Caskuda WCD Armoured Jump Operator",
+            "name": "REINF. CASKUDA", "main_army_id": 601,
+        },
+    ),
+    (
+        {
+            "id": 1610, "isc": "Ŝarko, Naval Reconaissance Special Unit", "name": "ŜARKO",
+            "main_army_id": 1001,
+        },
+        {
+            "id": 1700, "isc": "Reinf. Ŝarko, Naval Recon Special Unit",
+            "name": "REINF: ŜARKO", "main_army_id": 1001,
+        },
+    ),
+])
+def test_reinforcement_variant_matches_known_spelling_aliases(
+    standard: dict, reinforcement: dict
+) -> None:
+    memberships = {
+        standard["id"]: [{"id": standard["main_army_id"], "name": "Standard Army"}],
+        reinforcement["id"]: [{"id": 699, "name": "Reinforcements"}],
+    }
+
+    groups = logical_unit_groups([standard, reinforcement], memberships)
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == standard["id"]
+    assert groups[0]["source_ids"] == [standard["id"], reinforcement["id"]]
+
+
 @pytest.mark.parametrize("mutation", [
     lambda data: data["_meta"].update(format="not normalized"),
     lambda data: data["_meta"].update(formatVersion=2),
@@ -480,13 +566,18 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
         {"id": 6, "name": "A-l.p/h+a", "source_defined": True},
         {"id": 7, "name": "Béta", "source_defined": True},
         {"id": 8, "name": "C.A.T.!", "source_defined": True},
+        {"id": 237, "name": "S.A.S.", "source_defined": True},
+        {"id": 1610, "name": "Ŝarko", "source_defined": True},
     ])
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
     database = Database(path)
     assert [unit["name"] for unit in database.list_units()["items"]] == [
-        "100%_Guard", "Álpha", "A-l.p/h+a", "Beta", "Béta", "C.A.T.!", "Unit 4", "Unit 5",
+        "100%_Guard", "Álpha", "A-l.p/h+a", "Beta", "Béta", "C.A.T.!", "Ŝarko", "S.A.S.",
+        "Unit 4", "Unit 5",
     ]
+    assert database.list_units(search="sarko")["items"][0]["id"] == 1610
+    assert database.list_units(search="sas")["items"][0]["id"] == 237
     assert database.list_units(search="UNIT 4")["items"] == [{
         "id": 4, "name": "Unit 4", "isc": None, "slug": None, "main_army_id": None,
         "source_ids": [4],

@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.2] - 2026-09-11
+
+### Added
+
+- About page with project background, maintainer support contact, GitHub
+  repository link, and LLM code-use disclosure.
+- Snapshot download-date tracking for downloader-created Army archives, shown
+  in the shared browser sidebar when available.
+- Clickable unit-catalog rows, while preserving the unit-name link's normal
+  browser interactions.
+
+### Changed
+
+- Unit search now ignores case, accents, and punctuation.
+- Reinforcement-only records use normalized ISC and display-name identities to
+  join a uniquely matching standard unit despite wording and spelling variants.
+- Profile grouping normalizes reinforcement prefixes and equivalent profile
+  labels more consistently.
+- Database compatibility revision increased to 2; rebuild existing databases
+  before starting the updated application.
+
 ## [0.1.1] - 2026-09-11
 
 ### Added

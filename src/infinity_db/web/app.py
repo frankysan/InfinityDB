@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import sqlite3
+from datetime import date
 from http import HTTPStatus
 from importlib.resources import files
 from pathlib import Path
@@ -23,6 +24,7 @@ ASSETS = {
     "/static/unit-symbol-map.js": ("unit-symbol-map.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
+    "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
 }
 ARMY_SYMBOL_PATH = re.compile(
@@ -47,7 +49,9 @@ def _unit_symbol_paths(directory) -> dict[str, object]:
 UNIT_SYMBOLS = _unit_symbol_paths(files("infinity_db.web").joinpath("static", "unit-symbols"))
 
 
-def _page(filename: str, *, active_page: str | None = None) -> bytes:
+def _page(
+    filename: str, *, active_page: str | None = None, snapshot_downloaded_on: date | None = None,
+) -> bytes:
     """Render a page with the project-wide navigation shell."""
     static = files("infinity_db.web").joinpath("static")
     navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
@@ -55,6 +59,16 @@ def _page(filename: str, *, active_page: str | None = None) -> bytes:
         "{{UNIT_EXPLORER_CURRENT}}", ' aria-current="page"' if active_page == "units" else "",
     ).replace(
         "{{SKILL_EXTRAS_CURRENT}}", ' aria-current="page"' if active_page == "skill-extras" else "",
+    ).replace(
+        "{{ABOUT_CURRENT}}", ' aria-current="page"' if active_page == "about" else "",
+    ).replace(
+        "{{SNAPSHOT_DOWNLOAD_DATE}}",
+        (
+            '<p class="snapshot-date">Army snapshot downloaded '
+            f'<time datetime="{snapshot_downloaded_on.isoformat()}">'
+            f"{snapshot_downloaded_on:%B} {snapshot_downloaded_on.day}, {snapshot_downloaded_on:%Y}"
+            "</time></p>"
+        ) if snapshot_downloaded_on else "",
     )
     return static.joinpath(filename).read_text(encoding="utf-8").replace(
         "<!-- navigation -->", navigation
@@ -126,6 +140,7 @@ class Application:
     def __init__(self, database_path: Path) -> None:
         self.database = Database(database_path)
         self.database.validate()
+        self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
 
     def __call__(self, environ: dict, start_response):
         method = environ.get("REQUEST_METHOD", "GET")
@@ -142,7 +157,11 @@ class Application:
             extra_headers.append(("Allow", "GET, HEAD"))
         elif path == "/":
             content_type = "text/html; charset=utf-8"
-            body = _page("index.html", active_page="units")
+            body = _page(
+                "index.html",
+                active_page="units",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+            )
         elif path in ASSETS:
             filename, content_type = ASSETS[path]
             body = files("infinity_db.web").joinpath("static", filename).read_bytes()
@@ -161,10 +180,21 @@ class Application:
                 content_type = "image/svg+xml"
         elif re.fullmatch(r"/units/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
-            body = _page("unit.html")
+            body = _page("unit.html", snapshot_downloaded_on=self.snapshot_downloaded_on)
         elif path == "/skill-extras":
             content_type = "text/html; charset=utf-8"
-            body = _page("skill-extras.html", active_page="skill-extras")
+            body = _page(
+                "skill-extras.html",
+                active_page="skill-extras",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+            )
+        elif path == "/about":
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "about.html",
+                active_page="about",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+            )
         elif path == "/api/skill-extras":
             try:
                 payload = {"items": self.database.list_skill_extras()}

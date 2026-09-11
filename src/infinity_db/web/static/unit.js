@@ -165,14 +165,37 @@ function identicalStatline(left, right) {
 }
 
 function baseProfileName(profileName) {
-  return String(profileName || "").replace(/^REINF:\s*/i, "");
+  return String(profileName || "").replace(/^REINF(?:\.|:)?\s*/i, "").trim();
+}
+
+const profileIdentityWordAliases = {
+  armoured: "armored",
+  reconnaissance: "recon",
+  reconaissance: "recon",
+};
+const profileIdentityIgnoredWords = new Set([
+  "troops", "autonomous", "intervention", "unit",
+]);
+
+function profileIdentity(profileName) {
+  const words = baseProfileName(profileName)
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .match(/[\p{L}\p{N}]+/gu) || [];
+  return words.filter((word) => !profileIdentityIgnoredWords.has(word)).map((word) => {
+    const singular = word.length > 3 && word.endsWith("s") && !word.endsWith("ss")
+      ? word.slice(0, -1)
+      : word;
+    return profileIdentityWordAliases[singular] || singular;
+  }).sort().join(" ");
 }
 
 function generalProfiles(profiles, loadouts) {
   const byName = new Map();
   for (const profile of profiles) {
     const profileName = baseProfileName(profile.name);
-    const profileKey = profileName.toLowerCase();
+    const profileKey = profileIdentity(profile.name);
     if (!byName.has(profileKey)) byName.set(profileKey, {
       profileName, profiles: [],
     });

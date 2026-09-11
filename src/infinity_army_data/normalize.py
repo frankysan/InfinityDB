@@ -1097,6 +1097,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
             "sourceFormatVersion": master["_meta"].get("formatVersion"),
             "sourceFileCount": master["_meta"].get("sourceFileCount"),
             "sourceVersions": master["_meta"].get("sourceVersions"),
+            "snapshotDownloadedOn": master["_meta"].get("snapshotDownloadedOn"),
             "tableCounts": {name: len(rows) for name, rows in tables.items()},
             "warningCount": len(b.warnings),
             "warningCounts": dict(sorted((k.removeprefix("warning:"), v) for k, v in b.stats.items() if k.startswith("warning:"))),

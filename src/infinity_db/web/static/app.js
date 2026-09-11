@@ -117,6 +117,13 @@ function renderUnits(data) {
   const fragment = document.createDocumentFragment();
   for (const unit of data.items) {
     const row = document.createElement("tr");
+    row.className = "unit-row";
+    row.addEventListener("click", (event) => {
+      // Let the unit-name link retain its standard browser interactions,
+      // including opening in a new tab.
+      if (event.target.closest("a")) return;
+      window.location.href = `/units/${unit.id}`;
+    });
     const nameCell = document.createElement("th");
     nameCell.scope = "row";
     nameCell.className = "unit-name";

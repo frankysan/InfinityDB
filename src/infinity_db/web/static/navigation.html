@@ -11,6 +11,11 @@
         Unit explorer
         <span aria-hidden="true">↗</span>
       </a>
+      <a class="nav-item" href="/about"{{ABOUT_CURRENT}}>
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 9v4"/><path d="M10 6.5h.01"/></svg>
+        About InfinityDB
+        <span aria-hidden="true">↗</span>
+      </a>
     </nav>
     <label class="distance-toggle" for="distance-unit-toggle">
       <span class="distance-toggle-label">Distance</span>
@@ -20,6 +25,7 @@
   <div class="sidebar-footer">
     <span class="small-label">Built for the Human Sphere</span>
     <p>Your Infinity data,<br>in one place.</p>
+    {{SNAPSHOT_DOWNLOAD_DATE}}
     <div class="edition"><span aria-hidden="true"></span> InfinityDB / Unit catalog</div>
   </div>
 </aside>

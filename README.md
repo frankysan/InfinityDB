@@ -5,7 +5,7 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.1.1** (2026-09-11).
+Current release: **0.1.2** (2026-09-11).
 
 ## Current features
 
@@ -14,17 +14,23 @@ Current release: **0.1.1** (2026-09-11).
 - Provides merge, normalize, build, export, and local-server commands.
 - Preserves source records and reports normalization anomalies without replacing
   a working database when an import fails.
-- Browses units by army, name search, and paginated results.
+- Browses units by army, accent- and punctuation-insensitive name search, and
+  paginated results. Clicking a catalog row opens that unit's details.
 - Filters optional availability categories, including mercenaries, Spec-Ops,
   Team Operations, and reinforcements.
 - Shows a unit's general profile plus faction- and army-specific profiles,
   loadouts, availability (including reinforcement profiles), skills, equipment,
   and weapons. Army-specific tables are collapsible, with the first standard
   army open initially.
+- Matches reinforcement-only records to their corresponding standard unit when
+  their source labels use equivalent wording, accents, or spelling variants.
 - Provides a shared sidebar with a persistent centimetre/inch display
-  preference for movement and distance-based skill modifiers.
+  preference for movement and distance-based skill modifiers, and displays the
+  download date recorded for a downloader-created Army snapshot.
 - Includes a Skill Modifiers page for browsing distance-related skill extras
   and the units that use them.
+- Includes an About page with project background, maintainer contact details,
+  the GitHub repository, and an LLM code-use disclosure.
 - Bundles army and unit SVG symbols for the browser.
 - Includes standalone scripts for downloading Army JSON snapshots and unit
   symbols; normal build commands do not make network requests.
@@ -55,6 +61,8 @@ infinity-db serve
 Alternatively, download a fresh raw snapshot first. The downloader saves Army
 API metadata and each faction listed in it, writes a timestamped
 `JSON YYYYMMDD-HHMMSS.zip` archive, and removes its temporary loose files.
+When that archive is built, InfinityDB records its download date and shows it
+in the browser sidebar.
 
 ```powershell
 python tools/download_army_json.py data/raw

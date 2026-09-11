@@ -108,6 +108,7 @@ def app(tmp_path: Path) -> Callable:
         assert source is not None
         sources.append(source)
     normalized = normalize_master(merge_sources(sources))
+    normalized["_meta"]["snapshotDownloadedOn"] = "2026-09-10"
     database_path = tmp_path / "infinity.db"
     export_database(normalized, database_path)
     return create_app(database_path)
@@ -306,6 +307,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"Infinity" in body
     assert b'aria-label="Project navigation"' in body
     assert b'aria-current="page"' in body
+    assert b"Army snapshot downloaded" in body
+    assert b"September 10, 2026" in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
@@ -317,6 +320,20 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         assert head_status == status
         assert head_headers == headers
         assert head_body == b""
+
+
+def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
+    status, headers, body = request(app, "/about")
+
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"Know your options." in body
+    assert b'Made by Johannes "Franky" Haglund' in body
+    assert b"mailto:johannes@haglund.info" in body
+    assert b"https://github.com/frankysan/InfinityDB" in body
+    assert b"LLM code disclosure" in body
+    assert b'href="/about" aria-current="page"' in body
+    assert b"about.js" in body
 
 
 def test_army_symbol_is_served(app: Callable) -> None:
@@ -357,6 +374,9 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b'document.createElement("details")' in body
     assert b"function isStandardArmy(army)" in body
     assert b"section.open = expanded" in body
+    assert b"function profileIdentity(profileName)" in body
+    assert b"reconaissance: \"recon\"" in body
+    assert b'"troops", "autonomous", "intervention", "unit"' in body
 
 
 def test_distance_preference_script_is_served(app: Callable) -> None:

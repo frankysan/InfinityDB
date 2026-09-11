@@ -8,6 +8,7 @@ import sqlite3
 import unicodedata
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,11 @@ REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
 NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
 DISTANCE_DIVISOR = Decimal("2.5")
 NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
+UNIT_IDENTITY_WORD_ALIASES = {
+    "armoured": "armored",
+    "reconnaissance": "recon",
+    "reconaissance": "recon",
+}
 
 
 def is_reinforcement_army_id(army_id: int) -> bool:
@@ -54,6 +60,12 @@ def canonical_army_id(army_id: int) -> int:
 
 def unit_sort_key(value: object) -> str:
     """Return a case-insensitive, punctuation-free key for unit-name ordering."""
+    decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
+    return "".join(character for character in decomposed if character.isalnum())
+
+
+def accent_insensitive_key(value: object) -> str:
+    """Return text suitable for case-, accent-, and punctuation-insensitive matching."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
     return "".join(character for character in decomposed if character.isalnum())
 
@@ -98,10 +110,42 @@ def unit_group_key(row: sqlite3.Row) -> tuple[int, str]:
     )
 
 
+def normalized_unit_identity(value: object) -> str:
+    """Return an order-insensitive, singularized identity for a unit label."""
+    identity = re.sub(r"^reinf(?:\.|:)?\s*", "", str(value or ""), flags=re.IGNORECASE)
+    decomposed = unicodedata.normalize("NFKD", identity).casefold()
+    words = re.findall(r"[^\W_]+", decomposed)
+    normalized_words = [
+        UNIT_IDENTITY_WORD_ALIASES.get(
+            root := (
+                word[:-1]
+                if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
+                else word
+            ),
+            root,
+        )
+        for word in words
+    ]
+    return " ".join(sorted(normalized_words))
+
+
+def unit_match_identities(row: sqlite3.Row) -> set[str]:
+    """Return normalized ISC and display-name identities for a unit.
+
+    Reinforcement labels are secondary, and the Army data does not always use
+    the same wording for the ISC and display name.  These identities are used
+    only when joining a reinforcement-only record to a unique standard-unit
+    candidate.
+    """
+    return {
+        identity for value in (row["isc"], row["name"])
+        if (identity := normalized_unit_identity(value))
+    }
+
+
 def unit_base_identity(row: sqlite3.Row) -> str:
-    """Return an ISC identity that treats reinforcement labels as secondary."""
-    identity = row["isc"] or row["name"]
-    return re.sub(r"^reinf\.\s*", "", identity, flags=re.IGNORECASE).casefold()
+    """Return a stable primary identity for a logical unit group."""
+    return min(unit_match_identities(row), default="")
 
 
 def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> None:
@@ -156,8 +200,11 @@ def logical_unit_groups(
             "main_army_id": row["main_army_id"] if "main_army_id" in row.keys() else None,
             "source_ids": [],
             "names": [], "armies": {}, "army_occurrences": [],
-            "base_identity": base_identity, "reinforcement_only": reinforcement_only,
+            "base_identity": base_identity,
+            "match_identities": set(unit_match_identities(row)),
+            "reinforcement_only": reinforcement_only,
         })
+        group["match_identities"].update(unit_match_identities(row))
         group["source_ids"].append(row["id"])
         group["names"].append(row["name"])
         for army in armies:
@@ -176,11 +223,16 @@ def logical_unit_groups(
     standard_groups: dict[str, list[dict[str, Any]]] = {}
     for group in groups.values():
         if not group["reinforcement_only"]:
-            standard_groups.setdefault(group["base_identity"], []).append(group)
+            for identity in group["match_identities"]:
+                standard_groups.setdefault(identity, []).append(group)
     for key, group in list(groups.items()):
-        candidates = standard_groups.get(group["base_identity"], [])
+        candidates = {
+            id(candidate): candidate
+            for identity in group["match_identities"]
+            for candidate in standard_groups.get(identity, [])
+        }.values()
         if group["reinforcement_only"] and len(candidates) == 1:
-            target = candidates[0]
+            target = next(iter(candidates))
             target["source_ids"].extend(group["source_ids"])
             target["names"].extend(group["names"])
             target["armies"].update(group["armies"])
@@ -305,6 +357,18 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def snapshot_downloaded_on(self) -> date | None:
+        """Return the raw snapshot's download date, when recorded by the build."""
+        with self._connect() as connection:
+            row = connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?", ("_meta",)
+            ).fetchone()
+        try:
+            value = json.loads(row["value"]).get("snapshotDownloadedOn") if row else None
+            return date.fromisoformat(value) if isinstance(value, str) else None
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return None
 
     def list_armies(self) -> list[dict[str, Any]]:
         with self._connect() as connection:
@@ -436,7 +500,7 @@ class Database:
                 group["normal_army_ids"] = set().union(
                     *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
                 )
-            search_key = search.casefold()
+            search_key = accent_insensitive_key(search)
             grouped = []
             for group in groups:
                 visible_armies = {
@@ -447,7 +511,9 @@ class Database:
                     continue
                 if army_id is not None and army_id not in visible_armies:
                     continue
-                if search and not any(search_key in name.casefold() for name in group["names"]):
+                if search and not any(
+                    search_key in accent_insensitive_key(name) for name in group["names"]
+                ):
                     continue
                 grouped.append({**group, "armies": visible_armies})
             grouped.sort(key=lambda group: (unit_sort_key(group["name"]), group["id"]))

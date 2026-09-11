@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import zipfile
+from datetime import datetime
 from pathlib import Path
 
 from . import __version__
@@ -13,6 +15,19 @@ from .normalize import normalize_master, validate_normalized
 from .normalize import write_json as write_normalized
 
 DEFAULT_RAW_DIRECTORY = Path("data/raw")
+
+
+def snapshot_downloaded_on(source: Path) -> str | None:
+    """Return the ISO download date encoded by a downloader-created ZIP name."""
+    match = re.fullmatch(
+        r"JSON (\d{8})(?:-\d{6}(?:-\d+)?)?\.zip", source.name, re.IGNORECASE
+    )
+    if match is None:
+        return None
+    try:
+        return datetime.strptime(match.group(1), "%Y%m%d").date().isoformat()
+    except ValueError:
+        return None
 
 
 def latest_snapshot(directory: Path = DEFAULT_RAW_DIRECTORY) -> Path:
@@ -59,6 +74,8 @@ def _merge(
 ) -> dict:
     sources, skipped = load_sources(source)
     master = merge_sources(sources)
+    if downloaded_on := snapshot_downloaded_on(source):
+        master["_meta"]["snapshotDownloadedOn"] = downloaded_on
     if metadata is not None:
         master["armyMetadata"] = metadata
     if verify:
