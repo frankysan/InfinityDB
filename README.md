@@ -132,15 +132,17 @@ repeatable Docker Compose deployment with Gunicorn and Caddy is provided in the
 ## Linux deployment
 
 The supplied Docker Compose configuration packages the application and its
-validated SQLite snapshot in an immutable image, while Caddy provides HTTPS
-and reverse-proxying. Build the database before building the image:
+validated SQLite snapshot in an immutable image. Caddy listens on HTTP and
+reverse-proxies to the application; place it behind an external TLS reverse
+proxy for public HTTPS. Build the database before building the image:
 
 ```sh
 infinity-db build --compact
-DOMAIN=infinity.example.com IMAGE_TAG=2026-09-10 docker compose up -d --build
+DOMAIN=infinity.example.com IMAGE_TAG=2026-09-11 docker compose up -d --build
 ```
 
-Replace the hostname with the public domain whose DNS points at the server.
+Replace the hostname with the public domain configured at the external TLS
+reverse proxy.
 See the [Linux deployment guide](docs/deployment.md) for prerequisites,
 updates, rollback behavior, and operational commands.
 

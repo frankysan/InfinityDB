@@ -37,7 +37,7 @@ records its schema version. Imports build a temporary sibling file, check databa
 integrity, then replace the destination. Incompatible schemas require a rebuild
 from normalized JSON for now.
 
-The initial unit browser queries `units`, `army_units`, and `army_lists`. It excludes
+The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,
 preserving the distinction between list membership and canonical identity.
 

@@ -51,7 +51,7 @@ version and rejects incompatible databases with a rebuild instruction. Migration
 of persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 
-## Initial HTTP API
+## HTTP API
 
 All routes are same-origin and read-only. `GET` returns JSON or a static asset;
 `HEAD` returns the corresponding headers without a body.
@@ -74,7 +74,8 @@ The zero total above illustrates the response shape.
   faction references.
 - `main_army_id` is derived from canonical ownership and always references a
   whole-army faction group (`xx01`); it is null when that mapping is unavailable.
-- Search matches literal, case-insensitive name substrings, including Unicode.
+- Search matches accent- and punctuation-insensitive, case-folded name
+  substrings, including Unicode.
 - Results sort by display name after case-folding, removing diacritics, and ignoring
   punctuation and other non-alphanumeric characters; unit ID breaks ties for stable
   pagination.
@@ -88,13 +89,24 @@ The zero total above illustrates the response shape.
 - Unknown resources return 404; unsupported methods return 405; database read
   failures return 503 without exposing internal exception details.
 
+### `GET /api/units/{unit_id}`
+
+Returns one logical unit, including its general data and the profiles,
+loadouts, availability, skills, equipment, and weapons that apply to each army
+where it occurs. A reinforcement-only source variant is folded into a uniquely
+matching standard unit. Unknown unit IDs return 404.
+
+### `GET /api/skill-extras`
+
+Returns `{ "items": [...] }` of distinct skill/extra combinations whose extra
+contains a distance value, together with the units using each combination.
+The Skill Modifiers browser page consumes this endpoint.
+
 ## Next increments
 
-1. Add unit detail routes and views showing profiles and loadouts in a selected
-   army context, retaining army-specific points, AVA, and rules.
-2. Add equipment, weapon, and skill reference pages using existing normalized
-   catalog and occurrence tables.
-3. Expose fireteams and relationships while showing unresolved source references
+1. Add equipment and weapon reference pages using existing normalized catalog
+   and occurrence tables.
+2. Expose fireteams and relationships while showing unresolved source references
    explicitly.
-4. Add migrations, deployment, and another database adapter when their requirements
+3. Add migrations and another database adapter when their requirements
    are known. Keep user-owned data separate from replaceable imported snapshots.
