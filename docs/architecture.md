@@ -63,6 +63,12 @@ retain the common layout and responsive behavior. Detail renderers also reuse
 and `.badge`; use their modifiers for semantic variants instead of duplicating
 detail-table geometry or type treatments.
 
+Browser preferences are stored locally. The shared sidebar currently provides
+distance units and a default-off Developer mode. Developer mode sets
+`data-developer-mode` on the document root; use `.developer-only` for inline
+technical details and `.id-column` for table columns so they remain hidden in
+the player-facing view by default.
+
 The required API `metadata.json` is a supplemental snapshot. Its records are
 preserved separately and enrich display names for matching army IDs. It never
 creates an army list or changes unit membership, which continue to come solely

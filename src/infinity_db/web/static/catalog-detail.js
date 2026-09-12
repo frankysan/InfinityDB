@@ -217,6 +217,7 @@ function render(item) {
   name.firstChild.textContent = item.name;
   if (meta) {
     if (item.wiki) {
+      meta.classList.remove("developer-only");
       const link = document.createElement("a");
       link.href = item.wiki;
       link.target = "_blank";
@@ -224,7 +225,8 @@ function render(item) {
       link.textContent = item.wiki;
       meta.replaceChildren(link);
     } else {
-      meta.textContent = `Equipment #${item.id}`;
+      meta.classList.add("developer-only");
+      meta.textContent = `${catalog === "equipment" ? "Equipment" : "Weapon"} #${item.id}`;
     }
   }
   const sections = usageSections(item);

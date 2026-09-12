@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Default-off Developer mode in the sidebar. It reveals database IDs and ID
+  table columns for development and data-review work without exposing them in
+  the standard player-facing reference.
 - Landing page that introduces InfinityDB and links to the main reference
   catalogs.
 - Surface and Deepspace division badges on applicable unit profiles.

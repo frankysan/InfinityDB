@@ -426,6 +426,29 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert b"Version 0.2.1+dev" in body
 
 
+def test_developer_mode_controls_database_id_visibility_and_sidebar_placement(app: Callable) -> None:
+    status, _, body = request(app, "/units")
+
+    assert status == 200
+    assert b'id="developer-mode-toggle"' in body
+    assert body.index(b"Your Infinity data") < body.index(b"developer-mode-toggle")
+    assert body.index(b"developer-mode-toggle") < body.index(b"Army snapshot downloaded")
+    assert b'<th scope="col" class="id-column">Unit ID</th>' in body
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b'html:not([data-developer-mode="true"]) .id-column { display: none; }' in styles
+    assert b"--sidebar-section-gap: 70px" in styles
+    assert b".sidebar-developer { margin-top: var(--sidebar-section-gap); }" in styles
+    assert b".sidebar-footer .sidebar-developer + .snapshot-date { margin: 20px 0; }" in styles
+
+    status, _, preferences = request(app, "/static/preferences.js")
+    assert status == 200
+    assert b'const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";' in preferences
+    assert b"function initializeDeveloperModeToggle()" in preferences
+    assert b'new CustomEvent("developermodechange"' in preferences
+
+
 def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     status, headers, body = request(app, "/about")
 

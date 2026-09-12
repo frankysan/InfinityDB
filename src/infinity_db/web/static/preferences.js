@@ -1,4 +1,5 @@
 const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
+const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";
 const DISTANCE_NUMBER_PATTERN = /[+-]?\d+(?:\.\d+)?/g;
 
 export function distanceUnit() {
@@ -30,3 +31,21 @@ export function initializeDistanceUnitToggle() {
     window.dispatchEvent(new CustomEvent("distanceunitchange", { detail: nextUnit }));
   });
 }
+
+export function initializeDeveloperModeToggle() {
+  const toggle = document.getElementById("developer-mode-toggle");
+  if (!toggle) return;
+
+  const enabled = window.localStorage.getItem(DEVELOPER_MODE_KEY) === "true";
+  document.documentElement.dataset.developerMode = String(enabled);
+  toggle.checked = enabled;
+
+  toggle.addEventListener("change", () => {
+    const next = toggle.checked;
+    document.documentElement.dataset.developerMode = String(next);
+    window.localStorage.setItem(DEVELOPER_MODE_KEY, String(next));
+    window.dispatchEvent(new CustomEvent("developermodechange", { detail: next }));
+  });
+}
+
+initializeDeveloperModeToggle();

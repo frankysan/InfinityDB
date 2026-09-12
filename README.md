@@ -27,6 +27,8 @@ Current release: **0.2.1** (2026-09-12).
 - Provides a shared sidebar with a persistent centimetre/inch display
   preference for movement and distance-based skill modifiers, and displays the
   download date recorded for a downloader-created Army snapshot.
+- Provides a default-off Developer mode in the sidebar for showing database IDs
+  and ID table columns during data review.
 - Uses a shared page shell on every route: the navigation, breadcrumb header,
   catalog label, and versioned footer are rendered centrally. Core visual
   values are defined as CSS design tokens, so new screens can reuse the same

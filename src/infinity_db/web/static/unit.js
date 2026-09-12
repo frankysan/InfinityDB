@@ -467,9 +467,12 @@ function profileItems(items, catalog, fallbackLabel) {
   if (!items.length) return "—";
   const result = document.createDocumentFragment();
   items.forEach((item, index) => {
-    const name = item.name || `${fallbackLabel} #${text(item.id)}`;
+    const name = item.name || fallbackLabel;
+    const hiddenIds = [];
+    if (!item.name) hiddenIds.push(`${fallbackLabel} #${text(item.id)}`);
     const extras = (item.extras || []).map((extra) => {
-      const extraName = extra.name || `Extra #${text(extra.id)}`;
+      const extraName = extra.name || "Extra";
+      if (!extra.name) hiddenIds.push(`Extra #${text(extra.id)}`);
       if (!extra.is_distance) return extraName;
       return formatDistanceExtra(extraName, {
         showPositiveSign: item.name !== "Super-Jump",
@@ -483,6 +486,12 @@ function profileItems(items, catalog, fallbackLabel) {
     const link = document.createElement("a");
     link.href = `/${catalog}/${encodeURIComponent(item.id)}`;
     link.textContent = label;
+    if (hiddenIds.length) {
+      const details = document.createElement("span");
+      details.className = "developer-only";
+      details.textContent = ` (${hiddenIds.join(", ")})`;
+      link.append(details);
+    }
     if (index) result.append(", ");
     result.append(link);
   });
@@ -724,11 +733,15 @@ function render(unit) {
       || "Main army";
     name.prepend(mainIcon);
   }
-  meta.textContent = [
+  const unitMetadata = [
     unit.isc,
     unit.isc_abbr && `(${unit.isc_abbr})`,
-    `Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`,
-  ].filter(Boolean).join(" · ");
+  ].filter(Boolean);
+  meta.replaceChildren(document.createTextNode(unitMetadata.join(" · ")));
+  const unitIds = document.createElement("span");
+  unitIds.className = "developer-only";
+  unitIds.textContent = `${unitMetadata.length ? " · " : ""}Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`;
+  meta.append(unitIds);
   status.hidden = true;
   const allProfiles = unit.armies.flatMap((army) => army.profiles.map((profile) => ({
     ...profile, armyId: army.id,

@@ -70,6 +70,9 @@ clear requirement justifies it.
   express the need. Detail renderers must compose the shared `.detail-group`,
   `.detail-section-title`, `.data-surface-header`, `.data-label`, and `.badge`
   primitives before adding a semantic modifier.
+- Developer mode is a persistent, default-off browser preference for technical
+  details. Mark inline database identifiers with `.developer-only` and ID table
+  columns with `.id-column`; both must stay hidden unless Developer mode is on.
 
 ## Style and change discipline
 

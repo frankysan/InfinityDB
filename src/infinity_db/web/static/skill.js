@@ -48,6 +48,7 @@ function render(skill) {
   document.title = `${skill.name} · InfinityDB`;
   name.firstChild.textContent = skill.name;
   if (skill.wiki) {
+    meta.classList.remove("developer-only");
     const link = document.createElement("a");
     link.href = skill.wiki;
     link.target = "_blank";
@@ -55,6 +56,7 @@ function render(skill) {
     link.textContent = skill.wiki;
     meta.replaceChildren(link);
   } else {
+    meta.classList.add("developer-only");
     meta.textContent = `Skill #${skill.id}`;
   }
   const variants = [...skill.variants].sort((left, right) => (
