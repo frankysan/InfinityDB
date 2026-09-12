@@ -37,9 +37,10 @@ and warnings. The schema defines empty tables as well, so API queries do not dep
 on a particular snapshot containing every kind of record.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. Imports build a temporary sibling file, check database
-integrity, then replace the destination. Incompatible schemas require a rebuild
-from normalized JSON for now.
+records its schema version. The current schema version and application
+compatibility revision are both 6. Imports build a temporary sibling file, check
+database integrity, then replace the destination. Incompatible schemas or
+compatibility revisions require a rebuild from normalized JSON for now.
 
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,

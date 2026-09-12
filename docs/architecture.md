@@ -51,7 +51,8 @@ from the army JSON files.
 
 SQLite is the initial backend because it runs locally without a separate service.
 Schema definitions are separate from ingestion code. The current schema has a
-version and rejects incompatible databases with a rebuild instruction. Migration
+schema version of 6 and database compatibility revision of 6; it rejects
+incompatible databases with a rebuild instruction. Migration
 of persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 
@@ -123,5 +124,8 @@ traits, and range data, when present in the supplied metadata snapshot.
 
 1. Expose fireteams and relationships while showing unresolved source references
    explicitly.
-2. Add migrations and another database adapter when their requirements
-   are known. Keep user-owned data separate from replaceable imported snapshots.
+2. Add migrations and another database adapter when their requirements are
+   known, while keeping user-owned data separate from replaceable imported
+   snapshots.
+3. Extend the browser only where it can make source relationships and rules
+   context clearer for players.

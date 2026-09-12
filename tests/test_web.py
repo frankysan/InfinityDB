@@ -395,7 +395,7 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
-    assert b"Version 0.2.0" in body
+    assert b"Version 0.2.1" in body
     assert b"mailto:johannes@haglund.info" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body

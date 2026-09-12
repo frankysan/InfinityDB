@@ -5,7 +5,7 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.2.0** (2026-09-11).
+Current release: **0.2.1** (2026-09-12).
 
 ## Current features
 
@@ -32,8 +32,9 @@ Current release: **0.2.0** (2026-09-11).
 - Includes searchable Skills, Equipment, and Weapons reference catalogs. Their
   detail pages show the matching unit profiles and loadouts; weapon pages also
   show available profiles, traits, range bands, and special weapon data.
-- Includes an About page with project background, maintainer contact details,
-  the GitHub repository, and an LLM code-use disclosure.
+- Includes an About page that explains the local reference, its validated data
+  pipeline, its current capabilities and direction, plus maintainer contact
+  details, the GitHub repository, and an LLM code-use disclosure.
 - Bundles army, unit, order, and characteristic SVG symbols for the browser.
   Army and unit assets use stable ID-and-slug paths, so the browser can serve
   an exact asset without scanning a symbol directory.

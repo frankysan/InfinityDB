@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light">
     <meta name="theme-color" content="#162323">
-    <meta name="description" content="Learn how InfinityDB helps you explore Infinity units and prepare for your next game.">
+    <meta name="description" content="Learn how InfinityDB turns Infinity Army snapshots into a fast, local reference for units, rules, equipment, and weapons.">
     <title>About · InfinityDB</title>
     <link rel="stylesheet" href="/static/styles.css">
     <script type="module" src="/static/about.js"></script>
@@ -21,9 +21,9 @@
 
       <section class="intro about-intro" aria-labelledby="page-title">
         <div>
-          <p class="eyebrow">A clearer way to explore Infinity</p>
+          <p class="eyebrow">A local reference for Infinity</p>
           <h1 id="page-title">Know your options.<span></span></h1>
-          <p class="intro-copy">InfinityDB is a practical reference for the moments between inspiration and deployment. Find the units available to an army, understand what they bring, and keep the details you need close at hand.</p>
+          <p class="intro-copy">InfinityDB is a web app that turns an Infinity Army data snapshot into a clear, searchable reference. It is made for the time between an idea and a game: exploring an army, checking a profile, and understanding the rules and equipment that shape a list.</p>
         </div>
       </section>
 
@@ -31,30 +31,30 @@
         <article class="about-feature">
           <span class="about-number" aria-hidden="true">01</span>
           <div>
-            <h2>Start with your army</h2>
-            <p>Choose an army to narrow the catalog to the troops you can actually field. It is an easy starting point whether you are learning a faction or revisiting an old favourite.</p>
+            <h2>Explore what you can field</h2>
+            <p>Choose an army to narrow the unit catalog to the troops it contains. Search by name, include optional availability such as mercenaries or reinforcements when useful, and open a unit to see the profiles and loadouts available in each army.</p>
           </div>
         </article>
         <article class="about-feature">
           <span class="about-number" aria-hidden="true">02</span>
           <div>
-            <h2>Find a unit quickly</h2>
-            <p>Search by name when a profile catches your eye, then open it to see its available loadouts, stats, equipment, skills, and where it can be used.</p>
+            <h2>Follow details to their source</h2>
+            <p>Unit pages collect general and army-specific profiles, statistics, AVA, skills, equipment, weapons, and loadouts in one place. The Skills, Equipment, and Weapons catalogs then let you work backwards from a rule item to the units and loadouts that use it.</p>
           </div>
         </article>
         <article class="about-feature">
           <span class="about-number" aria-hidden="true">03</span>
           <div>
-            <h2>Compare choices with context</h2>
-            <p>Profiles are grouped by army so you can spot the options and differences that matter to your list. Optional units can be included when you want the broader picture.</p>
+            <h2>Built from a checked snapshot</h2>
+            <p>InfinityDB merges and normalizes downloaded Army data, validates it, and imports it into a local SQLite database. The browser reads that database through a small, read-only API, keeping the source snapshot, the data pipeline, and the reference interface clearly separated.</p>
           </div>
         </article>
       </section>
 
       <section class="about-callout" aria-labelledby="about-callout-title">
-        <p class="eyebrow">Built for the table</p>
+        <p class="eyebrow">Purpose and direction</p>
         <h2 id="about-callout-title">Less hunting. More planning.</h2>
-        <p>Use InfinityDB while you sketch a list, check a profile before a game, or settle a question with your opponent. Distances can be shown in centimetres or inches, so the reference meets your table where it is.</p>
+        <p>Today, InfinityDB is a fast reference for units and their connected rules data, with centimetre and inch distance preferences for the table. Its goal is to grow into a more complete and dependable way to explore Infinity data: make relationships easier to understand, surface more useful context, and add capabilities only where they remain transparent, accurate, and useful to players.</p>
         <a class="button button-primary" href="/">Explore units <span aria-hidden="true">→</span></a>
       </section>
 
@@ -73,7 +73,7 @@
         <p>This project has used large language model (LLM) assistance during development. LLM-generated suggestions and code are reviewed, tested, and remain the responsibility of the project maintainer. The data, game terms, and artwork assets originate from their respective sources; LLM assistance does not imply ownership of those materials.</p>
       </section>
 
-      <footer class="page-footer"><span>InfinityDB <span class="version">Version 0.2.0</span></span><span>A growing reference for your next game.</span></footer>
+      <footer class="page-footer"><span>InfinityDB <span class="version">Version 0.2.1</span></span><span>A growing reference for your next game.</span></footer>
     </main>
   </body>
 </html>

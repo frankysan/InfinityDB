@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.2.1] - 2026-09-12
+
+### Changed
+
+- Aligned the package and command-line version at 0.2.1.
+- Expanded the About page to describe InfinityDB's purpose, local data flow,
+  current reference features, and future direction while retaining its
+  independent-project and transparency disclosures.
+- Refreshed project documentation for the current web reference, data pipeline,
+  and database compatibility revision (6).
+
 ## [0.2.0] - 2026-09-11
 
 ### Added
