@@ -616,7 +616,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
       }
       return rows;
     }),
-    "loadout-table",
+    "data-table--compact loadout-table",
   );
 }
 
@@ -701,7 +701,7 @@ function renderArmyProfile(army, generalByName, expanded) {
       section.append(table(
         [],
         profileTableRows(group.profiles, generalByName),
-        "profile-details-table",
+        "data-table--compact profile-details-table",
       ));
     }
     if (group.loadouts.length) {

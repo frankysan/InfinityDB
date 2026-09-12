@@ -423,10 +423,12 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert b'<header class="topbar page-header">' in body
     assert b'aria-label="Breadcrumb"' in body
     assert b'<footer class="page-footer">' in body
-    assert b"Version 0.2.1+dev" in body
+    assert b"Version 0.3.0" in body
 
 
-def test_developer_mode_controls_database_id_visibility_and_sidebar_placement(app: Callable) -> None:
+def test_developer_mode_controls_database_id_visibility_and_sidebar_placement(
+    app: Callable,
+) -> None:
     status, _, body = request(app, "/units")
 
     assert status == 200
@@ -456,7 +458,7 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
-    assert b"Version 0.2.1+dev" in body
+    assert b"Version 0.3.0" in body
     assert b"mailto:johannes@haglund.info" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
@@ -527,7 +529,7 @@ def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable
     )
     assert b'className: "data-label profile-attributes-label"' in body
     assert b'className: "data-label general-item-label"' in body
-    assert b'"profile-details-table"' in body
+    assert b'"data-table--compact profile-details-table"' in body
     assert b'["Name", "Points", "SWC"]' in body
     assert b"attributeStatline(profile, generalStatsForProfile, true)" in body
 
@@ -575,6 +577,59 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
         assert status == 200
         assert b"detail-group" in body
         assert b"data-surface-header" in body
+
+
+def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    for selector in [
+        b".surface, .explorer",
+        b".surface--subtle",
+        b".surface--highlighted",
+        b".data-table--compact",
+    ]:
+        assert selector in styles
+
+    for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b"data-table--compact" in body
+
+    status, _, weapon_detail = request(app, "/static/catalog-detail.js")
+    assert status == 200
+    assert b'card.className = "explorer surface weapon-profile"' in weapon_detail
+    assert b"const profileTitle = profile.mode || profile.name || variant.name;" in weapon_detail
+    assert b"title.className = \"data-surface-header\";" in weapon_detail
+    assert b"headingText" not in weapon_detail
+    assert b"variantTitle" not in weapon_detail
+    assert b'profileHeading.textContent = "Profile";' in weapon_detail
+    assert b'traitsHeading.textContent = "Traits";' in weapon_detail
+    assert b"if (traitNames.length)" in weapon_detail
+    assert b".weapon-data-heading" in styles
+    assert b'profileRow.className = "weapon-data-row"' in weapon_detail
+    assert b'profileStats.className = "weapon-data-value"' in weapon_detail
+    assert b".weapon-data-row { display: grid;" in styles
+    assert b"border-left: 1px solid #e9ece3" in styles
+    assert b"--surface-data-header: #fafbf8" in styles
+    assert b"thead th { background: var(--surface-data-header);" in styles
+    assert b".weapon-data-heading" in styles
+    assert b".weapon-variants, .weapon-variant, .weapon-profile { width: 100%; }" in styles
+    assert b".weapon-profile .weapon-ranges { display: table;" in styles
+    assert b"width: 100%; table-layout: auto; }" in styles
+
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'generalProfile.className = "explorer general-profile"' in body
+    assert b".general-profile .profile-title" in styles
+    assert b"background: var(--surface-highlight)" in styles
+
+    status, _, body = request(app, "/about")
+    assert status == 200
+    assert b"surface surface--highlighted about-callout" in body
+    assert b"surface surface--subtle about-disclosure" in body
+
+    assert b".usage-section-group thead th:first-child," in styles
+    assert b".usage-section-group thead th:last-child { width: auto; }" in styles
 
 
 def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:
@@ -775,7 +830,8 @@ def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> 
 
     assert status == 200
     assert b'catalog === "equipment" && item.profiles?.length' in body
-    assert b'"Equipment profile"' in body
+    assert b"weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])" in body
+    assert b'"Equipment profile"' not in body
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body
 

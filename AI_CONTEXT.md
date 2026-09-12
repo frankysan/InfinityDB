@@ -70,6 +70,10 @@ clear requirement justifies it.
   express the need. Detail renderers must compose the shared `.detail-group`,
   `.detail-section-title`, `.data-surface-header`, `.data-label`, and `.badge`
   primitives before adding a semantic modifier.
+- Use the shared default, subdued, and highlighted `.surface` variants for
+  cards and panels. Tables use the comfortable default or
+  `.data-table--compact` for detail and usage data; do not introduce local
+  table padding or density rules.
 - Developer mode is a persistent, default-off browser preference for technical
   details. Mark inline database identifiers with `.developer-only` and ID table
   columns with `.id-column`; both must stay hidden unless Developer mode is on.

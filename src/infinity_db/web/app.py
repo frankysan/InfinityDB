@@ -110,10 +110,12 @@ def _page(
         .read_text(encoding="utf-8")
         .replace("{{VERSION}}", escape(__display_version__))
     )
-    return static.joinpath(filename).read_text(encoding="utf-8").replace(
-        "<!-- navigation -->", navigation
-    ).replace("<!-- page-header -->", page_header).replace("<!-- page-footer -->", page_footer).encode(
-        "utf-8"
+    document = static.joinpath(filename).read_text(encoding="utf-8")
+    return (
+        document.replace("<!-- navigation -->", navigation)
+        .replace("<!-- page-header -->", page_header)
+        .replace("<!-- page-footer -->", page_footer)
+        .encode("utf-8")
     )
 
 

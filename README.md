@@ -5,7 +5,7 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.2.1** (2026-09-12).
+Current release: **0.3.0** (2026-09-12).
 
 ## Current features
 
@@ -150,7 +150,7 @@ proxy for public HTTPS. Build the database before building the image:
 
 ```sh
 infinity-db build --compact
-DOMAIN=infinity.example.com IMAGE_TAG=2026-09-11 docker compose up -d --build
+DOMAIN=infinity.example.com IMAGE_TAG=0.3.0 docker compose up -d --build
 ```
 
 Replace the hostname with the public domain configured at the external TLS

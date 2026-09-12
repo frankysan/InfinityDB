@@ -32,6 +32,7 @@ function variantSection(variant) {
   count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
   heading.append(title, count);
   const table = document.createElement("table");
+  table.className = "data-table--compact";
   table.innerHTML = "<caption class=\"sr-only\">Units using this skill variant</caption><thead><tr><th scope=\"col\">Unit</th><th scope=\"col\">Armies</th><th class=\"id-column\" scope=\"col\">ID</th></tr></thead>";
   const body = document.createElement("tbody");
   renderUnitRows(body, variant.units);

@@ -63,6 +63,11 @@ retain the common layout and responsive behavior. Detail renderers also reuse
 and `.badge`; use their modifiers for semantic variants instead of duplicating
 detail-table geometry or type treatments.
 
+Surface hierarchy uses `.surface` with default, `--subtle`, or `--highlighted`
+variants. Tables use the comfortable default or `.data-table--compact` for
+detail and usage data; retain those variants instead of adding page-specific
+cell padding or header type rules.
+
 Browser preferences are stored locally. The shared sidebar currently provides
 distance units and a default-off Developer mode. Developer mode sets
 `data-developer-mode` on the document root; use `.developer-only` for inline

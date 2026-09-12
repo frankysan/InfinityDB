@@ -25,6 +25,10 @@
   --space-4: 32px;
   --control-height: 42px;
   --shadow-card: 0 3px 12px rgb(32 59 53 / 4%);
+  --shadow-surface: 0 3px 6px #203b3503;
+  --surface-highlight: #edf4e7;
+  --surface-highlight-border: #cbd9c0;
+  --surface-data-header: #fafbf8;
 }
 
 * { box-sizing: border-box; }
@@ -89,6 +93,9 @@ html[data-distance-unit="in"] .distance-toggle-options > span:last-child { color
 .landing-links { margin-bottom: 28px; }
 .landing-links .section-heading { padding-inline: 0; }
 .landing-link-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.surface, .explorer { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-surface); }
+.surface--subtle { background: var(--surface-subtle); box-shadow: none; }
+.surface--highlighted { border-color: var(--surface-highlight-border); background: var(--surface-highlight); }
 .landing-link { display: flex; align-items: center; gap: 17px; min-height: 142px; padding: 27px; border: 1px solid #d8e2d4; border-radius: var(--radius-lg); background: #fbfcf8; box-shadow: var(--shadow-card); text-decoration: none; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
 .landing-link:hover { border-color: #a8bf91; box-shadow: 0 9px 23px rgb(32 59 53 / 10%); transform: translateY(-3px); }
 .landing-link-number { color: #779354; font: 11px Consolas, "Courier New", monospace; align-self: start; }
@@ -124,25 +131,25 @@ h1 > span { color: #8caa60; }
 .about-feature h2, .about-callout h2 { color: var(--ink); font-size: 18px; font-weight: 600; letter-spacing: -.4px; }
 .about-feature h2 { margin: 0 0 11px; }
 .about-feature p, .about-callout > p:not(.eyebrow) { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.75; }
-.about-callout { margin-top: 24px; padding: 35px 38px 38px; border: 1px solid #cbd9c0; border-radius: 9px; background: #edf4e7; }
+.about-callout { margin-top: 24px; padding: 35px 38px 38px; }
 .about-callout .eyebrow { margin-bottom: 11px; }
 .about-callout h2 { margin: 0 0 13px; font-size: 24px; }
 .about-callout > p:not(.eyebrow) { max-width: 650px; color: #52634c; }
 .about-callout .button { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
-.about-details, .about-disclosure { margin-top: 24px; padding: 30px 32px; border: 1px solid var(--border); border-radius: 9px; }
+.about-details, .about-disclosure { margin-top: 24px; padding: 30px 32px; }
 .about-details { display: flex; align-items: end; justify-content: space-between; gap: 28px; }
 .about-details h2, .about-disclosure h2 { margin: 0 0 11px; color: var(--ink); font-size: 19px; font-weight: 600; letter-spacing: -.4px; }
 .about-details p:not(.eyebrow), .about-disclosure > p:not(.eyebrow) { margin: 0; max-width: 680px; color: var(--muted); font-size: 12px; line-height: 1.75; }
 .about-details a:not(.button), .about-disclosure a { color: #41683f; }
 .about-details .button { display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; border-color: #b9cbb0; background: #fffefa; color: #31573d; text-decoration: none; white-space: nowrap; }
 .about-details .button:hover { border-color: #8fac82; background: #f1f6eb; }
-.about-disclosure { margin-top: 16px; background: #fafbf8; }
+.about-disclosure { margin-top: 16px; }
 .catalog-stats { display: flex; flex-shrink: 0; padding: 9px 0 5px; }
 .catalog-stats > div { display: flex; flex-direction: column; gap: 8px; min-width: 125px; padding-left: 28px; }
 .catalog-stats > div + div { margin-left: 25px; border-left: 1px solid var(--border); }
 .stat-value { font-size: 34px; font-weight: 450; letter-spacing: -1px; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--ink); }
 .stat-label { font-size: 10px; color: var(--muted); }
-.explorer { width: fit-content; max-width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 3px 6px #203b3503; overflow: hidden; }
+.explorer { width: fit-content; max-width: 100%; overflow: hidden; }
 .unit-detail #unit-content { display: grid; gap: 20px; padding-bottom: 40px; }
 .detail-group { display: grid; width: fit-content; max-width: 100%; gap: 10px; }
 .detail-group > .explorer { width: 100%; }
@@ -150,7 +157,7 @@ h1 > span { color: #8caa60; }
 .detail-section-title--rule { padding: 4px 2px 8px; border-bottom: 2px solid var(--border-strong); color: #244438; font-size: 16px; }
 .detail-section-title--variant { padding: 0 2px; font-size: 13px; font-weight: 600; }
 .unit-detail .general-profile-group { gap: 10px; }
-.unit-detail .general-profile { border: 2px solid #9bb48a; box-shadow: 0 8px 20px #203b3512; }
+.unit-detail .general-profile { border: 2px solid var(--border-strong); box-shadow: 0 8px 20px #203b3512; }
 .data-label { color: #596a5b; font-size: 10px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; }
 .unit-detail .general-profile .general-item-label { padding-left: 46px; }
 .unit-detail .general-profile .general-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; color: #405b4d; }
@@ -176,18 +183,15 @@ h1 > span { color: #8caa60; }
 .availability-badge-reinforcement { border-color: #e1b9a7; background: #fff0e8; color: #87452c; }
 .unit-detail .army-profile > h4 { margin: 0; padding: 12px 18px 0; font-size: 12px; color: #596a5b; }
 .weapon-variants { display: grid; gap: 18px; margin-bottom: 24px; }
-.weapon-variants > .detail-section-title { padding: 0 2px 2px; }
 .weapon-variant { gap: 8px; }
 .weapon-profile > .data-surface-header { border-bottom: 1px solid var(--border); }
 .weapon-profile table { table-layout: auto; }
-.weapon-profile thead th { width: auto; padding: 10px 18px; font-size: 8px; }
-.weapon-profile tbody td { padding: 11px 18px; font-size: 11px; }
+.weapon-profile thead th { width: auto; }
 .weapon-ranges { border-top: 1px solid #e9ece3; }
 .weapon-profile .weapon-ranges { width: auto; table-layout: auto; }
 .weapon-ranges th, .weapon-ranges td { width: auto; }
 .weapon-profile .weapon-ranges th:first-child,
 .weapon-profile .weapon-ranges th:last-child { width: auto; }
-.weapon-ranges thead th { background: #fafbf8; }
 .weapon-ranges th, .weapon-ranges td { text-align: center; }
 .weapon-ranges tbody td { color: #405b4d; font-variant-numeric: tabular-nums; }
 .weapon-ranges tbody td.range-modifier-0 { background: #009fe3; color: #fff; }
@@ -196,6 +200,9 @@ h1 > span { color: #8caa60; }
 .weapon-ranges tbody td.range-modifier-minus-6 { background: #cd171a; color: #fff; }
 .weapon-profile-stats { margin: 0; padding: 12px 18px; border-top: 1px solid #e9ece3; color: #405b4d; font-size: 11px; line-height: 1.6; font-variant-numeric: tabular-nums; }
 .weapon-traits { margin: 0; padding: 12px 18px 14px; border-top: 1px solid #e9ece3; color: #52634c; font-size: 11px; line-height: 1.6; }
+.weapon-data-row { display: grid; grid-template-columns: minmax(105px, 30%) minmax(0, 1fr); border-top: 1px solid #e9ece3; }
+.weapon-data-heading { display: flex; align-items: center; margin: 0; padding: 12px 18px; background: var(--surface-data-header); color: #64715d; font-size: 9px; font-weight: 550; letter-spacing: 1.1px; text-transform: uppercase; }
+.weapon-data-value { margin: 0; padding: 12px 18px; border-left: 1px solid #e9ece3; color: #52634c; font-size: 11px; line-height: 1.6; }
 .section-heading { display: flex; justify-content: space-between; align-items: center; padding: 23px 26px 0; }
 h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.2px; }
 .section-index { font-size: 9px; color: #62725e; letter-spacing: 1.2px; font-family: Consolas, "Courier New", monospace; }
@@ -234,19 +241,20 @@ input::placeholder { color: #677261; }
 .state-symbol { width: 36px; height: 36px; border-radius: 50%; background: #edf1e6; color: #5e7951; display: grid; place-items: center; font-size: 21px; }
 .spinner { width: 26px; height: 26px; border: 2px solid #e3e9dc; border-top-color: #62874c; border-radius: 50%; animation: spin .85s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-table { width: auto; border-collapse: collapse; text-align: left; table-layout: auto; }
+table { --table-heading-padding: 16px 26px; --table-cell-padding: 18px 26px; --table-heading-size: 9px; --table-cell-size: inherit; --table-heading-spacing: 1.2px; width: auto; border-collapse: collapse; text-align: left; table-layout: auto; }
+.data-table--compact { --table-heading-padding: 10px 14px; --table-cell-padding: 11px 14px; --table-heading-size: 8px; --table-cell-size: 11px; --table-heading-spacing: 1px; }
 .unit-detail .profile-summary > :first-child { width: 30%; }
 .profile-summary th, .profile-summary td { white-space: nowrap; }
 .unit-detail .general-profile .general-item-label { width: 30%; }
-.unit-detail .general-profile .profile-title { margin: 0; padding: 16px 26px 13px; color: #2d4134; font-size: 17px; font-weight: 600; }
+.unit-detail .general-profile .profile-title { margin: 0; padding: 16px 26px 13px; border-bottom: 1px solid var(--surface-highlight-border); background: var(--surface-highlight); color: #2d4134; font-size: 17px; font-weight: 600; }
 .unit-detail .general-profile .profile-title .order-symbol { width: 23px; height: 23px; }
-thead th { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: #64715d; font-weight: 550; padding: 16px 26px; border-bottom: 1px solid var(--border); }
+thead th { background: var(--surface-data-header); font-size: var(--table-heading-size); letter-spacing: var(--table-heading-spacing); text-transform: uppercase; color: #64715d; font-weight: 550; padding: var(--table-heading-padding); border-bottom: 1px solid var(--border); }
 thead th:first-child { width: 43%; }
 thead th:last-child { width: 115px; }
-tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: 18px 26px; vertical-align: middle; }
+.usage-section-group thead th:first-child,
+.usage-section-group thead th:last-child { width: auto; }
+tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: var(--table-cell-padding); vertical-align: middle; font-size: var(--table-cell-size); }
 .stat-different { background: #fff3d5; color: #704d00; font-weight: 700; box-shadow: inset 3px 0 #d79b2d; }
-.unit-detail .army-profile thead th { padding: 10px 14px; font-size: 8px; letter-spacing: 1px; }
-.unit-detail .army-profile tbody td { padding: 11px 14px; font-size: 11px; }
 .unit-detail .army-profile .loadout-table tbody th,
 .unit-detail .army-profile .loadout-table tbody td { padding-block: 8px; }
 .unit-detail .army-profile .loadout-table tr.loadout-start > * { border-top: 2px solid #3a5547; }
@@ -317,7 +325,8 @@ tbody tr:hover { background: #f8f9f3; }
   .army-field { flex-basis: 210px; }
   .filters { gap: 12px; }
   .filter-row { gap: 12px; }
-  tbody th, tbody td, thead th { padding-inline: 20px; }
+  table { --table-heading-padding: 16px 20px; --table-cell-padding: 18px 20px; }
+  table.data-table--compact { --table-heading-padding: 10px 14px; --table-cell-padding: 11px 14px; }
   .army-tags { --symbols-per-row: 8; }
   .army-tags-compact { --symbols-per-row: 9; }
 }
@@ -400,9 +409,9 @@ tbody tr:hover { background: #f8f9f3; }
   .button-quiet { font-size: 10px; }
   .results-toolbar { padding-inline: 17px; }
   .sort-label { display: none; }
-  thead th { padding: 14px 17px; font-size: 8px; }
+  table { --table-heading-padding: 14px 17px; --table-cell-padding: 16px 17px; --table-heading-size: 8px; }
+  table.data-table--compact { --table-heading-padding: 10px 12px; --table-cell-padding: 10px 12px; }
   thead th:first-child { width: 47%; }
-  tbody th, tbody td { padding: 16px 17px; }
   .id-column { display: none; }
   .unit-name { font-size: 12px; }
   .unit-symbol { width: 21px; height: 21px; }
@@ -434,13 +443,14 @@ tbody tr:hover { background: #f8f9f3; }
   .attribute-statline-with-availability { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .attribute-statline > div { padding: 7px 4px; }
   .weapon-profile table { display: block; }
+  .weapon-variants, .weapon-variant, .weapon-profile { width: 100%; }
   .weapon-profile thead, .weapon-profile tbody, .weapon-profile tr { display: block; }
   .weapon-profile thead { display: none; }
   .weapon-profile tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px 12px; }
   .weapon-profile tbody td { min-width: 0; padding: 8px 6px; border-bottom: 1px solid #e9ece3; font-size: 10px; overflow-wrap: anywhere; }
   .weapon-profile tbody td::before { content: attr(data-label); display: block; margin-bottom: 3px; color: #64715d; font-size: 8px; font-weight: 550; letter-spacing: .6px; line-height: 1.2; text-transform: uppercase; }
   .weapon-profile .weapon-ranges tbody tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .weapon-profile .weapon-ranges { display: table; table-layout: auto; }
+  .weapon-profile .weapon-ranges { display: table; width: 100%; table-layout: auto; }
   .weapon-profile .weapon-ranges thead { display: table-header-group; }
   .weapon-profile .weapon-ranges tbody { display: table-row-group; }
   .weapon-profile .weapon-ranges tr { display: table-row; }

@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-12
+
 ### Added
 
 - Default-off Developer mode in the sidebar. It reveals database IDs and ID
@@ -16,8 +18,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
-- The shared footer identifies unreleased builds as `0.2.1+dev` while retaining
-  the released application version as 0.2.1.
+- Unified page and detail-card hierarchy around default, subdued, and
+  highlighted surface variants, and standardized data tables on comfortable or
+  compact density rules.
+- Released version 0.3.0 across the package, command-line tools, and browser
+  footer.
 - `infinity-db build` now requires validated Army API `metadata.json` and the
   database compatibility revision increased to 7; rebuild existing databases
   before starting the application.

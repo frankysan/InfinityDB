@@ -49,14 +49,14 @@ function rangeBandLabel(band) {
 
 function specialWeaponProfile(profile) {
   const card = document.createElement("section");
-  card.className = "explorer weapon-profile special-weapon-profile";
+  card.className = "explorer surface weapon-profile special-weapon-profile";
   const title = document.createElement("h4");
   title.className = "data-surface-header";
   title.textContent = "Armed Turret profile";
   card.append(title);
 
   const statTable = document.createElement("table");
-  statTable.className = "weapon-statline special-weapon-statline";
+  statTable.className = "data-table--compact weapon-statline special-weapon-statline";
   const header = document.createElement("thead");
   const headerRow = document.createElement("tr");
   const valueRow = document.createElement("tr");
@@ -89,35 +89,25 @@ function specialWeaponProfile(profile) {
   return card;
 }
 
-function weaponVariants(variants, headingText = "Weapon variants") {
+function weaponVariants(variants) {
   const section = document.createElement("section");
   section.className = "weapon-variants";
-  const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
-  heading.textContent = headingText;
-  section.append(heading);
 
   for (const variant of variants) {
     const variantSection = document.createElement("section");
     variantSection.className = "detail-group weapon-variant";
-    const variantTitle = document.createElement("h3");
-    variantTitle.className = "detail-section-title detail-section-title--variant";
-    variantTitle.textContent = variant.name;
-    variantSection.append(variantTitle);
 
     for (const profile of variant.profiles) {
       const card = document.createElement("section");
-      card.className = "explorer weapon-profile";
-      const profileTitle = profile.mode || (profile.name !== variant.name ? profile.name : "");
-      if (profileTitle) {
-        const title = document.createElement("h4");
-        title.className = "data-surface-header";
-        title.textContent = profileTitle;
-        card.append(title);
-      }
+      card.className = "explorer surface weapon-profile";
+      const profileTitle = profile.mode || profile.name || variant.name;
+      const title = document.createElement("h4");
+      title.className = "data-surface-header";
+      title.textContent = profileTitle;
+      card.append(title);
 
     const statTable = document.createElement("table");
-    statTable.className = "weapon-statline";
+    statTable.className = "data-table--compact weapon-statline";
     statTable.innerHTML = "<thead><tr><th>Ammunition</th><th>B</th><th>DAM</th><th>Saving</th></tr></thead>";
     const statRow = document.createElement("tr");
     const saving = [profile.saving, profile.saving_num].filter((value) => value !== null && value !== undefined && value !== "").join(" × ");
@@ -135,7 +125,7 @@ function weaponVariants(variants, headingText = "Weapon variants") {
     const modifiers = rangeBands.map((band) => rangeModifier(profile.ranges, band.maximum));
     if (modifiers.some(Boolean)) {
       const rangeTable = document.createElement("table");
-      rangeTable.className = "weapon-ranges";
+      rangeTable.className = "data-table--compact weapon-ranges";
       const rangeHeader = document.createElement("thead");
       const headerRow = document.createElement("tr");
       for (const band of rangeBands) {
@@ -160,17 +150,31 @@ function weaponVariants(variants, headingText = "Weapon variants") {
     }
 
       if (profile.profile) {
+        const profileRow = document.createElement("div");
+        profileRow.className = "weapon-data-row";
+        const profileHeading = document.createElement("h5");
+        profileHeading.className = "weapon-data-heading";
+        profileHeading.textContent = "Profile";
         const profileStats = document.createElement("p");
-        profileStats.className = "weapon-profile-stats";
-        profileStats.textContent = `Profile: ${profile.profile}`;
-        card.append(profileStats);
+        profileStats.className = "weapon-data-value";
+        profileStats.textContent = profile.profile;
+        profileRow.append(profileHeading, profileStats);
+        card.append(profileRow);
       }
 
-      const traits = document.createElement("p");
-    traits.className = "weapon-traits";
-    const traitNames = Array.isArray(profile.traits) ? profile.traits : [profile.traits].filter(Boolean);
-    traits.textContent = `Traits: ${traitNames.length ? traitNames.join(" · ") : "—"}`;
-      card.append(traits);
+      const traitNames = Array.isArray(profile.traits) ? profile.traits : [profile.traits].filter(Boolean);
+      if (traitNames.length) {
+        const traitsRow = document.createElement("div");
+        traitsRow.className = "weapon-data-row";
+        const traitsHeading = document.createElement("h5");
+        traitsHeading.className = "weapon-data-heading";
+        traitsHeading.textContent = "Traits";
+        const traits = document.createElement("p");
+        traits.className = "weapon-data-value";
+        traits.textContent = traitNames.join(" · ");
+        traitsRow.append(traitsHeading, traits);
+        card.append(traitsRow);
+      }
       variantSection.append(card);
     }
     section.append(variantSection);
@@ -193,6 +197,7 @@ function usageSections(item) {
       count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
       summary.append(title, count);
       const table = document.createElement("table");
+      table.className = "data-table--compact";
       table.innerHTML = "<thead><tr><th>Unit</th><th>Armies</th><th class=\"id-column\">ID</th></tr></thead>";
       const body = document.createElement("tbody");
       renderUnitRows(body, variant.units);
@@ -235,7 +240,7 @@ function render(item) {
     ...(catalog === "weapons" && item.weapon_variants?.length
       ? [weaponVariants(item.weapon_variants)] : []),
     ...(catalog === "equipment" && item.profiles?.length
-      ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }], "Equipment profile")] : []),
+      ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
     ...(sections.length ? [usageSectionGroup(sections)] : []),
   );
   content.hidden = false;

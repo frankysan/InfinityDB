@@ -1,9 +1,9 @@
 # Data directories
 
-- `raw/` — downloaded Corvus Belli Army JSON files or ZIP archives, plus the optional
+- `raw/` — downloaded Corvus Belli Army JSON files or ZIP archives, plus the required
   Army API `metadata.json` snapshot. Ignored by Git.
 - `generated/` — generated `master.json`, normalized data, validation reports, and `infinity.db`. Ignored by Git.
 
 Keeping raw and generated data outside source control prevents large snapshots from obscuring code changes.
-InfinityDB 0.2.1 treats generated data as replaceable: builds validate a new
+InfinityDB 0.3.0 treats generated data as replaceable: builds validate a new
 snapshot before atomically replacing `generated/infinity.db`.
