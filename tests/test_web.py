@@ -370,9 +370,10 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     status, headers, body = request(app, "/")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Infinity" in body
+    assert b"Your Infinity reference," in body
+    assert b"in one place." in body
     assert b'aria-label="Project navigation"' in body
-    assert b'aria-current="page"' in body
+    assert b'href="/units"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
@@ -386,6 +387,12 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         assert head_status == status
         assert head_headers == headers
         assert head_body == b""
+
+    status, headers, body = request(app, "/units")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"Unit explorer" in body
+    assert b'href="/units" aria-current="page"' in body
 
 
 def test_about_page_is_served_with_active_navigation(app: Callable) -> None:

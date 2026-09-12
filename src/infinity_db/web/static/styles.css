@@ -53,6 +53,24 @@ html[data-distance-unit="in"] .distance-toggle-options > span:last-child { color
 .main { margin-left: 244px; padding: 0 48px; max-width: 1800px; min-height: 100vh; }
 .main.unit-detail { padding-inline: 20px; max-width: none; }
 .main:focus { outline: none; }
+.landing-hero { max-width: 850px; padding: 96px 0 74px; }
+.landing-hero h1 { font-size: clamp(42px, 5vw, 68px); }
+.landing-hero > p:not(.eyebrow) { max-width: 650px; margin: 24px 0 28px; color: var(--muted); font-size: 16px; line-height: 1.8; }
+.landing-links { margin-bottom: 28px; }
+.landing-links .section-heading { padding-inline: 0; }
+.landing-link-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.landing-link { display: flex; align-items: center; gap: 17px; min-height: 142px; padding: 27px; border: 1px solid #d8e2d4; border-radius: 15px; background: #fbfcf8; box-shadow: 0 3px 12px rgb(32 59 53 / 4%); text-decoration: none; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+.landing-link:hover { border-color: #a8bf91; box-shadow: 0 9px 23px rgb(32 59 53 / 10%); transform: translateY(-3px); }
+.landing-link-number { color: #779354; font: 11px Consolas, "Courier New", monospace; align-self: start; }
+.landing-link strong, .landing-link small { display: block; }
+.landing-link strong { color: var(--ink); font-size: 16px; }
+.landing-link small { margin-top: 7px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.landing-link b { margin-left: auto; color: #66864e; font-size: 18px; font-weight: 400; }
+.landing-about { display: flex; justify-content: space-between; align-items: center; gap: 32px; margin: 0 0 48px; padding: 33px 36px; border-radius: 15px; background: #203b35; color: #e4ebdf; }
+.landing-about .eyebrow { color: #bad096; }
+.landing-about h2 { margin: 0; color: #fff; font-size: 23px; letter-spacing: -.7px; }
+.landing-about p:not(.eyebrow) { max-width: 580px; margin: 10px 0 0; color: #bdccbd; font-size: 13px; line-height: 1.65; }
+.landing-about .button-primary { flex: 0 0 auto; background: #d5efad; color: #18342d; }
 .topbar { display: flex; justify-content: space-between; align-items: center; height: 95px; border-bottom: 1px solid var(--border); }
 .breadcrumb { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 15px; }
 .breadcrumb > span { color: #a3afa4; }
@@ -303,6 +321,13 @@ tbody tr:hover { background: #f8f9f3; }
   .main.unit-detail { padding-inline: 12px; }
   .topbar { height: 61px; }
   .intro { display: block; padding-block: 30px; }
+  .landing-hero { padding: 62px 0 45px; }
+  .landing-hero h1 { font-size: clamp(38px, 11vw, 52px); }
+  .landing-hero > p:not(.eyebrow) { font-size: 13px; }
+  .landing-link-grid { grid-template-columns: 1fr; }
+  .landing-link { min-height: 104px; padding: 20px; }
+  .landing-about { display: block; padding: 27px 22px; }
+  .landing-about .button-primary { margin-top: 22px; }
   h1 { font-size: 38px; letter-spacing: -1.6px; }
   .intro-copy { font-size: 12px; margin-top: 13px; }
   .about-intro .intro-copy { font-size: 13px; }

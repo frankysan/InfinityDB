@@ -167,6 +167,12 @@ class Application:
             content_type = "text/html; charset=utf-8"
             body = _page(
                 "index.html",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+            )
+        elif path == "/units":
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "units.html",
                 active_page="units",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
             )
