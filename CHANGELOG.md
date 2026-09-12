@@ -4,8 +4,18 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Landing page that introduces InfinityDB and links to the main reference
+  catalogs.
+- Surface and Deepspace division badges on applicable unit profiles.
+- Compact navigation menu for narrow browser widths.
+
 ### Changed
 
+- `infinity-db build` now requires validated Army API `metadata.json` and the
+  database compatibility revision increased to 7; rebuild existing databases
+  before starting the application.
 - Standardized every browser route on a shared page shell with injected
   navigation, breadcrumb header, catalog tag, and versioned footer. The web UI
   now defines reusable design tokens for its core surfaces, typography,
