@@ -563,13 +563,15 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert headers["content-type"].startswith("text/html")
     assert b"catalog-list.js" in body
     assert f'href="/{catalog}" aria-current="page"'.encode() in body
+    assert b'<th scope="col">Uses</th>' in body
+    assert b"Reference</th>" not in body
 
     status, headers, body = request(app, f"/api/{catalog}")
     assert status == 200
     assert headers["content-type"].startswith("application/json")
     expected = {
-        "skills": {"id": 11, "name": "Stealth", "wiki": None},
-        "equipment": {"id": 21, "name": "Medikit", "wiki": None},
+        "skills": {"id": 11, "name": "Stealth", "wiki": None, "use_count": 1},
+        "equipment": {"id": 21, "name": "Medikit", "wiki": None, "use_count": 1},
         "weapons": {
             "id": 31,
             "name": "Combi Rifle",
@@ -577,6 +579,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "category": "Rifles",
             "ammunition": None,
             "properties": None,
+            "use_count": 1,
         },
     }
     assert json.loads(body)["items"] == [expected[catalog]]

@@ -589,6 +589,56 @@ class Database:
                     "ORDER BY casefold(c.name), c.id"
                 ).fetchall()
             items = [dict(row) for row in rows]
+            suffix = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[catalog]
+            option_usage = (
+                "SELECT 'option', t.item_id, o.occurrence_id, o.unit_id "
+                "FROM option_weapons AS o JOIN option_weapon_templates AS t "
+                "ON t.id = o.template_id"
+                if catalog == "weapons"
+                else f"SELECT 'option', item_id, occurrence_id, unit_id FROM option_{catalog}"
+            )
+            usage_rows = connection.execute(
+                "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, links.extra_id "
+                "FROM units AS u JOIN ("
+                f"SELECT 'profile' AS source, item_id, occurrence_id, unit_id FROM profile_{catalog} "
+                f"UNION ALL {option_usage} "
+                f"UNION ALL SELECT 'unit_option', item_id, occurrence_id, unit_id FROM unit_option_{catalog}"
+                ") AS uses ON uses.unit_id = u.id LEFT JOIN ("
+                f"SELECT 'profile' AS source, occurrence_id, position, extra_id FROM profile_{suffix}_extras "
+                f"UNION ALL SELECT 'option', occurrence_id, position, extra_id FROM option_{suffix}_extras "
+                f"UNION ALL SELECT 'unit_option', occurrence_id, position, extra_id FROM unit_option_{suffix}_extras"
+                ") AS links ON links.source = uses.source AND links.occurrence_id = uses.occurrence_id "
+                "WHERE u.source_defined = 1 "
+                "ORDER BY uses.source, uses.occurrence_id, links.position"
+            ).fetchall()
+            occurrences: dict[tuple[str, int], dict[str, Any]] = {}
+            for row in usage_rows:
+                occurrence = occurrences.setdefault(
+                    (row["source"], row["occurrence_id"]),
+                    {"item_id": row["item_id"], "unit_id": row["unit_id"], "extras": []},
+                )
+                if row["extra_id"] is not None:
+                    occurrence["extras"].append(row["extra_id"])
+            units = []
+            offset = 0
+            while True:
+                page = self.list_units(limit=500, offset=offset, specops=True)
+                units.extend(page["items"])
+                offset += len(page["items"])
+                if offset >= page["total"]:
+                    break
+            displayed_unit_ids = {
+                source_id: unit["id"] for unit in units for source_id in unit["source_ids"]
+            }
+            use_keys: dict[int, set[tuple[int, tuple[int, ...]]]] = {}
+            for occurrence in occurrences.values():
+                unit_id = displayed_unit_ids.get(occurrence["unit_id"])
+                if unit_id is not None:
+                    use_keys.setdefault(occurrence["item_id"], set()).add(
+                        (unit_id, tuple(occurrence["extras"]))
+                    )
+            for item in items:
+                item["use_count"] = len(use_keys.get(item["id"], set()))
             if catalog not in {"skills", "equipment", "weapons"}:
                 return items
             groups: dict[str, list[dict[str, Any]]] = {}
@@ -620,6 +670,7 @@ class Database:
                         **representative,
                         "name": merged_catalog_name(representative["name"]),
                     }
+                representative["use_count"] = sum(item["use_count"] for item in group)
                 merged.append(representative)
             return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
 

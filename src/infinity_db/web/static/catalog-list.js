@@ -55,12 +55,12 @@ function render() {
     } else {
       name.textContent = item.name;
     }
-    const details = document.createElement("td");
-    details.textContent = [item.type, item.ammunition, item.properties, item.wiki].filter(Boolean).join(" · ") || "—";
+    const useCount = document.createElement("td");
+    useCount.textContent = Number(item.use_count || 0).toLocaleString();
     const id = document.createElement("td");
     id.className = "id-column unit-id";
     id.textContent = item.id;
-    row.append(name, details, id);
+    row.append(name, useCount, id);
     fragment.append(row);
   }
   elements.list.replaceChildren(fragment);

@@ -286,6 +286,7 @@ def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
             "type": None,
             "ammunition": None,
             "properties": None,
+            "use_count": 0,
         }
     ]
     detail = database.get_catalog_item("weapons", 226)
@@ -511,13 +512,28 @@ def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normal
 
     database = Database(path)
     strategos = [item for item in database.list_catalog_items("skills") if item["id"] == 69]
-    assert strategos == [{"id": 69, "name": "Strategos", "wiki": None}]
+    assert strategos == [{"id": 69, "name": "Strategos", "wiki": None, "use_count": 0}]
     assert database.get_skill(70) == {
         "id": 69,
         "name": "Strategos",
         "wiki": None,
         "variants": [],
     }
+
+
+@pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
+def test_catalog_use_count_matches_detail_variant_unit_totals(
+    tmp_path: Path, normalized: dict, catalog: str
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    database = Database(path)
+    detail = database.get_skill(1) if catalog == "skills" else database.get_catalog_item(catalog, 1)
+    assert detail is not None
+    expected_count = sum(len(variant["units"]) for variant in detail["variants"])
+    item = next(item for item in database.list_catalog_items(catalog) if item["id"] == 1)
+    assert item["use_count"] == expected_count
 
 
 def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:
