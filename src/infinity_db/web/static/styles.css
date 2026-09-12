@@ -202,6 +202,10 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: 18px 26px; verti
 .unit-detail .army-profile .loadout-table tr.loadout-start > * { border-top: 2px solid #3a5547; }
 .unit-detail .army-profile .profile-details-table thead { display: none; }
 .unit-detail .army-profile .profile-details-table .profile-summary > th { width: auto; padding: 11px 14px; font-size: 11px; font-weight: 400; }
+.profile-name-with-division { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.division-badge { border-radius: 999px; color: #fff; padding: 2px 6px; font-size: 8px; font-weight: 650; letter-spacing: .35px; line-height: 1.2; text-transform: uppercase; white-space: nowrap; }
+.division-badge-surface { background: #256d1b; }
+.division-badge-deepspace { background: #d68623; }
 .unit-detail .army-profile .army-profiles-heading:not(:first-of-type) { margin-top: 6px; border-top: 2px solid #405b4d; }
 .unit-detail .army-profile .stat-different { box-shadow: inset 2px 0 #d79b2d; }
 .unit-detail .army-profile .profile-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }

@@ -485,6 +485,18 @@ def test_unit_details_frontend_marks_army_profile_section_headings(app: Callable
     assert b'profilesHeading.className = "army-profiles-heading"' in body
 
 
+def test_unit_details_frontend_marks_surface_and_deepspace_profiles(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function profileNameWithDivisionBadge(profile)" in body
+    assert b'for (const division of ["surface", "deepspace"])' in body
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b".division-badge-surface { background: #256d1b; }" in styles
+    assert b".division-badge-deepspace { background: #d68623; }" in styles
+
+
 def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200

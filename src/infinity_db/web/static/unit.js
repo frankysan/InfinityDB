@@ -529,7 +529,7 @@ function profileTableRows(profiles, generalByName) {
     const generalProfile = generalByName.get(profile.name || "");
     const generalStatsForProfile = generalProfile.stats;
     const sharedItems = generalProfile.sharedItems;
-    const profileRow = [{ value: profile.name, header: true, colSpan: 2 }];
+    const profileRow = [{ content: profileNameWithDivisionBadge(profile), header: true, colSpan: 2 }];
     profileRow.className = "profile-summary";
     const rows = [profileRow, [
       { value: "Attributes", header: true, className: "profile-attributes-label" },
@@ -555,6 +555,23 @@ function profileTableRows(profiles, generalByName) {
     }
     return rows;
   });
+}
+
+function profileNameWithDivisionBadge(profile) {
+  const title = document.createElement("span");
+  title.className = "profile-name-with-division";
+  title.append(document.createTextNode(text(profile.name)));
+  const divisions = new Set((profile.characteristics || []).map((characteristic) => (
+    String(characteristic.name || "").toLowerCase()
+  )));
+  for (const division of ["surface", "deepspace"]) {
+    if (!divisions.has(division)) continue;
+    const badge = document.createElement("span");
+    badge.className = `division-badge division-badge-${division}`;
+    badge.textContent = division === "surface" ? "Surface" : "Deepspace";
+    title.append(badge);
+  }
+  return title;
 }
 
 function loadoutTable(loadouts, sharedItems, generalOrderType) {
