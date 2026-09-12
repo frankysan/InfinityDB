@@ -9,8 +9,8 @@ Current release: **0.2.1** (2026-09-12).
 
 ## Current features
 
-- Imports Army JSON snapshots and optional API metadata into a validated SQLite
-  database.
+- Imports Army JSON snapshots together with required API metadata into a
+  validated SQLite database.
 - Provides merge, normalize, build, export, and local-server commands.
 - Preserves source records and reports normalization anomalies without replacing
   a working database when an import fails.
@@ -79,12 +79,11 @@ infinity-db serve
 Open <http://127.0.0.1:8000> and stop the server with `Ctrl+C`.
 
 When no input source is supplied, `infinity-db build` imports the newest ZIP in
-`data/raw/`; provide a source path to choose a different snapshot. If
-`metadata.json` sits next to the source directory or ZIP, it is imported too:
-it supplies official faction names and the ammunition, weapon, skill,
-equipment, and rules catalogs. Army-list JSON remains authoritative for unit
-availability. Use `--no-metadata` to omit metadata or `--metadata PATH` to
-choose another metadata snapshot.
+`data/raw/`; provide a source path to choose a different snapshot. Every
+database build requires `metadata.json`: keep it beside the source directory or
+ZIP, include one copy in the ZIP, or supply `--metadata PATH`. It supplies
+official faction names and the ammunition, weapon, skill, equipment, and rules
+catalogs. Army-list JSON remains authoritative for unit availability.
 
 The army selector includes main-army, sectorial, and reinforcement lists.
 Display names are derived from source slugs when a name is unavailable, and
@@ -108,9 +107,9 @@ infinity-db serve --database other-output/infinity.db --port 8001
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
 adds the SQLite export and web-server commands.
 
-Each build checks lossless source reconstruction, normalized keys and
-relationships, and SQLite import integrity. It writes the following ignored,
-generated artifacts:
+Each build checks that required metadata is present, lossless source
+reconstruction, normalized keys and relationships, and SQLite import
+integrity. It writes the following ignored, generated artifacts:
 
 ```text
 data/generated/master.json

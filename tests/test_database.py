@@ -75,6 +75,11 @@ def normalized() -> dict:
     filters["peripheral"] = [{"id": 1, "name": "Drone"}]
     master = {
         "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
+        "armyMetadata": {
+            "sourceFile": "metadata.json",
+            "sourceSha256": "test-metadata",
+            "data": {"factions": []},
+        },
         "armyLists": {
             "101": {
                 "_meta": {"slug": "first_army", "kind": "faction"},
@@ -919,6 +924,11 @@ def test_empty_import_replaces_previous_database(tmp_path: Path, normalized: dic
     empty = normalize_master(
         {
             "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
+            "armyMetadata": {
+                "sourceFile": "metadata.json",
+                "sourceSha256": "test-metadata",
+                "data": {"factions": []},
+            },
             "armyLists": {},
             "units": {},
         }

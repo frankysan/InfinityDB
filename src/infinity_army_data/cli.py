@@ -38,10 +38,10 @@ def latest_snapshot(directory: Path = DEFAULT_RAW_DIRECTORY) -> Path:
     return max(archives, key=lambda path: (path.stat().st_mtime_ns, path.name.casefold()))
 
 
-def discover_metadata(source: Path, explicit: Path | None, disabled: bool) -> dict | None:
-    """Find the optional API metadata beside a snapshot or within its ZIP."""
-    if disabled:
-        return None
+def discover_metadata(
+    source: Path, explicit: Path | None, *, required: bool = False
+) -> dict | None:
+    """Find API metadata beside a snapshot or within its ZIP."""
     if explicit is not None:
         return load_metadata(explicit)
     sidecar = (source / "metadata.json") if source.is_dir() else source.with_name("metadata.json")
@@ -59,6 +59,11 @@ def discover_metadata(source: Path, explicit: Path | None, disabled: bool) -> di
             if members:
                 member = members[0]
                 return decode_metadata(archive.read(member), member)
+    if required:
+        raise MetadataError(
+            "No metadata.json found; place it beside the source or in the ZIP, "
+            "or provide --metadata PATH"
+        )
     return None
 
 
@@ -71,6 +76,12 @@ def _merge(
     metadata: dict | None = None,
 ) -> dict:
     sources, skipped = load_sources(source)
+    if metadata is not None:
+        skipped = [
+            filename
+            for filename in skipped
+            if Path(filename).name.casefold() != "metadata.json"
+        ]
     master = merge_sources(sources)
     if downloaded_on := snapshot_downloaded_on(source):
         master["_meta"]["snapshotDownloadedOn"] = downloaded_on
@@ -112,7 +123,7 @@ def _normalize(master: dict, output: Path, report: Path, *, compact: bool) -> di
 
 
 def cmd_merge(args: argparse.Namespace) -> int:
-    metadata = discover_metadata(args.source, args.metadata, args.no_metadata)
+    metadata = None if args.no_metadata else discover_metadata(args.source, args.metadata)
     _merge(
         args.source,
         args.output,
@@ -141,7 +152,13 @@ def cmd_build(args: argparse.Namespace) -> int:
     normalized_path = output_dir / "normalized.json"
     report_path = output_dir / "normalized-validation.json"
 
-    metadata = discover_metadata(args.source, args.metadata, args.no_metadata)
+    metadata = (
+        None
+        if getattr(args, "no_metadata", False)
+        else discover_metadata(
+            args.source, args.metadata, required=getattr(args, "require_metadata_for_build", False)
+        )
+    )
     master = _merge(
         args.source,
         master_path,
@@ -154,7 +171,9 @@ def cmd_build(args: argparse.Namespace) -> int:
     return 0
 
 
-def add_data_commands(sub, *, build_handler=cmd_build) -> None:
+def add_data_commands(
+    sub, *, build_handler=cmd_build, require_metadata_for_build: bool = False
+) -> None:
     """Register ingestion commands for both the standalone tools and application CLI."""
     p_merge = sub.add_parser("merge", help="Merge raw Army JSON files into lossless master.json")
     p_merge.add_argument("source", type=Path, help="Source directory or ZIP archive")
@@ -165,7 +184,7 @@ def add_data_commands(sub, *, build_handler=cmd_build) -> None:
     )
     metadata_group = p_merge.add_mutually_exclusive_group()
     metadata_group.add_argument(
-        "--metadata", type=Path, help="Supplementary Army API metadata JSON"
+        "--metadata", type=Path, help="Army API metadata JSON"
     )
     metadata_group.add_argument(
         "--no-metadata", action="store_true", help="Do not load metadata.json"
@@ -194,14 +213,22 @@ def add_data_commands(sub, *, build_handler=cmd_build) -> None:
     p_build.add_argument(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"
     )
-    metadata_group = p_build.add_mutually_exclusive_group()
-    metadata_group.add_argument(
-        "--metadata", type=Path, help="Supplementary Army API metadata JSON"
-    )
-    metadata_group.add_argument(
-        "--no-metadata", action="store_true", help="Do not load metadata.json"
-    )
-    p_build.set_defaults(func=build_handler)
+    if require_metadata_for_build:
+        p_build.add_argument(
+            "--metadata",
+            type=Path,
+            help=(
+                "Required Army API metadata JSON "
+                "(otherwise discover metadata.json beside or in source)"
+            ),
+        )
+    else:
+        metadata_group = p_build.add_mutually_exclusive_group()
+        metadata_group.add_argument("--metadata", type=Path, help="Army API metadata JSON")
+        metadata_group.add_argument(
+            "--no-metadata", action="store_true", help="Do not load metadata.json"
+        )
+    p_build.set_defaults(func=build_handler, require_metadata_for_build=require_metadata_for_build)
 
 
 def build_parser() -> argparse.ArgumentParser:

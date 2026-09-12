@@ -16,8 +16,9 @@ only TCP port 80; Caddy does not obtain or manage TLS certificates.
 ## Deploy or update
 
 From a checked-out release on the server, prepare the database from a source
-snapshot. The build is validated and replaces the local database only after a
-successful import.
+snapshot. `metadata.json` is required: include it in the ZIP, place it beside
+the source snapshot, or pass `--metadata PATH` to the build command. The build
+is validated and replaces the local database only after a successful import.
 
 ```sh
 python3 -m venv .venv
@@ -46,9 +47,10 @@ docker compose pull caddy
 docker compose up -d --build
 ```
 
-To update data, download or place the new raw snapshot in `data/raw/`, repeat
-`infinity-db build --compact`, and run `docker compose up -d --build` with a new
-`IMAGE_TAG`. Do not edit the SQLite file inside a running container.
+To update data, download or place the new raw snapshot and its required
+`metadata.json` in `data/raw/`, repeat `infinity-db build --compact`, and run
+`docker compose up -d --build` with a new `IMAGE_TAG`. Do not edit the SQLite
+file inside a running container.
 
 The application container runs as an unprivileged user with a read-only
 filesystem. Caddy's named volumes are intentionally retained for its runtime

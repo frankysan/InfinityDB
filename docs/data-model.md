@@ -37,8 +37,8 @@ and warnings. The schema defines empty tables as well, so API queries do not dep
 on a particular snapshot containing every kind of record.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version and application
-compatibility revision are both 6. Imports build a temporary sibling file, check
+records its schema version. The current schema version is 6 and the application
+compatibility revision is 7. Imports build a temporary sibling file, check
 database integrity, then replace the destination. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now.
 
@@ -52,12 +52,14 @@ The rules-reference browsers query the global `skills`, `equipment`, and
 display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
-## Supplementary Army API metadata
+## Required Army API metadata
 
-`data/raw/metadata.json` is an optional supplementary API snapshot. When it is
-beside an Army directory or ZIP archive, `infinity-db build` discovers it
-automatically. It is copied losslessly into `master.json` and `normalized.json`,
-and its nine collections are available as `metadata_*` SQLite tables.
+`metadata.json` is a required supplementary API snapshot for database builds.
+When it is beside an Army directory or ZIP archive, `infinity-db build`
+discovers it automatically; otherwise use `--metadata PATH`. It is copied
+losslessly into `master.json` and `normalized.json`, and its nine collections
+are available as `metadata_*` SQLite tables. Database export also rejects
+normalized data that does not contain valid Army metadata.
 
 Faction names enrich matching `army_lists` by numeric ID. Army list files remain
 the authority for which armies and units are selectable: metadata-only factions

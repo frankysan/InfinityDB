@@ -14,7 +14,7 @@ inspection, validation, and rebuilding snapshots.
 
 ```text
 Army directory / ZIP
-    + optional metadata.json
+    + required metadata.json
     -> merge + lossless verification
     -> master.json
     -> normalize + relationship validation
@@ -44,14 +44,15 @@ and requires no JavaScript build step. Bundled army and unit symbols are
 addressed by stable ID-and-slug paths, while JavaScript maps source identities
 to those paths.
 
-The optional API `metadata.json` is a supplemental snapshot. Its records are
+The required API `metadata.json` is a supplemental snapshot. Its records are
 preserved separately and enrich display names for matching army IDs. It never
 creates an army list or changes unit membership, which continue to come solely
-from the army JSON files.
+from the army JSON files. Database builds fail when no metadata snapshot is
+provided beside, inside, or explicitly alongside the Army source.
 
 SQLite is the initial backend because it runs locally without a separate service.
 Schema definitions are separate from ingestion code. The current schema has a
-schema version of 6 and database compatibility revision of 6; it rejects
+schema version of 6 and database compatibility revision of 7; it rejects
 incompatible databases with a rebuild instruction. Migration
 of persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.

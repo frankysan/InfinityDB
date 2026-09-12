@@ -56,7 +56,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
-    add_data_commands(sub, build_handler=cmd_build)
+    add_data_commands(sub, build_handler=cmd_build, require_metadata_for_build=True)
 
     p_export = sub.add_parser("export", help="Import validated normalized JSON into SQLite")
     p_export.add_argument("input", type=Path, help="normalized.json input")

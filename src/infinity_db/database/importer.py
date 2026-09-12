@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from infinity_army_data.metadata import MetadataError, validate_metadata_envelope
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
 
 from .schema import (
@@ -35,6 +36,13 @@ def validate_input(data: dict[str, Any]) -> None:
         raise ValueError(f"Expected {FORMAT_NAME!r}, version {FORMAT_VERSION}")
     if meta["formatVersion"] != FORMAT_VERSION:
         raise ValueError(f"Unsupported normalized format version: {meta['formatVersion']}")
+    metadata = data.get("armyMetadata")
+    if metadata is None:
+        raise ValueError("Normalized data must contain required Army metadata")
+    try:
+        validate_metadata_envelope(metadata)
+    except MetadataError as exc:
+        raise ValueError(f"Invalid Army metadata: {exc}") from exc
     tables = data.get("tables")
     if not isinstance(tables, dict):
         raise ValueError("Normalized data must contain a tables object")

@@ -31,6 +31,17 @@ def source_directory(tmp_path: Path) -> Path:
             ],
         }
         (source_dir / f"{army_id}-{slug}.json").write_text(json.dumps(document), encoding="utf-8")
+    (source_dir / "metadata.json").write_text(
+        json.dumps(
+            {
+                "factions": [
+                    {"id": 101, "name": "First Army"},
+                    {"id": 201, "name": "Second Army"},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
     return source_dir
 
 
@@ -55,6 +66,8 @@ def test_build_creates_verified_json_and_queryable_database(
     assert validation["passed"] is True
     assert normalized["_meta"]["validationPassed"] is True
     for path in source_directory.glob("*.json"):
+        if path.name == "metadata.json":
+            continue
         army_id = int(path.name.split("-")[0])
         assert reconstruct_source(master, army_id) == json.loads(path.read_text(encoding="utf-8"))
     with sqlite3.connect(output_dir / "infinity.db") as connection:

@@ -158,24 +158,48 @@ def test_invalid_metadata_is_rejected(source: dict) -> None:
         decode_metadata(json.dumps(source).encode(), "metadata.json")
 
 
-def test_build_discovers_sidecar_metadata_and_can_disable_it(tmp_path: Path) -> None:
+def test_build_discovers_required_sidecar_metadata(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     source = tmp_path / "source"
     source.mkdir()
     (source / "101-first.json").write_text(
         json.dumps({"version": "test", "units": [{"id": 1, "name": "Unit"}]}), encoding="utf-8"
     )
     (source / "metadata.json").write_text(json.dumps(metadata_source()), encoding="utf-8")
-    output = tmp_path / "with-metadata"
+    output = tmp_path / "generated"
     assert main(["build", str(source), "--output-dir", str(output)]) == 0
+    assert "Skipped non-Army JSON files: metadata.json" not in capsys.readouterr().err
     with sqlite3.connect(output / "infinity.db") as connection:
         assert connection.execute("SELECT name FROM army_lists").fetchone()[0] == "Official First"
         assert connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
 
-    without = tmp_path / "without-metadata"
-    assert main(["build", str(source), "--output-dir", str(without), "--no-metadata"]) == 0
-    with sqlite3.connect(without / "infinity.db") as connection:
-        assert connection.execute("SELECT name FROM army_lists").fetchone()[0] is None
-        assert connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 0
+
+
+def test_build_rejects_a_source_without_metadata(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "101-first.json").write_text(
+        json.dumps({"version": "test", "units": [{"id": 1, "name": "Unit"}]}), encoding="utf-8"
+    )
+
+    output = tmp_path / "generated"
+    assert main(["build", str(source), "--output-dir", str(output)]) == 1
+    assert not (output / "infinity.db").exists()
+
+
+def test_database_import_rejects_normalized_data_without_metadata(
+    tmp_path: Path,
+) -> None:
+    data = normalize_master(
+        {
+            "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
+            "armyLists": {},
+            "units": {},
+        }
+    )
+    with pytest.raises(ValueError, match="required Army metadata"):
+        export_database(data, tmp_path / "infinity.db")
 
 
 def test_build_discovers_unique_metadata_inside_zip(tmp_path: Path) -> None:

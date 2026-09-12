@@ -138,6 +138,11 @@ def app(tmp_path: Path) -> Callable:
         assert source is not None
         sources.append(source)
     normalized = normalize_master(merge_sources(sources))
+    normalized["armyMetadata"] = {
+        "sourceFile": "metadata.json",
+        "sourceSha256": "test-metadata",
+        "data": {"factions": []},
+    }
     normalized["tables"]["metadata_equipment"] = [
         {"id": 21, "name": "Medikit", "wiki": "https://infinitythewiki.com/Medikit"}
     ]
