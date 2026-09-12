@@ -43,7 +43,7 @@ html:not([data-developer-mode="true"]) .id-column { display: none; }
 
 .sidebar { --sidebar-section-gap: 70px; position: fixed; inset: 0 auto 0 0; width: 244px; background: #162b27; color: #dbe4db; display: flex; flex-direction: column; padding: 34px 22px 28px; overflow-y: auto; }
 .brand { display: flex; align-items: center; gap: 12px; font-size: 23px; letter-spacing: -.9px; font-weight: 650; text-decoration: none; padding: 0 10px; }
-.brand-mark { color: #d5efad; border: 1px solid #637562; border-radius: 9px; width: 39px; height: 39px; display: flex; align-items: center; justify-content: center; font-size: 38px; line-height: 1; font-weight: 400; padding-bottom: 4px; }
+.brand-mark { width: 42px; height: 42px; flex: 0 0 auto; border: 1px solid #476a58; border-radius: 10px; background: #0d2922; object-fit: cover; }
 .brand-suffix { color: #bad096; font-weight: 400; }
 .sidebar-body { padding-top: 66px; }
 .navigation-menu { display: none; }
@@ -81,9 +81,11 @@ html[data-distance-unit="in"] .distance-toggle-options > span:last-child { color
 .main { margin-left: 244px; padding: 0 48px; max-width: 1800px; min-height: 100vh; }
 .main-detail { max-width: 1800px; }
 .main:focus { outline: none; }
-.landing-hero { max-width: 850px; padding: 96px 0 74px; }
+.landing-hero { display: flex; align-items: center; justify-content: space-between; gap: 54px; padding: 78px 0 62px; }
+.landing-hero-content { max-width: 720px; }
+.landing-logo { width: clamp(180px, 19vw, 290px); height: auto; flex: 0 0 auto; filter: drop-shadow(0 14px 22px rgb(27 63 47 / 18%)); }
 .landing-hero h1 { font-size: clamp(42px, 5vw, 68px); }
-.landing-hero > p:not(.eyebrow) { max-width: 650px; margin: 24px 0 28px; color: var(--muted); font-size: 16px; line-height: 1.8; }
+.landing-hero-content > p:not(.eyebrow) { max-width: 650px; margin: 24px 0 28px; color: var(--muted); font-size: 16px; line-height: 1.8; }
 .landing-links { margin-bottom: 28px; }
 .landing-links .section-heading { padding-inline: 0; }
 .landing-link-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -112,8 +114,9 @@ html[data-distance-unit="in"] .distance-toggle-options > span:last-child { color
 h1 { font-size: clamp(34px, 3.5vw, 51px); margin: 0; line-height: 1.12; letter-spacing: -2px; font-weight: 550; color: var(--ink); }
 h1 > span { color: #8caa60; }
 .intro-copy { font-size: 13px; line-height: 1.8; color: var(--muted); margin: 18px 0 0; }
-.about-intro { max-width: 800px; padding-bottom: 36px; }
+.about-intro { max-width: 1000px; padding-bottom: 36px; }
 .about-intro .intro-copy { max-width: 690px; font-size: 15px; }
+.about-logo { width: clamp(150px, 17vw, 240px); height: auto; flex: 0 0 auto; margin-right: 8%; filter: drop-shadow(0 12px 18px rgb(27 63 47 / 16%)); }
 .about-content { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .about-feature { display: grid; grid-template-columns: auto 1fr; gap: 17px; padding: 30px 28px 33px; }
 .about-feature + .about-feature { border-left: 1px solid var(--border); }
@@ -339,6 +342,8 @@ tbody tr:hover { background: #f8f9f3; }
   .main { margin: 0; padding-inline: 30px; }
   .topbar { height: 70px; }
   .intro { padding-top: 38px; padding-bottom: 36px; }
+  .landing-hero { gap: 32px; }
+  .about-logo { margin-right: 0; }
   .about-content { grid-template-columns: 1fr; }
   .about-feature + .about-feature { border-left: 0; border-top: 1px solid var(--border); }
   .army-tags { --symbols-per-row: 6; }
@@ -349,7 +354,7 @@ tbody tr:hover { background: #f8f9f3; }
   .sidebar { padding: 16px 18px; }
   .brand { font-size: 19px; }
   .brand > span:last-child { display: none; }
-  .brand-mark { height: 31px; width: 31px; font-size: 30px; border-radius: 7px; }
+  .brand-mark { width: 33px; height: 33px; border-radius: 8px; }
   .navigation-menu > summary { padding: 8px 10px; font-size: 12px; }
   .navigation-menu > nav { min-width: 180px; }
   .nav-item { font-size: 12px; padding: 9px 10px; gap: 9px; }
@@ -360,7 +365,8 @@ tbody tr:hover { background: #f8f9f3; }
   .main-detail { padding-inline: 18px; }
   .topbar { height: 61px; }
   .intro { display: block; padding-block: 30px; }
-  .landing-hero { padding: 62px 0 45px; }
+  .landing-hero { display: block; padding: 52px 0 45px; }
+  .landing-logo { display: block; width: min(52vw, 230px); margin: 34px auto 0; }
   .landing-hero h1 { font-size: clamp(38px, 11vw, 52px); }
   .landing-hero > p:not(.eyebrow) { font-size: 13px; }
   .landing-link-grid { grid-template-columns: 1fr; }
@@ -370,6 +376,7 @@ tbody tr:hover { background: #f8f9f3; }
   h1 { font-size: 38px; letter-spacing: -1.6px; }
   .intro-copy { font-size: 12px; margin-top: 13px; }
   .about-intro .intro-copy { font-size: 13px; }
+  .about-logo { display: block; width: min(44vw, 190px); margin: 30px auto 0; }
   .about-feature { padding: 24px 18px; }
   .about-callout { margin-top: 18px; padding: 27px 22px 29px; }
   .about-callout h2 { font-size: 21px; }

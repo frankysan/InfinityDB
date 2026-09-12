@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1024"
+   height="1024"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   id="svg17"
+   sodipodi:docname="infinity_database_logo.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview17"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.1396484"
+     inkscape:cx="324.2228"
+     inkscape:cy="688.3702"
+     inkscape:window-width="3440"
+     inkscape:window-height="1369"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg17" />
+  <defs
+     id="defs14">
+    <linearGradient
+       id="ribbonFace"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#e0f4b5"
+         id="stop1" />
+      <stop
+         offset="0.55"
+         stop-color="#bcd890"
+         id="stop2" />
+      <stop
+         offset="1"
+         stop-color="#759f69"
+         id="stop3" />
+    </linearGradient>
+    <linearGradient
+       id="ribbonSide"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#97bc7f"
+         id="stop4" />
+      <stop
+         offset="0.48"
+         stop-color="#668f63"
+         id="stop5" />
+      <stop
+         offset="1"
+         stop-color="#365c4d"
+         id="stop6" />
+    </linearGradient>
+    <linearGradient
+       id="planetFill"
+       x1="-98"
+       y1="585"
+       x2="-98"
+       y2="1805"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.0705177,0,-127.70311)">
+      <stop
+         offset="0"
+         stop-color="#1e493c"
+         id="stop7" />
+      <stop
+         offset="0.10"
+         stop-color="#15392f"
+         id="stop8" />
+      <stop
+         offset="0.42"
+         stop-color="#0c271f"
+         id="stop9" />
+      <stop
+         offset="0.78"
+         stop-color="#071b16"
+         id="stop10" />
+      <stop
+         offset="1"
+         stop-color="#04120e"
+         id="stop11" />
+    </linearGradient>
+    <linearGradient
+       id="rim"
+       x1="-99.933005"
+       y1="583.067"
+       x2="-99.933005"
+       y2="1806.933"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,1.0705177,0,-127.70311)">
+      <stop
+         offset="0"
+         stop-color="#d8efbd"
+         id="stop12" />
+      <stop
+         offset="0.5"
+         stop-color="#a8cd92"
+         id="stop13" />
+      <stop
+         offset="1"
+         stop-color="#527b5d"
+         id="stop14" />
+    </linearGradient>
+    <filter
+       id="rimGlow"
+       x="-0.010332008"
+       y="-0.010332008"
+       width="1.020664"
+       height="1.020664">
+      <feGaussianBlur
+         stdDeviation="2.5"
+         id="feGaussianBlur14" />
+    </filter>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath19">
+      <rect
+         style="fill:#2f2f2f;fill-opacity:0.359129;stroke-width:7.55906;stroke-opacity:0.16445"
+         id="rect19"
+         width="1024"
+         height="1057.3657"
+         x="0"
+         y="-58.81456"
+         rx="100"
+         ry="100" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath20">
+      <rect
+         style="fill:#2f2f2f;fill-opacity:0.359129;stroke-width:7.55906;stroke-opacity:0.16445"
+         id="rect20"
+         width="1024"
+         height="1163.6364"
+         x="0"
+         y="-25"
+         rx="100"
+         ry="100" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath21">
+      <rect
+         style="fill:#2f2f2f;fill-opacity:0.359129;stroke-width:7.55906;stroke-opacity:0.16445"
+         id="rect21"
+         width="1024"
+         height="1024"
+         x="0"
+         y="0"
+         rx="100"
+         ry="100" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath1">
+      <rect
+         style="fill:#2f2f2f;fill-opacity:0.359129;stroke-width:7.55905;stroke-opacity:0.16445"
+         id="rect2"
+         width="1024"
+         height="1057.3657"
+         x="0"
+         y="-58.81456"
+         rx="200.00002"
+         ry="200.00002" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2">
+      <rect
+         style="fill:#2f2f2f;fill-opacity:0.359129;stroke-width:7.55905;stroke-opacity:0.16445"
+         id="rect3"
+         width="1024"
+         height="1163.6364"
+         x="0"
+         y="-25"
+         rx="200.00002"
+         ry="200.00002" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath3">
+      <rect
+         style="fill:#2f2f2f;fill-opacity:0.359129;stroke-width:7.55905;stroke-opacity:0.16445"
+         id="rect4"
+         width="1024"
+         height="1024"
+         x="0"
+         y="0"
+         rx="200.00002"
+         ry="200.00002" />
+    </clipPath>
+  </defs>
+  <!-- Solid black space. -->
+  <rect
+     width="1024"
+     height="1024"
+     fill="#0d2922"
+     id="rect14"
+     clip-path="url(#clipPath3)" />
+  <!-- Infinity ribbon, slightly flattened vertically to imply a backward tilt. -->
+  <g
+     transform="translate(0 22) scale(1 0.88)"
+     id="g15"
+     clip-path="url(#clipPath2)">
+    <!-- Subtle visible thickness / underside. -->
+    <path
+       d="M 112 470              C 112 330 270 302 392 392              L 635 570              C 754 658 912 610 912 462              C 912 326 754 300 632 390              L 390 568              C 272 655 112 610 112 470"
+       fill="none"
+       stroke="url(#ribbonSide)"
+       stroke-width="102"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       transform="translate(0 16)"
+       id="path14" />
+    <!-- Main top face. -->
+    <path
+       d="M 112 470              C 112 330 270 302 392 392              L 635 570              C 754 658 912 610 912 462              C 912 326 754 300 632 390              L 390 568              C 272 655 112 610 112 470"
+       fill="none"
+       stroke="url(#ribbonFace)"
+       stroke-width="90"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       id="path15" />
+  </g>
+  <!-- Foreground planet; only its upper horizon is inside the frame. -->
+  <g
+     id="g17"
+     transform="matrix(1,0,0,0.96844449,0,56.958638)"
+     style="stroke-width:1.01616"
+     clip-path="url(#clipPath1)">
+    <ellipse
+       cx="512"
+       cy="1151.5656"
+       fill="url(#planetFill)"
+       id="circle15"
+       style="fill:url(#planetFill);stroke-width:1.01616"
+       rx="610"
+       ry="653.01581" />
+    <circle
+       cx="512"
+       cy="1195"
+       r="610"
+       fill="none"
+       stroke="#d8efbd"
+       stroke-opacity="0.34"
+       stroke-width="13.2101"
+       filter="url(#rimGlow)"
+       id="circle16"
+       transform="matrix(1,0,0,1.0705177,0,-127.70311)" />
+    <ellipse
+       cx="512"
+       cy="1151.5656"
+       fill="none"
+       stroke="url(#rim)"
+       stroke-width="4.06464"
+       id="circle17"
+       style="stroke:url(#rim)"
+       rx="610"
+       ry="653.01581" />
+  </g>
+</svg>

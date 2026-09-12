@@ -32,6 +32,7 @@ ASSETS = {
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
+    "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
 }
 ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
 UNIT_SYMBOL_PATH = re.compile(r"/static/units/[a-z0-9-]+/[a-z0-9-]+\.svg")

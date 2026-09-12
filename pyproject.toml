@@ -29,7 +29,7 @@ infinity-army = "infinity_army_data.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/armies/**/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
+"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg", "static/armies/**/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
