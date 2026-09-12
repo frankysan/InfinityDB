@@ -53,7 +53,10 @@ function render(skill) {
       formatVariantName(right), undefined, { sensitivity: "base", numeric: true },
     )
   ));
-  content.replaceChildren(...variants.map(variantSection));
+  const sections = document.createElement("section");
+  sections.className = "usage-section-group";
+  sections.append(...variants.map(variantSection));
+  content.replaceChildren(sections);
   status.hidden = true;
   content.hidden = false;
 }

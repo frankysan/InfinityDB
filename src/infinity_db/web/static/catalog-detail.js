@@ -64,6 +64,7 @@ function specialWeaponProfile(profile) {
     headerRow.append(heading);
     const cell = document.createElement("td");
     cell.dataset.label = statLabel;
+    if (statLabel === "MOV") cell.classList.add("movement-value");
     cell.textContent = value;
     valueRow.append(cell);
   }
@@ -199,6 +200,13 @@ function usageSections(item) {
     });
 }
 
+function usageSectionGroup(sections) {
+  const group = document.createElement("section");
+  group.className = "usage-section-group";
+  group.append(...sections);
+  return group;
+}
+
 function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
@@ -207,7 +215,7 @@ function render(item) {
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
     ...(catalog === "weapons" && item.weapon_variants?.length
       ? [weaponVariants(item.weapon_variants)] : []),
-    ...sections,
+    ...(sections.length ? [usageSectionGroup(sections)] : []),
   );
   content.hidden = false;
   status.hidden = true;

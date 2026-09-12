@@ -78,6 +78,7 @@ function attributeStatline(stats, generalStats = null, includeAvailability = fal
   attributes.className = "attribute-statline";
   for (const [label, read] of statColumns) {
     const attribute = document.createElement("div");
+    if (label === "MOV") attribute.classList.add("movement-attribute");
     const attributeLabel = document.createElement("span");
     attributeLabel.className = "attribute-label";
     const attributeValue = document.createElement("span");
