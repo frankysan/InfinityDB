@@ -463,9 +463,10 @@ function differsFromGeneral(profile, general, label) {
   return profile[statProperties[label]] !== general[statProperties[label]];
 }
 
-function profileItems(items, fallbackLabel) {
+function profileItems(items, catalog, fallbackLabel) {
   if (!items.length) return "—";
-  return items.map((item) => {
+  const result = document.createDocumentFragment();
+  items.forEach((item, index) => {
     const name = item.name || `${fallbackLabel} #${text(item.id)}`;
     const extras = (item.extras || []).map((extra) => {
       const extraName = extra.name || `Extra #${text(extra.id)}`;
@@ -476,10 +477,16 @@ function profileItems(items, fallbackLabel) {
       });
     });
     const decoratedName = extras.length ? `${name} (${extras.join(", ")})` : name;
-    return item.quantity != null && Number(item.quantity) !== 1
+    const label = item.quantity != null && Number(item.quantity) !== 1
       ? `${decoratedName} ×${item.quantity}`
       : decoratedName;
-  }).join(", ");
+    const link = document.createElement("a");
+    link.href = `/${catalog}/${encodeURIComponent(item.id)}`;
+    link.textContent = label;
+    if (index) result.append(", ");
+    result.append(link);
+  });
+  return result;
 }
 
 function generalProfileTableRows(profiles) {
@@ -508,7 +515,7 @@ function generalProfileTableRows(profiles) {
       rows.push([
         { value: label, className: "general-item-label" },
         {
-          value: profileItems(profile.sharedItems[property], fallbackLabel),
+          content: profileItems(profile.sharedItems[property], property, fallbackLabel),
           className: "general-item-list",
         },
       ]);
@@ -541,7 +548,7 @@ function profileTableRows(profiles, generalByName) {
       rows.push([
         { value: label, header: true, className: "profile-item-label" },
         {
-          value: profileItems(items, fallbackLabel),
+          content: profileItems(items, property, fallbackLabel),
           className: "profile-item-list",
         },
       ]);
@@ -575,7 +582,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
         rows.push([
           { value: label, header: true, className: "profile-item-label" },
           {
-            value: profileItems(items, fallbackLabel),
+            content: profileItems(items, property, fallbackLabel),
             className: "profile-item-list",
             colSpan: 2,
           },

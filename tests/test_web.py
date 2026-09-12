@@ -497,6 +497,13 @@ def test_unit_details_frontend_promotes_sole_loadout_skills_to_general_profile(
     assert b"if (loadouts.length !== 1) return skills;" in body
 
 
+def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function profileItems(items, catalog, fallbackLabel)" in body
+    assert b"link.href = `/${catalog}/${encodeURIComponent(item.id)}`" in body
+
+
 @pytest.mark.parametrize(
     "symbol",
     [
@@ -659,6 +666,14 @@ def test_equipment_and_weapon_details_are_served(
     payload = json.loads(body)
     assert payload["name"] == name
     assert payload["variants"][0]["units"][0]["id"] == 1
+
+
+def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b'catalog === "equipment" && item.profiles?.length' in body
+    assert b'"Equipment profile"' in body
 
 
 def test_unit_symbol_is_served(app: Callable) -> None:

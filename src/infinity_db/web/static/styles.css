@@ -99,6 +99,8 @@ h1 > span { color: #8caa60; }
 .unit-detail .general-profile { border: 2px solid #9bb48a; box-shadow: 0 8px 20px #203b3512; }
 .unit-detail .general-profile .general-item-label { padding-left: 46px; color: #596a5b; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; }
 .unit-detail .general-profile .general-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; color: #405b4d; }
+.unit-detail .general-item-list a, .unit-detail .profile-item-list a { color: #245e4c; }
+.unit-detail .general-item-list a:hover, .unit-detail .general-item-list a:focus-visible, .unit-detail .profile-item-list a:hover, .unit-detail .profile-item-list a:focus-visible { color: #087b62; }
 .order-symbol-name { display: inline-flex; align-items: center; gap: 8px; }
 .order-symbol { width: 18px; height: 18px; flex: 0 0 auto; }
 .order-symbol + .order-symbol { margin-left: -5px; }

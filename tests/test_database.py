@@ -537,6 +537,23 @@ def test_catalog_use_count_matches_detail_variant_unit_totals(
     assert item["use_count"] == expected_count
 
 
+@pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
+def test_catalog_details_omit_variants_without_visible_units(
+    tmp_path: Path, normalized: dict, catalog: str
+) -> None:
+    for membership in normalized["tables"]["army_units"]:
+        if membership["unit_id"] == 1:
+            membership["filters"] = {"mercs": True}
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    database = Database(path)
+    detail = database.get_skill(1) if catalog == "skills" else database.get_catalog_item(catalog, 1)
+
+    assert detail is not None
+    assert detail["variants"] == []
+
+
 def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:
     normalized["tables"]["extras"].append({"id": 2, "name": "+5", "source_defined": True})
     normalized["tables"]["profile_skill_extras"][0]["extra_id"] = 2

@@ -73,6 +73,59 @@ def test_missing_mine_profile_is_supplied_during_normalization() -> None:
     assert mine["profile"] == "ARM=0, BTS=0, STR=1, S=1"
 
 
+def test_multi_spitfire_name_is_corrected_in_catalog_and_profiles() -> None:
+    source = metadata_source()
+    source["weapons"] = [{"id": 217, "name": "Spitfire MULTI", "mode": "AP Mode"}]
+    document = master(decode_metadata(json.dumps(source).encode(), "metadata.json"))
+    document["armyLists"]["101"]["filters"] = {
+        "weapons": [{"id": 217, "name": "Spitfire MULTI", "type": "BS"}],
+    }
+
+    normalized = normalize_master(document)
+
+    assert normalized["tables"]["weapons"] == [
+        {
+            "id": 217,
+            "name": "MULTI Spitfire",
+            "type": "BS",
+            "category": "Spitfires",
+            "source_defined": True,
+        }
+    ]
+    assert normalized["tables"]["metadata_weapons"][0]["name"] == "MULTI Spitfire"
+
+
+def test_deployable_repeater_profile_is_shown_with_its_equipment(tmp_path: Path) -> None:
+    source = metadata_source()
+    source["weapons"] = [
+        {"id": 111, "name": "Deployable Repeater", "type": "EQUIPMENT"},
+        {"id": 111, "name": "Plasma Carbine", "type": "WEAPON", "mode": "Hit Mode"},
+    ]
+    document = master(decode_metadata(json.dumps(source).encode(), "metadata.json"))
+    document["armyLists"]["101"]["filters"] = {
+        "weapons": [{"id": 111, "name": "Plasma Carbine"}],
+        "equip": [{"id": 111, "name": "Deployable Repeater"}],
+    }
+
+    normalized = normalize_master(document)
+    path = tmp_path / "infinity.db"
+    export_database(normalized, path)
+
+    database = Database(path)
+    plasma = database.get_catalog_item("weapons", 111)
+    repeater = database.get_catalog_item("equipment", 111)
+
+    assert plasma is not None
+    assert [(profile["name"], profile["mode"]) for profile in plasma["profiles"]] == [
+        ("Plasma Carbine", "Hit Mode")
+    ]
+    assert repeater is not None
+    assert repeater["name"] == "Deployable Repeater"
+    assert [(profile["name"], profile["mode"]) for profile in repeater["profiles"]] == [
+        ("Deployable Repeater", None)
+    ]
+
+
 def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> None:
     envelope = decode_metadata(json.dumps(metadata_source()).encode(), "metadata.json")
     normalized = normalize_master(master(envelope))

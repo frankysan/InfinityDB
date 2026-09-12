@@ -793,17 +793,28 @@ class Database:
                 **dict(item),
                 "id": canonical_id,
                 "name": merged_catalog_name(item["name"]) if len(source_ids) > 1 else item["name"],
-                "variants": list(variants.values()),
+                "variants": [variant for variant in variants.values() if variant["units"]],
             }
-            if catalog == "weapons":
+            if catalog in {"equipment", "weapons"}:
+                if catalog == "weapons":
+                    profile_filter = (
+                        f"m.id IN ({placeholders}) AND (m.type IS NULL OR m.type != 'EQUIPMENT')"
+                    )
+                    profile_parameters: tuple[Any, ...] = source_ids
+                else:
+                    # The Army metadata exposes deployable equipment in its
+                    # weapon-profile collection. Match the equipment catalog
+                    # record by both source ID and label to avoid ID collisions.
+                    profile_filter = "m.id = ? AND m.type = 'EQUIPMENT' AND m.name = ?"
+                    profile_parameters = (canonical_id, item["name"])
                 profile_rows = connection.execute(
                     "SELECT m.position, m.id, m.type, m.name, m.ammunition, m.burst, m.damage, "
                     "m.saving, m.savingNum, m.properties, m.distance, m.__row_json, "
                     "a.name AS ammunition_name "
                     "FROM metadata_weapons AS m "
                     "LEFT JOIN metadata_ammunitions AS a ON a.id = m.ammunition "
-                    f"WHERE m.id IN ({placeholders}) ORDER BY m.position",
-                    source_ids,
+                    f"WHERE {profile_filter} ORDER BY m.position",
+                    profile_parameters,
                 ).fetchall()
 
                 def decoded(value: Any, default: Any) -> Any:
@@ -836,20 +847,21 @@ class Database:
                     if (item["id"], item["name"], item["mode"]) not in WEAPON_PROFILE_PLACEHOLDERS:
                         profiles.append(item)
                 result["profiles"] = profiles
-                profiles_by_id: dict[int, list[dict[str, Any]]] = {}
-                for profile in profiles:
-                    profiles_by_id.setdefault(profile["id"], []).append(profile)
-                result["weapon_variants"] = [
-                    {
-                        "id": source_id,
-                        "name": item_names[source_id],
-                        "profiles": profiles_by_id[source_id],
-                    }
-                    for source_id in sorted(
-                        profiles_by_id, key=lambda value: (unit_sort_key(item_names[value]), value)
-                    )
-                ]
-                result["special_profile"] = special_weapon_detail(canonical_id)
+                if catalog == "weapons":
+                    profiles_by_id: dict[int, list[dict[str, Any]]] = {}
+                    for profile in profiles:
+                        profiles_by_id.setdefault(profile["id"], []).append(profile)
+                    result["weapon_variants"] = [
+                        {
+                            "id": source_id,
+                            "name": item_names[source_id],
+                            "profiles": profiles_by_id[source_id],
+                        }
+                        for source_id in sorted(
+                            profiles_by_id, key=lambda value: (unit_sort_key(item_names[value]), value)
+                        )
+                    ]
+                    result["special_profile"] = special_weapon_detail(canonical_id)
             return result
 
     def get_skill(self, skill_id: int) -> dict[str, Any] | None:
@@ -1022,7 +1034,7 @@ class Database:
                     if len(source_ids) > 1
                     else representative["name"]
                 ),
-                "variants": list(variants.values()),
+                "variants": [variant for variant in variants.values() if variant["units"]],
             }
 
     def list_units(

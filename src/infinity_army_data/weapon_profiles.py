@@ -1,4 +1,4 @@
-"""Supplemental weapon-profile data missing from Army metadata."""
+"""Supplemental corrections for incomplete or inconsistent Army weapon metadata."""
 
 from __future__ import annotations
 
@@ -14,10 +14,21 @@ WEAPON_PROFILE_OVERRIDES: dict[int, str] = {
     220: "ARM=0, BTS=0, STR=1, S=1",  # PARA Mine
 }
 
+# Keep source naming anomalies explicit, so regenerated catalogs retain the
+# conventional display name used by the rest of the weapon list.
+WEAPON_NAME_OVERRIDES: dict[int, str] = {
+    217: "MULTI Spitfire",
+}
+
 
 def weapon_profile_override(weapon_id: int) -> str | None:
     """Return a manually maintained profile for a weapon missing one at source."""
     return WEAPON_PROFILE_OVERRIDES.get(weapon_id)
+
+
+def weapon_name_override(weapon_id: int) -> str | None:
+    """Return a corrected display name for a known source naming anomaly."""
+    return WEAPON_NAME_OVERRIDES.get(weapon_id)
 
 
 # Some weapons act as a battlefield model and have rules data outside the Army

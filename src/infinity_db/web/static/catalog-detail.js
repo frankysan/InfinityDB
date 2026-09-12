@@ -87,11 +87,11 @@ function specialWeaponProfile(profile) {
   return card;
 }
 
-function weaponVariants(variants) {
+function weaponVariants(variants, headingText = "Weapon variants") {
   const section = document.createElement("section");
   section.className = "weapon-variants";
   const heading = document.createElement("h2");
-  heading.textContent = "Weapon variants";
+  heading.textContent = headingText;
   section.append(heading);
 
   for (const variant of variants) {
@@ -215,6 +215,8 @@ function render(item) {
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
     ...(catalog === "weapons" && item.weapon_variants?.length
       ? [weaponVariants(item.weapon_variants)] : []),
+    ...(catalog === "equipment" && item.profiles?.length
+      ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }], "Equipment profile")] : []),
     ...(sections.length ? [usageSectionGroup(sections)] : []),
   );
   content.hidden = false;
