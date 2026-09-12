@@ -34,28 +34,32 @@
 
       <section class="explorer" aria-labelledby="catalog-heading">
         <div class="section-heading"><h2 id="catalog-heading">Browse units</h2><span class="section-index" aria-hidden="true">01 / CATALOG</span></div>
-        <form id="filters" class="filters" role="search" aria-label="Filter units">
-          <div class="field army-field">
-            <label for="army-filter">Army</label>
-            <select id="army-filter" name="army_id" disabled><option value="">All armies</option></select>
-          </div>
-          <div class="field search-field">
-            <label for="unit-search">Unit name</label>
-            <div class="search-input">
-              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
-              <input id="unit-search" type="search" name="search" placeholder="Search units…" autocomplete="off" maxlength="200">
+        <form id="filters" class="filters unit-filters" role="search" aria-label="Filter units">
+          <div class="filter-row filter-primary-row">
+            <div class="field army-field">
+              <label for="army-filter">Army</label>
+              <select id="army-filter" name="army_id" disabled><option value="">All armies</option></select>
+            </div>
+            <div class="field search-field">
+              <label for="unit-search">Unit name</label>
+              <div class="search-input">
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+                <input id="unit-search" type="search" name="search" placeholder="Search units…" autocomplete="off" maxlength="200">
+              </div>
             </div>
           </div>
-          <fieldset class="field availability-field">
-            <legend>Include optional units</legend>
-            <div class="availability-options">
-              <label><input id="mercs-filter" type="checkbox"> Mercenaries</label>
-              <label><input id="specops-filter" type="checkbox" checked> Spec-Ops</label>
-              <label><input id="teamops-filter" type="checkbox"> Team Operations</label>
-              <label><input id="reinforcement-filter" type="checkbox"> Reinforcements</label>
-            </div>
-          </fieldset>
-          <button id="clear-filters" class="button button-quiet" type="button" disabled>Clear filters</button>
+          <div class="filter-row filter-secondary-row">
+            <fieldset class="field availability-field">
+              <legend>Include optional units</legend>
+              <div class="availability-options">
+                <label><input id="mercs-filter" type="checkbox"> Mercenaries</label>
+                <label><input id="specops-filter" type="checkbox" checked> Spec-Ops</label>
+                <label><input id="teamops-filter" type="checkbox"> Team Operations</label>
+                <label><input id="reinforcement-filter" type="checkbox"> Reinforcements</label>
+              </div>
+            </fieldset>
+            <button id="clear-filters" class="button button-quiet" type="button" disabled>Clear filters</button>
+          </div>
           <button class="sr-only" type="submit">Apply filters</button>
         </form>
 

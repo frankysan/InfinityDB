@@ -148,6 +148,8 @@ h1 > span { color: #8caa60; }
 h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.2px; }
 .section-index { font-size: 9px; color: #62725e; letter-spacing: 1.2px; font-family: Consolas, "Courier New", monospace; }
 .filters { display: flex; align-items: end; gap: 18px; padding: 24px 26px 25px; }
+.unit-filters { align-items: stretch; flex-direction: column; }
+.filter-row { display: flex; align-items: end; gap: 18px; }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .field label { font-size: 11px; font-weight: 550; color: #566452; }
 .availability-field { border: 0; padding: 0; margin: 0; min-width: 0; }
@@ -258,7 +260,10 @@ tbody tr:hover { background: #f8f9f3; }
   .stat-value { font-size: 29px; }
   .army-field { flex-basis: 210px; }
   .filters { gap: 12px; }
+  .filter-row { gap: 12px; }
   tbody th, tbody td, thead th { padding-inline: 20px; }
+  .army-tags { --symbols-per-row: 8; }
+  .army-tags-compact { --symbols-per-row: 9; }
 }
 @media (max-width: 920px) {
   .sidebar { position: static; width: auto; min-height: 68px; flex-direction: row; align-items: center; justify-content: space-between; padding: 14px 25px; overflow: visible; }
@@ -274,6 +279,8 @@ tbody tr:hover { background: #f8f9f3; }
   .intro { padding-top: 38px; padding-bottom: 36px; }
   .about-content { grid-template-columns: 1fr; }
   .about-feature + .about-feature { border-left: 0; border-top: 1px solid var(--border); }
+  .army-tags { --symbols-per-row: 6; }
+  .army-tags-compact { --symbols-per-row: 7; }
   h1 { font-size: 42px; }
 }
 @media (max-width: 600px) {
@@ -308,6 +315,11 @@ tbody tr:hover { background: #f8f9f3; }
   .filters { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 12px; padding: 21px 17px; }
   .army-field { grid-column: 1 / -1; }
   .search-field { min-width: 0; }
+  .unit-filters { display: flex; gap: 16px; }
+  .filter-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 12px; }
+  .filter-primary-row .army-field, .filter-primary-row .search-field { grid-column: 1 / -1; }
+  .filter-secondary-row .availability-field, .filter-secondary-row .button-quiet { grid-column: 1 / -1; }
+  .filter-secondary-row .button-quiet { justify-self: start; }
   .button-quiet { font-size: 10px; }
   .results-toolbar { padding-inline: 17px; }
   .sort-label { display: none; }
@@ -322,6 +334,7 @@ tbody tr:hover { background: #f8f9f3; }
   .army-symbol.main-army-symbol-detail { width: 39px; height: 39px; margin-right: 7px; }
   .army-tag { font-size: 9px; padding: 3px 5px; }
   .army-symbol { width: 26px; height: 26px; }
+  .army-tags, .army-tags-compact { --symbols-per-row: 4; }
   .army-tags-compact .army-symbol { width: 22px; height: 22px; }
   .unit-detail .profile-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 12px; }
   .unit-detail .profile-summary > * { min-width: 0; padding: 8px 4px; font-size: 10px; overflow-wrap: anywhere; }
