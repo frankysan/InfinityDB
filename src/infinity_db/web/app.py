@@ -7,11 +7,13 @@ import logging
 import re
 import sqlite3
 from datetime import date
+from html import escape
 from http import HTTPStatus
 from importlib.resources import files
 from pathlib import Path
 from urllib.parse import parse_qs
 
+from infinity_db import __version__
 from infinity_db.database import Database
 
 LOGGER = logging.getLogger(__name__)
@@ -43,8 +45,10 @@ def _page(
     *,
     active_page: str | None = None,
     snapshot_downloaded_on: date | None = None,
+    breadcrumbs: tuple[tuple[str, str | None], ...],
+    catalog_tag: str,
 ) -> bytes:
-    """Render a page with the project-wide navigation shell."""
+    """Render a page with the project-wide navigation and page shell."""
     static = files("infinity_db.web").joinpath("static")
     navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
     navigation = (
@@ -85,11 +89,30 @@ def _page(
             else "",
         )
     )
-    return (
-        static.joinpath(filename)
+    breadcrumb_markup = "".join(
+        (
+            f'<a href="{escape(href, quote=True)}">{escape(label)}</a>'
+            if href
+            else f"<strong>{escape(label)}</strong>"
+        )
+        + ('<span aria-hidden="true">/</span>' if index < len(breadcrumbs) - 1 else "")
+        for index, (label, href) in enumerate(breadcrumbs)
+    )
+    page_header = (
+        static.joinpath("page-header.html")
         .read_text(encoding="utf-8")
-        .replace("<!-- navigation -->", navigation)
-        .encode("utf-8")
+        .replace("{{BREADCRUMBS}}", breadcrumb_markup)
+        .replace("{{CATALOG_TAG}}", escape(catalog_tag))
+    )
+    page_footer = (
+        static.joinpath("page-footer.html")
+        .read_text(encoding="utf-8")
+        .replace("{{VERSION}}", escape(__version__))
+    )
+    return static.joinpath(filename).read_text(encoding="utf-8").replace(
+        "<!-- navigation -->", navigation
+    ).replace("<!-- page-header -->", page_header).replace("<!-- page-footer -->", page_footer).encode(
+        "utf-8"
     )
 
 
@@ -168,6 +191,8 @@ class Application:
             body = _page(
                 "index.html",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(("InfinityDB", None), ("Home", None)),
+                catalog_tag="Player reference",
             )
         elif path == "/units":
             content_type = "text/html; charset=utf-8"
@@ -175,6 +200,8 @@ class Application:
                 "units.html",
                 active_page="units",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(("Database", "/"), ("Units", None)),
+                catalog_tag="Unit catalog",
             )
         elif path in ASSETS:
             filename, content_type = ASSETS[path]
@@ -207,13 +234,21 @@ class Application:
                 payload = {"error": "Resource not found"}
         elif re.fullmatch(r"/units/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
-            body = _page("unit.html", snapshot_downloaded_on=self.snapshot_downloaded_on)
+            body = _page(
+                "unit.html",
+                active_page="units",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(("Database", "/"), ("Units", "/units"), ("Details", None)),
+                catalog_tag="Unit catalog",
+            )
         elif path == "/skill-extras":
             content_type = "text/html; charset=utf-8"
             body = _page(
                 "skill-extras.html",
                 active_page="skill-extras",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
+                catalog_tag="Reference data",
             )
         elif path in {"/skills", "/equipment", "/weapons"}:
             content_type = "text/html; charset=utf-8"
@@ -222,6 +257,8 @@ class Application:
                 f"{catalog}.html",
                 active_page=catalog,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(("Database", "/"), (catalog.capitalize(), None)),
+                catalog_tag="Reference data",
             )
         elif re.fullmatch(r"/skills/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
@@ -229,6 +266,8 @@ class Application:
                 "skill.html",
                 active_page="skills",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(("Database", "/"), ("Skills", "/skills"), ("Details", None)),
+                catalog_tag="Reference data",
             )
         elif match := re.fullmatch(r"/(equipment|weapons)/[0-9]+", path):
             content_type = "text/html; charset=utf-8"
@@ -236,6 +275,12 @@ class Application:
                 f"{match.group(1)}-detail.html",
                 active_page=match.group(1),
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(
+                    ("Database", "/"),
+                    (match.group(1).capitalize(), f"/{match.group(1)}"),
+                    ("Details", None),
+                ),
+                catalog_tag="Reference data",
             )
         elif path == "/about":
             content_type = "text/html; charset=utf-8"
@@ -243,6 +288,8 @@ class Application:
                 "about.html",
                 active_page="about",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                breadcrumbs=(("InfinityDB", "/"), ("About", None)),
+                catalog_tag="Player reference",
             )
         elif path == "/api/skill-extras":
             try:

@@ -27,6 +27,11 @@ Current release: **0.2.1** (2026-09-12).
 - Provides a shared sidebar with a persistent centimetre/inch display
   preference for movement and distance-based skill modifiers, and displays the
   download date recorded for a downloader-created Army snapshot.
+- Uses a shared page shell on every route: the navigation, breadcrumb header,
+  catalog label, and versioned footer are rendered centrally. Core visual
+  values are defined as CSS design tokens, so new screens can reuse the same
+  surfaces, controls, spacing, typography, focus treatment, and responsive
+  behavior.
 - Includes a Skill Modifiers page for browsing distance-related skill extras
   and the units that use them.
 - Includes searchable Skills, Equipment, and Weapons reference catalogs. Their
@@ -159,7 +164,7 @@ src/
   infinity_db/
     cli.py                  # Application commands and pipeline orchestration
     database/               # Versioned schema, atomic importer, read-only queries
-    web/                    # WSGI app, local server, browser assets, and SVG symbols
+    web/                    # WSGI app, shared browser shell, assets, and SVG symbols
 tests/                      # Pipeline, database, API, and browser tests
 tools/                      # Manual source and symbol download scripts
 docs/                       # Architecture and data-model documentation

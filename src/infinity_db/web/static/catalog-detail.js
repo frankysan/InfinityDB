@@ -51,6 +51,7 @@ function specialWeaponProfile(profile) {
   const card = document.createElement("section");
   card.className = "explorer weapon-profile special-weapon-profile";
   const title = document.createElement("h4");
+  title.className = "data-surface-header";
   title.textContent = "Armed Turret profile";
   card.append(title);
 
@@ -92,13 +93,15 @@ function weaponVariants(variants, headingText = "Weapon variants") {
   const section = document.createElement("section");
   section.className = "weapon-variants";
   const heading = document.createElement("h2");
+  heading.className = "detail-section-title";
   heading.textContent = headingText;
   section.append(heading);
 
   for (const variant of variants) {
     const variantSection = document.createElement("section");
-    variantSection.className = "weapon-variant";
+    variantSection.className = "detail-group weapon-variant";
     const variantTitle = document.createElement("h3");
+    variantTitle.className = "detail-section-title detail-section-title--variant";
     variantTitle.textContent = variant.name;
     variantSection.append(variantTitle);
 
@@ -108,6 +111,7 @@ function weaponVariants(variants, headingText = "Weapon variants") {
       const profileTitle = profile.mode || (profile.name !== variant.name ? profile.name : "");
       if (profileTitle) {
         const title = document.createElement("h4");
+        title.className = "data-surface-header";
         title.textContent = profileTitle;
         card.append(title);
       }
@@ -181,7 +185,7 @@ function usageSections(item) {
       const section = document.createElement("details");
       section.className = "explorer army-profile";
       const summary = document.createElement("summary");
-      summary.className = "army-profile-title";
+      summary.className = "data-surface-header army-profile-title";
       const title = document.createElement("h2");
       title.textContent = label(item, variant);
       const count = document.createElement("span");
@@ -203,7 +207,7 @@ function usageSections(item) {
 
 function usageSectionGroup(sections) {
   const group = document.createElement("section");
-  group.className = "usage-section-group";
+  group.className = "detail-group usage-section-group";
   group.append(...sections);
   return group;
 }

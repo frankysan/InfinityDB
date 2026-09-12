@@ -400,6 +400,32 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/units" aria-current="page"' in body
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/",
+        "/units",
+        "/units/1",
+        "/skills",
+        "/skills/1",
+        "/equipment",
+        "/equipment/1",
+        "/weapons",
+        "/weapons/1",
+        "/skill-extras",
+        "/about",
+    ],
+)
+def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None:
+    status, _, body = request(app, path)
+
+    assert status == 200
+    assert b'<header class="topbar page-header">' in body
+    assert b'aria-label="Breadcrumb"' in body
+    assert b'<footer class="page-footer">' in body
+    assert b"Version 0.2.1" in body
+
+
 def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     status, headers, body = request(app, "/about")
 
@@ -476,9 +502,8 @@ def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable
         b"function attributeStatline(stats, generalStats = null, includeAvailability = false)"
         in body
     )
-    assert b'{ value: "Attributes", header: true, className: "profile-attributes-label" }' in body
-    assert b'{ value: "Type", header: true, className: "general-item-label" }' in body
-    assert b'{ value: "Classification", header: true, className: "general-item-label" }' in body
+    assert b'className: "data-label profile-attributes-label"' in body
+    assert b'className: "data-label general-item-label"' in body
     assert b'"profile-details-table"' in body
     assert b'["Name", "Points", "SWC"]' in body
     assert b"attributeStatline(profile, generalStatsForProfile, true)" in body
@@ -502,11 +527,31 @@ def test_unit_details_frontend_marks_surface_and_deepspace_profiles(app: Callabl
     assert status == 200
     assert b"function profileNameWithDivisionBadge(profile)" in body
     assert b'for (const division of ["surface", "deepspace"])' in body
+    assert b"badge division-badge division-badge-${division}" in body
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
     assert b".division-badge-surface { background: #256d1b; }" in styles
     assert b".division-badge-deepspace { background: #d68623; }" in styles
+
+
+def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    for selector in [
+        b".detail-group",
+        b".detail-section-title",
+        b".data-surface-header",
+        b".data-label",
+        b".badge",
+    ]:
+        assert selector in styles
+
+    for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b"detail-group" in body
+        assert b"data-surface-header" in body
 
 
 def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:

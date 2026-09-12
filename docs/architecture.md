@@ -33,7 +33,7 @@ Army directory / ZIP
 | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
 | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
 | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
-| `infinity_db.web.static` | UI, URL state, loading and error handling | New screens, filters, and catalogs |
+| `infinity_db.web.static` | UI, shared page-shell components, URL state, loading and error handling | New screens, filters, and catalogs |
 
 Only the importer consumes normalized JSON. HTTP routes query the repository;
 browser code calls the API. Neither web layer parses raw Army files. Browser
@@ -43,6 +43,25 @@ example, `app.js` or `catalog-detail.js`). The current UI uses native modules
 and requires no JavaScript build step. Bundled army and unit symbols are
 addressed by stable ID-and-slug paths, while JavaScript maps source identities
 to those paths.
+
+## Browser design system
+
+The WSGI page renderer composes every browser route from a page-specific
+document, the shared navigation, and shared header/footer fragments. The page
+header receives structured breadcrumb and catalog-tag data from the route; the
+footer receives the application version. New pages should use the
+`<!-- navigation -->`, `<!-- page-header -->`, and `<!-- page-footer -->`
+markers so their shell stays synchronized with existing pages.
+
+`static/styles.css` is the browser design-system entry point. Its root tokens
+define shared color roles, surfaces, borders, spacing, radii, control height,
+focus treatment, and shadows. Reuse these tokens and established components
+such as `.main`, `.topbar`, `.explorer`, `.button`, and `.page-footer` rather
+than introducing page-local visual values. Detail pages use `.main-detail` to
+retain the common layout and responsive behavior. Detail renderers also reuse
+`.detail-group`, `.detail-section-title`, `.data-surface-header`, `.data-label`,
+and `.badge`; use their modifiers for semantic variants instead of duplicating
+detail-table geometry or type treatments.
 
 The required API `metadata.json` is a supplemental snapshot. Its records are
 preserved separately and enrich display names for matching army IDs. It never

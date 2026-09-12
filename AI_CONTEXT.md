@@ -61,6 +61,15 @@ clear requirement justifies it.
 - Browser requests belong in `api.js`; shared unit rows belong in
   `unit-list.js`; page-specific state and rendering belong in their page module.
   Use native browser modules and stable asset paths rather than directory scans.
+- Every browser route uses the server-rendered shared page shell. Add new pages
+  through `_page()` with breadcrumb and catalog-tag values, and retain the
+  navigation/header/footer markers in their static document.
+- Treat `styles.css` as the design-system source of truth. Reuse its root
+  tokens and existing layout/control components; do not add page-local colors,
+  spacing scales, radii, or shell variants when a shared token or component can
+  express the need. Detail renderers must compose the shared `.detail-group`,
+  `.detail-section-title`, `.data-surface-header`, `.data-label`, and `.badge`
+  primitives before adding a semantic modifier.
 
 ## Style and change discipline
 
@@ -89,3 +98,6 @@ clear requirement justifies it.
   until that requirement exists.
 - 2026-09-12: The browser has no frontend build tool; native modules keep local
   deployment and maintenance simple.
+- 2026-09-12: The browser shell is centrally rendered from navigation, header,
+  and footer fragments. CSS tokens and shared components are the required
+  extension point for consistent visual design across current and future pages.

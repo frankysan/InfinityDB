@@ -24,7 +24,7 @@ function variantSection(variant) {
   const section = document.createElement("details");
   section.className = "explorer army-profile";
   const heading = document.createElement("summary");
-  heading.className = "army-profile-title";
+  heading.className = "data-surface-header army-profile-title";
   const title = document.createElement("h2");
   title.textContent = formatVariantName(variant);
   const count = document.createElement("span");
@@ -63,7 +63,7 @@ function render(skill) {
     )
   ));
   const sections = document.createElement("section");
-  sections.className = "usage-section-group";
+  sections.className = "detail-group usage-section-group";
   sections.append(...variants.map(variantSection));
   content.replaceChildren(sections);
   status.hidden = true;

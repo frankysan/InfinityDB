@@ -61,7 +61,7 @@ function cell(value) {
   else element.textContent = text(structured && "value" in value ? value.value : value);
   if (structured && value.header) element.scope = "row";
   if (value && typeof value === "object" && value.className) {
-    element.classList.add(value.className);
+    element.classList.add(...value.className.split(/\s+/));
   }
   if (value && typeof value === "object" && value.colSpan) {
     element.colSpan = value.colSpan;
@@ -494,16 +494,16 @@ function generalProfileTableRows(profiles) {
   for (const profile of profiles) {
     rows.push(
       [
-        { value: "Type", header: true, className: "general-item-label" },
+        { value: "Type", header: true, className: "data-label general-item-label" },
         { value: profile.type, className: "general-item-list" },
       ],
       [
-        { value: "Classification", header: true, className: "general-item-label" },
+        { value: "Classification", header: true, className: "data-label general-item-label" },
         { value: profile.classification, className: "general-item-list" },
       ],
     );
     rows.push([
-      { value: "Attributes", header: true, className: "profile-attributes-label" },
+      { value: "Attributes", header: true, className: "data-label profile-attributes-label" },
       { content: attributeStatline(profile.stats), className: "profile-attributes" },
     ]);
     for (const [label, property, fallbackLabel] of [
@@ -513,7 +513,7 @@ function generalProfileTableRows(profiles) {
     ]) {
       if (!profile.sharedItems[property].length) continue;
       rows.push([
-        { value: label, className: "general-item-label" },
+        { value: label, className: "data-label general-item-label" },
         {
           content: profileItems(profile.sharedItems[property], property, fallbackLabel),
           className: "general-item-list",
@@ -532,7 +532,7 @@ function profileTableRows(profiles, generalByName) {
     const profileRow = [{ content: profileNameWithDivisionBadge(profile), header: true, colSpan: 2 }];
     profileRow.className = "profile-summary";
     const rows = [profileRow, [
-      { value: "Attributes", header: true, className: "profile-attributes-label" },
+      { value: "Attributes", header: true, className: "data-label profile-attributes-label" },
       {
         content: attributeStatline(profile, generalStatsForProfile, true),
         className: "profile-attributes",
@@ -546,7 +546,7 @@ function profileTableRows(profiles, generalByName) {
       const items = withoutSharedItems(profile[property], sharedItems[property]);
       if (!items.length) continue;
       rows.push([
-        { value: label, header: true, className: "profile-item-label" },
+        { value: label, header: true, className: "data-label profile-item-label" },
         {
           content: profileItems(items, property, fallbackLabel),
           className: "profile-item-list",
@@ -567,7 +567,7 @@ function profileNameWithDivisionBadge(profile) {
   for (const division of ["surface", "deepspace"]) {
     if (!divisions.has(division)) continue;
     const badge = document.createElement("span");
-    badge.className = `division-badge division-badge-${division}`;
+    badge.className = `badge division-badge division-badge-${division}`;
     badge.textContent = division === "surface" ? "Surface" : "Deepspace";
     title.append(badge);
   }
@@ -597,7 +597,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
         const items = withoutSharedItems(loadout[property], sharedItems[property]);
         if (!items.length) continue;
         rows.push([
-          { value: label, header: true, className: "profile-item-label" },
+          { value: label, header: true, className: "data-label profile-item-label" },
           {
             content: profileItems(items, property, fallbackLabel),
             className: "profile-item-list",
@@ -652,7 +652,7 @@ function availabilityBadges(flags = []) {
   for (const flag of flags) {
     if (!availabilityLabels[flag]) continue;
     const badge = document.createElement("span");
-    badge.className = `availability-badge availability-badge-${flag}`;
+    badge.className = `badge availability-badge availability-badge-${flag}`;
     badge.textContent = availabilityLabels[flag];
     badges.append(badge);
   }
@@ -671,7 +671,7 @@ function renderArmyProfile(army, generalByName, expanded) {
   section.className = "explorer army-profile";
   section.open = expanded;
   const armyHeading = document.createElement("summary");
-  armyHeading.className = "army-profile-title";
+  armyHeading.className = "data-surface-header army-profile-title";
   armyHeading.textContent = army.name;
   const symbol = armySymbolPath(army.id);
   if (symbol) {
@@ -739,10 +739,12 @@ function render(unit) {
   const { rows: generalProfileRows, generalByName } = generalProfiles(allProfiles, allLoadouts);
   const displayedGeneralProfiles = visibleGeneralProfiles(generalProfileRows);
   const generalProfilesSection = document.createElement("section");
-  generalProfilesSection.className = "general-profile-group";
-  generalProfilesSection.append(heading(
+  generalProfilesSection.className = "detail-group general-profile-group";
+  const generalHeading = heading(
     displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",
-  ));
+  );
+  generalHeading.className = "detail-section-title detail-section-title--rule";
+  generalProfilesSection.append(generalHeading);
   for (const profile of displayedGeneralProfiles) {
     const generalProfile = document.createElement("section");
     generalProfile.className = "explorer general-profile";
@@ -757,12 +759,12 @@ function render(unit) {
   let standardArmyExpanded = false;
   for (const group of groupArmiesByFaction(unit.armies)) {
     const section = document.createElement("section");
-    section.className = "faction-profile-group";
+    section.className = "detail-group faction-profile-group";
     const groupHeading = heading(group.name);
-    groupHeading.className = "faction-profile-group-title";
+    groupHeading.className = "detail-section-title detail-section-title--rule";
     section.append(groupHeading);
     const profiles = document.createElement("div");
-    profiles.className = "faction-profile-grid";
+    profiles.className = "detail-group faction-profile-grid";
     for (const army of group.armies) {
       const expanded = !standardArmyExpanded && isStandardArmy(army);
       if (expanded) standardArmyExpanded = true;
