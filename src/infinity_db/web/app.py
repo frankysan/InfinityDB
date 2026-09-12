@@ -13,7 +13,7 @@ from importlib.resources import files
 from pathlib import Path
 from urllib.parse import parse_qs
 
-from infinity_db import __version__
+from infinity_db import __display_version__
 from infinity_db.database import Database
 
 LOGGER = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ def _page(
     page_footer = (
         static.joinpath("page-footer.html")
         .read_text(encoding="utf-8")
-        .replace("{{VERSION}}", escape(__version__))
+        .replace("{{VERSION}}", escape(__display_version__))
     )
     return static.joinpath(filename).read_text(encoding="utf-8").replace(
         "<!-- navigation -->", navigation

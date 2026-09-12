@@ -89,6 +89,9 @@ clear requirement justifies it.
   dated note below when a non-obvious, lasting tradeoff is introduced.
 - Record new work under `Unreleased` in `CHANGELOG.md`. Do not increment or
   otherwise alter the release version unless explicitly requested.
+- Keep `__version__` at the released value. While `Unreleased` contains work,
+  the browser footer must use `__display_version__` with a `+dev` suffix; reset
+  it to the release version only as part of an explicitly requested release.
 
 ## Decision log
 

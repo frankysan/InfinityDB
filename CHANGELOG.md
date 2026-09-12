@@ -13,6 +13,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- The shared footer identifies unreleased builds as `0.2.1+dev` while retaining
+  the released application version as 0.2.1.
 - `infinity-db build` now requires validated Army API `metadata.json` and the
   database compatibility revision increased to 7; rebuild existing databases
   before starting the application.
