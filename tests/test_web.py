@@ -138,6 +138,9 @@ def app(tmp_path: Path) -> Callable:
         assert source is not None
         sources.append(source)
     normalized = normalize_master(merge_sources(sources))
+    normalized["tables"]["metadata_equipment"] = [
+        {"id": 21, "name": "Medikit", "wiki": "https://infinitythewiki.com/Medikit"}
+    ]
     normalized["_meta"]["snapshotDownloadedOn"] = "2026-09-10"
     database_path = tmp_path / "infinity.db"
     export_database(normalized, database_path)
@@ -578,7 +581,12 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert headers["content-type"].startswith("application/json")
     expected = {
         "skills": {"id": 11, "name": "Stealth", "wiki": None, "use_count": 1},
-        "equipment": {"id": 21, "name": "Medikit", "wiki": None, "use_count": 1},
+        "equipment": {
+            "id": 21,
+            "name": "Medikit",
+            "wiki": "https://infinitythewiki.com/Medikit",
+            "use_count": 1,
+        },
         "weapons": {
             "id": 31,
             "name": "Combi Rifle",
@@ -665,6 +673,8 @@ def test_equipment_and_weapon_details_are_served(
     assert headers["content-type"].startswith("application/json")
     payload = json.loads(body)
     assert payload["name"] == name
+    if catalog == "equipment":
+        assert payload["wiki"] == "https://infinitythewiki.com/Medikit"
     assert payload["variants"][0]["units"][0]["id"] == 1
 
 
@@ -674,6 +684,16 @@ def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> 
     assert status == 200
     assert b'catalog === "equipment" && item.profiles?.length' in body
     assert b'"Equipment profile"' in body
+    assert b'link.target = "_blank"' in body
+    assert b'link.rel = "noopener noreferrer"' in body
+
+
+def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> None:
+    status, _, body = request(app, "/static/skill.js")
+
+    assert status == 200
+    assert b'link.target = "_blank"' in body
+    assert b'link.rel = "noopener noreferrer"' in body
 
 
 def test_unit_symbol_is_served(app: Callable) -> None:

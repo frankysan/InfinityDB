@@ -711,9 +711,10 @@ class Database:
                 ) or (item_id,)
                 canonical_id = min(source_ids)
             placeholders = ", ".join("?" for _ in source_ids)
+            wiki_field = "m.wiki AS wiki" if catalog == "equipment" else "NULL AS wiki"
             item = connection.execute(
                 f"SELECT c.id, COALESCE(NULLIF(c.name, ''), NULLIF(m.name, ''), "
-                f"'{catalog[:-1].title()} #' || c.id) AS name "
+                f"'{catalog[:-1].title()} #' || c.id) AS name, {wiki_field} "
                 f"FROM {item_table} AS c LEFT JOIN {metadata_table} AS m ON m.id = c.id "
                 "WHERE c.id = ?",
                 (canonical_id,),

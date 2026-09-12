@@ -4,6 +4,7 @@ import { renderUnitRows } from "./unit-list.js";
 const catalog = document.body.dataset.catalog;
 const itemId = window.location.pathname.split("/").pop();
 const name = document.getElementById("item-name");
+const meta = document.getElementById("item-meta");
 const status = document.getElementById("item-status");
 const content = document.getElementById("item-content");
 const rangeBands = [
@@ -210,6 +211,18 @@ function usageSectionGroup(sections) {
 function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
+  if (meta) {
+    if (item.wiki) {
+      const link = document.createElement("a");
+      link.href = item.wiki;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = item.wiki;
+      meta.replaceChildren(link);
+    } else {
+      meta.textContent = `Equipment #${item.id}`;
+    }
+  }
   const sections = usageSections(item);
   content.replaceChildren(
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),

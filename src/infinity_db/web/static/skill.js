@@ -47,7 +47,16 @@ function render(skill) {
   currentSkill = skill;
   document.title = `${skill.name} · InfinityDB`;
   name.firstChild.textContent = skill.name;
-  meta.textContent = skill.wiki || `Skill #${skill.id}`;
+  if (skill.wiki) {
+    const link = document.createElement("a");
+    link.href = skill.wiki;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = skill.wiki;
+    meta.replaceChildren(link);
+  } else {
+    meta.textContent = `Skill #${skill.id}`;
+  }
   const variants = [...skill.variants].sort((left, right) => (
     formatVariantName(left).localeCompare(
       formatVariantName(right), undefined, { sensitivity: "base", numeric: true },
