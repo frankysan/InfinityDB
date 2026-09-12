@@ -26,6 +26,7 @@ a { color: inherit; }
 .brand-mark { color: #d5efad; border: 1px solid #637562; border-radius: 9px; width: 39px; height: 39px; display: flex; align-items: center; justify-content: center; font-size: 38px; line-height: 1; font-weight: 400; padding-bottom: 4px; }
 .brand-suffix { color: #bad096; font-weight: 400; }
 .sidebar-body { padding-top: 66px; }
+.navigation-menu { display: none; }
 .nav-label, .small-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.8px; color: #a1b3a8; }
 .nav-label { padding-left: 14px; margin: 0 0 17px; }
 .nav-item { text-decoration: none; display: flex; align-items: center; gap: 12px; color: #b9c7ba; padding: 13px 12px; border: 1px solid transparent; border-radius: 6px; font-size: 13px; font-weight: 550; }
@@ -293,11 +294,17 @@ tbody tr:hover { background: #f8f9f3; }
   .sidebar { position: static; width: auto; min-height: 68px; flex-direction: row; align-items: center; justify-content: space-between; padding: 14px 25px; overflow: visible; }
   .brand { padding: 0; }
   .sidebar-body { display: flex; align-items: center; gap: 14px; padding: 0; }
-  .sidebar-body nav { display: flex; gap: 8px; }
+  .sidebar-navigation { display: none; }
+  .navigation-menu { position: relative; display: block; }
+  .navigation-menu > summary { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #3f5648; border-radius: 6px; color: #dff0c6; font-size: 13px; font-weight: 550; cursor: pointer; list-style: none; }
+  .navigation-menu > summary::-webkit-details-marker { display: none; }
+  .navigation-menu[open] > summary { background: #294039; }
+  .navigation-menu[open] > summary span { transform: rotate(180deg); }
+  .navigation-menu > nav { position: absolute; z-index: 4; top: calc(100% + 9px); right: 0; display: flex; flex-direction: column; min-width: 190px; padding: 7px; border: 1px solid #3f5648; border-radius: 6px; background: #162b27; box-shadow: 0 10px 24px rgb(9 22 18 / 25%); }
+  .navigation-menu:not([open]) > nav { display: none; }
   .distance-toggle { margin: 0; }
-  .nav-label, .sidebar-footer { display: none; }
-  .nav-item { padding: 9px 12px; }
-  .nav-item > span { display: none; }
+  .sidebar-footer { display: none; }
+  .nav-item { padding: 10px 12px; }
   .main { margin: 0; padding-inline: 30px; }
   .topbar { height: 70px; }
   .intro { padding-top: 38px; padding-bottom: 36px; }
@@ -312,9 +319,9 @@ tbody tr:hover { background: #f8f9f3; }
   .brand { font-size: 19px; }
   .brand > span:last-child { display: none; }
   .brand-mark { height: 31px; width: 31px; font-size: 30px; border-radius: 7px; }
-  .nav-item { font-size: 11px; padding: 8px 9px; gap: 7px; }
-  .nav-item { width: 33px; font-size: 0; justify-content: center; gap: 0; }
-  .nav-item svg { width: 15px; height: 15px; }
+  .navigation-menu > summary { padding: 8px 10px; font-size: 12px; }
+  .navigation-menu > nav { min-width: 180px; }
+  .nav-item { font-size: 12px; padding: 9px 10px; gap: 9px; }
   .distance-toggle { margin-left: 9px; gap: 7px; }
   .distance-toggle-label { display: none; }
   .main { padding-inline: 18px; }
@@ -327,7 +334,7 @@ tbody tr:hover { background: #f8f9f3; }
   .landing-link-grid { grid-template-columns: 1fr; }
   .landing-link { min-height: 104px; padding: 20px; }
   .landing-about { display: block; padding: 27px 22px; }
-  .landing-about .button-primary { margin-top: 22px; }
+  .landing-about .button-primary { display: inline-flex; margin-top: 28px; }
   h1 { font-size: 38px; letter-spacing: -1.6px; }
   .intro-copy { font-size: 12px; margin-top: 13px; }
   .about-intro .intro-copy { font-size: 13px; }
