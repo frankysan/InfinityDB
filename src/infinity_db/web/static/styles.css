@@ -228,7 +228,9 @@ tbody tr:hover { background: #f8f9f3; }
 .unit-symbol-detail { width: 42px; height: 42px; margin-right: 12px; vertical-align: -6px; }
 .army-symbol.main-army-symbol { width: 28px; height: 28px; flex: 0 0 auto; }
 .army-symbol.main-army-symbol-detail { width: 48px; height: 48px; margin-right: 10px; vertical-align: -8px; }
-.army-tags { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
+.army-tags { --symbols-per-row: 10; display: grid; grid-template-columns: repeat(var(--symbols-per-row), max-content); gap: 6px; font-size: 11px; }
+.army-tags-compact { --symbols-per-row: 12; }
+.army-tags-compact .army-symbol { width: 24px; height: 24px; }
 .army-tag { display: inline-block; border: 1px solid #dbe2d1; background: #f1f4e9; color: #536b42; padding: 4px 7px; border-radius: 4px; font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
 .army-symbol { width: 30px; height: 30px; object-fit: contain; border-radius: 4px; }
 .army-profile-symbol { width: 34px; height: 34px; }
@@ -320,6 +322,7 @@ tbody tr:hover { background: #f8f9f3; }
   .army-symbol.main-army-symbol-detail { width: 39px; height: 39px; margin-right: 7px; }
   .army-tag { font-size: 9px; padding: 3px 5px; }
   .army-symbol { width: 26px; height: 26px; }
+  .army-tags-compact .army-symbol { width: 22px; height: 22px; }
   .unit-detail .profile-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 12px; }
   .unit-detail .profile-summary > * { min-width: 0; padding: 8px 4px; font-size: 10px; overflow-wrap: anywhere; }
   .unit-detail .profile-summary > :first-child { grid-column: 1 / -1; padding-top: 15px; color: #2d4134; font-size: 12px; }

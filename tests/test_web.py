@@ -609,10 +609,11 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                     {
                         "id": 1,
                         "name": "Alpha Ranger",
-                        "isc": None,
-                        "slug": None,
-                        "main_army_id": None,
-                        "source_ids": [1],
+                            "isc": None,
+                            "slug": None,
+                            "main_army_id": None,
+                            "main_army_name": None,
+                            "source_ids": [1],
                         "army_ids": [101, 201],
                         "armies": [
                             {"id": 101, "name": "Zulu Company"},

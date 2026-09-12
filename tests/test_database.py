@@ -343,10 +343,11 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
             {
                 "id": 1,
                 "name": "Álpha",
-                "isc": None,
-                "slug": "alpha",
-                "main_army_id": None,
-                "source_ids": [1],
+                    "isc": None,
+                    "slug": "alpha",
+                    "main_army_id": None,
+                    "main_army_name": None,
+                    "source_ids": [1],
                 "army_ids": [101, 201],
                 "armies": [
                     {"id": 101, "name": "First Army"},
@@ -947,10 +948,11 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
         {
             "id": 4,
             "name": "Unit 4",
-            "isc": None,
-            "slug": None,
-            "main_army_id": None,
-            "source_ids": [4],
+                "isc": None,
+                "slug": None,
+                "main_army_id": None,
+                "main_army_name": None,
+                "source_ids": [4],
             "army_ids": [],
             "armies": [],
         }
@@ -960,10 +962,11 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
             {
                 "id": 5,
                 "name": "Unit 5",
-                "isc": None,
-                "slug": None,
-                "main_army_id": None,
-                "source_ids": [5],
+                    "isc": None,
+                    "slug": None,
+                    "main_army_id": None,
+                    "main_army_name": None,
+                    "source_ids": [5],
                 "army_ids": [],
                 "armies": [],
             }

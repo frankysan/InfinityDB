@@ -695,7 +695,9 @@ function render(unit) {
     mainIcon.className = "army-symbol main-army-symbol main-army-symbol-detail";
     mainIcon.src = mainArmySymbol;
     mainIcon.alt = "";
-    mainIcon.title = "Main army";
+    mainIcon.title = unit.main_army_name
+      || unit.armies.find((army) => army.id === unit.main_army_id)?.name
+      || "Main army";
     name.prepend(mainIcon);
   }
   meta.textContent = [

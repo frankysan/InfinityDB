@@ -29,7 +29,9 @@ export function renderUnitRows(container, units) {
       icon.className = "army-symbol main-army-symbol";
       icon.src = mainArmySymbol;
       icon.alt = "";
-      icon.title = "Main army";
+      icon.title = unit.main_army_name
+        || unit.armies.find((army) => army.id === unit.main_army_id)?.name
+        || "Main army";
       nameContent.append(icon);
     }
     nameContent.append(unitSymbol(unit.slug || unit.isc || unit.name), nameLink);
@@ -37,7 +39,9 @@ export function renderUnitRows(container, units) {
     const armyCell = document.createElement("td");
     const armyList = document.createElement("div");
     armyList.className = "army-tags";
-    for (const army of displayArmies(unit.armies)) {
+    const armies = displayArmies(unit.armies);
+    if (armies.length > 30) armyList.classList.add("army-tags-compact");
+    for (const army of armies) {
       const symbol = armySymbolPath(army.id);
       if (symbol) {
         const icon = document.createElement("img");

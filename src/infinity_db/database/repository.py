@@ -952,6 +952,10 @@ class Database:
                 "u.canonical_faction_id FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in unit_rows}
+            army_names = {
+                row["id"]: army_name(row)
+                for row in connection.execute("SELECT id, name, slug FROM army_lists")
+            }
             membership_rows = connection.execute(
                 "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
                 "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
@@ -992,6 +996,7 @@ class Database:
                     "isc": group["isc"],
                     "slug": group["slug"],
                     "main_army_id": group["main_army_id"],
+                    "main_army_name": army_names.get(group["main_army_id"]),
                     "source_ids": group["source_ids"],
                     "army_ids": list(visible_armies),
                     "armies": [
@@ -1060,6 +1065,10 @@ class Database:
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
+            army_names = {
+                row["id"]: army_name(row)
+                for row in connection.execute("SELECT id, name, slug FROM army_lists")
+            }
             if rows:
                 army_rows = connection.execute(
                     "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
@@ -1122,6 +1131,7 @@ class Database:
                     "isc": group["isc"],
                     "slug": group["slug"],
                     "main_army_id": group["main_army_id"],
+                    "main_army_name": army_names.get(group["main_army_id"]),
                     "source_ids": group["source_ids"],
                     "army_ids": list(group["armies"]),
                     "armies": [
@@ -1152,6 +1162,10 @@ class Database:
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in siblings}
+            army_names = {
+                row["id"]: army_name(row)
+                for row in connection.execute("SELECT id, name, slug FROM army_lists")
+            }
             membership_rows = connection.execute(
                 "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
                 "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
@@ -1479,6 +1493,7 @@ class Database:
             "isc_abbr": unit["isc_abbr"],
             "notes": unit["notes"],
             "main_army_id": group["main_army_id"],
+            "main_army_name": army_names.get(group["main_army_id"]),
             "source_ids": source_ids,
             "armies": armies,
         }
