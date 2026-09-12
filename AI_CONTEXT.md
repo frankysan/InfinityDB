@@ -87,6 +87,8 @@ clear requirement justifies it.
 - Update the README for user-visible behavior, and architecture/data-model docs
   when changing a documented boundary, invariant, or storage decision. Add a
   dated note below when a non-obvious, lasting tradeoff is introduced.
+- Record new work under `Unreleased` in `CHANGELOG.md`. Do not increment or
+  otherwise alter the release version unless explicitly requested.
 
 ## Decision log
 

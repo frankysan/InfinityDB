@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Standardized every browser route on a shared page shell with injected
+  navigation, breadcrumb header, catalog tag, and versioned footer. The web UI
+  now defines reusable design tokens for its core surfaces, typography,
+  borders, spacing, radii, controls, focus treatment, and shadows.
+- Consolidated repeated detail-view group, heading, surface-header, data-label,
+  and badge styles into shared primitives and added coverage that guards their
+  use across detail renderers.
+
 ## [0.2.1] - 2026-09-12
 
 ### Changed
@@ -12,13 +24,6 @@ All notable changes to this project are documented in this file.
   independent-project and transparency disclosures.
 - Refreshed project documentation for the current web reference, data pipeline,
   and database compatibility revision (6).
-- Standardized every browser route on a shared page shell with injected
-  navigation, breadcrumb header, catalog tag, and versioned footer. The web UI
-  now defines reusable design tokens for its core surfaces, typography,
-  borders, spacing, radii, controls, focus treatment, and shadows.
-- Consolidated repeated detail-view group, heading, surface-header, data-label,
-  and badge styles into shared primitives and added coverage that guards their
-  use across detail renderers.
 
 ## [0.2.0] - 2026-09-11
 
