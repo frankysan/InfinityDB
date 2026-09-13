@@ -64,6 +64,10 @@ clear requirement justifies it.
 - Every browser route uses the server-rendered shared page shell. Add new pages
   through `_page()` with breadcrumb and catalog-tag values, and retain the
   navigation/header/footer markers in their static document.
+- Shared menus use the sidebar-section / compact-topbar pattern: render their
+  labeled options inline beneath sidebar navigation on wide screens, then use
+  the shared compact-menu dropdown behavior beside Navigation in the top bar.
+  New sidebar or topbar menus should follow this pattern by default.
 - Treat `styles.css` as the design-system source of truth. Reuse its root
   tokens and existing layout/control components; do not add page-local colors,
   spacing scales, radii, or shell variants when a shared token or component can

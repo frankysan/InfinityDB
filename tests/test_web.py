@@ -485,23 +485,25 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
     assert b'html[data-distance-unit="in"] .attribute-statline-with-availability { grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }' in styles
 
 
-def test_developer_mode_controls_database_id_visibility_and_sidebar_placement(
+def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     app: Callable,
 ) -> None:
     status, _, body = request(app, "/units")
 
     assert status == 200
     assert b'id="developer-mode-toggle"' in body
-    assert body.index(b"Your Infinity data") < body.index(b"developer-mode-toggle")
-    assert body.index(b"developer-mode-toggle") < body.index(b"Army snapshot downloaded")
+    assert b'<div class="menu settings-menu" data-menu>' in body
+    assert b'aria-controls="settings-menu"' in body
+    assert b'>Settings <span aria-hidden="true">' in body
+    assert body.index(b"compact-navigation-menu") < body.index(b"settings-menu")
     assert b'<th scope="col" class="id-column">Unit ID</th>' in body
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
     assert b'html:not([data-developer-mode="true"]) .id-column { display: none; }' in styles
-    assert b"--sidebar-section-gap: 70px" in styles
-    assert b".sidebar-developer { margin-top: var(--sidebar-section-gap); }" in styles
-    assert b".sidebar-footer .sidebar-developer + .snapshot-date { margin: 20px 0; }" in styles
+    assert b".settings-menu { margin-top: 32px; }" in styles
+    assert b".compact-menu-panel { position: static; display: flex;" in styles
+    assert b".menu-label { display: none; }" in styles
     assert b".sidebar { position: relative; z-index: 4;" in styles
 
     status, _, preferences = request(app, "/static/preferences.js")
@@ -516,17 +518,30 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
 
     assert status == 200
     assert b'<script type="module" src="/static/navigation.js"></script>' in body
-    assert b'<p class="nav-label">Navigation</p>' in body
+    assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body
 
     status, _, navigation = request(app, "/static/navigation.js")
     assert status == 200
     assert b'document.querySelectorAll("[data-menu]")' in navigation
+    assert b"themed-logo.js" not in navigation
+    assert b"const menus = [...document.querySelectorAll" in navigation
     assert b'button.addEventListener("click"' in navigation
+    assert b'window.matchMedia("(max-width: 920px)")' in navigation
+    assert b'document.addEventListener("touchstart", closeOnOutsideInteraction' in navigation
     assert b'menu.dataset.open = String(isOpen)' in navigation
     assert b'document.addEventListener("pointerdown"' in navigation
     assert b'window.addEventListener("pagehide", closeMenu)' in navigation
+
+    status, headers, themed_logo = request(app, "/static/themed-logo.js")
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert b"hydrateThemedLogos" in themed_logo
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b'.menu[data-open="true"] > .compact-menu-panel { display: flex; }' in styles
     assert b'window.addEventListener("pageshow", closeMenu)' in navigation
 
 

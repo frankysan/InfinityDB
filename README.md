@@ -24,10 +24,10 @@ Current release: **0.3.0** (2026-09-12).
   army open initially.
 - Matches reinforcement-only records to their corresponding standard unit when
   their source labels use equivalent wording, accents, or spelling variants.
-- Provides a shared sidebar with a persistent centimetre/inch display
-  preference for movement and distance-based skill modifiers, and displays the
-  download date recorded for a downloader-created Army snapshot.
-- Provides a default-off Developer mode in the sidebar for showing database IDs
+- Provides a Settings menu with a persistent centimetre/inch display preference
+  for movement and distance-based skill modifiers, and displays the download
+  date recorded for a downloader-created Army snapshot in the sidebar.
+- Provides a default-off Developer mode in Settings for showing database IDs
   and ID table columns during data review.
 - Uses a shared page shell on every route: the navigation, breadcrumb header,
   catalog label, and versioned footer are rendered centrally. Core visual

@@ -68,8 +68,10 @@ variants. Tables use the comfortable default or `.data-table--compact` for
 detail and usage data; retain those variants instead of adding page-specific
 cell padding or header type rules.
 
-Browser preferences are stored locally. The shared sidebar currently provides
-distance units and a default-off Developer mode. Developer mode sets
+Browser preferences are stored locally. The Settings sidebar section provides
+distance units and a default-off Developer mode; on compact screens it becomes
+a top-bar menu beside Navigation. New sidebar or top-bar menus should use this
+same inline-sidebar and compact-dropdown pattern. Developer mode sets
 `data-developer-mode` on the document root; use `.developer-only` for inline
 technical details and `.id-column` for table columns so they remain hidden in
 the player-facing view by default.

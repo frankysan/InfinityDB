@@ -27,6 +27,7 @@ ASSETS = {
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
+    "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
     "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),

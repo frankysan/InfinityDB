@@ -1,25 +1,40 @@
-import { hydrateThemedLogos } from "./themed-logo.js";
+/** Shared behavior for menus: expanded sidebar sections and compact top-bar popovers. */
+const menus = [...document.querySelectorAll("[data-menu]")];
+const compactMenuMedia = window.matchMedia("(max-width: 920px)");
 
-hydrateThemedLogos();
+function setMenuOpen(menu, isOpen) {
+  menu.dataset.open = String(isOpen);
+  menu.querySelector(".menu-button").setAttribute("aria-expanded", String(isOpen));
+}
 
-/** Shared behavior for compact menus in the top bar. */
-document.querySelectorAll("[data-menu]").forEach((menu) => {
-  const button = menu.querySelector(".compact-menu-button");
-  const setMenuOpen = (isOpen) => {
-    menu.dataset.open = String(isOpen);
-    button.setAttribute("aria-expanded", String(isOpen));
-  };
-  const closeMenu = () => setMenuOpen(false);
+function closeMenus() {
+  menus.forEach((menu) => setMenuOpen(menu, false));
+}
+
+function syncMenuLayout() {
+  closeMenus();
+}
+
+syncMenuLayout();
+compactMenuMedia.addEventListener("change", syncMenuLayout);
+
+menus.forEach((menu) => {
+  const button = menu.querySelector(".menu-button");
+  const closeMenu = () => setMenuOpen(menu, false);
 
   button.addEventListener("click", () => {
-    setMenuOpen(menu.dataset.open !== "true");
+    if (!compactMenuMedia.matches) return;
+    const isOpen = menu.dataset.open !== "true";
+    closeMenus();
+    setMenuOpen(menu, isOpen);
   });
 
-  document.addEventListener("pointerdown", (event) => {
-    if (menu.dataset.open === "true" && !menu.contains(event.target)) {
-      closeMenu();
-    }
-  });
+  const closeOnOutsideInteraction = (event) => {
+    if (compactMenuMedia.matches && menu.dataset.open === "true" && !menu.contains(event.target)) closeMenu();
+  };
+
+  document.addEventListener("pointerdown", closeOnOutsideInteraction);
+  document.addEventListener("touchstart", closeOnOutsideInteraction, { passive: true });
 
   menu.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", closeMenu);
