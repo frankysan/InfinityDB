@@ -12,7 +12,7 @@ from infinity_army_data.cli import add_data_commands
 from infinity_army_data.cli import cmd_build as build_dataset
 
 from . import __version__
-from .database import export_database
+from .database import export_database, raw_database_path
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
 
@@ -22,6 +22,7 @@ def _export(source: Path, destination: Path) -> None:
         normalized = json.load(handle)
     export_database(normalized, destination)
     print(f"Database ready: {destination}")
+    print(f"Raw archive ready: {raw_database_path(destination)}")
 
 
 def cmd_build(args: argparse.Namespace) -> int:

@@ -10,7 +10,7 @@ import pytest
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
 from infinity_army_data.weapon_profiles import weapon_profile_override
-from infinity_db.database import Database, export_database
+from infinity_db.database import Database, export_database, raw_database_path
 from infinity_db.database.repository import (
     canonical_skill_extra_name,
     canonical_skill_id,
@@ -25,6 +25,7 @@ from infinity_db.database.schema import (
     DATABASE_COMPATIBILITY_VERSION,
     INDEXES,
     METADATA_TABLE,
+    RAW_ROWS_TABLE,
     ROW_JSON,
     TABLES,
     quote,
@@ -157,15 +158,19 @@ def test_database_preserves_every_normalized_table_and_field(
     export_database(normalized, path)
     Database(path).validate()
     assert set(normalized["tables"]) == set(TABLES)
+    archive = sqlite3.connect(raw_database_path(path))
     connection = sqlite3.connect(path)
     try:
         for name, source_rows in normalized["tables"].items():
-            stored_rows = connection.execute(
-                f"SELECT {quote(ROW_JSON)} FROM {quote(name)} ORDER BY rowid"
+            stored_rows = archive.execute(
+                f"SELECT {quote(ROW_JSON)} FROM {quote(RAW_ROWS_TABLE)} "
+                "WHERE table_name = ? ORDER BY row_position",
+                (name,),
             ).fetchall()
             assert [json.loads(row[0]) for row in stored_rows] == source_rows
             columns = {row[1] for row in connection.execute(f"PRAGMA table_info({quote(name)})")}
             assert {field for row in source_rows for field in row} <= columns
+            assert ROW_JSON not in columns
         assert connection.execute(
             "SELECT army_id, ava FROM profiles ORDER BY army_id"
         ).fetchall() == [(101, "T"), (201, 1)]
@@ -193,6 +198,7 @@ def test_database_preserves_every_normalized_table_and_field(
             connection.execute("UPDATE profiles SET army_id = 404 WHERE army_id = 101")
     finally:
         connection.close()
+        archive.close()
 
 
 def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: dict) -> None:
@@ -918,11 +924,14 @@ def test_invalid_import_keeps_existing_database(tmp_path: Path, normalized: dict
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
     original = path.read_bytes()
+    archive_path = raw_database_path(path)
+    original_archive = archive_path.read_bytes()
     mutation(normalized)
     with pytest.raises(ValueError):
         export_database(normalized, path)
     assert path.read_bytes() == original
-    assert sorted(item.name for item in tmp_path.iterdir()) == ["army.sqlite3"]
+    assert archive_path.read_bytes() == original_archive
+    assert sorted(item.name for item in tmp_path.iterdir()) == ["army.raw.sqlite3", "army.sqlite3"]
 
 
 def test_empty_import_replaces_previous_database(tmp_path: Path, normalized: dict) -> None:

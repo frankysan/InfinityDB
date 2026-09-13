@@ -1,7 +1,13 @@
 """SQLite export and read-only repositories for the InfinityDB application."""
 
-from .importer import export_database
+from .importer import export_database, raw_database_path
 from .repository import Database
 from .schema import DATABASE_COMPATIBILITY_VERSION, SCHEMA_VERSION
 
-__all__ = ["DATABASE_COMPATIBILITY_VERSION", "SCHEMA_VERSION", "Database", "export_database"]
+__all__ = [
+    "DATABASE_COMPATIBILITY_VERSION",
+    "SCHEMA_VERSION",
+    "Database",
+    "export_database",
+    "raw_database_path",
+]

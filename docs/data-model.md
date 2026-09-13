@@ -31,17 +31,17 @@ The merged master layer is lossless and source-oriented. The normalized layer is
 
 `infinity_db.database` imports every normalized table with its original field names,
 declared primary keys, and foreign keys. Nested arrays and objects use JSON text.
-Every row also has a `__row_json` field retaining the exact normalized record,
-including absent versus null fields. `__infinity_metadata` retains import metadata
-and warnings. The schema defines empty tables as well, so API queries do not depend
-on a particular snapshot containing every kind of record.
+The frontend `infinity.db` contains only queryable columns. Its sibling
+`infinity.raw.db` contains `__infinity_raw_rows`, preserving each exact normalized
+record (including absent versus null fields) for development use. Both databases
+retain `__infinity_metadata`; the schema defines empty frontend tables so API
+queries do not depend on a particular snapshot containing every kind of record.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 6 and the application
-compatibility revision is 7. Imports build a temporary sibling file, check
-database integrity, then replace the destination. Incompatible schemas or
+records its schema version. The current schema version is 8 and the application
+compatibility revision is 9. Imports build temporary sibling files, check
+database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now.
-Release 0.3.3 does not change either database version.
 
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,

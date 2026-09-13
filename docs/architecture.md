@@ -20,7 +20,7 @@ Army directory / ZIP
     -> normalize + relationship validation
     -> normalized.json + validation report
     -> SQLite importer
-    -> infinity.db
+    -> infinity.db + infinity.raw.db
     -> repository -> HTTP API -> browser UI
 ```
 

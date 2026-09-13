@@ -13,9 +13,11 @@ from infinity_army_data.metadata import MetadataError, validate_metadata_envelop
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
 
 from .schema import (
+    APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
     METADATA_TABLE,
+    RAW_ROWS_TABLE,
     ROW_JSON,
     TABLES,
     columns_for,
@@ -87,19 +89,60 @@ def sql_value(value: Any) -> Any:
     return value
 
 
+def raw_database_path(path: Path) -> Path:
+    """Return the development archive path associated with a frontend database."""
+    return path.with_name(f"{path.stem}.raw{path.suffix}")
+
+
+def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    """Store lossless normalized records outside the frontend database."""
+    connection.execute(f"PRAGMA application_id = {APPLICATION_ID}")
+    connection.execute(
+        f"CREATE TABLE {quote(METADATA_TABLE)} (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
+    )
+    connection.execute(
+        f"CREATE TABLE {quote(RAW_ROWS_TABLE)} ("
+        "table_name TEXT NOT NULL, row_position INTEGER NOT NULL, "
+        f"{quote(ROW_JSON)} TEXT NOT NULL, "
+        "PRIMARY KEY (table_name, row_position))"
+    )
+    metadata = {key: value for key, value in data.items() if key != "tables"}
+    metadata["imported_tables"] = list(data["tables"])
+    metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+    connection.executemany(
+        f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
+        [(key, json_text(value)) for key, value in metadata.items()],
+    )
+    connection.executemany(
+        f"INSERT INTO {quote(RAW_ROWS_TABLE)} (table_name, row_position, {quote(ROW_JSON)}) "
+        "VALUES (?, ?, ?)",
+        [
+            (name, position, json_text(row))
+            for name, rows in data["tables"].items()
+            for position, row in enumerate(rows)
+        ],
+    )
+
+
 def export_database(data: dict[str, Any], path: Path) -> None:
     """Replace ``path`` only after the complete normalized import passes validation.
 
-    Each normalized table is a SQLite table with the same field names. Object and
-    array fields are JSON text. ``__row_json`` preserves exact values and absent
-    versus null fields; metadata and warnings live in ``__infinity_metadata``.
+    The frontend database contains queryable normalized columns only. A sibling
+    ``.raw`` database preserves exact normalized rows, including absent versus
+    null fields, for development use.
     """
     validate_input(data)
     path = Path(path)
+    archive_path = raw_database_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, filename = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
     os.close(descriptor)
     temporary = Path(filename)
+    archive_descriptor, archive_filename = tempfile.mkstemp(
+        prefix=f".{archive_path.name}.", suffix=".tmp", dir=path.parent
+    )
+    os.close(archive_descriptor)
+    archive_temporary = Path(archive_filename)
     try:
         connection = sqlite3.connect(temporary)
         try:
@@ -115,13 +158,12 @@ def export_database(data: dict[str, Any], path: Path) -> None:
                 )
                 for name, rows in data["tables"].items():
                     columns = columns_for(name, rows)
-                    fields = ", ".join(map(quote, (*columns, ROW_JSON)))
-                    placeholders = ", ".join("?" for _ in range(len(columns) + 1))
+                    fields = ", ".join(map(quote, columns))
+                    placeholders = ", ".join("?" for _ in columns)
                     connection.executemany(
                         f"INSERT INTO {quote(name)} ({fields}) VALUES ({placeholders})",
                         [
-                            (*[sql_value(row.get(field)) for field in columns], json_text(row))
-                            for row in rows
+                            tuple(sql_value(row.get(field)) for field in columns) for row in rows
                         ],
                     )
         except (sqlite3.IntegrityError, OverflowError) as exc:
@@ -131,6 +173,16 @@ def export_database(data: dict[str, Any], path: Path) -> None:
         from .repository import Database
 
         Database(temporary).validate()
+        archive_connection = sqlite3.connect(archive_temporary)
+        try:
+            with archive_connection:
+                create_raw_archive(archive_connection, data)
+            if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+                raise ValueError("Raw archive integrity check failed")
+        finally:
+            archive_connection.close()
+        os.replace(archive_temporary, archive_path)
         os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
+        archive_temporary.unlink(missing_ok=True)

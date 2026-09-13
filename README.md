@@ -130,6 +130,7 @@ data/generated/master.json
 data/generated/normalized.json
 data/generated/normalized-validation.json
 data/generated/infinity.db
+data/generated/infinity.raw.db
 ```
 
 The database is replaced only after the new import passes integrity checks. A

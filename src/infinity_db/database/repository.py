@@ -25,7 +25,6 @@ from .schema import (
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
     METADATA_TABLE,
-    ROW_JSON,
     SCHEMA_VERSION,
     TABLES,
     quote,
@@ -457,7 +456,7 @@ class Database:
                 columns = {
                     row["name"] for row in connection.execute(f"PRAGMA table_info({quote(name)})")
                 }
-                if not {*definition.key, *definition.fields, ROW_JSON} <= columns:
+                if not {*definition.key, *definition.fields} <= columns:
                     raise ValueError(f"Incomplete database schema: {name}; rebuild the database")
             row = connection.execute(
                 f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?", ("_meta",)
@@ -840,7 +839,7 @@ class Database:
                     profile_parameters = (canonical_id, item["name"])
                 profile_rows = connection.execute(
                     "SELECT m.position, m.id, m.type, m.name, m.ammunition, m.burst, m.damage, "
-                    "m.saving, m.savingNum, m.properties, m.distance, m.__row_json, "
+                    "m.saving, m.savingNum, m.properties, m.distance, m.mode, m.profile, "
                     "a.name AS ammunition_name "
                     "FROM metadata_weapons AS m "
                     "LEFT JOIN metadata_ammunitions AS a ON a.id = m.ammunition "
@@ -860,18 +859,17 @@ class Database:
 
                 profiles = []
                 for profile in profile_rows:
-                    source = decoded(profile[ROW_JSON], {})
                     item = {
                         "id": profile["id"],
                         "name": profile["name"],
-                        "mode": source.get("mode") if isinstance(source, dict) else None,
+                        "mode": profile["mode"],
                         "type": profile["type"],
                         "ammunition": profile["ammunition_name"] or profile["ammunition"],
                         "burst": profile["burst"],
                         "damage": profile["damage"],
                         "saving": profile["saving"],
                         "saving_num": profile["savingNum"],
-                        "profile": source.get("profile") if isinstance(source, dict) else None,
+                        "profile": profile["profile"],
                         "traits": decoded(profile["properties"], []),
                         "ranges": decoded(profile["distance"], {}),
                     }

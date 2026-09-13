@@ -5,13 +5,14 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 8
+DATABASE_COMPATIBILITY_VERSION = 9
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
+RAW_ROWS_TABLE = "__infinity_raw_rows"
 METADATA_TABLE = "__infinity_metadata"
 DATABASE_COMPATIBILITY_KEY = "database_compatibility_version"
 
@@ -132,7 +133,9 @@ TABLES.update(
         "metadata_factions": table("id", "parent name slug discontinued logo"),
         "metadata_ammunitions": table("id", "name"),
         "metadata_weapons": table(
-            "position", "id type name ammunition burst damage saving savingNum properties distance"
+            "position",
+            "id type name mode ammunition burst damage saving savingNum "
+            "properties distance profile",
         ),
         "metadata_skills": table("id", "name wiki"),
         "metadata_equipment": table("id", "name wiki"),
@@ -288,7 +291,8 @@ def create_schema(connection: sqlite3.Connection, tables: dict[str, list[dict]])
     """Create all tables, including empty ones, with deferred relational constraints.
 
     Values have no SQLite affinity, avoiding coercion of source strings such as SWC.
-    Nested JSON occupies a text column; the original row is also retained losslessly.
+    Nested JSON occupies text columns. Lossless source rows are stored in the
+    separate development archive, not in the frontend database.
     """
     connection.execute(f"PRAGMA application_id = {APPLICATION_ID}")
     connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
@@ -300,7 +304,6 @@ def create_schema(connection: sqlite3.Connection, tables: dict[str, list[dict]])
         parts = [
             quote(field) + (" NOT NULL" if field in definition.key else "") for field in columns
         ]
-        parts.append(f"{quote(ROW_JSON)} TEXT NOT NULL")
         parts.append("PRIMARY KEY (" + ", ".join(map(quote, definition.key)) + ")")
         for reference in definition.references:
             parts.append(
