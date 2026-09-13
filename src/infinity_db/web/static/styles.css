@@ -434,7 +434,7 @@ tbody tr:hover { background: #f8f9f3; }
 
 @media (min-width: 1700px) { .main { padding-inline: 70px; } }
 @media (min-width: 601px) {
-  #table-container thead th:first-child { width: 55%; }
+  #table-container thead th:first-child { width: 65%; }
   #table-container thead th:last-child { width: 145px; }
 }
 @media (max-width: 1150px) {
