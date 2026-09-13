@@ -245,12 +245,19 @@ byId("retry").addEventListener("click", load);
 elements.previous.forEach((button) => button.addEventListener("click", () => changePage(-1)));
 elements.next.forEach((button) => button.addEventListener("click", () => changePage(1)));
 elements.sortButton.addEventListener("click", toggleSortOrder);
-window.addEventListener("popstate", () => {
+function onPopstate() {
   clearTimeout(searchTimer);
   state = readLocation();
   syncFilters();
   load();
-});
+}
+
+window.addEventListener("popstate", onPopstate);
+document.addEventListener("infinity:beforenavigation", () => {
+  clearTimeout(searchTimer);
+  controller?.abort();
+  window.removeEventListener("popstate", onPopstate);
+}, { once: true });
 
 syncFilters();
 writeLocation(true);

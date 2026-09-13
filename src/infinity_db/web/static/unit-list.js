@@ -25,7 +25,10 @@ export function renderUnitRows(container, units) {
     const faction = factionSlug(unit.main_army_id);
     if (faction) row.classList.add(`unit-row--faction-${faction}`);
     row.addEventListener("click", (event) => {
-      if (!event.target.closest("a")) window.location.href = `/units/${unit.id}`;
+      if (!event.target.closest("a")) {
+        const url = `/units/${unit.id}`;
+        window.infinityNavigate ? window.infinityNavigate(url) : window.location.assign(url);
+      }
     });
     const nameCell = document.createElement("th");
     nameCell.scope = "row";

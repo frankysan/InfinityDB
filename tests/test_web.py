@@ -577,6 +577,7 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
 
     assert status == 200
     assert b'<script type="module" src="/static/navigation.js?v=0.3.3"></script>' in body
+    assert b'<script type="module" src="/static/page-navigation.js?v=0.3.3"></script>' in body
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body
@@ -585,6 +586,14 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     assert status == 200
     assert b'document.querySelectorAll("[data-menu]")' in navigation
     assert b"themed-logo.js" not in navigation
+
+    status, _, page_navigation = request(app, "/static/page-navigation.js")
+    assert status == 200
+    assert b'currentMain.replaceWith(nextMain)' in page_navigation
+    assert b'window.infinityNavigate' in page_navigation
+    assert b'"/static/navigation.js", "/static/page-navigation.js"' in page_navigation
+    assert b'source.searchParams.set("_navigation", String(navigationNumber))' in page_navigation
+    assert b'window.document.body.append(script)' in page_navigation
     assert b"const menus = [...document.querySelectorAll" in navigation
     assert b'button.addEventListener("click"' in navigation
     assert b'window.matchMedia("(max-width: 920px)")' in navigation
