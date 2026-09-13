@@ -26,10 +26,10 @@ import re
 import sys
 import zipfile
 from collections import Counter
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
-
+from typing import Any
 
 SOURCE_NAME_RE = re.compile(r"^(?P<id>\d+)-(?P<slug>.+)\.json$", re.IGNORECASE)
 VARIANT_UNIT_FIELDS = frozenset({"profileGroups", "filters"})
@@ -168,16 +168,8 @@ def merge_sources(sources: Iterable[SourceDocument]) -> dict[str, Any]:
             seen_in_this_source.add(unit_id)
             unit_ids.append(unit_id)
 
-            shared = {
-                key: value
-                for key, value in unit.items()
-                if key not in VARIANT_UNIT_FIELDS
-            }
-            variant = {
-                key: value
-                for key, value in unit.items()
-                if key in VARIANT_UNIT_FIELDS
-            }
+            shared = {key: value for key, value in unit.items() if key not in VARIANT_UNIT_FIELDS}
+            variant = {key: value for key, value in unit.items() if key in VARIANT_UNIT_FIELDS}
 
             unit_key = str(unit_id)
             if unit_key not in units:
@@ -233,9 +225,7 @@ def reconstruct_source(master: dict[str, Any], faction_id: int) -> dict[str, Any
     army_record = master["armyLists"][faction_key]
 
     reconstructed = {
-        key: value
-        for key, value in army_record.items()
-        if key not in {"_meta", "unitIds"}
+        key: value for key, value in army_record.items() if key not in {"_meta", "unitIds"}
     }
 
     reconstructed_units: list[dict[str, Any]] = []

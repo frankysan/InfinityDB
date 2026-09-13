@@ -407,7 +407,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"September 10, 2026" in body
     assert b'data-app-version="0.3.3"' in body
     assert b'data-snapshot-revision="' in body
-    assert b'/static/version-check.js?v=0.3.3' in body
+    assert b"/static/version-check.js?v=0.3.3" in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
@@ -490,9 +490,9 @@ def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b'.landing-logo { grid-column: 2; grid-row: 1; align-self: start;' in styles
-    assert b'width: min(30vw, 135px); height: auto;' in styles
-    assert b'.landing-hero-content { grid-column: 1 / -1; }' in styles
+    assert b".landing-logo { grid-column: 2; grid-row: 1; align-self: start;" in styles
+    assert b"width: min(30vw, 135px); height: auto;" in styles
+    assert b".landing-hero-content { grid-column: 1 / -1; }" in styles
 
 
 def test_mobile_unit_list_prioritizes_the_unit_name_column(
@@ -501,35 +501,34 @@ def test_mobile_unit_list_prioritizes_the_unit_name_column(
     status, _, styles = request(app, "/static/styles.css")
 
     assert status == 200
-    assert b'thead th:last-child { width: 156px; }' in styles
-    assert b'.army-tags { --symbols-per-row: 4; }' in styles
-    assert b'.army-tags-compact { --symbols-per-row: 6; gap: 3px; }' in styles
-    assert b'.army-tags-compact .army-symbol { width: 17px; height: 17px; }' in styles
+    assert b"thead th:last-child { width: 156px; }" in styles
+    assert b".army-tags { --symbols-per-row: 4; }" in styles
+    assert b".army-tags-compact { --symbols-per-row: 6; gap: 3px; }" in styles
+    assert b".army-tags-compact .army-symbol { width: 17px; height: 17px; }" in styles
 
     status, _, unit_list = request(app, "/static/unit-list.js")
     assert status == 200
-    assert b'if (armies.length > 12)' in unit_list
+    assert b"if (armies.length > 12)" in unit_list
 
 
 def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
 
     assert status == 200
-    assert b'@media (min-width: 601px) and (max-width: 700px)' in styles
-    assert b'--movement-column-width: 60px;' in styles
+    assert b"@media (min-width: 601px) and (max-width: 700px)" in styles
+    assert b"--movement-column-width: 60px;" in styles
     assert (
         b'html[data-distance-unit="in"] .attribute-statline { --movement-column-width: 52px; }'
         in styles
     )
     assert (
-        b'grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr));'
-        in styles
+        b"grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr));" in styles
     )
-    assert b'.attribute-statline > div { padding-inline: 4px; }' in styles
-    assert b'grid-template-columns: 60px repeat(4, minmax(0, 1fr));' in styles
+    assert b".attribute-statline > div { padding-inline: 4px; }" in styles
+    assert b"grid-template-columns: 60px repeat(4, minmax(0, 1fr));" in styles
     assert (
         b'html[data-distance-unit="in"] .attribute-statline-with-availability '
-        b'{ grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }' in styles
+        b"{ grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }" in styles
     )
 
 
@@ -589,16 +588,16 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
 
     status, _, page_navigation = request(app, "/static/page-navigation.js")
     assert status == 200
-    assert b'currentMain.replaceWith(nextMain)' in page_navigation
-    assert b'window.infinityNavigate' in page_navigation
+    assert b"currentMain.replaceWith(nextMain)" in page_navigation
+    assert b"window.infinityNavigate" in page_navigation
     assert b'"/static/navigation.js", "/static/page-navigation.js"' in page_navigation
     assert b'source.searchParams.set("_navigation", String(navigationNumber))' in page_navigation
-    assert b'window.document.body.append(script)' in page_navigation
+    assert b"window.document.body.append(script)" in page_navigation
     assert b"const menus = [...document.querySelectorAll" in navigation
     assert b'button.addEventListener("click"' in navigation
     assert b'window.matchMedia("(max-width: 920px)")' in navigation
     assert b'document.addEventListener("touchstart", closeOnOutsideInteraction' in navigation
-    assert b'menu.dataset.open = String(isOpen)' in navigation
+    assert b"menu.dataset.open = String(isOpen)" in navigation
     assert b'document.addEventListener("pointerdown"' in navigation
     assert b'window.addEventListener("pagehide", closeMenu)' in navigation
 
@@ -834,7 +833,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert status == 200
     assert b'card.className = "explorer surface weapon-profile"' in weapon_detail
     assert b"const profileTitle = profile.mode || profile.name || variant.name;" in weapon_detail
-    assert b"title.className = \"data-surface-header\";" in weapon_detail
+    assert b'title.className = "data-surface-header";' in weapon_detail
     assert b"headingText" not in weapon_detail
     assert b"variantTitle" not in weapon_detail
     assert b'profileHeading.textContent = "Profile";' in weapon_detail
@@ -1005,11 +1004,11 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                     {
                         "id": 1,
                         "name": "Alpha Ranger",
-                            "isc": "Explorer Prototype",
-                            "slug": "ranger-prototype",
-                            "main_army_id": None,
-                            "main_army_name": None,
-                            "source_ids": [1],
+                        "isc": "Explorer Prototype",
+                        "slug": "ranger-prototype",
+                        "main_army_id": None,
+                        "main_army_name": None,
+                        "source_ids": [1],
                         "army_ids": [101, 201],
                         "armies": [
                             {"id": 101, "name": "Zulu Company"},

@@ -78,9 +78,7 @@ def _merge(
     sources, skipped = load_sources(source)
     if metadata is not None:
         skipped = [
-            filename
-            for filename in skipped
-            if Path(filename).name.casefold() != "metadata.json"
+            filename for filename in skipped if Path(filename).name.casefold() != "metadata.json"
         ]
     master = merge_sources(sources)
     if downloaded_on := snapshot_downloaded_on(source):
@@ -183,9 +181,7 @@ def add_data_commands(
         "--no-verify", action="store_true", help="Skip lossless reconstruction verification"
     )
     metadata_group = p_merge.add_mutually_exclusive_group()
-    metadata_group.add_argument(
-        "--metadata", type=Path, help="Army API metadata JSON"
-    )
+    metadata_group.add_argument("--metadata", type=Path, help="Army API metadata JSON")
     metadata_group.add_argument(
         "--no-metadata", action="store_true", help="Do not load metadata.json"
     )

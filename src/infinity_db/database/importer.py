@@ -189,9 +189,7 @@ def export_database(data: dict[str, Any], path: Path) -> None:
                     insert_batched(
                         connection,
                         f"INSERT INTO {quote(name)} ({fields}) VALUES ({placeholders})",
-                        (
-                            tuple(sql_value(row.get(field)) for field in columns) for row in rows
-                        ),
+                        (tuple(sql_value(row.get(field)) for field in columns) for row in rows),
                     )
                 create_indexes(connection)
                 # The frontend database is an immutable snapshot. Persist planner

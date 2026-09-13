@@ -6,8 +6,8 @@ from typing import Any
 
 # Keep source omissions explicit and easy to update as new snapshots are imported.
 WEAPON_PROFILE_OVERRIDES: dict[int, str] = {
-    62: "ARM=0, BTS=0, STR=1, S=1",   # Monofilament Mine
-    63: "ARM=0, BTS=0, STR=1, S=1",   # Viral Mine
+    62: "ARM=0, BTS=0, STR=1, S=1",  # Monofilament Mine
+    63: "ARM=0, BTS=0, STR=1, S=1",  # Viral Mine
     196: "ARM=0, BTS=0, STR=1, S=1",  # Shock Mine
     197: "ARM=0, BTS=0, STR=1, S=1",  # E/M Mine
     199: "ARM=0, BTS=0, STR=1, S=1",  # AP Mine
@@ -36,8 +36,15 @@ def weapon_name_override(weapon_id: int) -> str | None:
 SPECIAL_WEAPON_DETAILS: dict[int, dict[str, Any]] = {
     226: {
         "stats": [
-            ["MOV", "--"], ["CC", "5"], ["BS", "10"], ["PH", "--"], ["WIP", "--"],
-            ["ARM", "2"], ["BTS", "3"], ["STR", "1"], ["S", "2"],
+            ["MOV", "--"],
+            ["CC", "5"],
+            ["BS", "10"],
+            ["PH", "--"],
+            ["WIP", "--"],
+            ["ARM", "2"],
+            ["BTS", "3"],
+            ["STR", "1"],
+            ["S", "2"],
         ],
         "equipment": ["360º Visor"],
         "skills": ["Total Reaction"],

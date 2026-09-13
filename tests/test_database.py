@@ -207,9 +207,7 @@ def test_database_preserves_every_normalized_table_and_field(
 
 def _query_plan(connection: sqlite3.Connection, sql: str, parameters: tuple[object, ...]) -> str:
     """Return the detail strings from SQLite's query planner."""
-    return "\n".join(
-        row[3] for row in connection.execute(f"EXPLAIN QUERY PLAN {sql}", parameters)
-    )
+    return "\n".join(row[3] for row in connection.execute(f"EXPLAIN QUERY PLAN {sql}", parameters))
 
 
 @pytest.mark.parametrize(
@@ -472,11 +470,11 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
             {
                 "id": 1,
                 "name": "Álpha",
-                    "isc": None,
-                    "slug": "alpha",
-                    "main_army_id": None,
-                    "main_army_name": None,
-                    "source_ids": [1],
+                "isc": None,
+                "slug": "alpha",
+                "main_army_id": None,
+                "main_army_name": None,
+                "source_ids": [1],
                 "army_ids": [101, 201],
                 "armies": [
                     {"id": 101, "name": "First Army"},
@@ -1102,11 +1100,11 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
         {
             "id": 4,
             "name": "Unit 4",
-                "isc": None,
-                "slug": None,
-                "main_army_id": None,
-                "main_army_name": None,
-                "source_ids": [4],
+            "isc": None,
+            "slug": None,
+            "main_army_id": None,
+            "main_army_name": None,
+            "source_ids": [4],
             "army_ids": [],
             "armies": [],
         }
@@ -1116,11 +1114,11 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
             {
                 "id": 5,
                 "name": "Unit 5",
-                    "isc": None,
-                    "slug": None,
-                    "main_army_id": None,
-                    "main_army_name": None,
-                    "source_ids": [5],
+                "isc": None,
+                "slug": None,
+                "main_army_id": None,
+                "main_army_name": None,
+                "source_ids": [5],
                 "army_ids": [],
                 "armies": [],
             }
@@ -1156,16 +1154,12 @@ def test_secondary_indexes_are_created_after_schema_setup() -> None:
     connection = sqlite3.connect(":memory:")
     try:
         create_schema(connection, {})
-        indexes_before = {
-            row[1] for row in connection.execute("PRAGMA index_list(units)")
-        }
+        indexes_before = {row[1] for row in connection.execute("PRAGMA index_list(units)")}
         assert "units_name" not in indexes_before
 
         create_indexes(connection)
 
-        indexes_after = {
-            row[1] for row in connection.execute("PRAGMA index_list(units)")
-        }
+        indexes_after = {row[1] for row in connection.execute("PRAGMA index_list(units)")}
         assert "units_name" in indexes_after
     finally:
         connection.close()

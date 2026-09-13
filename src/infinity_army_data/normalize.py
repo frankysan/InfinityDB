@@ -35,8 +35,9 @@ import argparse
 import json
 import sys
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from .metadata import METADATA_TABLES, MetadataError, normalize_metadata, validate_metadata_envelope
 from .weapon_categories import weapon_category
@@ -101,8 +102,7 @@ def load_master(path: Path) -> dict[str, Any]:
         raise NormalizationError("master.json has no valid _meta object")
     if meta.get("format") != EXPECTED_MASTER_FORMAT:
         raise NormalizationError(
-            f"Expected master format {EXPECTED_MASTER_FORMAT!r}, "
-            f"got {meta.get('format')!r}"
+            f"Expected master format {EXPECTED_MASTER_FORMAT!r}, got {meta.get('format')!r}"
         )
     if meta.get("formatVersion") != EXPECTED_MASTER_VERSION:
         raise NormalizationError(
@@ -132,8 +132,7 @@ def _merge_catalog_identity(
         identities[item_id] = base
     elif previous != base:
         raise NormalizationError(
-            f"Global lookup conflict in {catalog_name} for id {item_id}: "
-            f"{previous!r} != {base!r}"
+            f"Global lookup conflict in {catalog_name} for id {item_id}: {previous!r} != {base!r}"
         )
 
 
@@ -142,7 +141,7 @@ def collect_faction_ids(master: dict[str, Any]) -> tuple[set[int], Counter[int],
     canonical_refs: Counter[int] = Counter()
     membership_refs: Counter[int] = Counter()
 
-    for army_key, army in master["armyLists"].items():
+    for army in master["armyLists"].values():
         reinf = army.get("reinforcements")
         if isinstance(reinf, int):
             ids.add(reinf)
@@ -169,8 +168,7 @@ def main_army_id(canonical_faction_id: Any, faction_ids: set[int]) -> int | None
     # Non-Aligned Armies rather than PanOceania.  Other canonical IDs use the
     # current hundred-based army namespace.
     candidate = (
-        901 if canonical_faction_id == 1
-        else canonical_faction_id - canonical_faction_id % 100 + 1
+        901 if canonical_faction_id == 1 else canonical_faction_id - canonical_faction_id % 100 + 1
     )
     return candidate if candidate in faction_ids and candidate % 100 == 1 else None
 
@@ -231,9 +229,7 @@ def build_catalogs(master: dict[str, Any], b: Builder) -> dict[str, set[Any]]:
         for position, item in enumerate(filters.get("peripheral", []), start=1):
             item_id = item.get("id")
             if item_id in seen_peripheral:
-                raise NormalizationError(
-                    f"Army {army_id} has duplicate peripheral id {item_id}"
-                )
+                raise NormalizationError(f"Army {army_id} has duplicate peripheral id {item_id}")
             seen_peripheral.add(item_id)
             b.add(
                 "peripherals",
@@ -417,7 +413,15 @@ def normalize_orders(
     for position, value in enumerate(values, start=1):
         if not isinstance(value, dict):
             b.warn("invalid_order", f"{context} order is not an object", value=value)
-            b.add(table, **parent, position=position, order_type=None, list_count=None, total_count=None, raw=value)
+            b.add(
+                table,
+                **parent,
+                position=position,
+                order_type=None,
+                list_count=None,
+                total_count=None,
+                raw=value,
+            )
             continue
         known = {"type", "list", "total"}
         unknown = {k: v for k, v in value.items() if k not in known}
@@ -512,7 +516,10 @@ def normalize_option_nested(
         for value in option.get("peripheral", []):
             b.warn(
                 "global_option_peripheral",
-                "Global unit option contains an army-local peripheral reference; preserved in raw option",
+                (
+                    "Global unit option contains an army-local peripheral reference; "
+                    "preserved in raw option"
+                ),
                 context=context,
                 value=value,
             )
@@ -542,7 +549,12 @@ def normalize_option_nested(
 
 
 OPTION_WEAPON_LINK_FIELDS = (
-    "occurrence_id", "army_id", "unit_id", "group_id", "option_id", "position",
+    "occurrence_id",
+    "army_id",
+    "unit_id",
+    "group_id",
+    "option_id",
+    "position",
 )
 
 
@@ -563,10 +575,12 @@ def deduplicate_option_weapons(tables: dict[str, list[dict[str, Any]]]) -> None:
             template_id = len(templates) + 1
             templates_by_payload[fingerprint] = template_id
             templates.append({"id": template_id, **payload})
-        links.append({
-            **{key: row[key] for key in OPTION_WEAPON_LINK_FIELDS},
-            "template_id": template_id,
-        })
+        links.append(
+            {
+                **{key: row[key] for key in OPTION_WEAPON_LINK_FIELDS},
+                "template_id": template_id,
+            }
+        )
     tables["option_weapons"] = links
     tables["option_weapon_templates"] = templates
 
@@ -655,9 +669,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
             fireteam_spec=spec,
         )
 
-    peripheral_ids = {
-        (row["army_id"], row["id"]) for row in b.tables.get("peripherals", [])
-    }
+    peripheral_ids = {(row["army_id"], row["id"]) for row in b.tables.get("peripherals", [])}
 
     # Global units and their declared faction memberships.
     for unit_key, unit_record in sorted(units.items(), key=lambda kv: int(kv[0])):
@@ -695,9 +707,21 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
             option_id = option.get("id")
             parent = {"unit_id": unit_id, "option_id": option_id}
             known = {
-                "id", "name", "points", "swc", "minis", "disabled", "compatible",
-                "habilities", "skills", "equip", "weapons", "peripheral", "chars",
-                "includes", "orders",
+                "id",
+                "name",
+                "points",
+                "swc",
+                "minis",
+                "disabled",
+                "compatible",
+                "habilities",
+                "skills",
+                "equip",
+                "weapons",
+                "peripheral",
+                "chars",
+                "includes",
+                "orders",
             }
             unknown = {k: v for k, v in option.items() if k not in known}
             b.add(
@@ -751,7 +775,10 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
         )
         b.warn(
             "unit_placeholder",
-            f"Relation references unit id {unit_id}, which has no ordinary unit record; placeholder created",
+            (
+                f"Relation references unit id {unit_id}, which has no ordinary unit record; "
+                "placeholder created"
+            ),
             unit_id=unit_id,
             reference_count=relation_unit_refs[unit_id],
         )
@@ -815,7 +842,8 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                     profile_id = profile.get("id")
                     if profile_id in seen_profiles:
                         raise NormalizationError(
-                            f"Army {army_id} unit {unit_id} group {group_id} has duplicate profile id {profile_id}"
+                            f"Army {army_id} unit {unit_id} group {group_id} has duplicate "
+                            f"profile id {profile_id}"
                         )
                     seen_profiles.add(profile_id)
                     type_id = profile.get("type")
@@ -843,6 +871,9 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         "group_id": group_id,
                         "profile_id": profile_id,
                     }
+                    profile_context = (
+                        f"army {army_id} unit {unit_id} group {group_id} profile {profile_id}"
+                    )
                     b.add(
                         "profiles",
                         **parent,
@@ -870,7 +901,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         "profile_characteristics",
                         parent,
                         profile.get("chars", []),
-                        f"army {army_id} unit {unit_id} group {group_id} profile {profile_id}.chars",
+                        f"{profile_context}.chars",
                     )
                     normalize_reference_occurrences(
                         b,
@@ -880,7 +911,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         extras_table="profile_skill_extras",
                         parent=parent,
                         values=profile.get("skills", []),
-                        context=f"army {army_id} unit {unit_id} group {group_id} profile {profile_id}.skills",
+                        context=f"{profile_context}.skills",
                     )
                     normalize_reference_occurrences(
                         b,
@@ -890,7 +921,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         extras_table="profile_equipment_extras",
                         parent=parent,
                         values=profile.get("equip", []),
-                        context=f"army {army_id} unit {unit_id} group {group_id} profile {profile_id}.equip",
+                        context=f"{profile_context}.equip",
                     )
                     normalize_reference_occurrences(
                         b,
@@ -900,7 +931,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         extras_table="profile_weapon_extras",
                         parent=parent,
                         values=profile.get("weapons", []),
-                        context=f"army {army_id} unit {unit_id} group {group_id} profile {profile_id}.weapons",
+                        context=f"{profile_context}.weapons",
                     )
                     normalize_reference_occurrences(
                         b,
@@ -910,7 +941,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         extras_table=None,
                         parent=parent,
                         values=profile.get("peripheral", []),
-                        context=f"army {army_id} unit {unit_id} group {group_id} profile {profile_id}.peripheral",
+                        context=f"{profile_context}.peripheral",
                         army_id=army_id,
                         peripheral_ids=peripheral_ids,
                     )
@@ -919,7 +950,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         "profile_includes",
                         parent,
                         profile.get("includes", []),
-                        f"army {army_id} unit {unit_id} group {group_id} profile {profile_id}.includes",
+                        f"{profile_context}.includes",
                     )
 
                 for option_position, option in enumerate(group.get("options", []), start=1):
@@ -948,7 +979,9 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                         army_id=army_id,
                         parent=parent,
                         option=option,
-                        context=f"army {army_id} unit {unit_id} group {group_id} option {option_id}",
+                        context=(
+                            f"army {army_id} unit {unit_id} group {group_id} option {option_id}"
+                        ),
                     )
 
             # Verify includes after every group/option key has been collected.
@@ -1102,9 +1135,7 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
                     )
                 for dependency_id, dep in enumerate(rel_unit.get("depends", []), start=1):
                     dep_unit = dep.get("unit")
-                    known_dep = {
-                        "unit", "profile", "group", "min", "minDependant", "options"
-                    }
+                    known_dep = {"unit", "profile", "group", "min", "minDependant", "options"}
                     unknown_dep = {k: v for k, v in dep.items() if k not in known_dep}
                     b.add(
                         "relation_dependencies",
@@ -1145,7 +1176,13 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
             "snapshotDownloadedOn": master["_meta"].get("snapshotDownloadedOn"),
             "tableCounts": {name: len(rows) for name, rows in tables.items()},
             "warningCount": len(b.warnings),
-            "warningCounts": dict(sorted((k.removeprefix("warning:"), v) for k, v in b.stats.items() if k.startswith("warning:"))),
+            "warningCounts": dict(
+                sorted(
+                    (k.removeprefix("warning:"), v)
+                    for k, v in b.stats.items()
+                    if k.startswith("warning:")
+                )
+            ),
         },
         "tables": tables,
         "warnings": b.warnings,
@@ -1155,7 +1192,9 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def _unique(rows: list[dict[str, Any]], fields: tuple[str, ...], table: str) -> set[tuple[Any, ...]]:
+def _unique(
+    rows: list[dict[str, Any]], fields: tuple[str, ...], table: str
+) -> set[tuple[Any, ...]]:
     seen: set[tuple[Any, ...]] = set()
     for row in rows:
         key = tuple(row.get(field) for field in fields)
@@ -1187,19 +1226,33 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     unit_ids = _unique(t.get("units", []), ("id",), "units")
     unit_ids_scalar = {x[0] for x in unit_ids}
     army_unit_keys = _unique(t.get("army_units", []), ("army_id", "unit_id"), "army_units")
-    profile_group_keys = _unique(t.get("profile_groups", []), ("army_id", "unit_id", "group_id"), "profile_groups")
-    profile_keys = _unique(t.get("profiles", []), ("army_id", "unit_id", "group_id", "profile_id"), "profiles")
-    option_keys = _unique(t.get("loadout_options", []), ("army_id", "unit_id", "group_id", "option_id"), "loadout_options")
+    profile_group_keys = _unique(
+        t.get("profile_groups", []), ("army_id", "unit_id", "group_id"), "profile_groups"
+    )
+    profile_keys = _unique(
+        t.get("profiles", []), ("army_id", "unit_id", "group_id", "profile_id"), "profiles"
+    )
+    option_keys = _unique(
+        t.get("loadout_options", []),
+        ("army_id", "unit_id", "group_id", "option_id"),
+        "loadout_options",
+    )
     _unique(t.get("option_weapon_templates", []), ("id",), "option_weapon_templates")
     unit_option_keys = _unique(t.get("unit_options", []), ("unit_id", "option_id"), "unit_options")
     peripheral_keys = _unique(t.get("peripherals", []), ("army_id", "id"), "peripherals")
     fireteam_keys = _unique(t.get("fireteams", []), ("army_id", "fireteam_id"), "fireteams")
     relation_keys = _unique(t.get("relations", []), ("army_id", "relation_id"), "relations")
-    relation_unit_keys = _unique(t.get("relation_units", []), ("army_id", "relation_id", "relation_unit_id"), "relation_units")
+    relation_unit_keys = _unique(
+        t.get("relation_units", []),
+        ("army_id", "relation_id", "relation_unit_id"),
+        "relation_units",
+    )
     _unique(t.get("unit_factions", []), ("unit_id", "faction_id"), "unit_factions")
     _unique(t.get("peripherals", []), ("army_id", "id"), "peripherals")
     _unique(t.get("fireteam_types", []), ("army_id", "fireteam_id", "position"), "fireteam_types")
-    _unique(t.get("fireteam_members", []), ("army_id", "fireteam_id", "member_id"), "fireteam_members")
+    _unique(
+        t.get("fireteam_members", []), ("army_id", "fireteam_id", "member_id"), "fireteam_members"
+    )
 
     # Global lookup keys.
     catalog_table_ids: dict[str, set[Any]] = {}
@@ -1207,59 +1260,162 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
         keys = _unique(t.get(global_table, []), ("id",), global_table)
         catalog_table_ids[source_name] = {x[0] for x in keys}
 
-    check("army_list -> faction", all((row["id"],) in faction_ids for row in t.get("army_lists", [])), "all army-list IDs exist as faction references")
-    check("army_list reinforcement -> faction", all(row.get("reinforcement_id") is None or row["reinforcement_id"] in faction_ids_scalar for row in t.get("army_lists", [])), "all reinforcement IDs exist in faction references")
-    check("unit canonical -> faction", all(row.get("canonical_faction_id") is None or row["canonical_faction_id"] in faction_ids_scalar for row in t.get("units", [])), "all canonical faction references resolve")
-    check("unit main army -> whole army group", all(
-        row.get("main_army_id") is None
-        or row["main_army_id"] in faction_ids_scalar and row["main_army_id"] % 100 == 1
-        for row in t.get("units", [])
-    ), "all main-army references resolve to whole-army group IDs")
-    check("unit_factions -> unit/faction", all(row["unit_id"] in unit_ids_scalar and row["faction_id"] in faction_ids_scalar for row in t.get("unit_factions", [])), "all unit faction memberships resolve")
-    check("army_units -> army/unit", all(row["army_id"] in army_ids_scalar and row["unit_id"] in unit_ids_scalar for row in t.get("army_units", [])), "all army-unit rows resolve")
-    check("profile_groups -> army_unit", all((row["army_id"], row["unit_id"]) in army_unit_keys for row in t.get("profile_groups", [])), "all profile groups have an army-unit parent")
-    check("profiles -> profile_group", all((row["army_id"], row["unit_id"], row["group_id"]) in profile_group_keys for row in t.get("profiles", [])), "all profiles have a profile-group parent")
-    check("options -> profile_group", all((row["army_id"], row["unit_id"], row["group_id"]) in profile_group_keys for row in t.get("loadout_options", [])), "all loadout options have a profile-group parent")
-    check("unit_options -> unit", all(row["unit_id"] in unit_ids_scalar for row in t.get("unit_options", [])), "all global unit options have a unit parent")
-    check("peripherals -> army", all(row["army_id"] in army_ids_scalar for row in t.get("peripherals", [])), "all army-local peripherals have an army parent")
-    check("profile_groups category -> categories", all(row.get("category_id") is None or row["category_id"] in catalog_table_ids["category"] for row in t.get("profile_groups", [])), "all non-null profile-group categories resolve")
-    check("profiles type -> troop_types", all(row.get("type_id") is None or row["type_id"] in catalog_table_ids["type"] for row in t.get("profiles", [])), "all non-null profile troop types resolve")
+    check(
+        "army_list -> faction",
+        all((row["id"],) in faction_ids for row in t.get("army_lists", [])),
+        "all army-list IDs exist as faction references",
+    )
+    check(
+        "army_list reinforcement -> faction",
+        all(
+            row.get("reinforcement_id") is None or row["reinforcement_id"] in faction_ids_scalar
+            for row in t.get("army_lists", [])
+        ),
+        "all reinforcement IDs exist in faction references",
+    )
+    check(
+        "unit canonical -> faction",
+        all(
+            row.get("canonical_faction_id") is None
+            or row["canonical_faction_id"] in faction_ids_scalar
+            for row in t.get("units", [])
+        ),
+        "all canonical faction references resolve",
+    )
+    check(
+        "unit main army -> whole army group",
+        all(
+            row.get("main_army_id") is None
+            or row["main_army_id"] in faction_ids_scalar
+            and row["main_army_id"] % 100 == 1
+            for row in t.get("units", [])
+        ),
+        "all main-army references resolve to whole-army group IDs",
+    )
+    check(
+        "unit_factions -> unit/faction",
+        all(
+            row["unit_id"] in unit_ids_scalar and row["faction_id"] in faction_ids_scalar
+            for row in t.get("unit_factions", [])
+        ),
+        "all unit faction memberships resolve",
+    )
+    check(
+        "army_units -> army/unit",
+        all(
+            row["army_id"] in army_ids_scalar and row["unit_id"] in unit_ids_scalar
+            for row in t.get("army_units", [])
+        ),
+        "all army-unit rows resolve",
+    )
+    check(
+        "profile_groups -> army_unit",
+        all(
+            (row["army_id"], row["unit_id"]) in army_unit_keys
+            for row in t.get("profile_groups", [])
+        ),
+        "all profile groups have an army-unit parent",
+    )
+    check(
+        "profiles -> profile_group",
+        all(
+            (row["army_id"], row["unit_id"], row["group_id"]) in profile_group_keys
+            for row in t.get("profiles", [])
+        ),
+        "all profiles have a profile-group parent",
+    )
+    check(
+        "options -> profile_group",
+        all(
+            (row["army_id"], row["unit_id"], row["group_id"]) in profile_group_keys
+            for row in t.get("loadout_options", [])
+        ),
+        "all loadout options have a profile-group parent",
+    )
+    check(
+        "unit_options -> unit",
+        all(row["unit_id"] in unit_ids_scalar for row in t.get("unit_options", [])),
+        "all global unit options have a unit parent",
+    )
+    check(
+        "peripherals -> army",
+        all(row["army_id"] in army_ids_scalar for row in t.get("peripherals", [])),
+        "all army-local peripherals have an army parent",
+    )
+    check(
+        "profile_groups category -> categories",
+        all(
+            row.get("category_id") is None or row["category_id"] in catalog_table_ids["category"]
+            for row in t.get("profile_groups", [])
+        ),
+        "all non-null profile-group categories resolve",
+    )
+    check(
+        "profiles type -> troop_types",
+        all(
+            row.get("type_id") is None or row["type_id"] in catalog_table_ids["type"]
+            for row in t.get("profiles", [])
+        ),
+        "all non-null profile troop types resolve",
+    )
 
     # Catalog link tables.
     for source_name, (global_table, link_table) in GLOBAL_CATALOGS.items():
         valid = catalog_table_ids[source_name]
         check(
             f"{link_table} -> army/{global_table}",
-            all(row["army_id"] in army_ids_scalar and row["item_id"] in valid for row in t.get(link_table, [])),
+            all(
+                row["army_id"] in army_ids_scalar and row["item_id"] in valid
+                for row in t.get(link_table, [])
+            ),
             f"all {link_table} rows resolve",
         )
 
     # Parent FK helpers for nested tables.
     profile_parent_tables = {
-        "profile_characteristics", "profile_skills", "profile_equipment", "profile_weapons",
-        "profile_peripherals", "profile_includes",
+        "profile_characteristics",
+        "profile_skills",
+        "profile_equipment",
+        "profile_weapons",
+        "profile_peripherals",
+        "profile_includes",
     }
     for table in profile_parent_tables:
         check(
             f"{table} -> profile",
-            all((r["army_id"], r["unit_id"], r["group_id"], r["profile_id"]) in profile_keys for r in t.get(table, [])),
+            all(
+                (r["army_id"], r["unit_id"], r["group_id"], r["profile_id"]) in profile_keys
+                for r in t.get(table, [])
+            ),
             f"all {table} rows have a profile parent",
         )
 
     option_parent_tables = {
-        "option_characteristics", "option_skills", "option_equipment", "option_weapons",
-        "option_peripherals", "option_includes", "option_orders",
+        "option_characteristics",
+        "option_skills",
+        "option_equipment",
+        "option_weapons",
+        "option_peripherals",
+        "option_includes",
+        "option_orders",
     }
     for table in option_parent_tables:
         check(
             f"{table} -> option",
-            all((r["army_id"], r["unit_id"], r["group_id"], r["option_id"]) in option_keys for r in t.get(table, [])),
+            all(
+                (r["army_id"], r["unit_id"], r["group_id"], r["option_id"]) in option_keys
+                for r in t.get(table, [])
+            ),
             f"all {table} rows have a loadout-option parent",
         )
 
     unit_option_parent_tables = {
-        "unit_option_characteristics", "unit_option_skills", "unit_option_equipment", "unit_option_weapons",
-        "unit_option_includes", "unit_option_orders",
+        "unit_option_characteristics",
+        "unit_option_skills",
+        "unit_option_equipment",
+        "unit_option_weapons",
+        "unit_option_includes",
+        "unit_option_orders",
     }
     for table in unit_option_parent_tables:
         check(
@@ -1269,9 +1425,7 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
         )
 
     # Item refs (null is allowed only for source anomalies intentionally preserved).
-    option_weapon_templates = {
-        row["id"]: row for row in t.get("option_weapon_templates", [])
-    }
+    option_weapon_templates = {row["id"]: row for row in t.get("option_weapon_templates", [])}
     check(
         "option_weapon_templates -> weapons",
         all(
@@ -1282,7 +1436,9 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     )
     check(
         "option_weapons -> option_weapon_templates",
-        all(row.get("template_id") in option_weapon_templates for row in t.get("option_weapons", [])),
+        all(
+            row.get("template_id") in option_weapon_templates for row in t.get("option_weapons", [])
+        ),
         "all option-weapon rows resolve a template",
     )
 
@@ -1304,7 +1460,11 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
             f"all non-null {table} item IDs resolve",
         )
 
-    char_tables = ["profile_characteristics", "option_characteristics", "unit_option_characteristics"]
+    char_tables = [
+        "profile_characteristics",
+        "option_characteristics",
+        "unit_option_characteristics",
+    ]
     for table in char_tables:
         valid = catalog_table_ids["chars"]
         check(
@@ -1317,7 +1477,10 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     for table in periph_tables:
         check(
             f"{table} -> peripherals",
-            all(r.get("item_id") is None or (r["army_id"], r["item_id"]) in peripheral_keys for r in t.get(table, [])),
+            all(
+                r.get("item_id") is None or (r["army_id"], r["item_id"]) in peripheral_keys
+                for r in t.get(table, [])
+            ),
             f"all non-null {table} peripheral IDs resolve",
         )
 
@@ -1325,9 +1488,15 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     occurrence_ids_by_table = {
         table: {r["occurrence_id"] for r in t.get(table, [])}
         for table in [
-            "profile_skills", "profile_equipment", "profile_weapons",
-            "option_skills", "option_equipment", "option_weapons",
-            "unit_option_skills", "unit_option_equipment", "unit_option_weapons",
+            "profile_skills",
+            "profile_equipment",
+            "profile_weapons",
+            "option_skills",
+            "option_equipment",
+            "option_weapons",
+            "unit_option_skills",
+            "unit_option_equipment",
+            "unit_option_weapons",
         ]
     }
     extras_pairs = [
@@ -1344,7 +1513,11 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     for extra_table, parent_table in extras_pairs:
         check(
             f"{extra_table} -> occurrence/extras",
-            all(r["occurrence_id"] in occurrence_ids_by_table[parent_table] and r["extra_id"] in catalog_table_ids["extras"] for r in t.get(extra_table, [])),
+            all(
+                r["occurrence_id"] in occurrence_ids_by_table[parent_table]
+                and r["extra_id"] in catalog_table_ids["extras"]
+                for r in t.get(extra_table, [])
+            ),
             f"all {extra_table} rows resolve",
         )
 
@@ -1352,7 +1525,11 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     for table in ["profile_includes", "option_includes"]:
         check(
             f"{table} target -> option",
-            all((r["army_id"], r["unit_id"], r["target_group_id"], r["target_option_id"]) in option_keys for r in t.get(table, [])),
+            all(
+                (r["army_id"], r["unit_id"], r["target_group_id"], r["target_option_id"])
+                in option_keys
+                for r in t.get(table, [])
+            ),
             f"all {table} targets resolve",
         )
 
@@ -1360,16 +1537,57 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
     # The normalizer already proves it resolves in every occurrence while building.
     check(
         "unit_option_includes target -> option",
-        all(any(ok[1] == r["unit_id"] and ok[2] == r["target_group_id"] and ok[3] == r["target_option_id"] for ok in option_keys) for r in t.get("unit_option_includes", [])),
+        all(
+            any(
+                ok[1] == r["unit_id"]
+                and ok[2] == r["target_group_id"]
+                and ok[3] == r["target_option_id"]
+                for ok in option_keys
+            )
+            for r in t.get("unit_option_includes", [])
+        ),
         "all global unit-option include targets resolve",
     )
 
-    check("fireteam_types -> fireteam", all((r["army_id"], r["fireteam_id"]) in fireteam_keys for r in t.get("fireteam_types", [])), "all fireteam types have a fireteam parent")
-    check("fireteam_members -> fireteam", all((r["army_id"], r["fireteam_id"]) in fireteam_keys for r in t.get("fireteam_members", [])), "all fireteam members have a fireteam parent")
-    check("resolved fireteam unit -> unit", all(r.get("resolved_unit_id") is None or r["resolved_unit_id"] in unit_ids_scalar for r in t.get("fireteam_members", [])), "all resolved fireteam units exist")
+    check(
+        "fireteam_types -> fireteam",
+        all((r["army_id"], r["fireteam_id"]) in fireteam_keys for r in t.get("fireteam_types", [])),
+        "all fireteam types have a fireteam parent",
+    )
+    check(
+        "fireteam_members -> fireteam",
+        all(
+            (r["army_id"], r["fireteam_id"]) in fireteam_keys for r in t.get("fireteam_members", [])
+        ),
+        "all fireteam members have a fireteam parent",
+    )
+    check(
+        "resolved fireteam unit -> unit",
+        all(
+            r.get("resolved_unit_id") is None or r["resolved_unit_id"] in unit_ids_scalar
+            for r in t.get("fireteam_members", [])
+        ),
+        "all resolved fireteam units exist",
+    )
 
-    check("relation_units -> relation/unit", all((r["army_id"], r["relation_id"]) in relation_keys and (r.get("unit_id") is None or r["unit_id"] in unit_ids_scalar) for r in t.get("relation_units", [])), "all relation units resolve")
-    check("relation_dependencies -> relation_unit/unit", all((r["army_id"], r["relation_id"], r["relation_unit_id"]) in relation_unit_keys and (r.get("unit_id") is None or r["unit_id"] in unit_ids_scalar) for r in t.get("relation_dependencies", [])), "all relation dependencies resolve")
+    check(
+        "relation_units -> relation/unit",
+        all(
+            (r["army_id"], r["relation_id"]) in relation_keys
+            and (r.get("unit_id") is None or r["unit_id"] in unit_ids_scalar)
+            for r in t.get("relation_units", [])
+        ),
+        "all relation units resolve",
+    )
+    check(
+        "relation_dependencies -> relation_unit/unit",
+        all(
+            (r["army_id"], r["relation_id"], r["relation_unit_id"]) in relation_unit_keys
+            and (r.get("unit_id") is None or r["unit_id"] in unit_ids_scalar)
+            for r in t.get("relation_dependencies", [])
+        ),
+        "all relation dependencies resolve",
+    )
 
     return {
         "passed": True,
@@ -1431,7 +1649,9 @@ def main() -> int:
 
     meta = normalized["_meta"]
     print(f"Normalized {args.input} -> {args.output}")
-    print(f"Tables: {len(meta['tableCounts'])}; validation checks: {validation['checkCount']} passed")
+    print(
+        f"Tables: {len(meta['tableCounts'])}; validation checks: {validation['checkCount']} passed"
+    )
     print(f"Warnings: {meta['warningCount']}")
     for name, count in sorted(meta.get("warningCounts", {}).items()):
         print(f"  {name}: {count}")

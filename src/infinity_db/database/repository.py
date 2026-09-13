@@ -63,6 +63,8 @@ def instance_lru_cache(maxsize: int) -> Callable:
         return cached
 
     return decorator
+
+
 # Source records whose IDs differ without following either of the general
 # duplicate patterns.  The value is the preferred representative ID.
 UNIT_MERGE_ALIASES = {
@@ -535,8 +537,7 @@ class Database:
                 if faction["unit_id"] in normal_armies_by_unit:
                     normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
             search_terms_by_source = {
-                row["id"]: {row["name"], row["isc"], row["isc_abbr"], row["slug"]}
-                for row in rows
+                row["id"]: {row["name"], row["isc"], row["isc_abbr"], row["slug"]} for row in rows
             }
             for table in ("profiles", "loadout_options", "unit_options"):
                 for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
@@ -587,8 +588,7 @@ class Database:
                 "source_ids": group["source_ids"],
                 "army_ids": list(visible_armies),
                 "armies": [
-                    {"id": army["id"], "name": army["name"]}
-                    for army in visible_armies.values()
+                    {"id": army["id"], "name": army["name"]} for army in visible_armies.values()
                 ],
             }
             for source_id in group["source_ids"]:
@@ -982,7 +982,8 @@ class Database:
                             "profiles": profiles_by_id[source_id],
                         }
                         for source_id in sorted(
-                            profiles_by_id, key=lambda value: (unit_sort_key(item_names[value]), value)
+                            profiles_by_id,
+                            key=lambda value: (unit_sort_key(item_names[value]), value),
                         )
                     ]
                     result["special_profile"] = special_weapon_detail(canonical_id)
@@ -1180,7 +1181,9 @@ class Database:
                 if not matches_search:
                     continue
             grouped.append({**group, "armies": visible_armies})
-        grouped.sort(key=lambda group: (unit_sort_key(group["name"]), group["id"]), reverse=descending)
+        grouped.sort(
+            key=lambda group: (unit_sort_key(group["name"]), group["id"]), reverse=descending
+        )
         total = len(grouped)
         items = [
             {
@@ -1193,8 +1196,7 @@ class Database:
                 "source_ids": group["source_ids"],
                 "army_ids": list(group["armies"]),
                 "armies": [
-                    {"id": army["id"], "name": army["name"]}
-                    for army in group["armies"].values()
+                    {"id": army["id"], "name": army["name"]} for army in group["armies"].values()
                 ],
             }
             for group in grouped[offset : offset + limit]

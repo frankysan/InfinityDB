@@ -334,6 +334,4 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     connection.execute("CREATE INDEX units_name ON units(name COLLATE NOCASE, id)")
     connection.execute("CREATE INDEX army_units_unit ON army_units(unit_id, army_id)")
     for index_name, table_name, columns in INDEXES:
-        connection.execute(
-            f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})"
-        )
+        connection.execute(f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})")

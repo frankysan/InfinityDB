@@ -54,7 +54,7 @@ def _version_static_urls(document: str) -> str:
     """Give page assets a new URL for each application release."""
 
     return STATIC_URL.sub(
-        lambda match: f'{match.group(0)[:-1]}?v={__version__}{match.group("quote")}', document
+        lambda match: f"{match.group(0)[:-1]}?v={__version__}{match.group('quote')}", document
     )
 
 
@@ -72,8 +72,8 @@ def _version_module_imports(source: str) -> str:
 
     return MODULE_IMPORT_URL.sub(
         lambda match: (
-            f'{match.group("prefix")}{match.group("quote")}'
-            f'{match.group("path")}?v={__version__}{match.group("quote")}'
+            f"{match.group('prefix')}{match.group('quote')}"
+            f"{match.group('path')}?v={__version__}{match.group('quote')}"
         ),
         source,
     )
@@ -457,12 +457,14 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 filters = _unit_query(environ.get("QUERY_STRING", ""))
-                payload = {"ids": self.database.visible_unit_ids(
-                    mercs=filters["mercs"],
-                    specops=filters["specops"],
-                    teamops=filters["teamops"],
-                    reinforcement=filters["reinforcement"],
-                )}
+                payload = {
+                    "ids": self.database.visible_unit_ids(
+                        mercs=filters["mercs"],
+                        specops=filters["specops"],
+                        teamops=filters["teamops"],
+                        reinforcement=filters["reinforcement"],
+                    )
+                }
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}

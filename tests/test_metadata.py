@@ -175,7 +175,6 @@ def test_build_discovers_required_sidecar_metadata(
         assert connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
 
 
-
 def test_build_rejects_a_source_without_metadata(tmp_path: Path) -> None:
     source = tmp_path / "source"
     source.mkdir()
