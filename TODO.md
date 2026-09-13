@@ -21,9 +21,11 @@ documentation are complete.
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
   representative snapshot before and after each performance change.
-- [ ] Review catalog extra joins. Detail queries currently union extra-link
-  tables before joining them; joining the applicable extras table in each
-  occurrence branch may reduce intermediate rows.
+- [x] Review catalog extra joins. Detail queries previously unioned extra-link
+  tables before joining them. Review confirmed SQLite materializes every
+  source table and creates an automatic temporary index; rewrite each source
+  branch to join its matching extras table through its `(occurrence_id,
+  position)` primary key.
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.
 

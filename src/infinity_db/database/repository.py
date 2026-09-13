@@ -718,25 +718,29 @@ class Database:
             items = [dict(row) for row in rows]
             suffix = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[catalog]
             option_usage = (
-                "SELECT 'option', t.item_id, o.occurrence_id, o.unit_id "
+                "SELECT 'option' AS source, t.item_id, o.occurrence_id, o.unit_id, "
+                "e.position AS extra_position, e.extra_id "
                 "FROM option_weapons AS o JOIN option_weapon_templates AS t "
-                "ON t.id = o.template_id"
+                "ON t.id = o.template_id "
+                "LEFT JOIN option_weapon_extras AS e ON e.occurrence_id = o.occurrence_id"
                 if catalog == "weapons"
-                else f"SELECT 'option', item_id, occurrence_id, unit_id FROM option_{catalog}"
+                else f"SELECT 'option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                f"e.position AS extra_position, e.extra_id FROM option_{catalog} AS o "
+                f"LEFT JOIN option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id"
             )
             usage_rows = connection.execute(
-                "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, links.extra_id "
+                "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, uses.extra_id "
                 "FROM units AS u JOIN ("
-                f"SELECT 'profile' AS source, item_id, occurrence_id, unit_id FROM profile_{catalog} "
+                f"SELECT 'profile' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                f"e.position AS extra_position, e.extra_id FROM profile_{catalog} AS o "
+                f"LEFT JOIN profile_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"UNION ALL {option_usage} "
-                f"UNION ALL SELECT 'unit_option', item_id, occurrence_id, unit_id FROM unit_option_{catalog}"
-                ") AS uses ON uses.unit_id = u.id LEFT JOIN ("
-                f"SELECT 'profile' AS source, occurrence_id, position, extra_id FROM profile_{suffix}_extras "
-                f"UNION ALL SELECT 'option', occurrence_id, position, extra_id FROM option_{suffix}_extras "
-                f"UNION ALL SELECT 'unit_option', occurrence_id, position, extra_id FROM unit_option_{suffix}_extras"
-                ") AS links ON links.source = uses.source AND links.occurrence_id = uses.occurrence_id "
+                f"UNION ALL SELECT 'unit_option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                f"e.position AS extra_position, e.extra_id FROM unit_option_{catalog} AS o "
+                f"LEFT JOIN unit_option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id"
+                ") AS uses ON uses.unit_id = u.id "
                 "WHERE u.source_defined = 1 "
-                "ORDER BY uses.source, uses.occurrence_id, links.position"
+                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position"
             ).fetchall()
             occurrences: dict[tuple[str, int], dict[str, Any]] = {}
             for row in usage_rows:
@@ -843,29 +847,36 @@ class Database:
                 (canonical_id,),
             ).fetchone()
             option_usage = (
-                "SELECT 'option', t.item_id, o.occurrence_id, o.unit_id "
+                "SELECT 'option' AS source, t.item_id, o.occurrence_id, o.unit_id, "
+                "e.position AS extra_position, e.extra_id "
                 "FROM option_weapons AS o JOIN option_weapon_templates AS t "
                 "ON t.id = o.template_id "
+                "LEFT JOIN option_weapon_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"WHERE t.item_id IN ({placeholders}) "
                 if catalog == "weapons"
-                else f"SELECT 'option', item_id, occurrence_id, unit_id FROM option_{catalog} "
-                f"WHERE item_id IN ({placeholders}) "
+                else f"SELECT 'option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                f"e.position AS extra_position, e.extra_id FROM option_{catalog} AS o "
+                f"LEFT JOIN option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders}) "
             )
             rows = connection.execute(
                 "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, "
                 + UNIT_NAME_SQL
-                + " AS unit_name, links.position AS extra_position, e.id AS extra_id, e.name AS extra_name "
+                + " AS unit_name, uses.extra_position, e.id AS extra_id, e.name AS extra_name "
                 "FROM units AS u JOIN ("
-                f"SELECT 'profile' AS source, item_id, occurrence_id, unit_id FROM profile_{catalog} WHERE item_id IN ({placeholders}) "
+                f"SELECT 'profile' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                f"e.position AS extra_position, e.extra_id FROM profile_{catalog} AS o "
+                f"LEFT JOIN profile_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders}) "
                 f"UNION ALL {option_usage}"
-                f"UNION ALL SELECT 'unit_option', item_id, occurrence_id, unit_id FROM unit_option_{catalog} WHERE item_id IN ({placeholders})"
-                ") AS uses ON uses.unit_id = u.id LEFT JOIN ("
-                f"SELECT 'profile' AS source, occurrence_id, position, extra_id FROM profile_{suffix}_extras "
-                f"UNION ALL SELECT 'option', occurrence_id, position, extra_id FROM option_{suffix}_extras "
-                f"UNION ALL SELECT 'unit_option', occurrence_id, position, extra_id FROM unit_option_{suffix}_extras"
-                ") AS links ON links.source = uses.source AND links.occurrence_id = uses.occurrence_id "
-                "LEFT JOIN extras AS e ON e.id = links.extra_id WHERE u.source_defined = 1 "
-                "ORDER BY uses.source, uses.occurrence_id, links.position, unit_sort_key(unit_name), u.id",
+                f"UNION ALL SELECT 'unit_option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                f"e.position AS extra_position, e.extra_id FROM unit_option_{catalog} AS o "
+                f"LEFT JOIN unit_option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders})"
+                ") AS uses ON uses.unit_id = u.id "
+                "LEFT JOIN extras AS e ON e.id = uses.extra_id "
+                "WHERE u.source_defined = 1 "
+                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position, unit_sort_key(unit_name), u.id",
                 source_ids * 3,
             ).fetchall()
             occurrences: dict[tuple[str, Any], dict[str, Any]] = {}
@@ -1013,22 +1024,25 @@ class Database:
             rows = connection.execute(
                 "SELECT uses.source, uses.skill_id, uses.occurrence_id, uses.unit_id, "
                 + UNIT_NAME_SQL
-                + " AS unit_name, extra_links.position AS extra_position, "
+                + " AS unit_name, uses.extra_position, "
                 "e.id AS extra_id, e.name AS extra_name "
                 "FROM units AS u JOIN ("
-                f"SELECT 'profile' AS source, item_id AS skill_id, occurrence_id, unit_id FROM profile_skills WHERE item_id IN ({placeholders}) "
-                f"UNION ALL SELECT 'option', item_id, occurrence_id, unit_id FROM option_skills WHERE item_id IN ({placeholders}) "
-                f"UNION ALL SELECT 'unit_option', item_id, occurrence_id, unit_id FROM unit_option_skills WHERE item_id IN ({placeholders})"
+                f"SELECT 'profile' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
+                "e.position AS extra_position, e.extra_id FROM profile_skills AS o "
+                "LEFT JOIN profile_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders}) "
+                "UNION ALL SELECT 'option' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
+                "e.position AS extra_position, e.extra_id FROM option_skills AS o "
+                "LEFT JOIN option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders}) "
+                "UNION ALL SELECT 'unit_option' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
+                "e.position AS extra_position, e.extra_id FROM unit_option_skills AS o "
+                "LEFT JOIN unit_option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders})"
                 ") AS uses ON uses.unit_id = u.id "
-                "LEFT JOIN ("
-                "SELECT 'profile' AS source, occurrence_id, position, extra_id FROM profile_skill_extras "
-                "UNION ALL SELECT 'option', occurrence_id, position, extra_id FROM option_skill_extras "
-                "UNION ALL SELECT 'unit_option', occurrence_id, position, extra_id FROM unit_option_skill_extras"
-                ") AS extra_links ON extra_links.source = uses.source "
-                "AND extra_links.occurrence_id = uses.occurrence_id "
-                "LEFT JOIN extras AS e ON e.id = extra_links.extra_id "
+                "LEFT JOIN extras AS e ON e.id = uses.extra_id "
                 "WHERE u.source_defined = 1 "
-                "ORDER BY uses.skill_id, uses.source, uses.occurrence_id, extra_links.position, "
+                "ORDER BY uses.skill_id, uses.source, uses.occurrence_id, uses.extra_position, "
                 "unit_sort_key(unit_name), u.id",
                 source_ids * 3,
             ).fetchall()
