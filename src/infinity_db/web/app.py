@@ -366,6 +366,22 @@ class Application:
                 LOGGER.exception("Could not read armies")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The database is unavailable. Please try again."}
+        elif path == "/api/visible-unit-ids":
+            try:
+                filters = _unit_query(environ.get("QUERY_STRING", ""))
+                payload = {"ids": self.database.visible_unit_ids(
+                    mercs=filters["mercs"],
+                    specops=filters["specops"],
+                    teamops=filters["teamops"],
+                    reinforcement=filters["reinforcement"],
+                )}
+            except ValueError as exc:
+                status = HTTPStatus.BAD_REQUEST
+                payload = {"error": str(exc)}
+            except (OSError, sqlite3.Error):
+                LOGGER.exception("Could not read visible unit IDs")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The database is unavailable. Please try again."}
         elif path == "/api/units":
             try:
                 query = _unit_query(environ.get("QUERY_STRING", ""))

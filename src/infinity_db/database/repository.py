@@ -1176,6 +1176,30 @@ class Database:
             ]
         return {"items": items, "total": total, "limit": limit, "offset": offset}
 
+    def visible_unit_ids(
+        self,
+        mercs: bool = False,
+        specops: bool = False,
+        teamops: bool = False,
+        reinforcement: bool = False,
+    ) -> list[int]:
+        """Return the IDs of units visible under the selected optional-unit filters."""
+        ids = []
+        offset = 0
+        while True:
+            page = self.list_units(
+                limit=500,
+                offset=offset,
+                mercs=mercs,
+                specops=specops,
+                teamops=teamops,
+                reinforcement=reinforcement,
+            )
+            ids.extend(item["id"] for item in page["items"])
+            offset += len(page["items"])
+            if offset >= page["total"]:
+                return ids
+
     def get_unit(self, unit_id: int) -> dict[str, Any] | None:
         """Return a browsable unit and its army-specific profiles and loadouts."""
         if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:

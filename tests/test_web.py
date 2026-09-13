@@ -889,7 +889,6 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"skill.js" in body
     assert b'href="/skills" aria-current="page"' in body
-
     status, headers, body = request(app, "/api/skills/11")
     assert status == 200
     assert headers["content-type"].startswith("application/json")
@@ -931,6 +930,24 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     status, _, body = request(app, "/api/skills/999")
     assert status == 404
     assert json.loads(body)["error"] == "Skill not found"
+
+
+def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:
+    for asset in ("catalog-detail.js", "skill.js"):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b'new URL(url).hostname.toLowerCase() === "infinitythewiki.com"' in body
+        assert b'url.split("?", 1)[0]' in body
+
+
+def test_visible_unit_ids_api_matches_default_unit_listing(app: Callable) -> None:
+    status, _, body = request(app, "/api/visible-unit-ids")
+    assert status == 200
+    visible_ids = json.loads(body)["ids"]
+
+    status, _, body = request(app, "/api/units?limit=200")
+    assert status == 200
+    assert visible_ids == [item["id"] for item in json.loads(body)["items"]]
 
 
 @pytest.mark.parametrize(

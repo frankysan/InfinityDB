@@ -25,6 +25,16 @@ const rangeModifierClasses = {
 };
 let currentItem;
 
+function displayWikiUrl(url) {
+  try {
+    return new URL(url).hostname.toLowerCase() === "infinitythewiki.com"
+      ? url.split("?", 1)[0]
+      : url;
+  } catch {
+    return url;
+  }
+}
+
 function withVisibleUnits(item, ids) {
   return { ...item, variants: item.variants.map((variant) => ({
     ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
@@ -234,7 +244,7 @@ function render(item) {
       link.href = item.wiki;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
-      link.textContent = item.wiki;
+      link.textContent = displayWikiUrl(item.wiki);
       meta.replaceChildren(link);
     } else {
       meta.classList.add("developer-only");

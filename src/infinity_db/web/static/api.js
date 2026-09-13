@@ -9,14 +9,12 @@ async function get(path, signal) {
 
 export async function visibleUnitIds(signal) {
   const { optionalUnitFilters } = await import("./preferences.js");
-  const ids = new Set();
-  let offset = 0;
-  while (true) {
-    const page = await getUnits({ ...optionalUnitFilters(), limit: 200, offset }, signal);
-    page.items.forEach((unit) => ids.add(unit.id));
-    offset += page.items.length;
-    if (offset >= page.total) return ids;
+  const filters = new URLSearchParams();
+  for (const [name, enabled] of Object.entries(optionalUnitFilters())) {
+    if (enabled) filters.set(name, "1");
   }
+  const payload = await get(`/api/visible-unit-ids?${filters}`, signal);
+  return new Set(payload.ids);
 }
 
 export function getArmies(signal) {

@@ -10,6 +10,16 @@ const status = document.getElementById("skill-status");
 const content = document.getElementById("skill-content");
 let currentSkill;
 
+function displayWikiUrl(url) {
+  try {
+    return new URL(url).hostname.toLowerCase() === "infinitythewiki.com"
+      ? url.split("?", 1)[0]
+      : url;
+  } catch {
+    return url;
+  }
+}
+
 function withVisibleUnits(skill, ids) {
   return { ...skill, variants: skill.variants.map((variant) => ({
     ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
@@ -60,7 +70,7 @@ function render(skill) {
     link.href = skill.wiki;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.textContent = skill.wiki;
+    link.textContent = displayWikiUrl(skill.wiki);
     meta.replaceChildren(link);
   } else {
     meta.classList.add("developer-only");
