@@ -405,13 +405,13 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/units"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
-    assert b'data-app-version="0.4.0"' in body
+    assert b'data-app-version="0.4.1"' in body
     assert b'data-snapshot-revision="' in body
-    assert b"/static/version-check.js?v=0.4.0" in body
+    assert b"/static/version-check.js?v=0.4.1" in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
-        assert asset.endswith("?v=0.4.0")
+        assert asset.endswith("?v=0.4.1")
         status, headers, body = request(app, asset)
         assert status == 200
         assert body
@@ -440,7 +440,7 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert status == 200
     assert headers["cache-control"] == "no-store"
     version = json.loads(body)
-    assert version["version"] == "0.4.0"
+    assert version["version"] == "0.4.1"
     assert len(version["snapshot_revision"]) == 64
     assert int(version["snapshot_revision"], 16) >= 0
 
@@ -477,7 +477,7 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert b'<header class="topbar page-header">' in body
     assert b'aria-label="Breadcrumb"' in body
     assert b'<footer class="page-footer">' in body
-    assert b"Version 0.4.0+dev" in body
+    assert b"Version 0.4.1+dev" in body
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
@@ -575,8 +575,8 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     status, _, body = request(app, "/units")
 
     assert status == 200
-    assert b'<script type="module" src="/static/navigation.js?v=0.4.0"></script>' in body
-    assert b'<script type="module" src="/static/page-navigation.js?v=0.4.0"></script>' in body
+    assert b'<script type="module" src="/static/navigation.js?v=0.4.1"></script>' in body
+    assert b'<script type="module" src="/static/page-navigation.js?v=0.4.1"></script>' in body
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body
@@ -619,7 +619,7 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
-    assert b"Version 0.4.0+dev" in body
+    assert b"Version 0.4.1+dev" in body
     assert b"Support questions, suggestions, or" in body
     assert b"feedback can be submitted on the project's GitHub page." in body
     assert b"mailto:johannes@haglund.info" not in body
@@ -660,7 +660,7 @@ def test_army_symbol_is_served(app: Callable) -> None:
 
 
 def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -> None:
-    status, headers, _ = request(app, "/static/styles.css?v=0.4.0")
+    status, headers, _ = request(app, "/static/styles.css?v=0.4.1")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
 
@@ -675,7 +675,7 @@ def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> Non
     assert status == 200
     assert body
     etag = headers["etag"]
-    assert etag.startswith('"0.4.0-')
+    assert etag.startswith('"0.4.1-')
 
     status, conditional_headers, conditional_body = request(
         app,
@@ -715,16 +715,16 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
-    status, headers, body = request(app, "/static/unit.js?v=0.4.0")
+    status, headers, body = request(app, "/static/unit.js?v=0.4.1")
 
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
-    assert b'from "./api.js?v=0.4.0"' in body
-    assert b'from "./preferences.js?v=0.4.0"' in body
+    assert b'from "./api.js?v=0.4.1"' in body
+    assert b'from "./preferences.js?v=0.4.1"' in body
 
-    status, _, body = request(app, "/static/api.js?v=0.4.0")
+    status, _, body = request(app, "/static/api.js?v=0.4.1")
     assert status == 200
-    assert b'import("./preferences.js?v=0.4.0")' in body
+    assert b'import("./preferences.js?v=0.4.1")' in body
 
     status, headers, _ = request(app, "/api/armies")
     assert status == 200

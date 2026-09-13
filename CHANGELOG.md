@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.1] - 2026-09-13
+
+### Changed
+
+- Direct About-page support questions, suggestions, and feedback to the
+  project's GitHub page instead of publishing an email address.
+
 ## [0.4.0] - 2026-09-13
 
 ### Added
