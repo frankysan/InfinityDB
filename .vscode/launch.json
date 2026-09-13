@@ -8,7 +8,6 @@
       "module": "infinity_db",
       "args": [
         "build",
-        "${workspaceFolder}/data/raw/JSON 20260909.zip",
         "--output-dir",
         "${workspaceFolder}/data/generated",
         "--compact"
