@@ -69,35 +69,35 @@
          stop-color="#365c4d"
          id="stop6" />
     </linearGradient>
-    <linearGradient
+    <radialGradient
        id="planetFill"
-       x1="-98"
-       y1="585"
-       x2="-98"
-       y2="1805"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1,0,0,1.0705177,0,-127.70311)">
+       cx="390"
+       cy="735"
+       r="760"
+       fx="342"
+       fy="676"
+       gradientUnits="userSpaceOnUse">
       <stop
          offset="0"
-         stop-color="#1e493c"
+         stop-color="#5ea177"
          id="stop7" />
       <stop
-         offset="0.10"
-         stop-color="#15392f"
+         offset="0.18"
+         stop-color="#3c795c"
          id="stop8" />
       <stop
-         offset="0.42"
-         stop-color="#0c271f"
+         offset="0.46"
+         stop-color="#1b503e"
          id="stop9" />
       <stop
-         offset="0.78"
-         stop-color="#071b16"
+         offset="0.72"
+         stop-color="#0b2d23"
          id="stop10" />
       <stop
          offset="1"
-         stop-color="#04120e"
+         stop-color="#03130e"
          id="stop11" />
-    </linearGradient>
+    </radialGradient>
     <linearGradient
        id="rim"
        x1="-99.933005"
