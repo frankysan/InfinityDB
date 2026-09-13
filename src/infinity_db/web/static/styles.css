@@ -85,9 +85,11 @@ html[data-distance-unit="in"] .distance-toggle-options > span:last-child { color
 .main { margin-left: 244px; padding: 0 48px; max-width: 1800px; min-height: 100vh; }
 .main-detail { max-width: 1800px; }
 .main:focus { outline: none; }
-.landing-hero { display: flex; align-items: center; justify-content: space-between; gap: 54px; padding: 78px 0 62px; }
-.landing-hero-content { max-width: 720px; }
-.landing-logo { width: clamp(180px, 19vw, 290px); height: auto; flex: 0 0 auto; filter: drop-shadow(0 14px 22px rgb(27 63 47 / 18%)); }
+.landing-hero { padding: 78px 0 62px; }
+.landing-hero-copy { display: grid; grid-template-columns: minmax(0, 720px) auto; align-items: center; column-gap: 54px; }
+.landing-hero-heading { grid-column: 1; }
+.landing-logo { grid-column: 2; grid-row: 1 / span 2; width: clamp(180px, 19vw, 290px); height: auto; align-self: center; filter: drop-shadow(0 14px 22px rgb(27 63 47 / 18%)); }
+.landing-hero-content { grid-column: 1; max-width: 720px; }
 .landing-hero h1 { font-size: clamp(42px, 5vw, 68px); }
 .landing-hero-content > p:not(.eyebrow) { max-width: 650px; margin: 24px 0 28px; color: var(--muted); font-size: 16px; line-height: 1.8; }
 .landing-links { margin-bottom: 28px; }
@@ -269,8 +271,9 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: var(--table-cell
 .unit-detail .army-profile .profile-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
 .profile-attributes-label, .profile-item-label { width: 30%; padding-left: 46px; }
 .profile-attributes { padding: 10px 26px; }
-.attribute-statline { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); }
-.attribute-statline-with-availability { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.attribute-statline { --movement-column-width: 60px; display: grid; grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr)); }
+.attribute-statline-with-availability { grid-template-columns: var(--movement-column-width) repeat(9, minmax(0, 1fr)); }
+html[data-distance-unit="in"] .attribute-statline { --movement-column-width: 52px; }
 .attribute-statline > div { min-width: 0; padding: 4px 8px; border-left: 1px solid #e9ece3; text-align: center; font-variant-numeric: tabular-nums; }
 .attribute-statline > div:first-child { border-left: 0; }
 .attribute-statline .attribute-label { display: block; margin-bottom: 3px; color: #64715d; font-size: 9px; font-weight: 550; letter-spacing: 1.2px; line-height: 1.2; text-transform: uppercase; }
@@ -350,13 +353,19 @@ tbody tr:hover { background: #f8f9f3; }
   .main { margin: 0; padding-inline: 30px; }
   .topbar { height: 70px; }
   .intro { padding-top: 38px; padding-bottom: 36px; }
-  .landing-hero { gap: 32px; }
+  .landing-hero-copy { column-gap: 32px; }
   .about-logo { margin-right: 0; }
   .about-content { grid-template-columns: 1fr; }
   .about-feature + .about-feature { border-left: 0; border-top: 1px solid var(--border); }
   .army-tags { --symbols-per-row: 6; }
   .army-tags-compact { --symbols-per-row: 7; }
   h1 { font-size: 42px; }
+}
+@media (min-width: 601px) and (max-width: 700px) {
+  .profile-attributes { padding-inline: 12px; }
+  .attribute-statline { grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr)); }
+  .attribute-statline-with-availability { grid-template-columns: var(--movement-column-width) repeat(9, minmax(0, 1fr)); }
+  .attribute-statline > div { padding-inline: 4px; }
 }
 @media (max-width: 600px) {
   .sidebar { padding: 16px 18px; }
@@ -373,8 +382,10 @@ tbody tr:hover { background: #f8f9f3; }
   .main-detail { padding-inline: 18px; }
   .topbar { height: 61px; }
   .intro { display: block; padding-block: 30px; }
-  .landing-hero { display: block; padding: 52px 0 45px; }
-  .landing-logo { display: block; width: min(52vw, 230px); margin: 34px auto 0; }
+  .landing-hero { padding: 52px 0 45px; }
+  .landing-hero-copy { grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: 16px; }
+  .landing-logo { grid-column: 2; grid-row: 1; align-self: start; width: min(30vw, 135px); height: auto; }
+  .landing-hero-content { grid-column: 1 / -1; }
   .landing-hero h1 { font-size: clamp(38px, 11vw, 52px); }
   .landing-hero > p:not(.eyebrow) { font-size: 13px; }
   .landing-link-grid { grid-template-columns: 1fr; }
@@ -410,7 +421,8 @@ tbody tr:hover { background: #f8f9f3; }
   .sort-label { display: none; }
   table { --table-heading-padding: 14px 17px; --table-cell-padding: 16px 17px; --table-heading-size: 8px; }
   table.data-table--compact { --table-heading-padding: 10px 12px; --table-cell-padding: 10px 12px; }
-  thead th:first-child { width: 47%; }
+  thead th:first-child { width: auto; }
+  thead th:last-child { width: 156px; }
   .id-column { display: none; }
   .unit-name { font-size: 12px; }
   .unit-symbol { width: 21px; height: 21px; }
@@ -419,8 +431,9 @@ tbody tr:hover { background: #f8f9f3; }
   .army-symbol.main-army-symbol-detail { width: 39px; height: 39px; margin-right: 7px; }
   .army-tag { font-size: 9px; padding: 3px 5px; }
   .army-symbol { width: 26px; height: 26px; }
-  .army-tags, .army-tags-compact { --symbols-per-row: 4; }
-  .army-tags-compact .army-symbol { width: 22px; height: 22px; }
+  .army-tags { --symbols-per-row: 4; }
+  .army-tags-compact { --symbols-per-row: 6; gap: 3px; }
+  .army-tags-compact .army-symbol { width: 17px; height: 17px; }
   .unit-detail .profile-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 12px; }
   .unit-detail .profile-summary > * { min-width: 0; padding: 8px 4px; font-size: 10px; overflow-wrap: anywhere; }
   .unit-detail .profile-summary > :first-child { grid-column: 1 / -1; padding-top: 15px; color: #2d4134; font-size: 12px; }
@@ -438,8 +451,9 @@ tbody tr:hover { background: #f8f9f3; }
   .profile-attributes-label { width: auto; padding: 10px 16px; }
   .unit-detail .general-profile .profile-attributes-label { padding-left: 46px; }
   .profile-attributes { padding: 8px 12px; }
-  .attribute-statline { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .attribute-statline-with-availability { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .attribute-statline, .attribute-statline-with-availability { grid-template-columns: 60px repeat(4, minmax(0, 1fr)); }
+  html[data-distance-unit="in"] .attribute-statline,
+  html[data-distance-unit="in"] .attribute-statline-with-availability { grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }
   .attribute-statline > div { padding: 7px 4px; }
   .weapon-profile table { display: block; }
   .weapon-variants, .weapon-variant, .weapon-profile { width: 100%; }

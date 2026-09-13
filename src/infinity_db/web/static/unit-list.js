@@ -40,7 +40,7 @@ export function renderUnitRows(container, units) {
     const armyList = document.createElement("div");
     armyList.className = "army-tags";
     const armies = displayArmies(unit.armies);
-    if (armies.length > 30) armyList.classList.add("army-tags-compact");
+    if (armies.length > 12) armyList.classList.add("army-tags-compact");
     for (const army of armies) {
       const symbol = armySymbolPath(army.id);
       if (symbol) {
