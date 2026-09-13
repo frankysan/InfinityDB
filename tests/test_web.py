@@ -457,10 +457,13 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
 
     assert status == 200
     assert b'<script type="module" src="/static/navigation.js"></script>' in body
+    assert b'<p class="nav-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
+    assert b'>Navigation <span aria-hidden="true">' in body
 
     status, _, navigation = request(app, "/static/navigation.js")
     assert status == 200
+    assert b'document.querySelectorAll("[data-menu]")' in navigation
     assert b'button.addEventListener("click"' in navigation
     assert b'menu.dataset.open = String(isOpen)' in navigation
     assert b'document.addEventListener("pointerdown"' in navigation

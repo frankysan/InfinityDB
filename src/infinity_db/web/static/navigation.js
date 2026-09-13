@@ -1,8 +1,6 @@
-/** Controls the compact navigation without relying on native disclosures. */
-const menu = document.querySelector(".navigation-menu");
-
-if (menu) {
-  const button = menu.querySelector(".navigation-menu-button");
+/** Shared behavior for compact menus in the top bar. */
+document.querySelectorAll("[data-menu]").forEach((menu) => {
+  const button = menu.querySelector(".compact-menu-button");
   const setMenuOpen = (isOpen) => {
     menu.dataset.open = String(isOpen);
     button.setAttribute("aria-expanded", String(isOpen));
@@ -32,4 +30,4 @@ if (menu) {
 
   window.addEventListener("pagehide", closeMenu);
   window.addEventListener("pageshow", closeMenu);
-}
+});

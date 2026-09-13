@@ -6,7 +6,7 @@
   </a>
   <div class="sidebar-body">
     <div class="sidebar-navigation">
-      <p class="nav-label">The database</p>
+      <p class="nav-label">Navigation</p>
       <nav aria-label="Main">
         <a class="nav-item" href="/units"{{UNIT_EXPLORER_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="12" y="3" width="5" height="5" rx="1"/><rect x="3" y="12" width="5" height="5" rx="1"/><rect x="12" y="12" width="5" height="5" rx="1"/></svg>
@@ -30,9 +30,9 @@
         </a>
       </nav>
     </div>
-    <div class="navigation-menu">
-      <button class="navigation-menu-button" type="button" aria-expanded="false" aria-controls="compact-navigation-menu">Browse <span aria-hidden="true">⌄</span></button>
-      <nav id="compact-navigation-menu" aria-label="Main">
+    <div class="compact-menu navigation-menu" data-menu>
+      <button class="compact-menu-button" type="button" aria-expanded="false" aria-controls="compact-navigation-menu">Navigation <span aria-hidden="true">⌄</span></button>
+      <nav id="compact-navigation-menu" class="compact-menu-panel" aria-label="Main">
         <a class="nav-item" href="/units"{{UNIT_EXPLORER_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="12" y="3" width="5" height="5" rx="1"/><rect x="3" y="12" width="5" height="5" rx="1"/><rect x="12" y="12" width="5" height="5" rx="1"/></svg>
           Unit explorer
