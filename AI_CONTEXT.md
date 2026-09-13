@@ -98,6 +98,10 @@ clear requirement justifies it.
 - Update the README for user-visible behavior, and architecture/data-model docs
   when changing a documented boundary, invariant, or storage decision. Add a
   dated note below when a non-obvious, lasting tradeoff is introduced.
+- Update `TODO.md` whenever the user or any agent identifies a potential
+  improvement, optimization, or new feature. Keep it actionable, place it in
+  the appropriate section, and mark work complete only after implementation,
+  verification, and documentation are finished.
 - Record new work under `Unreleased` in `CHANGELOG.md`. Do not increment or
   otherwise alter the release version unless explicitly requested.
 - Keep `__version__` at the released value. While `Unreleased` contains work,
