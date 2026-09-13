@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-09-13
+
+### Fixed
+
+- Version every JavaScript module dependency with its release URL. This prevents
+  browsers with cached 0.3.2 modules from mixing releases and leaving catalog
+  or detail pages on their loading states.
+
 ## [0.3.2] - 2026-09-13
 
 ### Added

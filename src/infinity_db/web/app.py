@@ -43,6 +43,9 @@ ORDER_SYMBOL_PATH = re.compile(
     r"/static/orders/(regular|irregular|peripheral|impetuous|tactical|lieutenant|hackable|cube|cube-2)\.svg"
 )
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
+MODULE_IMPORT_URL = re.compile(
+    r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
+)
 
 
 def _version_static_urls(document: str) -> str:
@@ -60,6 +63,18 @@ def _asset_cache_control(query: str) -> str:
     if version == [__version__]:
         return "public, max-age=31536000, immutable"
     return "public, max-age=300, stale-while-revalidate=600"
+
+
+def _version_module_imports(source: str) -> str:
+    """Keep an ES module and every relative dependency in the same release."""
+
+    return MODULE_IMPORT_URL.sub(
+        lambda match: (
+            f'{match.group("prefix")}{match.group("quote")}'
+            f'{match.group("path")}?v={__version__}{match.group("quote")}'
+        ),
+        source,
+    )
 
 
 def _page(
@@ -245,6 +260,9 @@ class Application:
         elif path in ASSETS:
             filename, content_type = ASSETS[path]
             body = files("infinity_db.web").joinpath("static", filename).read_bytes()
+            version = parse_qs(environ.get("QUERY_STRING", "")).get("v")
+            if filename.endswith(".js") and version == [__version__]:
+                body = _version_module_imports(body.decode("utf-8")).encode("utf-8")
             cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
         elif ARMY_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/armies/")
