@@ -60,8 +60,9 @@ documentation are complete.
   archive.
 - [ ] Keep README and architecture-version references synchronized with schema
   and compatibility revisions during every database-format change.
-- [ ] Consider snapshot version headers or ETags for HTTP responses so clients
-  can recognize a refreshed dataset.
+- [x] Send snapshot-aware ETags for successful API responses and expose the
+  snapshot revision to the browser refresh check so clients recognize a
+  refreshed dataset.
 
 ## Potential product features
 

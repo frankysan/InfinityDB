@@ -7,6 +7,7 @@ import logging
 import re
 import sqlite3
 from datetime import date
+from hashlib import file_digest, sha256
 from html import escape
 from http import HTTPStatus
 from importlib.resources import files
@@ -77,11 +78,35 @@ def _version_module_imports(source: str) -> str:
     )
 
 
+def _snapshot_revision(path: Path) -> str:
+    """Return a stable identifier for an immutable database snapshot."""
+
+    with path.open("rb") as database:
+        return file_digest(database, "sha256").hexdigest()
+
+
+def _etag_matches(header: str | None, etag: str) -> bool:
+    """Use HTTP's weak comparison rules for an If-None-Match request header."""
+
+    if not header:
+        return False
+    for candidate in header.split(","):
+        candidate = candidate.strip()
+        if candidate == "*":
+            return True
+        if candidate.startswith(("W/", "w/")):
+            candidate = candidate[2:].lstrip()
+        if candidate == etag:
+            return True
+    return False
+
+
 def _page(
     filename: str,
     *,
     active_page: str | None = None,
     snapshot_downloaded_on: date | None = None,
+    snapshot_revision: str,
     breadcrumbs: tuple[tuple[str, str | None], ...],
     catalog_tag: str,
 ) -> bytes:
@@ -148,7 +173,11 @@ def _page(
     )
     document = static.joinpath(filename).read_text(encoding="utf-8")
     return _version_static_urls(
-        document.replace('<html lang="en">', f'<html lang="en" data-app-version="{__version__}">')
+        document.replace(
+            '<html lang="en">',
+            f'<html lang="en" data-app-version="{__version__}" '
+            f'data-snapshot-revision="{snapshot_revision}">',
+        )
         .replace(
             "</head>",
             (
@@ -223,6 +252,13 @@ class Application:
         self.database = Database(database_path)
         self.database.validate()
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
+        self.snapshot_revision = _snapshot_revision(self.database.path)
+
+    def _snapshot_etag(self, path: str, query: str) -> str:
+        """Return a snapshot validator scoped to one requested representation."""
+
+        representation = sha256(f"{path}?{query}".encode()).hexdigest()[:16]
+        return f'"{__version__}-{self.snapshot_revision}-{representation}"'
 
     def __call__(self, environ: dict, start_response):
         method = environ.get("REQUEST_METHOD", "GET")
@@ -245,6 +281,7 @@ class Application:
             body = _page(
                 "index.html",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("InfinityDB", None), ("Home", None)),
                 catalog_tag="Player reference",
             )
@@ -254,6 +291,7 @@ class Application:
                 "units.html",
                 active_page="units",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Units", None)),
                 catalog_tag="Unit catalog",
             )
@@ -299,6 +337,7 @@ class Application:
                 "unit.html",
                 active_page="units",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Units", "/units"), ("Details", None)),
                 catalog_tag="Unit catalog",
             )
@@ -308,6 +347,7 @@ class Application:
                 "skill-extras.html",
                 active_page="skill-extras",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
                 catalog_tag="Reference data",
             )
@@ -318,6 +358,7 @@ class Application:
                 f"{catalog}.html",
                 active_page=catalog,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), (catalog.capitalize(), None)),
                 catalog_tag="Reference data",
             )
@@ -327,6 +368,7 @@ class Application:
                 "skill.html",
                 active_page="skills",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Skills", "/skills"), ("Details", None)),
                 catalog_tag="Reference data",
             )
@@ -336,6 +378,7 @@ class Application:
                 f"{match.group(1)}-detail.html",
                 active_page=match.group(1),
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
                     ("Database", "/"),
                     (match.group(1).capitalize(), f"/{match.group(1)}"),
@@ -349,11 +392,12 @@ class Application:
                 "about.html",
                 active_page="about",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("InfinityDB", "/"), ("About", None)),
                 catalog_tag="Player reference",
             )
         elif path == "/api/version":
-            payload = {"version": __version__}
+            payload = {"version": __version__, "snapshot_revision": self.snapshot_revision}
             cache_control = "no-store"
         elif path == "/api/skill-extras":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
@@ -462,17 +506,27 @@ class Application:
 
         if payload is not None:
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        etag = (
+            self._snapshot_etag(path, environ.get("QUERY_STRING", ""))
+            if path.startswith("/api/") and status == HTTPStatus.OK
+            else None
+        )
+        if etag and _etag_matches(environ.get("HTTP_IF_NONE_MATCH"), etag):
+            status = HTTPStatus.NOT_MODIFIED
+            body = b""
+        etag_headers = [("ETag", etag)] if etag else []
         headers = [
-            ("Content-Type", content_type),
-            ("Content-Length", str(len(body))),
             ("Cache-Control", cache_control),
             ("X-Content-Type-Options", "nosniff"),
             (
                 "Content-Security-Policy",
                 "default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
             ),
+            *etag_headers,
             *extra_headers,
         ]
+        if status != HTTPStatus.NOT_MODIFIED:
+            headers[:0] = [("Content-Type", content_type), ("Content-Length", str(len(body)))]
         start_response(f"{status.value} {status.phrase}", headers)
         return [] if method == "HEAD" else [body]
 

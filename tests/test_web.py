@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Callable, Iterator
+import shutil
+import sqlite3
+from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode, urlsplit
@@ -22,6 +24,7 @@ def request(
     *,
     query: str = "",
     method: str = "GET",
+    request_headers: Mapping[str, str] | None = None,
 ) -> tuple[int, dict[str, str], bytes]:
     parsed = urlsplit(path)
     environ: dict[str, Any] = {}
@@ -31,6 +34,13 @@ def request(
         QUERY_STRING=query or parsed.query,
         REQUEST_METHOD=method,
     )
+    if request_headers:
+        environ.update(
+            {
+                f"HTTP_{name.upper().replace('-', '_')}": value
+                for name, value in request_headers.items()
+            }
+        )
     response: dict[str, Any] = {}
 
     def start_response(status: str, headers: list[tuple[str, str]], exc_info=None) -> None:
@@ -396,6 +406,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
     assert b'data-app-version="0.3.3"' in body
+    assert b'data-snapshot-revision="' in body
     assert b'/static/version-check.js?v=0.3.3' in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
@@ -428,12 +439,18 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
 
     assert status == 200
     assert headers["cache-control"] == "no-store"
-    assert json.loads(body) == {"version": "0.3.3"}
+    version = json.loads(body)
+    assert version["version"] == "0.3.3"
+    assert len(version["snapshot_revision"]) == 64
+    assert int(version["snapshot_revision"], 16) >= 0
 
     status, _, script = request(app, "/static/version-check.js")
     assert status == 200
     assert b'fetch("/api/version", { cache: "no-store" })' in script
-    assert b'freshUrl.searchParams.set("app-version", version)' in script
+    assert b"snapshot_revision: snapshotRevision" in script
+    assert b"currentSnapshotRevision" in script
+    assert b'freshUrl.searchParams.set("app-version", version || currentVersion)' in script
+    assert b'freshUrl.searchParams.set("snapshot-revision", snapshotRevision)' in script
     assert b"window.location.replace(freshUrl)" in script
 
 
@@ -640,6 +657,51 @@ def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -
     status, headers, _ = request(app, "/static/unit-list.js")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+
+
+def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
+    status, headers, body = request(app, "/api/armies")
+
+    assert status == 200
+    assert body
+    etag = headers["etag"]
+    assert etag.startswith('"0.3.3-')
+
+    status, conditional_headers, conditional_body = request(
+        app,
+        "/api/armies",
+        request_headers={"If-None-Match": f'"other", W/{etag}'},
+    )
+
+    assert status == 304
+    assert conditional_body == b""
+    assert conditional_headers["etag"] == etag
+    assert conditional_headers["cache-control"] == headers["cache-control"]
+    assert "content-length" not in conditional_headers
+
+    status, query_headers, _ = request(app, "/api/units", query="limit=1")
+    assert status == 200
+    assert query_headers["etag"] != etag
+
+    status, missing_headers, _ = request(app, "/api/units/9099")
+    assert status == 404
+    assert "etag" not in missing_headers
+
+
+def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: Path) -> None:
+    status, headers, body = request(app, "/api/armies")
+    assert status == 200
+
+    rebuilt_database = tmp_path / "rebuilt.db"
+    shutil.copyfile(app.database.path, rebuilt_database)
+    with sqlite3.connect(rebuilt_database) as connection:
+        connection.execute("UPDATE units SET name = ? WHERE id = ?", ("Updated Ranger", 1))
+    rebuilt_app = create_app(rebuilt_database)
+
+    rebuilt_status, rebuilt_headers, rebuilt_body = request(rebuilt_app, "/api/armies")
+    assert rebuilt_status == 200
+    assert rebuilt_body == body
+    assert rebuilt_headers["etag"] != headers["etag"]
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
