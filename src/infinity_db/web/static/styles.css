@@ -30,9 +30,11 @@
   --shadow-surface: 0 3px 6px #203b3503;
   --shadow-logo-hero: 0 14px 22px rgb(27 63 47 / 18%);
   --shadow-logo-about: 0 12px 18px rgb(27 63 47 / 16%);
-  --color-surface-highlight: #edf4e7;
+  --surface-highlight: #edf4e7;
+  --color-surface-highlight: var(--surface-highlight);
   --color-border-highlight: #cbd9c0;
-  --color-surface-data-header: #fafbf8;
+  --surface-data-header: #fafbf8;
+  --color-surface-data-header: var(--surface-data-header);
 
   --color-nav-surface: #162b27;
   --color-nav-surface-hover: #203832;
@@ -159,7 +161,7 @@ html[data-distance-unit="in"] .distance-toggle-options > span:last-child { color
 .landing-link-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .surface, .explorer { border: 1px solid var(--color-border-default); border-radius: var(--radius-md); background: var(--color-surface-default); box-shadow: var(--shadow-surface); }
 .surface--subtle { background: var(--color-surface-subtle); box-shadow: none; }
-.surface--highlighted { border-color: var(--color-border-highlight); background: var(--color-surface-highlight); }
+.surface--highlighted { border-color: var(--color-border-highlight); background: var(--surface-highlight); }
 .landing-link { display: flex; align-items: center; gap: 17px; min-height: 142px; padding: 27px; border: 1px solid #d8e2d4; border-radius: var(--radius-lg); background: #fbfcf8; box-shadow: var(--shadow-card); text-decoration: none; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
 .landing-link:hover { border-color: #a8bf91; box-shadow: 0 9px 23px rgb(32 59 53 / 10%); transform: translateY(-3px); }
 .landing-link-number { color: #779354; font: 11px Consolas, "Courier New", monospace; align-self: start; }
@@ -276,7 +278,7 @@ h1 > span { color: #8caa60; }
 .weapon-profile-stats { margin: 0; padding: 12px 18px; border-top: 1px solid #e9ece3; color: #405b4d; font-size: 11px; line-height: 1.6; font-variant-numeric: tabular-nums; }
 .weapon-traits { margin: 0; padding: 12px 18px 14px; border-top: 1px solid #e9ece3; color: #52634c; font-size: 11px; line-height: 1.6; }
 .weapon-data-row { display: grid; grid-template-columns: minmax(105px, 30%) minmax(0, 1fr); border-top: 1px solid #e9ece3; }
-.weapon-data-heading { display: flex; align-items: center; margin: 0; padding: 12px 18px; background: var(--color-surface-data-header); color: #64715d; font-size: 9px; font-weight: 550; letter-spacing: 1.1px; text-transform: uppercase; }
+.weapon-data-heading { display: flex; align-items: center; margin: 0; padding: 12px 18px; background: var(--surface-data-header); color: #64715d; font-size: 9px; font-weight: 550; letter-spacing: 1.1px; text-transform: uppercase; }
 .weapon-data-value { margin: 0; padding: 12px 18px; border-left: 1px solid #e9ece3; color: #52634c; font-size: 11px; line-height: 1.6; }
 .section-heading { display: flex; justify-content: space-between; align-items: center; padding: 23px 26px 0; }
 h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.2px; }
@@ -326,7 +328,7 @@ table { --table-heading-padding: 16px 26px; --table-cell-padding: 18px 26px; --t
   .unit-detail .general-profile-group[class*="general-profile-group--faction-"] .general-profile .profile-title { background: linear-gradient(90deg, color-mix(in srgb, var(--color-general-profile-primary) 22%, transparent), color-mix(in srgb, var(--color-general-profile-secondary) 11%, transparent) 48%, transparent 78%), var(--color-surface-highlight); }
 }
 .unit-detail .general-profile .profile-title .order-symbol { width: 23px; height: 23px; }
-thead th { background: var(--color-surface-data-header); font-size: var(--table-heading-size); letter-spacing: var(--table-heading-spacing); text-transform: uppercase; color: #64715d; font-weight: 550; padding: var(--table-heading-padding); border-bottom: 1px solid var(--color-border-default); }
+thead th { background: var(--surface-data-header); font-size: var(--table-heading-size); letter-spacing: var(--table-heading-spacing); text-transform: uppercase; color: #64715d; font-weight: 550; padding: var(--table-heading-padding); border-bottom: 1px solid var(--color-border-default); }
 thead th:first-child { width: 43%; }
 thead th:last-child { width: 115px; }
 .usage-section-group thead th:first-child,
