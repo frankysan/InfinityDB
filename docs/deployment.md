@@ -25,7 +25,7 @@ python3 -m venv .venv
 .venv/bin/pip install -e .
 .venv/bin/infinity-db build --compact
 
-DOMAIN=infinity.example.com IMAGE_TAG=0.3.1 docker compose up -d --build
+DOMAIN=infinity.example.com IMAGE_TAG=0.3.2 docker compose up -d --build
 ```
 
 The image build deliberately requires `data/generated/infinity.db`. This makes

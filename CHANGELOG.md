@@ -4,6 +4,34 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-09-13
+
+### Added
+
+- Global Settings controls for including mercenaries, Spec-Ops, Team Operations,
+  and reinforcements. The chosen filters apply consistently to the unit catalog
+  and unit lists on rules-reference detail pages.
+- An opt-in cookie consent flow to remember distance, optional-unit, and
+  Developer mode settings on the current device.
+- A version endpoint and browser-side release check, plus release-fingerprinted
+  static assets and cache headers that safely cache immutable release assets.
+- An actionable startup error when the selected web-server port is already in
+  use.
+
+### Changed
+
+- Improved web-reference responsiveness by caching immutable database-query
+  results and reducing repeated client-side catalog and detail-page work.
+- Updated the package, documentation, and About page for version 0.3.2.
+- Modernized package license metadata for current setuptools releases.
+
+### Fixed
+
+- Ensured global optional-unit settings affect every related unit list,
+  including Skills, Equipment, and Weapons detail pages.
+- Corrected optional-unit filter updates and Infinity Wiki link labels on
+  catalog detail pages.
+
 ## [0.3.1] - 2026-09-13
 
 ### Added
