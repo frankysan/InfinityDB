@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 SCHEMA_VERSION = 8
@@ -287,12 +288,18 @@ def columns_for(name: str, rows: list[dict]) -> tuple[str, ...]:
     return tuple(columns)
 
 
-def create_schema(connection: sqlite3.Connection, tables: dict[str, list[dict]]) -> None:
+def create_schema(
+    connection: sqlite3.Connection,
+    tables: dict[str, list[dict]],
+    *,
+    table_columns: Mapping[str, tuple[str, ...]] | None = None,
+) -> None:
     """Create all tables, including empty ones, with deferred relational constraints.
 
     Values have no SQLite affinity, avoiding coercion of source strings such as SWC.
     Nested JSON occupies text columns. Lossless source rows are stored in the
-    separate development archive, not in the frontend database.
+    separate development archive, not in the frontend database. Secondary
+    indexes are deliberately created after the bulk load by ``create_indexes``.
     """
     connection.execute(f"PRAGMA application_id = {APPLICATION_ID}")
     connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
@@ -300,7 +307,11 @@ def create_schema(connection: sqlite3.Connection, tables: dict[str, list[dict]])
         f"CREATE TABLE {quote(METADATA_TABLE)} (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
     )
     for name, definition in TABLES.items():
-        columns = columns_for(name, tables.get(name, []))
+        columns = (
+            table_columns[name]
+            if table_columns is not None and name in table_columns
+            else columns_for(name, tables.get(name, []))
+        )
         parts = [
             quote(field) + (" NOT NULL" if field in definition.key else "") for field in columns
         ]
@@ -316,6 +327,10 @@ def create_schema(connection: sqlite3.Connection, tables: dict[str, list[dict]])
                 "DEFERRABLE INITIALLY DEFERRED"
             )
         connection.execute(f"CREATE TABLE {quote(name)} ({', '.join(parts)})")
+
+
+def create_indexes(connection: sqlite3.Connection) -> None:
+    """Create read-path indexes after data loading completes."""
     connection.execute("CREATE INDEX units_name ON units(name COLLATE NOCASE, id)")
     connection.execute("CREATE INDEX army_units_unit ON army_units(unit_id, army_id)")
     for index_name, table_name, columns in INDEXES:

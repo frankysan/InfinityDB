@@ -11,6 +11,7 @@ from infinity_army_data.normalize import main_army_id, normalize_master, validat
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
 from infinity_army_data.weapon_profiles import weapon_profile_override
 from infinity_db.database import Database, export_database, raw_database_path
+from infinity_db.database.importer import BATCH_SIZE, batched
 from infinity_db.database.repository import (
     canonical_skill_extra_name,
     canonical_skill_id,
@@ -28,6 +29,8 @@ from infinity_db.database.schema import (
     RAW_ROWS_TABLE,
     ROW_JSON,
     TABLES,
+    create_indexes,
+    create_schema,
     quote,
 )
 
@@ -1137,6 +1140,35 @@ def test_reading_missing_or_unsupported_database_does_not_create_it(tmp_path: Pa
     connection.close()
     with pytest.raises(ValueError, match="Unsupported"):
         Database(path).validate()
+
+
+def test_bulk_insert_batches_are_bounded() -> None:
+    rows = ((number,) for number in range(BATCH_SIZE * 2 + 1))
+
+    batches = list(batched(rows))
+
+    assert [len(batch) for batch in batches] == [BATCH_SIZE, BATCH_SIZE, 1]
+    assert batches[0][0] == (0,)
+    assert batches[-1] == [(BATCH_SIZE * 2,)]
+
+
+def test_secondary_indexes_are_created_after_schema_setup() -> None:
+    connection = sqlite3.connect(":memory:")
+    try:
+        create_schema(connection, {})
+        indexes_before = {
+            row[1] for row in connection.execute("PRAGMA index_list(units)")
+        }
+        assert "units_name" not in indexes_before
+
+        create_indexes(connection)
+
+        indexes_after = {
+            row[1] for row in connection.execute("PRAGMA index_list(units)")
+        }
+        assert "units_name" in indexes_after
+    finally:
+        connection.close()
 
 
 def test_database_with_different_compatibility_revision_requires_rebuild(

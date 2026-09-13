@@ -6,6 +6,8 @@ import json
 import os
 import sqlite3
 import tempfile
+from collections.abc import Iterable, Iterator
+from itertools import islice
 from pathlib import Path
 from typing import Any
 
@@ -21,16 +23,19 @@ from .schema import (
     ROW_JSON,
     TABLES,
     columns_for,
+    create_indexes,
     create_schema,
     quote,
 )
+
+BATCH_SIZE = 1_000
 
 
 def json_text(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
 
 
-def validate_input(data: dict[str, Any]) -> None:
+def validate_input(data: dict[str, Any]) -> dict[str, tuple[str, ...]]:
     if not isinstance(data, dict) or not isinstance(data.get("_meta"), dict):
         raise ValueError("Normalized data must contain a _meta object")
     meta = data["_meta"]
@@ -48,12 +53,13 @@ def validate_input(data: dict[str, Any]) -> None:
     tables = data.get("tables")
     if not isinstance(tables, dict):
         raise ValueError("Normalized data must contain a tables object")
+    table_columns: dict[str, tuple[str, ...]] = {}
     for name, rows in tables.items():
         if name not in TABLES:
             raise ValueError(f"Unsupported normalized table: {name}")
         if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
             raise ValueError(f"Normalized table {name} must be an array of objects")
-        columns_for(name, rows)
+        table_columns[name] = columns_for(name, rows)
         for row in rows:
             for field in TABLES[name].key:
                 if type(row.get(field)) not in (int, str):
@@ -78,6 +84,7 @@ def validate_input(data: dict[str, Any]) -> None:
         validate_normalized(data)
     except (KeyError, TypeError, OverflowError, RecursionError) as exc:
         raise ValueError(f"Invalid normalized data: {exc}") from exc
+    return table_columns
 
 
 def sql_value(value: Any) -> Any:
@@ -92,6 +99,22 @@ def sql_value(value: Any) -> Any:
 def raw_database_path(path: Path) -> Path:
     """Return the development archive path associated with a frontend database."""
     return path.with_name(f"{path.stem}.raw{path.suffix}")
+
+
+def batched(
+    rows: Iterable[tuple[Any, ...]], size: int = BATCH_SIZE
+) -> Iterator[list[tuple[Any, ...]]]:
+    """Yield bounded parameter batches without retaining an entire table."""
+    iterator = iter(rows)
+    while batch := list(islice(iterator, size)):
+        yield batch
+
+
+def insert_batched(
+    connection: sqlite3.Connection, statement: str, rows: Iterable[tuple[Any, ...]]
+) -> None:
+    for batch in batched(rows):
+        connection.executemany(statement, batch)
 
 
 def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
@@ -109,18 +132,20 @@ def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> 
     metadata = {key: value for key, value in data.items() if key != "tables"}
     metadata["imported_tables"] = list(data["tables"])
     metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
-    connection.executemany(
+    insert_batched(
+        connection,
         f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
         [(key, json_text(value)) for key, value in metadata.items()],
     )
-    connection.executemany(
+    insert_batched(
+        connection,
         f"INSERT INTO {quote(RAW_ROWS_TABLE)} (table_name, row_position, {quote(ROW_JSON)}) "
         "VALUES (?, ?, ?)",
-        [
+        (
             (name, position, json_text(row))
             for name, rows in data["tables"].items()
             for position, row in enumerate(rows)
-        ],
+        ),
     )
 
 
@@ -131,7 +156,7 @@ def export_database(data: dict[str, Any], path: Path) -> None:
     ``.raw`` database preserves exact normalized rows, including absent versus
     null fields, for development use.
     """
-    validate_input(data)
+    table_columns = validate_input(data)
     path = Path(path)
     archive_path = raw_database_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -148,24 +173,27 @@ def export_database(data: dict[str, Any], path: Path) -> None:
         try:
             connection.execute("PRAGMA foreign_keys = ON")
             with connection:
-                create_schema(connection, data["tables"])
+                create_schema(connection, data["tables"], table_columns=table_columns)
                 metadata = {key: value for key, value in data.items() if key != "tables"}
                 metadata["imported_tables"] = list(data["tables"])
                 metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
-                connection.executemany(
+                insert_batched(
+                    connection,
                     f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
                     [(key, json_text(value)) for key, value in metadata.items()],
                 )
                 for name, rows in data["tables"].items():
-                    columns = columns_for(name, rows)
+                    columns = table_columns[name]
                     fields = ", ".join(map(quote, columns))
                     placeholders = ", ".join("?" for _ in columns)
-                    connection.executemany(
+                    insert_batched(
+                        connection,
                         f"INSERT INTO {quote(name)} ({fields}) VALUES ({placeholders})",
-                        [
+                        (
                             tuple(sql_value(row.get(field)) for field in columns) for row in rows
-                        ],
+                        ),
                     )
+                create_indexes(connection)
                 # The frontend database is an immutable snapshot. Persist planner
                 # statistics at build time so read-only connections make informed
                 # join-order choices without request-time analysis.

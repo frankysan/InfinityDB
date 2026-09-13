@@ -31,6 +31,40 @@ documentation are complete.
 
 ## Database and data pipeline
 
+- [x] Optimize the JSON-to-SQLite import after benchmarking the following
+  measured hot paths (current generated snapshot: 25.2 MB normalized JSON,
+  198,647 normalized rows, 13.7 MB frontend DB, and 37.7 MB raw archive):
+  - [x] Cache each table's derived column tuple after input validation. It is
+    currently scanned once by `validate_input`, again by `create_schema`, and
+    again before its frontend insert.
+  - [x] Feed `executemany` in bounded batches (especially the raw archive's single
+    198k-row list) so serialization and parameter tuples are not all retained
+    at once.
+  - [x] Build secondary indexes after loading table data, then run `ANALYZE`; keep
+    primary keys and foreign-key validation intact. This avoids maintaining the
+    read-only indexes during every insert.
+  - Generated-snapshot smoke export: 8.45 seconds, 13.4 MB frontend DB, and
+    37.7 MB raw archive. Repeat this measurement on CI or a fixed development
+    host before treating it as a performance regression baseline.
+- [ ] Remove redundant whole-document work in the combined build/export path.
+  Export validation serializes the complete normalized object to reject invalid
+  JSON, while the raw archive serializes every row again and normalization has
+  already run `validate_normalized`. Consider a hash-attested validation report
+  or an in-memory hand-off that skips only the duplicate build-path pass; the
+  standalone `export` command must retain full untrusted-input validation.
+- [ ] Evaluate artifact-level deduplication for development builds. The raw
+  archive contains 24.9 MB of row JSON, nearly the 25.2 MB normalized input,
+  so retaining `normalized.json` and `infinity.raw.db` duplicates the same
+  lossless data. Decide whether post-export development workflows need both,
+  or document one as a regenerable/transient artifact.
+- [ ] Prototype loadout payload templates, following the existing
+  `option_weapon_templates` design. In the current snapshot, 52,554
+  `option_weapons` links already share 490 payload templates; similarly,
+  12,993 loadout-option rows have only 3,045 distinct payloads when their
+  army/unit/group/option IDs and position are excluded. A template/link split
+  could reduce repeated `name`, points, SWC, mini, and disabled values, but
+  must be query-plan and database-size benchmarked before changing the
+  read-optimized schema.
 - [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
   list raw rows by normalized table, and verify that an archive matches its
   frontend sibling's metadata.
