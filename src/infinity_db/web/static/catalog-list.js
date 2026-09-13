@@ -9,6 +9,15 @@ const elements = {
   table: byId("catalog-table-container"), list: byId("catalog-list"), search: byId("catalog-search"),
 };
 let items = [];
+let searchTimer;
+
+function searchableItem(item) {
+  return {
+    ...item,
+    searchText: Object.values(item).map((value) => String(value || "").toLocaleLowerCase()).join("\u0000"),
+    categoryName: item.category || "Uncategorized",
+  };
+}
 
 function show(panel) {
   for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
@@ -19,20 +28,13 @@ function show(panel) {
 
 function render() {
   const query = elements.search.value.trim().toLocaleLowerCase();
-  const visible = items.filter((item) => Object.values(item).some(
-    (value) => String(value || "").toLocaleLowerCase().includes(query),
-  ));
+  const visible = query ? items.filter((item) => item.searchText.includes(query)) : items;
   elements.count.textContent = `${visible.length} ${title}${visible.length === 1 ? "" : " entries"}`;
   if (!visible.length) return show(elements.empty);
   const fragment = document.createDocumentFragment();
-  const sorted = [...visible].sort((left, right) => (
-    `${left.category || "Uncategorized"}\u0000${left.name}`.localeCompare(
-      `${right.category || "Uncategorized"}\u0000${right.name}`, undefined, { numeric: true },
-    )
-  ));
   let category;
-  for (const item of sorted) {
-    const itemCategory = item.category || "Uncategorized";
+  for (const item of visible) {
+    const itemCategory = item.categoryName;
     if (page === "weapons" && itemCategory !== category) {
       category = itemCategory;
       const categoryRow = document.createElement("tr");
@@ -73,7 +75,11 @@ async function load() {
     const response = await fetch(`/api/${page}`);
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || `Could not load ${title}.`);
-    items = payload.items;
+    items = payload.items.map(searchableItem).sort((left, right) => (
+      `${left.categoryName}\u0000${left.name}`.localeCompare(
+        `${right.categoryName}\u0000${right.name}`, undefined, { numeric: true },
+      )
+    ));
     render();
   } catch (error) {
     elements.errorMessage.textContent = error.message || `Could not load ${title}.`;
@@ -81,6 +87,9 @@ async function load() {
   }
 }
 
-elements.search.addEventListener("input", render);
+elements.search.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(render, 150);
+});
 initializeDistanceUnitToggle();
 load();

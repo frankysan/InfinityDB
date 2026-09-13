@@ -702,6 +702,10 @@ function renderArmyProfile(army, generalByName, expanded) {
     icon.className = "army-symbol army-profile-symbol";
     icon.src = symbol;
     icon.alt = "";
+    icon.width = 34;
+    icon.height = 34;
+    icon.loading = "lazy";
+    icon.decoding = "async";
     icon.title = army.name;
     armyHeading.prepend(icon);
   }
@@ -742,6 +746,9 @@ function render(unit) {
     mainIcon.className = "army-symbol main-army-symbol main-army-symbol-detail";
     mainIcon.src = mainArmySymbol;
     mainIcon.alt = "";
+    mainIcon.width = 48;
+    mainIcon.height = 48;
+    mainIcon.decoding = "async";
     mainIcon.title = unit.main_army_name
       || unit.armies.find((army) => army.id === unit.main_army_id)?.name
       || "Main army";

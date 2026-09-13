@@ -11,7 +11,8 @@ function slugify(name) {
 export function unitSymbolPath(unitName) {
   const slug = slugify(unitName);
   const symbol = unitSymbolSlug(slug) || slug;
-  return symbol && `/static/units/${encodeURI(symbol)}.svg`;
+  const version = document.documentElement.dataset.appVersion;
+  return symbol && `/static/units/${encodeURI(symbol)}.svg?v=${encodeURIComponent(version)}`;
 }
 
 export function unitSymbol(unitName, className = "") {
@@ -19,6 +20,10 @@ export function unitSymbol(unitName, className = "") {
   icon.className = `unit-symbol ${className}`.trim();
   icon.src = unitSymbolPath(unitName);
   icon.alt = "";
+  icon.width = 24;
+  icon.height = 24;
+  icon.loading = "lazy";
+  icon.decoding = "async";
   icon.addEventListener("error", () => icon.remove(), { once: true });
   return icon;
 }

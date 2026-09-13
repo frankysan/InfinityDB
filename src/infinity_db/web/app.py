@@ -53,6 +53,15 @@ def _version_static_urls(document: str) -> str:
     )
 
 
+def _asset_cache_control(query: str) -> str:
+    """Cache fingerprinted assets forever and imported modules briefly."""
+
+    version = parse_qs(query).get("v")
+    if version == [__version__]:
+        return "public, max-age=31536000, immutable"
+    return "public, max-age=300, stale-while-revalidate=600"
+
+
 def _page(
     filename: str,
     *,
@@ -126,7 +135,11 @@ def _page(
     return _version_static_urls(
         document.replace('<html lang="en">', f'<html lang="en" data-app-version="{__version__}">')
         .replace(
-            "</head>", '<script type="module" src="/static/version-check.js"></script></head>'
+            "</head>",
+            (
+                f'<script type="module" src="/static/version-check.js?v={__version__}"></script>'
+                "</head>"
+            ),
         )
         .replace("<!-- navigation -->", navigation)
         .replace("<!-- page-header -->", page_header)
@@ -202,6 +215,8 @@ class Application:
         extra_headers = []
         status = HTTPStatus.OK
         content_type = "application/json; charset=utf-8"
+        # Pages contain a small amount of release-specific information, while API
+        # data and versioned assets are immutable for the lifetime of a release.
         cache_control = "no-cache"
         payload = None
         body = b""
@@ -230,12 +245,14 @@ class Application:
         elif path in ASSETS:
             filename, content_type = ASSETS[path]
             body = files("infinity_db.web").joinpath("static", filename).read_bytes()
+            cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
         elif ARMY_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/armies/")
             asset = files("infinity_db.web").joinpath("static", "armies", filename)
             if asset.is_file():
                 body = asset.read_bytes()
                 content_type = "image/svg+xml"
+                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
             else:
                 status = HTTPStatus.NOT_FOUND
                 payload = {"error": "Resource not found"}
@@ -244,6 +261,7 @@ class Application:
             if asset.is_file():
                 body = asset.read_bytes()
                 content_type = "image/svg+xml"
+                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
             else:
                 status = HTTPStatus.NOT_FOUND
                 payload = {"error": "Resource not found"}
@@ -253,6 +271,7 @@ class Application:
             if asset.is_file():
                 body = asset.read_bytes()
                 content_type = "image/svg+xml"
+                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
             else:
                 status = HTTPStatus.NOT_FOUND
                 payload = {"error": "Resource not found"}
@@ -319,6 +338,7 @@ class Application:
             payload = {"version": __version__}
             cache_control = "no-store"
         elif path == "/api/skill-extras":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 payload = {"items": self.database.list_skill_extras()}
             except (OSError, ValueError, sqlite3.Error):
@@ -326,6 +346,7 @@ class Application:
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The skill modifiers are unavailable. Please try again."}
         elif path in {"/api/skills", "/api/equipment", "/api/weapons"}:
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 payload = {"items": self.database.list_catalog_items(path.removeprefix("/api/"))}
             except (OSError, ValueError, sqlite3.Error):
@@ -333,6 +354,7 @@ class Application:
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The catalog is unavailable. Please try again."}
         elif match := re.fullmatch(r"/api/skills/([0-9]+)", path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 skill_id = int(match.group(1))
                 payload = self.database.get_skill(skill_id)
@@ -347,6 +369,7 @@ class Application:
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The skill is unavailable. Please try again."}
         elif match := re.fullmatch(r"/api/(equipment|weapons)/([0-9]+)", path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 payload = self.database.get_catalog_item(match.group(1), int(match.group(2)))
                 if payload is None:
@@ -360,6 +383,7 @@ class Application:
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The reference item is unavailable. Please try again."}
         elif path == "/api/armies":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 payload = {"items": self.database.list_armies()}
             except (OSError, ValueError, sqlite3.Error):
@@ -367,6 +391,7 @@ class Application:
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The database is unavailable. Please try again."}
         elif path == "/api/visible-unit-ids":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 filters = _unit_query(environ.get("QUERY_STRING", ""))
                 payload = {"ids": self.database.visible_unit_ids(
@@ -383,6 +408,7 @@ class Application:
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The database is unavailable. Please try again."}
         elif path == "/api/units":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 query = _unit_query(environ.get("QUERY_STRING", ""))
             except ValueError as exc:
@@ -396,6 +422,7 @@ class Application:
                     status = HTTPStatus.SERVICE_UNAVAILABLE
                     payload = {"error": "The database is unavailable. Please try again."}
         elif match := re.fullmatch(r"/api/units/([0-9]+)", path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 unit_id = int(match.group(1))
                 if unit_id > 2**63 - 1:

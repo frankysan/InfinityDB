@@ -5,11 +5,15 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import threading
 import unicodedata
-from collections.abc import Iterator
+import weakref
+from collections import OrderedDict
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from datetime import date
 from decimal import Decimal, InvalidOperation
+from functools import wraps
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +35,35 @@ SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
 UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
+
+
+def instance_lru_cache(maxsize: int) -> Callable:
+    """Cache immutable database-query results without retaining Database instances."""
+
+    caches: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+    lock = threading.RLock()
+
+    def decorator(function: Callable) -> Callable:
+        @wraps(function)
+        def cached(self, *args, **kwargs):
+            key = (args, tuple(sorted(kwargs.items())))
+            with lock:
+                cache = caches.setdefault(self, OrderedDict())
+                if key in cache:
+                    cache.move_to_end(key)
+                    return cache[key]
+            value = function(self, *args, **kwargs)
+            with lock:
+                cache = caches.setdefault(self, OrderedDict())
+                cache[key] = value
+                cache.move_to_end(key)
+                if len(cache) > maxsize:
+                    cache.popitem(last=False)
+            return value
+
+        return cached
+
+    return decorator
 # Source records whose IDs differ without following either of the general
 # duplicate patterns.  The value is the preferred representative ID.
 UNIT_MERGE_ALIASES = {
@@ -471,6 +504,7 @@ class Database:
         except (TypeError, ValueError, json.JSONDecodeError):
             return None
 
+    @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
@@ -505,6 +539,7 @@ class Database:
                 for army in sorted(armies.values(), key=lambda army: army["id"])
             ]
 
+    @instance_lru_cache(maxsize=1)
     def list_skill_extras(self) -> list[dict[str, Any]]:
         """Return candidate distance-related skill and extra pairings."""
         with self._connect() as connection:
@@ -556,6 +591,7 @@ class Database:
                     item["units"].append(unit)
             return list(combinations.values())
 
+    @instance_lru_cache(maxsize=8)
     def list_catalog_items(self, catalog: str) -> list[dict[str, Any]]:
         """Return the named records in one of the public rules reference catalogs."""
         metadata_tables = {
@@ -674,6 +710,7 @@ class Database:
                 merged.append(representative)
             return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
 
+    @instance_lru_cache(maxsize=128)
     def get_catalog_item(self, catalog: str, item_id: int) -> dict[str, Any] | None:
         """Return an equipment or weapon item and its extra-specific unit usage."""
         tables = {
@@ -865,6 +902,7 @@ class Database:
                     result["special_profile"] = special_weapon_detail(canonical_id)
             return result
 
+    @instance_lru_cache(maxsize=128)
     def get_skill(self, skill_id: int) -> dict[str, Any] | None:
         """Return one skill together with the units that use it."""
         if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
@@ -1038,6 +1076,7 @@ class Database:
                 "variants": [variant for variant in variants.values() if variant["units"]],
             }
 
+    @instance_lru_cache(maxsize=128)
     def list_units(
         self,
         army_id: int | None = None,
@@ -1176,6 +1215,7 @@ class Database:
             ]
         return {"items": items, "total": total, "limit": limit, "offset": offset}
 
+    @instance_lru_cache(maxsize=32)
     def visible_unit_ids(
         self,
         mercs: bool = False,
@@ -1200,6 +1240,7 @@ class Database:
             if offset >= page["total"]:
                 return ids
 
+    @instance_lru_cache(maxsize=128)
     def get_unit(self, unit_id: int) -> dict[str, Any] | None:
         """Return a browsable unit and its army-specific profiles and loadouts."""
         if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:

@@ -631,6 +631,20 @@ def test_army_symbol_is_served(app: Callable) -> None:
     assert status == 404
 
 
+def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -> None:
+    status, headers, _ = request(app, "/static/styles.css?v=0.3.1")
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+
+    status, headers, _ = request(app, "/static/unit-list.js")
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+
+    status, headers, _ = request(app, "/api/armies")
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+
+
 def test_frontend_recognizes_98_and_99_as_reinforcement_armies(app: Callable) -> None:
     for asset in ["/static/unit-list.js", "/static/unit.js"]:
         status, _, body = request(app, asset)

@@ -41,6 +41,10 @@ export function renderUnitRows(container, units) {
       icon.className = "army-symbol main-army-symbol";
       icon.src = mainArmySymbol;
       icon.alt = "";
+      icon.width = 28;
+      icon.height = 28;
+      icon.loading = "lazy";
+      icon.decoding = "async";
       icon.title = unit.main_army_name
         || unit.armies.find((army) => army.id === unit.main_army_id)?.name
         || "Main army";
@@ -60,6 +64,10 @@ export function renderUnitRows(container, units) {
         icon.className = "army-symbol";
         icon.src = symbol;
         icon.alt = army.name;
+        icon.width = 30;
+        icon.height = 30;
+        icon.loading = "lazy";
+        icon.decoding = "async";
         icon.title = army.name;
         armyList.append(icon);
       } else {

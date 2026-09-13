@@ -29,5 +29,6 @@ const armySymbols = new Map([
 
 export function armySymbolPath(armyId) {
   const symbol = armySymbols.get(armyId);
-  return symbol && `/static/armies/${encodeURI(symbol)}`;
+  const version = document.documentElement.dataset.appVersion;
+  return symbol && `/static/armies/${encodeURI(symbol)}?v=${encodeURIComponent(version)}`;
 }
