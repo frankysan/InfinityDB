@@ -303,7 +303,7 @@ tbody tr:hover { background: #f8f9f3; }
 .army-symbol { width: 30px; height: 30px; object-fit: contain; border-radius: 4px; }
 .army-profile-symbol { width: 34px; height: 34px; }
 .id-column { text-align: right; }
-.unit-id { font-family: Consolas, "Courier New", monospace; font-size: 10px; color: #64725c; overflow-wrap: anywhere; }
+.unit-id { min-width: 92px; font-family: Consolas, "Courier New", monospace; font-size: 10px; color: #64725c; white-space: nowrap; }
 .modifier-unit-links { font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
 .modifier-unit-links a { color: #245e4c; }
 .modifier-unit-links a:hover, .modifier-unit-links a:focus-visible { color: #087b62; }
@@ -318,6 +318,10 @@ tbody tr:hover { background: #f8f9f3; }
 .noscript { padding: 16px; border: 1px solid var(--border); }
 
 @media (min-width: 1700px) { .main { padding-inline: 70px; } }
+@media (min-width: 601px) {
+  #table-container thead th:first-child { width: 55%; }
+  #table-container thead th:last-child { width: 145px; }
+}
 @media (max-width: 1150px) {
   .sidebar { width: 208px; padding-inline: 17px; }
   .brand { font-size: 21px; gap: 9px; }
