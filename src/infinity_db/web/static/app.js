@@ -1,5 +1,5 @@
 import { getArmies, getUnits } from "./api.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
+import { initializeDistanceUnitToggle, initializeOptionalUnitToggles } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 
 const PAGE_SIZE = 50;
@@ -22,6 +22,10 @@ const elements = {
 };
 
 document.querySelector(".results-toolbar").remove();
+const availabilityField = document.querySelector(".availability-field");
+availabilityField?.remove();
+initializeDistanceUnitToggle();
+initializeOptionalUnitToggles();
 elements.sortButton = document.createElement("button");
 elements.sortButton.className = "unit-sort-button";
 elements.sortButton.type = "button";
@@ -35,7 +39,7 @@ let controller;
 let searchTimer;
 
 function hasActiveFilters() {
-  return state.armyId || state.search || state.mercs || !state.specops || state.teamops || state.reinforcement;
+  return state.armyId || state.search;
 }
 
 function readLocation() {
@@ -45,10 +49,10 @@ function readLocation() {
   return {
     armyId: /^\d+$/.test(armyId) ? armyId : "",
     search: (params.get("search") || "").trim().slice(0, 200),
-    mercs: params.get("mercs") === "1",
-    specops: params.get("specops") !== "0",
-    teamops: params.get("teamops") === "1",
-    reinforcement: params.get("reinforcement") === "1",
+    mercs: elements.mercs.checked,
+    specops: elements.specops.checked,
+    teamops: elements.teamops.checked,
+    reinforcement: elements.reinforcement.checked,
     descending: params.get("order") === "desc",
     offset: Number.isSafeInteger(offset) && offset >= 0 ? Math.floor(offset / PAGE_SIZE) * PAGE_SIZE : 0,
     limit: PAGE_SIZE,
@@ -61,10 +65,6 @@ function writeLocation(replace = false) {
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
   if (state.search) url.searchParams.set("search", state.search);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
-  if (state.mercs) url.searchParams.set("mercs", "1");
-  if (!state.specops) url.searchParams.set("specops", "0");
-  if (state.teamops) url.searchParams.set("teamops", "1");
-  if (state.reinforcement) url.searchParams.set("reinforcement", "1");
   if (state.descending) url.searchParams.set("order", "desc");
   if (url.href !== window.location.href) {
     window.history[replace ? "replaceState" : "pushState"](null, "", url);
@@ -208,8 +208,7 @@ function applyFilters() {
 function clearFilters() {
   clearTimeout(searchTimer);
   state = {
-    ...state, armyId: "", search: "", mercs: false, specops: true, teamops: false,
-    reinforcement: false, offset: 0,
+    ...state, armyId: "", search: "", offset: 0,
   };
   syncFilters();
   writeLocation();
@@ -253,7 +252,6 @@ window.addEventListener("popstate", () => {
   load();
 });
 
-initializeDistanceUnitToggle();
 syncFilters();
 writeLocation(true);
 load();

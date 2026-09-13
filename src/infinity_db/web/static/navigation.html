@@ -39,6 +39,25 @@
           <span class="distance-toggle-label">Distance</span>
           <span class="distance-toggle-options"><span>cm</span><input id="distance-unit-toggle" type="checkbox" aria-label="Use inches for movement distances"><span>in</span></span>
         </label>
+        <div id="optional-unit-settings">
+          <span class="settings-group-label">Include optional units</span>
+          <label class="optional-unit-toggle" for="mercs-filter">
+            <span>Mercenaries</span>
+            <input id="mercs-filter" type="checkbox">
+          </label>
+          <label class="optional-unit-toggle" for="specops-filter">
+            <span>Spec-Ops</span>
+            <input id="specops-filter" type="checkbox" checked>
+          </label>
+          <label class="optional-unit-toggle" for="teamops-filter">
+            <span>Team Operations</span>
+            <input id="teamops-filter" type="checkbox">
+          </label>
+          <label class="optional-unit-toggle" for="reinforcement-filter">
+            <span>Reinforcements</span>
+            <input id="reinforcement-filter" type="checkbox">
+          </label>
+        </div>
         <label class="developer-toggle" for="developer-mode-toggle">
           <span>Developer mode</span>
           <input id="developer-mode-toggle" type="checkbox" aria-label="Show database IDs and developer details">
@@ -60,7 +79,7 @@
 <dialog id="cookie-consent-dialog" class="cookie-consent-dialog" aria-labelledby="cookie-consent-title">
   <form method="dialog">
     <h2 id="cookie-consent-title">Remember settings?</h2>
-    <p>InfinityDB uses a browser cookie to remember your distance and developer mode settings on this device.</p>
+    <p>InfinityDB uses a browser cookie to remember your distance, optional-unit, and developer mode settings on this device.</p>
     <div class="cookie-consent-actions">
       <button value="cancel" class="button cookie-consent-cancel">Cancel</button>
       <button value="accept" class="button button-primary">Allow cookies</button>

@@ -1,6 +1,12 @@
 const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";
 const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
 const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";
+const OPTIONAL_UNIT_SETTINGS = [
+  { id: "mercs-filter", key: "infinity-db-mercs", defaultChecked: false },
+  { id: "specops-filter", key: "infinity-db-specops", defaultChecked: true },
+  { id: "teamops-filter", key: "infinity-db-teamops", defaultChecked: false },
+  { id: "reinforcement-filter", key: "infinity-db-reinforcement", defaultChecked: false },
+];
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 const DISTANCE_NUMBER_PATTERN = /[+-]?\d+(?:\.\d+)?/g;
 
@@ -44,8 +50,9 @@ export function formatDistanceExtra(value, { showPositiveSign = true, forcePosit
 
 export function initializeDistanceUnitToggle() {
   const toggle = document.getElementById("distance-unit-toggle");
-  if (!toggle) return;
+  if (!toggle || toggle.dataset.initialized === "true") return;
 
+  toggle.dataset.initialized = "true";
   const savedUnit = savedSetting(DISTANCE_UNIT_KEY);
   const unit = savedUnit === "in" ? "in" : "cm";
   document.documentElement.dataset.distanceUnit = unit;
@@ -61,8 +68,9 @@ export function initializeDistanceUnitToggle() {
 
 export function initializeDeveloperModeToggle() {
   const toggle = document.getElementById("developer-mode-toggle");
-  if (!toggle) return;
+  if (!toggle || toggle.dataset.initialized === "true") return;
 
+  toggle.dataset.initialized = "true";
   const enabled = savedSetting(DEVELOPER_MODE_KEY) === "true";
   document.documentElement.dataset.developerMode = String(enabled);
   toggle.checked = enabled;
@@ -73,6 +81,18 @@ export function initializeDeveloperModeToggle() {
     saveSetting(DEVELOPER_MODE_KEY, String(next));
     window.dispatchEvent(new CustomEvent("developermodechange", { detail: next }));
   });
+}
+
+export function initializeOptionalUnitToggles() {
+  for (const { id, key, defaultChecked } of OPTIONAL_UNIT_SETTINGS) {
+    const toggle = document.getElementById(id);
+    if (!toggle || toggle.dataset.initialized === "true") continue;
+
+    toggle.dataset.initialized = "true";
+    const saved = savedSetting(key);
+    toggle.checked = saved === undefined ? defaultChecked : saved === "true";
+    toggle.addEventListener("change", () => saveSetting(key, String(toggle.checked)));
+  }
 }
 
 export function initializeRememberSettingsToggle() {
@@ -88,6 +108,7 @@ export function initializeRememberSettingsToggle() {
       removeCookie(REMEMBER_SETTINGS_KEY);
       removeCookie(DISTANCE_UNIT_KEY);
       removeCookie(DEVELOPER_MODE_KEY);
+      OPTIONAL_UNIT_SETTINGS.forEach(({ key }) => removeCookie(key));
       return;
     }
 
@@ -104,8 +125,13 @@ export function initializeRememberSettingsToggle() {
     setCookie(REMEMBER_SETTINGS_KEY, "true");
     setCookie(DISTANCE_UNIT_KEY, document.getElementById("distance-unit-toggle")?.checked ? "in" : "cm");
     setCookie(DEVELOPER_MODE_KEY, String(document.getElementById("developer-mode-toggle")?.checked));
+    OPTIONAL_UNIT_SETTINGS.forEach(({ id, key, defaultChecked }) => {
+      setCookie(key, String(document.getElementById(id)?.checked ?? defaultChecked));
+    });
   });
 }
 
 initializeRememberSettingsToggle();
 initializeDeveloperModeToggle();
+initializeOptionalUnitToggles();
+initializeDistanceUnitToggle();
