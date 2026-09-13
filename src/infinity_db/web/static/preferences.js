@@ -91,8 +91,17 @@ export function initializeOptionalUnitToggles() {
     toggle.dataset.initialized = "true";
     const saved = savedSetting(key);
     toggle.checked = saved === undefined ? defaultChecked : saved === "true";
-    toggle.addEventListener("change", () => saveSetting(key, String(toggle.checked)));
+    toggle.addEventListener("change", () => {
+      saveSetting(key, String(toggle.checked));
+      window.dispatchEvent(new CustomEvent("optionalunitschange", { detail: optionalUnitFilters() }));
+    });
   }
+}
+
+export function optionalUnitFilters() {
+  return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ id, key, defaultChecked }) => [
+    key.replace("infinity-db-", ""), document.getElementById(id)?.checked ?? defaultChecked,
+  ]));
 }
 
 export function initializeRememberSettingsToggle() {

@@ -7,6 +7,18 @@ async function get(path, signal) {
   return response.json();
 }
 
+export async function visibleUnitIds(signal) {
+  const { optionalUnitFilters } = await import("./preferences.js");
+  const ids = new Set();
+  let offset = 0;
+  while (true) {
+    const page = await getUnits({ ...optionalUnitFilters(), limit: 200, offset }, signal);
+    page.items.forEach((unit) => ids.add(unit.id));
+    offset += page.items.length;
+    if (offset >= page.total) return ids;
+  }
+}
+
 export function getArmies(signal) {
   return get("/api/armies", signal);
 }

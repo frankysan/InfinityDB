@@ -1,7 +1,7 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
 import { unitSymbol } from "./unit-symbols.js";
-import { distanceUnit, formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { distanceUnit, formatDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
@@ -684,6 +684,11 @@ function isStandardArmy(army) {
     && !isReinforcementArmy(army.id);
 }
 
+function isEnabledArmy(army) {
+  const filters = optionalUnitFilters();
+  return (army.availability_flags || []).every((flag) => filters[flag]);
+}
+
 function renderArmyProfile(army, generalByName, expanded) {
   const section = document.createElement("details");
   section.className = "explorer army-profile";
@@ -752,10 +757,11 @@ function render(unit) {
   unitIds.textContent = `${unitMetadata.length ? " · " : ""}Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`;
   meta.append(unitIds);
   status.hidden = true;
-  const allProfiles = unit.armies.flatMap((army) => army.profiles.map((profile) => ({
+  const armies = unit.armies.filter(isEnabledArmy);
+  const allProfiles = armies.flatMap((army) => army.profiles.map((profile) => ({
     ...profile, armyId: army.id,
   })));
-  const allLoadouts = unit.armies.flatMap((army) => army.loadouts.map((loadout) => ({
+  const allLoadouts = armies.flatMap((army) => army.loadouts.map((loadout) => ({
     ...loadout, armyId: army.id,
   })));
   const { rows: generalProfileRows, generalByName } = generalProfiles(allProfiles, allLoadouts);
@@ -781,7 +787,7 @@ function render(unit) {
   }
   content.append(generalProfilesSection);
   let standardArmyExpanded = false;
-  for (const group of groupArmiesByFaction(unit.armies)) {
+  for (const group of groupArmiesByFaction(armies)) {
     const section = document.createElement("section");
     section.className = "detail-group faction-profile-group";
     const groupHeading = heading(group.name);
@@ -808,6 +814,7 @@ if (!unitId) {
   getUnit(unitId).then((unit) => {
     render(unit);
     window.addEventListener("distanceunitchange", () => render(unit));
+    window.addEventListener("optionalunitschange", () => render(unit));
   }).catch((error) => {
     name.textContent = "Unit unavailable";
     status.textContent = error.message || "Could not load this unit.";

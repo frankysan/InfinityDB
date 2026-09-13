@@ -1,4 +1,5 @@
 import { formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
@@ -8,6 +9,12 @@ const meta = document.getElementById("skill-meta");
 const status = document.getElementById("skill-status");
 const content = document.getElementById("skill-content");
 let currentSkill;
+
+function withVisibleUnits(skill, ids) {
+  return { ...skill, variants: skill.variants.map((variant) => ({
+    ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
+  })).filter((variant) => variant.units.length) };
+}
 
 function formatVariantName(variant) {
   const extras = variant.extras.map((extra) => {
@@ -45,7 +52,6 @@ function variantSection(variant) {
 }
 
 function render(skill) {
-  currentSkill = skill;
   document.title = `${skill.name} · InfinityDB`;
   name.firstChild.textContent = skill.name;
   if (skill.wiki) {
@@ -85,8 +91,14 @@ if (!/^\d+$/.test(skillId || "")) {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Could not load this skill.");
     return payload;
-  }).then(render).catch((error) => {
+  }).then((skill) => {
+    currentSkill = skill;
+    return visibleUnitIds().then((ids) => render(withVisibleUnits(skill, ids)));
+  }).catch((error) => {
     name.firstChild.textContent = "Skill unavailable";
     status.textContent = error.message || "Could not load this skill.";
   });
 }
+window.addEventListener("optionalunitschange", () => {
+  if (currentSkill) visibleUnitIds().then((ids) => render(withVisibleUnits(currentSkill, ids)));
+});

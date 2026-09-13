@@ -1,4 +1,5 @@
 import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
+import { visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 
 const catalog = document.body.dataset.catalog;
@@ -23,6 +24,12 @@ const rangeModifierClasses = {
   "-6": "range-modifier-minus-6",
 };
 let currentItem;
+
+function withVisibleUnits(item, ids) {
+  return { ...item, variants: item.variants.map((variant) => ({
+    ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
+  })).filter((variant) => variant.units.length) };
+}
 
 function label(item, variant) {
   const variantName = variant.item_name || item.name;
@@ -257,8 +264,11 @@ fetch(`/api/${catalog}/${encodeURIComponent(itemId)}`).then(async (response) => 
   return payload;
 }).then((item) => {
   currentItem = item;
-  render(item);
+  return visibleUnitIds().then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
   name.firstChild.textContent = "Item unavailable";
   status.textContent = error.message || "Could not load this item.";
+});
+window.addEventListener("optionalunitschange", () => {
+  if (currentItem) visibleUnitIds().then((ids) => render(withVisibleUnits(currentItem, ids)));
 });
