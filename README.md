@@ -83,7 +83,10 @@ infinity-db build --compact
 infinity-db serve
 ```
 
-Open <http://127.0.0.1:8000> and stop the server with `Ctrl+C`.
+The development server listens on all local network interfaces. Open
+<http://127.0.0.1:8000> on the development machine, or use its LAN address
+(for example, `http://192.168.1.25:8000`) from another device. Allow Python
+through the Windows firewall if prompted. Stop the server with `Ctrl+C`.
 
 When no input source is supplied, `infinity-db build` imports the newest ZIP in
 `data/raw/`; provide a source path to choose a different snapshot. Every
@@ -108,6 +111,8 @@ infinity-db export data/generated/normalized.json data/generated/infinity.db
 # Use an alternate output directory or database/server port
 infinity-db build --output-dir other-output --compact
 infinity-db serve --database other-output/infinity.db --port 8001
+# Bind only to this machine when LAN access is not wanted
+infinity-db serve --host 127.0.0.1
 ```
 
 `infinity-army` and `python -m infinity_army_data` remain available for the

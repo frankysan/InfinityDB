@@ -105,7 +105,7 @@ def test_serve_defaults_and_explicit_binding() -> None:
     parser = build_parser()
     defaults = parser.parse_args(["serve"])
     assert defaults.database == Path("data/generated/infinity.db")
-    assert defaults.host == "127.0.0.1"
+    assert defaults.host == "0.0.0.0"
     assert defaults.port == 8000
     configured = parser.parse_args(
         ["serve", "--database", "custom.db", "--host", "0.0.0.0", "--port", "9000"]

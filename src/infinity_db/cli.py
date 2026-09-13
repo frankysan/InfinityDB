@@ -65,7 +65,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_serve = sub.add_parser("serve", help="Start the local unit browser and read-only API")
     p_serve.add_argument("--database", type=Path, default=DEFAULT_DATABASE)
-    p_serve.add_argument("--host", default="127.0.0.1")
+    p_serve.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Interface to bind (defaults to all interfaces, including the local network)",
+    )
     p_serve.add_argument("--port", type=_port, default=8000)
     p_serve.set_defaults(func=cmd_serve)
     return parser
