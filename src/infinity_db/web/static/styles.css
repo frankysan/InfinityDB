@@ -65,6 +65,29 @@
   --color-logo-rim-highlight: #d8efbd;
   --color-logo-rim-default: #a8cd92;
   --color-logo-rim-shadow: #527b5d;
+
+  --color-faction-panoceania-primary: #009fe4;
+  --color-faction-panoceania-secondary: #004665;
+  --color-faction-yu-jing-primary: #f1861d;
+  --color-faction-yu-jing-secondary: #864708;
+  --color-faction-ariadna-primary: #14883a;
+  --color-faction-ariadna-secondary: #04190b;
+  --color-faction-haqqislam-primary: #f2e0b3;
+  --color-faction-haqqislam-secondary: #cf9e23;
+  --color-faction-nomads-primary: #e30a14;
+  --color-faction-nomads-secondary: #690509;
+  --color-faction-combined-army-primary: #7d4390;
+  --color-faction-combined-army-secondary: #311b39;
+  --color-faction-aleph-primary: #5458a1;
+  --color-faction-aleph-secondary: #282a4d;
+  --color-faction-tohaa-primary: #3b3b3b;
+  --color-faction-tohaa-secondary: #222;
+  --color-faction-non-aligned-armies-primary: #77b8a1;
+  --color-faction-non-aligned-armies-secondary: #3c7360;
+  --color-faction-o-12-primary: #2e2560;
+  --color-faction-o-12-secondary: #1c173b;
+  --color-faction-jsa-primary: #e3f2f1;
+  --color-faction-jsa-secondary: #4ca49e;
 }
 
 * { box-sizing: border-box; }
