@@ -13,9 +13,20 @@ const elements = {
   summary: byId("results-summary"), results: byId("results"), loading: byId("loading-state"),
   error: byId("error-state"), errorMessage: byId("error-message"), empty: byId("empty-state"),
   emptyTitle: byId("empty-title"), emptyMessage: byId("empty-message"), emptyClear: byId("empty-clear"),
-  table: byId("table-container"), list: byId("unit-list"), pagination: byId("pagination"),
-  pageSummary: byId("page-summary"), previous: byId("previous-page"), next: byId("next-page"),
+  table: byId("table-container"), list: byId("unit-list"),
+  pagination: [byId("pagination-top"), byId("pagination-bottom")],
+  pageSummary: [byId("page-summary-top"), byId("page-summary-bottom")],
+  previous: [byId("previous-page-top"), byId("previous-page-bottom")],
+  next: [byId("next-page-top"), byId("next-page-bottom")],
+  sort: document.querySelector("#table-container th"),
 };
+
+document.querySelector(".results-toolbar").remove();
+elements.sortButton = document.createElement("button");
+elements.sortButton.className = "unit-sort-button";
+elements.sortButton.type = "button";
+elements.sort.classList.add("sortable-unit-name");
+elements.sort.replaceChildren(elements.sortButton);
 
 let state = readLocation();
 let armiesLoaded = false;
@@ -38,6 +49,7 @@ function readLocation() {
     specops: params.get("specops") !== "0",
     teamops: params.get("teamops") === "1",
     reinforcement: params.get("reinforcement") === "1",
+    descending: params.get("order") === "desc",
     offset: Number.isSafeInteger(offset) && offset >= 0 ? Math.floor(offset / PAGE_SIZE) * PAGE_SIZE : 0,
     limit: PAGE_SIZE,
   };
@@ -45,7 +57,7 @@ function readLocation() {
 
 function writeLocation(replace = false) {
   const url = new URL(window.location.href);
-  for (const key of ["army_id", "search", "offset", "mercs", "specops", "teamops", "reinforcement"]) url.searchParams.delete(key);
+  for (const key of ["army_id", "search", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
   if (state.search) url.searchParams.set("search", state.search);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
@@ -53,6 +65,7 @@ function writeLocation(replace = false) {
   if (!state.specops) url.searchParams.set("specops", "0");
   if (state.teamops) url.searchParams.set("teamops", "1");
   if (state.reinforcement) url.searchParams.set("reinforcement", "1");
+  if (state.descending) url.searchParams.set("order", "desc");
   if (url.href !== window.location.href) {
     window.history[replace ? "replaceState" : "pushState"](null, "", url);
   }
@@ -66,6 +79,17 @@ function syncFilters() {
   elements.teamops.checked = state.teamops;
   elements.reinforcement.checked = state.reinforcement;
   elements.clear.disabled = !hasActiveFilters();
+  updateSortButton();
+}
+
+function updateSortButton() {
+  const order = state.descending ? "Z–A ↓" : "A–Z ↑";
+  elements.sortButton.textContent = `Unit name ${order}`;
+  elements.sortButton.setAttribute(
+    "aria-label",
+    `Unit name, ${state.descending ? "reverse alphabetical" : "alphabetical"} order. Activate to reverse the order.`,
+  );
+  elements.sort.setAttribute("aria-sort", state.descending ? "descending" : "ascending");
 }
 
 function showPanel(panel) {
@@ -74,7 +98,7 @@ function showPanel(panel) {
   }
   const loading = panel === elements.loading;
   elements.results.setAttribute("aria-busy", String(loading));
-  if (panel !== elements.table) elements.pagination.hidden = true;
+  if (panel !== elements.table) elements.pagination.forEach((pagination) => { pagination.hidden = true; });
 }
 
 function populateArmies(armies) {
@@ -118,12 +142,19 @@ function renderUnits(data) {
   }
   const first = data.offset + 1;
   const last = data.offset + data.items.length;
-  elements.summary.textContent = `${number.format(first)}–${number.format(last)} of ${number.format(data.total)} units`;
-  elements.pageSummary.textContent = `Page ${number.format(Math.floor(data.offset / PAGE_SIZE) + 1)} of ${number.format(Math.ceil(data.total / PAGE_SIZE))}`;
-  elements.previous.disabled = data.offset === 0;
-  elements.next.disabled = data.offset + data.items.length >= data.total;
+  const resultsSummary = `${number.format(first)}–${number.format(last)} of ${number.format(data.total)} units`;
+  elements.summary.textContent = resultsSummary;
+  const pageSummary = `Page ${number.format(Math.floor(data.offset / PAGE_SIZE) + 1)} of ${number.format(Math.ceil(data.total / PAGE_SIZE))}`;
+  elements.pageSummary.forEach((summary) => {
+    const range = document.createElement("span");
+    range.className = "page-results-summary";
+    range.textContent = resultsSummary;
+    summary.replaceChildren(pageSummary, range);
+  });
+  elements.previous.forEach((button) => { button.disabled = data.offset === 0; });
+  elements.next.forEach((button) => { button.disabled = data.offset + data.items.length >= data.total; });
   showPanel(elements.table);
-  elements.pagination.hidden = false;
+  elements.pagination.forEach((pagination) => { pagination.hidden = false; });
 }
 
 async function load() {
@@ -192,6 +223,13 @@ function changePage(direction) {
   load();
 }
 
+function toggleSortOrder() {
+  state = { ...state, descending: !state.descending, offset: 0 };
+  updateSortButton();
+  writeLocation();
+  load();
+}
+
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {
@@ -205,8 +243,9 @@ elements.search.addEventListener("input", () => {
 elements.clear.addEventListener("click", clearFilters);
 elements.emptyClear.addEventListener("click", clearFilters);
 byId("retry").addEventListener("click", load);
-elements.previous.addEventListener("click", () => changePage(-1));
-elements.next.addEventListener("click", () => changePage(1));
+elements.previous.forEach((button) => button.addEventListener("click", () => changePage(-1)));
+elements.next.forEach((button) => button.addEventListener("click", () => changePage(1)));
+elements.sortButton.addEventListener("click", toggleSortOrder);
 window.addEventListener("popstate", () => {
   clearTimeout(searchTimer);
   state = readLocation();

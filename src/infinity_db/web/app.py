@@ -152,6 +152,7 @@ def _unit_query(query: str) -> dict:
             "specops",
             "teamops",
             "reinforcement",
+            "order",
         }:
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
@@ -159,6 +160,9 @@ def _unit_query(query: str) -> dict:
     search = params.get("search", [""])[0].strip()
     if len(search) > 200:
         raise ValueError("search must be at most 200 characters")
+    order = params.get("order", ["asc"])[0]
+    if order not in {"asc", "desc"}:
+        raise ValueError("order must be asc or desc")
     return {
         "army_id": _integer(params, "army_id", None, 0, 2**63 - 1),
         "search": search,
@@ -168,6 +172,7 @@ def _unit_query(query: str) -> dict:
         "specops": _flag(params, "specops"),
         "teamops": _flag(params, "teamops"),
         "reinforcement": _flag(params, "reinforcement"),
+        "descending": order == "desc",
     }
 
 

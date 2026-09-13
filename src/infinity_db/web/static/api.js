@@ -11,7 +11,7 @@ export function getArmies(signal) {
   return get("/api/armies", signal);
 }
 
-export function getUnits({ armyId, search, limit, offset, mercs, specops, teamops, reinforcement }, signal) {
+export function getUnits({ armyId, search, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
   if (search) params.set("search", search);
@@ -19,6 +19,7 @@ export function getUnits({ armyId, search, limit, offset, mercs, specops, teamop
   if (specops) params.set("specops", "1");
   if (teamops) params.set("teamops", "1");
   if (reinforcement) params.set("reinforcement", "1");
+  if (descending) params.set("order", "desc");
   return get(`/api/units?${params}`, signal);
 }
 

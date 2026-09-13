@@ -961,7 +961,7 @@ class Database:
                 if occurrence["unit"] not in variant["units"]:
                     variant["units"].append(occurrence["unit"])
             unit_rows = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.slug, u.main_army_id, "
+                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.main_army_id, "
                 "u.canonical_faction_id FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in unit_rows}
@@ -1048,6 +1048,7 @@ class Database:
         specops: bool = False,
         teamops: bool = False,
         reinforcement: bool = False,
+        descending: bool = False,
     ) -> dict[str, Any]:
         if army_id is not None and (
             type(army_id) is not int or not SQLITE_INTEGER_MIN <= army_id <= SQLITE_INTEGER_MAX
@@ -1061,6 +1062,8 @@ class Database:
             raise ValueError("limit must be an integer between 1 and 500")
         if type(offset) is not int or not 0 <= offset <= SQLITE_INTEGER_MAX:
             raise ValueError("offset must be a nonnegative integer at most 9223372036854775807")
+        if type(descending) is not bool:
+            raise ValueError("descending must be a boolean")
         selected_flags = {
             flag
             for flag, enabled in {
@@ -1073,8 +1076,8 @@ class Database:
         }
         with self._connect() as connection:
             rows = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.slug, u.main_army_id, "
-                "u.canonical_faction_id "
+                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, "
+                "u.main_army_id, u.canonical_faction_id "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
@@ -1107,9 +1110,20 @@ class Database:
                 if faction["unit_id"] in normal_armies_by_unit:
                     normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
             groups = logical_unit_groups(rows, memberships)
+            search_terms_by_source = {
+                row["id"]: {row["name"], row["isc"], row["isc_abbr"], row["slug"]}
+                for row in rows
+            }
+            for table in ("profiles", "loadout_options", "unit_options"):
+                for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
+                    if row["unit_id"] in search_terms_by_source:
+                        search_terms_by_source[row["unit_id"]].add(row["name"])
             for group in groups:
                 group["normal_army_ids"] = set().union(
                     *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
+                )
+                group["search_terms"] = set().union(
+                    *(search_terms_by_source[source_id] for source_id in group["source_ids"])
                 )
             search_key = accent_insensitive_key(search)
             grouped = []
@@ -1126,16 +1140,22 @@ class Database:
                 if search:
                     if search_key:
                         matches_search = any(
-                            search_key in accent_insensitive_key(name) for name in group["names"]
+                            search_key in accent_insensitive_key(name)
+                            for name in group["search_terms"]
+                            if name
                         )
                     else:
                         matches_search = any(
-                            search.casefold() in str(name).casefold() for name in group["names"]
+                            search.casefold() in str(name).casefold()
+                            for name in group["search_terms"]
+                            if name
                         )
                     if not matches_search:
                         continue
                 grouped.append({**group, "armies": visible_armies})
-            grouped.sort(key=lambda group: (unit_sort_key(group["name"]), group["id"]))
+            grouped.sort(
+                key=lambda group: (unit_sort_key(group["name"]), group["id"]), reverse=descending
+            )
             total = len(grouped)
             items = [
                 {

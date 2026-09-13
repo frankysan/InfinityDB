@@ -46,6 +46,8 @@ def app(tmp_path: Path) -> Callable:
     shared = {
         "id": 1,
         "name": "Alpha Ranger",
+        "isc": "Explorer Prototype",
+        "slug": "ranger-prototype",
         "canonical": 999,
         "factions": [101],
         "profileGroups": [
@@ -55,7 +57,7 @@ def app(tmp_path: Path) -> Callable:
                 "profiles": [
                     {
                         "id": 1,
-                        "name": "Ranger",
+                        "name": "Ranger Profile",
                         "type": 1,
                         "skills": [{"id": 11, "extra": [41]}],
                         "equip": [{"id": 21, "q": 2, "extra": [42]}],
@@ -198,6 +200,10 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
         paged_ids.extend(item["id"] for item in page["items"])
     assert paged_ids == expected_ids
 
+    status, _, body = request(app, "/api/units", query="order=desc")
+    assert status == 200
+    assert [item["id"] for item in json.loads(body)["items"]] == list(reversed(expected_ids))
+
 
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
@@ -326,6 +332,9 @@ def test_unit_details_include_occurrence_availability_categories(
     ("query", "expected_ids"),
     [
         ({"search": "ALPHA"}, {1}),
+        ({"search": "explorer"}, {1}),
+        ({"search": "profile"}, {1}),
+        ({"search": "rifle loadout"}, {1}),
         ({"search": "%", "mercs": 1}, {3}),
         ({"search": "_", "mercs": 1}, {3}),
         ({"search": "' OR 1=1 --"}, set()),
@@ -398,6 +407,12 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert headers["content-type"].startswith("text/html")
     assert b"Unit explorer" in body
     assert b'href="/units" aria-current="page"' in body
+    assert body.index(b'id="pagination-top"') < body.index(b'id="results"')
+    assert body.index(b'id="results"') < body.index(b'id="pagination-bottom"')
+
+    status, _, script = request(app, "/static/app.js")
+    assert status == 200
+    assert b'className = "page-results-summary"' in script
 
 
 @pytest.mark.parametrize(
@@ -835,8 +850,8 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                     {
                         "id": 1,
                         "name": "Alpha Ranger",
-                            "isc": None,
-                            "slug": None,
+                            "isc": "Explorer Prototype",
+                            "slug": "ranger-prototype",
                             "main_army_id": None,
                             "main_army_name": None,
                             "source_ids": [1],

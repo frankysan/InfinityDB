@@ -308,7 +308,15 @@ tbody tr:hover { background: #f8f9f3; }
 .modifier-unit-links a { color: #245e4c; }
 .modifier-unit-links a:hover, .modifier-unit-links a:focus-visible { color: #087b62; }
 .pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 26px; border-top: 1px solid var(--border); }
+.pagination-top { border-top: 0; border-bottom: 1px solid var(--border); }
 .pagination > span { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pagination > span { display: grid; gap: 2px; }
+.page-results-summary { color: var(--ink); }
+.results-toolbar #results-summary { display: none; }
+.results-toolbar { display: none; }
+.unit-sort-button { appearance: none; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.unit-sort-button:hover { color: var(--ink); }
+.unit-sort-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .page-controls { display: flex; gap: 8px; }
 .button-page { background: #fffefa; border-color: var(--border); min-height: 34px; padding: 7px 11px; font-size: 10px; color: #435b3a; display: flex; align-items: center; gap: 9px; }
 .button-page:not(:disabled):hover { background: #edf2e5; border-color: #bcc9ae; }
