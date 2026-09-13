@@ -117,3 +117,6 @@ clear requirement justifies it.
 - 2026-09-12: The browser shell is centrally rendered from navigation, header,
   and footer fragments. CSS tokens and shared components are the required
   extension point for consistent visual design across current and future pages.
+- 2026-09-13: Settings follows the shared menu pattern across sidebar and
+  compact top-bar layouts. Unit catalog accents may draw from named main-army
+  colors only through the shared design-system tokens and gradients.

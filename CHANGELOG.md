@@ -4,6 +4,27 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-13
+
+### Added
+
+- A reusable Settings menu that presents browser preferences in the sidebar on
+  wide screens and beside Navigation on compact screens.
+
+### Changed
+
+- Improved unit search and catalog presentation, including army-color accents
+  for unit-list and general-profile surfaces.
+- Made development-version detection compare the checkout with the current
+  release tag, so the browser footer accurately marks unreleased checkouts.
+- Updated local build and debug defaults to use the newest source archive in
+  `data/raw/` rather than a stale, hard-coded snapshot path.
+
+### Fixed
+
+- Corrected a CSS naming issue and the movement-value display.
+- Ensured the reusable navigation menu closes correctly on iOS.
+
 ## [0.3.0] - 2026-09-12
 
 ### Added

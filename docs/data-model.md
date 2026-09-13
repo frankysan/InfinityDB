@@ -41,6 +41,7 @@ records its schema version. The current schema version is 6 and the application
 compatibility revision is 7. Imports build a temporary sibling file, check
 database integrity, then replace the destination. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now.
+Release 0.3.1 does not change either database version.
 
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,

@@ -438,7 +438,7 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert b'<header class="topbar page-header">' in body
     assert b'aria-label="Breadcrumb"' in body
     assert b'<footer class="page-footer">' in body
-    assert b"Version 0.3.0+dev" in body
+    assert b"Version 0.3.1+dev" in body
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
@@ -478,11 +478,20 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
     assert status == 200
     assert b'@media (min-width: 601px) and (max-width: 700px)' in styles
     assert b'--movement-column-width: 60px;' in styles
-    assert b'html[data-distance-unit="in"] .attribute-statline { --movement-column-width: 52px; }' in styles
-    assert b'grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr));' in styles
+    assert (
+        b'html[data-distance-unit="in"] .attribute-statline { --movement-column-width: 52px; }'
+        in styles
+    )
+    assert (
+        b'grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr));'
+        in styles
+    )
     assert b'.attribute-statline > div { padding-inline: 4px; }' in styles
     assert b'grid-template-columns: 60px repeat(4, minmax(0, 1fr));' in styles
-    assert b'html[data-distance-unit="in"] .attribute-statline-with-availability { grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }' in styles
+    assert (
+        b'html[data-distance-unit="in"] .attribute-statline-with-availability '
+        b'{ grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }' in styles
+    )
 
 
 def test_developer_mode_controls_database_id_visibility_in_settings_menu(
@@ -552,7 +561,7 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
-    assert b"Version 0.3.0+dev" in body
+    assert b"Version 0.3.1+dev" in body
     assert b"mailto:johannes@haglund.info" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body

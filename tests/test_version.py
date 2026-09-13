@@ -4,7 +4,9 @@ import infinity_army_data
 
 
 def test_display_version_uses_release_version_for_a_clean_checkout(monkeypatch) -> None:
-    monkeypatch.setattr(infinity_army_data, "_source_checkout_has_unreleased_changes", lambda: False)
+    monkeypatch.setattr(
+        infinity_army_data, "_source_checkout_has_unreleased_changes", lambda: False
+    )
 
     assert infinity_army_data._display_version() == infinity_army_data.__version__
 

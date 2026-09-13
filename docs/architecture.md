@@ -68,6 +68,10 @@ variants. Tables use the comfortable default or `.data-table--compact` for
 detail and usage data; retain those variants instead of adding page-specific
 cell padding or header type rules.
 
+Unit-list and general-profile surfaces may use the unit's named main-army
+colors as accents. Keep those accents within the shared token and gradient
+system so catalog-specific styling remains legible and consistent.
+
 Browser preferences are stored locally. The Settings sidebar section provides
 distance units and a default-off Developer mode; on compact screens it becomes
 a top-bar menu beside Navigation. New sidebar or top-bar menus should use this

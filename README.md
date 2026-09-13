@@ -5,7 +5,7 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.3.0** (2026-09-12).
+Current release: **0.3.1** (2026-09-13).
 
 ## Current features
 
@@ -34,6 +34,8 @@ Current release: **0.3.0** (2026-09-12).
   values are defined as CSS design tokens, so new screens can reuse the same
   surfaces, controls, spacing, typography, focus treatment, and responsive
   behavior.
+- Accents unit-list and general-profile surfaces with the unit's main-army
+  colors while retaining the shared design-system contrast and spacing rules.
 - Includes a Skill Modifiers page for browsing distance-related skill extras
   and the units that use them.
 - Includes searchable Skills, Equipment, and Weapons reference catalogs. Their
@@ -155,7 +157,7 @@ proxy for public HTTPS. Build the database before building the image:
 
 ```sh
 infinity-db build --compact
-DOMAIN=infinity.example.com IMAGE_TAG=0.3.0 docker compose up -d --build
+DOMAIN=infinity.example.com IMAGE_TAG=0.3.1 docker compose up -d --build
 ```
 
 Replace the hostname with the public domain configured at the external TLS
