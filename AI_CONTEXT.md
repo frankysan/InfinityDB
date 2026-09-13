@@ -37,11 +37,13 @@ clear requirement justifies it.
   the source or passed with `--metadata`. It enriches display names and
   reference catalogs, but must not create list membership or alter availability.
 - Army-list data is authoritative for selectable army lists and unit membership.
-- SQLite imports are complete snapshot replacements. Build and validate a
-  temporary sibling database before replacing the working database, so a failed
-  build leaves the prior database usable.
-- Nested data and each row's original normalized representation are retained as
-  JSON. Do not remove that fidelity merely to simplify a query.
+- SQLite imports are complete snapshot replacements. Build and validate temporary
+  sibling frontend and raw-archive databases before replacing the working files,
+  so a failed build leaves the prior snapshot usable.
+- Nested data remains JSON in the queryable frontend database. Each row's exact
+  normalized representation, including absent versus null fields, belongs in
+  the sibling raw archive; do not remove that fidelity merely to simplify a
+  query.
 - Increment `DATABASE_COMPATIBILITY_VERSION` whenever a code change requires a
   rebuilt database, even when the SQLite schema is unchanged. Incompatible
   databases must fail with a rebuild instruction rather than serving stale
@@ -60,6 +62,9 @@ clear requirement justifies it.
   preserve this behavior for new searchable names.
 - Browser requests belong in `api.js`; shared unit rows belong in
   `unit-list.js`; page-specific state and rendering belong in their page module.
+- Treat frontend database data as immutable for a running application instance.
+  Snapshot-aware ETags and the version endpoint distinguish a new dataset from
+  a new application release; keep these validators aligned when adding routes.
   Use native browser modules and stable asset paths rather than directory scans.
 - Every browser route uses the server-rendered shared page shell. Add new pages
   through `_page()` with breadcrumb and catalog-tag values, and retain the

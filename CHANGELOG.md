@@ -2,7 +2,22 @@
 
 All notable changes to this project are documented in this file.
 
-## [Unreleased]
+## [0.4.0] - 2026-09-13
+
+### Added
+
+- Export a sibling `infinity.raw.db` development archive that preserves every
+  exact normalized row while keeping the deployed `infinity.db` lean and
+  queryable.
+- Add targeted read-path indexes, bounded batch insertion, and query-plan
+  regression coverage for high-volume unit and catalog-detail queries.
+- Add snapshot-aware ETags for successful API responses, expose the snapshot
+  revision through `/api/version`, and refresh browser pages when either the
+  release or imported data changes.
+- Add shared page-navigation loading events so the sidebar retains its active
+  state while page data is loading.
+- Add `TODO.md` as the maintained backlog for performance, pipeline,
+  operational, and potential product work.
 
 ### Changed
 
@@ -12,6 +27,18 @@ All notable changes to this project are documented in this file.
 - Join catalog extras inside each profile, option, and unit-option source branch
   so SQLite uses occurrence primary keys instead of materializing extras unions.
 - Persist SQLite planner statistics when exporting the immutable frontend snapshot.
+- Build indexes after bulk loading and write both generated database files only
+  after their integrity checks pass.
+- Update project documentation for the split database artifacts, snapshot-aware
+  caching, current database compatibility revision, and release 0.4.0.
+- Refocus the About page on InfinityDB's data-driven use of official Infinity
+  Army snapshots and API metadata, and describe the planned player-facing rules,
+  Fireteam, model-image, and personal-collection features.
+
+### Fixed
+
+- Align formatting and linting across the data pipeline, database, web, and
+  test code.
 
 ## [0.3.3] - 2026-09-13
 

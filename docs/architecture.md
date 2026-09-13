@@ -88,8 +88,10 @@ provided beside, inside, or explicitly alongside the Army source.
 
 SQLite is the initial backend because it runs locally without a separate service.
 Schema definitions are separate from ingestion code. The current schema has a
-schema version of 6 and database compatibility revision of 7; it rejects
-incompatible databases with a rebuild instruction. Migration
+schema version of 8 and database compatibility revision of 9; it rejects
+incompatible databases with a rebuild instruction. The importer builds a lean
+frontend database and a lossless sibling raw archive, creates read-path indexes
+after loading, and persists SQLite planner statistics. Migration
 of persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 
@@ -97,6 +99,17 @@ replace a complete imported snapshot.
 
 All routes are same-origin and read-only. `GET` returns JSON or a static asset;
 `HEAD` returns the corresponding headers without a body.
+
+HTML is revalidated on each request. API representations have snapshot-specific
+ETags and short shared-cache lifetimes; fingerprinted static assets are immutable
+for a release. Pages compare both the application version and snapshot revision
+with the version endpoint, then reload through a fresh URL after a deployment or
+data refresh.
+
+### `GET /api/version`
+
+Returns `{ "version": "0.4.0", "snapshot_revision": "..." }`. The browser
+uses it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`
 

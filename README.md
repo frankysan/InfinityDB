@@ -5,12 +5,14 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.3.3** (2026-09-13).
+Current release: **0.4.0** (2026-09-13).
 
 ## Current features
 
 - Imports Army JSON snapshots together with required API metadata into a
   validated SQLite database.
+- Exports a lean, queryable `infinity.db` for the browser and a sibling
+  `infinity.raw.db` development archive that preserves exact normalized rows.
 - Provides merge, normalize, build, export, and local-server commands.
 - Preserves source records and reports normalization anomalies without replacing
   a working database when an import fails.
@@ -49,6 +51,8 @@ Current release: **0.3.3** (2026-09-13).
   an exact asset without scanning a symbol directory.
 - Includes standalone scripts for downloading Army JSON snapshots and unit
   symbols; normal build commands do not make network requests.
+- Uses snapshot-aware API validators and release-fingerprinted static modules,
+  so browsers refresh safely when either deployed application or data changes.
 
 ## Requirements and setup
 
@@ -158,7 +162,7 @@ proxy for public HTTPS. Build the database before building the image:
 
 ```sh
 infinity-db build --compact
-DOMAIN=infinity.example.com IMAGE_TAG=0.3.3 docker compose up -d --build
+DOMAIN=infinity.example.com IMAGE_TAG=0.4.0 docker compose up -d --build
 ```
 
 Replace the hostname with the public domain configured at the external TLS

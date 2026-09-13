@@ -100,6 +100,12 @@ documentation are complete.
 
 ## Potential product features
 
+- [ ] Add list and detail pages for weapon traits.
+- [ ] Add rules summaries for skills, equipment, ammunition, and weapon traits.
+- [ ] Show unit Fireteam eligibility on the unit-details page.
+- [ ] Add Fireteam list and detail pages.
+- [ ] Create a unit-model image repository.
+- [ ] Add a per-user model-collection tracker.
 - [ ] Saved army lists, favourites, and personal notes stored separately from
   the replaceable imported snapshot.
 - [ ] Unit comparison view for profiles, loadouts, weapons, skills, and
@@ -114,8 +120,13 @@ documentation are complete.
   migrations are established.
 - [ ] Data-review screens in Developer mode: normalization warnings, source
   record links through `infinity.raw.db`, and unresolved placeholder records.
-- [ ] Snapshot comparison view showing additions, removals, and changed unit or
-  rules records between two generated databases.
+- [ ] Low priority: provide access to prior imported-data versions when JSON
+  source files change. Existing archived JSON ZIP files and Army snapshots are
+  sufficient for recovery until this is needed.
+- [ ] Low priority: add a JSON-snapshot comparison page showing added, removed,
+  and updated data between two snapshots.
+- [ ] Low priority: optionally highlight added, removed, and updated data
+  elsewhere in the application when comparing snapshots.
 
 ## Completed baseline
 
