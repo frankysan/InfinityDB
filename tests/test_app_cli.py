@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import socket
 import sqlite3
 import zipfile
 from pathlib import Path
@@ -113,3 +114,14 @@ def test_serve_defaults_and_explicit_binding() -> None:
     assert configured.database == Path("custom.db")
     assert configured.host == "0.0.0.0"
     assert configured.port == 9000
+
+
+def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str]) -> None:
+    with socket.socket() as occupied_socket:
+        occupied_socket.bind(("127.0.0.1", 0))
+        occupied_socket.listen()
+        port = occupied_socket.getsockname()[1]
+
+        assert main(["serve", "--host", "127.0.0.1", "--port", str(port)]) == 1
+
+    assert f"Port {port} is already in use on 127.0.0.1" in capsys.readouterr().err
