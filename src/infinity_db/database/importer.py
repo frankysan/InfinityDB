@@ -166,6 +166,10 @@ def export_database(data: dict[str, Any], path: Path) -> None:
                             tuple(sql_value(row.get(field)) for field in columns) for row in rows
                         ],
                     )
+                # The frontend database is an immutable snapshot. Persist planner
+                # statistics at build time so read-only connections make informed
+                # join-order choices without request-time analysis.
+                connection.execute("ANALYZE")
         except (sqlite3.IntegrityError, OverflowError) as exc:
             raise ValueError(f"Invalid normalized database data: {exc}") from exc
         finally:

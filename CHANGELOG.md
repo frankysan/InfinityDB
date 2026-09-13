@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file.
   search-term, and catalog-pagination assembly per request.
 - Join catalog extras inside each profile, option, and unit-option source branch
   so SQLite uses occurrence primary keys instead of materializing extras unions.
+- Persist SQLite planner statistics when exporting the immutable frontend snapshot.
 
 ## [0.3.3] - 2026-09-13
 

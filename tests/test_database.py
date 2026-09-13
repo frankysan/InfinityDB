@@ -192,6 +192,7 @@ def test_database_preserves_every_normalized_table_and_field(
             for row in connection.execute(f"PRAGMA index_list({quote(table_name)})")
         }
         assert {index_name for index_name, _, _ in INDEXES} <= indexes
+        assert connection.execute("SELECT COUNT(*) FROM sqlite_stat1").fetchone()[0] > 0
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
         connection.execute("PRAGMA foreign_keys = ON")
         with pytest.raises(sqlite3.IntegrityError), connection:

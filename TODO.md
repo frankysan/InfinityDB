@@ -41,6 +41,9 @@ documentation are complete.
   visible in build output and CI.
 - [ ] Add query-plan regression tests for the high-volume `unit_id`, `item_id`,
   and weapon-template lookup paths.
+- [x] Run `ANALYZE` after importing and indexing the immutable frontend snapshot,
+  then verify `sqlite_stat1` is present. This gives SQLite durable cardinality
+  statistics for join-order decisions without adding request-time work.
 - [ ] Decide whether dynamic, source-only columns should remain in the frontend
   schema or move exclusively to the raw archive once no runtime query consumes
   them.

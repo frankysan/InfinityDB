@@ -42,6 +42,8 @@ records its schema version. The current schema version is 8 and the application
 compatibility revision is 9. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now.
+The frontend export runs `ANALYZE` after loading and indexing data, preserving
+SQLite planner statistics in the immutable snapshot.
 
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,
