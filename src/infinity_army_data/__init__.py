@@ -6,28 +6,51 @@ from subprocess import DEVNULL, PIPE, TimeoutExpired, run
 __version__ = "0.3.0"
 
 
-def _working_tree_has_changes() -> bool:
-    """Return whether this source checkout has unreleased changes."""
+def _repository_root() -> Path | None:
     for directory in Path(__file__).resolve().parents:
         if (directory / ".git").exists():
-            try:
-                status = run(
-                    ["git", "status", "--porcelain"],
-                    cwd=directory,
-                    stdout=PIPE,
-                    stderr=DEVNULL,
-                    text=True,
-                    check=False,
-                    timeout=1,
-                )
-            except (OSError, TimeoutExpired):
-                return False
-            return status.returncode == 0 and bool(status.stdout.strip())
-    return False
+            return directory
+    return None
+
+
+def _git_output(repository: Path, *arguments: str) -> str | None:
+    try:
+        result = run(
+            ["git", *arguments],
+            cwd=repository,
+            stdout=PIPE,
+            stderr=DEVNULL,
+            text=True,
+            check=False,
+            timeout=1,
+        )
+    except (OSError, TimeoutExpired):
+        return None
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def _has_commits_after_version_tag(repository: Path) -> bool:
+    """Return whether HEAD is ahead of the current release tag."""
+    count = _git_output(repository, "rev-list", "--count", f"v{__version__}..HEAD")
+    return count is None or int(count) > 0
+
+
+def _source_checkout_has_unreleased_changes() -> bool:
+    """Return whether the source checkout differs from its release tag."""
+    repository = _repository_root()
+    if repository is None:
+        return False
+
+    status = _git_output(repository, "status", "--porcelain")
+    if status is None:
+        return False
+    if status:
+        return True
+    return _has_commits_after_version_tag(repository)
 
 
 def _display_version() -> str:
-    return f"{__version__}+dev" if _working_tree_has_changes() else __version__
+    return f"{__version__}+dev" if _source_checkout_has_unreleased_changes() else __version__
 
 
 __display_version__ = _display_version()
