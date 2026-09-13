@@ -213,16 +213,21 @@ function usageSections(item) {
       count.className = "section-index";
       count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
       summary.append(title, count);
-      const table = document.createElement("table");
-      table.className = "data-table--compact";
-      table.innerHTML = "<thead><tr><th>Unit</th><th>Armies</th><th class=\"id-column\">ID</th></tr></thead>";
-      const body = document.createElement("tbody");
-      renderUnitRows(body, variant.units);
-      table.append(body);
-      const container = document.createElement("div");
-      container.className = "table-container";
-      container.append(table);
-      section.append(summary, container);
+      section.append(summary);
+      section.addEventListener("toggle", () => {
+        if (!section.open || section.dataset.loaded) return;
+        const table = document.createElement("table");
+        table.className = "data-table--compact";
+        table.innerHTML = "<thead><tr><th>Unit</th><th>Armies</th><th class=\"id-column\">ID</th></tr></thead>";
+        const body = document.createElement("tbody");
+        renderUnitRows(body, variant.units);
+        table.append(body);
+        const container = document.createElement("div");
+        container.className = "table-container";
+        container.append(table);
+        section.append(container);
+        section.dataset.loaded = "true";
+      });
       return section;
     });
 }
@@ -274,6 +279,7 @@ fetch(`/api/${catalog}/${encodeURIComponent(itemId)}`).then(async (response) => 
   return payload;
 }).then((item) => {
   currentItem = item;
+  render(item);
   return visibleUnitIds().then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
   name.firstChild.textContent = "Item unavailable";

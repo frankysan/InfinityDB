@@ -655,14 +655,7 @@ class Database:
                 )
                 if row["extra_id"] is not None:
                     occurrence["extras"].append(row["extra_id"])
-            units = []
-            offset = 0
-            while True:
-                page = self.list_units(limit=500, offset=offset, specops=True)
-                units.extend(page["items"])
-                offset += len(page["items"])
-                if offset >= page["total"]:
-                    break
+            units = self.list_units(limit=10_000, specops=True, _unbounded=True)["items"]
             displayed_unit_ids = {
                 source_id: unit["id"] for unit in units for source_id in unit["source_ids"]
             }
@@ -1088,6 +1081,7 @@ class Database:
         teamops: bool = False,
         reinforcement: bool = False,
         descending: bool = False,
+        _unbounded: bool = False,
     ) -> dict[str, Any]:
         if army_id is not None and (
             type(army_id) is not int or not SQLITE_INTEGER_MIN <= army_id <= SQLITE_INTEGER_MAX
@@ -1097,7 +1091,10 @@ class Database:
             army_id = canonical_army_id(army_id)
         if not isinstance(search, str):
             raise ValueError("search must be a string")
-        if type(limit) is not int or not 1 <= limit <= 500:
+        if type(_unbounded) is not bool:
+            raise ValueError("_unbounded must be a boolean")
+        max_limit = 10_000 if _unbounded else 500
+        if type(limit) is not int or not 1 <= limit <= max_limit:
             raise ValueError("limit must be an integer between 1 and 500")
         if type(offset) is not int or not 0 <= offset <= SQLITE_INTEGER_MAX:
             raise ValueError("offset must be a nonnegative integer at most 9223372036854775807")
@@ -1224,21 +1221,15 @@ class Database:
         reinforcement: bool = False,
     ) -> list[int]:
         """Return the IDs of units visible under the selected optional-unit filters."""
-        ids = []
-        offset = 0
-        while True:
-            page = self.list_units(
-                limit=500,
-                offset=offset,
-                mercs=mercs,
-                specops=specops,
-                teamops=teamops,
-                reinforcement=reinforcement,
-            )
-            ids.extend(item["id"] for item in page["items"])
-            offset += len(page["items"])
-            if offset >= page["total"]:
-                return ids
+        page = self.list_units(
+            limit=10_000,
+            mercs=mercs,
+            specops=specops,
+            teamops=teamops,
+            reinforcement=reinforcement,
+            _unbounded=True,
+        )
+        return [item["id"] for item in page["items"]]
 
     @instance_lru_cache(maxsize=128)
     def get_unit(self, unit_id: int) -> dict[str, Any] | None:

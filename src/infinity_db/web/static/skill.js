@@ -48,16 +48,21 @@ function variantSection(variant) {
   count.className = "section-index";
   count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
   heading.append(title, count);
-  const table = document.createElement("table");
-  table.className = "data-table--compact";
-  table.innerHTML = "<caption class=\"sr-only\">Units using this skill variant</caption><thead><tr><th scope=\"col\">Unit</th><th scope=\"col\">Armies</th><th class=\"id-column\" scope=\"col\">ID</th></tr></thead>";
-  const body = document.createElement("tbody");
-  renderUnitRows(body, variant.units);
-  table.append(body);
-  const container = document.createElement("div");
-  container.className = "table-container";
-  container.append(table);
-  section.append(heading, container);
+  section.append(heading);
+  section.addEventListener("toggle", () => {
+    if (!section.open || section.dataset.loaded) return;
+    const table = document.createElement("table");
+    table.className = "data-table--compact";
+    table.innerHTML = "<caption class=\"sr-only\">Units using this skill variant</caption><thead><tr><th scope=\"col\">Unit</th><th scope=\"col\">Armies</th><th class=\"id-column\" scope=\"col\">ID</th></tr></thead>";
+    const body = document.createElement("tbody");
+    renderUnitRows(body, variant.units);
+    table.append(body);
+    const container = document.createElement("div");
+    container.className = "table-container";
+    container.append(table);
+    section.append(container);
+    section.dataset.loaded = "true";
+  });
   return section;
 }
 
@@ -103,6 +108,7 @@ if (!/^\d+$/.test(skillId || "")) {
     return payload;
   }).then((skill) => {
     currentSkill = skill;
+    render(skill);
     return visibleUnitIds().then((ids) => render(withVisibleUnits(skill, ids)));
   }).catch((error) => {
     name.firstChild.textContent = "Skill unavailable";
