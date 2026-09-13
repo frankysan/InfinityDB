@@ -1,3 +1,7 @@
+import { hydrateThemedLogos } from "./themed-logo.js";
+
+hydrateThemedLogos();
+
 /** Shared behavior for compact menus in the top bar. */
 document.querySelectorAll("[data-menu]").forEach((menu) => {
   const button = menu.querySelector(".compact-menu-button");

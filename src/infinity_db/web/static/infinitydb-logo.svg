@@ -39,15 +39,15 @@
        y2="1">
       <stop
          offset="0"
-         stop-color="#e0f4b5"
+         stop-color="var(--color-logo-ribbon-highlight, #e0f4b5)"
          id="stop1" />
       <stop
          offset="0.55"
-         stop-color="#bcd890"
+         stop-color="var(--color-logo-ribbon-default, #bcd890)"
          id="stop2" />
       <stop
          offset="1"
-         stop-color="#759f69"
+         stop-color="var(--color-logo-ribbon-shadow, #759f69)"
          id="stop3" />
     </linearGradient>
     <linearGradient
@@ -58,15 +58,15 @@
        y2="1">
       <stop
          offset="0"
-         stop-color="#97bc7f"
+         stop-color="var(--color-logo-ribbon-side-highlight, #97bc7f)"
          id="stop4" />
       <stop
          offset="0.48"
-         stop-color="#668f63"
+         stop-color="var(--color-logo-ribbon-side-default, #668f63)"
          id="stop5" />
       <stop
          offset="1"
-         stop-color="#365c4d"
+         stop-color="var(--color-logo-ribbon-side-shadow, #365c4d)"
          id="stop6" />
     </linearGradient>
     <radialGradient
@@ -79,23 +79,23 @@
        gradientUnits="userSpaceOnUse">
       <stop
          offset="0"
-         stop-color="#5ea177"
+         stop-color="var(--color-logo-planet-highlight, #5ea177)"
          id="stop7" />
       <stop
          offset="0.18"
-         stop-color="#3c795c"
+         stop-color="var(--color-logo-planet-default, #3c795c)"
          id="stop8" />
       <stop
          offset="0.46"
-         stop-color="#1b503e"
+         stop-color="var(--color-logo-planet-shadow, #1b503e)"
          id="stop9" />
       <stop
          offset="0.72"
-         stop-color="#0b2d23"
+         stop-color="var(--color-logo-planet-deep-shadow, #0b2d23)"
          id="stop10" />
       <stop
          offset="1"
-         stop-color="#03130e"
+         stop-color="var(--color-logo-planet-void, #03130e)"
          id="stop11" />
     </radialGradient>
     <linearGradient
@@ -108,15 +108,15 @@
        gradientTransform="matrix(1,0,0,1.0705177,0,-127.70311)">
       <stop
          offset="0"
-         stop-color="#d8efbd"
+         stop-color="var(--color-logo-rim-highlight, #d8efbd)"
          id="stop12" />
       <stop
          offset="0.5"
-         stop-color="#a8cd92"
+         stop-color="var(--color-logo-rim-default, #a8cd92)"
          id="stop13" />
       <stop
          offset="1"
-         stop-color="#527b5d"
+         stop-color="var(--color-logo-rim-shadow, #527b5d)"
          id="stop14" />
     </linearGradient>
     <filter
@@ -212,7 +212,7 @@
   <rect
      width="1024"
      height="1024"
-     fill="#0d2922"
+     fill="var(--color-logo-background, #0d2922)"
      id="rect14"
      clip-path="url(#clipPath3)" />
   <!-- Infinity ribbon, slightly flattened vertically to imply a backward tilt. -->
@@ -259,7 +259,7 @@
        cy="1195"
        r="610"
        fill="none"
-       stroke="#d8efbd"
+       stroke="var(--color-logo-rim-highlight, #d8efbd)"
        stroke-opacity="0.34"
        stroke-width="13.2101"
        filter="url(#rimGlow)"
