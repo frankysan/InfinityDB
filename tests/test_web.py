@@ -443,12 +443,29 @@ def test_developer_mode_controls_database_id_visibility_and_sidebar_placement(
     assert b"--sidebar-section-gap: 70px" in styles
     assert b".sidebar-developer { margin-top: var(--sidebar-section-gap); }" in styles
     assert b".sidebar-footer .sidebar-developer + .snapshot-date { margin: 20px 0; }" in styles
+    assert b".sidebar { position: relative; z-index: 4;" in styles
 
     status, _, preferences = request(app, "/static/preferences.js")
     assert status == 200
     assert b'const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";' in preferences
     assert b"function initializeDeveloperModeToggle()" in preferences
     assert b'new CustomEvent("developermodechange"' in preferences
+
+
+def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> None:
+    status, _, body = request(app, "/units")
+
+    assert status == 200
+    assert b'<script type="module" src="/static/navigation.js"></script>' in body
+    assert b'aria-controls="compact-navigation-menu"' in body
+
+    status, _, navigation = request(app, "/static/navigation.js")
+    assert status == 200
+    assert b'button.addEventListener("click"' in navigation
+    assert b'menu.dataset.open = String(isOpen)' in navigation
+    assert b'document.addEventListener("pointerdown"' in navigation
+    assert b'window.addEventListener("pagehide", closeMenu)' in navigation
+    assert b'window.addEventListener("pageshow", closeMenu)' in navigation
 
 
 def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
