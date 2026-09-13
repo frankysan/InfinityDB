@@ -7,7 +7,7 @@ documentation are complete.
 
 ## Next: performance
 
-- [ ] Build one private, per-`Database` cached unit graph.
+- [x] Build one private, per-`Database` cached unit graph.
   - Load source units, army memberships, parsed availability filters, unit
     factions, search terms, and logical-unit groups once per database snapshot.
   - Include a `source_unit_id -> logical group` lookup for detail routes.
@@ -15,9 +15,9 @@ documentation are complete.
     this shared graph rather than rebuilding it independently.
   - Keep cached graph data immutable, or copy only request-local structures,
     so optional-unit filters cannot mutate state shared by requests.
-- [ ] Replace catalog-detail pagination through `list_units(limit=500,
+- [x] Replace catalog-detail pagination through `list_units(limit=500,
   offset=...)` with an internal helper that returns the complete visible-unit
-  mapping once. Today every distinct offset has a separate result-cache key.
+  mapping once.
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
   representative snapshot before and after each performance change.

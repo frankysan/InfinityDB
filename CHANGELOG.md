@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Cache snapshot-wide unit relationships and visible logical-unit mappings for
+  unit, skill, and catalog queries, avoiding repeated membership, faction,
+  search-term, and catalog-pagination assembly per request.
+
 ## [0.3.3] - 2026-09-13
 
 ### Fixed

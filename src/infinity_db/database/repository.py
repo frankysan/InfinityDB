@@ -504,6 +504,98 @@ class Database:
             return None
 
     @instance_lru_cache(maxsize=1)
+    def _unit_graph(self) -> dict[str, Any]:
+        """Load the snapshot-wide unit relationships shared by read paths."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
+                "u.main_army_id, u.canonical_faction_id "
+                "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
+            ).fetchall()
+            memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
+            army_names = {
+                row["id"]: army_name(row)
+                for row in connection.execute("SELECT id, name, slug FROM army_lists")
+            }
+            for army in connection.execute(
+                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
+                "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
+            ):
+                if army["unit_id"] not in memberships:
+                    continue
+                try:
+                    filters = json.loads(army["filters"]) if army["filters"] else {}
+                except (TypeError, json.JSONDecodeError):
+                    filters = {}
+                memberships[army["unit_id"]].append(
+                    {"id": army["id"], "name": army_name(army), "filters": filters}
+                )
+            normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in rows}
+            for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
+                if faction["unit_id"] in normal_armies_by_unit:
+                    normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
+            search_terms_by_source = {
+                row["id"]: {row["name"], row["isc"], row["isc_abbr"], row["slug"]}
+                for row in rows
+            }
+            for table in ("profiles", "loadout_options", "unit_options"):
+                for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
+                    if row["unit_id"] in search_terms_by_source:
+                        search_terms_by_source[row["unit_id"]].add(row["name"])
+        groups = logical_unit_groups(rows, memberships)
+        for group in groups:
+            group["normal_army_ids"] = set().union(
+                *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
+            )
+            group["search_terms"] = set().union(
+                *(search_terms_by_source[source_id] for source_id in group["source_ids"])
+            )
+        groups_by_source = {
+            source_id: group for group in groups for source_id in group["source_ids"]
+        }
+        return {
+            "rows": rows,
+            "army_names": army_names,
+            "normal_armies_by_unit": normal_armies_by_unit,
+            "search_terms_by_source": search_terms_by_source,
+            "groups": groups,
+            "groups_by_source": groups_by_source,
+        }
+
+    @instance_lru_cache(maxsize=16)
+    def _visible_unit_items_by_source(
+        self, selected_flags: frozenset[str]
+    ) -> dict[int, dict[str, Any]]:
+        """Map every visible source unit to its logical-unit list item."""
+        graph = self._unit_graph()
+        items_by_source: dict[int, dict[str, Any]] = {}
+        for group in graph["groups"]:
+            visible_armies = {
+                army_id: army
+                for army_id, army in group["armies"].items()
+                if army_is_available(army, group, set(selected_flags))
+            }
+            if group["armies"] and not visible_armies:
+                continue
+            item = {
+                "id": group["id"],
+                "name": group["name"],
+                "isc": group["isc"],
+                "slug": group["slug"],
+                "main_army_id": group["main_army_id"],
+                "main_army_name": graph["army_names"].get(group["main_army_id"]),
+                "source_ids": group["source_ids"],
+                "army_ids": list(visible_armies),
+                "armies": [
+                    {"id": army["id"], "name": army["name"]}
+                    for army in visible_armies.values()
+                ],
+            }
+            for source_id in group["source_ids"]:
+                items_by_source[source_id] = item
+        return items_by_source
+
+    @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
@@ -654,9 +746,11 @@ class Database:
                 )
                 if row["extra_id"] is not None:
                     occurrence["extras"].append(row["extra_id"])
-            units = self.list_units(limit=10_000, specops=True, _unbounded=True)["items"]
             displayed_unit_ids = {
-                source_id: unit["id"] for unit in units for source_id in unit["source_ids"]
+                source_id: unit["id"]
+                for source_id, unit in self._visible_unit_items_by_source(
+                    frozenset({"specops"})
+                ).items()
             }
             use_keys: dict[int, set[tuple[int, tuple[int, ...]]]] = {}
             for occurrence in occurrences.values():
@@ -786,17 +880,7 @@ class Database:
                 )
                 if row["extra_id"] is not None:
                     occurrence["extras"].append({"id": row["extra_id"], "name": row["extra_name"]})
-            units = []
-            offset = 0
-            while True:
-                page = self.list_units(limit=500, offset=offset, specops=True)
-                units.extend(page["items"])
-                offset += len(page["items"])
-                if offset >= page["total"]:
-                    break
-            units_by_source = {
-                source_id: unit for unit in units for source_id in unit["source_ids"]
-            }
+            units_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
             item_names = {row["id"]: row["name"] for row in catalog_items}
             variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
             for occurrence in occurrences.values():
@@ -989,64 +1073,7 @@ class Database:
                 )
                 if occurrence["unit"] not in variant["units"]:
                     variant["units"].append(occurrence["unit"])
-            unit_rows = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.main_army_id, "
-                "u.canonical_faction_id FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
-            ).fetchall()
-            memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in unit_rows}
-            army_names = {
-                row["id"]: army_name(row)
-                for row in connection.execute("SELECT id, name, slug FROM army_lists")
-            }
-            membership_rows = connection.execute(
-                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
-                "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
-            )
-            for army in membership_rows:
-                if army["unit_id"] not in memberships:
-                    continue
-                try:
-                    filters = json.loads(army["filters"]) if army["filters"] else {}
-                except (TypeError, json.JSONDecodeError):
-                    filters = {}
-                memberships[army["unit_id"]].append(
-                    {
-                        "id": army["id"],
-                        "name": army_name(army),
-                        "filters": filters,
-                    }
-                )
-            normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in unit_rows}
-            for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
-                if faction["unit_id"] in normal_armies_by_unit:
-                    normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
-            unit_items_by_source: dict[int, dict[str, Any]] = {}
-            for group in logical_unit_groups(unit_rows, memberships):
-                group["normal_army_ids"] = set().union(
-                    *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
-                )
-                visible_armies = {
-                    army_id: army
-                    for army_id, army in group["armies"].items()
-                    if army_is_available(army, group, {"specops"})
-                }
-                if group["armies"] and not visible_armies:
-                    continue
-                item = {
-                    "id": group["id"],
-                    "name": group["name"],
-                    "isc": group["isc"],
-                    "slug": group["slug"],
-                    "main_army_id": group["main_army_id"],
-                    "main_army_name": army_names.get(group["main_army_id"]),
-                    "source_ids": group["source_ids"],
-                    "army_ids": list(visible_armies),
-                    "armies": [
-                        {"id": army["id"], "name": army["name"]} for army in visible_armies.values()
-                    ],
-                }
-                for source_id in group["source_ids"]:
-                    unit_items_by_source[source_id] = item
+            unit_items_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
             for variant in variants.values():
                 items = {
                     item["id"]: item
@@ -1108,106 +1135,56 @@ class Database:
             }.items()
             if enabled
         }
-        with self._connect() as connection:
-            rows = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, "
-                "u.main_army_id, u.canonical_faction_id "
-                "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
-            ).fetchall()
-            memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
-            army_names = {
-                row["id"]: army_name(row)
-                for row in connection.execute("SELECT id, name, slug FROM army_lists")
+        graph = self._unit_graph()
+        army_names = graph["army_names"]
+        groups = graph["groups"]
+        search_key = accent_insensitive_key(search)
+        grouped = []
+        for group in groups:
+            visible_armies = {
+                id: army
+                for id, army in group["armies"].items()
+                if army_is_available(army, group, selected_flags)
             }
-            if rows:
-                army_rows = connection.execute(
-                    "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
-                    "JOIN army_lists AS a ON a.id = au.army_id "
-                    "ORDER BY a.id"
-                )
-                for army in army_rows:
-                    if army["unit_id"] in memberships:
-                        try:
-                            filters = json.loads(army["filters"]) if army["filters"] else {}
-                        except (TypeError, json.JSONDecodeError):
-                            filters = {}
-                        memberships[army["unit_id"]].append(
-                            {
-                                "id": army["id"],
-                                "name": army_name(army),
-                                "filters": filters,
-                            }
-                        )
-            normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in rows}
-            faction_rows = connection.execute("SELECT unit_id, faction_id FROM unit_factions")
-            for faction in faction_rows:
-                if faction["unit_id"] in normal_armies_by_unit:
-                    normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
-            groups = logical_unit_groups(rows, memberships)
-            search_terms_by_source = {
-                row["id"]: {row["name"], row["isc"], row["isc_abbr"], row["slug"]}
-                for row in rows
+            if group["armies"] and not visible_armies:
+                continue
+            if army_id is not None and army_id not in visible_armies:
+                continue
+            if search:
+                if search_key:
+                    matches_search = any(
+                        search_key in accent_insensitive_key(name)
+                        for name in group["search_terms"]
+                        if name
+                    )
+                else:
+                    matches_search = any(
+                        search.casefold() in str(name).casefold()
+                        for name in group["search_terms"]
+                        if name
+                    )
+                if not matches_search:
+                    continue
+            grouped.append({**group, "armies": visible_armies})
+        grouped.sort(key=lambda group: (unit_sort_key(group["name"]), group["id"]), reverse=descending)
+        total = len(grouped)
+        items = [
+            {
+                "id": group["id"],
+                "name": group["name"],
+                "isc": group["isc"],
+                "slug": group["slug"],
+                "main_army_id": group["main_army_id"],
+                "main_army_name": army_names.get(group["main_army_id"]),
+                "source_ids": group["source_ids"],
+                "army_ids": list(group["armies"]),
+                "armies": [
+                    {"id": army["id"], "name": army["name"]}
+                    for army in group["armies"].values()
+                ],
             }
-            for table in ("profiles", "loadout_options", "unit_options"):
-                for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
-                    if row["unit_id"] in search_terms_by_source:
-                        search_terms_by_source[row["unit_id"]].add(row["name"])
-            for group in groups:
-                group["normal_army_ids"] = set().union(
-                    *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
-                )
-                group["search_terms"] = set().union(
-                    *(search_terms_by_source[source_id] for source_id in group["source_ids"])
-                )
-            search_key = accent_insensitive_key(search)
-            grouped = []
-            for group in groups:
-                visible_armies = {
-                    id: army
-                    for id, army in group["armies"].items()
-                    if army_is_available(army, group, selected_flags)
-                }
-                if group["armies"] and not visible_armies:
-                    continue
-                if army_id is not None and army_id not in visible_armies:
-                    continue
-                if search:
-                    if search_key:
-                        matches_search = any(
-                            search_key in accent_insensitive_key(name)
-                            for name in group["search_terms"]
-                            if name
-                        )
-                    else:
-                        matches_search = any(
-                            search.casefold() in str(name).casefold()
-                            for name in group["search_terms"]
-                            if name
-                        )
-                    if not matches_search:
-                        continue
-                grouped.append({**group, "armies": visible_armies})
-            grouped.sort(
-                key=lambda group: (unit_sort_key(group["name"]), group["id"]), reverse=descending
-            )
-            total = len(grouped)
-            items = [
-                {
-                    "id": group["id"],
-                    "name": group["name"],
-                    "isc": group["isc"],
-                    "slug": group["slug"],
-                    "main_army_id": group["main_army_id"],
-                    "main_army_name": army_names.get(group["main_army_id"]),
-                    "source_ids": group["source_ids"],
-                    "army_ids": list(group["armies"]),
-                    "armies": [
-                        {"id": army["id"], "name": army["name"]}
-                        for army in group["armies"].values()
-                    ],
-                }
-                for group in grouped[offset : offset + limit]
-            ]
+            for group in grouped[offset : offset + limit]
+        ]
         return {"items": items, "total": total, "limit": limit, "offset": offset}
 
     @instance_lru_cache(maxsize=32)
@@ -1243,43 +1220,13 @@ class Database:
             ).fetchone()
             if selected is None:
                 return None
-            siblings = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id, u.canonical_faction_id "
-                "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
-            ).fetchall()
-            memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in siblings}
-            army_names = {
-                row["id"]: army_name(row)
-                for row in connection.execute("SELECT id, name, slug FROM army_lists")
-            }
-            membership_rows = connection.execute(
-                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
-                "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
-            )
-            for army in membership_rows:
-                if army["unit_id"] in memberships:
-                    try:
-                        filters = json.loads(army["filters"]) if army["filters"] else {}
-                    except (TypeError, json.JSONDecodeError):
-                        filters = {}
-                    memberships[army["unit_id"]].append(
-                        {"id": army["id"], "name": army_name(army), "filters": filters}
-                    )
-            group = next(
-                group
-                for group in logical_unit_groups(siblings, memberships)
-                if selected["id"] in group["source_ids"]
-            )
+            graph = self._unit_graph()
+            siblings = graph["rows"]
+            army_names = graph["army_names"]
+            group = graph["groups_by_source"][selected["id"]]
             source_ids = group["source_ids"]
             unit = next(sibling for sibling in siblings if sibling["id"] == group["id"])
-            normal_army_ids: dict[int, set[int]] = {row["id"]: set() for row in siblings}
-            for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
-                if faction["unit_id"] in normal_army_ids:
-                    normal_army_ids[faction["unit_id"]].add(faction["faction_id"])
-            group["normal_army_ids"] = set().union(
-                *(normal_army_ids[source_id] for source_id in source_ids)
-            )
+            normal_army_ids = graph["normal_armies_by_unit"]
             canonical_factions = {row["id"]: row["canonical_faction_id"] for row in siblings}
             placeholders = ", ".join("?" for _ in source_ids)
             armies_by_occurrence: dict[tuple[int, tuple[str, ...]], dict[str, Any]] = {}
