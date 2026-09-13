@@ -1,77 +1,98 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#162b27">
-    <meta name="description" content="Learn how InfinityDB turns Infinity Army snapshots into a fast, local reference for units, rules, equipment, and weapons.">
-    <title>About · InfinityDB</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <script type="module" src="/static/about.js"></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to about InfinityDB</a>
-    <!-- navigation -->
-    <main id="main" class="main" tabindex="-1">
-      <!-- page-header -->
 
-      <section class="intro about-intro" aria-labelledby="page-title">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#162b27">
+  <meta name="description"
+    content="Learn how InfinityDB turns Infinity Army snapshots into a fast, local reference for units, rules, equipment, and weapons.">
+  <title>About · InfinityDB</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script type="module" src="/static/about.js"></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to about InfinityDB</a>
+  <!-- navigation -->
+  <main id="main" class="main" tabindex="-1">
+    <!-- page-header -->
+
+    <section class="intro about-intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">A local reference for Infinity</p>
+        <h1 id="page-title">Know your options.<span></span></h1>
+        <p class="intro-copy">InfinityDB is a web app that turns an Infinity Army data snapshot into a clear, searchable
+          reference. It is made for the time between an idea and a game: exploring an army, checking a profile, and
+          understanding the rules and equipment that shape a list.</p>
+      </div>
+      <img class="about-logo" src="/static/infinitydb-logo.svg" alt="" data-themed-logo>
+    </section>
+
+    <section class="about-content" aria-label="What InfinityDB helps you do">
+      <article class="about-feature">
+        <span class="about-number" aria-hidden="true">01</span>
         <div>
-          <p class="eyebrow">A local reference for Infinity</p>
-          <h1 id="page-title">Know your options.<span></span></h1>
-          <p class="intro-copy">InfinityDB is a web app that turns an Infinity Army data snapshot into a clear, searchable reference. It is made for the time between an idea and a game: exploring an army, checking a profile, and understanding the rules and equipment that shape a list.</p>
+          <h2>Explore what you can field</h2>
+          <p>Choose an army to narrow the unit catalog to the troops it contains. Search by name, include optional
+            availability such as mercenaries or reinforcements when useful, and open a unit to see the profiles and
+            loadouts available in each army.</p>
         </div>
-        <img class="about-logo" src="/static/infinitydb-logo.svg" alt="" data-themed-logo>
-      </section>
-
-      <section class="about-content" aria-label="What InfinityDB helps you do">
-        <article class="about-feature">
-          <span class="about-number" aria-hidden="true">01</span>
-          <div>
-            <h2>Explore what you can field</h2>
-            <p>Choose an army to narrow the unit catalog to the troops it contains. Search by name, include optional availability such as mercenaries or reinforcements when useful, and open a unit to see the profiles and loadouts available in each army.</p>
-          </div>
-        </article>
-        <article class="about-feature">
-          <span class="about-number" aria-hidden="true">02</span>
-          <div>
-            <h2>Follow details to their source</h2>
-            <p>Unit pages collect general and army-specific profiles, statistics, AVA, skills, equipment, weapons, and loadouts in one place. The Skills, Equipment, and Weapons catalogs then let you work backwards from a rule item to the units and loadouts that use it.</p>
-          </div>
-        </article>
-        <article class="about-feature">
-          <span class="about-number" aria-hidden="true">03</span>
-          <div>
-            <h2>Data-driven from official sources</h2>
-            <p>InfinityDB derives its reference data from official Infinity Army snapshots and API metadata. It merges, normalizes, and validates those sources before importing them into a local SQLite database, so the browser can present connected game data through a small, read-only API.</p>
-          </div>
-        </article>
-      </section>
-
-      <section class="surface surface--highlighted about-callout" aria-labelledby="about-callout-title">
-        <p class="eyebrow">Purpose and direction</p>
-        <h2 id="about-callout-title">Less hunting. More planning.</h2>
-        <p>InfinityDB is growing into a better companion for choosing, collecting, and playing your army. Alongside fast unit and rules reference, the roadmap includes clearer rule summaries for skills, equipment, ammunition, and weapon traits; Fireteam eligibility and reference pages; model imagery; and a personal collection tracker. Every addition should help you spend less time hunting through data and more time making informed choices for the table.</p>
-        <a class="button button-primary" href="/units">Explore units <span aria-hidden="true">→</span></a>
-      </section>
-
-      <section class="surface about-details" aria-labelledby="about-details-title">
+      </article>
+      <article class="about-feature">
+        <span class="about-number" aria-hidden="true">02</span>
         <div>
-          <p class="eyebrow">Independent project</p>
-          <h2 id="about-details-title">Made by Johannes "Franky" Haglund</h2>
-          <p>InfinityDB is created and maintained by Johannes "Franky" Haglund. For support questions, suggestions, or feedback, email <a href="mailto:johannes@haglund.info">johannes@haglund.info</a>.</p>
+          <h2>Follow details to their source</h2>
+          <p>Unit pages collect general and army-specific profiles, statistics, AVA, skills, equipment, weapons, and
+            loadouts in one place. The Skills, Equipment, and Weapons catalogs then let you work backwards from a rule
+            item to the units and loadouts that use it.</p>
         </div>
-        <a class="button button-secondary" href="https://github.com/frankysan/InfinityDB">View the project on GitHub <span aria-hidden="true">&rarr;</span></a>
-      </section>
+      </article>
+      <article class="about-feature">
+        <span class="about-number" aria-hidden="true">03</span>
+        <div>
+          <h2>Data-driven from official sources</h2>
+          <p>InfinityDB derives its reference data from official Infinity Army snapshots and API metadata. It merges,
+            normalizes, and validates those sources before importing them into a local SQLite database, so the browser
+            can present connected game data through a small, read-only API.</p>
+        </div>
+      </article>
+    </section>
 
-      <section class="surface surface--subtle about-disclosure" aria-labelledby="llm-disclosure-title">
-        <p class="eyebrow">Transparency</p>
-        <h2 id="llm-disclosure-title">LLM code disclosure</h2>
-        <p>This project has used large language model (LLM) assistance during development. LLM-generated suggestions and code are reviewed, tested, and remain the responsibility of the project maintainer. The data, game terms, and artwork assets originate from their respective sources; LLM assistance does not imply ownership of those materials.</p>
-      </section>
+    <section class="surface surface--highlighted about-callout" aria-labelledby="about-callout-title">
+      <p class="eyebrow">Purpose and direction</p>
+      <h2 id="about-callout-title">Less hunting. More planning.</h2>
+      <p>InfinityDB is growing into a better companion for choosing, collecting, and playing your army. Alongside fast
+        unit and rules reference, the roadmap includes clearer rule summaries for skills, equipment, ammunition, and
+        weapon traits; Fireteam eligibility and reference pages; model imagery; and a personal collection tracker. Every
+        addition should help you spend less time hunting through data and more time making informed choices for the
+        table.</p>
+      <a class="button button-primary" href="/units">Explore units <span aria-hidden="true">→</span></a>
+    </section>
 
-      <!-- page-footer -->
-    </main>
-  </body>
+    <section class="surface about-details" aria-labelledby="about-details-title">
+      <div>
+        <p class="eyebrow">Independent project</p>
+        <h2 id="about-details-title">Made by Johannes "Franky" Haglund</h2>
+        <p>InfinityDB is created and maintained by Johannes "Franky" Haglund. Support questions, suggestions, or
+          feedback can be submitted on the project's GitHub page.</p>
+      </div>
+      <a class="button button-secondary" href="https://github.com/frankysan/InfinityDB">View the project on GitHub <span
+          aria-hidden="true">&rarr;</span></a>
+    </section>
+
+    <section class="surface surface--subtle about-disclosure" aria-labelledby="llm-disclosure-title">
+      <p class="eyebrow">Transparency</p>
+      <h2 id="llm-disclosure-title">LLM code disclosure</h2>
+      <p>This project has used large language model (LLM) assistance during development. LLM-generated suggestions and
+        code are reviewed, tested, and remain the responsibility of the project maintainer. The data, game terms, and
+        artwork assets originate from their respective sources; LLM assistance does not imply ownership of those
+        materials.</p>
+    </section>
+
+    <!-- page-footer -->
+  </main>
+</body>
+
 </html>

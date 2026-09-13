@@ -620,7 +620,9 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
     assert b"Version 0.4.0+dev" in body
-    assert b"mailto:johannes@haglund.info" in body
+    assert b"Support questions, suggestions, or" in body
+    assert b"feedback can be submitted on the project's GitHub page." in body
+    assert b"mailto:johannes@haglund.info" not in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
     assert b"better companion for choosing, collecting, and playing your army" in body
