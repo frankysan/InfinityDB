@@ -218,6 +218,17 @@ h1 > span { color: #8caa60; }
 .detail-section-title--rule { padding: 4px 2px 8px; border-bottom: 2px solid var(--color-border-strong); color: #244438; font-size: 16px; }
 .detail-section-title--variant { padding: 0 2px; font-size: 13px; font-weight: 600; }
 .unit-detail .general-profile-group { gap: 10px; }
+.unit-detail .general-profile-group--faction-panoceania { --color-general-profile-primary: var(--color-faction-panoceania-primary); --color-general-profile-secondary: var(--color-faction-panoceania-secondary); }
+.unit-detail .general-profile-group--faction-yu-jing { --color-general-profile-primary: var(--color-faction-yu-jing-primary); --color-general-profile-secondary: var(--color-faction-yu-jing-secondary); }
+.unit-detail .general-profile-group--faction-ariadna { --color-general-profile-primary: var(--color-faction-ariadna-primary); --color-general-profile-secondary: var(--color-faction-ariadna-secondary); }
+.unit-detail .general-profile-group--faction-haqqislam { --color-general-profile-primary: var(--color-faction-haqqislam-primary); --color-general-profile-secondary: var(--color-faction-haqqislam-secondary); }
+.unit-detail .general-profile-group--faction-nomads { --color-general-profile-primary: var(--color-faction-nomads-primary); --color-general-profile-secondary: var(--color-faction-nomads-secondary); }
+.unit-detail .general-profile-group--faction-combined-army { --color-general-profile-primary: var(--color-faction-combined-army-primary); --color-general-profile-secondary: var(--color-faction-combined-army-secondary); }
+.unit-detail .general-profile-group--faction-aleph { --color-general-profile-primary: var(--color-faction-aleph-primary); --color-general-profile-secondary: var(--color-faction-aleph-secondary); }
+.unit-detail .general-profile-group--faction-tohaa { --color-general-profile-primary: var(--color-faction-tohaa-primary); --color-general-profile-secondary: var(--color-faction-tohaa-secondary); }
+.unit-detail .general-profile-group--faction-non-aligned-armies { --color-general-profile-primary: var(--color-faction-non-aligned-armies-primary); --color-general-profile-secondary: var(--color-faction-non-aligned-armies-secondary); }
+.unit-detail .general-profile-group--faction-o-12 { --color-general-profile-primary: var(--color-faction-o-12-primary); --color-general-profile-secondary: var(--color-faction-o-12-secondary); }
+.unit-detail .general-profile-group--faction-jsa { --color-general-profile-primary: var(--color-faction-jsa-primary); --color-general-profile-secondary: var(--color-faction-jsa-secondary); }
 .unit-detail .general-profile { border: 2px solid var(--color-border-strong); box-shadow: 0 8px 20px #203b3512; }
 .data-label { color: #596a5b; font-size: 10px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; }
 .unit-detail .general-profile .general-item-label { padding-left: 46px; }
@@ -308,6 +319,9 @@ table { --table-heading-padding: 16px 26px; --table-cell-padding: 18px 26px; --t
 .profile-summary th, .profile-summary td { white-space: nowrap; }
 .unit-detail .general-profile .general-item-label { width: 30%; }
 .unit-detail .general-profile .profile-title { margin: 0; padding: 16px 26px 13px; border-bottom: 1px solid var(--color-border-highlight); background: var(--color-surface-highlight); color: #2d4134; font-size: 17px; font-weight: 600; }
+@supports (color: color-mix(in srgb, white, transparent)) {
+  .unit-detail .general-profile-group[class*="general-profile-group--faction-"] .general-profile .profile-title { background: linear-gradient(90deg, color-mix(in srgb, var(--color-general-profile-primary) 22%, transparent), color-mix(in srgb, var(--color-general-profile-secondary) 11%, transparent) 48%, transparent 78%), var(--color-surface-highlight); }
+}
 .unit-detail .general-profile .profile-title .order-symbol { width: 23px; height: 23px; }
 thead th { background: var(--color-surface-data-header); font-size: var(--table-heading-size); letter-spacing: var(--table-heading-spacing); text-transform: uppercase; color: #64715d; font-weight: 550; padding: var(--table-heading-padding); border-bottom: 1px solid var(--color-border-default); }
 thead th:first-child { width: 43%; }
@@ -347,6 +361,21 @@ tbody tr:hover { background: #f8f9f3; }
 .catalog-category-row:hover { background: transparent; }
 .catalog-category-row th { padding-block: 10px; background: #edf4e7; color: #3a5547; font-size: 10px; letter-spacing: .8px; text-transform: uppercase; }
 .unit-row { cursor: pointer; }
+.unit-row--faction-panoceania { --color-unit-row-primary: var(--color-faction-panoceania-primary); --color-unit-row-secondary: var(--color-faction-panoceania-secondary); }
+.unit-row--faction-yu-jing { --color-unit-row-primary: var(--color-faction-yu-jing-primary); --color-unit-row-secondary: var(--color-faction-yu-jing-secondary); }
+.unit-row--faction-ariadna { --color-unit-row-primary: var(--color-faction-ariadna-primary); --color-unit-row-secondary: var(--color-faction-ariadna-secondary); }
+.unit-row--faction-haqqislam { --color-unit-row-primary: var(--color-faction-haqqislam-primary); --color-unit-row-secondary: var(--color-faction-haqqislam-secondary); }
+.unit-row--faction-nomads { --color-unit-row-primary: var(--color-faction-nomads-primary); --color-unit-row-secondary: var(--color-faction-nomads-secondary); }
+.unit-row--faction-combined-army { --color-unit-row-primary: var(--color-faction-combined-army-primary); --color-unit-row-secondary: var(--color-faction-combined-army-secondary); }
+.unit-row--faction-aleph { --color-unit-row-primary: var(--color-faction-aleph-primary); --color-unit-row-secondary: var(--color-faction-aleph-secondary); }
+.unit-row--faction-tohaa { --color-unit-row-primary: var(--color-faction-tohaa-primary); --color-unit-row-secondary: var(--color-faction-tohaa-secondary); }
+.unit-row--faction-non-aligned-armies { --color-unit-row-primary: var(--color-faction-non-aligned-armies-primary); --color-unit-row-secondary: var(--color-faction-non-aligned-armies-secondary); }
+.unit-row--faction-o-12 { --color-unit-row-primary: var(--color-faction-o-12-primary); --color-unit-row-secondary: var(--color-faction-o-12-secondary); }
+.unit-row--faction-jsa { --color-unit-row-primary: var(--color-faction-jsa-primary); --color-unit-row-secondary: var(--color-faction-jsa-secondary); }
+@supports (color: color-mix(in srgb, white, transparent)) {
+  .unit-row[class*="unit-row--faction-"] { background-image: linear-gradient(90deg, color-mix(in srgb, var(--color-unit-row-primary) 14%, transparent), color-mix(in srgb, var(--color-unit-row-secondary) 7%, transparent) 48%, transparent 78%); }
+  .unit-row[class*="unit-row--faction-"]:hover { background-image: linear-gradient(90deg, color-mix(in srgb, var(--color-unit-row-primary) 20%, transparent), color-mix(in srgb, var(--color-unit-row-secondary) 10%, transparent) 48%, transparent 78%); }
+}
 .unit-name { font-size: 13px; font-weight: 550; line-height: 1.6; overflow-wrap: anywhere; color: #2d4134; }
 .unit-name-content { display: inline-flex; align-items: center; gap: 8px; }
 .unit-name a { color: inherit; text-decoration: none; }

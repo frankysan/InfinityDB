@@ -24,6 +24,15 @@ const factionGroups = new Map([
   [10, "O-12"],
   [11, "JSA"],
 ]);
+const factionSlugs = new Map([
+  [1, "panoceania"], [2, "yu-jing"], [3, "ariadna"], [4, "haqqislam"],
+  [5, "nomads"], [6, "combined-army"], [7, "aleph"], [8, "tohaa"],
+  [9, "non-aligned-armies"], [10, "o-12"], [11, "jsa"],
+]);
+
+function factionSlug(armyId) {
+  return factionSlugs.get(Math.floor(Number(armyId) / 100));
+}
 
 function factionGroup(armyId) {
   const key = Math.floor(Number(armyId) / 100);
@@ -753,6 +762,8 @@ function render(unit) {
   const displayedGeneralProfiles = visibleGeneralProfiles(generalProfileRows);
   const generalProfilesSection = document.createElement("section");
   generalProfilesSection.className = "detail-group general-profile-group";
+  const mainFaction = factionSlug(unit.main_army_id);
+  if (mainFaction) generalProfilesSection.classList.add(`general-profile-group--faction-${mainFaction}`);
   const generalHeading = heading(
     displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",
   );
