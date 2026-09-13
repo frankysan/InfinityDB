@@ -23,6 +23,7 @@ from infinity_db.database.repository import (
 from infinity_db.database.schema import (
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
+    INDEXES,
     METADATA_TABLE,
     ROW_JSON,
     TABLES,
@@ -180,6 +181,12 @@ def test_database_preserves_every_normalized_table_and_field(
             (DATABASE_COMPATIBILITY_KEY,),
         ).fetchone()[0]
         assert json.loads(compatibility) == DATABASE_COMPATIBILITY_VERSION
+        indexes = {
+            row[1]
+            for table_name in TABLES
+            for row in connection.execute(f"PRAGMA index_list({quote(table_name)})")
+        }
+        assert {index_name for index_name, _, _ in INDEXES} <= indexes
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
         connection.execute("PRAGMA foreign_keys = ON")
         with pytest.raises(sqlite3.IntegrityError), connection:

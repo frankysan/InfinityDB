@@ -5,11 +5,11 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 7
+DATABASE_COMPATIBILITY_VERSION = 8
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 METADATA_TABLE = "__infinity_metadata"
@@ -227,6 +227,40 @@ TABLES["option_weapons"] = table(
     ref("template_id", "option_weapon_templates", "id"),
 )
 
+# Primary keys preserve the source hierarchy, which normally starts with
+# ``army_id``. The public read API also traverses the data by unit and performs
+# reverse catalog lookups by item, neither of which can use those key prefixes.
+# Keep these indexes deliberately limited to the predicates used by repository
+# queries; this is a read-only snapshot, so their small import cost is repaid by
+# every cold-cache detail request.
+INDEXES = (
+    ("profiles_unit", "profiles", "unit_id, army_id, group_id, position, profile_id"),
+    (
+        "loadout_options_unit",
+        "loadout_options",
+        "unit_id, army_id, group_id, position, option_id",
+    ),
+    ("profile_characteristics_unit", "profile_characteristics", "unit_id"),
+    ("option_characteristics_unit", "option_characteristics", "unit_id"),
+    ("option_orders_unit", "option_orders", "unit_id"),
+    ("profile_skills_unit", "profile_skills", "unit_id"),
+    ("profile_skills_item", "profile_skills", "item_id"),
+    ("profile_equipment_unit", "profile_equipment", "unit_id"),
+    ("profile_equipment_item", "profile_equipment", "item_id"),
+    ("profile_weapons_unit", "profile_weapons", "unit_id"),
+    ("profile_weapons_item", "profile_weapons", "item_id"),
+    ("option_skills_unit", "option_skills", "unit_id"),
+    ("option_skills_item", "option_skills", "item_id"),
+    ("option_equipment_unit", "option_equipment", "unit_id"),
+    ("option_equipment_item", "option_equipment", "item_id"),
+    ("option_weapons_unit", "option_weapons", "unit_id"),
+    ("option_weapons_template", "option_weapons", "template_id"),
+    ("option_weapon_templates_item", "option_weapon_templates", "item_id"),
+    ("unit_option_skills_item", "unit_option_skills", "item_id"),
+    ("unit_option_equipment_item", "unit_option_equipment", "item_id"),
+    ("unit_option_weapons_item", "unit_option_weapons", "item_id"),
+)
+
 
 def quote(identifier: str) -> str:
     """Quote identifiers; source field names are data, never executable SQL."""
@@ -281,3 +315,7 @@ def create_schema(connection: sqlite3.Connection, tables: dict[str, list[dict]])
         connection.execute(f"CREATE TABLE {quote(name)} ({', '.join(parts)})")
     connection.execute("CREATE INDEX units_name ON units(name COLLATE NOCASE, id)")
     connection.execute("CREATE INDEX army_units_unit ON army_units(unit_id, army_id)")
+    for index_name, table_name, columns in INDEXES:
+        connection.execute(
+            f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})"
+        )
