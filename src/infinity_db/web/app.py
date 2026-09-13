@@ -13,11 +13,12 @@ from importlib.resources import files
 from pathlib import Path
 from urllib.parse import parse_qs
 
-from infinity_db import __display_version__
+from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
 
 LOGGER = logging.getLogger(__name__)
 ASSETS = {
+    "/static/version-check.js": ("version-check.js", "text/javascript; charset=utf-8"),
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
@@ -41,6 +42,15 @@ UNIT_SYMBOL_PATH = re.compile(r"/static/units/[a-z0-9-]+/[a-z0-9-]+\.svg")
 ORDER_SYMBOL_PATH = re.compile(
     r"/static/orders/(regular|irregular|peripheral|impetuous|tactical|lieutenant|hackable|cube|cube-2)\.svg"
 )
+STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
+
+
+def _version_static_urls(document: str) -> str:
+    """Give page assets a new URL for each application release."""
+
+    return STATIC_URL.sub(
+        lambda match: f'{match.group(0)[:-1]}?v={__version__}{match.group("quote")}', document
+    )
 
 
 def _page(
@@ -113,12 +123,15 @@ def _page(
         .replace("{{VERSION}}", escape(__display_version__))
     )
     document = static.joinpath(filename).read_text(encoding="utf-8")
-    return (
-        document.replace("<!-- navigation -->", navigation)
+    return _version_static_urls(
+        document.replace('<html lang="en">', f'<html lang="en" data-app-version="{__version__}">')
+        .replace(
+            "</head>", '<script type="module" src="/static/version-check.js"></script></head>'
+        )
+        .replace("<!-- navigation -->", navigation)
         .replace("<!-- page-header -->", page_header)
         .replace("<!-- page-footer -->", page_footer)
-        .encode("utf-8")
-    )
+    ).encode("utf-8")
 
 
 def _integer(params: dict, key: str, default: int | None, low: int, high: int) -> int | None:
@@ -189,6 +202,7 @@ class Application:
         extra_headers = []
         status = HTTPStatus.OK
         content_type = "application/json; charset=utf-8"
+        cache_control = "no-cache"
         payload = None
         body = b""
 
@@ -301,6 +315,9 @@ class Application:
                 breadcrumbs=(("InfinityDB", "/"), ("About", None)),
                 catalog_tag="Player reference",
             )
+        elif path == "/api/version":
+            payload = {"version": __version__}
+            cache_control = "no-store"
         elif path == "/api/skill-extras":
             try:
                 payload = {"items": self.database.list_skill_extras()}
@@ -387,7 +404,7 @@ class Application:
         headers = [
             ("Content-Type", content_type),
             ("Content-Length", str(len(body))),
-            ("Cache-Control", "no-cache"),
+            ("Cache-Control", cache_control),
             ("X-Content-Type-Options", "nosniff"),
             (
                 "Content-Security-Policy",

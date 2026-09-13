@@ -5,7 +5,7 @@ import re
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from wsgiref.util import setup_testing_defaults
 
 import pytest
@@ -23,9 +23,14 @@ def request(
     query: str = "",
     method: str = "GET",
 ) -> tuple[int, dict[str, str], bytes]:
+    parsed = urlsplit(path)
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
-    environ.update(PATH_INFO=path, QUERY_STRING=query, REQUEST_METHOD=method)
+    environ.update(
+        PATH_INFO=parsed.path,
+        QUERY_STRING=query or parsed.query,
+        REQUEST_METHOD=method,
+    )
     response: dict[str, Any] = {}
 
     def start_response(status: str, headers: list[tuple[str, str]], exc_info=None) -> None:
@@ -390,9 +395,12 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/units"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
+    assert b'data-app-version="0.3.1"' in body
+    assert b'/static/version-check.js?v=0.3.1' in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
+        assert asset.endswith("?v=0.3.1")
         status, headers, body = request(app, asset)
         assert status == 200
         assert body
@@ -413,6 +421,20 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     status, _, script = request(app, "/static/app.js")
     assert status == 200
     assert b'className = "page-results-summary"' in script
+
+
+def test_browser_version_check_uses_an_uncached_server_version(app: Callable) -> None:
+    status, headers, body = request(app, "/api/version")
+
+    assert status == 200
+    assert headers["cache-control"] == "no-store"
+    assert json.loads(body) == {"version": "0.3.1"}
+
+    status, _, script = request(app, "/static/version-check.js")
+    assert status == 200
+    assert b'fetch("/api/version", { cache: "no-store" })' in script
+    assert b'freshUrl.searchParams.set("app-version", version)' in script
+    assert b"window.location.replace(freshUrl)" in script
 
 
 @pytest.mark.parametrize(
@@ -501,6 +523,9 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
 
     assert status == 200
     assert b'id="developer-mode-toggle"' in body
+    assert b'id="remember-settings-toggle"' in body
+    assert b'id="cookie-consent-dialog"' in body
+    assert b"Allow cookies" in body
     assert b'<div class="menu settings-menu" data-menu>' in body
     assert b'aria-controls="settings-menu"' in body
     assert b'>Settings <span aria-hidden="true">' in body
@@ -514,11 +539,19 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b".compact-menu-panel { position: static; display: flex;" in styles
     assert b".menu-label { display: none; }" in styles
     assert b".sidebar { position: relative; z-index: 4;" in styles
+    assert b".cookie-consent-dialog" in styles
+    assert b"background: var(--color-surface-default);" in styles
 
     status, _, preferences = request(app, "/static/preferences.js")
     assert status == 200
     assert b'const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";' in preferences
+    assert b'const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";' in preferences
     assert b"function initializeDeveloperModeToggle()" in preferences
+    assert b"function initializeRememberSettingsToggle()" in preferences
+    assert b"dialog.showModal()" in preferences
+    assert b'getElementById("distance-unit-toggle")?.checked ? "in" : "cm"' in preferences
+    assert b'getElementById("developer-mode-toggle")?.checked' in preferences
+    assert b"window.localStorage" not in preferences
     assert b'new CustomEvent("developermodechange"' in preferences
 
 
@@ -526,7 +559,7 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     status, _, body = request(app, "/units")
 
     assert status == 200
-    assert b'<script type="module" src="/static/navigation.js"></script>' in body
+    assert b'<script type="module" src="/static/navigation.js?v=0.3.1"></script>' in body
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body

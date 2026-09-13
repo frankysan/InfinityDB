@@ -43,6 +43,10 @@
           <span>Developer mode</span>
           <input id="developer-mode-toggle" type="checkbox" aria-label="Show database IDs and developer details">
         </label>
+        <label class="remember-settings-toggle" for="remember-settings-toggle">
+          <span>Remember settings</span>
+          <input id="remember-settings-toggle" type="checkbox" aria-label="Remember settings with a browser cookie">
+        </label>
       </div>
     </div>
   </div>
@@ -53,3 +57,13 @@
     <div class="edition"><span aria-hidden="true"></span> InfinityDB / Unit catalog</div>
   </div>
 </aside>
+<dialog id="cookie-consent-dialog" class="cookie-consent-dialog" aria-labelledby="cookie-consent-title">
+  <form method="dialog">
+    <h2 id="cookie-consent-title">Remember settings?</h2>
+    <p>InfinityDB uses a browser cookie to remember your distance and developer mode settings on this device.</p>
+    <div class="cookie-consent-actions">
+      <button value="cancel" class="button cookie-consent-cancel">Cancel</button>
+      <button value="accept" class="button button-primary">Allow cookies</button>
+    </div>
+  </form>
+</dialog>
