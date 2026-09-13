@@ -86,6 +86,27 @@ documentation are complete.
 
 ## Reliability and operations
 
+- [ ] Establish production load monitoring and a repeatable capacity test for
+  the Docker deployment.
+  - Record host and container CPU, memory, swap, disk-space/inode, disk-I/O,
+    and network utilization; retain Docker restart/OOM events and Caddy and
+    Gunicorn error logs. Alert on sustained CPU saturation, memory pressure or
+    OOM kills, low disk space, elevated 5xx responses, and failed health checks.
+  - Publish Caddy access-log metrics (request rate, status code, latency, and
+    active connections) and application metrics for dynamic API latency. Keep
+    dashboards split between static assets and `/api/` requests.
+  - Define a representative load-test scenario: browse the unit list, search,
+    open unit/catalog details, and fetch API endpoints using a current
+    production-like SQLite snapshot. Include a warm-cache steady-state run and
+    a short burst run; do not benchmark only the health endpoint.
+  - Establish a baseline at 2 Gunicorn workers x 4 threads, then test 4 x 4
+    only with a matching 4-vCPU/4-GiB container allocation. Record p50/p95/p99
+    latency, request/error rate, CPU, memory, and SQLite/disk behavior at each
+    concurrency level.
+  - Set an explicit scale trigger (for example, a sustained p95 latency or
+    error-rate SLO breach while CPU is not otherwise constrained). Prefer
+    multiple immutable app replicas behind Caddy over unbounded worker growth;
+    re-run the test before changing worker counts or deployment resources.
 - [ ] Add a benchmark/health-check command that validates the frontend database,
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
