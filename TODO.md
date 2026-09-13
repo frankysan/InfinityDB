@@ -39,7 +39,7 @@ documentation are complete.
   process stops between replacing either output.
 - [ ] Add database-size reporting to `infinity-db build` so snapshot growth is
   visible in build output and CI.
-- [ ] Add query-plan regression tests for the high-volume `unit_id`, `item_id`,
+- [x] Add query-plan regression tests for the high-volume `unit_id`, `item_id`,
   and weapon-template lookup paths.
 - [x] Run `ANALYZE` after importing and indexing the immutable frontend snapshot,
   then verify `sqlite_stat1` is present. This gives SQLite durable cardinality

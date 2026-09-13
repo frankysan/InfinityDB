@@ -202,6 +202,113 @@ def test_database_preserves_every_normalized_table_and_field(
         archive.close()
 
 
+def _query_plan(connection: sqlite3.Connection, sql: str, parameters: tuple[object, ...]) -> str:
+    """Return the detail strings from SQLite's query planner."""
+    return "\n".join(
+        row[3] for row in connection.execute(f"EXPLAIN QUERY PLAN {sql}", parameters)
+    )
+
+
+@pytest.mark.parametrize(
+    ("index_name", "table_name"),
+    [
+        (index_name, table_name)
+        for index_name, table_name, _ in INDEXES
+        if index_name.endswith("_unit")
+    ],
+)
+def test_unit_detail_queries_use_unit_indexes(
+    tmp_path: Path, normalized: dict, index_name: str, table_name: str
+) -> None:
+    """Keep cold unit-detail lookups from degrading into table scans."""
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        plan = _query_plan(
+            connection,
+            f"SELECT 1 FROM {quote(table_name)} WHERE unit_id IN (?, ?)",
+            (1, 3),
+        )
+        assert index_name in plan
+    finally:
+        connection.close()
+
+
+@pytest.mark.parametrize(
+    ("index_name", "table_name"),
+    [
+        (index_name, table_name)
+        for index_name, table_name, _ in INDEXES
+        if index_name.endswith("_item") and table_name != "option_weapon_templates"
+    ],
+)
+def test_catalog_detail_queries_use_item_indexes(
+    tmp_path: Path, normalized: dict, index_name: str, table_name: str
+) -> None:
+    """Keep reverse catalog lookups from degrading into table scans."""
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        plan = _query_plan(
+            connection,
+            f"SELECT 1 FROM {quote(table_name)} WHERE item_id IN (?, ?)",
+            (1, 2),
+        )
+        assert index_name in plan
+    finally:
+        connection.close()
+
+
+def test_weapon_catalog_detail_uses_template_lookup_indexes(
+    tmp_path: Path, normalized: dict
+) -> None:
+    """A weapon reverse lookup must start at its item template, not all occurrences."""
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        # The regular fixture is deliberately tiny, so SQLite quite reasonably
+        # scans it. Add unrelated weapon templates and occurrences to model the
+        # high-volume production path this index pair protects.
+        template_ids = [f"query-plan-template-{position}" for position in range(1_000)]
+        connection.executemany(
+            "INSERT INTO option_weapon_templates (id, item_id) VALUES (?, ?)",
+            [(template_id, 2) for template_id in template_ids],
+        )
+        connection.executemany(
+            "INSERT INTO option_weapons "
+            "(occurrence_id, army_id, unit_id, group_id, option_id, position, template_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [
+                (
+                    f"query-plan-occurrence-{position}",
+                    101,
+                    1,
+                    1,
+                    1,
+                    position + 10_000,
+                    template_id,
+                )
+                for position, template_id in enumerate(template_ids)
+            ],
+        )
+        connection.execute("ANALYZE")
+        plan = _query_plan(
+            connection,
+            "SELECT o.occurrence_id "
+            "FROM option_weapon_templates AS t "
+            "JOIN option_weapons AS o ON o.template_id = t.id "
+            "WHERE t.item_id IN (?)",
+            (1,),
+        )
+        assert "option_weapon_templates_item" in plan
+        assert "option_weapons_template" in plan
+    finally:
+        connection.close()
+
+
 def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: dict) -> None:
     data = copy.deepcopy(normalized)
     data["tables"]["metadata_ammunitions"] = [{"id": 2, "name": "Normal"}]
