@@ -45,6 +45,16 @@ compatibility revisions require a rebuild from normalized JSON for now.
 The frontend export runs `ANALYZE` after loading and indexing data, preserving
 SQLite planner statistics in the immutable snapshot.
 
+## PDF-derived rules storage (planned)
+
+Curated facts from user-supplied rules PDFs will be stored in a separate SQLite
+database, rather than in either Army JSON-derived database. The rules database
+will have an independent schema and replaceable, versioned snapshot lifecycle.
+Every fact must retain document identity, edition/version or date, and a
+printed-page citation. It may reference stable application-level rule
+identities, but neither database is an import source for the other; any combined
+view is assembled by application code.
+
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,
 preserving the distinction between list membership and canonical identity.

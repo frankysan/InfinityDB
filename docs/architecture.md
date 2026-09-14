@@ -22,7 +22,18 @@ Army directory / ZIP
     -> SQLite importer
     -> infinity.db + infinity.raw.db
     -> repository -> HTTP API -> browser UI
+
+PDF rules documents
+    -> curated, cited rules facts
+    -> separate rules SQLite database
+    -> rules repository -> HTTP API -> browser UI
 ```
+
+The two flows are deliberately independent. A rules-document update must not
+rebuild an Army snapshot, and an Army import must not modify rules data. Where a
+screen needs both, the application/service layer joins stable application-level
+identities and returns a combined representation; the databases do not import
+from or attach to one another.
 
 ## Module boundaries
 
@@ -95,6 +106,12 @@ frontend database and a lossless sibling raw archive, creates read-path indexes
 after loading, and persists SQLite planner statistics. Migration
 of persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
+
+When PDF-derived rules references are introduced, they use a distinct SQLite
+database with its own schema, compatibility/versioning, importer, and atomic
+replacement policy. Each curated fact records its document edition/date and
+printed-page citation. This database is not an extension of `infinity.db` or
+`infinity.raw.db`.
 
 ## HTTP API
 

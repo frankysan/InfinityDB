@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Document the decision to keep future PDF-derived rules references in a
+  separately versioned SQLite database from Army JSON-derived data.
+
 ## [0.5.1] - 2026-09-14
 
 ### Added

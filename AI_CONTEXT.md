@@ -40,6 +40,11 @@ clear requirement justifies it.
 - SQLite imports are complete snapshot replacements. Build and validate temporary
   sibling frontend and raw-archive databases before replacing the working files,
   so a failed build leaves the prior snapshot usable.
+- PDF-derived rules material belongs in a separate SQLite database from the
+  Army JSON-derived frontend and raw-archive databases. Its import and release
+  lifecycle must be independent; combine Army and rules results only in an
+  application/service layer, never by treating either source as input to the
+  other's pipeline.
 - Nested data remains JSON in the queryable frontend database. Each row's exact
   normalized representation, including absent versus null fields, belongs in
   the sibling raw archive; do not remove that fidelity merely to simplify a
@@ -149,3 +154,7 @@ or served copyrighted PDF text or artwork.
 - 2026-09-13: Settings follows the shared menu pattern across sidebar and
   compact top-bar layouts. Unit catalog accents may draw from named main-army
   colors only through the shared design-system tokens and gradients.
+- 2026-09-14: PDF-derived rules references will use their own SQLite database,
+  independently versioned and updated from the replaceable Army JSON snapshot.
+  This preserves source provenance and prevents a rules-document update from
+  requiring an Army import (or vice versa).

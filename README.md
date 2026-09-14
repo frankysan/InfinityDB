@@ -148,6 +148,11 @@ failed import leaves the prior database available. Rebuilding replaces imported
 data, so keep future user-authored data separately. On Windows, stop the server
 before rebuilding if active readers prevent database replacement.
 
+Future rules-reference material curated from the supplied PDFs will be stored
+in a separate SQLite database. It will retain its own source version and
+printed-page citations, and can be updated independently of the Army
+JSON-derived `infinity.db` and `infinity.raw.db` snapshots.
+
 The application also records a database compatibility revision in every build
 and verifies it at startup. This is independent of the release version: bump
 `DATABASE_COMPATIBILITY_VERSION` whenever a code change requires rebuilding the

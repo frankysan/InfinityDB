@@ -129,6 +129,10 @@ documentation are complete.
 
 - [ ] Establish a versioned, curated rules-reference overlay from the supplied
   N5 v5.3 rulebook (`data/eng-n5-update-5-3.pdf`, dated 2026-08-10).
+  - Store the overlay in its own SQLite database, with independent schema,
+    versioning, and atomic replacement. Do not add PDF-derived facts to
+    `infinity.db` or `infinity.raw.db`; application code may combine results by
+    stable rule identity only after each database is queried independently.
   - Keep it separate from the replaceable Infinity Army snapshot and key its
     entries by canonical rule identity (skill, equipment, ammunition, trait,
     state, Fireteam concept, and glossary term), with rulebook version and
