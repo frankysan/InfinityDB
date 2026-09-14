@@ -127,6 +127,143 @@ documentation are complete.
 
 ## Potential product features
 
+- [ ] Establish a versioned, curated rules-reference overlay from the supplied
+  N5 v5.3 rulebook (`data/eng-n5-update-5-3.pdf`, dated 2026-08-10).
+  - Keep it separate from the replaceable Infinity Army snapshot and key its
+    entries by canonical rule identity (skill, equipment, ammunition, trait,
+    state, Fireteam concept, and glossary term), with rulebook version and
+    printed-page citation.
+  - Store original, concise editorial summaries and structured facts (labels,
+    requirements, effects, restrictions, related rules, and page locators),
+    rather than bulk-extracting or serving the copyrighted PDF text or artwork.
+    Confirm permissions and attribution/linking requirements before publishing
+    any rule-derived prose.
+  - Add a coverage report that flags Army metadata items with no matching
+    reference entry, ambiguous names/levels/MOD variants, and entries whose
+    cited rulebook version is stale. The PDF labels changed text visually, but
+    a prior-version comparison is needed before claiming a specific change.
+- [ ] Add a dated FAQ/errata layer to the rules-reference overlay, starting
+  with `data/eng-faqs-n5-v0-1.pdf` (2026-08-25, four printed FAQ pages).
+  - Model each ruling as a question, concise answer, rule/topic links,
+    applicable scope, document version/date, and source-page citation; do not
+    flatten it into the base-rule summary. This preserves the distinction
+    between a rule and a later clarification, and permits an answer to be
+    superseded cleanly.
+  - Prioritize links to features already represented by the app: deployment
+    and private-information handling; BS Attack/MOD and template behavior;
+    hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;
+    Coordinated Orders; and Fireteam creation/bonuses/integrity. The FAQ also
+    contains scenario-specific rulings, so scope them to the relevant ITS
+    season and mission rather than presenting them as universal core rules.
+  - Define an explicit source-precedence and effective-date policy. ITS Season
+    18 says official rules, FAQs, Wiki, errata, and army lists published up to
+    one week before an event apply (p. 9); an on-screen answer must show its
+    source date/version and never silently blend conflicting documents.
+- [ ] Build a versioned ITS reference library, with Season 18 as current
+  (`data/its-18-en.pdf`, v2026.09.01) and Season 17 as an archived, selectable
+  reference (`data/its-rules-season-17-en-v1.0.2.pdf`, internally v0.2).
+  - Keep season content isolated by season and effective date. A user choosing
+    a prior event must see its matching scenario, objectives, extras, and FAQ
+    rulings—not a mix of Season 17 and Season 18 rules. Retain a curated,
+    human-reviewed change log/diff rather than relying on raw PDF text diffing.
+  - Treat the official Army app/site as the authority for army-list legality,
+    as the ITS rules require. InfinityDB may provide read-only explanation and
+    planning support, but must label its snapshot/date and avoid claiming
+    tournament validation.
+- [ ] Add ITS scenario list and detail pages backed by a curated seasonal data
+  model, rather than PDF excerpts.
+  - Capture structured, cited scenario facts: objectives and scoring, game
+    rounds/end conditions, force/point/SWC/table/deployment configuration,
+    deployment map or geometry, exclusion zones, token types/diameters,
+    classified-objective setup, reinforcement suitability, tactical-support
+    options, and scenario-specific rules/elements.
+  - Season 18 supplies Resilience Operations plus 15 standard scenarios and
+    five Direct Action scenarios (contents pp. 37-132); Season 17 remains a
+    useful historical comparison. Scenario pages should expose the selected
+    season prominently and link terms such as CivEvac, Casevac, HVT, Key Ops,
+    zones, and tactical elements to the relevant rules/state references.
+- [ ] Add mission-aware list capability guidance once saved-list support exists.
+  - Derive a transparent checklist from the selected ITS scenario and the
+    imported profile data: ITS Specialist Troops (Hackers, Doctors, Engineers,
+    Forward Observers, Paramedics, Chain of Command, Specialist Operative),
+    relevant equipment/skills, Reinforcement or Team-Ops constraints, and
+    scenario interactions. Explain missing capabilities without declaring a
+    list illegal or strategically inadequate.
+  - Keep temporary scenario-granted skills, designated Troopers, classified
+    cards, tactical support, and private information out of static unit
+    profiles. They belong to a per-game/session layer, which is not yet part
+    of InfinityDB's replaceable imported snapshot.
+- [ ] Provide an optional ITS organizer/event companion only after
+  user-authored persistent storage and migrations are established.
+  - Support season-aware event setup: published scenarios, allowed extras,
+    player count/round guidance, pairings, byes, score entry, and a printable
+    control-sheet checklist. Do not infer an official ranking submission or
+    replace the Online Tournament Manager.
+  - Include setup aids from the ITS documents (token sizing, terrain guidance,
+    table/deployment configuration, and mission elements), but make event
+    organizer choices and any local participant data clearly separate from
+    official records.
+- [ ] Use the rulebook to complete the existing Skills, Equipment, Weapons,
+  Ammunition, and Traits reference pages.
+  - The current catalogs expose Army metadata, reverse unit uses, and only a
+    small set of concise Trait descriptions. The v5.3 rules provide structured
+    labels, requirements, effects, restrictions, levels, and interactions for
+    common/special skills (pp. 75-118), equipment (pp. 119-127), and weapon
+    and ammunition rules (quick-reference chart from p. 176).
+  - Add cited, concise summaries and cross-links between a rule, its variants,
+    relevant states, ammunition, traits, and unit/loadout uses; make MOD scope
+    explicit so profile annotations such as `(+1B)`, `(-3)`, `PH=`, rerolls,
+    and Special Dice are not mistaken for universal unit statistics.
+- [ ] Add a rules glossary and profile-notation help layer to unit details.
+  - Explain the existing profile fields and symbols in context: training/order,
+    troop type, classification, ISC, Hackable, Peripheral, equipment versus
+    BS weapons, melee weapons, and the profile/loadout separators (rulebook
+    pp. 7-9 and glossary p. 173). Use tooltips or a linked glossary rather than
+    making every profile row denser.
+  - Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
+    Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever
+    it changes how profile data should be read.
+- [ ] Turn the existing Fireteam eligibility and list/detail-page backlog into
+  a rule-aware Fireteams feature.
+  - The imported schema already retains `fireteams`, types, members, and
+    descriptions, but the browser does not expose them. Present each army's
+    current Army-data chart as authoritative, with membership restrictions,
+    min/max requirements, FTO/wildcard notes, and source-data provenance.
+  - Pair it with concise v5.3 general rules: formation/coherency, leader,
+    integrity, active/reactive behavior, Fireteam levels, and bonuses
+    (pp. 132-136). Clearly separate general rules from army-specific chart
+    exceptions and warn that Infinity Army is the current chart authority.
+- [ ] Add a Game States reference catalog and contextual state links.
+  - The rulebook defines activation, effects, cancellation, and Null-State
+    status for states on pp. 157-172, while InfinityDB currently has no state
+    catalog. Create cited state pages and link them from skills, equipment,
+    weapon traits, and future Fireteam guidance.
+  - Surface interactions that affect the existing UI's concepts, especially
+    marker forms, Hidden Deployment, Suppressive Fire, Isolated, Unconscious,
+    Possessed, and Peripherals; do not infer a unit's current in-game state
+    from its static Army profile.
+- [ ] Add a weapon-and-ammunition quick-reference view built from existing
+  weapon profiles plus a curated rules overlay.
+  - Existing weapon pages already show profiles, traits, ranges, and special
+    weapon data. The v5.3 weapon chart supplies the player-facing reading
+    model—range bands, PS, Burst, ammunition, saving-roll attribute/count,
+    and traits (p. 176 onward)—and the rules explain their game effects.
+  - Normalize display of multi-mode/multi-ammunition profiles, link
+    ammunition names and traits to their effects, and provide a unit-neutral
+    comparison/filter view. Validate it against Army metadata; do not copy the
+    chart wholesale into the application.
+- [ ] Add optional play-aid pages for core procedures, distinct from the unit
+  database: order expenditure/ARO sequence, modifiers, movement/combat
+  resolution, command tokens, and Fireteam quick reference. The rulebook
+  explicitly organizes these as repeatable game flows (basic rules pp. 6-74,
+  command pp. 128-131, quick-reference charts pp. 176-195); concise,
+  cited checklists would make the existing catalog more useful at the table.
+- [ ] When a saved army-list builder is introduced, use the rules reference to
+  add game-mode and list-review guidance—not hidden-information disclosure.
+  The v5.3 game modes specify table/deployment/points/SWC guidance (p. 6) and
+  the rules distinguish private from open list information (p. 7). Keep any
+  share/export view privacy-aware and treat the Army app/data as authoritative
+  for list legality.
 - [x] Add list and detail pages for traits.
 - [ ] Add fuller rules summaries for skills, equipment, ammunition, and
   remaining traits.

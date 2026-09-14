@@ -49,6 +49,26 @@ clear requirement justifies it.
   databases must fail with a rebuild instruction rather than serving stale
   results.
 
+## Local rules-reference documents
+
+The ignored, user-supplied PDFs in `data/` are potential sources for
+rules-aware product work and data review; they are not inputs to the Army JSON
+merge/normalization/build pipeline:
+
+- `eng-n5-update-5-3.pdf`: N5 core rules v5.3.
+- `eng-faqs-n5-v0-1.pdf`: N5 FAQ v0.1.
+- `its-18-en.pdf`: current ITS Season 18 rules (v2026.09.01).
+- `its-rules-season-17-en-v1.0.2.pdf`: archived ITS Season 17 rules
+  (internally v0.2).
+
+When using these documents, record the document version/date and printed-page
+citation. Keep core rules, FAQ/errata rulings, and ITS season content separate
+so a view cannot silently combine editions or seasons. The official Infinity
+Army app/data remains authoritative for unit availability and list legality;
+live official rules, FAQs, wiki, errata, and event dates may supersede a local
+copy. Use concise original summaries and structured facts, not bulk-extracted
+or served copyrighted PDF text or artwork.
+
 ## API and UI rules
 
 - API routes are same-origin and read-only. Validate request input at the HTTP
