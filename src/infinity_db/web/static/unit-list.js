@@ -12,8 +12,7 @@ function factionSlug(armyId) {
 }
 
 function displayArmies(armies) {
-  const regularArmies = armies.filter((army) => ![98, 99].includes(army.id % 100));
-  return [...(regularArmies.length ? regularArmies : armies)].sort((left, right) => left.id - right.id);
+  return [...armies].sort((left, right) => left.id - right.id);
 }
 
 /** Render catalog unit records with the shared Unit explorer presentation. */

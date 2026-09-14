@@ -429,6 +429,32 @@ def army_required_flags(
     return required
 
 
+def visible_armies_for_group(
+    group: dict[str, Any],
+    selected_flags: set[str],
+    canonical_factions: dict[int, int | None],
+    normal_armies_by_unit: dict[int, set[int]],
+) -> dict[int, dict[str, Any]]:
+    """Collect armies that have at least one visible source occurrence.
+
+    A logical unit can combine a normal source record with a generic mercenary
+    or reinforcement record.  Availability must be evaluated before those
+    occurrences are collapsed into one army symbol.
+    """
+    visible: dict[int, dict[str, Any]] = {}
+    for occurrence in group["army_occurrences"]:
+        source_id = occurrence["source_id"]
+        flags = army_required_flags(
+            occurrence,
+            group,
+            canonical_factions[source_id],
+            normal_armies_by_unit[source_id],
+        )
+        if flags <= selected_flags:
+            visible.setdefault(occurrence["id"], occurrence)
+    return visible
+
+
 class Database:
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
@@ -569,13 +595,13 @@ class Database:
     ) -> dict[int, dict[str, Any]]:
         """Map every visible source unit to its logical-unit list item."""
         graph = self._unit_graph()
+        canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
+        normal_armies_by_unit = graph["normal_armies_by_unit"]
         items_by_source: dict[int, dict[str, Any]] = {}
         for group in graph["groups"]:
-            visible_armies = {
-                army_id: army
-                for army_id, army in group["armies"].items()
-                if army_is_available(army, group, set(selected_flags))
-            }
+            visible_armies = visible_armies_for_group(
+                group, set(selected_flags), canonical_factions, normal_armies_by_unit
+            )
             if group["armies"] and not visible_armies:
                 continue
             item = {
@@ -1153,14 +1179,14 @@ class Database:
         graph = self._unit_graph()
         army_names = graph["army_names"]
         groups = graph["groups"]
+        canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
+        normal_armies_by_unit = graph["normal_armies_by_unit"]
         search_key = accent_insensitive_key(search)
         grouped = []
         for group in groups:
-            visible_armies = {
-                id: army
-                for id, army in group["armies"].items()
-                if army_is_available(army, group, selected_flags)
-            }
+            visible_armies = visible_armies_for_group(
+                group, selected_flags, canonical_factions, normal_armies_by_unit
+            )
             if group["armies"] and not visible_armies:
                 continue
             if army_id is not None and army_id not in visible_armies:

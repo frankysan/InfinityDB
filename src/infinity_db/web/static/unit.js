@@ -218,7 +218,9 @@ function identicalStatline(left, right) {
 }
 
 function baseProfileName(profileName) {
-  return String(profileName || "").replace(/^REINF(?:\.|:)?\s*/i, "").trim();
+  return String(profileName || "")
+    .replace(/^(?:REINF|REFUERZOS)(?:\.|:)?\s*/i, "")
+    .trim();
 }
 
 const profileIdentityWordAliases = {

@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.2] - 2026-09-14
+
+### Fixed
+
+- Evaluate each source occurrence before merging a unit's army availability,
+  preventing mercenary and reinforcement armies from appearing when their
+  optional toggles are disabled.
+- Render every army that is visible under the selected optional-unit toggles,
+  including reinforcement armies alongside normal armies.
+- Bypass browser-cached API responses for optional-unit filtering, and advance
+  the static-asset fingerprint so an updated deployment immediately shows the
+  corrected availability symbols.
+
 ## [0.4.1] - 2026-09-13
 
 ### Changed

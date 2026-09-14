@@ -1,6 +1,10 @@
 /** Same-origin catalog API. Page modules do not need to know transport details. */
 async function get(path, signal) {
-  const response = await fetch(path, { signal, headers: { Accept: "application/json" } });
+  const response = await fetch(path, {
+    signal,
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  });
   if (!response.ok) {
     throw new Error(`The database returned an error (${response.status}). Please try again.`);
   }

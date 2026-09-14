@@ -3,7 +3,7 @@
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, TimeoutExpired, run
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 
 def _repository_root() -> Path | None:

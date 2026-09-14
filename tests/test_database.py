@@ -20,6 +20,7 @@ from infinity_db.database.repository import (
     merged_catalog_name,
     merged_skill_name,
     skill_merge_key,
+    visible_armies_for_group,
 )
 from infinity_db.database.schema import (
     DATABASE_COMPATIBILITY_KEY,
@@ -868,6 +869,31 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
     first_army_occurrences = [army for army in details["armies"] if army["id"] == 101]
     assert [army["availability_flags"] for army in first_army_occurrences] == [[], ["mercs"]]
     assert all(len(army["profiles"]) == 1 for army in first_army_occurrences)
+
+
+def test_list_availability_uses_source_specific_occurrences() -> None:
+    group = {
+        "canonical_faction_id": 301,
+        "normal_army_ids": {303},
+        "names": ["WOLFGANG"],
+        "slug": "wolfgang",
+        "army_occurrences": [
+            {"source_id": 1555, "id": 303, "name": "Kosmoflot"},
+            {"source_id": 11555, "id": 101, "name": "PanOceania"},
+            {"source_id": 1634, "id": 399, "name": "Reinforcements"},
+        ],
+    }
+    canonical_factions = {1555: 301, 11555: 1, 1634: 399}
+    normal_armies = {1555: {303}, 11555: set(), 1634: set()}
+
+    assert set(visible_armies_for_group(group, set(), canonical_factions, normal_armies)) == {303}
+    assert set(visible_armies_for_group(group, {"mercs"}, canonical_factions, normal_armies)) == {
+        101,
+        303,
+    }
+    assert set(
+        visible_armies_for_group(group, {"reinforcement"}, canonical_factions, normal_armies)
+    ) == {303, 399}
 
 
 def test_reinforcement_only_variants_join_their_standard_unit() -> None:
