@@ -109,7 +109,7 @@ data refresh.
 
 ### `GET /api/version`
 
-Returns `{ "version": "0.5.0", "snapshot_revision": "..." }`. The browser
+Returns `{ "version": "0.5.1", "snapshot_revision": "..." }`. The browser
 uses it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`

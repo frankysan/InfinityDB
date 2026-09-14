@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.5.0] - 2026-09-14
+## [0.5.1] - 2026-09-14
 
 ### Added
 
@@ -18,7 +18,7 @@ All notable changes to this project are documented in this file.
 ### Changed
 
 - Document the release deployment workflow and update release references to
-  version 0.5.0.
+  version 0.5.1.
 - Refresh immutable static-asset URLs so linked modules load their matching
   release versions after deployment.
 
