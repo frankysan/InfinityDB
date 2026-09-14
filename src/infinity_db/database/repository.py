@@ -176,6 +176,11 @@ def merged_catalog_name(name: object) -> str:
     return merged_skill_name(text)
 
 
+def weapon_trait_slug(name: object) -> str:
+    """Return the URL-safe identity used by the derived weapon-traits catalog."""
+    return re.sub(r"[^a-z0-9]+", "-", str(name or "").casefold()).strip("-")
+
+
 def unit_sort_key(value: object) -> str:
     """Return a case-insensitive, punctuation-free key for unit-name ordering."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
@@ -825,6 +830,80 @@ class Database:
                 representative["use_count"] = sum(item["use_count"] for item in group)
                 merged.append(representative)
             return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
+
+    @instance_lru_cache(maxsize=1)
+    def list_weapon_traits(self) -> list[dict[str, Any]]:
+        """Return distinct weapon-profile traits carried by catalogued weapons."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT DISTINCT w.id AS weapon_id, m.properties "
+                "FROM weapons AS w JOIN metadata_weapons AS m ON m.id = w.id "
+                "WHERE m.type IS NULL OR m.type != 'EQUIPMENT'"
+            ).fetchall()
+        weapons_by_trait: dict[str, set[int]] = {}
+        for row in rows:
+            try:
+                traits = json.loads(row["properties"] or "[]")
+            except json.JSONDecodeError:
+                traits = []
+            if not isinstance(traits, list):
+                traits = [traits]
+            for trait in traits:
+                trait_name = str(trait or "").strip()
+                if trait_name:
+                    weapons_by_trait.setdefault(trait_name, set()).add(row["weapon_id"])
+        traits = []
+        slug_counts: dict[str, int] = {}
+        for name in sorted(weapons_by_trait, key=unit_sort_key):
+            base_slug = weapon_trait_slug(name) or "trait"
+            slug_counts[base_slug] = slug_counts.get(base_slug, 0) + 1
+            slug = base_slug if slug_counts[base_slug] == 1 else f"{base_slug}-{slug_counts[base_slug]}"
+            traits.append({"id": slug, "name": name, "use_count": len(weapons_by_trait[name])})
+        return traits
+
+    @instance_lru_cache(maxsize=128)
+    def get_weapon_trait(self, trait_slug: str) -> dict[str, Any] | None:
+        """Return one trait with each weapon's visible unit usage."""
+        trait = next((item for item in self.list_weapon_traits() if item["id"] == trait_slug), None)
+        if trait is None:
+            return None
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT DISTINCT w.id, m.properties FROM weapons AS w JOIN metadata_weapons AS m ON m.id = w.id "
+                "WHERE m.type IS NULL OR m.type != 'EQUIPMENT'"
+            ).fetchall()
+        weapon_ids = []
+        for row in rows:
+            try:
+                profile_traits = json.loads(row["properties"] or "[]")
+            except json.JSONDecodeError:
+                profile_traits = []
+            if not isinstance(profile_traits, list):
+                profile_traits = [profile_traits]
+            if trait["name"] in profile_traits:
+                weapon_ids.append(row["id"])
+        variants = []
+        for weapon_id in sorted(set(weapon_ids)):
+            weapon = self.get_catalog_item("weapons", weapon_id)
+            if weapon is None:
+                continue
+            units = {
+                unit["id"]: unit
+                for variant in weapon["variants"]
+                for unit in variant["units"]
+            }
+            if units:
+                variants.append(
+                    {
+                        "item_id": weapon["id"],
+                        "item_name": weapon["name"],
+                        "extras": [],
+                        "units": sorted(
+                            units.values(), key=lambda unit: (unit_sort_key(unit["name"]), unit["id"])
+                        ),
+                    }
+                )
+        return {**trait, "variants": variants}
 
     @instance_lru_cache(maxsize=128)
     def get_catalog_item(self, catalog: str, item_id: int) -> dict[str, Any] | None:

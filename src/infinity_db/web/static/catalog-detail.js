@@ -52,6 +52,22 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
+function weaponTraitSlug(trait) {
+  return String(trait || "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function weaponTraitLinks(traitNames) {
+  const fragment = document.createDocumentFragment();
+  for (const [index, trait] of traitNames.entries()) {
+    if (index) fragment.append(" · ");
+    const link = document.createElement("a");
+    link.href = `/weapon-traits/${encodeURIComponent(weaponTraitSlug(trait))}`;
+    link.textContent = trait;
+    fragment.append(link);
+  }
+  return fragment;
+}
+
 function rangeModifier(ranges, maximum) {
   const matchingRange = Object.values(ranges || {})
     .filter((range) => range && typeof range === "object" && Number.isFinite(Number(range.max)))
@@ -188,7 +204,7 @@ function weaponVariants(variants) {
         traitsHeading.textContent = "Traits";
         const traits = document.createElement("p");
         traits.className = "weapon-data-value";
-        traits.textContent = traitNames.join(" · ");
+        traits.append(weaponTraitLinks(traitNames));
         traitsRow.append(traitsHeading, traits);
         card.append(traitsRow);
       }
@@ -253,7 +269,7 @@ function render(item) {
       meta.replaceChildren(link);
     } else {
       meta.classList.add("developer-only");
-      meta.textContent = `${catalog === "equipment" ? "Equipment" : "Weapon"} #${item.id}`;
+      meta.textContent = `${catalog === "equipment" ? "Equipment" : catalog === "weapons" ? "Weapon" : "Weapon trait"} #${item.id}`;
     }
   }
   const sections = usageSections(item);

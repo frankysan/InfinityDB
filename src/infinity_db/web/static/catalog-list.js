@@ -1,7 +1,7 @@
 import { initializeDistanceUnitToggle } from "./preferences.js";
 
 const page = document.body.dataset.catalog;
-const title = page === "equipment" ? "equipment" : page;
+const title = page === "weapon-traits" ? "weapon traits" : page;
 const byId = (id) => document.getElementById(id);
 const elements = {
   count: byId("catalog-count"), results: byId("catalog-results"), loading: byId("catalog-loading"),
@@ -29,7 +29,9 @@ function show(panel) {
 function render() {
   const query = elements.search.value.trim().toLocaleLowerCase();
   const visible = query ? items.filter((item) => item.searchText.includes(query)) : items;
-  elements.count.textContent = `${visible.length} ${title}${visible.length === 1 ? "" : " entries"}`;
+  elements.count.textContent = page === "weapon-traits"
+    ? `${visible.length} weapon trait${visible.length === 1 ? "" : "s"}`
+    : `${visible.length} ${title}${visible.length === 1 ? "" : " entries"}`;
   if (!visible.length) return show(elements.empty);
   const fragment = document.createDocumentFragment();
   let category;
@@ -49,9 +51,9 @@ function render() {
     const row = document.createElement("tr");
     const name = document.createElement("th");
     name.scope = "row";
-    if (["skills", "equipment", "weapons"].includes(page)) {
+    if (["skills", "equipment", "weapons", "weapon-traits"].includes(page)) {
       const link = document.createElement("a");
-      link.href = `/${page}/${item.id}`;
+      link.href = `/${page}/${encodeURIComponent(item.id)}`;
       link.textContent = item.name;
       name.append(link);
     } else {

@@ -360,6 +360,13 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
             "profiles": detail["profiles"],
         }
     ]
+    assert Database(path).list_weapon_traits() == [
+        {"id": "suppressive-fire", "name": "Suppressive Fire", "use_count": 1}
+    ]
+    trait = Database(path).get_weapon_trait("suppressive-fire")
+    assert trait is not None
+    assert trait["name"] == "Suppressive Fire"
+    assert trait["variants"][0]["item_name"] == "weapons"
 
 
 def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(

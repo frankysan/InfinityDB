@@ -850,6 +850,11 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b'profileHeading.textContent = "Profile";' in weapon_detail
     assert b'traitsHeading.textContent = "Traits";' in weapon_detail
     assert b"if (traitNames.length)" in weapon_detail
+    assert b"function weaponTraitLinks(traitNames)" in weapon_detail
+    assert (
+        b'link.href = `/weapon-traits/${encodeURIComponent(weaponTraitSlug(trait))}`;'
+        in weapon_detail
+    )
     assert b".weapon-data-heading" in styles
     assert b'profileRow.className = "weapon-data-row"' in weapon_detail
     assert b'profileStats.className = "weapon-data-value"' in weapon_detail
@@ -956,6 +961,29 @@ def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("application/json")
     assert json.loads(body) == {"items": []}
+
+
+def test_weapon_traits_page_and_api_are_served(app: Callable) -> None:
+    status, headers, body = request(app, "/weapon-traits")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"catalog-list.js" in body
+    assert b'href="/weapon-traits" aria-current="page"' in body
+    assert b"Weapon traits catalog" in body
+
+    status, headers, body = request(app, "/api/weapon-traits")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    assert json.loads(body) == {"items": []}
+
+    status, headers, body = request(app, "/weapon-traits/suppressive-fire")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"catalog-detail.js" in body
+
+    status, _, body = request(app, "/api/weapon-traits/suppressive-fire")
+    assert status == 404
+    assert json.loads(body)["error"] == "Weapon trait not found"
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])

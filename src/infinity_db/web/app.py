@@ -132,6 +132,10 @@ def _page(
             ' aria-current="page"' if active_page == "weapons" else "",
         )
         .replace(
+            "{{WEAPON_TRAITS_CURRENT}}",
+            ' aria-current="page"' if active_page == "weapon-traits" else "",
+        )
+        .replace(
             "{{SKILL_EXTRAS_CURRENT}}",
             ' aria-current="page"' if active_page == "skill-extras" else "",
         )
@@ -352,7 +356,7 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
                 catalog_tag="Reference data",
             )
-        elif path in {"/skills", "/equipment", "/weapons"}:
+        elif path in {"/skills", "/equipment", "/weapons", "/weapon-traits"}:
             content_type = "text/html; charset=utf-8"
             catalog = path.removeprefix("/")
             body = _page(
@@ -360,7 +364,7 @@ class Application:
                 active_page=catalog,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), (catalog.capitalize(), None)),
+                breadcrumbs=(("Database", "/"), (catalog.replace("-", " ").title(), None)),
                 catalog_tag="Reference data",
             )
         elif re.fullmatch(r"/skills/[0-9]+", path):
@@ -383,6 +387,20 @@ class Application:
                 breadcrumbs=(
                     ("Database", "/"),
                     (match.group(1).capitalize(), f"/{match.group(1)}"),
+                    ("Details", None),
+                ),
+                catalog_tag="Reference data",
+            )
+        elif re.fullmatch(r"/weapon-traits/[a-z0-9-]+", path):
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "weapon-traits-detail.html",
+                active_page="weapon-traits",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(
+                    ("Database", "/"),
+                    ("Weapon traits", "/weapon-traits"),
                     ("Details", None),
                 ),
                 catalog_tag="Reference data",
@@ -416,6 +434,14 @@ class Application:
                 LOGGER.exception("Could not read catalog")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The catalog is unavailable. Please try again."}
+        elif path == "/api/weapon-traits":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = {"items": self.database.list_weapon_traits()}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read weapon traits")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The weapon traits are unavailable. Please try again."}
         elif match := re.fullmatch(r"/api/skills/([0-9]+)", path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
@@ -445,6 +471,17 @@ class Application:
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The reference item is unavailable. Please try again."}
+        elif match := re.fullmatch(r"/api/weapon-traits/([a-z0-9-]+)", path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = self.database.get_weapon_trait(match.group(1))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Weapon trait not found"}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read weapon trait")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The weapon trait is unavailable. Please try again."}
         elif path == "/api/armies":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:

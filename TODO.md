@@ -127,8 +127,9 @@ documentation are complete.
 
 ## Potential product features
 
-- [ ] Add list and detail pages for weapon traits.
+- [x] Add list and detail pages for weapon traits.
 - [ ] Add rules summaries for skills, equipment, ammunition, and weapon traits.
+- [ ] Add a curated Infinity Wiki URL mapping for weapon traits when authoritative links are available.
 - [ ] Show unit Fireteam eligibility on the unit-details page.
 - [ ] Add Fireteam list and detail pages.
 - [ ] Create a unit-model image repository.
