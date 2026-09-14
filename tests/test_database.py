@@ -656,11 +656,13 @@ def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normal
 
     database = Database(path)
     strategos = [item for item in database.list_catalog_items("skills") if item["id"] == 69]
-    assert strategos == [{"id": 69, "name": "Strategos", "wiki": None, "use_count": 0}]
+    assert strategos == [{"id": 69, "name": "Strategos", "wiki": None, "use_count": 0,
+                          "categories": [{"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}]}]
     assert database.get_skill(70) == {
         "id": 69,
         "name": "Strategos",
         "wiki": None,
+        "categories": [{"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}],
         "variants": [],
     }
 

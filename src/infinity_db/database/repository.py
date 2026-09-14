@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Any
 
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
+
+from infinity_db.skill_categories import categories_for_skill
 from infinity_army_data.weapon_profiles import special_weapon_detail
 from infinity_db.traits import TRAIT_DESCRIPTIONS, canonical_trait_name
 
@@ -798,6 +800,8 @@ class Database:
                     )
             for item in items:
                 item["use_count"] = len(use_keys.get(item["id"], set()))
+                if catalog == "skills":
+                    item["categories"] = categories_for_skill(item["id"])
             if catalog not in {"skills", "equipment", "weapons"}:
                 return items
             groups: dict[str, list[dict[str, Any]]] = {}
@@ -1210,6 +1214,11 @@ class Database:
                 variant["units"] = sorted(
                     items.values(), key=lambda item: (unit_sort_key(item["name"]), item["id"])
                 )
+            categories = {
+                (category["name"], category["source"], category["page"]): category
+                for source_id in source_ids
+                for category in categories_for_skill(source_id)
+            }
             return {
                 **dict(representative),
                 "id": canonical_id,
@@ -1218,6 +1227,7 @@ class Database:
                     if len(source_ids) > 1
                     else representative["name"]
                 ),
+                "categories": list(categories.values()),
                 "variants": [variant for variant in variants.values() if variant["units"]],
             }
 

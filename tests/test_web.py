@@ -1041,7 +1041,8 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert status == 200
     assert headers["content-type"].startswith("application/json")
     expected = {
-        "skills": {"id": 11, "name": "Stealth", "wiki": None, "use_count": 1},
+        "skills": {"id": 11, "name": "Stealth", "wiki": None, "use_count": 1,
+                   "categories": [{"name": "Unclassified", "source": None, "page": None}]},
         "equipment": {
             "id": 21,
             "name": "Medikit",
@@ -1075,6 +1076,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
         "id": 11,
         "name": "Stealth",
         "wiki": None,
+        "categories": [{"name": "Unclassified", "source": None, "page": None}],
         "variants": [
             {
                 "skill_id": 11,

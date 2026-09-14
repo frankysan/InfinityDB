@@ -79,7 +79,8 @@ function render(skill) {
     meta.replaceChildren(link);
   } else {
     meta.classList.add("developer-only");
-    meta.textContent = `Skill #${skill.id}`;
+  const categories = (skill.categories || []).map((category) => category.name).join(", ");
+  meta.textContent = `Skill #${skill.id}${categories ? ` · ${categories}` : ""}`;
   }
   const variants = [...skill.variants].sort((left, right) => (
     formatVariantName(left).localeCompare(
