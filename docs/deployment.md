@@ -15,18 +15,22 @@ only TCP port 80; Caddy does not obtain or manage TLS certificates.
 
 ## Deploy or update
 
-From a checked-out release on the server, prepare the database from a source
-snapshot. `metadata.json` is required: include it in the ZIP, place it beside
-the source snapshot, or pass `--metadata PATH` to the build command. The build
-is validated and replaces the local database only after a successful import.
+From a clone on the server, place the current source snapshot and its required
+`metadata.json` in `data/raw/` (or ensure they are otherwise available to the
+build). `metadata.json` is required: include it in the ZIP, place it beside the
+source snapshot, or pass `--metadata PATH` to the build command. The build is
+validated and replaces the local database only after a successful import.
 
 ```sh
-python3 -m venv .venv
-.venv/bin/pip install -e .
-.venv/bin/infinity-db build --compact
-
-DOMAIN=infinity.example.com IMAGE_TAG=0.4.2 docker compose up -d --build
+sh ./scripts/install-or-update.sh
 ```
+
+The interactive script fetches tags from `origin`, checks out the newest
+version tag in detached-HEAD mode, asks for the public domain and image
+retention count, builds the database, and deploys it. It can save those two
+settings to the ignored `.infinity-db-deploy.env` file for subsequent runs.
+It stops before changing tags when tracked local edits are present, but leaves
+untracked raw data and the optional config file intact.
 
 The image build deliberately requires `data/generated/infinity.db`. This makes
 an unbuilt or invalid data snapshot fail the deployment rather than serving an
@@ -48,9 +52,19 @@ docker compose up -d --build
 ```
 
 To update data, download or place the new raw snapshot and its required
-`metadata.json` in `data/raw/`, repeat `infinity-db build --compact`, and run
-`docker compose up -d --build` with a new `IMAGE_TAG`. Do not edit the SQLite
-file inside a running container.
+`metadata.json` in `data/raw/`, then run `sh ./scripts/install-or-update.sh`.
+Do not edit the SQLite file inside a running container.
+
+`deploy.sh` retains the current build and the two newest rollback builds by
+default. After Compose has successfully started and health-checked the new application container,
+it removes only older `infinity-db:app-*` tags. It does not prune dangling
+images or touch Caddy, Portainer, named volumes, or images from other
+repositories. Set `RETAIN_APP_IMAGES=2` to keep the current build plus one
+rollback build; use `RETAIN_APP_IMAGES=1` to keep only the current build.
+
+To apply the retention policy to images already on the server without
+deploying, run `sh ./scripts/prune-app-images.sh` (or pass the desired count as
+its first argument).
 
 The application container runs as an unprivileged user with a read-only
 filesystem. Caddy's named volumes are intentionally retained for its runtime

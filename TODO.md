@@ -64,7 +64,13 @@ documentation are complete.
   army/unit/group/option IDs and position are excluded. A template/link split
   could reduce repeated `name`, points, SWC, mini, and disabled values, but
   must be query-plan and database-size benchmarked before changing the
-  read-optimized schema.
+  read-optimized schema. 2026-09-14 probe: isolating the table and its unit
+  index reduced 884,736 bytes to 819,200 bytes (64 KiB, 7.4%), while the
+  largest unit-detail loadout query (368 rows) retained indexed access but was
+  roughly 14% slower from the extra template primary-key lookup. The checked-in
+  `infinity.db` has 3,045 loadout rows whereas `normalized.json` has 12,993,
+  so regenerate aligned artifacts before treating this as a whole-database
+  decision.
 - [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
   list raw rows by normalized table, and verify that an archive matches its
   frontend sibling's metadata.
