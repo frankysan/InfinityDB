@@ -1,6 +1,7 @@
 const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";
 const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
 const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";
+const DISABLE_CACHE_KEY = "infinity-db-disable-cache";
 const OPTIONAL_UNIT_SETTINGS = [
   { id: "mercs-filter", key: "infinity-db-mercs", defaultChecked: false },
   { id: "specops-filter", key: "infinity-db-specops", defaultChecked: true },
@@ -79,7 +80,38 @@ export function initializeDeveloperModeToggle() {
     const next = toggle.checked;
     document.documentElement.dataset.developerMode = String(next);
     saveSetting(DEVELOPER_MODE_KEY, String(next));
+    if (!next) {
+      const cacheToggle = document.getElementById("disable-cache-toggle");
+      document.documentElement.dataset.disableCache = "false";
+      if (cacheToggle) cacheToggle.checked = false;
+      saveSetting(DISABLE_CACHE_KEY, "false");
+      window.dispatchEvent(new CustomEvent("cachemodechange", { detail: false }));
+    }
     window.dispatchEvent(new CustomEvent("developermodechange", { detail: next }));
+  });
+}
+
+export function cacheBustedUrl(path) {
+  if (document.documentElement.dataset.disableCache !== "true") return path;
+  const url = new URL(path, window.location.origin);
+  url.searchParams.set("cache_bust", String(Date.now()));
+  return `${url.pathname}${url.search}`;
+}
+
+export function initializeDisableCacheToggle() {
+  const toggle = document.getElementById("disable-cache-toggle");
+  if (!toggle || toggle.dataset.initialized === "true") return;
+
+  toggle.dataset.initialized = "true";
+  const enabled = document.documentElement.dataset.developerMode === "true"
+    && savedSetting(DISABLE_CACHE_KEY) === "true";
+  document.documentElement.dataset.disableCache = String(enabled);
+  toggle.checked = enabled;
+  toggle.addEventListener("change", () => {
+    const next = toggle.checked;
+    document.documentElement.dataset.disableCache = String(next);
+    saveSetting(DISABLE_CACHE_KEY, String(next));
+    window.dispatchEvent(new CustomEvent("cachemodechange", { detail: next }));
   });
 }
 
@@ -117,6 +149,7 @@ export function initializeRememberSettingsToggle() {
       removeCookie(REMEMBER_SETTINGS_KEY);
       removeCookie(DISTANCE_UNIT_KEY);
       removeCookie(DEVELOPER_MODE_KEY);
+      removeCookie(DISABLE_CACHE_KEY);
       OPTIONAL_UNIT_SETTINGS.forEach(({ key }) => removeCookie(key));
       return;
     }
@@ -134,6 +167,7 @@ export function initializeRememberSettingsToggle() {
     setCookie(REMEMBER_SETTINGS_KEY, "true");
     setCookie(DISTANCE_UNIT_KEY, document.getElementById("distance-unit-toggle")?.checked ? "in" : "cm");
     setCookie(DEVELOPER_MODE_KEY, String(document.getElementById("developer-mode-toggle")?.checked));
+    setCookie(DISABLE_CACHE_KEY, String(document.getElementById("disable-cache-toggle")?.checked));
     OPTIONAL_UNIT_SETTINGS.forEach(({ id, key, defaultChecked }) => {
       setCookie(key, String(document.getElementById(id)?.checked ?? defaultChecked));
     });
@@ -142,5 +176,6 @@ export function initializeRememberSettingsToggle() {
 
 initializeRememberSettingsToggle();
 initializeDeveloperModeToggle();
+initializeDisableCacheToggle();
 initializeOptionalUnitToggles();
 initializeDistanceUnitToggle();

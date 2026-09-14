@@ -127,9 +127,10 @@ documentation are complete.
 
 ## Potential product features
 
-- [x] Add list and detail pages for weapon traits.
-- [ ] Add rules summaries for skills, equipment, ammunition, and weapon traits.
-- [ ] Add a curated Infinity Wiki URL mapping for weapon traits when authoritative links are available.
+- [x] Add list and detail pages for traits.
+- [ ] Add fuller rules summaries for skills, equipment, ammunition, and
+  remaining traits.
+- [ ] Add a curated Infinity Wiki URL mapping for traits when authoritative links are available.
 - [ ] Show unit Fireteam eligibility on the unit-details page.
 - [ ] Add Fireteam list and detail pages.
 - [ ] Create a unit-model image repository.
@@ -143,7 +144,7 @@ documentation are complete.
 - [ ] Deep-linkable, shareable search and filter state for catalog and unit
   views.
 - [ ] Rules-reference cross-links from profiles, loadouts, skills, equipment,
-  and weapon traits to their catalog detail pages.
+  and traits to their catalog detail pages.
 - [ ] Army-list builder/export integration once user-authored data storage and
   migrations are established.
 - [ ] Data-review screens in Developer mode: normalization warnings, source

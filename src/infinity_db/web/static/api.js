@@ -1,6 +1,8 @@
+import { cacheBustedUrl } from "./preferences.js";
+
 /** Same-origin catalog API. Page modules do not need to know transport details. */
 async function get(path, signal) {
-  const response = await fetch(path, {
+  const response = await fetch(cacheBustedUrl(path), {
     signal,
     cache: "no-store",
     headers: { Accept: "application/json" },

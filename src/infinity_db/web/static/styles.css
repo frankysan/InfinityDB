@@ -298,7 +298,6 @@ h1 > span { color: #8caa60; }
 .weapon-ranges tbody td.range-modifier-minus-3 { background: var(--color-range-caution); color: #263a38; }
 .weapon-ranges tbody td.range-modifier-minus-6 { background: var(--color-range-negative); color: #fff; }
 .weapon-profile-stats { margin: 0; padding: 12px 18px; border-top: 1px solid #e9ece3; color: #405b4d; font-size: 11px; line-height: 1.6; font-variant-numeric: tabular-nums; }
-.weapon-traits { margin: 0; padding: 12px 18px 14px; border-top: 1px solid #e9ece3; color: #52634c; font-size: 11px; line-height: 1.6; }
 .weapon-data-row { display: grid; grid-template-columns: minmax(105px, 30%) minmax(0, 1fr); border-top: 1px solid #e9ece3; }
 .weapon-data-heading { display: flex; align-items: center; margin: 0; padding: 12px 18px; background: var(--surface-data-header); color: #64715d; font-size: 9px; font-weight: 550; letter-spacing: 1.1px; text-transform: uppercase; }
 .weapon-data-value { margin: 0; padding: 12px 18px; border-left: 1px solid #e9ece3; color: #52634c; font-size: 11px; line-height: 1.6; }
@@ -371,6 +370,7 @@ tbody th, tbody td { border-bottom: 1px solid #e9ece3; padding: var(--table-cell
 .division-badge-surface { background: #256d1b; }
 .division-badge-deepspace { background: #d68623; }
 .unit-detail .army-profile .army-profiles-heading:not(:first-of-type) { margin-top: 6px; border-top: 2px solid #405b4d; }
+.trait-catalog-heading { margin: 24px 0 10px; padding: 0 0 10px; border-bottom: 2px solid #405b4d; color: #405b4d; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
 .unit-detail .army-profile .stat-different { box-shadow: inset 2px 0 var(--color-status-warning-indicator); }
 .unit-detail .army-profile .profile-item-list { white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
 .profile-attributes-label, .profile-item-label { width: 30%; padding-left: 46px; }

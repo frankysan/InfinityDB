@@ -5,7 +5,7 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.4.2** (2026-09-14).
+Current release: **0.5.0** (2026-09-14).
 
 ## Current features
 
@@ -17,7 +17,8 @@ Current release: **0.4.2** (2026-09-14).
 - Preserves source records and reports normalization anomalies without replacing
   a working database when an import fails.
 - Browses units by army, accent- and punctuation-insensitive name search, and
-  paginated results. Clicking a catalog row opens that unit's details.
+  paginated results. Advanced filters narrow results by skill, equipment, or
+  weapon. Clicking a catalog row opens that unit's details.
 - Filters optional availability categories, including mercenaries, Spec-Ops,
   Team Operations, and reinforcements.
 - Shows a unit's general profile plus faction- and army-specific profiles,
@@ -30,7 +31,8 @@ Current release: **0.4.2** (2026-09-14).
   for movement and distance-based skill modifiers, and displays the download
   date recorded for a downloader-created Army snapshot in the sidebar.
 - Provides a default-off Developer mode in Settings for showing database IDs
-  and ID table columns during data review.
+  and ID table columns during data review, with an optional cache bypass for
+  reviewing local changes.
 - Uses a shared page shell on every route: the navigation, breadcrumb header,
   catalog label, and versioned footer are rendered centrally. Core visual
   values are defined as CSS design tokens, so new screens can reuse the same
@@ -40,9 +42,11 @@ Current release: **0.4.2** (2026-09-14).
   colors while retaining the shared design-system contrast and spacing rules.
 - Includes a Skill Modifiers page for browsing distance-related skill extras
   and the units that use them.
-- Includes searchable Skills, Equipment, and Weapons reference catalogs. Their
-  detail pages show the matching unit profiles and loadouts; weapon pages also
-  show available profiles, traits, range bands, and special weapon data.
+- Includes searchable Skills, Equipment, Weapons, and Traits reference
+  catalogs. Skills, Equipment, and Weapons detail pages show the matching unit
+  profiles and loadouts; weapon pages also show available profiles, traits,
+  range bands, and special weapon data. Traits pages provide concise summaries
+  and group their uses across rule catalogs.
 - Includes an About page that explains the local reference, its validated data
   pipeline, its current capabilities and direction, plus maintainer contact
   details, the GitHub repository, and an LLM code-use disclosure.
@@ -53,6 +57,8 @@ Current release: **0.4.2** (2026-09-14).
   symbols; normal build commands do not make network requests.
 - Uses snapshot-aware API validators and release-fingerprinted static modules,
   so browsers refresh safely when either deployed application or data changes.
+- Includes server deployment, update, and image-pruning scripts; see the
+  [Linux deployment guide](docs/deployment.md) for the supported workflow.
 
 ## Requirements and setup
 
@@ -162,7 +168,7 @@ proxy for public HTTPS. Build the database before building the image:
 
 ```sh
 infinity-db build --compact
-DOMAIN=infinity.example.com IMAGE_TAG=0.4.2 docker compose up -d --build
+DOMAIN=infinity.example.com IMAGE_TAG=0.5.0 docker compose up -d --build
 ```
 
 Replace the hostname with the public domain configured at the external TLS

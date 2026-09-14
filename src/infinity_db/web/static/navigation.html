@@ -26,9 +26,9 @@
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10h10l3-3 1 1-3 3 3 3-1 1-3-3H3z"/><path d="M6 10V6"/></svg>
           Weapons
         </a>
-        <a class="nav-item" href="/weapon-traits"{{WEAPON_TRAITS_CURRENT}}>
+        <a class="nav-item" href="/traits"{{TRAITS_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 5 5-2 7 7-6 6-7-7z"/><circle cx="6.5" cy="6.5" r="1"/></svg>
-          Weapon traits
+          Traits
         </a>
         <a class="nav-item" href="/about"{{ABOUT_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 9v4"/><path d="M10 6.5h.01"/></svg>
@@ -66,6 +66,10 @@
         <label class="developer-toggle" for="developer-mode-toggle">
           <span>Developer mode</span>
           <input id="developer-mode-toggle" type="checkbox" aria-label="Show database IDs and developer details">
+        </label>
+        <label class="developer-toggle developer-only" for="disable-cache-toggle">
+          <span>Disable cache</span>
+          <input id="disable-cache-toggle" type="checkbox" aria-label="Disable cached API responses">
         </label>
         <label class="remember-settings-toggle" for="remember-settings-toggle">
           <span>Remember settings</span>

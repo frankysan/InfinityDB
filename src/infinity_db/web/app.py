@@ -132,8 +132,8 @@ def _page(
             ' aria-current="page"' if active_page == "weapons" else "",
         )
         .replace(
-            "{{WEAPON_TRAITS_CURRENT}}",
-            ' aria-current="page"' if active_page == "weapon-traits" else "",
+            "{{TRAITS_CURRENT}}",
+            ' aria-current="page"' if active_page == "traits" else "",
         )
         .replace(
             "{{SKILL_EXTRAS_CURRENT}}",
@@ -217,7 +217,7 @@ def _flag(params: dict, key: str) -> bool:
 
 
 def _unit_query(query: str) -> dict:
-    params = parse_qs(query, keep_blank_values=True, max_num_fields=13)
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=14)
     for key, values in params.items():
         if key not in {
             "army_id",
@@ -232,6 +232,7 @@ def _unit_query(query: str) -> dict:
             "teamops",
             "reinforcement",
             "order",
+            "cache_bust",
         }:
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
@@ -362,7 +363,7 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
                 catalog_tag="Reference data",
             )
-        elif path in {"/skills", "/equipment", "/weapons", "/weapon-traits"}:
+        elif path in {"/skills", "/equipment", "/weapons", "/traits"}:
             content_type = "text/html; charset=utf-8"
             catalog = path.removeprefix("/")
             body = _page(
@@ -397,16 +398,16 @@ class Application:
                 ),
                 catalog_tag="Reference data",
             )
-        elif re.fullmatch(r"/weapon-traits/[a-z0-9-]+", path):
+        elif re.fullmatch(r"/traits/[a-z0-9-]+", path):
             content_type = "text/html; charset=utf-8"
             body = _page(
-                "weapon-traits-detail.html",
-                active_page="weapon-traits",
+                "traits-detail.html",
+                active_page="traits",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
                     ("Database", "/"),
-                    ("Weapon traits", "/weapon-traits"),
+                    ("Traits", "/traits"),
                     ("Details", None),
                 ),
                 catalog_tag="Reference data",
@@ -440,14 +441,14 @@ class Application:
                 LOGGER.exception("Could not read catalog")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The catalog is unavailable. Please try again."}
-        elif path == "/api/weapon-traits":
+        elif path == "/api/traits":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = {"items": self.database.list_weapon_traits()}
+                payload = {"items": self.database.list_traits()}
             except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read weapon traits")
+                LOGGER.exception("Could not read traits")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The weapon traits are unavailable. Please try again."}
+                payload = {"error": "The traits are unavailable. Please try again."}
         elif match := re.fullmatch(r"/api/skills/([0-9]+)", path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
@@ -477,17 +478,17 @@ class Application:
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The reference item is unavailable. Please try again."}
-        elif match := re.fullmatch(r"/api/weapon-traits/([a-z0-9-]+)", path):
+        elif match := re.fullmatch(r"/api/traits/([a-z0-9-]+)", path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = self.database.get_weapon_trait(match.group(1))
+                payload = self.database.get_trait(match.group(1))
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "Weapon trait not found"}
+                    payload = {"error": "Trait not found"}
             except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read weapon trait")
+                LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The weapon trait is unavailable. Please try again."}
+                payload = {"error": "The trait is unavailable. Please try again."}
         elif path == "/api/armies":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:

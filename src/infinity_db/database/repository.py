@@ -19,6 +19,7 @@ from typing import Any
 
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
 from infinity_army_data.weapon_profiles import special_weapon_detail
+from infinity_db.traits import TRAIT_DESCRIPTIONS, canonical_trait_name
 
 from .schema import (
     APPLICATION_ID,
@@ -176,9 +177,10 @@ def merged_catalog_name(name: object) -> str:
     return merged_skill_name(text)
 
 
-def weapon_trait_slug(name: object) -> str:
-    """Return the URL-safe identity used by the derived weapon-traits catalog."""
-    return re.sub(r"[^a-z0-9]+", "-", str(name or "").casefold()).strip("-")
+def trait_slug(name: object) -> str:
+    """Return the URL-safe identity used by the derived traits catalog."""
+    text = str(name or "").removesuffix(" (SF)")
+    return re.sub(r"[^a-z0-9]+", "-", text.casefold()).strip("-")
 
 
 def unit_sort_key(value: object) -> str:
@@ -832,15 +834,14 @@ class Database:
             return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
 
     @instance_lru_cache(maxsize=1)
-    def list_weapon_traits(self) -> list[dict[str, Any]]:
-        """Return distinct weapon-profile traits carried by catalogued weapons."""
+    def list_traits(self) -> list[dict[str, Any]]:
+        """Return distinct rules traits carried by catalogued profiles."""
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT DISTINCT w.id AS weapon_id, m.properties "
+                "SELECT DISTINCT w.id AS item_id, m.type, m.properties "
                 "FROM weapons AS w JOIN metadata_weapons AS m ON m.id = w.id "
-                "WHERE m.type IS NULL OR m.type != 'EQUIPMENT'"
             ).fetchall()
-        weapons_by_trait: dict[str, set[int]] = {}
+        items_by_trait: dict[str, set[tuple[str, int]]] = {}
         for row in rows:
             try:
                 traits = json.loads(row["properties"] or "[]")
@@ -849,28 +850,30 @@ class Database:
             if not isinstance(traits, list):
                 traits = [traits]
             for trait in traits:
-                trait_name = str(trait or "").strip()
+                trait_name = canonical_trait_name(trait)
                 if trait_name:
-                    weapons_by_trait.setdefault(trait_name, set()).add(row["weapon_id"])
+                    catalog = {"EQUIPMENT": "equipment", "SKILL": "skills"}.get(
+                        row["type"], "weapons"
+                    )
+                    items_by_trait.setdefault(trait_name, set()).add((catalog, row["item_id"]))
         traits = []
         slug_counts: dict[str, int] = {}
-        for name in sorted(weapons_by_trait, key=unit_sort_key):
-            base_slug = weapon_trait_slug(name) or "trait"
+        for name in sorted(items_by_trait, key=unit_sort_key):
+            base_slug = trait_slug(name) or "trait"
             slug_counts[base_slug] = slug_counts.get(base_slug, 0) + 1
             slug = base_slug if slug_counts[base_slug] == 1 else f"{base_slug}-{slug_counts[base_slug]}"
-            traits.append({"id": slug, "name": name, "use_count": len(weapons_by_trait[name])})
+            traits.append({"id": slug, "name": name, "use_count": len(items_by_trait[name]), "description": TRAIT_DESCRIPTIONS.get(name)})
         return traits
 
     @instance_lru_cache(maxsize=128)
-    def get_weapon_trait(self, trait_slug: str) -> dict[str, Any] | None:
-        """Return one trait with each weapon's visible unit usage."""
-        trait = next((item for item in self.list_weapon_traits() if item["id"] == trait_slug), None)
+    def get_trait(self, item_slug: str) -> dict[str, Any] | None:
+        """Return one trait with each matching item's visible unit usage."""
+        trait = next((item for item in self.list_traits() if item["id"] == item_slug), None)
         if trait is None:
             return None
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT DISTINCT w.id, m.properties FROM weapons AS w JOIN metadata_weapons AS m ON m.id = w.id "
-                "WHERE m.type IS NULL OR m.type != 'EQUIPMENT'"
+                "SELECT DISTINCT w.id, m.type, m.properties FROM weapons AS w JOIN metadata_weapons AS m ON m.id = w.id"
             ).fetchall()
         weapon_ids = []
         for row in rows:
@@ -880,23 +883,27 @@ class Database:
                 profile_traits = []
             if not isinstance(profile_traits, list):
                 profile_traits = [profile_traits]
-            if trait["name"] in profile_traits:
-                weapon_ids.append(row["id"])
+            if trait["name"] in {canonical_trait_name(value) for value in profile_traits}:
+                catalog = {"EQUIPMENT": "equipment", "SKILL": "skills"}.get(
+                    row["type"], "weapons"
+                )
+                weapon_ids.append((catalog, row["id"]))
         variants = []
-        for weapon_id in sorted(set(weapon_ids)):
-            weapon = self.get_catalog_item("weapons", weapon_id)
-            if weapon is None:
+        for catalog, item_id in sorted(set(weapon_ids)):
+            item = self.get_skill(item_id) if catalog == "skills" else self.get_catalog_item(catalog, item_id)
+            if item is None:
                 continue
             units = {
                 unit["id"]: unit
-                for variant in weapon["variants"]
+                for variant in item["variants"]
                 for unit in variant["units"]
             }
             if units:
                 variants.append(
                     {
-                        "item_id": weapon["id"],
-                        "item_name": weapon["name"],
+                        "catalog": catalog,
+                        "item_id": item["id"],
+                        "item_name": item["name"],
                         "extras": [],
                         "units": sorted(
                             units.values(), key=lambda unit: (unit_sort_key(unit["name"]), unit["id"])

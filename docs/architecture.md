@@ -73,7 +73,8 @@ colors as accents. Keep those accents within the shared token and gradient
 system so catalog-specific styling remains legible and consistent.
 
 Browser preferences are stored locally. The Settings sidebar section provides
-distance units and a default-off Developer mode; on compact screens it becomes
+distance units, a default-off Developer mode, and a developer-only cache-bypass
+control; on compact screens it becomes
 a top-bar menu beside Navigation. New sidebar or top-bar menus should use this
 same inline-sidebar and compact-dropdown pattern. Developer mode sets
 `data-developer-mode` on the document root; use `.developer-only` for inline
@@ -108,7 +109,7 @@ data refresh.
 
 ### `GET /api/version`
 
-Returns `{ "version": "0.4.2", "snapshot_revision": "..." }`. The browser
+Returns `{ "version": "0.5.0", "snapshot_revision": "..." }`. The browser
 uses it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`
@@ -141,6 +142,8 @@ The zero total above illustrates the response shape.
   must be a nonnegative SQLite integer.
 - `search` is limited to 200 characters. Invalid or repeated unit query parameters
   return HTTP 400 with `{ "error": "..." }`. Unknown army IDs return an empty list.
+- Optional `skill_id`, `equipment_id`, and `weapon_id` parameters narrow results
+  to units with matching catalog items in a profile, loadout, or unit option.
 - Unknown resources return 404; unsupported methods return 405; database read
   failures return 503 without exposing internal exception details.
 
@@ -169,6 +172,10 @@ reference link when the metadata snapshot provides one.
 Each variant includes the relevant extras and logical units that use it. Weapon
 details additionally include metadata weapon profiles, such as ammunition,
 traits, and range data, when present in the supplied metadata snapshot.
+
+`GET /api/traits` returns the derived shared-traits catalog. `GET
+/api/traits/{slug}` returns a trait's concise rules summary, when available,
+and its use grouped across skills, equipment, and weapons.
 
 ## Next increments
 

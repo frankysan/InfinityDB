@@ -1,4 +1,4 @@
-import { formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { cacheBustedUrl, formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 import { visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 
@@ -102,7 +102,7 @@ if (!/^\d+$/.test(skillId || "")) {
   name.firstChild.textContent = "Skill unavailable";
   status.textContent = "The requested skill address is invalid.";
 } else {
-  fetch(`/api/skills/${encodeURIComponent(skillId)}`).then(async (response) => {
+  fetch(cacheBustedUrl(`/api/skills/${encodeURIComponent(skillId)}`), { cache: "no-store" }).then(async (response) => {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Could not load this skill.");
     return payload;

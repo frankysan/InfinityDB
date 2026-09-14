@@ -360,12 +360,20 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
             "profiles": detail["profiles"],
         }
     ]
-    assert Database(path).list_weapon_traits() == [
-        {"id": "suppressive-fire", "name": "Suppressive Fire", "use_count": 1}
+    assert Database(path).list_traits() == [
+        {
+            "id": "suppressive-fire",
+            "name": "Suppressive Fire (SF)",
+            "use_count": 1,
+            "description": (
+                "Allows the user to enter Suppressive Fire State and use its SF Mode profile."
+            ),
+        }
     ]
-    trait = Database(path).get_weapon_trait("suppressive-fire")
+    trait = Database(path).get_trait("suppressive-fire")
     assert trait is not None
-    assert trait["name"] == "Suppressive Fire"
+    assert trait["name"] == "Suppressive Fire (SF)"
+    assert trait["variants"][0]["catalog"] == "weapons"
     assert trait["variants"][0]["item_name"] == "weapons"
 
 

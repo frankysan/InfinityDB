@@ -1,4 +1,4 @@
-import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
+import { cacheBustedUrl, distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
 import { visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 
@@ -52,20 +52,54 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
-function weaponTraitSlug(trait) {
-  return String(trait || "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function canonicalTraitName(trait) {
+  const name = String(trait || "").trim();
+  if (name.startsWith("[")) return "";
+  if (name === "Suppressive Fire") return "Suppressive Fire (SF)";
+  for (const [prefix, canonical] of [
+    ["Disposable (", "Disposable (X)"], ["Direct Template (", "Direct Template"],
+    ["Impact Template (", "Impact Template"], ["Silent (", "Silent (X)"],
+    ["State:", "State"], ["Target (", "Target (Attribute)"],
+    ["Bioweapon", "BioWeapon"], ["Continous Damage", "Continuous Damage"],
+  ]) {
+    if (name.startsWith(prefix)) return canonical;
+  }
+  return name;
+}
+
+function traitSlug(trait) {
+  return canonicalTraitName(trait).replace(/ \(SF\)$/, "")
+    .toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function weaponTraitLinks(traitNames) {
   const fragment = document.createDocumentFragment();
   for (const [index, trait] of traitNames.entries()) {
     if (index) fragment.append(" · ");
-    const link = document.createElement("a");
-    link.href = `/weapon-traits/${encodeURIComponent(weaponTraitSlug(trait))}`;
-    link.textContent = trait;
-    fragment.append(link);
+    const traitName = canonicalTraitName(trait);
+    if (traitName) {
+      const link = document.createElement("a");
+      link.href = `/traits/${encodeURIComponent(traitSlug(trait))}`;
+      link.textContent = trait;
+      fragment.append(link);
+    } else {
+      fragment.append(trait);
+    }
   }
   return fragment;
+}
+
+function traitDescription(description) {
+  const section = document.createElement("section");
+  section.className = "explorer surface";
+  const heading = document.createElement("h2");
+  heading.className = "data-surface-header";
+  heading.textContent = "Rules summary";
+  const text = document.createElement("p");
+  text.className = "weapon-profile-stats";
+  text.textContent = description;
+  section.append(heading, text);
+  return section;
 }
 
 function rangeModifier(ranges, maximum) {
@@ -255,6 +289,24 @@ function usageSectionGroup(sections) {
   return group;
 }
 
+function traitUsageSectionGroup(item) {
+  const group = document.createElement("section");
+  group.className = "detail-group usage-section-group";
+  const groups = new Map();
+  for (const variant of item.variants) {
+    const catalogName = variant.catalog || "other";
+    if (!groups.has(catalogName)) groups.set(catalogName, []);
+    groups.get(catalogName).push(variant);
+  }
+  for (const [catalogName, variants] of [...groups.entries()].sort(([left], [right]) => left.localeCompare(right))) {
+    const title = document.createElement("h3");
+    title.className = "trait-catalog-heading";
+    title.textContent = catalogName[0].toUpperCase() + catalogName.slice(1);
+    group.append(title, ...usageSections({ ...item, variants }));
+  }
+  return group;
+}
+
 function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
@@ -274,12 +326,13 @@ function render(item) {
   }
   const sections = usageSections(item);
   content.replaceChildren(
+    ...(catalog === "traits" && item.description ? [traitDescription(item.description)] : []),
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
     ...(catalog === "weapons" && item.weapon_variants?.length
       ? [weaponVariants(item.weapon_variants)] : []),
     ...(catalog === "equipment" && item.profiles?.length
       ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
-    ...(sections.length ? [usageSectionGroup(sections)] : []),
+    ...(sections.length ? [catalog === "traits" ? traitUsageSectionGroup(item) : usageSectionGroup(sections)] : []),
   );
   content.hidden = false;
   status.hidden = true;
@@ -289,7 +342,7 @@ initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
 });
-fetch(`/api/${catalog}/${encodeURIComponent(itemId)}`).then(async (response) => {
+fetch(cacheBustedUrl(`/api/${catalog}/${encodeURIComponent(itemId)}`), { cache: "no-store" }).then(async (response) => {
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || "Could not load this item.");
   return payload;

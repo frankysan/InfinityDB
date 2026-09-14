@@ -1,4 +1,4 @@
-import { formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { cacheBustedUrl, formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -47,7 +47,7 @@ function renderItems(items) {
 async function load() {
   show(elements.loading);
   try {
-    const response = await fetch("/api/skill-extras");
+    const response = await fetch(cacheBustedUrl("/api/skill-extras"), { cache: "no-store" });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Could not load skill modifiers.");
     items = payload.items;
