@@ -217,11 +217,14 @@ def _flag(params: dict, key: str) -> bool:
 
 
 def _unit_query(query: str) -> dict:
-    params = parse_qs(query, keep_blank_values=True, max_num_fields=10)
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=13)
     for key, values in params.items():
         if key not in {
             "army_id",
             "search",
+            "skill_id",
+            "equipment_id",
+            "weapon_id",
             "limit",
             "offset",
             "mercs",
@@ -242,6 +245,9 @@ def _unit_query(query: str) -> dict:
     return {
         "army_id": _integer(params, "army_id", None, 0, 2**63 - 1),
         "search": search,
+        "skill_id": _integer(params, "skill_id", None, 0, 2**63 - 1),
+        "equipment_id": _integer(params, "equipment_id", None, 0, 2**63 - 1),
+        "weapon_id": _integer(params, "weapon_id", None, 0, 2**63 - 1),
         "limit": _integer(params, "limit", 50, 1, 200),
         "offset": _integer(params, "offset", 0, 0, 2**63 - 1),
         "mercs": _flag(params, "mercs"),

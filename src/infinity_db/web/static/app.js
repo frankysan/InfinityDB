@@ -1,4 +1,4 @@
-import { getArmies, getUnits } from "./api.js";
+import { getArmies, getCatalogItems, getUnits } from "./api.js";
 import { initializeDistanceUnitToggle, initializeOptionalUnitToggles } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 
@@ -7,6 +7,7 @@ const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
 const elements = {
   filters: byId("filters"), army: byId("army-filter"), search: byId("unit-search"),
+  skill: byId("skill-filter"), equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
   mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
   reinforcement: byId("reinforcement-filter"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
@@ -39,15 +40,21 @@ let controller;
 let searchTimer;
 
 function hasActiveFilters() {
-  return state.armyId || state.search;
+  return state.armyId || state.search || state.skillId || state.equipmentId || state.weaponId;
 }
 
 function readLocation() {
   const params = new URLSearchParams(window.location.search);
   const offset = Number(params.get("offset") || 0);
   const armyId = params.get("army_id") || "";
+  const skillId = params.get("skill_id") || "";
+  const equipmentId = params.get("equipment_id") || "";
+  const weaponId = params.get("weapon_id") || "";
   return {
     armyId: /^\d+$/.test(armyId) ? armyId : "",
+    skillId: /^\d+$/.test(skillId) ? skillId : "",
+    equipmentId: /^\d+$/.test(equipmentId) ? equipmentId : "",
+    weaponId: /^\d+$/.test(weaponId) ? weaponId : "",
     search: (params.get("search") || "").trim().slice(0, 200),
     mercs: elements.mercs.checked,
     specops: elements.specops.checked,
@@ -61,9 +68,12 @@ function readLocation() {
 
 function writeLocation(replace = false) {
   const url = new URL(window.location.href);
-  for (const key of ["army_id", "search", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
+  for (const key of ["army_id", "search", "skill_id", "equipment_id", "weapon_id", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
   if (state.search) url.searchParams.set("search", state.search);
+  if (state.skillId) url.searchParams.set("skill_id", state.skillId);
+  if (state.equipmentId) url.searchParams.set("equipment_id", state.equipmentId);
+  if (state.weaponId) url.searchParams.set("weapon_id", state.weaponId);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
   if (state.descending) url.searchParams.set("order", "desc");
   if (url.href !== window.location.href) {
@@ -74,6 +84,9 @@ function writeLocation(replace = false) {
 function syncFilters() {
   elements.army.value = state.armyId;
   elements.search.value = state.search;
+  elements.skill.value = state.skillId;
+  elements.equipment.value = state.equipmentId;
+  elements.weapon.value = state.weaponId;
   elements.mercs.checked = state.mercs;
   elements.specops.checked = state.specops;
   elements.teamops.checked = state.teamops;
@@ -126,6 +139,12 @@ function populateArmies(armies) {
   syncFilters();
 }
 
+function populateCatalogFilter(element, items, label) {
+  element.replaceChildren(new Option(`All ${label.toLowerCase()}`, ""));
+  for (const item of items) element.add(new Option(item.name, String(item.id)));
+  element.disabled = false;
+}
+
 function renderUnits(data) {
   renderUnitRows(elements.list, data.items);
   elements.unitCount.textContent = number.format(data.total);
@@ -167,9 +186,15 @@ async function load() {
   elements.summary.textContent = "Loading units…";
   try {
     if (!armiesLoaded) {
-      const data = await getArmies(signal);
+      const [armies, skills, equipment, weapons] = await Promise.all([
+        getArmies(signal), getCatalogItems("skills", signal), getCatalogItems("equipment", signal), getCatalogItems("weapons", signal),
+      ]);
       if (currentRequest !== requestNumber) return;
-      populateArmies(data.items);
+      populateArmies(armies.items);
+      populateCatalogFilter(elements.skill, skills.items, "Skills");
+      populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
+      populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
+      syncFilters();
       armiesLoaded = true;
     }
     const data = await getUnits(state, signal);
@@ -195,6 +220,7 @@ function applyFilters() {
   clearTimeout(searchTimer);
   const next = {
     armyId: elements.army.value, search: elements.search.value.trim(),
+    skillId: elements.skill.value, equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
     mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
     reinforcement: elements.reinforcement.checked,
   };
@@ -209,6 +235,7 @@ function clearFilters() {
   clearTimeout(searchTimer);
   state = {
     ...state, armyId: "", search: "", offset: 0,
+    skillId: "", equipmentId: "", weaponId: "",
   };
   syncFilters();
   writeLocation();
@@ -231,6 +258,9 @@ function toggleSortOrder() {
 
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
+for (const filter of [elements.skill, elements.equipment, elements.weapon]) {
+  filter.addEventListener("change", applyFilters);
+}
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {
   filter.addEventListener("change", applyFilters);
 }

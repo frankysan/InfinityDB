@@ -220,6 +220,21 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
     assert [item["id"] for item in json.loads(body)["items"]] == list(reversed(expected_ids))
 
 
+def test_unit_rule_filters_match_profiles_and_loadouts(app: Callable) -> None:
+    for parameter in ("skill_id=11", "equipment_id=21", "weapon_id=31"):
+        status, _, body = request(app, "/api/units", query=parameter)
+        assert status == 200
+        assert {item["id"] for item in json.loads(body)["items"]} == {1}
+
+    status, _, body = request(app, "/api/units", query="skill_id=11&weapon_id=31")
+    assert status == 200
+    assert {item["id"] for item in json.loads(body)["items"]} == {1}
+
+    status, _, body = request(app, "/api/units", query="skill_id=999")
+    assert status == 200
+    assert json.loads(body)["items"] == []
+
+
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
     assert status == 200

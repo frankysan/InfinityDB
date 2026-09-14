@@ -1219,6 +1219,9 @@ class Database:
         self,
         army_id: int | None = None,
         search: str = "",
+        skill_id: int | None = None,
+        equipment_id: int | None = None,
+        weapon_id: int | None = None,
         limit: int = 50,
         offset: int = 0,
         mercs: bool = False,
@@ -1234,6 +1237,17 @@ class Database:
             raise ValueError("army_id must be an integer within SQLite's signed 64-bit range")
         if army_id is not None:
             army_id = canonical_army_id(army_id)
+        rule_filters = {
+            "skills": skill_id,
+            "equipment": equipment_id,
+            "weapons": weapon_id,
+        }
+        for name, item_id in rule_filters.items():
+            if item_id is not None and (
+                type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX
+            ):
+                parameter = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[name]
+                raise ValueError(f"{parameter}_id must be an integer within SQLite's signed 64-bit range")
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -1255,6 +1269,29 @@ class Database:
             }.items()
             if enabled
         }
+        matching_sources_by_rule: dict[str, set[int]] = {}
+        if any(item_id is not None for item_id in rule_filters.values()):
+            with self._connect() as connection:
+                for catalog, item_id in rule_filters.items():
+                    if item_id is None:
+                        continue
+                    if catalog == "weapons":
+                        query = (
+                            "SELECT unit_id FROM profile_weapons WHERE item_id = ? "
+                            "UNION SELECT o.unit_id FROM option_weapons AS o "
+                            "JOIN option_weapon_templates AS t ON t.id = o.template_id "
+                            "WHERE t.item_id = ? "
+                            "UNION SELECT unit_id FROM unit_option_weapons WHERE item_id = ?"
+                        )
+                    else:
+                        query = (
+                            f"SELECT unit_id FROM profile_{catalog} WHERE item_id = ? "
+                            f"UNION SELECT unit_id FROM option_{catalog} WHERE item_id = ? "
+                            f"UNION SELECT unit_id FROM unit_option_{catalog} WHERE item_id = ?"
+                        )
+                    matching_sources_by_rule[catalog] = {
+                        row["unit_id"] for row in connection.execute(query, (item_id, item_id, item_id))
+                    }
         graph = self._unit_graph()
         army_names = graph["army_names"]
         groups = graph["groups"]
@@ -1263,6 +1300,11 @@ class Database:
         search_key = accent_insensitive_key(search)
         grouped = []
         for group in groups:
+            if any(
+                not set(group["source_ids"]).intersection(source_ids)
+                for source_ids in matching_sources_by_rule.values()
+            ):
+                continue
             visible_armies = visible_armies_for_group(
                 group, selected_flags, canonical_factions, normal_armies_by_unit
             )
