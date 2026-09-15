@@ -21,9 +21,11 @@ function displayWikiUrl(url) {
 }
 
 function withVisibleUnits(skill, ids) {
-  return { ...skill, variants: skill.variants.map((variant) => ({
-    ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
-  })).filter((variant) => variant.units.length) };
+  return {
+    ...skill, variants: skill.variants.map((variant) => ({
+      ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
+    })).filter((variant) => variant.units.length)
+  };
 }
 
 function formatVariantName(variant) {
@@ -35,6 +37,63 @@ function formatVariantName(variant) {
     });
   });
   return extras.length ? `${variant.skill_name} (${extras.join(", ")})` : variant.skill_name;
+}
+
+function rulesReferenceSection(rules) {
+  const section = document.createElement("section");
+  section.className = "detail-group rules-reference";
+  const heading = document.createElement("h2");
+  heading.className = "detail-section-title";
+  heading.textContent = "Rules reference";
+  section.append(heading);
+  for (const rule of rules) {
+    const article = document.createElement("article");
+    article.className = "detail-section";
+    const title = document.createElement("h3");
+    title.textContent = rule.name;
+    article.append(title);
+    const summary = document.createElement("p");
+    summary.className = "detail-copy";
+    summary.textContent = rule.summary;
+    article.append(summary);
+    const badges = [];
+    if (rule.skill_type?.name) badges.push(rule.skill_type.name);
+    for (const label of rule.labels || []) badges.push(label.name);
+    if (badges.length) {
+      const badgeRow = document.createElement("p");
+      badgeRow.className = "detail-badges";
+      for (const badge of badges) {
+        const element = document.createElement("span");
+        element.className = "badge";
+        element.textContent = badge;
+        badgeRow.append(element);
+      }
+      article.append(badgeRow);
+    }
+    const facts = rule.facts || {};
+    for (const key of ["effects", "requirements", "restrictions"]) {
+      if (!Array.isArray(facts[key]) || !facts[key].length) continue;
+      const list = document.createElement("ul");
+      list.className = "detail-list";
+      for (const fact of facts[key]) {
+        const item = document.createElement("li");
+        item.textContent = fact;
+        list.append(item);
+      }
+      article.append(list);
+    }
+    if (rule.citations?.length) {
+      const citations = document.createElement("p");
+      citations.className = "detail-source";
+      citations.textContent = rule.citations.map((citation) => {
+        const location = citation.page ? `p. ${citation.page}` : citation.heading || citation.path;
+        return `${citation.source_title || citation.source_id}, ${location}`;
+      }).join(" · ");
+      article.append(citations);
+    }
+    section.append(article);
+  }
+  return section;
 }
 
 function variantSection(variant) {
@@ -79,8 +138,8 @@ function render(skill) {
     meta.replaceChildren(link);
   } else {
     meta.classList.add("developer-only");
-  const categories = (skill.categories || []).map((category) => category.name).join(", ");
-  meta.textContent = `Skill #${skill.id}${categories ? ` · ${categories}` : ""}`;
+    const categories = (skill.categories || []).map((category) => category.name).join(", ");
+    meta.textContent = `Skill #${skill.id}${categories ? ` · ${categories}` : ""}`;
   }
   const variants = [...skill.variants].sort((left, right) => (
     formatVariantName(left).localeCompare(
@@ -89,8 +148,11 @@ function render(skill) {
   ));
   const sections = document.createElement("section");
   sections.className = "detail-group usage-section-group";
+  const children = [];
+  if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
+  children.push(sections);
   sections.append(...variants.map(variantSection));
-  content.replaceChildren(sections);
+  content.replaceChildren(...children);
   status.hidden = true;
   content.hidden = false;
 }

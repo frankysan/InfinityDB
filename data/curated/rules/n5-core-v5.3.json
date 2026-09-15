@@ -1,0 +1,391 @@
+{
+    "format": "InfinityDB curated reference",
+    "formatVersion": 2,
+    "collection": {
+        "id": "n5-core-v5.3",
+        "title": "N5 Core Rules v5.3",
+        "domain": "core-rules",
+        "status": "current",
+        "effectiveFrom": "2026-08-10",
+        "authority": "primary"
+    },
+    "vocabularySources": {
+        "skillTypes": [
+            {
+                "sourceId": "wiki-20260915",
+                "path": "infinitythewiki.com/Skills_and_Equipment_Module.html",
+                "snapshotDate": "2026-09-15",
+                "heading": "Common and Special Skills in Infinity",
+                "page": 76
+            }
+        ],
+        "labels": [
+            {
+                "sourceId": "wiki-20260915",
+                "path": "infinitythewiki.com/Labels.html",
+                "snapshotDate": "2026-09-15",
+                "heading": "Labels",
+                "page": 174
+            }
+        ]
+    },
+    "skillTypes": [
+        {
+            "id": "automatic",
+            "name": "Automatic Skills",
+            "labels": [
+                "Automatic Skill",
+                "Automatic Skills"
+            ],
+            "descriptions": {
+                "singular": "An Automatic Skill can be employed without expending an Order or ARO.",
+                "plural": "Automatic Skills can be employed without expending an Order or ARO."
+            }
+        },
+        {
+            "id": "deployment-skill",
+            "name": "Deployment Skills",
+            "labels": [
+                "Deployment Skill",
+                "Deployment Skills"
+            ],
+            "descriptions": {
+                "singular": "A Deployment Skill is used during the Deployment Phase or when a trooper is deployed.",
+                "plural": "Deployment Skills are used during the Deployment Phase or when troopers are deployed."
+            }
+        },
+        {
+            "id": "basic-short-skill",
+            "name": "Basic Short Skills",
+            "labels": [
+                "Basic Short Skill",
+                "Basic Short Skills"
+            ],
+            "descriptions": {
+                "singular": "A Basic Short Skill expends one Basic Short Skill.",
+                "plural": "Basic Short Skills expend one Basic Short Skill."
+            }
+        },
+        {
+            "id": "short-skill",
+            "name": "Short Skills",
+            "labels": [
+                "Short Skill",
+                "Short Skills"
+            ],
+            "descriptions": {
+                "singular": "A Short Skill expends one Short Skill.",
+                "plural": "Short Skills expend one Short Skill."
+            }
+        },
+        {
+            "id": "long-skill",
+            "name": "Long Skills",
+            "labels": [
+                "Long Skill",
+                "Long Skills"
+            ],
+            "descriptions": {
+                "singular": "A Long Skill expends the entire Order and can only be declared in the Active Turn.",
+                "plural": "Long Skills expend the entire Order and can only be declared in the Active Turn."
+            }
+        },
+        {
+            "id": "aro",
+            "name": "ARO Skills",
+            "labels": [
+                "ARO Skill",
+                "ARO Skills"
+            ],
+            "descriptions": {
+                "singular": "An ARO Skill is one that a trooper may perform as an ARO.",
+                "plural": "ARO Skills are those that troopers may perform as an ARO."
+            }
+        }
+    ],
+    "labels": [
+        {
+            "id": "airborne-deployment",
+            "name": "Airborne Deployment (AD)",
+            "description": "Encompasses Skills related to Airborne Infantry."
+        },
+        {
+            "id": "assignable-transmutation",
+            "name": "Assignable (Transmutation)",
+            "description": "Allows certain weapons or Equipment to be assigned to Troopers with Transmutation (X)."
+        },
+        {
+            "id": "attack",
+            "name": "Attack",
+            "description": "The use of the Special Skill or Equipment is considered an Attack."
+        },
+        {
+            "id": "bs-attack",
+            "name": "BS Attack",
+            "description": "The use of the Special Skill or Equipment is a form of BS Attack."
+        },
+        {
+            "id": "cc-attack",
+            "name": "CC Attack",
+            "description": "The use of the Special Skill or Equipment is a form of CC Attack."
+        },
+        {
+            "id": "cc-special-skill",
+            "name": "CC Special Skill",
+            "description": "The Skill can only be used when the user is in Silhouette contact with the target."
+        },
+        {
+            "id": "comms-attack",
+            "name": "Comms Attack",
+            "description": "The weapon, Special Skill, or Equipment is an Attack avoided with Reset rather than Dodge."
+        },
+        {
+            "id": "comms-equipment",
+            "name": "Comms Equipment",
+            "description": "Equipment vulnerable to certain Hacking Programs and Ammunition."
+        },
+        {
+            "id": "hackable",
+            "name": "Hackable",
+            "description": "A Trooper, Peripheral, weapon, or Equipment that can be targeted by certain Hacking Programs."
+        },
+        {
+            "id": "hostile",
+            "name": "Hostile",
+            "description": "A game element with its own Attributes that belongs to neither player's Army List."
+        },
+        {
+            "id": "optional",
+            "name": "Optional",
+            "description": "The use of this Special Skill or Equipment is optional and can be waived."
+        },
+        {
+            "id": "marker",
+            "name": "Marker",
+            "description": "This label indicates that a trooper, weapon, or piece of equipment can be represented by a Marker."
+        },
+        {
+            "id": "movement",
+            "name": "Movement",
+            "description": "The use of the Skill or Equipment is a form of Movement."
+        },
+        {
+            "id": "negative-feedback",
+            "name": "Negative Feedback (NFB)",
+            "description": "The Skill or Equipment is incompatible with another element having the same Label or Trait."
+        },
+        {
+            "id": "no-lof",
+            "name": "No LoF",
+            "description": "The Skill does not require Line of Fire to the target."
+        },
+        {
+            "id": "non-reloadable",
+            "name": "Non-Reloadable",
+            "description": "An Unloaded State cannot be canceled and expended uses cannot be regained."
+        },
+        {
+            "id": "no-roll",
+            "name": "No Roll",
+            "description": "The weapon, Special Skill, or Equipment works automatically without requiring a Roll."
+        },
+        {
+            "id": "null",
+            "name": "Null",
+            "description": "A State with this Label does not provide an Order or Victory Points."
+        },
+        {
+            "id": "obligatory",
+            "name": "Obligatory",
+            "description": "The use of the Special Skill or Equipment is compulsory and cannot be waived."
+        },
+        {
+            "id": "private-information",
+            "name": "Private Information",
+            "description": "Whether Troopers have this Label is Private Information until it is used or the game ends."
+        },
+        {
+            "id": "states-phase",
+            "name": "States Phase",
+            "description": "The Equipment or Skill can only be used during the States Phase unless stated otherwise."
+        },
+        {
+            "id": "superior-deployment",
+            "name": "Superior Deployment",
+            "description": "Encompasses Skills that allow Troopers to deploy outside their Deployment Zone."
+        },
+        {
+            "id": "supportware",
+            "name": "Supportware",
+            "description": "Hacking Programs that provide support to Allied Troopers or interfere with enemies."
+        },
+        {
+            "id": "faqs",
+            "name": "FAQs",
+            "description": "A label category for FAQ-related rule references."
+        }
+    ],
+    "sources": [
+        {
+            "id": "n5-core-v5.3-pdf",
+            "kind": "pdf",
+            "title": "N5 Core Rules",
+            "version": "5.3",
+            "publishedDate": "2026-08-10",
+            "localPath": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+            "pageCount": 196,
+            "authority": "primary"
+        },
+        {
+            "id": "wiki-20260915",
+            "kind": "wiki",
+            "title": "Infinity Wiki snapshot",
+            "version": "20260915",
+            "snapshotDate": "2026-09-15",
+            "localPath": "data/wiki/20260915/",
+            "url": "https://infinitythewiki.com/",
+            "authority": "secondary"
+        }
+    ],
+    "records": [
+        {
+            "id": "state:camouflaged",
+            "kind": "state",
+            "name": "Camouflaged State",
+            "labelIds": [
+                "marker"
+            ],
+            "aliases": [
+                "Camouflage State",
+                "CAMO"
+            ],
+            "summary": "A state in which a trooper is represented by a Camouflage Marker rather than its model.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "timing": [
+                    "Deployment Phase"
+                ],
+                "effects": [
+                    "The trooper is represented by a Camouflage Marker."
+                ],
+                "requirements": [
+                    "The trooper has the Camouflage Special Skill."
+                ],
+                "restrictions": [],
+                "enteredBy": [
+                    "skill:camouflage"
+                ],
+                "interactions": [
+                    "rule:discover"
+                ]
+            },
+            "relatedRecords": [
+                "skill:camouflage",
+                "rule:discover"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 87,
+                    "section": "Camouflage"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 157,
+                    "section": "Camouflaged State"
+                },
+                {
+                    "sourceId": "wiki-20260915",
+                    "path": "infinitythewiki.com/Camouflaged_State.html",
+                    "snapshotDate": "2026-09-15",
+                    "heading": "Camouflaged State"
+                },
+                {
+                    "sourceId": "wiki-20260915",
+                    "path": "infinitythewiki.com/Labels.html",
+                    "snapshotDate": "2026-09-15",
+                    "heading": "Marker"
+                }
+            ],
+            "review": {
+                "status": "draft",
+                "reviewedOn": "2026-09-15"
+            }
+        },
+        {
+            "id": "skill:camouflage",
+            "kind": "skill",
+            "name": "Camouflage",
+            "labelIds": [
+                "optional"
+            ],
+            "aliases": [
+                "CAMO"
+            ],
+            "summary": "A Special Skill that allows a trooper to enter and remain in Camouflaged State.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "timing": [
+                    "Deployment Phase"
+                ],
+                "effects": [
+                    "Allows the trooper to enter Camouflaged State."
+                ],
+                "requirements": [],
+                "restrictions": [],
+                "entersStates": [
+                    "state:camouflaged"
+                ],
+                "interactions": [
+                    "rule:discover"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 29
+                }
+            ],
+            "relatedRecords": [
+                "state:camouflaged",
+                "rule:discover"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 87,
+                    "section": "Camouflage"
+                },
+                {
+                    "sourceId": "wiki-20260915",
+                    "path": "infinitythewiki.com/Camouflage.html",
+                    "snapshotDate": "2026-09-15",
+                    "heading": "Camouflage"
+                },
+                {
+                    "sourceId": "wiki-20260915",
+                    "path": "infinitythewiki.com/Labels.html",
+                    "snapshotDate": "2026-09-15",
+                    "heading": "Optional"
+                }
+            ],
+            "review": {
+                "status": "draft",
+                "reviewedOn": "2026-09-15"
+            }
+        }
+    ]
+}

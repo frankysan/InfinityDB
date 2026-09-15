@@ -150,6 +150,9 @@ infinity-db build --output-dir other-output --compact
 infinity-db serve --database other-output/infinity.db --port 8001
 # Bind only to this machine when LAN access is not wanted
 infinity-db serve --host 127.0.0.1
+
+# Build the independent rules-reference database from curated JSON
+infinity-db build-rules data/curated --output data/generated/rules.db
 ```
 
 `infinity-army` and `python -m infinity_army_data` remain available for the

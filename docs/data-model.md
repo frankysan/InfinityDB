@@ -45,7 +45,7 @@ compatibility revisions require a rebuild from normalized JSON for now.
 The frontend export runs `ANALYZE` after loading and indexing data, preserving
 SQLite planner statistics in the immutable snapshot.
 
-## PDF-derived rules storage (planned)
+## PDF-derived rules storage
 
 Curated facts from user-supplied rules PDFs and wiki research first pass through
 the source-controlled JSON contract in `data/curated/`. The loader validates
@@ -66,9 +66,11 @@ citations. PDF citations require printed page numbers. Wiki citations require
 the local page path and snapshot date instead. Version 1 files are no longer
 accepted and must be migrated before ingestion.
 
-Those curated facts will be stored in a separate SQLite
-database, rather than in either Army JSON-derived database. The rules database
-will have an independent schema and replaceable, versioned snapshot lifecycle.
+`infinity-db build-rules data/curated --output data/generated/rules.db` stores
+those curated facts in a separate SQLite database, rather than in either Army
+JSON-derived database. Directory ingestion skips `example.json`. The rules
+database has an independent schema, application ID, compatibility version, and
+replaceable snapshot lifecycle.
 Every fact must retain document identity, edition/version or date, and a
 printed-page citation. It may reference stable application-level rule
 identities, but neither database is an import source for the other; any combined
@@ -84,7 +86,9 @@ The rules-reference browsers query the global `skills`, `equipment`, and
 display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
-Curated records may also link to `ammunition`, `extras`, `characteristics`,
+The first rules schema stores collections, sources, vocabulary definitions,
+records, citations, Army links, and related-record links. Curated records may
+also link to `ammunition`, `extras`, `characteristics`,
 `troop_types`, `units`, and profile occurrences. These are annotations and
 explanations only; Army JSON remains authoritative for unit membership,
 availability, legality, and source-derived statistics.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import re
 import shutil
@@ -14,7 +15,9 @@ import pytest
 
 from infinity_army_data.merge import make_source, merge_sources
 from infinity_army_data.normalize import normalize_master
+from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
+from infinity_db.rules_database import export_rules_database
 from infinity_db.web import create_app
 
 
@@ -870,14 +873,10 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b"function canonicalTraitName(trait)" in weapon_detail
     assert b"function traitUsageSectionGroup(item)" in weapon_detail
     assert (
-        b'title.textContent = catalogName[0].toUpperCase() + catalogName.slice(1);'
-        in weapon_detail
+        b"title.textContent = catalogName[0].toUpperCase() + catalogName.slice(1);" in weapon_detail
     )
     assert b'title.className = "trait-catalog-heading";' in weapon_detail
-    assert (
-        b'link.href = `/traits/${encodeURIComponent(traitSlug(trait))}`;'
-        in weapon_detail
-    )
+    assert b"link.href = `/traits/${encodeURIComponent(traitSlug(trait))}`;" in weapon_detail
     assert b".weapon-data-heading" in styles
     assert b'profileRow.className = "weapon-data-row"' in weapon_detail
     assert b'profileStats.className = "weapon-data-value"' in weapon_detail
@@ -1024,7 +1023,7 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-list.js")
     assert status == 200
     assert b'["skills", "equipment", "weapons", "traits"].includes(page)' in body
-    assert b'link.href = `/${page}/${encodeURIComponent(item.id)}`;' in body
+    assert b"link.href = `/${page}/${encodeURIComponent(item.id)}`;" in body
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
@@ -1041,8 +1040,13 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert status == 200
     assert headers["content-type"].startswith("application/json")
     expected = {
-        "skills": {"id": 11, "name": "Stealth", "wiki": None, "use_count": 1,
-                   "categories": [{"name": "Unclassified", "source": None, "page": None}]},
+        "skills": {
+            "id": 11,
+            "name": "Stealth",
+            "wiki": None,
+            "use_count": 1,
+            "categories": [{"name": "Unclassified", "source": None, "page": None}],
+        },
         "equipment": {
             "id": 21,
             "name": "Medikit",
@@ -1112,6 +1116,27 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body)["error"] == "Skill not found"
 
 
+def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    document = copy.deepcopy(documents[0][1])
+    skill_record = next(record for record in document["records"] if record["kind"] == "skill")
+    skill_record["id"] = "skill:stealth"
+    skill_record["name"] = "Stealth"
+    skill_record["armyLinks"] = [{"entity": "skill", "id": 11}]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database([(root / "curated.json", document)], rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/skills/11")
+
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["rules"][0]["id"] == "skill:stealth"
+    assert payload["rules"][0]["labels"][0]["name"] == "Optional"
+    assert payload["rules"][0]["citations"][0]["page"] == 87
+
+
 def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:
     for asset in ("catalog-detail.js", "skill.js"):
         status, _, body = request(app, f"/static/{asset}")
@@ -1179,6 +1204,14 @@ def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> 
     assert status == 200
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body
+
+
+def test_skill_details_frontend_renders_curated_rules_reference(app: Callable) -> None:
+    status, _, body = request(app, "/static/skill.js")
+
+    assert status == 200
+    assert b"rulesReferenceSection" in body
+    assert b"Rules reference" in body
 
 
 def test_unit_symbol_is_served(app: Callable) -> None:

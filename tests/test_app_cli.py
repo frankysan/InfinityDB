@@ -122,6 +122,13 @@ def test_validate_curated_command_parses() -> None:
     assert args.input == Path("data/curated/rules/example.json")
 
 
+def test_build_rules_command_parses() -> None:
+    parser = build_parser()
+    args = parser.parse_args(["build-rules", "data/curated", "--output", "rules.db"])
+    assert args.input == Path("data/curated")
+    assert args.output == Path("rules.db")
+
+
 def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str]) -> None:
     with socket.socket() as occupied_socket:
         occupied_socket.bind(("127.0.0.1", 0))

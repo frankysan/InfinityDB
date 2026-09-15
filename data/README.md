@@ -6,9 +6,9 @@
   developer-only PDF and wiki research. The application may ingest these files,
   but must never read `pdf/` or `wiki/` directly.
 - `generated/` — generated `master.json`, normalized data, validation reports,
-  the browser-facing `infinity.db`, and development-only `infinity.raw.db`.
-  A future PDF-derived rules SQLite database will be a separate generated
-  artifact here, with an independent update lifecycle. Ignored by Git.
+  the browser-facing `infinity.db`, development-only `infinity.raw.db`, and
+  the separate curated-rules `rules.db`. The rules database has an independent
+  update lifecycle and is built only from `data/curated/`. Ignored by Git.
 
 Keeping raw and generated data outside source control prevents large snapshots from obscuring code changes.
 InfinityDB 0.5.1 treats generated data as replaceable: builds validate new

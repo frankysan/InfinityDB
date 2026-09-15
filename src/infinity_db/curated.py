@@ -13,11 +13,38 @@ REQUIRED_COLLECTION_FIELDS = frozenset(
 )
 REQUIRED_SOURCE_FIELDS = frozenset({"id", "kind", "title", "version", "authority"})
 REQUIRED_RECORD_FIELDS = frozenset({"id", "kind", "name", "summary", "citations"})
+REQUIRED_SKILL_TYPE_FIELDS = frozenset({"id", "name", "labels", "descriptions"})
+REQUIRED_LABEL_FIELDS = frozenset({"id", "name", "description"})
+REQUIRED_VOCABULARY_SOURCE_FIELDS = frozenset(
+    {"sourceId", "path", "snapshotDate", "heading", "page"}
+)
+EXCLUDED_CURATED_FILENAMES = frozenset({"example.json"})
 
 
 def _require_string(value: Any, field: str, context: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{context}: '{field}' must be a non-empty string")
+
+
+def discover_curated_documents(directory: Path) -> list[Path]:
+    """Return curated collection files, excluding the non-ingested example template."""
+    if not directory.is_dir():
+        raise ValueError(f"Curated source directory does not exist: {directory}")
+    return sorted(
+        path
+        for path in directory.rglob("*.json")
+        if path.is_file() and path.name.casefold() not in EXCLUDED_CURATED_FILENAMES
+    )
+
+
+def load_curated_directory(directory: Path) -> list[tuple[Path, dict[str, Any]]]:
+    """Load every curated collection below a directory except example templates."""
+    documents = [
+        (path, load_curated_document(path)) for path in discover_curated_documents(directory)
+    ]
+    if not documents:
+        raise ValueError(f"No curated collection JSON files found in {directory}")
+    return documents
 
 
 def load_curated_document(path: Path) -> dict[str, Any]:
@@ -44,6 +71,9 @@ def load_curated_document(path: Path) -> dict[str, Any]:
     collection = document.get("collection")
     sources = document.get("sources")
     records = document.get("records")
+    skill_types = document.get("skillTypes")
+    labels = document.get("labels")
+    vocabulary_sources = document.get("vocabularySources")
     if not isinstance(collection, dict):
         raise ValueError("Curated source must contain a collection object")
     missing = REQUIRED_COLLECTION_FIELDS - collection.keys()
@@ -53,6 +83,67 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         _require_string(collection[field], field, "collection")
     if not isinstance(sources, list) or not isinstance(records, list):
         raise ValueError("Curated source must contain 'sources' and 'records' arrays")
+    if not isinstance(skill_types, list):
+        raise ValueError("Curated source must contain a 'skillTypes' array")
+    if not isinstance(labels, list):
+        raise ValueError("Curated source must contain a 'labels' array")
+    if not isinstance(vocabulary_sources, dict):
+        raise ValueError("Curated source must contain a 'vocabularySources' object")
+    for vocabulary_name in ("skillTypes", "labels"):
+        source_list = vocabulary_sources.get(vocabulary_name)
+        if not isinstance(source_list, list):
+            raise ValueError(f"vocabularySources.{vocabulary_name} must be an array")
+        for index, source in enumerate(source_list):
+            context = f"vocabularySources.{vocabulary_name}[{index}]"
+            if not isinstance(source, dict):
+                raise ValueError(f"{context}: must be an object")
+            missing = REQUIRED_VOCABULARY_SOURCE_FIELDS - source.keys()
+            if missing:
+                raise ValueError(f"{context}: missing fields {sorted(missing)}")
+            for field in ("sourceId", "path", "snapshotDate", "heading"):
+                _require_string(source[field], field, context)
+            if type(source["page"]) is not int or source["page"] < 1:
+                raise ValueError(f"{context}: 'page' must be a positive integer")
+
+    skill_type_ids: set[str] = set()
+    for index, skill_type in enumerate(skill_types):
+        context = f"skillTypes[{index}]"
+        if not isinstance(skill_type, dict):
+            raise ValueError(f"{context}: must be an object")
+        missing = REQUIRED_SKILL_TYPE_FIELDS - skill_type.keys()
+        if missing:
+            raise ValueError(f"{context}: missing fields {sorted(missing)}")
+        for field in ("id", "name"):
+            _require_string(skill_type[field], field, context)
+        skill_type_labels = skill_type["labels"]
+        if (
+            not isinstance(skill_type_labels, list)
+            or len(skill_type_labels) != 2
+            or any(not isinstance(label, str) or not label.strip() for label in skill_type_labels)
+        ):
+            raise ValueError(f"{context}: 'labels' must contain singular and plural strings")
+        descriptions = skill_type["descriptions"]
+        if not isinstance(descriptions, dict):
+            raise ValueError(f"{context}: 'descriptions' must be an object")
+        for form in ("singular", "plural"):
+            _require_string(descriptions.get(form), f"descriptions.{form}", context)
+        if skill_type["id"] in skill_type_ids:
+            raise ValueError(f"{context}: duplicate skill type id {skill_type['id']!r}")
+        skill_type_ids.add(skill_type["id"])
+
+    label_ids: set[str] = set()
+    for index, label in enumerate(labels):
+        context = f"labels[{index}]"
+        if not isinstance(label, dict):
+            raise ValueError(f"{context}: must be an object")
+        missing = REQUIRED_LABEL_FIELDS - label.keys()
+        if missing:
+            raise ValueError(f"{context}: missing fields {sorted(missing)}")
+        for field in REQUIRED_LABEL_FIELDS:
+            _require_string(label[field], field, context)
+        if label["id"] in label_ids:
+            raise ValueError(f"{context}: duplicate label id {label['id']!r}")
+        label_ids.add(label["id"])
 
     source_ids: set[str] = set()
     for index, source in enumerate(sources):
@@ -100,6 +191,16 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         for optional_object in ("scope", "facts", "review"):
             if optional_object in record and not isinstance(record[optional_object], dict):
                 raise ValueError(f"{context}: '{optional_object}' must be an object")
+        if record["kind"] == "skill":
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids:
+                raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
+        if record["kind"] in {"skill", "state"}:
+            record_labels = record.get("labelIds")
+            if not isinstance(record_labels, list) or not record_labels:
+                raise ValueError(f"{context}: '{record['kind']}' requires non-empty 'labelIds'")
+            if any(label_id not in label_ids for label_id in record_labels):
+                raise ValueError(f"{context}: 'labelIds' must reference labels")
         if "armyLinks" in record and not isinstance(record["armyLinks"], list):
             raise ValueError(f"{context}: 'armyLinks' must be an array")
         if record["id"] in record_ids:

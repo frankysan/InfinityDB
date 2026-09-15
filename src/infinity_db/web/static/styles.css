@@ -1152,6 +1152,47 @@ h1>span {
   font-weight: 600;
 }
 
+.rules-reference {
+  width: min(760px, 100%);
+}
+
+.rules-reference>.detail-section {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-subtle);
+}
+
+.rules-reference h3,
+.rules-reference p,
+.rules-reference ul {
+  margin: 0;
+}
+
+.detail-copy {
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+
+.detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.detail-list {
+  display: grid;
+  gap: 4px;
+  padding-left: 20px;
+  color: var(--color-text-secondary);
+}
+
+.detail-source {
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+
 .unit-detail .general-profile-group {
   gap: 10px;
 }

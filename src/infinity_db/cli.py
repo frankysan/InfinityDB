@@ -12,10 +12,12 @@ from infinity_army_data.cli import add_data_commands
 from infinity_army_data.cli import cmd_build as build_dataset
 
 from . import __version__
-from .curated import load_curated_document
+from .curated import load_curated_directory, load_curated_document
 from .database import export_database, raw_database_path
+from .rules_database import export_rules_database
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
+DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
 
 
 def _export(source: Path, destination: Path) -> None:
@@ -45,9 +47,25 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
 
 def cmd_validate_curated(args: argparse.Namespace) -> int:
+    if args.input.is_dir():
+        documents = load_curated_directory(args.input)
+        for path, document in documents:
+            print(f"Validated curated reference: {path}")
+            print(f"Sources: {len(document['sources'])}; records: {len(document['records'])}")
+        print("Skipped reserved template: example.json")
+        return 0
+
     document = load_curated_document(args.input)
     print(f"Validated curated reference: {args.input}")
     print(f"Sources: {len(document['sources'])}; records: {len(document['records'])}")
+    return 0
+
+
+def cmd_build_rules(args: argparse.Namespace) -> int:
+    documents = load_curated_directory(args.input)
+    export_rules_database(documents, args.output)
+    print(f"Rules database ready: {args.output}")
+    print(f"Collections: {len(documents)}")
     return 0
 
 
@@ -83,10 +101,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_serve.set_defaults(func=cmd_serve)
 
     p_curated = sub.add_parser(
-        "validate-curated", help="Validate a human-reviewed curated reference JSON file"
+        "validate-curated", help="Validate curated reference JSON files or a collection directory"
     )
-    p_curated.add_argument("input", type=Path, help="Curated reference JSON input")
+    p_curated.add_argument("input", type=Path, help="Curated JSON file or directory")
     p_curated.set_defaults(func=cmd_validate_curated)
+
+    p_rules = sub.add_parser(
+        "build-rules", help="Build the separate rules database from curated JSON collections"
+    )
+    p_rules.add_argument("input", nargs="?", type=Path, default=Path("data/curated"))
+    p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
+    p_rules.set_defaults(func=cmd_build_rules)
     return parser
 
 

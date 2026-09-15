@@ -16,6 +16,7 @@ from urllib.parse import parse_qs
 
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
+from infinity_db.rules_database import RulesDatabase
 
 LOGGER = logging.getLogger(__name__)
 ASSETS = {
@@ -260,11 +261,27 @@ def _unit_query(query: str) -> dict:
 
 
 class Application:
-    def __init__(self, database_path: Path) -> None:
+    def __init__(self, database_path: Path, rules_database_path: Path | None = None) -> None:
         self.database = Database(database_path)
         self.database.validate()
+        self.rules_database: RulesDatabase | None = None
+        candidate_rules_path = rules_database_path or Path(database_path).with_name("rules.db")
+        if candidate_rules_path.is_file():
+            try:
+                rules_database = RulesDatabase(candidate_rules_path)
+                rules_database.validate()
+                self.rules_database = rules_database
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
-        self.snapshot_revision = _snapshot_revision(self.database.path)
+        rules_revision = (
+            _snapshot_revision(self.rules_database.path)
+            if self.rules_database is not None
+            else "none"
+        )
+        self.snapshot_revision = sha256(
+            f"{_snapshot_revision(self.database.path)}:{rules_revision}".encode()
+        ).hexdigest()
 
     def _snapshot_etag(self, path: str, query: str) -> str:
         """Return a snapshot validator scoped to one requested representation."""
@@ -457,6 +474,10 @@ class Application:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
+                elif self.rules_database is not None:
+                    rules = self.rules_database.records_for_army_link("skill", skill_id)
+                    if rules:
+                        payload = {**payload, "rules": rules}
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -578,6 +599,6 @@ class Application:
         return [] if method == "HEAD" else [body]
 
 
-def create_app(database_path: Path) -> Application:
+def create_app(database_path: Path, rules_database_path: Path | None = None) -> Application:
     """Create the app after verifying the database, without starting a server."""
-    return Application(database_path)
+    return Application(database_path, rules_database_path)

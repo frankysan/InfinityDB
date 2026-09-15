@@ -40,13 +40,16 @@ Army directory / ZIP
 
 PDF rules documents
     -> curated, cited rules facts
-    -> separate rules SQLite database
+  -> `infinity-db build-rules`
+  -> separate `rules.db`
     -> rules repository -> HTTP API -> browser UI
 ```
 
-The two flows are deliberately independent. A rules-document update must not
-rebuild an Army snapshot, and an Army import must not modify rules data. Where a
-screen needs both, the application/service layer joins stable application-level
+The two flows are deliberately independent. `build-rules` consumes only
+validated JSON collections under `data/curated/` and skips the reserved
+`example.json` template; it never reads PDFs or wiki snapshots directly. A
+rules-document update must not rebuild an Army snapshot, and an Army import must
+not modify rules data. Where a screen needs both, the application/service layer joins stable application-level
 identities and returns a combined representation; the databases do not import
 from or attach to one another.
 

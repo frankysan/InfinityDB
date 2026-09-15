@@ -126,11 +126,15 @@ use a local path, snapshot date, and optional heading or anchor, for example:
 Version 1 files are no longer accepted by the loader and must be migrated to
 this collection/source/citation structure before ingestion.
 
-The starter file in `rules/` is intentionally empty and can be validated with:
+The starter file `rules/example.json` is intentionally empty and is never an
+ingestion input. Directory ingestion skips that reserved filename. Validate all
+real collections with:
 
 ```powershell
-infinity-db validate-curated data/curated/rules/example.json
+infinity-db validate-curated data/curated
 ```
+
+To validate one collection directly, provide its path instead.
 
 Curated files are source-controlled project data. Raw PDFs and wiki snapshots
 remain ignored, local-only research material, and are never packaged or served.
