@@ -18,6 +18,11 @@ data/raw/*
 !data/raw/.gitkeep
 data/generated/*
 !data/generated/.gitkeep
+data/curated/*
+!data/curated/
+!data/curated/**/
+!data/curated/**/*.json
+!data/curated/**/*.md
 data/pdf/**/*
 data/wiki/**/*
 src/infinity_db/web/static/armies/**/*

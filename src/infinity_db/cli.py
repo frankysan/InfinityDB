@@ -12,6 +12,7 @@ from infinity_army_data.cli import add_data_commands
 from infinity_army_data.cli import cmd_build as build_dataset
 
 from . import __version__
+from .curated import load_curated_document
 from .database import export_database, raw_database_path
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
@@ -40,6 +41,13 @@ def cmd_serve(args: argparse.Namespace) -> int:
     from .web.server import serve
 
     serve(args.database, host=args.host, port=args.port)
+    return 0
+
+
+def cmd_validate_curated(args: argparse.Namespace) -> int:
+    document = load_curated_document(args.input)
+    print(f"Validated curated reference: {args.input}")
+    print(f"Sources: {len(document['sources'])}; records: {len(document['records'])}")
     return 0
 
 
@@ -73,6 +81,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_serve.add_argument("--port", type=_port, default=8000)
     p_serve.set_defaults(func=cmd_serve)
+
+    p_curated = sub.add_parser(
+        "validate-curated", help="Validate a human-reviewed curated reference JSON file"
+    )
+    p_curated.add_argument("input", type=Path, help="Curated reference JSON input")
+    p_curated.set_defaults(func=cmd_validate_curated)
     return parser
 
 

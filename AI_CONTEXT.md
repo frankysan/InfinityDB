@@ -71,11 +71,14 @@ The ignored, user-supplied PDFs in `data/` are potential sources for
 rules-aware product work and data review; they are not inputs to the Army JSON
 merge/normalization/build pipeline:
 
-- `eng-n5-update-5-3.pdf`: N5 core rules v5.3.
-- `eng-faqs-n5-v0-1.pdf`: N5 FAQ v0.1.
-- `its-18-en.pdf`: current ITS Season 18 rules (v2026.09.01).
-- `its-rules-season-17-en-v1.0.2.pdf`: archived ITS Season 17 rules
-  (internally v0.2).
+- `data/pdf/rules/n5-rules-v5-1-en.pdf`, `n5-rules-v5-2-en.pdf`, and
+  `n5-rules-v5-3-en.pdf`: N5 core rules revisions.
+- `data/pdf/faq/n5-faqs-v0-0-en.pdf` and `n5-faqs-v0-1-en.pdf`: dated FAQ
+  clarifications.
+- `data/pdf/its/Its-rules-season-18-en.pdf`: current ITS Season 18 rules.
+- `data/pdf/legacy/`: historical ITS Seasons 6-17 and N2/N3 rules.
+- `data/wiki/20260915/`: a local wiki snapshot with HTML pages, originals,
+  and assets.
 
 When using these documents, record the document version/date and printed-page
 citation. Keep core rules, FAQ/errata rulings, and ITS season content separate
@@ -83,7 +86,19 @@ so a view cannot silently combine editions or seasons. The official Infinity
 Army app/data remains authoritative for unit availability and list legality;
 live official rules, FAQs, wiki, errata, and event dates may supersede a local
 copy. Use concise original summaries and structured facts, not bulk-extracted
-or served copyrighted PDF text or artwork.
+or served copyrighted PDF text or artwork. Curate core rules, FAQ/errata, and
+ITS records into separate versioned collections; historical sources must not be
+silently blended with current rules.
+
+The handoff from research to project data is `data/curated/`. Curated JSON
+files use the `InfinityDB curated reference` format and must preserve source
+identity plus printed-page provenance for every record. Application ingestion
+must use `infinity_db.curated.load_curated_document` (or a validated importer
+built on it), never open files under `data/pdf/` or `data/wiki/`.
+Army links in curated records may point to existing catalog or unit IDs, but
+must not change Army-derived availability, legality, or statistics. The
+current v2 citation model supports printed PDF pages and wiki paths with
+snapshot dates. Version 1 curated files must be migrated before ingestion.
 
 ## API and UI rules
 

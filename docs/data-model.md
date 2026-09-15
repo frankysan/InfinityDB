@@ -47,7 +47,26 @@ SQLite planner statistics in the immutable snapshot.
 
 ## PDF-derived rules storage (planned)
 
-Curated facts from user-supplied rules PDFs will be stored in a separate SQLite
+Curated facts from user-supplied rules PDFs and wiki research first pass through
+the source-controlled JSON contract in `data/curated/`. The loader validates
+that every record has a stable identity, concise summary, and source reference
+with a printed page. Raw PDFs and wiki snapshots are never accepted as
+application inputs.
+
+The available source families are N5 core rules v5.1-v5.3, N5 FAQs v0.0-v0.1,
+ITS Seasons 6-18, and the 20260915 wiki snapshot. Core rules yield reusable
+rule identities and structured effects; FAQs yield dated rulings; ITS material
+is isolated by season; wiki material supplies discovery, aliases, and
+cross-links. Historical documents remain selectable references and must not be
+silently merged into current rules.
+
+The current curated v2 document has a collection identity, source records,
+typed fact records, scope, Army links, related-record links, review state, and
+citations. PDF citations require printed page numbers. Wiki citations require
+the local page path and snapshot date instead. Version 1 files are no longer
+accepted and must be migrated before ingestion.
+
+Those curated facts will be stored in a separate SQLite
 database, rather than in either Army JSON-derived database. The rules database
 will have an independent schema and replaceable, versioned snapshot lifecycle.
 Every fact must retain document identity, edition/version or date, and a
@@ -64,6 +83,11 @@ The rules-reference browsers query the global `skills`, `equipment`, and
 `unit_option_*` occurrence tables. Equivalent source labels can be merged for
 display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
+
+Curated records may also link to `ammunition`, `extras`, `characteristics`,
+`troop_types`, `units`, and profile occurrences. These are annotations and
+explanations only; Army JSON remains authoritative for unit membership,
+availability, legality, and source-derived statistics.
 
 ## Required Army API metadata
 

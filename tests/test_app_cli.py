@@ -116,6 +116,12 @@ def test_serve_defaults_and_explicit_binding() -> None:
     assert configured.port == 9000
 
 
+def test_validate_curated_command_parses() -> None:
+    parser = build_parser()
+    args = parser.parse_args(["validate-curated", "data/curated/rules/example.json"])
+    assert args.input == Path("data/curated/rules/example.json")
+
+
 def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str]) -> None:
     with socket.socket() as occupied_socket:
         occupied_socket.bind(("127.0.0.1", 0))

@@ -2,6 +2,9 @@
 
 - `raw/` — downloaded Corvus Belli Army JSON files or ZIP archives, plus the required
   Army API `metadata.json` snapshot. Ignored by Git.
+- `curated/` — source-controlled, human-reviewed JSON intermediaries derived from
+  developer-only PDF and wiki research. The application may ingest these files,
+  but must never read `pdf/` or `wiki/` directly.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the browser-facing `infinity.db`, and development-only `infinity.raw.db`.
   A future PDF-derived rules SQLite database will be a separate generated
@@ -12,9 +15,10 @@ InfinityDB 0.5.1 treats generated data as replaceable: builds validate new
 frontend and raw-archive snapshots before atomically replacing both generated
 database files.
 
-PDFs in this directory are research sources, not Army-pipeline inputs. Their
-curated facts must retain document version and printed-page provenance in the
-separate rules database; do not merge them into Army JSON-derived artifacts.
+PDFs and wiki snapshots in this directory are research sources, not Army-pipeline
+inputs. Their curated facts must retain document version and printed-page
+provenance in `curated/` and, later, in the separate rules database; do not merge
+them into Army JSON-derived artifacts.
 
 Raw Army data, generated databases, PDF documents, and wiki snapshots are not
 automatically covered by InfinityDB's MIT License. Review the repository's

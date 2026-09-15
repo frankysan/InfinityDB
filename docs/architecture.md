@@ -128,6 +128,20 @@ replacement policy. Each curated fact records its document edition/date and
 printed-page citation. This database is not an extension of `infinity.db` or
 `infinity.raw.db`.
 
+The first boundary is the source-controlled `data/curated/` JSON layer. It is
+the only application-facing representation of facts researched from PDFs or
+the wiki. `data/pdf/` and `data/wiki/` remain local reference material and are
+not opened by application code; `infinity_db.curated.load_curated_document`
+validates the intermediary contract before a future rules importer consumes it.
+
+The current corpus is intentionally split into N5 core rules, N5 FAQ/errata,
+ITS season, historical, and wiki collections. Curated v2 stores collection
+scope, source metadata, typed records, Army catalog links, related-rule links,
+review state, and citations. Printed page numbers are required for PDF sources;
+wiki records require a snapshot-local path and date. No collection may
+silently combine current, historical, FAQ, and season rules. Version 1 curated
+files must be migrated before ingestion.
+
 ## HTTP API
 
 All routes are same-origin and read-only. `GET` returns JSON or a static asset;

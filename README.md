@@ -122,6 +122,16 @@ ZIP, include one copy in the ZIP, or supply `--metadata PATH`. It supplies
 official faction names and the ammunition, weapon, skill, equipment, and rules
 catalogs. Army-list JSON remains authoritative for unit availability.
 
+Reference PDFs and the local wiki mirror are developer and agent research
+inputs only. They are never read by the application or the Army build. Curate
+concise, human-reviewed facts with printed-page provenance into JSON files under
+`data/curated/`; validate those intermediary files before a future rules-data
+import:
+
+```powershell
+infinity-db validate-curated data/curated/rules/example.json
+```
+
 The army selector includes main-army, sectorial, and reinforcement lists.
 Display names are derived from source slugs when a name is unavailable, and
 reinforcement lists that share the `reinf` slug include their list ID so they
