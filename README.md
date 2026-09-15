@@ -199,17 +199,34 @@ updates, rollback behavior, and operational commands.
 ## Project layout
 
 ```text
-src/
-  infinity_army_data/       # Merge, normalization, metadata, and validation tools
-  infinity_db/
-    cli.py                  # Application commands and pipeline orchestration
-    database/               # Versioned schema, atomic importer, read-only queries
-    web/                    # WSGI app, shared browser shell, assets, and SVG symbols
-tests/                      # Pipeline, database, API, and browser tests
-tools/                      # Manual source and symbol download scripts
 docs/                       # Architecture and data-model documentation
 data/raw/                   # Ignored source snapshots
 data/generated/             # Ignored database, JSON, and validation artifacts
+src/
+  infinity_army_data/       # Army JSON merge, normalization, metadata, and validation
+  infinity_db/
+    cli.py                  # Build, export, and local-server commands
+    database/               # Schema, importer, and read-only repository queries
+    skill_categories.py     # Skill category definitions for the rules reference
+    traits.py               # Trait definitions and catalog metadata
+    web/
+      app.py                # WSGI application and API routes
+      server.py             # Local development server
+      wsgi.py               # WSGI entry point for deployment
+      static/               # Browser pages, modules, styles, and symbols
+tests/                      # Pipeline, database, API, web, and tool-script tests
+tools/                      # Manual Army, wiki, and unit-symbol download utilities
+docs/                       # Architecture, data model, and deployment documentation
+scripts/                    # Linux deployment, update, and image-maintenance scripts
+data/
+  raw/                      # Ignored Army JSON and ZIP source snapshots
+  wiki/                     # Ignored wiki mirror snapshots
+  pdf/                      # Supplied rules and FAQ reference documents
+  generated/                # Ignored database, JSON, and validation artifacts
+.vscode/                    # Shared build, serve, test, lint, and debug tasks
+Dockerfile                 # Immutable application image for deployment
+compose.yaml               # Gunicorn, Caddy, and application Compose deployment
+Caddyfile                  # Reverse-proxy configuration for the Compose deployment
 ```
 
 See [architecture and development direction](docs/architecture.md) and the
