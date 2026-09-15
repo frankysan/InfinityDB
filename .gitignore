@@ -17,7 +17,10 @@ data/raw/*
 !data/raw/.gitkeep
 data/generated/*
 !data/generated/.gitkeep
-data/*.pdf
+data/pdf/**/*
+src/infinity_db/web/static/armies/**/*
+src/infinity_db/web/static/orders/**/*
+src/infinity_db/web/static/units/**/*
 
 # OS
 .DS_Store
