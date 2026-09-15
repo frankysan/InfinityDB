@@ -66,9 +66,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             _require_string(source[field], field, context)
         if source["kind"] not in {"pdf", "wiki"}:
             raise ValueError(f"{context}: 'kind' must be 'pdf' or 'wiki'")
-        if not isinstance(source.get("localPath"), str) and not isinstance(
-            source.get("url"), str
-        ):
+        if not isinstance(source.get("localPath"), str) and not isinstance(source.get("url"), str):
             raise ValueError(f"{context}: requires a 'localPath' or 'url'")
         if source["kind"] == "pdf":
             _require_string(source.get("publishedDate"), "publishedDate", context)

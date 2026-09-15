@@ -1,14 +1,14 @@
 {
-  "format": "InfinityDB curated reference",
-  "formatVersion": 2,
-  "collection": {
-    "id": "example",
-    "title": "Curated reference example",
-    "domain": "example",
-    "status": "draft",
-    "effectiveFrom": "2026-09-15",
-    "authority": "secondary"
-  },
-  "sources": [],
-  "records": []
+    "format": "InfinityDB curated reference",
+    "formatVersion": 2,
+    "collection": {
+        "id": "example",
+        "title": "Curated reference example",
+        "domain": "example",
+        "status": "draft",
+        "effectiveFrom": "2026-09-15",
+        "authority": "secondary"
+    },
+    "sources": [],
+    "records": []
 }
