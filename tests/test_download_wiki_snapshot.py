@@ -40,3 +40,34 @@ def test_sanitize_posix_path_components() -> None:
     name = module.sanitize_path_component("folder/name.txt", os_name="Linux")
     assert name == "folder_name.txt"
     assert "/" not in name
+
+
+def test_download_unit_symbols_sanitizes_windows_invalid_names() -> None:
+    import importlib.util
+    from pathlib import Path
+
+    module_path = Path(__file__).resolve().parents[1] / "tools" / "download_unit_symbols.py"
+    spec = importlib.util.spec_from_file_location("download_unit_symbols", module_path)
+    assert spec is not None and spec.loader is not None
+    tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tool)
+
+    name = tool.destination_name(
+        "https://assets.corvusbelli.net/army/img/logo/units/Special:Recent Changes?new=1*.svg"
+    )
+    assert name.endswith(".svg")
+    assert "<" not in name and ">" not in name and ":" not in name
+    assert "?" not in name and "*" not in name and '"' not in name
+
+
+def test_reorganize_symbols_slugifies_windows_invalid_names() -> None:
+    import importlib.util
+    from pathlib import Path
+
+    module_path = Path(__file__).resolve().parents[1] / "tools" / "reorganize_symbols.py"
+    spec = importlib.util.spec_from_file_location("reorganize_symbols", module_path)
+    assert spec is not None and spec.loader is not None
+    tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tool)
+
+    assert tool.slugify("Special:Recent Changes?new=1*") == "special-recent-changes-new-1"

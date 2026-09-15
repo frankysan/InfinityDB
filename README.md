@@ -53,8 +53,12 @@ Current release: **0.5.1** (2026-09-14).
 - Bundles army, unit, order, and characteristic SVG symbols for the browser.
   Army and unit assets use stable ID-and-slug paths, so the browser can serve
   an exact asset without scanning a symbol directory.
-- Includes standalone scripts for downloading Army JSON snapshots and unit
-  symbols; normal build commands do not make network requests.
+- Includes standalone scripts for downloading Army JSON snapshots, wiki mirror
+  snapshots, and unit symbols; normal build commands do not make network
+  requests.
+- Includes dedicated regression tests for each standalone tool script so the
+  wiki mirror, symbol download, symbol reorganizer, Army JSON downloader, and
+  shared sanitization logic stay cross-platform and safe to run.
 - Uses snapshot-aware API validators and release-fingerprinted static modules,
   so browsers refresh safely when either deployed application or data changes.
 - Includes server deployment, update, and image-pruning scripts; see the
@@ -209,8 +213,9 @@ python -m ruff check src/infinity_db src/infinity_army_data/cli.py tests
 
 Tests cover the ingestion and import pipeline, preservation of normalized
 records, safe database replacement, army membership, pagination, search, API
-validation, reference catalogs, unit details, profile data, and static-symbol
-delivery. VS Code includes build, serve, test, and lint tasks, plus build and
+validation, reference catalogs, unit details, profile data, static-symbol
+delivery, and the standalone tool scripts used for local Army and wiki data
+fetches. VS Code includes build, serve, test, and lint tasks, plus build and
 web-server debug configurations.
 
 ## LLM code disclosure

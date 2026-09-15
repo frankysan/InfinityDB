@@ -121,7 +121,9 @@ or served copyrighted PDF text or artwork.
   records unless a deliberate mapping is documented.
 - Update tests with behavior changes. Pipeline changes need lossless,
   relationship, and import-integrity coverage; repository/API/UI changes need
-  focused behavior coverage.
+  focused behavior coverage. Standalone scripts in `tools/` also need their own
+  dedicated regression tests so filesystem-safety and download logic remain
+  covered independently of the main pipeline.
 - Run `python -m pytest -q` and
   `python -m ruff check src/infinity_db src/infinity_army_data/cli.py tests`
   for substantive changes.

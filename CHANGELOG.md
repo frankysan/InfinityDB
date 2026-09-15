@@ -4,10 +4,23 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Add dedicated regression tests for each standalone tool script in `tools/`,
+  covering the Army JSON downloader, wiki mirror downloader, asset symbol
+  downloader, symbol reorganizer, and shared file-path sanitizer.
+- Add project-local pytest temp/cache configuration so the suite runs reliably
+  from the repository `.venv` on Windows and does not depend on the system temp
+  directory.
+
 ### Changed
 
+- Standardize tool-script validation around one regression file per script so
+  failures are easier to trace and maintain.
 - Document the decision to keep future PDF-derived rules references in a
   separately versioned SQLite database from Army JSON-derived data.
+- Harden the file-path sanitization and wiki mirror logic for cross-platform
+  safety while preserving compatible local URLs and asset-file naming.
 
 ## [0.5.1] - 2026-09-14
 

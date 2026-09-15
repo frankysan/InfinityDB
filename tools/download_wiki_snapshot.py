@@ -25,6 +25,11 @@ from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
+try:
+    from tools.path_sanitization import sanitize_path_component, sanitize_relative_path
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from path_sanitization import sanitize_path_component, sanitize_relative_path
+
 ROOT_URL = "https://infinitythewiki.com/"
 ALLOWED_HOSTS = {"infinitythewiki.com", "assets.corvusbelli.net"}
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:155.0) Gecko/20100101 Firefox/155.0"
@@ -62,27 +67,6 @@ def should_skip_url(url: str) -> bool:
     return False
 
 
-def sanitize_path_component(value: str, *, os_name: str | None = None) -> str:
-    """Normalize a path component so it is valid on the target OS."""
-    os_name = (os_name or sys.platform).lower()
-
-    cleaned = urllib.parse.unquote(value)
-    cleaned = cleaned.strip().replace("\\", "/")
-
-    if os_name.startswith("win"):
-        cleaned = re.sub(r'[<>:"|?*]', "_", cleaned)
-        cleaned = cleaned.rstrip(". ")
-        if not cleaned:
-            cleaned = "_"
-    else:
-        cleaned = re.sub(r"[\x00-\x1f]", "", cleaned)
-        cleaned = cleaned.replace("/", "_")
-        if not cleaned:
-            cleaned = "_"
-
-    return cleaned
-
-
 def local_relative_path(url: str, *, os_name: str | None = None) -> str:
     """Map a wiki URL to a relative local filesystem path."""
     parsed = urllib.parse.urlparse(url)
@@ -96,12 +80,7 @@ def local_relative_path(url: str, *, os_name: str | None = None) -> str:
     if not normalized or normalized.endswith("/"):
         normalized = f"{normalized}index.html" if normalized else "index.html"
 
-    parts = [
-        sanitize_path_component(part, os_name=os_name) for part in normalized.split("/") if part
-    ]
-    if not parts:
-        return "index.html"
-    return "/".join(parts)
+    return sanitize_relative_path(normalized, os_name=os_name)
 
 
 def rewrite_html_links(html_text: str, base_url: str, *, os_name: str | None = None) -> str:
@@ -128,9 +107,7 @@ def rewrite_html_links(html_text: str, base_url: str, *, os_name: str | None = N
                 a_path = a_path[1:]
             if not a_path:
                 return f"{match.group('attr')}{candidate}{match.group('quote')}"
-            normalized = "/".join(
-                sanitize_path_component(part, os_name=os_name) for part in a_path.split("/") if part
-            )
+            normalized = sanitize_relative_path(a_path, os_name=os_name)
             return f"{match.group('attr')}{normalized}{match.group('quote')}"
 
         if hostname == "infinitythewiki.com" or not hostname:

@@ -5,12 +5,18 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 import time
 import zipfile
 from collections.abc import Iterable
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlopen
+
+try:
+    from tools.path_sanitization import sanitize_filename
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from path_sanitization import sanitize_filename
 
 ASSET_HOST = "assets.corvusbelli.net"
 ASSET_PATH = "/army/img/logo/units/"
@@ -84,9 +90,17 @@ def destination_name(url: str) -> str:
         raise ValueError(f"Unsupported symbol host: {url}")
     if not parsed.path.startswith(ASSET_PATH):
         raise ValueError(f"Unsupported symbol path: {url}")
-    name = Path(parsed.path).name
+
+    tail = url.removeprefix(f"https://{ASSET_HOST}{ASSET_PATH}")
+    tail = tail.split("#", 1)[0]
+    if ".svg" in tail.lower():
+        stem = tail[: tail.lower().rfind(".svg")]
+        name = f"{stem}.svg"
+    else:
+        name = Path(parsed.path).name
+
     if not SVG_NAME.fullmatch(name):
-        raise ValueError(f"Unsupported symbol filename: {url}")
+        name = sanitize_filename(name)
     return name
 
 

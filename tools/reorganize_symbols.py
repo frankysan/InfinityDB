@@ -11,11 +11,15 @@ import argparse
 import json
 import re
 import shutil
-import unicodedata
 import zipfile
 from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
+
+try:
+    from tools.path_sanitization import sanitize_filename
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from path_sanitization import sanitize_filename
 
 SYMBOL_MAP = "unit-symbol-map.js"
 ARMY_MAP = "army-symbols.js"
@@ -26,9 +30,7 @@ UNIT_ENTRY = re.compile(r'(\["[^"]+", )"([^"]+)"(\])')
 
 def slugify(value: str) -> str:
     """Return an ASCII, lowercase, dash-separated filename component."""
-    normalized = unicodedata.normalize("NFKD", value)
-    ascii_value = normalized.encode("ascii", "ignore").decode("ascii").lower()
-    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", ascii_value)).strip("-")
+    return sanitize_filename(value).removesuffix(".svg")
 
 
 def unique_path(directory: Path, stem: str) -> Path:

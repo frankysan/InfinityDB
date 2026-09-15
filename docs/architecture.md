@@ -8,7 +8,10 @@
    through focused API endpoints and views.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
-inspection, validation, and rebuilding snapshots.
+inspection, validation, and rebuilding snapshots. The standalone scripts in
+`tools/` keep their own dedicated regression coverage under `tests/` so their
+filesystem safety, URL handling, and cross-platform naming remain validated
+independently from the core database and web pipeline.
 
 ## Data flow
 
