@@ -6,6 +6,11 @@ listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public
 HTTPS.
 
+The application image can contain a generated database snapshot and downloaded
+unit symbols. Those materials are not automatically covered by InfinityDB's
+MIT License. Review [third-party notices](../THIRD_PARTY_NOTICES.md) before
+redistributing an image or database that contains external data or assets.
+
 ## Prerequisites
 
 Install Docker Engine with the Compose plugin on the Linux server. Configure

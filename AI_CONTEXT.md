@@ -24,6 +24,17 @@ Keep source-format logic, database storage choices, HTTP behavior, and browser
 state in their respective layers. Do not add a JavaScript build step unless a
 clear requirement justifies it.
 
+## Guiding principles
+
+- **Accuracy:** Use official data sources and strive to represent them as
+  accurately as possible. Preserve uncertainty when a source is incomplete or
+  ambiguous rather than presenting an unsupported conclusion as fact.
+- **Flexibility:** Expand the ways users can browse and understand the data
+  while keeping the experience simple, fast, and customizable.
+- **Transparency:** Keep the project open source under the MIT License and
+  distinguish InfinityDB's work from outside data, quoted text, and image
+  assets, which remain the property of their respective owners.
+
 ## Data and compatibility invariants
 
 - Preserve the merged master document losslessly. The normalized document is

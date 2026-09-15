@@ -7,6 +7,17 @@ interface and API on top of the resulting database.
 
 Current release: **0.5.1** (2026-09-14).
 
+## Guiding principles
+
+- **Accuracy:** InfinityDB uses official data sources and strives to represent
+  them as accurately as possible, preserving uncertainty where the source is
+  incomplete or ambiguous.
+- **Flexibility:** InfinityDB expands the ways users can browse its data while
+  keeping the experience simple, fast, and customizable.
+- **Transparency:** InfinityDB is open source under the [MIT License](LICENSE).
+  Outside data, quoted text, and image assets remain the property of their
+  respective owners.
+
 ## Current features
 
 - Imports Army JSON snapshots together with required API metadata into a
@@ -228,4 +239,8 @@ ownership of those materials.
 
 ## License
 
-InfinityDB is released under the [MIT License](LICENSE).
+InfinityDB's original source code and documentation are released under the
+[MIT License](LICENSE). Downloaded Army data, symbols, wiki content, rules
+documents, and deployment dependencies retain their own rights and licenses;
+see [third-party notices](THIRD_PARTY_NOTICES.md) before redistributing a
+build that includes them.

@@ -224,6 +224,12 @@ h1 > span { color: #8caa60; }
 .about-callout h2 { margin: 0 0 13px; font-size: 24px; }
 .about-callout > p:not(.eyebrow) { max-width: 650px; color: #52634c; }
 .about-callout .button { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.about-principles { margin-top: 38px; }
+.about-principles > h2 { margin: 0 0 22px; color: var(--color-text-primary); font-size: 24px; font-weight: 600; letter-spacing: -.4px; }
+.about-principles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.about-principles-grid article { padding-top: 18px; border-top: 2px solid #b9cbb0; }
+.about-principles-grid h3 { margin: 0 0 9px; color: var(--color-text-primary); font-size: 15px; font-weight: 600; }
+.about-principles-grid p { margin: 0; color: var(--color-text-secondary); font-size: 12px; line-height: 1.75; }
 .about-details, .about-disclosure { margin-top: 24px; padding: 30px 32px; }
 .about-details { display: flex; align-items: end; justify-content: space-between; gap: 28px; }
 .about-details h2, .about-disclosure h2 { margin: 0 0 11px; color: var(--color-text-primary); font-size: 19px; font-weight: 600; letter-spacing: -.4px; }
@@ -486,6 +492,7 @@ tbody tr:hover { background: #f8f9f3; }
   .about-logo { margin-right: 0; }
   .about-content { grid-template-columns: 1fr; }
   .about-feature + .about-feature { border-left: 0; border-top: 1px solid var(--color-border-default); }
+  .about-principles-grid { grid-template-columns: 1fr; gap: 20px; }
   .army-tags { --symbols-per-row: 6; }
   .army-tags-compact { --symbols-per-row: 7; }
   h1 { font-size: 42px; }
@@ -526,6 +533,8 @@ tbody tr:hover { background: #f8f9f3; }
   .about-feature { padding: 24px 18px; }
   .about-callout { margin-top: 18px; padding: 27px 22px 29px; }
   .about-callout h2 { font-size: 21px; }
+  .about-principles { margin-top: 30px; }
+  .about-principles > h2 { font-size: 21px; }
   .about-details, .about-disclosure { padding: 24px 22px; }
   .about-details { align-items: start; flex-direction: column; }
   .desktop-break { display: none; }

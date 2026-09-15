@@ -28,6 +28,9 @@ infinity-army = "infinity_army_data.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools]
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+
 [tool.setuptools.package-data]
 "infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg", "static/armies/**/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
 

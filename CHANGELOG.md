@@ -21,6 +21,9 @@ All notable changes to this project are documented in this file.
   separately versioned SQLite database from Army JSON-derived data.
 - Harden the file-path sanitization and wiki mirror logic for cross-platform
   safety while preserving compatible local URLs and asset-file naming.
+- Document the MIT licensing boundary for original project material, external
+  data and assets, and deployment dependencies in a third-party notices file
+  and related user documentation.
 
 ## [0.5.1] - 2026-09-14
 

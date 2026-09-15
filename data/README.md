@@ -15,3 +15,8 @@ database files.
 PDFs in this directory are research sources, not Army-pipeline inputs. Their
 curated facts must retain document version and printed-page provenance in the
 separate rules database; do not merge them into Army JSON-derived artifacts.
+
+Raw Army data, generated databases, PDF documents, and wiki snapshots are not
+automatically covered by InfinityDB's MIT License. Review the repository's
+[third-party notices](../THIRD_PARTY_NOTICES.md) before redistributing any
+snapshot or derived artifact that contains them.

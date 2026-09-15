@@ -7,6 +7,18 @@
 2. **Extensible web UI:** provide a unit explorer and rules-reference catalogs
    through focused API endpoints and views.
 
+## Guiding principles
+
+1. **Accuracy:** use official data sources and strive to represent those
+  sources as accurately as possible. When source data is incomplete or
+  ambiguous, preserve that uncertainty rather than presenting an unsupported
+  conclusion as fact.
+2. **Flexibility:** expand the ways users can browse and understand the data
+  while keeping the experience simple, fast, and customizable.
+3. **Transparency:** keep the project open source under the MIT License and
+  clearly distinguish InfinityDB's work from outside data, quoted text, and
+  image assets, which remain the property of their respective owners.
+
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in
 `tools/` keep their own dedicated regression coverage under `tests/` so their
