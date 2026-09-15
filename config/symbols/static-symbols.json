@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "base_url": "https://assets.corvusbelli.net/army/img/icon/",
+  "assets": {
+    "characteristics": [
+      "cube.svg",
+      "cube2.svg",
+      "hackable.svg",
+      "peripheral.svg"
+    ],
+    "orders": [
+      "regular.svg",
+      "irregular.svg",
+      "tactical.svg",
+      "lieutenant.svg",
+      "impetuous.svg"
+    ]
+  }
+}
