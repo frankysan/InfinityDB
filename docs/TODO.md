@@ -125,13 +125,6 @@ reference. Git history retains implementation detail.
     overrides, and the generated symbol-build manifest.
   - Remove legacy migration assumptions such as first-symbol-wins once the new
     symbol publisher becomes authoritative.
-- [ ] Eliminate duplicated faction and reinforcement assumptions from browser
-  and repository code.
-  - Derive faction names/slugs from imported Army metadata/API responses rather
-    than maintaining JavaScript maps.
-  - Use the imported `army_lists.kind` relationship for reinforcement
-    classification instead of teaching either Python or JavaScript that Army
-    IDs ending in `98` or `99` are reinforcements.
 - [ ] Review remaining hard-coded domain tables with the same decision rule:
   prefer derivation from authoritative imported data first, a validated
   manifest second, and code only when the value is implementation behavior.
