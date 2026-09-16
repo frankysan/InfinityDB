@@ -12,6 +12,12 @@ All notable changes to this project are documented in this file.
 - Add project-local pytest temp/cache configuration so the suite runs reliably
   from the repository `.venv` on Windows and does not depend on the system temp
   directory.
+- Add the validated `config/identity/source-identities.json` manifest for
+  maintained unit, army, skill, equipment, weapon, and name-normalization
+  identity exceptions.
+- Pin the exact identity manifest and its deterministic SHA-256 into both
+  generated Army database siblings, with validation that rejects missing or
+  tampered identity metadata.
 
 ### Changed
 
@@ -24,6 +30,13 @@ All notable changes to this project are documented in this file.
 - Document the MIT licensing boundary for original project material, external
   data and assets, and deployment dependencies in a third-party notices file
   and related user documentation.
+- Move explicit logical-unit, army-list, and catalog identity exceptions out of
+  repository code and into the validated source-identity manifest. Generic
+  duplicate and name-normalization algorithms remain implementation behavior.
+- Resolve runtime identities from the policy pinned into the immutable database
+  snapshot rather than from the working tree's configuration files.
+- Increase the Army database compatibility revision to 10; existing databases
+  must be rebuilt so they contain the required identity policy metadata.
 
 ## [0.5.1] - 2026-09-14
 
