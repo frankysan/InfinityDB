@@ -156,6 +156,28 @@ reference. Git history retains implementation detail.
     output lifecycle as Army acquisition. The wiki downloader no longer keeps
     a dated unpacked mirror as its primary output, and the symbol downloader no
     longer incrementally fills a long-lived loose destination directory.
+  - [ ] Add a shared, versioned snapshot sidecar metadata contract for every
+    persisted Army, wiki, and symbol archive.
+    - Store the sidecar adjacent to its archive as
+      `<archive-stem>.metadata.json`; bind it to the immutable ZIP by archive
+      filename and SHA-256 rather than embedding editable notes in the ZIP.
+    - Keep generated provenance separate from human annotation. Provenance
+      should include snapshot type, acquisition timestamp, source/language or
+      base URL where applicable, archive SHA-256, and other downloader-known
+      source facts without duplicating Corvus Belli's source `metadata.json`.
+    - Start the editable annotation schema with optional `description`, optional
+      `compared_to` snapshot identity, and an ordered `changes` list for notable
+      differences or release notes. Do not require a structured diff model yet.
+    - Allow annotations to be added or revised after acquisition without
+      changing the raw archive or its hash. Validate the referenced archive
+      hash before consuming, displaying, or updating a sidecar.
+    - Have downloaders create an initial sidecar automatically and provide a
+      shared CLI/helper for atomically editing annotation fields later. Preserve
+      existing human notes when generated provenance is refreshed or augmented.
+    - Future snapshot-comparison tooling may append structured diff data, but it
+      must not overwrite hand-written descriptions or change notes.
+    - Add schema validation, deterministic serialization, hash-mismatch tests,
+      edit-preservation tests, and coverage for all three snapshot types.
   - [ ] Add a thin `tools/build_symbols.py` orchestrator with mutually exclusive
     offline `--snapshot PATH` and explicit online `--fetch-snapshot` modes.
     Once selected or downloaded, pin archive path/name, SHA-256, language,

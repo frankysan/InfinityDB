@@ -128,6 +128,13 @@ machine-specific absolute paths.
   with that exact timestamp already exists, append `-2`, `-3`, and so on rather
   than overwriting it. Loose download trees are transient working state, not
   the durable acquisition artifact.
+- Snapshot annotations are InfinityDB-owned metadata, not part of the immutable
+  raw ZIP and not part of Corvus Belli's source `metadata.json`. Each persisted
+  snapshot may have an adjacent, versioned `<archive-stem>.metadata.json`
+  sidecar that identifies the archive by filename and SHA-256. Generated
+  provenance and human-maintained annotation must remain distinguishable;
+  editing a description, comparison target, or notable-change notes must never
+  mutate the archive or change its hash.
 - Persistent generated state should be validated before replacement and written
   atomically where practical so failed builds leave the prior valid state
   usable.
@@ -344,3 +351,8 @@ snapshot timestamps. Version 1 curated files must be migrated before ingestion.
   timestamped ZIP snapshot convention. Downloaders stage loose files only
   temporarily and persist complete `JSON`, `WIKI`, or `SYMBOLS` archives rather
   than long-lived unpacked download directories.
+- 2026-09-16: Snapshot descriptions and notable-change notes live in versioned
+  InfinityDB sidecar metadata rather than inside raw archives. Sidecars bind to
+  immutable snapshots by filename and SHA-256, separate generated provenance
+  from editable human annotation, and may be revised without changing the raw
+  snapshot identity.
