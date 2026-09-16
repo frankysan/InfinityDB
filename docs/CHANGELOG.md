@@ -15,9 +15,9 @@ All notable changes to this project are documented in this file.
 - Add the validated `config/identity/source-identities.json` manifest for
   maintained unit, army, skill, equipment, weapon, and name-normalization
   identity exceptions.
-- Pin the exact identity manifest and its deterministic SHA-256 into both
-  generated Army database siblings, with validation that rejects missing or
-  tampered identity metadata.
+- Pin the exact identity manifest and its deterministic SHA-256 into
+  `normalized.json` during InfinityDB normalization and propagate the same
+  validated policy into both generated Army database siblings.
 
 ### Changed
 
@@ -30,11 +30,13 @@ All notable changes to this project are documented in this file.
 - Document the MIT licensing boundary for original project material, external
   data and assets, and deployment dependencies in a third-party notices file
   and related user documentation.
-- Move explicit logical-unit, army-list, and catalog identity exceptions out of
-  repository code and into the validated source-identity manifest. Generic
-  duplicate and name-normalization algorithms remain implementation behavior.
-- Resolve runtime identities from the policy pinned into the immutable database
-  snapshot rather than from the working tree's configuration files.
+- Move explicit logical-unit, army-list, catalog, and exceptional canonical-
+  faction identity knowledge out of implementation code and into the validated
+  source-identity manifest. Generic duplicate, name-normalization, and whole-
+  army `xx01` derivation algorithms remain implementation behavior.
+- Make database export revalidate identity provenance pinned into normalized
+  data, reject incomplete or conflicting policies, and preserve that exact
+  policy in the immutable database snapshot used by runtime queries.
 - Increase the Army database compatibility revision to 10; existing databases
   must be rebuilt so they contain the required identity policy metadata.
 
@@ -277,7 +279,7 @@ All notable changes to this project are documented in this file.
 - Persistent centimetre/inch display preference in the shared sidebar, applied
   to movement values and distance-based skill modifiers.
 - Skill Modifiers page and API for browsing distance-related skill extras and
-  linking directly to the units that use them.
+  linking directly to the units using each combination.
 - Reinforcement filter and nested reinforcement-list display in the army
   selector, including reinforcement availability badges on unit details.
 - Profile type and classification in general unit profiles.
