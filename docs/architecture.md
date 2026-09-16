@@ -356,6 +356,11 @@ reference link when the metadata snapshot provides one.
 Each variant includes the relevant extras and logical units that use it. Weapon
 details additionally include metadata weapon profiles, such as ammunition,
 traits, and range data, when present in the supplied metadata snapshot.
+Metadata weapon/equipment profiles retain the raw `traits` value and also expose
+`trait_references`. Each reference contains the raw `label`, canonical `name`
+(or null), and trait-catalog `slug` (or null). Browser rendering consumes these
+backend-derived references for trait links and does not canonicalize trait text
+or generate trait slugs independently.
 
 `GET /api/traits` returns the derived shared-traits catalog.
 `GET /api/traits/{slug}` returns a trait's concise rules summary, when
