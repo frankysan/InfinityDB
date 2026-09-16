@@ -88,16 +88,21 @@ representations rather than machine-specific absolute paths.
 `config/identity/source-identities.json` is the first repository-wide example
 of this split. It owns maintained logical-identity exceptions for source unit,
 army-list, skill, equipment, and weapon IDs plus identity-name aliases. Generic
-matching and duplicate-detection algorithms remain code. Source-format
-semantics that belong to Army normalization also remain code rather than being
-moved into this application-level manifest.
+matching and duplicate-detection algorithms remain code. The ordinary
+whole-army `xx01` derivation also remains code; exceptional interpretation
+policy, such as the legacy mercenary canonical-faction mapping, lives in the
+manifest and is supplied explicitly to the generic normalizer.
 
 The authored identity manifest is a build input, not a deployed runtime file.
-Database export validates it, serializes it deterministically, and stores both
-the exact document and its SHA-256 in the frontend and raw database metadata.
-Repository queries revalidate and consume the policy pinned into that immutable
-snapshot. This keeps deployments self-contained and ensures a database cannot
-silently change meaning because the working tree's configuration changed.
+InfinityDB normalization validates it, supplies normalization-time exceptions,
+and writes the exact document and its deterministic SHA-256 into
+`normalized.json`. Database export revalidates that pinned provenance, rejects
+incomplete or conflicting identity metadata, and propagates the same policy to
+the frontend and raw database metadata. Repository queries revalidate and
+consume the policy pinned into that immutable database snapshot. This keeps
+deployments self-contained and prevents later working-tree configuration
+changes from silently changing the meaning of an existing normalized or SQLite
+snapshot.
 
 ## Data flow
 
@@ -106,10 +111,12 @@ Army directory / ZIP
     + required metadata.json
     -> merge + lossless verification
     -> master.json
+       + validated identity configuration
     -> normalize + relationship validation
     -> normalized.json + validation report
+       + pinned identity document / SHA-256
     -> SQLite importer
-       + validated identity configuration
+       + revalidated pinned identity provenance
     -> infinity.db + infinity.raw.db
     -> repository -> HTTP API -> browser UI
 
