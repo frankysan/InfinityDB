@@ -9,17 +9,16 @@ import threading
 import unicodedata
 import weakref
 from collections import OrderedDict
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
 from infinity_army_data.weapon_profiles import special_weapon_detail
-
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -45,6 +44,14 @@ SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
 UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
+
+
+class RowLike(Protocol):
+    """Minimal row interface shared by sqlite3.Row and test dictionaries."""
+
+    def __getitem__(self, key: str) -> Any: ...
+
+    def keys(self) -> Iterable[str]: ...
 
 
 def instance_lru_cache(maxsize: int) -> Callable:
@@ -159,7 +166,7 @@ def configured_catalog_group(
     identity_config: IdentityConfig,
     catalog: str,
     item_id: int,
-    available_ids: set[int],
+    available_ids: Collection[int],
 ) -> tuple[int, tuple[int, ...]] | None:
     """Return an explicit manifest group restricted to IDs present in this snapshot."""
     source_ids = tuple(
@@ -222,7 +229,7 @@ def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
     return extra
 
 
-def unit_group_key(row: sqlite3.Row, identity_config: IdentityConfig) -> tuple[int, str]:
+def unit_group_key(row: RowLike, identity_config: IdentityConfig) -> tuple[int, str]:
     """Identify duplicate unit records that belong to one logical unit."""
     unit_id = row["id"]
     if unit_id in identity_config.unit_aliases:
@@ -252,7 +259,7 @@ def normalized_unit_identity(value: object, identity_config: IdentityConfig) -> 
     return " ".join(sorted(normalized_words))
 
 
-def unit_match_identities(row: sqlite3.Row, identity_config: IdentityConfig) -> set[str]:
+def unit_match_identities(row: RowLike, identity_config: IdentityConfig) -> set[str]:
     """Return normalized ISC and display-name identities for a unit.
 
     Reinforcement labels are secondary, and the Army data does not always use
@@ -267,7 +274,7 @@ def unit_match_identities(row: sqlite3.Row, identity_config: IdentityConfig) -> 
     }
 
 
-def unit_base_identity(row: sqlite3.Row, identity_config: IdentityConfig) -> str:
+def unit_base_identity(row: RowLike, identity_config: IdentityConfig) -> str:
     """Return a stable primary identity for a logical unit group."""
     return min(unit_match_identities(row, identity_config), default="")
 
@@ -303,8 +310,8 @@ def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
 
 
 def logical_unit_groups(
-    rows: list[sqlite3.Row],
-    memberships: dict[int, list[dict[str, Any]]],
+    rows: Sequence[RowLike],
+    memberships: Mapping[int, Sequence[Mapping[str, Any]]],
     identity_config: IdentityConfig | None = None,
 ) -> list[dict[str, Any]]:
     """Combine 10,000-ID duplicates and their reinforcement-only variants."""
@@ -382,7 +389,7 @@ def logical_unit_groups(
     return list(groups.values())
 
 
-def army_name(row: sqlite3.Row) -> str:
+def army_name(row: RowLike) -> str:
     if row["name"]:
         return row["name"]
     if row["slug"] == "reinf":
@@ -394,7 +401,7 @@ def army_name(row: sqlite3.Row) -> str:
     return f"Army {row['id']}"
 
 
-def unit_optional_modes(group: dict[str, Any]) -> set[str]:
+def unit_optional_modes(group: Mapping[str, Any]) -> set[str]:
     """Return optional modes encoded in a dedicated unit's name or slug."""
     labels = [*group["names"], group.get("slug") or ""]
     normalized = " ".join(
@@ -409,17 +416,17 @@ def unit_optional_modes(group: dict[str, Any]) -> set[str]:
 
 
 def army_is_available(
-    army: dict[str, Any], group: dict[str, Any], selected_flags: set[str]
+    army: Mapping[str, Any], group: Mapping[str, Any], selected_flags: set[str]
 ) -> bool:
     """Return whether an army occurrence needs only enabled optional modes."""
     return army_required_flags(army, group) <= selected_flags
 
 
 def army_required_flags(
-    army: dict[str, Any],
-    group: dict[str, Any],
+    army: Mapping[str, Any],
+    group: Mapping[str, Any],
     canonical_faction_id: int | None = None,
-    normal_army_ids: set[int] | None = None,
+    normal_army_ids: Collection[int] | None = None,
 ) -> set[str]:
     """Return the optional availability categories required by an occurrence."""
     required = unit_optional_modes(group)
@@ -438,10 +445,10 @@ def army_required_flags(
 
 
 def visible_armies_for_group(
-    group: dict[str, Any],
+    group: Mapping[str, Any],
     selected_flags: set[str],
-    canonical_factions: dict[int, int | None],
-    normal_armies_by_unit: dict[int, set[int]],
+    canonical_factions: Mapping[int, int | None],
+    normal_armies_by_unit: Mapping[int, Collection[int]],
 ) -> dict[int, dict[str, Any]]:
     """Collect armies that have at least one visible source occurrence.
 
@@ -1748,3 +1755,4 @@ class Database:
             "source_ids": source_ids,
             "armies": armies,
         }
+
