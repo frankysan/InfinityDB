@@ -107,21 +107,25 @@ documentation are complete.
   - Require versioned schemas, validation on load, deterministic
     serialization where generated, focused regression tests, and portable
     project-relative paths for important manifests.
-- [ ] Add `config/identity/source-identities.json` as the canonical home for
-  source-identity exceptions and aliases.
-  - Move explicit unit, army, skill, equipment, and weapon merge aliases out
-    of `database/repository.py`.
-  - Represent alias groups declaratively around a canonical source ID rather
-    than duplicating pairwise mappings.
-  - Move exceptional canonical-faction mappings such as the legacy mercenary
-    ownership case into the manifest while keeping the normal whole-army
-    `xx01` derivation algorithm in code.
-  - Centralize source spelling/word aliases used for unit and profile identity,
-    including known source misspellings.
-  - Record a short reason/provenance note for exceptional mappings where
+- [ ] Complete `config/identity/source-identities.json` as the canonical home
+  for source-identity exceptions and aliases.
+  - [x] Move explicit unit, army, skill, equipment, and weapon merge aliases
+    out of `database/repository.py`.
+  - [x] Represent alias groups declaratively around a canonical source ID
+    rather than duplicating pairwise mappings.
+  - [x] Move exceptional canonical-faction mappings such as the legacy
+    mercenary ownership case into the manifest while keeping the normal
+    whole-army `xx01` derivation algorithm in code.
+  - [x] Centralize source spelling/word aliases and profile-identity ignored
+    words, including known source misspellings.
+  - [x] Pin the validated identity document and SHA-256 into InfinityDB
+    `normalized.json`, revalidate them during export, and propagate the same
+    policy into both database siblings for runtime use.
+  - [x] Record short reason/provenance notes for exceptional mappings where
     useful for future review.
-  - Remove duplicated identity interpretation from browser JavaScript where
-    the backend can expose a canonical/group identity directly.
+  - [ ] Remove the duplicated profile-identity aliases and ignored-word table
+    from `unit.js`. Expose or derive the manifest-backed grouping identity from
+    the backend so the browser does not independently reinterpret source names.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.
@@ -168,12 +172,12 @@ documentation are complete.
   - Remove legacy migration assumptions such as first-symbol-wins once the new
     symbol publisher becomes authoritative.
 - [ ] Eliminate duplicated faction and reinforcement assumptions from browser
-  code.
+  and repository code.
   - Derive faction names/slugs from imported Army metadata/API responses rather
     than maintaining JavaScript maps.
-  - Expose reinforcement/list kind explicitly from the backend instead of
-    teaching the browser that Army IDs ending in `98` or `99` are
-    reinforcements.
+  - Use the imported `army_lists.kind` relationship for reinforcement
+    classification instead of teaching either Python or JavaScript that Army
+    IDs ending in `98` or `99` are reinforcements.
 - [ ] Review remaining hard-coded domain tables with the same decision rule:
   prefer derivation from authoritative imported data first, a validated
   manifest second, and code only when the value is implementation behavior.
