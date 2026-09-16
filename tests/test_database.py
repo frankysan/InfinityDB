@@ -13,6 +13,7 @@ from infinity_army_data.weapon_profiles import weapon_profile_override
 from infinity_db.database import Database, export_database, raw_database_path
 from infinity_db.database.importer import BATCH_SIZE, batched
 from infinity_db.database.repository import (
+    army_required_flags,
     canonical_skill_extra_name,
     canonical_skill_id,
     catalog_merge_key,
@@ -896,6 +897,21 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
     assert all(len(army["profiles"]) == 1 for army in first_army_occurrences)
 
 
+def test_reinforcement_classification_uses_army_kind_not_id_suffix() -> None:
+    group = {
+        "canonical_faction_id": 301,
+        "normal_army_ids": {399},
+        "names": ["TEST"],
+        "slug": "test",
+    }
+
+    assert army_required_flags({"id": 399, "kind": "army"}, group) == set()
+    assert army_required_flags(
+        {"id": 350, "kind": "reinforcement"},
+        group,
+    ) == {"reinforcement"}
+
+
 def test_list_availability_uses_source_specific_occurrences() -> None:
     group = {
         "canonical_faction_id": 301,
@@ -905,10 +921,15 @@ def test_list_availability_uses_source_specific_occurrences() -> None:
         "army_occurrences": [
             {"source_id": 1555, "id": 303, "name": "Kosmoflot"},
             {"source_id": 11555, "id": 101, "name": "PanOceania"},
-            {"source_id": 1634, "id": 399, "name": "Reinforcements"},
+            {
+                "source_id": 1634,
+                "id": 350,
+                "name": "Reinforcements",
+                "kind": "reinforcement",
+            },
         ],
     }
-    canonical_factions = {1555: 301, 11555: 1, 1634: 399}
+    canonical_factions = {1555: 301, 11555: 1, 1634: 350}
     normal_armies = {1555: {303}, 11555: set(), 1634: set()}
 
     assert set(visible_armies_for_group(group, set(), canonical_factions, normal_armies)) == {303}
@@ -918,7 +939,7 @@ def test_list_availability_uses_source_specific_occurrences() -> None:
     }
     assert set(
         visible_armies_for_group(group, {"reinforcement"}, canonical_factions, normal_armies)
-    ) == {303, 399}
+    ) == {303, 350}
 
 
 def test_reinforcement_only_variants_join_their_standard_unit() -> None:
@@ -950,9 +971,9 @@ def test_reinforcement_only_variants_join_their_standard_unit() -> None:
     ]
     memberships = {
         265: [{"id": 301, "name": "Ariadna"}],
-        1635: [{"id": 399, "name": "Reinforcements"}],
-        1691: [{"id": 999, "name": "Reinforcements"}],
-        2691: [{"id": 998, "name": "Reinforcements"}],
+        1635: [{"id": 399, "name": "Reinforcements", "kind": "reinforcement"}],
+        1691: [{"id": 999, "name": "Reinforcements", "kind": "reinforcement"}],
+        2691: [{"id": 998, "name": "Reinforcements", "kind": "reinforcement"}],
     }
 
     groups = logical_unit_groups(rows, memberships)
@@ -981,7 +1002,7 @@ def test_reinforcement_variant_matches_reordered_pluralized_identity() -> None:
     ]
     memberships = {
         35: [{"id": 101, "name": "PanOceania"}],
-        1649: [{"id": 199, "name": "Reinforcements"}],
+        1649: [{"id": 199, "name": "Reinforcements", "kind": "reinforcement"}],
     }
 
     groups = logical_unit_groups(rows, memberships)
@@ -1009,7 +1030,7 @@ def test_reinforcement_variant_uses_display_name_when_isc_is_abbreviated() -> No
     ]
     memberships = {
         1751: [{"id": 101, "name": "PanOceania"}],
-        1642: [{"id": 199, "name": "Reinforcements"}],
+        1642: [{"id": 199, "name": "Reinforcements", "kind": "reinforcement"}],
     }
 
     groups = logical_unit_groups(rows, memberships)
@@ -1057,7 +1078,9 @@ def test_reinforcement_variant_matches_known_spelling_aliases(
 ) -> None:
     memberships = {
         standard["id"]: [{"id": standard["main_army_id"], "name": "Standard Army"}],
-        reinforcement["id"]: [{"id": 699, "name": "Reinforcements"}],
+        reinforcement["id"]: [
+            {"id": 699, "name": "Reinforcements", "kind": "reinforcement"}
+        ],
     }
 
     groups = logical_unit_groups([standard, reinforcement], memberships)
