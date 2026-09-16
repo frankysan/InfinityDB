@@ -490,6 +490,31 @@ class Database:
         with self._connect() as connection:
             return identity_config_from_connection(connection)
 
+    @instance_lru_cache(maxsize=1)
+    def _faction_groups(self) -> dict[int, dict[str, Any]]:
+        """Return Army metadata faction groups keyed by source army ID."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT child.id AS army_id, "
+                "COALESCE(child.parent, child.id) AS faction_id, "
+                "parent.name AS faction_name, parent.slug AS faction_slug "
+                "FROM metadata_factions AS child "
+                "LEFT JOIN metadata_factions AS parent "
+                "ON parent.id = COALESCE(child.parent, child.id)"
+            ).fetchall()
+        groups = {
+            row["army_id"]: {
+                "id": row["faction_id"],
+                "name": row["faction_name"],
+                "slug": row["faction_slug"],
+            }
+            for row in rows
+        }
+        for source_id, canonical_id in self._identity_config().army_aliases.items():
+            if canonical_id not in groups and source_id in groups:
+                groups[canonical_id] = groups[source_id]
+        return groups
+
     def validate(self) -> None:
         """Reject missing, unrelated, unsupported, incomplete, or corrupt databases."""
         with self._connect() as connection:
@@ -620,6 +645,7 @@ class Database:
     ) -> dict[int, dict[str, Any]]:
         """Map every visible source unit to its logical-unit list item."""
         graph = self._unit_graph()
+        faction_groups = self._faction_groups()
         canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
         normal_armies_by_unit = graph["normal_armies_by_unit"]
         items_by_source: dict[int, dict[str, Any]] = {}
@@ -636,6 +662,7 @@ class Database:
                 "slug": group["slug"],
                 "main_army_id": group["main_army_id"],
                 "main_army_name": graph["army_names"].get(group["main_army_id"]),
+                "main_faction": faction_groups.get(group["main_army_id"]),
                 "source_ids": group["source_ids"],
                 "army_ids": list(visible_armies),
                 "armies": [
@@ -1347,6 +1374,7 @@ class Database:
                         for row in connection.execute(query, (item_id, item_id, item_id))
                     }
         graph = self._unit_graph()
+        faction_groups = self._faction_groups()
         army_names = graph["army_names"]
         groups = graph["groups"]
         canonical_factions = {
@@ -1397,6 +1425,7 @@ class Database:
                 "slug": group["slug"],
                 "main_army_id": group["main_army_id"],
                 "main_army_name": army_names.get(group["main_army_id"]),
+                "main_faction": faction_groups.get(group["main_army_id"]),
                 "source_ids": group["source_ids"],
                 "army_ids": list(group["armies"]),
                 "armies": [
@@ -1443,6 +1472,7 @@ class Database:
             if selected is None:
                 return None
             graph = self._unit_graph()
+            faction_groups = self._faction_groups()
             siblings = graph["rows"]
             army_names = graph["army_names"]
             group = graph["groups_by_source"][selected["id"]]
@@ -1473,6 +1503,7 @@ class Database:
                     {
                         "id": occurrence["id"],
                         "name": occurrence["name"],
+                        "faction": faction_groups.get(occurrence["source_army_id"]),
                         "availability_flags": list(flags),
                         "profiles": [],
                         "loadouts": [],
@@ -1748,6 +1779,7 @@ class Database:
                                 "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
                             },
                         )
+            main_faction = faction_groups.get(group["main_army_id"])
             for army in armies:
                 del army["_occurrence_key"]
         return {
@@ -1759,6 +1791,7 @@ class Database:
             "notes": unit["notes"],
             "main_army_id": group["main_army_id"],
             "main_army_name": army_names.get(group["main_army_id"]),
+            "main_faction": main_faction,
             "source_ids": source_ids,
             "armies": armies,
         }

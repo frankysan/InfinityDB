@@ -11,44 +11,18 @@ const unitId = /^\/units\/(\d+)$/.exec(window.location.pathname)?.[1];
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
-const factionGroups = new Map([
-  [1, "PanOceania"],
-  [2, "Yu Jing"],
-  [3, "Ariadna"],
-  [4, "Haqqislam"],
-  [5, "Nomads"],
-  [6, "Combined Army"],
-  [7, "ALEPH"],
-  [8, "Tohaa"],
-  [9, "Non-Aligned Armies"],
-  [10, "O-12"],
-  [11, "JSA"],
-]);
-const factionSlugs = new Map([
-  [1, "panoceania"], [2, "yu-jing"], [3, "ariadna"], [4, "haqqislam"],
-  [5, "nomads"], [6, "combined-army"], [7, "aleph"], [8, "tohaa"],
-  [9, "non-aligned-armies"], [10, "o-12"], [11, "jsa"],
-]);
-
-function factionSlug(armyId) {
-  return factionSlugs.get(Math.floor(Number(armyId) / 100));
-}
-
-function factionGroup(armyId) {
-  const key = Math.floor(Number(armyId) / 100);
-  return {
-    key,
-    name: factionGroups.get(key) || "Other armies",
-    order: key,
-  };
-}
-
 function groupArmiesByFaction(armies) {
   const groups = new Map();
   for (const army of armies) {
-    const group = factionGroup(army.id);
-    if (!groups.has(group.key)) groups.set(group.key, { ...group, armies: [] });
-    groups.get(group.key).armies.push(army);
+    const faction = army.faction;
+    const key = faction?.id ?? "other";
+    if (!groups.has(key)) groups.set(key, {
+      key,
+      name: faction?.name || "Other armies",
+      order: faction?.id ?? Number.MAX_SAFE_INTEGER,
+      armies: [],
+    });
+    groups.get(key).armies.push(army);
   }
   return [...groups.values()]
     .sort((left, right) => left.order - right.order)
@@ -752,7 +726,7 @@ function render(unit) {
   const displayedGeneralProfiles = visibleGeneralProfiles(generalProfileRows);
   const generalProfilesSection = document.createElement("section");
   generalProfilesSection.className = "detail-group general-profile-group";
-  const mainFaction = factionSlug(unit.main_army_id);
+  const mainFaction = unit.main_faction?.slug;
   if (mainFaction) generalProfilesSection.classList.add(`general-profile-group--faction-${mainFaction}`);
   const generalHeading = heading(
     displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",

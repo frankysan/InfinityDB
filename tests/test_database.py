@@ -491,6 +491,7 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
                 "slug": "alpha",
                 "main_army_id": None,
                 "main_army_name": None,
+                "main_faction": None,
                 "source_ids": [1],
                 "army_ids": [101, 201],
                 "armies": [
@@ -1178,6 +1179,7 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
             "slug": None,
             "main_army_id": None,
             "main_army_name": None,
+            "main_faction": None,
             "source_ids": [4],
             "army_ids": [],
             "armies": [],
@@ -1192,6 +1194,7 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
                 "slug": None,
                 "main_army_id": None,
                 "main_army_name": None,
+                "main_faction": None,
                 "source_ids": [5],
                 "army_ids": [],
                 "armies": [],
