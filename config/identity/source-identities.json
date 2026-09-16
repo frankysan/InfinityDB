@@ -27,6 +27,16 @@
     "skills": {
       "groups": [
         {
+          "canonical_id": 19,
+          "source_ids": [19, 20, 21, 22, 23],
+          "reason": "Numbered source variants share one logical skill identity"
+        },
+        {
+          "canonical_id": 69,
+          "source_ids": [69, 70],
+          "reason": "Numbered source variants share one logical skill identity"
+        },
+        {
           "canonical_id": 201,
           "source_ids": [201, 278, 279]
         },
