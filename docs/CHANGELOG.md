@@ -28,12 +28,15 @@ All notable changes to this project are documented in this file.
   persist complete `WIKI YYYYMMDD-HHMMSS.zip` and
   `SYMBOLS YYYYMMDD-HHMMSS.zip` archives instead of long-lived loose download
   trees; Army acquisition continues to emit `JSON YYYYMMDD-HHMMSS.zip`.
-- Document a shared snapshot-sidecar metadata design for Army, wiki, and symbol
-  archives. Editable InfinityDB descriptions, comparison targets, and notable
-  change notes remain outside immutable raw ZIPs and bind to them by archive
-  filename and SHA-256, separate from generated acquisition provenance and from
-  Corvus Belli's source `metadata.json`.
-- Document the decision to keep future PDF-derived rules references in a
+- Replace the proposed adjacent snapshot sidecars with the existing data-path
+  model: generated Army/wiki/symbol snapshot provenance belongs under
+  `data/manifests/snapshots/`, while human-authored descriptions, comparison
+  targets, and notable-change notes belong under
+  `data/curated/snapshot-notes/`. Both identify immutable snapshots by SHA-256.
+- Scope rules-database ingestion to `data/curated/rules/`; `infinity-db
+  build-rules` now defaults to that subtree so other curated data categories are
+  not implicitly treated as rules collections.
+- Document the decision to keep PDF/wiki-derived rules references in a
   separately versioned SQLite database from Army JSON-derived data.
 - Harden the file-path sanitization and wiki mirror logic for cross-platform
   safety while preserving compatible local URLs and asset-file naming.
@@ -348,7 +351,7 @@ All notable changes to this project are documented in this file.
 - Manual tools to download Army JSON snapshots and unit symbols.
 - Architecture and data-model documentation, VS Code tasks/debug profiles, and
   automated coverage for the pipeline, database, API, and web interface.
-- Repeatable Linux deployment using Docker Compose, Gunicorn, and Caddy, with
+- Repeatable Linux deployment using Docker Compose, Gunicorn and Caddy, with
   a production WSGI entry point and an image that embeds a validated SQLite
   snapshot.
 
