@@ -85,6 +85,20 @@ state; hand-authored configuration remains distinct from generated output.
 Persistent project paths stored in manifests use portable project-relative
 representations rather than machine-specific absolute paths.
 
+`config/identity/source-identities.json` is the first repository-wide example
+of this split. It owns maintained logical-identity exceptions for source unit,
+army-list, skill, equipment, and weapon IDs plus identity-name aliases. Generic
+matching and duplicate-detection algorithms remain code. Source-format
+semantics that belong to Army normalization also remain code rather than being
+moved into this application-level manifest.
+
+The authored identity manifest is a build input, not a deployed runtime file.
+Database export validates it, serializes it deterministically, and stores both
+the exact document and its SHA-256 in the frontend and raw database metadata.
+Repository queries revalidate and consume the policy pinned into that immutable
+snapshot. This keeps deployments self-contained and ensures a database cannot
+silently change meaning because the working tree's configuration changed.
+
 ## Data flow
 
 ```text
@@ -95,6 +109,7 @@ Army directory / ZIP
     -> normalize + relationship validation
     -> normalized.json + validation report
     -> SQLite importer
+       + validated identity configuration
     -> infinity.db + infinity.raw.db
     -> repository -> HTTP API -> browser UI
 
@@ -208,7 +223,7 @@ provided beside, inside, or explicitly alongside the Army source.
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 8 and database compatibility revision of 9; it
+schema has a schema version of 8 and database compatibility revision of 10; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of
