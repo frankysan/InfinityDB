@@ -20,6 +20,13 @@ raw Army JSON
   loadout, or unit option, display order, quantity, and linked extras. This
   supports both unit details and reverse lookup from the rules-reference
   catalogs.
+- Explicit source-equivalent unit, army, skill, equipment, and weapon IDs are
+  maintained in the validated `config/identity/source-identities.json`
+  manifest. Generic duplicate/name rules remain implementation behavior rather
+  than authored alias data.
+- Database export pins the exact validated identity manifest and its canonical
+  SHA-256 into the snapshot metadata. Repository queries consume that pinned
+  policy rather than reading the working tree's `config/` directory at runtime.
 - Peripheral IDs are army-local.
 - Referenced but undefined factions/units/categories are retained as explicit placeholder records rather than discarded.
 
@@ -36,10 +43,13 @@ The frontend `infinity.db` contains only queryable columns. Its sibling
 record (including absent versus null fields) for development use. Both databases
 retain `__infinity_metadata`; the schema defines empty frontend tables so API
 queries do not depend on a particular snapshot containing every kind of record.
+The metadata also stores the validated source-identity manifest and its
+canonical hash, making the identity policy part of the immutable database
+snapshot and allowing tampering or incomplete exports to fail validation.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 8 and the application
-compatibility revision is 9. Imports build temporary sibling files, check
+compatibility revision is 10. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now.
 The frontend export runs `ANALYZE` after loading and indexing data, preserving
