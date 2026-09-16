@@ -71,10 +71,12 @@ reference. Git history retains implementation detail.
   - Keep the distinction explicit:
     - `config/` contains InfinityDB-maintained interpretation, correction,
       mapping, and compatibility policy.
-    - `data/curated/` contains human-reviewed facts derived from authoritative
-      rules sources and retains source/version/citation information.
-    - `data/manifests/` contains generated build provenance and state rather
-      than hand-authored project knowledge.
+    - `data/curated/` contains human-reviewed information derived from identified
+      external sources. `data/curated/rules/` is the rules-database input;
+      sibling curated categories such as `snapshot-notes/` have separate
+      semantics and are not implicitly application inputs.
+    - `data/manifests/` contains generated build/acquisition provenance and state
+      rather than hand-authored project knowledge.
     - Code continues to own algorithms, schemas, parser mechanics, generic
       normalization behavior, validation, and application behavior.
   - Require versioned schemas, validation on load, deterministic
@@ -156,28 +158,28 @@ reference. Git history retains implementation detail.
     output lifecycle as Army acquisition. The wiki downloader no longer keeps
     a dated unpacked mirror as its primary output, and the symbol downloader no
     longer incrementally fills a long-lived loose destination directory.
-  - [ ] Add a shared, versioned snapshot sidecar metadata contract for every
-    persisted Army, wiki, and symbol archive.
-    - Store the sidecar adjacent to its archive as
-      `<archive-stem>.metadata.json`; bind it to the immutable ZIP by archive
-      filename and SHA-256 rather than embedding editable notes in the ZIP.
-    - Keep generated provenance separate from human annotation. Provenance
-      should include snapshot type, acquisition timestamp, source/language or
-      base URL where applicable, archive SHA-256, and other downloader-known
-      source facts without duplicating Corvus Belli's source `metadata.json`.
-    - Start the editable annotation schema with optional `description`, optional
-      `compared_to` snapshot identity, and an ordered `changes` list for notable
-      differences or release notes. Do not require a structured diff model yet.
-    - Allow annotations to be added or revised after acquisition without
-      changing the raw archive or its hash. Validate the referenced archive
-      hash before consuming, displaying, or updating a sidecar.
-    - Have downloaders create an initial sidecar automatically and provide a
-      shared CLI/helper for atomically editing annotation fields later. Preserve
-      existing human notes when generated provenance is refreshed or augmented.
-    - Future snapshot-comparison tooling may append structured diff data, but it
-      must not overwrite hand-written descriptions or change notes.
-    - Add schema validation, deterministic serialization, hash-mismatch tests,
-      edit-preservation tests, and coverage for all three snapshot types.
+  - [ ] Add shared, versioned snapshot-provenance and annotation contracts using
+    the existing data paths rather than adjacent sidecars.
+    - Store downloader-generated provenance under `data/manifests/snapshots/`.
+      Each record binds to one immutable Army, wiki, or symbol archive by
+      SHA-256 and may retain archive path/name, snapshot type, acquisition
+      timestamp, source/language or base URL, document count, and other
+      downloader-known source facts without duplicating Corvus Belli's source
+      `metadata.json`.
+    - Store human-authored descriptions, comparison targets, and ordered notable
+      change notes separately under `data/curated/snapshot-notes/`, also bound to
+      the immutable snapshot by SHA-256. Archive filenames are useful labels but
+      not the authoritative identity.
+    - Have acquisition tools create/update generated snapshot manifests only;
+      generated tooling must never rewrite or overwrite curated snapshot notes.
+      Editing curated notes must never mutate the archive or generated
+      provenance.
+    - Future snapshot-comparison tooling may write structured generated diff
+      data/reports under manifest/report paths, while curated notes remain the
+      human interpretation of those results.
+    - Add schema validation, deterministic generated serialization, archive-hash
+      verification, annotation-reference tests, and coverage for all three
+      snapshot types.
   - [ ] Add a thin `tools/build_symbols.py` orchestrator with mutually exclusive
     offline `--snapshot PATH` and explicit online `--fetch-snapshot` modes.
     Once selected or downloaded, pin archive path/name, SHA-256, language,
