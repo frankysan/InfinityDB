@@ -311,8 +311,7 @@ All notable changes to this project are documented in this file.
 - Unit catalog with army filtering, name search, pagination, and availability
   filters for mercenaries, Spec-Ops, Team Operations, and reinforcements.
 - Unit-detail pages that show shared/general profiles and faction- and
-  army-specific profiles, loadouts, availability (including reinforcement
-  profiles), skills, equipment, weapons, and AVA.
+  army-specific profiles, loadouts, skills, equipment, weapons, and AVA.
 - API metadata import for faction names and ammunition, weapon, skill,
   equipment, and rules catalogs.
 - Bundled SVG symbols for armies and units, including fallback resolution for
