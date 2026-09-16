@@ -1,25 +1,19 @@
 #!/usr/bin/env python3
-"""Download a local mirror snapshot of the Infinity wiki.
+"""Download one timestamped local mirror snapshot of the Infinity wiki.
 
-This script is intentionally standalone like the other one-off downloaders in
-``tools``. It keeps the important wget-style behavior:
-
-- mirror a wiki subtree from the public site
-- download linked local pages/assets
-- rewrite local HTML links to point at the mirrored files
-- skip special/index pages that are noisy or not useful for offline browsing
+The downloader stages the mirror in a temporary directory, rewrites local links,
+then stores the complete result as a timestamped ZIP archive. Loose downloaded
+files are not retained after a successful run.
 """
 
 from __future__ import annotations
 
 import argparse
-import html
 import re
-import shutil
 import sys
+import tempfile
 import urllib.parse
 import urllib.request
-import zipfile
 from collections import deque
 from datetime import datetime
 from html.parser import HTMLParser
@@ -27,8 +21,10 @@ from pathlib import Path
 
 try:
     from tools.path_sanitization import sanitize_path_component, sanitize_relative_path
+    from tools.snapshot_archive import create_timestamped_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
     from path_sanitization import sanitize_path_component, sanitize_relative_path
+    from snapshot_archive import create_timestamped_archive
 
 ROOT_URL = "https://infinitythewiki.com/"
 ALLOWED_HOSTS = {"infinitythewiki.com", "assets.corvusbelli.net"}
@@ -119,21 +115,6 @@ def rewrite_html_links(html_text: str, base_url: str, *, os_name: str | None = N
     return pattern.sub(replace, html_text)
 
 
-def fetch_text(url: str) -> str:
-    request = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": USER_AGENT,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Connection": "keep-alive",
-        },
-    )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        body = response.read()
-    return body.decode("utf-8", errors="replace")
-
-
 def fetch_bytes(url: str) -> bytes:
     request = urllib.request.Request(
         url,
@@ -181,11 +162,7 @@ def download_wiki(base_url: str, destination: Path) -> list[Path]:
         write_bytes(target, payload)
         saved.add(target)
 
-        try:
-            text = payload.decode("utf-8", errors="replace")
-        except Exception:
-            continue
-
+        text = payload.decode("utf-8", errors="replace")
         if not any(token in text.lower() for token in ("<html", "<body", "href=", "src=")):
             continue
 
@@ -204,85 +181,52 @@ def download_wiki(base_url: str, destination: Path) -> list[Path]:
     return sorted(saved)
 
 
-def create_zip(snapshot_dir: Path, archive_path: Path) -> None:
-    archive_path.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for path in sorted(snapshot_dir.rglob("*")):
-            if path.is_file():
-                archive.write(path, arcname=path.relative_to(snapshot_dir).as_posix())
+def archive_wiki(
+    files: list[Path],
+    destination: Path,
+    *,
+    root: Path,
+    now: datetime | None = None,
+) -> Path:
+    """Store exactly one mirrored wiki snapshot in a timestamped ZIP file."""
+    return create_timestamped_archive(
+        files,
+        destination,
+        prefix="WIKI",
+        root=root,
+        now=now,
+    )
 
 
-def ask_to_overwrite(snapshot_dir: Path, archive_path: Path) -> None:
-    if not snapshot_dir.exists() and not archive_path.exists():
-        return
-
-    print("Existing snapshot found for this date:")
-    if snapshot_dir.exists():
-        print(f"  Mirror:  {snapshot_dir}")
-    if archive_path.exists():
-        print(f"  Archive: {archive_path}")
-
-    answer = input("Overwrite and continue? [y/N]: ").strip().lower()
-    if answer not in {"y", "yes"}:
-        print("Aborting snapshot creation.")
-        raise SystemExit(1)
-
-    if snapshot_dir.exists():
-        shutil.rmtree(snapshot_dir)
-    if archive_path.exists():
-        archive_path.unlink()
-
-
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--root",
         type=Path,
         default=Path("data/wiki"),
-        help="Parent folder used to store snapshot output (default: data/wiki)",
+        help="Directory used to store timestamped wiki ZIP snapshots (default: data/wiki)",
     )
-    parser.add_argument(
-        "--date",
-        type=str,
-        default=datetime.utcnow().strftime("%Y%m%d"),
-        help="Snapshot date in YYYYMMDD format (default: today)",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Overwrite an existing snapshot for the same date without prompting",
-    )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     snapshot_root = (Path.cwd() / args.root).resolve()
     snapshot_root.mkdir(parents=True, exist_ok=True)
 
-    snapshot_dir = snapshot_root / args.date
-    archive_path = snapshot_root / f"{args.date}.zip"
-
-    if args.force:
-        if snapshot_dir.exists():
-            shutil.rmtree(snapshot_dir)
-        if archive_path.exists():
-            archive_path.unlink()
-    else:
-        ask_to_overwrite(snapshot_dir, archive_path)
-
-    print(f"Creating wiki snapshot for {args.date}")
-    print(f"Destination: {snapshot_dir}")
-    snapshot_dir.mkdir(parents=True, exist_ok=True)
-
-    files = download_wiki(ROOT_URL, snapshot_dir)
-    if not files:
-        print("No wiki pages were downloaded.", file=sys.stderr)
+    try:
+        with tempfile.TemporaryDirectory(prefix="infinity-wiki-", dir=snapshot_root) as staging:
+            staging_path = Path(staging)
+            files = download_wiki(ROOT_URL, staging_path)
+            if not files:
+                print("No wiki pages were downloaded.", file=sys.stderr)
+                return 1
+            archive = archive_wiki(files, snapshot_root, root=staging_path)
+    except (OSError, ValueError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    create_zip(snapshot_dir, archive_path)
-    print("Mirror completed.")
-    print(f"Archive created: {archive_path}")
+    print(f"Downloaded {len(files)} wiki files -> {archive}")
     return 0
 
 

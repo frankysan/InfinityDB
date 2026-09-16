@@ -23,6 +23,11 @@ All notable changes to this project are documented in this file.
 
 - Standardize tool-script validation around one regression file per script so
   failures are easier to trace and maintain.
+- Standardize Army, wiki, and symbol acquisition on one timestamped ZIP snapshot
+  convention. Wiki and symbol downloads now stage loose files temporarily and
+  persist complete `WIKI YYYYMMDD-HHMMSS.zip` and
+  `SYMBOLS YYYYMMDD-HHMMSS.zip` archives instead of long-lived loose download
+  trees; Army acquisition continues to emit `JSON YYYYMMDD-HHMMSS.zip`.
 - Document the decision to keep future PDF-derived rules references in a
   separately versioned SQLite database from Army JSON-derived data.
 - Harden the file-path sanitization and wiki mirror logic for cross-platform
