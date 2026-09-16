@@ -14,6 +14,7 @@ from infinity_army_data.cli import cmd_build as build_dataset
 from . import __version__
 from .curated import load_curated_directory, load_curated_document
 from .database import export_database, raw_database_path
+from .identities import load_identity_config
 from .rules_database import export_rules_database
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
@@ -23,7 +24,13 @@ DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
 def _export(source: Path, destination: Path) -> None:
     with source.open(encoding="utf-8") as handle:
         normalized = json.load(handle)
-    export_database(normalized, destination)
+    identity_config = load_identity_config()
+    database_input = {
+        **normalized,
+        "identityConfig": identity_config.document,
+        "identityConfigSha256": identity_config.content_sha256,
+    }
+    export_database(database_input, destination)
     print(f"Database ready: {destination}")
     print(f"Raw archive ready: {raw_database_path(destination)}")
 
