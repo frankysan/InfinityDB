@@ -36,6 +36,16 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     assert "intervention" in config.profile_identity_ignored_words
 
 
+def test_default_identity_manifest_is_independent_of_working_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    config = load_identity_config()
+
+    assert config.canonical_unit_id(1690) == 300
+
+
 def test_unlisted_source_ids_are_not_implicitly_aliased() -> None:
     config = load_identity_config()
 
