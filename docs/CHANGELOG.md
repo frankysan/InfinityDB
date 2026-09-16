@@ -41,6 +41,10 @@ All notable changes to this project are documented in this file.
   policy pinned into the database and expose them through unit-detail API
   records, so browser code no longer maintains duplicate profile alias and
   ignored-word tables.
+- Derive reinforcement classification from imported army-list `kind` metadata
+  and faction grouping, names, and slugs from Army metadata parent relationships,
+  exposing the derived faction metadata through unit API records so browser code
+  no longer interprets Army ID suffixes or maintains faction lookup tables.
 - Increase the Army database compatibility revision to 10; existing databases
   must be rebuilt so they contain the required identity policy metadata.
 
