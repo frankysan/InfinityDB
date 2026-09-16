@@ -133,11 +133,12 @@ ZIP, include one copy in the ZIP, or supply `--metadata PATH`. It supplies
 official faction names and the ammunition, weapon, skill, equipment, and rules
 catalogs. Army-list JSON remains authoritative for unit availability.
 
-Reference PDFs and the local wiki mirror are developer and agent research
-inputs only. They are never read by the application or the Army build. Curate
-concise, human-reviewed facts with printed-page provenance into JSON files under
-`data/curated/`; validate those intermediary files before a future rules-data
-import:
+Reference PDFs and local wiki snapshots are developer and agent research inputs
+only. They are never read by the application or the Army build. Curate concise,
+human-reviewed rules facts under `data/curated/rules/`; PDF-derived facts retain
+printed-page provenance, while wiki-derived facts retain exact snapshot and
+snapshot-local path provenance. Validate those intermediary files before a
+rules-data import:
 
 ```powershell
 infinity-db validate-curated data/curated/rules/example.json
@@ -152,7 +153,7 @@ remain distinguishable.
 
 ```powershell
 # Run individual data stages
-infinity-db merge "data/raw/JSON 20260909.zip" data/generated/master.json --compact
+infinity-db merge "data/raw/JSON 20260910-204106.zip" data/generated/master.json --compact
 infinity-db normalize data/generated/master.json data/generated/normalized.json --compact
 infinity-db export data/generated/normalized.json data/generated/infinity.db
 
@@ -162,9 +163,12 @@ infinity-db serve --database other-output/infinity.db --port 8001
 # Bind only to this machine when LAN access is not wanted
 infinity-db serve --host 127.0.0.1
 
-# Build the independent rules-reference database from curated JSON
-infinity-db build-rules data/curated --output data/generated/rules.db
+# Build the independent rules-reference database from curated rules JSON
+infinity-db build-rules --output data/generated/rules.db
 ```
+
+`build-rules` defaults to `data/curated/rules/`. Other curated subtrees are not
+rules-database inputs.
 
 `infinity-army` and `python -m infinity_army_data` remain available for the
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
@@ -187,10 +191,10 @@ failed import leaves the prior database available. Rebuilding replaces imported
 data, so keep future user-authored data separately. On Windows, stop the server
 before rebuilding if active readers prevent database replacement.
 
-Future rules-reference material curated from the supplied PDFs will be stored
-in a separate SQLite database. It will retain its own source version and
-printed-page citations, and can be updated independently of the Army
-JSON-derived `infinity.db` and `infinity.raw.db` snapshots.
+Rules-reference material curated from supplied PDFs and wiki snapshots is stored
+in the separate `rules.db`. It retains source-appropriate provenance and can be
+updated independently of the Army JSON-derived `infinity.db` and
+`infinity.raw.db` snapshots.
 
 The application also records a database compatibility revision in every build
 and verifies it at startup. This is independent of the release version: bump
@@ -223,13 +227,11 @@ updates, rollback behavior, and operational commands.
 ## Project layout
 
 ```text
-docs/                       # Architecture and data-model documentation
-data/raw/                   # Ignored source snapshots
-data/generated/             # Ignored database, JSON, and validation artifacts
+docs/                       # Architecture, data model, deployment, and project docs
 src/
   infinity_army_data/       # Army JSON merge, normalization, metadata, and validation
   infinity_db/
-    cli.py                  # Build, export, and local-server commands
+    cli.py                  # Build, export, rules, and local-server commands
     database/               # Schema, importer, and read-only repository queries
     skill_categories.py     # Skill category definitions for the rules reference
     traits.py               # Trait definitions and catalog metadata
@@ -240,17 +242,21 @@ src/
       static/               # Browser pages, modules, styles, and symbols
 tests/                      # Pipeline, database, API, web, and tool-script tests
 tools/                      # Manual Army, wiki, and unit-symbol download utilities
-docs/                       # Architecture, data model, and deployment documentation
 scripts/                    # Linux deployment, update, and image-maintenance scripts
 data/
-  raw/                      # Ignored Army JSON and ZIP source snapshots
-  wiki/                     # Ignored wiki mirror snapshots
+  raw/                      # Ignored immutable Army/source snapshots
+    symbols/                # Ignored immutable symbol snapshots
+  wiki/                     # Ignored immutable wiki mirror snapshots
   pdf/                      # Supplied rules and FAQ reference documents
+  curated/
+    rules/                  # Source-controlled rules-reference collections
+    snapshot-notes/         # Human-reviewed snapshot annotations when created
+  manifests/                # Generated provenance/build-state manifests when created
   generated/                # Ignored database, JSON, and validation artifacts
 .vscode/                    # Shared build, serve, test, lint, and debug tasks
-Dockerfile                 # Immutable application image for deployment
-compose.yaml               # Gunicorn, Caddy, and application Compose deployment
-Caddyfile                  # Reverse-proxy configuration for the Compose deployment
+Dockerfile                  # Immutable application image for deployment
+compose.yaml                # Gunicorn, Caddy, and application Compose deployment
+Caddyfile                    # Reverse-proxy configuration for the Compose deployment
 ```
 
 See [architecture and development direction](docs/architecture.md) and the
