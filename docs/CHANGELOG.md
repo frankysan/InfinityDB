@@ -48,6 +48,10 @@ All notable changes to this project are documented in this file.
 - Expose backend-derived trait references alongside raw metadata trait labels,
   including canonical trait names and catalog slugs, so catalog-detail browser
   code no longer duplicates trait aliases, misspellings, or slug generation.
+- Document the distinction between canonical ownership and army playability:
+  legacy canonical-faction ID `1` maps to Non-Aligned Armies `901` through the
+  identity manifest, while 901 itself is a grouping identity whose explicit
+  non-playable role still needs backend/API modeling.
 - Increase the Army database compatibility revision to 10; existing databases
   must be rebuilt so they contain the required identity policy metadata.
 

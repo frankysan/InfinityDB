@@ -87,7 +87,16 @@ machine-specific absolute paths.
 - Database creation requires valid `metadata.json`, discovered beside or inside
   the source or passed with `--metadata`. It enriches display names and
   reference catalogs, but must not create list membership or alter availability.
-- Army-list data is authoritative for selectable army lists and unit membership.
+- Army-list data is authoritative for unit membership and source-derived
+  availability, but the existence of an army-list identity does not necessarily
+  make it independently playable. Grouping, list kind, and playability are
+  separate domain semantics.
+- The legacy canonical-faction source ID `1` -> `901` mapping is maintained in
+  the validated source-identity manifest and establishes canonical ownership
+  only. It does not imply that 901 is independently playable.
+- 901 (Non-Aligned Armies) is a grouping identity for its child 9xx armies, not
+  a playable army. Playability must not be inferred from numeric ID ranges or
+  from the mere presence of an `army_lists` record.
 - SQLite imports are complete snapshot replacements. Build and validate temporary
   sibling frontend and raw-archive databases before replacing the working files,
   so a failed build leaves the prior snapshot usable.
@@ -200,6 +209,8 @@ snapshot dates. Version 1 curated files must be migrated before ingestion.
 - Army filtering derives from actual `army_units` occurrences, not canonical
   faction references. Source records may be combined into one logical unit only
   using the repository's established identity rules.
+- Army selectors must ultimately use explicit backend-provided playability/role
+  semantics rather than treating every imported army-list identity as playable.
 - Search and display ordering are case-, accent-, and punctuation-insensitive;
   preserve this behavior for new searchable names.
 - Browser requests belong in `api.js`; shared unit rows belong in
@@ -283,3 +294,8 @@ snapshot dates. Version 1 curated files must be migrated before ingestion.
   independently of implementation behavior should use validated manifests or
   configuration where appropriate. Tooling and generated project paths should
   remain deterministic and portable across Windows, Linux, and macOS.
+- 2026-09-16: Legacy canonical-faction ID `1` -> `901` is an identity-policy
+  mapping for Non-Aligned Armies ownership and is distinct from army
+  playability. 901 is a grouping identity for its child 9xx armies, not an
+  independently playable army; explicit role/playability semantics are still
+  required for selectors and APIs.

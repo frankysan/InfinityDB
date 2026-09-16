@@ -90,8 +90,9 @@ of this split. It owns maintained logical-identity exceptions for source unit,
 army-list, skill, equipment, and weapon IDs plus identity-name aliases. Generic
 matching and duplicate-detection algorithms remain code. The ordinary
 whole-army `xx01` derivation also remains code; exceptional interpretation
-policy, such as the legacy mercenary canonical-faction mapping, lives in the
-manifest and is supplied explicitly to the generic normalizer.
+policy lives in the manifest and is supplied explicitly to the generic
+normalizer. In particular, legacy canonical-faction source ID `1` maps to `901`
+(Non-Aligned Armies) for canonical ownership.
 
 The authored identity manifest is a build input, not a deployed runtime file.
 InfinityDB normalization validates it, supplies normalization-time exceptions,
@@ -114,6 +115,12 @@ Faction grouping, display names, and slugs come from `metadata_factions.parent`,
 summaries/details and `faction` for each army occurrence. Browser code consumes
 those fields and must not infer faction or reinforcement semantics from Army ID
 prefixes or suffixes.
+
+Canonical ownership and playability are separate semantics. The `1` -> `901`
+identity-manifest mapping establishes ownership only: 901 is a grouping identity
+for the associated 9xx armies rather than an independently playable army. Army
+role/playability still needs an explicit backend representation so API and
+browser selectors do not infer it from list presence or numeric ID patterns.
 
 ## Data flow
 
@@ -288,10 +295,14 @@ it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`
 
-Returns `{ "items": [...] }`. Each item has `id`, `name`, `slug`, `kind`, and
-`unit_count`. Only actual imported army lists appear; referenced faction
-placeholders do not become selectable armies. Unit counts use source-defined
-units in `army_units`.
+Returns `{ "items": [...] }`. Each item currently has `id`, `name`, `slug`,
+`kind`, and `unit_count`. Only actual imported army-list identities appear;
+referenced faction placeholders do not create entries. Presence in this response
+does not by itself imply that an identity is independently playable: 901
+(Non-Aligned Armies) is a known grouping-only identity. Explicit role/playability
+semantics still need to be exposed before clients use this endpoint as the
+source for selectable army controls. Unit counts use source-defined units in
+`army_units`.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
@@ -304,8 +315,10 @@ total above illustrates the response shape.
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
 - Army membership comes from `army_units`, not canonical faction or declared
   faction references.
-- `main_army_id` is derived from canonical ownership and always references a
-  whole-army faction group (`xx01`); it is null when that mapping is unavailable.
+- `main_army_id` represents canonical whole-army/group ownership and is not
+  synonymous with independent playability. Ordinary ownership uses the `xx01`
+  derivation; exceptional mappings come from the pinned identity policy. In
+  particular, legacy canonical-faction ID `1` maps to grouping identity `901`.
 - `main_faction` is derived from the matching metadata-faction parent record;
   browser code consumes it directly instead of deriving a faction from Army IDs.
 - Search matches accent- and punctuation-insensitive, case-folded name
