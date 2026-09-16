@@ -57,6 +57,21 @@ def identity_metadata(config: IdentityConfig) -> dict[str, Any]:
     }
 
 
+def parse_identity_metadata(document: Any, content_sha256: Any) -> IdentityConfig:
+    """Validate identity policy loaded from persisted snapshot metadata."""
+    if not isinstance(content_sha256, str) or len(content_sha256) != 64:
+        raise IdentityConfigError("identity config metadata must contain a SHA-256 digest")
+    try:
+        int(content_sha256, 16)
+    except ValueError as exc:
+        raise IdentityConfigError("identity config metadata SHA-256 must be hexadecimal") from exc
+
+    config = parse_identity_config(document)
+    if config.content_sha256 != content_sha256.casefold():
+        raise IdentityConfigError("identity config metadata hash does not match its document")
+    return config
+
+
 def _canonical_json(document: Mapping[str, Any]) -> str:
     return json.dumps(
         document,
