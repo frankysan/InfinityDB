@@ -90,6 +90,100 @@ documentation are complete.
 - [ ] Establish a migration policy for future persistent user-authored data;
   imported snapshots are intentionally replaced wholesale today.
 
+## Configuration and domain-knowledge manifests
+
+- [ ] Extract hard-coded Infinity-specific aliases, assumptions, corrections,
+  and manual mappings from implementation code where they represent maintained
+  project knowledge rather than algorithmic behavior.
+  - Keep the distinction explicit:
+    - `config/` contains InfinityDB-maintained interpretation, correction,
+      mapping, and compatibility policy.
+    - `data/curated/` contains human-reviewed facts derived from authoritative
+      rules sources and retains source/version/citation information.
+    - `data/manifests/` contains generated build provenance and state rather
+      than hand-authored project knowledge.
+    - Code continues to own algorithms, schemas, parser mechanics, generic
+      normalization behavior, validation, and application behavior.
+  - Require versioned schemas, validation on load, deterministic
+    serialization where generated, focused regression tests, and portable
+    project-relative paths for important manifests.
+- [ ] Add `config/identity/source-identities.json` as the canonical home for
+  source-identity exceptions and aliases.
+  - Move explicit unit, army, skill, equipment, and weapon merge aliases out
+    of `database/repository.py`.
+  - Represent alias groups declaratively around a canonical source ID rather
+    than duplicating pairwise mappings.
+  - Move exceptional canonical-faction mappings such as the legacy mercenary
+    ownership case into the manifest while keeping the normal whole-army
+    `xx01` derivation algorithm in code.
+  - Centralize source spelling/word aliases used for unit and profile identity,
+    including known source misspellings.
+  - Record a short reason/provenance note for exceptional mappings where
+    useful for future review.
+  - Remove duplicated identity interpretation from browser JavaScript where
+    the backend can expose a canonical/group identity directly.
+- [ ] Add `config/catalogs/weapon-categories.json`.
+  - Move the ordered weapon-family taxonomy and regex patterns out of
+    `weapon_categories.py`.
+  - Move manual weapon-ID category decisions into the same manifest.
+  - Preserve category-rule order and validate that override targets name a
+    declared category.
+  - Keep the classifier implementation in Python: override lookup, ordered
+    rule evaluation, and fallback behavior remain code.
+- [ ] Add `config/catalogs/weapon-overrides.json`.
+  - Move known Army metadata corrections such as missing weapon profiles and
+    source naming anomalies out of `weapon_profiles.py`.
+  - Include an optional reason/source note so corrections remain reviewable
+    when a new Army snapshot is imported.
+  - Treat actual game-rule facts differently from source corrections: special
+    weapon profiles, statistics, skills, and equipment should move into cited
+    curated rules data when an authoritative source is available.
+- [ ] Move rule-derived skill declaration categories out of
+  `skill_categories.py` and into the curated rules layer.
+  - Preserve N5 edition/version and printed-page citations.
+  - Let application code query validated curated records rather than embed the
+    rules facts in Python.
+- [ ] Move trait rules-reference knowledge into curated data.
+  - Migrate concise trait descriptions, canonical identities, aliases,
+    misspellings, and citations from `traits.py`.
+  - Remove the duplicate trait-canonicalization table from
+    `catalog-detail.js`; API responses should expose canonical trait identity,
+    name, and slug.
+- [ ] Add `config/symbols/font-aliases.json`.
+  - Move Infinity-asset-specific legacy/exported font-reference overrides out
+    of `svg_processor.py`.
+  - Keep generic CSS family handling, font weight/stretch interpretation,
+    cmap-suffix recognition, installed-font discovery, and matching algorithms
+    in code.
+- [ ] Extend `config/symbols/static-symbols.json` so static symbol declarations
+  can own their semantic metadata as well as their source filenames.
+  - Support fields such as stable key, source filename, user-facing label, and
+    known source names where needed.
+  - Generate browser mappings/labels from the symbol build rather than
+    maintaining duplicate symbol knowledge in `unit.js`.
+- [ ] Treat `army-symbols.js` and `unit-symbol-map.js` as generated publisher
+  output, not authored configuration.
+  - Generate them from the pinned Army snapshot, symbol configuration, local
+    overrides, and the generated symbol-build manifest.
+  - Remove legacy migration assumptions such as first-symbol-wins once the new
+    symbol publisher becomes authoritative.
+- [ ] Eliminate duplicated faction and reinforcement assumptions from browser
+  code.
+  - Derive faction names/slugs from imported Army metadata/API responses rather
+    than maintaining JavaScript maps.
+  - Expose reinforcement/list kind explicitly from the backend instead of
+    teaching the browser that Army IDs ending in `98` or `99` are
+    reinforcements.
+- [ ] Review remaining hard-coded domain tables with the same decision rule:
+  prefer derivation from authoritative imported data first, a validated
+  manifest second, and code only when the value is implementation behavior.
+  - In particular, review fixed weapon-range display bands before creating any
+    new config; derive them from weapon metadata if that can produce the
+    intended UI.
+  - Keep API-source table wiring such as `METADATA_TABLES`, schema definitions,
+    generic merge/normalization algorithms, Unicode normalization mechanics,
+    database behavior, and UI preference mechanics in code.
+
 ## Reliability and operations
 
 - [ ] Establish production load monitoring and a repeatable capacity test for
