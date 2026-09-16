@@ -4,6 +4,7 @@ import argparse
 import re
 import sys
 import zipfile
+from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 
@@ -103,8 +104,27 @@ def _merge(
     return master
 
 
-def _normalize(master: dict, output: Path, report: Path, *, compact: bool) -> dict:
-    normalized = normalize_master(master)
+def _normalize(
+    master: dict,
+    output: Path,
+    report: Path,
+    *,
+    compact: bool,
+    canonical_faction_overrides: Mapping[int, int] | None = None,
+    normalized_metadata: Mapping[str, object] | None = None,
+) -> dict:
+    normalized = normalize_master(
+        master,
+        canonical_faction_overrides=canonical_faction_overrides,
+    )
+    if normalized_metadata is not None:
+        conflicts = set(normalized_metadata) & set(normalized)
+        if conflicts:
+            raise ValueError(
+                "Normalized metadata conflicts with generated field(s): "
+                + ", ".join(sorted(conflicts))
+            )
+        normalized.update(normalized_metadata)
     validation = validate_normalized(normalized)
     normalized["_meta"]["validationPassed"] = True
     normalized["_meta"]["validationCheckCount"] = validation["checkCount"]
@@ -132,16 +152,33 @@ def cmd_merge(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_normalize(args: argparse.Namespace) -> int:
+def cmd_normalize(
+    args: argparse.Namespace,
+    *,
+    canonical_faction_overrides: Mapping[int, int] | None = None,
+    normalized_metadata: Mapping[str, object] | None = None,
+) -> int:
     from .normalize import load_master
 
     master = load_master(args.input)
     report = args.report or args.output.with_name(args.output.stem + "-validation.json")
-    _normalize(master, args.output, report, compact=args.compact)
+    _normalize(
+        master,
+        args.output,
+        report,
+        compact=args.compact,
+        canonical_faction_overrides=canonical_faction_overrides,
+        normalized_metadata=normalized_metadata,
+    )
     return 0
 
 
-def cmd_build(args: argparse.Namespace) -> int:
+def cmd_build(
+    args: argparse.Namespace,
+    *,
+    canonical_faction_overrides: Mapping[int, int] | None = None,
+    normalized_metadata: Mapping[str, object] | None = None,
+) -> int:
     if args.source is None:
         args.source = latest_snapshot()
     output_dir: Path = args.output_dir
@@ -164,13 +201,24 @@ def cmd_build(args: argparse.Namespace) -> int:
         verify=not args.no_verify,
         metadata=metadata,
     )
-    _normalize(master, normalized_path, report_path, compact=args.compact)
+    _normalize(
+        master,
+        normalized_path,
+        report_path,
+        compact=args.compact,
+        canonical_faction_overrides=canonical_faction_overrides,
+        normalized_metadata=normalized_metadata,
+    )
     print(f"Build complete: {output_dir}")
     return 0
 
 
 def add_data_commands(
-    sub, *, build_handler=cmd_build, require_metadata_for_build: bool = False
+    sub,
+    *,
+    build_handler=cmd_build,
+    normalize_handler=cmd_normalize,
+    require_metadata_for_build: bool = False,
 ) -> None:
     """Register ingestion commands for both the standalone tools and application CLI."""
     p_merge = sub.add_parser("merge", help="Merge raw Army JSON files into lossless master.json")
@@ -194,7 +242,7 @@ def add_data_commands(
     )
     p_norm.add_argument("--report", type=Path, default=None, help="Validation report output path")
     p_norm.add_argument("--compact", action="store_true", help="Minify normalized JSON")
-    p_norm.set_defaults(func=cmd_normalize)
+    p_norm.set_defaults(func=normalize_handler)
 
     p_build = sub.add_parser("build", help="Run merge, verification, normalization and validation")
     p_build.add_argument(

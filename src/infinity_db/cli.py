@@ -10,10 +10,12 @@ from pathlib import Path
 
 from infinity_army_data.cli import add_data_commands
 from infinity_army_data.cli import cmd_build as build_dataset
+from infinity_army_data.cli import cmd_normalize as normalize_dataset
 
 from . import __version__
 from .curated import load_curated_directory, load_curated_document
 from .database import export_database, raw_database_path
+from .identities import identity_metadata, load_identity_config
 from .rules_database import export_rules_database
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
@@ -28,8 +30,22 @@ def _export(source: Path, destination: Path) -> None:
     print(f"Raw archive ready: {raw_database_path(destination)}")
 
 
+def cmd_normalize(args: argparse.Namespace) -> int:
+    config = load_identity_config()
+    return normalize_dataset(
+        args,
+        canonical_faction_overrides=config.canonical_faction_overrides,
+        normalized_metadata=identity_metadata(config),
+    )
+
+
 def cmd_build(args: argparse.Namespace) -> int:
-    build_dataset(args)
+    config = load_identity_config()
+    build_dataset(
+        args,
+        canonical_faction_overrides=config.canonical_faction_overrides,
+        normalized_metadata=identity_metadata(config),
+    )
     _export(args.output_dir / "normalized.json", args.output_dir / "infinity.db")
     return 0
 
@@ -83,7 +99,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
-    add_data_commands(sub, build_handler=cmd_build, require_metadata_for_build=True)
+    add_data_commands(
+        sub,
+        build_handler=cmd_build,
+        normalize_handler=cmd_normalize,
+        require_metadata_for_build=True,
+    )
 
     p_export = sub.add_parser("export", help="Import validated normalized JSON into SQLite")
     p_export.add_argument("input", type=Path, help="normalized.json input")
