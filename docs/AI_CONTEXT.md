@@ -5,7 +5,7 @@ project decisions, implementation constraints, and historical choices that help
 agents work consistently without duplicating the canonical architecture or data
 model.
 
-## Documentation hierarchy
+## Documentation hierarchy and status
 
 - `AGENTS.md` contains immediate repository-wide instructions for coding agents.
 - `docs/architecture.md` is authoritative for architecture, engineering
@@ -17,12 +17,18 @@ model.
   useful during implementation.
 - `README.md` is the user-facing project introduction, setup, and operations
   guide.
-- `docs/TODO.md` is the maintained backlog.
+- `docs/TODO.md` is the maintained backlog of unimplemented work.
 - `docs/CHANGELOG.md` records released and unreleased changes.
 
 Before changing a boundary or persistence behavior, read
 `docs/architecture.md` and `docs/data-model.md`. Do not maintain a competing
 copy of their principles here.
+
+Status must remain explicit. Unqualified descriptions in this document should
+refer to current constraints/behavior. Accepted but unimplemented choices are
+marked **Design direction**. The decision log may record an accepted decision
+before implementation, but the current sections and `TODO.md` remain
+responsible for implementation status.
 
 ## Purpose and subsystem boundaries
 
@@ -57,11 +63,14 @@ and serves a read-only browser and same-origin HTTP API.
 - Army-list occurrences are authoritative for unit membership and availability.
   List presence, grouping, list kind, canonical ownership, and playability are
   separate semantics.
-- Legacy canonical-faction source ID `1` maps to `901` through the validated
-  source-identity policy for canonical ownership only.
+- Legacy canonical-faction source ID `1` maps to `901` through validated
+  source-identity configuration for canonical ownership only.
 - 901 (Non-Aligned Armies) is a grouping identity for its child 9xx armies, not
   an independently playable army. Do not infer playability from ID patterns or
   the existence of an `army_lists` record.
+- The current backend/API does not yet expose complete explicit
+  role/playability semantics. **Design direction:** selectors should eventually
+  consume backend-provided role/playability rather than list presence or IDs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized
@@ -72,36 +81,59 @@ and serves a read-only browser and same-origin HTTP API.
 
 ## Snapshot acquisition and provenance
 
-The canonical path/lifecycle model is defined in `docs/architecture.md`.
-Implementation work must preserve these additional constraints:
+### Current
 
 - Army, wiki, and symbol downloaders stage loose files temporarily and persist
   complete timestamped `JSON`, `WIKI`, or `SYMBOLS` ZIP snapshots. Same-second
   name collisions receive `-2`, `-3`, and so on rather than overwriting.
 - Raw snapshot archives are immutable after successful acquisition.
-- Downloader-generated snapshot provenance belongs under
-  `data/manifests/snapshots/` and binds to an archive by SHA-256. It is not
-  Corvus Belli's source `metadata.json` and is not hand-edited project policy.
-- Human-authored snapshot descriptions, comparison targets, and notable-change
-  notes belong under `data/curated/snapshot-notes/`, also keyed to the snapshot
-  SHA-256. They are intentionally separate from generated provenance so either
-  lifecycle can change without rewriting the other.
-- `data/curated/snapshot-notes/` is not a rules-database input.
-- Persistent generated project paths use portable project-relative forms; treat
-  filenames as case-sensitive internally and detect case-only collisions before
-  publishing.
-- External executable discovery should use explicit configuration/shared
-  discovery helpers/`shutil.which()` rather than fixed installation paths.
-- Subprocess-heavy tools use argument lists, not shell command strings, and
-  process-based concurrency must remain safe under the Windows `spawn` model.
+- Current downloaders do not write InfinityDB-owned snapshot provenance under
+  `data/manifests/`, and there is no populated/consumed curated snapshot-note
+  contract yet.
+- Corvus Belli's Army `metadata.json` remains source data, not project-generated
+  snapshot metadata.
 
-## Symbol pipeline constraints
+### Design direction
+
+- Downloader-generated snapshot provenance will live under
+  `data/manifests/snapshots/` and bind to an archive by SHA-256.
+- Human-authored snapshot descriptions, comparison targets, and notable-change
+  notes will live separately under `data/curated/snapshot-notes/`, also keyed to
+  the snapshot SHA-256.
+- Generated tooling must never overwrite curated snapshot notes; editing notes
+  must never mutate the raw archive or generated provenance.
+- Persistence/version-control/package policy for generated manifests is not yet
+  implemented and should be finalized together with the first manifest writer.
+- Persistent generated project paths should use portable project-relative forms;
+  treat filenames as case-sensitive internally and detect case-only collisions
+  before publishing.
+
+Current curated wiki provenance predates the timestamped ZIP lifecycle. Do not
+invent exact archive/hash associations for legacy wiki references. Migrate them
+when the wiki downloader/packager and curated provenance contract are rewritten
+together.
+
+External executable discovery should use explicit configuration/shared discovery
+helpers/`shutil.which()` rather than fixed installation paths. Subprocess-heavy
+tools use argument lists, not shell command strings, and process-based
+concurrency must remain safe under the Windows `spawn` model.
+
+## Symbol pipeline
+
+### Current
 
 Downloaded Corvus Belli graphical assets remain outside the public repository
 unless redistribution permission clearly allows inclusion. Local corrected
 image overrides likewise remain ignored unless redistribution status changes.
 
-A symbol build associated with an Army snapshot must use the same exact pinned
+Current acquisition can create timestamped symbol archives, and the repository
+contains standalone processing/reorganization tooling plus bundled browser
+assets. The complete manifest-backed build described below is not yet the
+current integrated workflow.
+
+### Design direction
+
+A symbol build associated with an Army snapshot will use the same exact pinned
 Army snapshot throughout discovery and publication. Pin archive identity and
 SHA-256 plus source metadata needed for reproducibility; no downstream stage may
 select a newer snapshot independently.
@@ -118,7 +150,7 @@ based. A unit may reference several source SVGs, and several units/profiles may
 reference the same SVG. Exact or visual deduplication may map several source
 assets to one canonical asset but must retain every original reference.
 
-Source resolution follows the maintained policy:
+Source resolution follows the accepted policy:
 
 ```text
 local override
@@ -137,36 +169,47 @@ The established processing direction is `resvg` for visual duplicate and
 compression validation, persistent `inkscape --shell` workers for text-to-path
 conversion, and standalone reusable stages wrapped by a thin orchestrator. The
 roughly 8-9 second Windows Inkscape startup cost is an accepted external-tool
-limitation for now; persistent workers mitigate it. Do not restart startup
-profiling without new evidence.
+limitation; persistent workers are the intended mitigation. Do not restart
+startup profiling without new evidence.
 
 ## Curated rules-reference constraints
 
+### Current
+
 Raw PDF and wiki research material is not an application input. Human-reviewed
 rules collections live under `data/curated/rules/`; `infinity-db build-rules`
-defaults to that subtree and must not ingest sibling curated categories such as
-`snapshot-notes/`.
+defaults to that subtree and does not ingest sibling curated categories.
 
 Current local reference families include N5 core rules revisions, N5 FAQs, ITS
-season/historical material, and timestamped wiki snapshots. Keep core rules,
-FAQ/errata rulings, ITS seasons, historical sources, and wiki-derived material
-explicitly scoped so a view cannot silently combine incompatible versions.
+season/historical material, and wiki research. Keep core rules, FAQ/errata
+rulings, ITS seasons, historical sources, and wiki-derived material explicitly
+scoped so a view cannot silently combine incompatible versions.
 
-PDF-derived facts retain document version/date plus printed-page citations. Wiki
-facts retain snapshot-local paths and snapshot identity; current curated-v2
-citations use `snapshotDate`, while source metadata should also retain the exact
-selected timestamped archive identity/SHA-256 when available.
+PDF record citations retain document version/date plus printed-page citations.
+Wiki record citations currently retain snapshot-local paths and `snapshotDate`.
+The checked-in wiki source still references the legacy unpacked mirror identity;
+that is current provenance, not a timestamped-archive guarantee.
 
 The current curated-v2 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with `vocabularySources`, typed
-records, Army links, related-record links, review state, and citations. Version
-1 curated-rule files must be migrated before ingestion. The reserved
+records, Army links, related-record links, review state, and citations. The
+current `vocabularySources` validator requires the mixed legacy locator fields
+`sourceId`, `path`, `snapshotDate`, `heading`, and positive `page`. Version 1
+curated-rule files must be migrated before ingestion. The reserved
 `rules/example.json` template is excluded from directory ingestion.
 
 The rules database has its own schema/versioning and replacement lifecycle. It
 must not import Army JSON data, and Army database construction must not import
 rules data. Application/service code may combine the two only through stable
 application-level identities.
+
+### Design direction
+
+When the wiki downloader/packager is rewritten, migrate legacy wiki source
+identity to exact recorded timestamped archive/hash provenance and replace the
+mixed `vocabularySources` locator with source-appropriate provenance. This is
+tracked as future work and should not be papered over by documentation-only
+changes.
 
 ## API and UI constraints
 
@@ -175,8 +218,9 @@ application-level identities.
 - Prefer additive response changes; do not silently repurpose existing fields.
 - Army filtering uses actual `army_units` occurrences, not canonical faction
   references.
-- Army selectors must ultimately use explicit backend-provided role/playability
-  semantics rather than treating every imported list identity as selectable.
+- **Design direction:** Army selectors should use explicit backend-provided
+  role/playability semantics rather than treating every imported list identity
+  as selectable.
 - Search/display ordering is case-, accent-, and punctuation-insensitive.
 - Browser requests belong in `api.js`; shared unit rows in `unit-list.js`;
   page-specific rendering/state in the corresponding page module.
@@ -239,14 +283,18 @@ application-level identities.
   role/playability semantics remain required for selectors/APIs.
 - 2026-09-16: Army-linked symbol discovery is reference/URL based, uses one
   exact pinned Army snapshot, audits unknown SVG locations, and leaves final
-  canonical application paths/mappings to the publisher.
+  canonical application paths/mappings to the publisher. This records design
+  direction; the integrated manifest-backed pipeline is not yet implemented.
 - 2026-09-16: Army JSON, wiki, and symbol acquisition use complete timestamped
   ZIP snapshots rather than long-lived unpacked download directories.
 - 2026-09-16: Snapshot metadata follows the existing data-path model instead of
-  introducing editable sidecars beside raw archives. Generated acquisition
-  provenance lives under `data/manifests/snapshots/`; human descriptions and
-  notable-change notes live under `data/curated/snapshot-notes/`; both bind to
-  immutable raw snapshots by SHA-256.
+  introducing editable sidecars beside raw archives. The accepted design puts
+  generated acquisition provenance under `data/manifests/snapshots/` and human
+  notes under `data/curated/snapshot-notes/`; the writers/contracts are not yet
+  implemented.
 - 2026-09-16: Rules ingestion is scoped to `data/curated/rules/`. Other curated
-  categories are human-reviewed project data but are not implicitly rules
+  categories may have separate future semantics but are not implicitly rules
   database inputs.
+- 2026-09-16: Documentation distinguishes current implementation, accepted
+  design direction, and planned/unimplemented backlog so future architecture is
+  not presented as existing behavior.

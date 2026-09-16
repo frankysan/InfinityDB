@@ -6,10 +6,15 @@ listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public
 HTTPS.
 
-The application image can contain a generated database snapshot and downloaded
-unit symbols. Those materials are not automatically covered by InfinityDB's
-MIT License. Review [third-party notices](../THIRD_PARTY_NOTICES.md) before
-redistributing an image or database that contains external data or assets.
+The current application image can contain a generated database snapshot and
+bundled Corvus Belli-derived graphical assets. Those materials are not
+automatically covered by InfinityDB's MIT License. Review
+[third-party notices](../THIRD_PARTY_NOTICES.md) before redistributing an image
+or database that contains external data or assets.
+
+This guide documents the **current deployment workflow**. Future acquisition,
+snapshot-manifest, and symbol-pipeline design described elsewhere is not part of
+the deployment contract until it is implemented and explicitly added here.
 
 ## Prerequisites
 
@@ -61,11 +66,12 @@ To update data, download or place the new raw snapshot and its required
 Do not edit the SQLite file inside a running container.
 
 `deploy.sh` retains the current build and the two newest rollback builds by
-default. After Compose has successfully started and health-checked the new application container,
-it removes only older `infinity-db:app-*` tags. It does not prune dangling
-images or touch Caddy, Portainer, named volumes, or images from other
-repositories. Set `RETAIN_APP_IMAGES=2` to keep the current build plus one
-rollback build; use `RETAIN_APP_IMAGES=1` to keep only the current build.
+default. After Compose has successfully started and health-checked the new
+application container, it removes only older `infinity-db:app-*` tags. It does
+not prune dangling images or touch Caddy, Portainer, named volumes, or images
+from other repositories. Set `RETAIN_APP_IMAGES=2` to keep the current build
+plus one rollback build; use `RETAIN_APP_IMAGES=1` to keep only the current
+build.
 
 To apply the retention policy to images already on the server without
 deploying, run `sh ./scripts/prune-app-images.sh` (or pass the desired count as

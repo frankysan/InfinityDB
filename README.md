@@ -65,9 +65,9 @@ Current release: **0.5.1** (2026-09-14).
   Army and unit assets use stable ID-and-slug paths, so the browser can serve
   an exact asset without scanning a symbol directory.
 - Includes standalone scripts for downloading Army JSON snapshots, wiki mirror
-  snapshots, and unit symbols. All three stage loose files temporarily and
-  persist complete timestamped ZIP snapshots; normal build commands do not make
-  network requests.
+  snapshots, and the current unit-symbol set. All three stage loose files
+  temporarily and persist complete timestamped ZIP snapshots; normal build
+  commands do not make network requests.
 - Includes dedicated regression tests for each standalone tool script so the
   wiki mirror, symbol download, symbol reorganizer, Army JSON downloader, and
   shared sanitization logic stay cross-platform and safe to run.
@@ -75,6 +75,22 @@ Current release: **0.5.1** (2026-09-14).
   so browsers refresh safely when either deployed application or data changes.
 - Includes server deployment, update, and image-pruning scripts; see the
   [Linux deployment guide](docs/deployment.md) for the supported workflow.
+
+## Design direction
+
+Accepted architectural direction is documented separately from current
+features. Major unimplemented directions include explicit army
+role/playability semantics, generated snapshot provenance under
+`data/manifests/snapshots/` with separate human-authored snapshot notes, and a
+complete manifest-backed symbol pipeline. These are **not current features**;
+see [architecture](docs/architecture.md) for the intended boundaries and
+[the backlog](docs/TODO.md) for concrete implementation work.
+
+The current curated rules schema records wiki pages by snapshot-local path and
+snapshot date, and the checked-in v5.3 collection still contains legacy
+provenance from the earlier unpacked wiki mirror. Exact timestamped wiki archive
+identity/hash is intentionally deferred until the wiki downloader/packager and
+curated provenance contract are rewritten together.
 
 ## Requirements and setup
 
@@ -135,19 +151,21 @@ catalogs. Army-list JSON remains authoritative for unit availability.
 
 Reference PDFs and local wiki snapshots are developer and agent research inputs
 only. They are never read by the application or the Army build. Curate concise,
-human-reviewed rules facts under `data/curated/rules/`; PDF-derived facts retain
-printed-page provenance, while wiki-derived facts retain exact snapshot and
-snapshot-local path provenance. Validate those intermediary files before a
-rules-data import:
+human-reviewed rules facts under `data/curated/rules/`; PDF record citations
+retain printed-page provenance, while current wiki record citations retain a
+snapshot-local path and snapshot date. Validate those intermediary files before
+a rules-data import:
 
 ```powershell
 infinity-db validate-curated data/curated/rules/example.json
 ```
 
-The army selector includes main-army, sectorial, and reinforcement lists.
-Display names are derived from source slugs when a name is unavailable, and
-reinforcement lists that share the `reinf` slug include their list ID so they
-remain distinguishable.
+The current army selector includes imported main-army, sectorial, and
+reinforcement lists. Display names are derived from source slugs when a name is
+unavailable, and reinforcement lists that share the `reinf` slug include their
+list ID so they remain distinguishable. A complete explicit grouping-only versus
+selectable role is not yet exposed by the backend/API, so current selector
+behavior should not be read as the final playability model.
 
 ## Commands
 
@@ -191,10 +209,10 @@ failed import leaves the prior database available. Rebuilding replaces imported
 data, so keep future user-authored data separately. On Windows, stop the server
 before rebuilding if active readers prevent database replacement.
 
-Rules-reference material curated from supplied PDFs and wiki snapshots is stored
-in the separate `rules.db`. It retains source-appropriate provenance and can be
-updated independently of the Army JSON-derived `infinity.db` and
-`infinity.raw.db` snapshots.
+Rules-reference material curated from supplied PDFs and wiki research is stored
+in the separate `rules.db`. It retains the provenance required by the current
+curated schema and can be updated independently of the Army JSON-derived
+`infinity.db` and `infinity.raw.db` snapshots.
 
 The application also records a database compatibility revision in every build
 and verifies it at startup. This is independent of the release version: bump
@@ -220,9 +238,8 @@ DOMAIN=infinity.example.com IMAGE_TAG=0.5.1 docker compose up -d --build
 ```
 
 Replace the hostname with the public domain configured at the external TLS
-reverse proxy.
-See the [Linux deployment guide](docs/deployment.md) for prerequisites,
-updates, rollback behavior, and operational commands.
+reverse proxy. See the [Linux deployment guide](docs/deployment.md) for
+prerequisites, updates, rollback behavior, and operational commands.
 
 ## Project layout
 
@@ -241,17 +258,17 @@ src/
       wsgi.py               # WSGI entry point for deployment
       static/               # Browser pages, modules, styles, and symbols
 tests/                      # Pipeline, database, API, web, and tool-script tests
-tools/                      # Manual Army, wiki, and unit-symbol download utilities
+tools/                      # Manual Army, wiki, and current unit-symbol download utilities
 scripts/                    # Linux deployment, update, and image-maintenance scripts
 data/
   raw/                      # Ignored immutable Army/source snapshots
     symbols/                # Ignored immutable symbol snapshots
-  wiki/                     # Ignored immutable wiki mirror snapshots
-  pdf/                      # Supplied rules and FAQ reference documents
+  wiki/                     # Ignored wiki research snapshots
+  pdf/                      # Ignored rules and FAQ research documents
   curated/
-    rules/                  # Source-controlled rules-reference collections
-    snapshot-notes/         # Human-reviewed snapshot annotations when created
-  manifests/                # Generated provenance/build-state manifests when created
+    rules/                  # Current source-controlled rules-reference collections
+    snapshot-notes/         # Planned human-reviewed snapshot annotations
+  manifests/                # Planned generated provenance/build-state location
   generated/                # Ignored database, JSON, and validation artifacts
 .vscode/                    # Shared build, serve, test, lint, and debug tasks
 Dockerfile                  # Immutable application image for deployment
@@ -259,8 +276,9 @@ compose.yaml                # Gunicorn, Caddy, and application Compose deploymen
 Caddyfile                    # Reverse-proxy configuration for the Compose deployment
 ```
 
-See [architecture and development direction](docs/architecture.md) and the
-[data model](docs/data-model.md) for boundaries and extension points.
+See [architecture](docs/architecture.md), the [data model](docs/data-model.md),
+and [the backlog](docs/TODO.md) for current boundaries, accepted design
+direction, and unimplemented work respectively.
 
 ## Development checks
 
