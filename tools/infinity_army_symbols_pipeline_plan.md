@@ -1461,3 +1461,189 @@ snapshot
 ```
 
 Individual stage tools remain directly runnable for debugging and targeted maintenance.
+
+---
+
+## Cross-platform compatibility requirements
+
+Cross-platform support is a first-class requirement for the entire Army/SVG pipeline. All Python tools should support **Windows, Linux, and macOS**.
+
+### Core rules
+
+- Use `pathlib.Path` for filesystem paths.
+- Use `subprocess.run()` / `subprocess.Popen()` with argument lists rather than shell command strings.
+- Avoid `shell=True` unless there is no practical alternative.
+- Do not rely on CMD, PowerShell, Bash, `^`, `&&`, or platform-specific quoting inside pipeline code.
+- Use `shutil.which()` for executable discovery.
+- Allow explicit executable paths through CLI/configuration.
+- Use UTF-8 explicitly for generated text files.
+- Use LF (`\n`) for generated project/config files unless an external format requires otherwise.
+- Treat filenames as case-sensitive internally, even on case-insensitive filesystems.
+- Do not assume symlink support.
+- Do not assume executable extensions.
+- Do not persist absolute machine-specific paths unless they are clearly transient build metadata.
+- Generated project asset names should follow one deterministic, conservative naming policy that is valid on all three platforms.
+
+### External tools
+
+The current external executables are:
+
+- Inkscape
+- resvg
+- SVGO
+
+Executable discovery order should be:
+
+```text
+1. explicit CLI/config path
+2. shutil.which(...)
+3. small platform-specific fallback locations
+4. clear installation error
+```
+
+The lookup layer should support common platform variants such as:
+
+```text
+inkscape / inkscape.exe
+resvg / resvg.exe
+svgo / svgo.cmd
+```
+
+Do not hardcode Windows paths such as:
+
+```text
+C:\Program Files\Inkscape\bin\inkscape.exe
+```
+
+into core pipeline logic.
+
+If SVGO is later pinned through `package.json`, prefer the project-local executable over an arbitrary global installation.
+
+### Inkscape shell backend
+
+The persistent `inkscape --shell` backend should be launched directly through `subprocess.Popen()` using stdin/stdout pipes.
+
+It must not depend on PowerShell, CMD, Bash, or terminal-specific syntax.
+
+The slow Windows startup behavior is treated as an external Inkscape limitation; persistent workers remain the production design on every platform.
+
+### Paths and persistent manifests
+
+Persistent manifest paths should use project-relative POSIX-style strings:
+
+```text
+units/panoceania/123-example.svg
+```
+
+Convert those strings to native `Path` objects only when accessing the local filesystem.
+
+This prevents manifests generated on one operating system from becoming unusable on another.
+
+### Temporary files
+
+Use Python's `tempfile` module for ephemeral work.
+
+Use `data/work/` only when retained intermediate files are useful for diagnostics.
+
+Do not assume either:
+
+```text
+C:\Temp
+/tmp
+```
+
+### Filename policy
+
+`path_sanitization.py` may retain OS-specific behavior for external mirroring tasks, but **pipeline-generated asset names should be host-independent**.
+
+The common policy should be safe on Windows, Linux, and macOS:
+
+- lowercase
+- ASCII where required by existing project conventions
+- dash-separated
+- no Windows-reserved characters
+- no trailing spaces or dots
+- no Windows reserved device names
+- conservative path-component length
+
+The pipeline must detect case-only collisions such as:
+
+```text
+Foo.svg
+foo.svg
+```
+
+before publishing.
+
+### Atomic writes
+
+Persistent generated files should be written to a temporary file and atomically replaced where practical.
+
+This applies especially to:
+
+- JSON manifests
+- CSV reports
+- generated JavaScript mappings
+- snapshot metadata
+- final build state
+
+Interrupted execution should not leave partially written persistent files.
+
+### Concurrency
+
+Use Python concurrency primitives rather than shell job control.
+
+Any process-based concurrency must be compatible with Windows' `spawn` model.
+
+For subprocess-heavy stages such as Inkscape and resvg, threads remain preferable unless there is a clear reason to use multiprocessing.
+
+### Cross-platform testing
+
+The core test suite should eventually run in CI on:
+
+```text
+Windows
+Ubuntu/Linux
+macOS
+```
+
+At minimum test:
+
+- path generation and sanitization
+- project-relative manifest paths
+- executable discovery
+- `.exe` / `.cmd` handling
+- subprocess argument construction without shell quoting
+- temporary-file behavior
+- case-only filename collision detection
+- snapshot ZIP handling
+- override lookup
+- static-symbol manifest loading
+- atomic file replacement
+- any process-based concurrency under Windows `spawn`
+
+External-tool integration tests may be conditional when Inkscape, resvg, or SVGO are not installed.
+
+### Implementation impact
+
+Before the individual pipeline stages are tied together, add a small shared utility layer for:
+
+- executable discovery
+- native/project-relative path conversion
+- atomic writes
+- subprocess invocation
+- platform-neutral filename generation
+
+This avoids duplicating OS-specific logic across:
+
+```text
+download_army_json.py
+download_army_symbols.py
+svg_processor.py
+svg_compress.py
+reorganize_symbols.py
+build_symbols.py
+```
+
+Cross-platform behavior should therefore be designed once and reused throughout the pipeline.
+

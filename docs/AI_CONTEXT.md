@@ -1,9 +1,27 @@
 # InfinityDB: AI context
 
-Use this document to orient changes. It records durable project decisions and
-constraints; the README is the user-facing setup and operations guide. For
-deeper detail, read `docs/architecture.md` and `docs/data-model.md` before
-changing a boundary or persistence behavior.
+Use this document to orient substantial changes. It records durable project
+decisions, invariants, and non-obvious development constraints.
+
+## Documentation hierarchy
+
+- `AGENTS.md` contains immediate repository-wide instructions for coding agents.
+- `docs/architecture.md` is authoritative for architecture, engineering
+  principles, subsystem boundaries, and lasting design direction.
+- `docs/data-model.md` is authoritative for normalized data semantics and
+  persistence structure.
+- This document records durable project context, compatibility invariants, and
+  implementation constraints that help agents make changes consistently.
+- `README.md` remains the user-facing project introduction, setup, and
+  operations guide.
+- `docs/TODO.md` is the maintained backlog.
+- `docs/CHANGELOG.md` records released and unreleased changes.
+
+Before changing a boundary or persistence behavior, read
+`docs/architecture.md` and `docs/data-model.md`.
+
+Follow the guiding and engineering principles defined in
+`docs/architecture.md`; do not maintain a separate competing copy here.
 
 ## Purpose and boundaries
 
@@ -19,21 +37,43 @@ HTTP API.
   contains the native-module browser UI.
 - Raw Army files are parsed only by the data pipeline. Routes and browser code
   must use the repository and HTTP API respectively.
+- Standalone acquisition and processing tools remain independently usable and
+  testable rather than becoming hidden side effects of normal application
+  builds.
+- Deployment is a separate concern from acquisition, normalization, database
+  construction, and asset processing.
 
-Keep source-format logic, database storage choices, HTTP behavior, and browser
-state in their respective layers. Do not add a JavaScript build step unless a
-clear requirement justifies it.
+Keep source-format logic, database storage choices, HTTP behavior, browser
+state, asset processing, and deployment behavior in their respective layers.
+Do not add a JavaScript build step unless a clear requirement justifies it.
 
-## Guiding principles
+## Configuration and manifests
 
-- **Accuracy:** Use official data sources and strive to represent them as
-  accurately as possible. Preserve uncertainty when a source is incomplete or
-  ambiguous rather than presenting an unsupported conclusion as fact.
-- **Flexibility:** Expand the ways users can browse and understand the data
-  while keeping the experience simple, fast, and customizable.
-- **Transparency:** Keep the project open source under the MIT License and
-  distinguish InfinityDB's work from outside data, quoted text, and image
-  assets, which remain the property of their respective owners.
+InfinityDB distinguishes behavior from maintained project knowledge:
+
+```text
+code        = behavior
+config      = maintained project/domain knowledge
+raw data    = immutable external input
+generated   = reproducible build output
+```
+
+Aliases, mappings, filters, manual overrides, compatibility exceptions, static
+asset declarations, and similar domain knowledge should use validated,
+versioned configuration when they can change independently of implementation
+behavior.
+
+Do not move ordinary implementation constants into configuration merely for
+configurability. Use manifests when the content represents maintained domain
+knowledge, policy, mappings, source declarations, or independently reviewable
+exceptions.
+
+Important configuration contracts should have an explicit schema or schema
+version, validation on load, deterministic serialization when generated, and
+tests for invalid and edge-case inputs.
+
+Persistent manifests should store portable project-relative paths rather than
+machine-specific absolute paths.
 
 ## Data and compatibility invariants
 
@@ -64,6 +104,57 @@ clear requirement justifies it.
   rebuilt database, even when the SQLite schema is unchanged. Incompatible
   databases must fail with a rebuild instruction rather than serving stale
   results.
+
+## Filesystem, portability, and build invariants
+
+- Target Windows, Linux, and macOS for Python tooling unless a component is
+  explicitly documented as platform-specific.
+- Use portable filesystem APIs and avoid hard-coded user or system paths.
+- Treat raw downloaded inputs as immutable. Transformations write to separate
+  working/generated locations.
+- Persistent generated state should be validated before replacement and written
+  atomically where practical so failed builds leave the prior valid state
+  usable.
+- Generated project paths and names must be deterministic across supported host
+  operating systems.
+- Treat filenames as case-sensitive internally and detect case-only collisions
+  before publishing.
+- External executables should be discovered through explicit configuration,
+  shared discovery helpers, or `shutil.which()` rather than fixed installation
+  paths.
+- Subprocess-heavy tooling should use argument lists rather than shell command
+  strings. Do not make core pipeline behavior depend on CMD, PowerShell, Bash,
+  or shell-specific quoting.
+- Any process-based concurrency must be safe under the Windows `spawn` model.
+- Normal builds and tests must not make unexpected network requests. Network
+  acquisition belongs in explicit downloader/refresh operations.
+
+## Third-party assets and symbol processing
+
+Downloaded Army data, graphical assets, rules documents, wiki material, and
+other third-party content are not automatically covered by InfinityDB's MIT
+License. Review `THIRD_PARTY_NOTICES.md` before redistribution.
+
+Corvus Belli graphical assets should remain outside the public repository unless
+redistribution permission clearly allows their inclusion.
+
+Local image overrides may contain corrected or technically modified derivatives
+of Corvus Belli assets and therefore remain local/ignored unless their
+redistribution status changes. Configuration may document an expected override
+and its purpose without embedding the asset itself.
+
+The symbol pipeline should preserve provenance and distinguish upstream asset
+identity, local source resolution, canonical/deduplicated identity, and final
+published paths. Override resolution follows the project policy:
+
+```text
+local override
+    -> validated raw cache
+    -> upstream download
+```
+
+An invalid override must fail explicitly rather than silently falling back to a
+different source.
 
 ## Local rules-reference documents
 
@@ -148,20 +239,21 @@ snapshot dates. Version 1 curated files must be migrated before ingestion.
 - Update tests with behavior changes. Pipeline changes need lossless,
   relationship, and import-integrity coverage; repository/API/UI changes need
   focused behavior coverage. Standalone scripts in `tools/` also need their own
-  dedicated regression tests so filesystem-safety and download logic remain
-  covered independently of the main pipeline.
-- Run `python -m pytest -q` and
-  `python -m ruff check src/infinity_db src/infinity_army_data/cli.py tests`
-  for substantive changes.
-- Update the README for user-visible behavior, and architecture/data-model docs
-  when changing a documented boundary, invariant, or storage decision. Add a
-  dated note below when a non-obvious, lasting tradeoff is introduced.
-- Update `TODO.md` whenever the user or any agent identifies a potential
-  improvement, optimization, or new feature. Keep it actionable, place it in
-  the appropriate section, and mark work complete only after implementation,
-  verification, and documentation are finished.
-- Record new work under `Unreleased` in `CHANGELOG.md`. Do not increment or
-  otherwise alter the release version unless explicitly requested.
+  dedicated regression tests so filesystem safety, portability, and download
+  logic remain covered independently of the main pipeline.
+- Run substantive test and lint commands through the project's virtual
+  environment, for example:
+  `<venv-python> -m pytest -q` and
+  `<venv-python> -m ruff check src/infinity_db src/infinity_army_data/cli.py tests`.
+- Update `README.md` for user-visible behavior and the relevant canonical
+  documentation when changing a documented boundary, invariant, or storage
+  decision.
+- Update `docs/TODO.md` whenever the user or an agent identifies a concrete
+  future improvement, optimization, cleanup, or feature. Keep it actionable,
+  place it in the appropriate section, and mark work complete only after
+  implementation, verification, and documentation are finished.
+- Record meaningful work under `Unreleased` in `docs/CHANGELOG.md`. Do not
+  increment or otherwise alter the release version unless explicitly requested.
 - Keep `__version__` at the released value. While `Unreleased` contains work,
   the browser footer must use `__display_version__` with a `+dev` suffix; reset
   it to the release version only as part of an explicitly requested release.
@@ -186,3 +278,8 @@ snapshot dates. Version 1 curated files must be migrated before ingestion.
   independently versioned and updated from the replaceable Army JSON snapshot.
   This preserves source provenance and prevents a rules-document update from
   requiring an Army import (or vice versa).
+- 2026-09-16: Engineering principles are canonical in
+  `docs/architecture.md`. Durable project knowledge that can change
+  independently of implementation behavior should use validated manifests or
+  configuration where appropriate. Tooling and generated project paths should
+  remain deterministic and portable across Windows, Linux, and macOS.
