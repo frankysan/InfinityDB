@@ -866,6 +866,22 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
         assert b"data-surface-header" in body
 
 
+def test_catalog_detail_frontend_uses_backend_trait_references(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"profile.trait_references" in body
+    assert b"function weaponTraitLinks(traits)" in body
+    assert b"const label = trait.label || trait.name ||" in body
+    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
+    assert b"function canonicalTraitName(" not in body
+    assert b"function traitSlug(" not in body
+    assert b"Continous Damage" not in body
+    assert b"BioWeapon" not in body
+
+
 def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -891,15 +907,16 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b"variantTitle" not in weapon_detail
     assert b'profileHeading.textContent = "Profile";' in weapon_detail
     assert b'traitsHeading.textContent = "Traits";' in weapon_detail
-    assert b"if (traitNames.length)" in weapon_detail
-    assert b"function weaponTraitLinks(traitNames)" in weapon_detail
-    assert b"function canonicalTraitName(trait)" in weapon_detail
+    assert b"if (traitReferences.length)" in weapon_detail
+    assert b"function weaponTraitLinks(traits)" in weapon_detail
+    assert b"function canonicalTraitName(" not in weapon_detail
+    assert b"function traitSlug(" not in weapon_detail
     assert b"function traitUsageSectionGroup(item)" in weapon_detail
     assert (
         b"title.textContent = catalogName[0].toUpperCase() + catalogName.slice(1);" in weapon_detail
     )
     assert b'title.className = "trait-catalog-heading";' in weapon_detail
-    assert b"link.href = `/traits/${encodeURIComponent(traitSlug(trait))}`;" in weapon_detail
+    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in weapon_detail
     assert b".weapon-data-heading" in styles
     assert b'profileRow.className = "weapon-data-row"' in weapon_detail
     assert b'profileStats.className = "weapon-data-value"' in weapon_detail

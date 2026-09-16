@@ -185,6 +185,17 @@ def trait_slug(name: object) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.casefold()).strip("-")
 
 
+def trait_reference(value: object, trait_slugs: Mapping[str, str]) -> dict[str, Any]:
+    """Describe a source trait with its backend-owned catalog identity."""
+    label = str(value or "").strip()
+    name = canonical_trait_name(label)
+    return {
+        "label": label,
+        "name": name or None,
+        "slug": trait_slugs.get(name),
+    }
+
+
 def unit_sort_key(value: object) -> str:
     """Return a case-insensitive, punctuation-free key for unit-name ordering."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
@@ -1126,8 +1137,18 @@ class Database:
                     except json.JSONDecodeError:
                         return value
 
+                trait_slugs = {
+                    trait["name"]: trait["id"] for trait in self.list_traits()
+                }
                 profiles = []
                 for profile in profile_rows:
+                    traits = decoded(profile["properties"], [])
+                    if isinstance(traits, list):
+                        trait_values = traits
+                    elif traits:
+                        trait_values = [traits]
+                    else:
+                        trait_values = []
                     profile_item = {
                         "id": profile["id"],
                         "name": profile["name"],
@@ -1139,7 +1160,10 @@ class Database:
                         "saving": profile["saving"],
                         "saving_num": profile["savingNum"],
                         "profile": profile["profile"],
-                        "traits": decoded(profile["properties"], []),
+                        "traits": traits,
+                        "trait_references": [
+                            trait_reference(value, trait_slugs) for value in trait_values
+                        ],
                         "ranges": decoded(profile["distance"], {}),
                     }
                     if (

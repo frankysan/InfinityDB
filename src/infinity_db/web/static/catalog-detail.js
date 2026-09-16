@@ -52,38 +52,18 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
-function canonicalTraitName(trait) {
-  const name = String(trait || "").trim();
-  if (name.startsWith("[")) return "";
-  if (name === "Suppressive Fire") return "Suppressive Fire (SF)";
-  for (const [prefix, canonical] of [
-    ["Disposable (", "Disposable (X)"], ["Direct Template (", "Direct Template"],
-    ["Impact Template (", "Impact Template"], ["Silent (", "Silent (X)"],
-    ["State:", "State"], ["Target (", "Target (Attribute)"],
-    ["Bioweapon", "BioWeapon"], ["Continous Damage", "Continuous Damage"],
-  ]) {
-    if (name.startsWith(prefix)) return canonical;
-  }
-  return name;
-}
-
-function traitSlug(trait) {
-  return canonicalTraitName(trait).replace(/ \(SF\)$/, "")
-    .toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-function weaponTraitLinks(traitNames) {
+function weaponTraitLinks(traits) {
   const fragment = document.createDocumentFragment();
-  for (const [index, trait] of traitNames.entries()) {
+  for (const [index, trait] of traits.entries()) {
     if (index) fragment.append(" · ");
-    const traitName = canonicalTraitName(trait);
-    if (traitName) {
+    const label = trait.label || trait.name || "";
+    if (trait.slug) {
       const link = document.createElement("a");
-      link.href = `/traits/${encodeURIComponent(traitSlug(trait))}`;
-      link.textContent = trait;
+      link.href = `/traits/${encodeURIComponent(trait.slug)}`;
+      link.textContent = label;
       fragment.append(link);
     } else {
-      fragment.append(trait);
+      fragment.append(label);
     }
   }
   return fragment;
@@ -229,8 +209,10 @@ function weaponVariants(variants) {
         card.append(profileRow);
       }
 
-      const traitNames = Array.isArray(profile.traits) ? profile.traits : [profile.traits].filter(Boolean);
-      if (traitNames.length) {
+      const traitReferences = Array.isArray(profile.trait_references)
+        ? profile.trait_references
+        : [];
+      if (traitReferences.length) {
         const traitsRow = document.createElement("div");
         traitsRow.className = "weapon-data-row";
         const traitsHeading = document.createElement("h5");
@@ -238,7 +220,7 @@ function weaponVariants(variants) {
         traitsHeading.textContent = "Traits";
         const traits = document.createElement("p");
         traits.className = "weapon-data-value";
-        traits.append(weaponTraitLinks(traitNames));
+        traits.append(weaponTraitLinks(traitReferences));
         traitsRow.append(traitsHeading, traits);
         card.append(traitsRow);
       }
