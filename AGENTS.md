@@ -52,6 +52,31 @@ instructions must not depend on a particular user's machine configuration.
   knowledge rather than burying that knowledge in implementation code.
 - Do not add a JavaScript build step unless a clear requirement justifies it.
 
+## Repository write safety
+
+When modifying the repository through a remote Git/GitHub API rather than a
+normal local working tree:
+
+- Read the target branch tip immediately before starting any write sequence and
+  use that exact commit as the expected base.
+- Prepare and review the complete intended change set before creating Git blobs,
+  trees, or commits. Do not use repository object creation as scratch staging.
+- Prefer a direct file-update operation for a single-file change. For a
+  multi-file atomic change, create blobs/tree/commit only after every replacement
+  is ready, then move the branch ref once with a non-forced fast-forward update.
+- Never report a change as committed merely because blobs, trees, or a commit
+  object were created. A change is on the branch only after the branch ref has
+  been updated successfully.
+- Immediately after a write sequence, re-read the branch tip and inspect the
+  resulting commit/diff or changed-file set. Confirm that only the intended
+  files changed before reporting success.
+- If a tool call fails, stalls, or the user interrupts a write sequence, stop
+  making writes and re-read the branch tip before continuing. Explicitly state
+  whether the branch changed; unattached Git objects do not count as repository
+  changes.
+- Do not force-update a branch unless the user explicitly requests history
+  rewriting or a previously agreed recovery requires it.
+
 ## Documentation and project tracking
 
 - Update `docs/architecture.md` when changing architectural boundaries,
