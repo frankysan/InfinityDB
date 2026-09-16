@@ -89,36 +89,59 @@ compatibility revisions require a rebuild from normalized JSON for now.
 The frontend export runs `ANALYZE` after loading and indexing data, preserving
 SQLite planner statistics in the immutable snapshot.
 
-## PDF-derived rules storage
+## Snapshot provenance and human annotations
 
-Curated facts from user-supplied rules PDFs and wiki research first pass through
-the source-controlled JSON contract in `data/curated/`. The loader validates
-that every record has a stable identity, concise summary, and source reference
-with a printed page. Raw PDFs and wiki snapshots are never accepted as
-application inputs.
+Timestamped `JSON`, `WIKI`, and `SYMBOLS` ZIP files are immutable acquisition
+artifacts. Their downloader-known provenance belongs in generated records under
+`data/manifests/snapshots/`, not inside the ZIP and not in Corvus Belli's source
+`metadata.json`. A snapshot manifest identifies its archive by SHA-256 and may
+also retain the archive path/name, snapshot type, acquisition timestamp,
+language, source/base URL, document counts, and other reproducibility facts.
 
-The available source families are N5 core rules v5.1-v5.3, N5 FAQs v0.0-v0.1,
-ITS Seasons 6-18, and the 20260915 wiki snapshot. Core rules yield reusable
-rule identities and structured effects; FAQs yield dated rulings; ITS material
-is isolated by season; wiki material supplies discovery, aliases, and
+Human-authored descriptions, comparison targets, and notable-change notes are a
+different kind of data. They belong under `data/curated/snapshot-notes/` and
+reference the corresponding immutable snapshot by SHA-256. Editing those notes
+does not alter the raw archive or its generated provenance. Snapshot notes are
+not rules-database inputs and do not become runtime application data unless a
+future feature explicitly defines such an ingestion path.
+
+## PDF- and wiki-derived rules storage
+
+Curated facts from user-supplied rules PDFs and wiki research pass through the
+source-controlled JSON contract in `data/curated/rules/`. The loader validates
+that every record has a stable identity, concise summary, and source-specific
+citation. PDF citations require a printed page; wiki citations require a local
+snapshot path and snapshot date. Raw PDFs and wiki snapshots are never accepted
+as application inputs.
+
+The available source families include N5 core rules revisions, N5 FAQs, ITS
+seasons, historical rules, and timestamped wiki snapshots. Core rules yield
+reusable rule identities and structured effects; FAQs yield dated rulings; ITS
+material is isolated by season; wiki material supplies discovery, aliases, and
 cross-links. Historical documents remain selectable references and must not be
 silently merged into current rules.
 
 The current curated v2 document has a collection identity, source records,
-typed fact records, scope, Army links, related-record links, review state, and
-citations. PDF citations require printed page numbers. Wiki citations require
-the local page path and snapshot date instead. Version 1 files are no longer
+typed fact records, maintained vocabularies, scope, Army links, related-record
+links, review state, and citations. PDF citations require printed page numbers.
+Wiki citations require the local page path and snapshot date instead, while the
+wiki source record should retain exact archive identity such as its timestamped
+archive path and SHA-256 where available. Version 1 files are no longer
 accepted and must be migrated before ingestion.
 
-`infinity-db build-rules data/curated --output data/generated/rules.db` stores
-those curated facts in a separate SQLite database, rather than in either Army
-JSON-derived database. Directory ingestion skips `example.json`. The rules
-database has an independent schema, application ID, compatibility version, and
-replaceable snapshot lifecycle.
-Every fact must retain document identity, edition/version or date, and a
-printed-page citation. It may reference stable application-level rule
-identities, but neither database is an import source for the other; any combined
-view is assembled by application code.
+`infinity-db build-rules` defaults to `data/curated/rules/` and stores those
+curated facts in a separate SQLite database, rather than in either Army
+JSON-derived database. Directory ingestion skips `example.json`. Other curated
+subtrees, including `data/curated/snapshot-notes/`, are not rules-database
+inputs. The rules database has an independent schema, application ID,
+compatibility version, and replaceable snapshot lifecycle.
+
+Every curated rule fact must retain the provenance appropriate to its source:
+document identity and edition/version/date plus a printed-page citation for
+PDFs, or exact wiki snapshot/source identity plus snapshot-local path for wiki
+material. A rule fact may reference stable application-level identities, but
+neither database is an import source for the other; any combined view is
+assembled by application code.
 
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
 source-undefined placeholder units and uses actual army occurrences for filtering,

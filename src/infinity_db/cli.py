@@ -20,6 +20,7 @@ from .rules_database import export_rules_database
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
+DEFAULT_CURATED_RULES = Path("data/curated/rules")
 
 
 def _export(source: Path, destination: Path) -> None:
@@ -130,7 +131,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules = sub.add_parser(
         "build-rules", help="Build the separate rules database from curated JSON collections"
     )
-    p_rules.add_argument("input", nargs="?", type=Path, default=Path("data/curated"))
+    p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
     p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
     p_rules.set_defaults(func=cmd_build_rules)
     return parser
