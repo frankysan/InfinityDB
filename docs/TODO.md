@@ -80,25 +80,6 @@ reference. Git history retains implementation detail.
   - Require versioned schemas, validation on load, deterministic
     serialization where generated, focused regression tests, and portable
     project-relative paths for important manifests.
-- [ ] Complete `config/identity/source-identities.json` as the canonical home
-  for source-identity exceptions and aliases.
-  - [x] Move explicit unit, army, skill, equipment, and weapon merge aliases
-    out of `database/repository.py`.
-  - [x] Represent alias groups declaratively around a canonical source ID
-    rather than duplicating pairwise mappings.
-  - [x] Move exceptional canonical-faction mappings such as the legacy
-    mercenary ownership case into the manifest while keeping the normal
-    whole-army `xx01` derivation algorithm in code.
-  - [x] Centralize source spelling/word aliases and profile-identity ignored
-    words, including known source misspellings.
-  - [x] Pin the validated identity document and SHA-256 into InfinityDB
-    `normalized.json`, revalidate them during export, and propagate the same
-    policy into both database siblings for runtime use.
-  - [x] Record short reason/provenance notes for exceptional mappings where
-    useful for future review.
-  - [ ] Remove the duplicated profile-identity aliases and ignored-word table
-    from `unit.js`. Expose or derive the manifest-backed grouping identity from
-    the backend so the browser does not independently reinterpret source names.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.
