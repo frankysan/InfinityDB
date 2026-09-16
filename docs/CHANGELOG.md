@@ -52,6 +52,10 @@ All notable changes to this project are documented in this file.
   legacy canonical-faction ID `1` maps to Non-Aligned Armies `901` through the
   identity manifest, while 901 itself is a grouping identity whose explicit
   non-playable role still needs backend/API modeling.
+- Consolidate the standalone Army/symbol pipeline plan into the maintained
+  backlog and durable AI context, preserving its pinned-snapshot, complete SVG
+  discovery, reference/asset identity, override/cache/network resolution,
+  processing, publishing, cross-platform, failure-policy, and testing decisions.
 - Increase the Army database compatibility revision to 10; existing databases
   must be rebuilt so they contain the required identity policy metadata.
 

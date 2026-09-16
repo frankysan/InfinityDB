@@ -125,24 +125,6 @@ reference. Git history retains implementation detail.
   - [x] Remove the duplicate trait-canonicalization table from
     `catalog-detail.js`; API responses expose canonical trait identity, name,
     and slug while preserving the raw source trait label.
-- [ ] Add `config/symbols/font-aliases.json`.
-  - Move Infinity-asset-specific legacy/exported font-reference overrides out
-    of `svg_processor.py`.
-  - Keep generic CSS family handling, font weight/stretch interpretation,
-    cmap-suffix recognition, installed-font discovery, and matching algorithms
-    in code.
-- [ ] Extend `config/symbols/static-symbols.json` so static symbol declarations
-  can own their semantic metadata as well as their source filenames.
-  - Support fields such as stable key, source filename, user-facing label, and
-    known source names where needed.
-  - Generate browser mappings/labels from the symbol build rather than
-    maintaining duplicate symbol knowledge in `unit.js`.
-- [ ] Treat `army-symbols.js` and `unit-symbol-map.js` as generated publisher
-  output, not authored configuration.
-  - Generate them from the pinned Army snapshot, symbol configuration, local
-    overrides, and the generated symbol-build manifest.
-  - Remove legacy migration assumptions such as first-symbol-wins once the new
-    symbol publisher becomes authoritative.
 - [ ] Review remaining hard-coded domain tables with the same decision rule:
   prefer derivation from authoritative imported data first, a validated
   manifest second, and code only when the value is implementation behavior.
@@ -152,6 +134,265 @@ reference. Git history retains implementation detail.
   - Keep API-source table wiring such as `METADATA_TABLES`, schema definitions,
     generic merge/normalization algorithms, Unicode normalization mechanics,
     database behavior, and UI preference mechanics in code.
+
+## Army snapshot and symbol pipeline
+
+- [ ] Replace the current migration-oriented symbol workflow with one
+  reproducible, manifest-backed pipeline tied to a single pinned Army snapshot.
+  - [x] Keep acquisition and processing tools independently runnable for
+    debugging and targeted maintenance; orchestration must call reusable logic
+    rather than duplicate it.
+  - [x] Keep `download_army_json.py` explicitly invoked and networked only on
+    demand. It already downloads/validates metadata, downloads every faction
+    listed by metadata, validates each Army document, stages through temporary
+    files, and writes one complete timestamped ZIP snapshot.
+  - [ ] Add a thin `tools/build_symbols.py` orchestrator with mutually exclusive
+    offline `--snapshot PATH` and explicit online `--fetch-snapshot` modes.
+    Once selected or downloaded, pin archive path/name, SHA-256, language,
+    acquisition timestamp, API base URL, and source-document count; every
+    downstream symbol stage must consume that same snapshot rather than select
+    a newer one independently.
+  - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
+    separate, intentional operations; `--snapshot-only`, `--language`,
+    `--data-root`, `--static-root`, `--jobs`, `--image-overrides`,
+    `--static-symbols`, `--refresh-symbols`, `--skip-symbol-download`,
+    `--skip-compression`, `--keep-work`, and `--dry-run` are candidate
+    orchestrator options as those stages are integrated.
+
+- [ ] Replace first-logo-per-unit symbol discovery with complete source-semantic
+  discovery keyed by source reference/URL rather than unit ID.
+  - Treat every `units[].profileGroups[].profiles[].logo` as authoritative for
+    unit/profile symbols and every `metadata.json -> factions[].logo` as
+    authoritative for faction symbols.
+  - Treat `resume[].logo` as a validation/consistency source only; it is not
+    complete enough to drive discovery.
+  - Recursively audit every source string for SVG references and compare that
+    set with semantic discovery. Unknown SVG-bearing fields must be reported
+    with their JSON paths and URLs and must not be silently ignored; fail by
+    default or require an explicit reviewed allowlist decision.
+  - Preserve every reference even when download URLs repeat or visual
+    deduplication later collapses assets. One unit may reference several SVGs,
+    and several units/profiles may reference one source SVG.
+  - Rename/refactor `download_unit_symbols.py` to `download_army_symbols.py` so
+    it covers unit/profile and faction assets plus manually declared static
+    symbols, without generating final browser mappings.
+  - Preserve the 2026-09-10 snapshot audit as a regression baseline, not a
+    permanent source count: 59 JSON documents (`metadata.json` + 58 Army
+    documents), 5,020 profile-logo references / 1,033 unique unit SVG URLs,
+    58 faction-logo references / 57 unique faction SVG URLs, 1,090 unique SVG
+    URLs in total, 4,137 `resume` references / 862 unique resume URLs, and zero
+    unknown SVG locations. The old first-logo-per-unit behavior found only 861
+    unique unit SVGs, missing 172 distinct SVGs; 136 unit IDs referenced more
+    than one profile logo.
+
+- [ ] Define `data/manifests/army-symbol-build.json` as the authoritative
+  machine-readable state passed through symbol processing.
+  - Separate `snapshot`, `assets`, and `references`; do not use a filename-keyed
+    structure that conflates source assets with their consumers.
+  - Snapshot records should include archive identity/hash, language, acquisition
+    timestamp, API base/version if available, and source-document count.
+  - Asset records should retain kind, source URL/filename/hash, source-resolution
+    method, font classification, alias normalization, duplicate group,
+    canonical source identity, conversion backend/status, compression
+    profile/status, and final published path.
+  - Reference records should retain source document, JSON path, reference kind,
+    unit/faction/army IDs and slugs as applicable, and source asset URL.
+  - Persistent manifest paths must be portable project-relative POSIX-style
+    strings; convert them to native `Path` objects only at filesystem access.
+
+- [ ] Complete the static-symbol and local-override model as maintained project
+  knowledge rather than downloader code.
+  - [x] `config/symbols/static-symbols.json` already declares the known
+    non-API assets: characteristics `cube`, `cube2`, `hackable`, `peripheral`
+    and orders `regular`, `irregular`, `tactical`, `lieutenant`, `impetuous`,
+    all under the stable Corvus Belli icon base URL.
+  - [ ] Extend static declarations with semantic metadata such as stable key,
+    source filename, user-facing label, and known source names where needed.
+  - [ ] Keep local `image_overrides/` outside version control, organized by
+    explicit categories such as `units/`, `factions/`, `characteristics/`, and
+    `orders/`. Use stable URL-derived logical names/categories as lookup keys,
+    not generated publication filenames.
+  - [ ] Resolve each asset strictly in this order: matching local override,
+    existing validated immutable raw cache, then upstream network download.
+    A valid override suppresses all network access for that asset; an invalid
+    matching override is an error and must not silently fall back upstream.
+  - [ ] Report unused overrides and filename collisions. Preserve provenance
+    such as origin URL, resolved local source, source method, source/override
+    SHA-256, and whether an upstream download occurred.
+  - [ ] Keep corrected derivative SVG content uncommitted unless redistribution
+    rights are established. Committed metadata may document recommended local
+    overrides and their reasons; `cube.svg` is the known case where the upstream
+    asset renders with horizontal raster/mask artifacts.
+  - [ ] Run overrides through the normal processing pipeline by default. Add a
+    `publish_as_is` escape hatch only if a concrete future use case justifies it.
+
+- [ ] Make downloaded/raw symbols immutable and keep source, work, generated
+  state, reports, and published assets conceptually separate.
+  - Use roots equivalent to `data/raw/army/`, `data/raw/symbols/{units,
+    factions,characteristics,orders}/`, `data/work/symbols/`,
+    `data/manifests/`, `data/reports/`, local `image_overrides/`, and the final
+    `src/infinity_db/web/static/` publication tree.
+  - Never rename, move, rewrite, normalize, compress, or delete downloaded raw
+    Army JSON or SVG source files during later processing.
+  - Reuse validated raw files before network access and do not overwrite them
+    unless explicit refresh behavior is requested. Treat URL-to-filename
+    collisions as errors requiring deterministic disambiguation.
+
+- [ ] Consolidate SVG audit, font handling, and complete-set duplicate detection
+  around one structured manifest.
+  - [ ] Add `config/symbols/font-aliases.json` for Infinity-asset-specific
+    legacy/exported font-reference overrides. Keep generic CSS family handling,
+    weight/stretch interpretation, cmap-suffix recognition, installed-font
+    discovery, and matching algorithms in code.
+  - Audit all resolved categories for SVG parse errors, active text, referenced
+    fonts, available/missing fonts, alias normalization, and unused declarations.
+  - Deduplicate across the full resolved raw set before expensive text-to-path
+    conversion: SHA-256 exact groups first, then visual duplicate detection with
+    `resvg` using the established production default of 4 jobs.
+  - Use deterministic canonical ranking: `no_active_text`, then
+    `fonts_available`, then `fonts_missing`, then parse/unknown errors, followed
+    by shorter filename and alphabetical source path/name. A failed or
+    inconclusive visual comparison keeps an asset unique rather than removing it.
+  - Removing a duplicate from active processing must never remove its source
+    references; each original URL continues to point at the selected canonical
+    asset in the manifest.
+
+- [ ] Keep text-to-path conversion limited to canonical assets that still have
+  active text and resolvable fonts.
+  - Use persistent `inkscape --shell` workers as the production backend with 4
+    jobs, launched directly with `subprocess.Popen()` pipes rather than through
+    a shell. Keep one-shot Inkscape as fallback/debugging.
+  - Keep `usvg` experimental only; real font-heavy symbol tests produced visible
+    differences from the intended rendering.
+  - Validate that converted SVGs parse, meaningful active `<text>` is gone,
+    empty text placeholders are removed when safe, and namespaces remain valid.
+    Failed conversion must not replace or masquerade as a verified canonical
+    source.
+  - Treat the roughly 8-9 second Windows Inkscape startup cost as an accepted
+    external-tool limitation for now. Clean-profile testing did not remove it;
+    persistent workers are the mitigation rather than continued startup chasing.
+
+- [ ] Keep `svg_compress.py` reusable while integrating compression into the
+  manifest-backed build.
+  - Preserve production defaults: `balanced` profile, `resvg` validation,
+    precision `p2` first and `p3` rescue, target sizes 32/64, DPR 1/2, maximum
+    RMS 0.01, maximum changed fraction 0.01, and pixel-difference threshold 8.
+  - Compress canonical assets only. If no lossy candidate passes visual
+    validation, retain the validated lossless/path-only output.
+
+- [ ] Refactor `reorganize_symbols.py` from destructive migration tooling into
+  a non-destructive publisher.
+  - Consume the pinned snapshot, authoritative build manifest, and final
+    canonical/compressed asset directory; copy/materialize outputs rather than
+    move or delete source/work files.
+  - Build a temporary publication tree, validate it, and atomically replace the
+    generated published tree only after success so a failed run leaves the prior
+    assets intact.
+  - The publisher alone defines final application paths after deduplication,
+    conversion, compression, and organization. Generate `army-symbols.js` and
+    `unit-symbol-map.js` here, not in a downloader, and remove legacy
+    first-symbol-wins assumptions once this publisher is authoritative.
+  - Preserve stable ID/slug application conventions where practical. The useful
+    unit convention is `units/<army-slug>/<unit-id>-<unit-slug>.svg`; faction
+    assets should use an ID/slug form such as
+    `armies/<faction-id>-<faction-slug>.svg` or the existing compatible format.
+    Decide the exact canonical physical naming before changing browser mappings.
+  - Permit several source/unit references to map to one canonical physical SVG.
+
+- [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
+  small shared symbol-pipeline utility layer.
+  - `download_army_json.py`: expose snapshot identity/result to callers while
+    keeping its standalone CLI and explicit network behavior.
+  - `download_army_symbols.py`: own complete discovery, static declarations,
+    override/cache/network source resolution, recursive SVG audit, and manifest
+    reference/asset updates.
+  - `svg_processor.py`: keep font audit, alias normalization, complete-set
+    duplicate detection, deterministic representative ranking, persistent
+    Inkscape conversion, and reports; add structured manifest updates and
+    multi-category processing.
+  - `svg_compress.py`: keep the standalone CLI and production validation
+    behavior; expose an importable result/update path for orchestration.
+  - `reorganize_symbols.py`: become the publisher and final mapping generator.
+  - `path_sanitization.py`: remain shared infrastructure for external/mirror
+    naming; pipeline-generated asset names should use one host-independent
+    policy.
+  - Longer-term reusable modules may be split into `snapshot`, `discovery`,
+    `manifest`, `downloader`, `audit`, `deduplicate`, `convert`, `compress`, and
+    `publish` helpers when that reduces duplication rather than adding ceremony.
+
+- [ ] Make every integrated symbol stage idempotent and traceable before adding
+  sophisticated incremental caching.
+  - Never overwrite a timestamped Army snapshot; pin it once selected.
+  - Changes to an override SHA-256 invalidate downstream processing for that
+    asset. Removing an override falls back to validated raw cache or network by
+    the normal resolution rules.
+  - Reuse validated raw downloads and rebuild work deterministically.
+  - After the integrated build is stable, consider cache keys based on snapshot
+    SHA-256, source SVG SHA-256, processor/tool versions, font-alias config,
+    duplicate renderer/settings, conversion backend/settings, and compression
+    profile/settings.
+
+- [ ] Preserve conservative failure behavior throughout symbol processing.
+  - Partial/invalid snapshot acquisition must not continue or replace prior
+    snapshots/publication.
+  - Unknown SVG source locations require explicit review.
+  - Invalid matching overrides fail; failed network downloads leave raw files
+    untouched and prevent incomplete publication.
+  - SVG parse/font errors are retained and reported rather than discarded.
+  - Duplicate-render uncertainty keeps assets unique.
+  - Text conversion failure retains the verified source rather than claiming a
+    successful replacement.
+  - Compression falls back to a validated lossless/path-only asset.
+  - Publication failure leaves the previous published tree intact.
+
+- [ ] Standardize symbol-pipeline reports around detailed machine/human outputs
+  plus one concise build summary.
+  - Preserve/report discovery counts, unknown SVG references, font audit,
+    missing fonts, unused font declarations, SVG parse errors, duplicate groups,
+    duplicate-render errors/separation/summary, text-to-path results/summary,
+    compression report/candidates/run metadata, overrides used/unused, raw-cache
+    hits, network downloads, manual static assets, canonical counts, published
+    asset counts, application-mapping counts, and per-stage/total runtime.
+  - Existing report filenames from the plan may be retained where useful:
+    `symbol-discovery.csv`, `unknown-svg-references.csv`, `svg-font-report.csv`,
+    `missing-fonts.csv`, `unused-font-declarations.csv`, `svg-parse-errors.csv`,
+    `duplicate-groups.csv`, `duplicate-render-errors.csv`,
+    `duplicate-separation.csv`, `duplicate-summary.csv`,
+    `svg-text-to-path-report.csv`, `text-conversion-summary.csv`,
+    `compression-report.csv`, `compression-candidates.csv`, and
+    `compression-run.json`.
+
+- [ ] Add focused end-to-end and cross-platform regression coverage for the
+  integrated Army/symbol pipeline.
+  - Snapshot/discovery tests: metadata/faction validation, complete archive,
+    snapshot identity/hash, all profile/faction logos, multiple logos for one
+    unit, one logo shared by units, duplicate URLs, static declarations,
+    override suppression of network, override over cache, invalid/unused
+    overrides, filename collisions, unexpected SVG fields, and proof that
+    `resume` is not required for complete discovery.
+  - SVG fixtures: exact duplicate, XML-different visual duplicate, no-text,
+    normal text, alias-font, missing-font, empty-text cleanup, and troublesome
+    real-world conversion cases.
+  - Publisher tests: several references to one canonical asset, faction assets,
+    deterministic paths, no destructive raw/work mutation, and failed build
+    preserving the prior static tree.
+  - Run core portability coverage on Windows, Ubuntu/Linux, and macOS when CI
+    permits: project-relative path generation, path sanitization, executable
+    discovery including `.exe`/`.cmd`, subprocess argument construction without
+    shell quoting, temp files, case-only collisions, snapshot ZIP handling,
+    override lookup, static-symbol manifest loading, atomic replacement, and
+    Windows `spawn` compatibility. External-tool integration tests may be
+    conditional when Inkscape, `resvg`, or SVGO are unavailable.
+  - Add a shared utility layer for executable discovery, native/project-relative
+    path conversion, atomic writes, subprocess invocation, and platform-neutral
+    generated filenames before orchestration otherwise duplicates those rules.
+
+- [ ] Preserve the intended normal workflow once orchestration exists:
+  `snapshot -> discover API symbols -> add static symbols -> audit unknown SVG
+  sources -> resolve override/cache/network -> classify fonts -> deduplicate ->
+  select canonical -> convert text -> compress -> publish -> generate mappings ->
+  validate -> report`. Offline rebuilds use a known snapshot; fresh acquisition
+  is an explicit separate mode.
 
 ## Reliability and operations
 

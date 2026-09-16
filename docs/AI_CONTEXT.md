@@ -165,6 +165,33 @@ local override
 An invalid override must fail explicitly rather than silently falling back to a
 different source.
 
+A symbol build associated with an Army snapshot must use that one exact pinned
+snapshot throughout discovery and publication. Pin the archive identity,
+SHA-256, language, acquisition timestamp, and API base URL; no downstream stage
+may independently select a newer snapshot.
+
+Authoritative Army-API symbol discovery comes from every
+`units[].profileGroups[].profiles[].logo` reference plus
+`metadata.json -> factions[].logo`. `resume[].logo` is a consistency/validation
+source, not the complete discovery source. Recursively scanning all source
+strings for additional SVG references is an audit for source-schema drift; an
+unknown SVG-bearing field must be reported rather than silently ignored.
+
+Symbol identity is reference/URL based rather than unit-ID based. A unit may
+reference several source SVGs, several units or profiles may reference one SVG,
+and visual duplicate detection may collapse several source assets to one
+canonical asset. Deduplication must never discard the original references. The
+publisher, not the downloader, owns final application paths and generated
+`army-symbols.js` / `unit-symbol-map.js` mappings because only the publisher
+knows the final canonical asset after processing.
+
+The established production processing direction is `resvg` for visual duplicate
+and compression validation, persistent `inkscape --shell` workers for text-to-
+path conversion, and standalone stage tools wrapped by a thin orchestrator.
+The slow Windows startup cost of Inkscape is treated as an external-tool
+limitation; persistent workers are the mitigation unless new evidence warrants
+reopening that investigation.
+
 ## Local rules-reference documents
 
 The ignored, user-supplied PDFs in `data/` are potential sources for
@@ -299,3 +326,8 @@ snapshot dates. Version 1 curated files must be migrated before ingestion.
   playability. 901 is a grouping identity for its child 9xx armies, not an
   independently playable army; explicit role/playability semantics are still
   required for selectors and APIs.
+- 2026-09-16: Army-linked symbol processing uses one exact pinned Army snapshot.
+  Source discovery is reference/URL based rather than unit-ID based; profile
+  logos and metadata faction logos are authoritative, recursive SVG scanning is
+  a schema-drift audit, and only the publisher assigns final canonical asset
+  paths and generated application mappings.
