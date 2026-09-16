@@ -37,6 +37,10 @@ All notable changes to this project are documented in this file.
 - Make database export revalidate identity provenance pinned into normalized
   data, reject incomplete or conflicting policies, and preserve that exact
   policy in the immutable database snapshot used by runtime queries.
+- Derive unit profile grouping identities in the backend from the identity
+  policy pinned into the database and expose them through unit-detail API
+  records, so browser code no longer maintains duplicate profile alias and
+  ignored-word tables.
 - Increase the Army database compatibility revision to 10; existing databases
   must be rebuilt so they contain the required identity policy metadata.
 
