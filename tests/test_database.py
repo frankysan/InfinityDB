@@ -271,6 +271,9 @@ def test_weapon_catalog_detail_uses_template_lookup_indexes(
     export_database(normalized, path)
     connection = sqlite3.connect(path)
     try:
+        # The regular fixture is deliberately tiny, so SQLite quite reasonably
+        # scans it. Add unrelated weapon templates and occurrences to model the
+        # high-volume production path this index pair protects.
         template_ids = [f"query-plan-template-{position}" for position in range(1_000)]
         connection.executemany(
             "INSERT INTO option_weapon_templates (id, item_id) VALUES (?, ?)",
@@ -805,6 +808,7 @@ def test_unit_300_merge_alias_is_one_logical_unit() -> None:
 def test_merged_source_profiles_do_not_repeat_identical_items(
     tmp_path: Path, normalized: dict
 ) -> None:
+    """Merged IDs can share an army and local profile/option IDs."""
     duplicate_id = 10_001
     original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
     duplicate = copy.deepcopy(original)
@@ -817,11 +821,14 @@ def test_merged_source_profiles_do_not_repeat_identical_items(
                 duplicate = copy.deepcopy(row)
                 duplicate["unit_id"] = duplicate_id
                 if table == "profiles":
+                    # An overlapping source may carry a conflicting AVA while
+                    # omitting the profile's skills and equipment.
                     duplicate["ava"] = 1
                 normalized["tables"][table].append(duplicate)
 
     for prefix in ("profile", "option"):
         if prefix == "profile":
+            # The overlapping profile is deliberately sparse.
             continue
         occurrence_ids: dict[object, object] = {}
         for suffix in ("skills", "equipment", "weapons"):
