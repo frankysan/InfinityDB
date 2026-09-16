@@ -279,7 +279,7 @@ All notable changes to this project are documented in this file.
 - Persistent centimetre/inch display preference in the shared sidebar, applied
   to movement values and distance-based skill modifiers.
 - Skill Modifiers page and API for browsing distance-related skill extras and
-  linking directly to the units using each combination.
+  linking directly to the units that use them.
 - Reinforcement filter and nested reinforcement-list display in the army
   selector, including reinforcement availability badges on unit details.
 - Profile type and classification in general unit profiles.
@@ -311,7 +311,8 @@ All notable changes to this project are documented in this file.
 - Unit catalog with army filtering, name search, pagination, and availability
   filters for mercenaries, Spec-Ops, Team Operations, and reinforcements.
 - Unit-detail pages that show shared/general profiles and faction- and
-  army-specific profiles, loadouts, skills, equipment, weapons, and AVA.
+  army-specific profiles, loadouts, availability (including reinforcement
+  profiles), skills, equipment, weapons, and AVA.
 - API metadata import for faction names and ammunition, weapon, skill,
   equipment, and rules catalogs.
 - Bundled SVG symbols for armies and units, including fallback resolution for
