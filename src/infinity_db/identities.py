@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -63,6 +65,36 @@ class IdentityConfig:
         if canonical_id is None:
             return ()
         return tuple(item_id for item_id, target in aliases.items() if target == canonical_id)
+
+
+def normalized_profile_identity(value: object, config: IdentityConfig) -> str:
+    """Return the manifest-backed grouping identity for a profile label."""
+    identity = re.sub(
+        r"^(?:reinf|refuerzos)(?:\.|:)?\s*",
+        "",
+        str(value or ""),
+        flags=re.IGNORECASE,
+    )
+    decomposed = unicodedata.normalize("NFKD", identity).casefold()
+    text = "".join(
+        character
+        for character in decomposed
+        if not unicodedata.category(character).startswith("M")
+    )
+    words = re.findall(r"[^\W_]+", text)
+    normalized_words = [
+        config.word_aliases.get(
+            root := (
+                word[:-1]
+                if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
+                else word
+            ),
+            root,
+        )
+        for word in words
+        if word not in config.profile_identity_ignored_words
+    ]
+    return " ".join(sorted(normalized_words))
 
 
 def identity_metadata(config: IdentityConfig) -> dict[str, Any]:
