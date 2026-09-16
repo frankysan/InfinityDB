@@ -12,6 +12,8 @@ from typing import Any, Mapping
 IDENTITY_CONFIG_SCHEMA_VERSION = 1
 DEFAULT_IDENTITY_CONFIG = Path("config/identity/source-identities.json")
 CATALOG_NAMES = ("skills", "equipment", "weapons")
+IDENTITY_CONFIG_METADATA_KEY = "identityConfig"
+IDENTITY_CONFIG_SHA256_METADATA_KEY = "identityConfigSha256"
 
 
 class IdentityConfigError(ValueError):
@@ -45,6 +47,14 @@ class IdentityConfig:
     def canonical_catalog_id(self, catalog: str, source_id: int) -> int | None:
         aliases = self.catalog_aliases.get(catalog)
         return aliases.get(source_id) if aliases is not None else None
+
+
+def identity_metadata(config: IdentityConfig) -> dict[str, Any]:
+    """Return the validated identity policy fields persisted with a database snapshot."""
+    return {
+        IDENTITY_CONFIG_METADATA_KEY: config.document,
+        IDENTITY_CONFIG_SHA256_METADATA_KEY: config.content_sha256,
+    }
 
 
 def _canonical_json(document: Mapping[str, Any]) -> str:
