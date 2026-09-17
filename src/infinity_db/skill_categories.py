@@ -9,7 +9,6 @@ Basic Short Skill and an ARO.
 
 from __future__ import annotations
 
-
 UNCLASSIFIED = "Unclassified"
 
 # Categories are the declaration labels printed for the skill.  The page

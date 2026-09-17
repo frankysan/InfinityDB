@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import Any
 
 IDENTITY_CONFIG_SCHEMA_VERSION = 1
-DEFAULT_IDENTITY_CONFIG = Path("config/identity/source-identities.json")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_IDENTITY_CONFIG = PROJECT_ROOT / "config" / "identity" / "source-identities.json"
 CATALOG_NAMES = ("skills", "equipment", "weapons")
 IDENTITY_CONFIG_METADATA_KEY = "identityConfig"
 IDENTITY_CONFIG_SHA256_METADATA_KEY = "identityConfigSha256"
