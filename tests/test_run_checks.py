@@ -61,7 +61,7 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "-m",
         "infinity_db",
         "build",
-        "data/raw/example.zip",
+        str(Path("data/raw/example.zip")),
         "--compact",
     )
 
