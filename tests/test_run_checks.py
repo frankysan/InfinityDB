@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -75,6 +76,27 @@ def test_lint_stage_uses_project_defaults_without_targets() -> None:
         "ruff",
         "check",
         *run_checks.DEFAULT_LINT_TARGETS,
+    )
+
+
+def test_report_without_path_uses_timestamped_repository_filename() -> None:
+    args = run_checks.build_parser().parse_args(["--profile", "code", "--report"])
+    started_at = datetime.fromisoformat("2026-09-17T14:05:06+02:00")
+
+    assert args.report is True
+    assert run_checks.resolve_report_path(args.report, started_at) == (
+        run_checks.REPORT_DIRECTORY / "CHECKS 20260917-140506.txt"
+    )
+
+
+def test_explicit_report_path_is_preserved() -> None:
+    args = run_checks.build_parser().parse_args(
+        ["--profile", "code", "--report", "custom/check-output.txt"]
+    )
+    started_at = datetime.fromisoformat("2026-09-17T14:05:06+02:00")
+
+    assert run_checks.resolve_report_path(args.report, started_at) == Path(
+        "custom/check-output.txt"
     )
 
 

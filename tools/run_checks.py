@@ -29,6 +29,7 @@ EXIT_OK = 0
 EXIT_STAGE_FAILURE = 1
 EXIT_RUNNER_ERROR = 2
 REPO_ROOT = Path(__file__).resolve().parents[1]
+REPORT_DIRECTORY = REPO_ROOT / "reports"
 
 
 @dataclass(frozen=True)
@@ -110,8 +111,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--report",
-        type=Path,
-        help="Also write the complete console transcript to this UTF-8 text file.",
+        nargs="?",
+        const=True,
+        default=False,
+        metavar="PATH",
+        help=(
+            "Also write the complete console transcript to a UTF-8 text file. "
+            "With no PATH, use reports/CHECKS YYYYMMDD-HHMMSS.txt."
+        ),
     )
     parser.add_argument(
         "--fail-fast",
@@ -156,6 +163,16 @@ def stage_definitions(
             raise ValueError(f"Unknown stage: {name}")
         stages.append(Stage(name=name, command=tuple(command)))
     return stages
+
+
+def resolve_report_path(report: bool | str, started_at: datetime) -> Path | None:
+    """Resolve an optional report argument to an explicit output path."""
+    if report is False:
+        return None
+    if report is True:
+        timestamp = started_at.strftime("%Y%m%d-%H%M%S")
+        return REPORT_DIRECTORY / f"CHECKS {timestamp}.txt"
+    return Path(report)
 
 
 def format_command(command: tuple[str, ...]) -> str:
@@ -217,9 +234,14 @@ def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
     return StageResult(stage.name, status, returncode, duration)
 
 
-def write_header(reporter: Reporter, stages: list[Stage], targets: list[str]) -> None:
+def write_header(
+    reporter: Reporter,
+    stages: list[Stage],
+    targets: list[str],
+    started_at: datetime,
+) -> None:
     reporter.write("InfinityDB check run")
-    reporter.write(f"Started: {datetime.now().astimezone().isoformat(timespec='seconds')}")
+    reporter.write(f"Started: {started_at.isoformat(timespec='seconds')}")
     reporter.write(f"Branch: {git_value('branch', '--show-current')}")
     reporter.write(f"Commit: {git_value('rev-parse', 'HEAD')}")
     reporter.write(f"Stages: {', '.join(stage.name for stage in stages)}")
@@ -254,9 +276,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return EXIT_RUNNER_ERROR
 
+    started_at = datetime.now().astimezone()
+    report_path = resolve_report_path(args.report, started_at)
     try:
-        with Reporter(args.report) as reporter:
-            write_header(reporter, stages, args.targets)
+        with Reporter(report_path) as reporter:
+            write_header(reporter, stages, args.targets, started_at)
             if args.targets and "build" in stage_names:
                 reporter.write(
                     "Note: positional targets apply to pytest/Ruff only; build uses --build-source."
