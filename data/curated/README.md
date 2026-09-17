@@ -2,8 +2,8 @@
 
 `data/curated/` contains source-controlled, human-reviewed information derived
 from external sources. Curated material is distinct from immutable external
-inputs under `data/raw/`, `data/wiki/`, and `data/pdf/`, and from the accepted
-future generated-provenance role under `data/manifests/`.
+inputs under `data/raw/`, `data/wiki/`, and `data/pdf/`, and from generated
+provenance under `data/manifests/`.
 
 ## Current curated data
 
@@ -13,13 +13,14 @@ build-rules` defaults to `data/curated/rules/`.
 
 The sections below document the implemented `curated/rules/` contract.
 
-## Design direction — other curated categories
+## Other curated categories
 
-`data/curated/snapshot-notes/` is an accepted future location for
+`data/curated/snapshot-notes/` defines the current versioned contract for
 human-maintained snapshot descriptions, comparison targets, and notable-change
-notes associated with immutable snapshots. Those notes will be separate from
-generated snapshot provenance and will not be rules-database inputs. No current
-tooling writes or consumes this subtree.
+notes associated with immutable snapshots by SHA-256. Those notes remain
+separate from generated snapshot provenance and are not rules-database inputs.
+Acquisition tooling never writes or consumes this subtree; see
+[`snapshot-notes/README.md`](snapshot-notes/README.md).
 
 ## Curated rules reference data
 
@@ -183,8 +184,8 @@ actually used.
 When the wiki downloader/packager and curated provenance contract are rewritten,
 migrate wiki sources to exact recorded timestamped archive identity/hash and
 make vocabulary provenance source-specific instead of requiring the current
-mixed wiki/page locator. Generated acquisition provenance will belong under the
-planned `data/manifests/snapshots/`; curated rules will reference the source
+mixed wiki/page locator. Generated acquisition provenance belongs under
+`data/manifests/snapshots/`; curated rules will reference the source
 identity they actually used rather than duplicating downloader state.
 
 Version 1 curated-rule files are no longer accepted by the loader and must be

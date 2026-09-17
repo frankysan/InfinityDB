@@ -15,6 +15,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
+from infinity_db.snapshot_provenance import write_snapshot_manifest
+
 try:
     from tools.path_sanitization import sanitize_filename
     from tools.snapshot_archive import create_timestamped_archive
@@ -24,6 +26,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
 
 ASSET_HOST = "assets.corvusbelli.net"
 ASSET_PATH = "/army/img/logo/units/"
+ASSET_BASE_URL = f"https://{ASSET_HOST}{ASSET_PATH}"
 SVG_NAME = re.compile(r"[a-z0-9-]+\.svg$")
 
 
@@ -161,6 +164,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--manifest", type=Path, help="Write a browser symbol-slug map")
     parser.add_argument(
+        "--manifest-dir",
+        type=Path,
+        default=Path("data/manifests/snapshots"),
+        help="Generated snapshot manifest directory (default: data/manifests/snapshots)",
+    )
+    parser.add_argument(
         "--delay", type=float, default=0.2, help="Seconds to wait between downloads (default: 0.2)"
     )
     parser.add_argument("--dry-run", action="store_true")
@@ -178,8 +187,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     args.destination.mkdir(parents=True, exist_ok=True)
+    archive: Path | None = None
+    snapshot_manifest: Path | None = None
     try:
-        with tempfile.TemporaryDirectory(prefix="infinity-symbols-", dir=args.destination) as staging:
+        with tempfile.TemporaryDirectory(
+            prefix="infinity-symbols-", dir=args.destination
+        ) as staging:
             staging_path = Path(staging)
             files: list[Path] = []
             for index, url in enumerate(urls, start=1):
@@ -194,12 +207,30 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"[{index}/{len(urls)}] {name}")
                 if index < len(urls) and args.delay:
                     time.sleep(args.delay)
-            archive = archive_symbols(files, args.destination, root=staging_path)
+            acquired_at = datetime.now().astimezone()
+            archive = archive_symbols(
+                files, args.destination, root=staging_path, now=acquired_at
+            )
+            snapshot_manifest = write_snapshot_manifest(
+                archive,
+                args.manifest_dir,
+                snapshot_type="symbols",
+                acquired_at=acquired_at,
+                source_url=ASSET_BASE_URL,
+                document_count=len(files),
+                project_root=Path.cwd(),
+                input_artifact=args.source,
+            )
     except (OSError, ValueError) as exc:
+        if snapshot_manifest is not None:
+            snapshot_manifest.unlink(missing_ok=True)
+        if archive is not None:
+            archive.unlink(missing_ok=True)
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
     print(f"Downloaded {len(files)} symbols -> {archive}")
+    print(f"Snapshot provenance -> {snapshot_manifest}")
     return 0
 
 
