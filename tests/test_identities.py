@@ -26,9 +26,12 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     assert config.canonical_unit_id(1690) == 300
     assert config.canonical_unit_id(11345) == 1345
     assert config.canonical_army_id(998) == 999
+    assert config.canonical_catalog_id("skills", 20) == 19
+    assert config.canonical_catalog_id("skills", 70) == 69
     assert config.canonical_catalog_id("skills", 278) == 201
     assert config.canonical_catalog_id("equipment", 248) == 235
     assert config.canonical_catalog_id("weapons", 228) == 226
+    assert config.catalog_source_ids("skills", 20) == (19, 20, 21, 22, 23)
     assert config.canonical_faction_overrides[1] == 901
     assert config.word_aliases["reconaissance"] == "recon"
     assert "intervention" in config.profile_identity_ignored_words
@@ -40,6 +43,7 @@ def test_unlisted_source_ids_are_not_implicitly_aliased() -> None:
     assert config.canonical_unit_id(42) == 42
     assert config.canonical_army_id(101) == 101
     assert config.canonical_catalog_id("skills", 42) is None
+    assert config.catalog_source_ids("skills", 42) == ()
 
 
 def test_identity_metadata_contains_document_and_hash() -> None:

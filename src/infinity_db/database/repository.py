@@ -25,6 +25,7 @@ from infinity_db.identities import (
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
     IdentityConfig,
     IdentityConfigError,
+    load_identity_config,
     parse_identity_metadata,
 )
 from infinity_db.skill_categories import categories_for_skill
@@ -113,6 +114,14 @@ def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityC
 def is_reinforcement_army_id(army_id: int) -> bool:
     """Return whether an army ID denotes a reinforcement-only army."""
     return army_id % 100 in REINFORCEMENT_ARMY_SUFFIXES
+
+
+def canonical_skill_id(
+    skill_id: int, identity_config: IdentityConfig | None = None
+) -> int:
+    """Return the configured representative ID for an explicit skill identity group."""
+    config = identity_config or load_identity_config()
+    return config.canonical_catalog_id("skills", skill_id) or skill_id
 
 
 def skill_merge_key(name: object) -> str | None:
@@ -296,9 +305,10 @@ def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
 def logical_unit_groups(
     rows: list[sqlite3.Row],
     memberships: dict[int, list[dict[str, Any]]],
-    identity_config: IdentityConfig,
+    identity_config: IdentityConfig | None = None,
 ) -> list[dict[str, Any]]:
     """Combine 10,000-ID duplicates and their reinforcement-only variants."""
+    identity_config = identity_config or load_identity_config()
     groups: dict[tuple[Any, ...], dict[str, Any]] = {}
     for row in rows:
         armies = memberships[row["id"]]
@@ -694,9 +704,6 @@ class Database:
                 display_extra_name = canonical_skill_extra_name(
                     row["skill_name"], row["extra_name"]
                 )
-                # The normalized display text is the semantic pair identity.
-                # This retains ordinary sign differences while applying the
-                # known Super-Jump and Forward Deployment conventions.
                 key = (row["skill_id"], display_extra_name)
                 item = combinations.setdefault(
                     key,
@@ -863,7 +870,12 @@ class Database:
             base_slug = trait_slug(name) or "trait"
             slug_counts[base_slug] = slug_counts.get(base_slug, 0) + 1
             slug = base_slug if slug_counts[base_slug] == 1 else f"{base_slug}-{slug_counts[base_slug]}"
-            traits.append({"id": slug, "name": name, "use_count": len(items_by_trait[name]), "description": TRAIT_DESCRIPTIONS.get(name)})
+            traits.append({
+                "id": slug,
+                "name": name,
+                "use_count": len(items_by_trait[name]),
+                "description": TRAIT_DESCRIPTIONS.get(name),
+            })
         return traits
 
     @instance_lru_cache(maxsize=128)
@@ -874,7 +886,8 @@ class Database:
             return None
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT DISTINCT w.id, m.type, m.properties FROM weapons AS w JOIN metadata_weapons AS m ON m.id = w.id"
+                "SELECT DISTINCT w.id, m.type, m.properties FROM weapons AS w "
+                "JOIN metadata_weapons AS m ON m.id = w.id"
             ).fetchall()
         weapon_ids = []
         for row in rows:
@@ -891,7 +904,11 @@ class Database:
                 weapon_ids.append((catalog, row["id"]))
         variants = []
         for catalog, item_id in sorted(set(weapon_ids)):
-            item = self.get_skill(item_id) if catalog == "skills" else self.get_catalog_item(catalog, item_id)
+            item = (
+                self.get_skill(item_id)
+                if catalog == "skills"
+                else self.get_catalog_item(catalog, item_id)
+            )
             if item is None:
                 continue
             units = {
@@ -907,7 +924,8 @@ class Database:
                         "item_name": item["name"],
                         "extras": [],
                         "units": sorted(
-                            units.values(), key=lambda unit: (unit_sort_key(unit["name"]), unit["id"])
+                            units.values(),
+                            key=lambda unit: (unit_sort_key(unit["name"]), unit["id"]),
                         ),
                     }
                 )
@@ -989,7 +1007,8 @@ class Database:
                 ") AS uses ON uses.unit_id = u.id "
                 "LEFT JOIN extras AS e ON e.id = uses.extra_id "
                 "WHERE u.source_defined = 1 "
-                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position, unit_sort_key(unit_name), u.id",
+                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position, "
+                "unit_sort_key(unit_name), u.id",
                 source_ids * 3,
             ).fetchall()
             occurrences: dict[tuple[str, Any], dict[str, Any]] = {}
@@ -1003,7 +1022,9 @@ class Database:
                     },
                 )
                 if row["extra_id"] is not None:
-                    occurrence["extras"].append({"id": row["extra_id"], "name": row["extra_name"]})
+                    occurrence["extras"].append(
+                        {"id": row["extra_id"], "name": row["extra_name"]}
+                    )
             units_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
             item_names = {row["id"]: row["name"] for row in catalog_items}
             variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
@@ -1026,11 +1047,17 @@ class Database:
                 if unit is not None and unit not in variant["units"]:
                     variant["units"].append(unit)
             for variant in variants.values():
-                variant["units"].sort(key=lambda unit: (unit_sort_key(unit["name"]), unit["id"]))
+                variant["units"].sort(
+                    key=lambda unit: (unit_sort_key(unit["name"]), unit["id"])
+                )
             result = {
                 **dict(item),
                 "id": canonical_id,
-                "name": merged_catalog_name(item["name"]) if len(source_ids) > 1 else item["name"],
+                "name": (
+                    merged_catalog_name(item["name"])
+                    if len(source_ids) > 1
+                    else item["name"]
+                ),
                 "variants": [variant for variant in variants.values() if variant["units"]],
             }
             if catalog in {"equipment", "weapons"}:
@@ -1040,9 +1067,6 @@ class Database:
                     )
                     profile_parameters: tuple[Any, ...] = source_ids
                 else:
-                    # The Army metadata exposes deployable equipment in its
-                    # weapon-profile collection. Match the equipment catalog
-                    # record by both source ID and label to avoid ID collisions.
                     profile_filter = "m.id = ? AND m.type = 'EQUIPMENT' AND m.name = ?"
                     profile_parameters = (canonical_id, item["name"])
                 profile_rows = connection.execute(
@@ -1067,7 +1091,7 @@ class Database:
 
                 profiles = []
                 for profile in profile_rows:
-                    item = {
+                    profile_item = {
                         "id": profile["id"],
                         "name": profile["name"],
                         "mode": profile["mode"],
@@ -1081,8 +1105,12 @@ class Database:
                         "traits": decoded(profile["properties"], []),
                         "ranges": decoded(profile["distance"], {}),
                     }
-                    if (item["id"], item["name"], item["mode"]) not in WEAPON_PROFILE_PLACEHOLDERS:
-                        profiles.append(item)
+                    if (
+                        profile_item["id"],
+                        profile_item["name"],
+                        profile_item["mode"],
+                    ) not in WEAPON_PROFILE_PLACEHOLDERS:
+                        profiles.append(profile_item)
                 result["profiles"] = profiles
                 if catalog == "weapons":
                     profiles_by_id: dict[int, list[dict[str, Any]]] = {}
@@ -1145,12 +1173,13 @@ class Database:
                 "e.position AS extra_position, e.extra_id FROM profile_skills AS o "
                 "LEFT JOIN profile_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"WHERE o.item_id IN ({placeholders}) "
-                "UNION ALL SELECT 'option' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
-                "e.position AS extra_position, e.extra_id FROM option_skills AS o "
+                "UNION ALL SELECT 'option' AS source, o.item_id AS skill_id, o.occurrence_id, "
+                "o.unit_id, e.position AS extra_position, e.extra_id FROM option_skills AS o "
                 "LEFT JOIN option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"WHERE o.item_id IN ({placeholders}) "
-                "UNION ALL SELECT 'unit_option' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
-                "e.position AS extra_position, e.extra_id FROM unit_option_skills AS o "
+                "UNION ALL SELECT 'unit_option' AS source, o.item_id AS skill_id, "
+                "o.occurrence_id, o.unit_id, e.position AS extra_position, e.extra_id "
+                "FROM unit_option_skills AS o "
                 "LEFT JOIN unit_option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"WHERE o.item_id IN ({placeholders})"
                 ") AS uses ON uses.unit_id = u.id "
@@ -1167,18 +1196,12 @@ class Database:
                     key,
                     {
                         "skill_id": row["skill_id"],
-                        "unit": {
-                            "id": row["unit_id"],
-                            "name": row["unit_name"],
-                        },
+                        "unit": {"id": row["unit_id"], "name": row["unit_name"]},
                         "extras": [],
                     },
                 )
                 if row["extra_id"] is not None:
-                    extra = {
-                        "id": row["extra_id"],
-                        "name": row["extra_name"],
-                    }
+                    extra = {"id": row["extra_id"], "name": row["extra_name"]}
                     if contains_distance_multiple(row["extra_name"]):
                         extra["is_distance"] = True
                     occurrence["extras"].append(extra)
@@ -1260,8 +1283,14 @@ class Database:
             if item_id is not None and (
                 type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX
             ):
-                parameter = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[name]
-                raise ValueError(f"{parameter}_id must be an integer within SQLite's signed 64-bit range")
+                parameter = {
+                    "skills": "skill",
+                    "equipment": "equipment",
+                    "weapons": "weapon",
+                }[name]
+                raise ValueError(
+                    f"{parameter}_id must be an integer within SQLite's signed 64-bit range"
+                )
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -1304,12 +1333,15 @@ class Database:
                             f"UNION SELECT unit_id FROM unit_option_{catalog} WHERE item_id = ?"
                         )
                     matching_sources_by_rule[catalog] = {
-                        row["unit_id"] for row in connection.execute(query, (item_id, item_id, item_id))
+                        row["unit_id"]
+                        for row in connection.execute(query, (item_id, item_id, item_id))
                     }
         graph = self._unit_graph()
         army_names = graph["army_names"]
         groups = graph["groups"]
-        canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
+        canonical_factions = {
+            row["id"]: row["canonical_faction_id"] for row in graph["rows"]
+        }
         normal_armies_by_unit = graph["normal_armies_by_unit"]
         search_key = accent_insensitive_key(search)
         grouped = []
@@ -1343,7 +1375,8 @@ class Database:
                     continue
             grouped.append({**group, "armies": visible_armies})
         grouped.sort(
-            key=lambda group: (unit_sort_key(group["name"]), group["id"]), reverse=descending
+            key=lambda group: (unit_sort_key(group["name"]), group["id"]),
+            reverse=descending,
         )
         total = len(grouped)
         items = [
@@ -1357,7 +1390,8 @@ class Database:
                 "source_ids": group["source_ids"],
                 "army_ids": list(group["armies"]),
                 "armies": [
-                    {"id": army["id"], "name": army["name"]} for army in group["armies"].values()
+                    {"id": army["id"], "name": army["name"]}
+                    for army in group["armies"].values()
                 ],
             }
             for group in grouped[offset : offset + limit]
@@ -1404,7 +1438,9 @@ class Database:
             source_ids = group["source_ids"]
             unit = next(sibling for sibling in siblings if sibling["id"] == group["id"])
             normal_army_ids = graph["normal_armies_by_unit"]
-            canonical_factions = {row["id"]: row["canonical_faction_id"] for row in siblings}
+            canonical_factions = {
+                row["id"]: row["canonical_faction_id"] for row in siblings
+            }
             placeholders = ", ".join("?" for _ in source_ids)
             armies_by_occurrence: dict[tuple[int, tuple[str, ...]], dict[str, Any]] = {}
             by_source_army: dict[tuple[int, int], dict[str, Any]] = {}
@@ -1453,13 +1489,15 @@ class Database:
                 army = by_source_army.get((profile["unit_id"], profile["army_id"]))
                 if army is None:
                     continue
-                item = {
-                    key: profile[key] for key in profile.keys() if key not in {"army_id", "unit_id"}
+                profile_item = {
+                    key: profile[key]
+                    for key in profile.keys()
+                    if key not in {"army_id", "unit_id"}
                 }
-                item["skills"] = []
-                item["equipment"] = []
-                item["weapons"] = []
-                item["characteristics"] = []
+                profile_item["skills"] = []
+                profile_item["equipment"] = []
+                profile_item["weapons"] = []
+                profile_item["characteristics"] = []
                 profile_key = (
                     army["_occurrence_key"],
                     profile["group_id"],
@@ -1488,10 +1526,10 @@ class Database:
                 ] = profile_key
                 existing = profile_items.get(profile_key)
                 if existing is None:
-                    army["profiles"].append(item)
-                    profile_items[profile_key] = item
+                    army["profiles"].append(profile_item)
+                    profile_items[profile_key] = profile_item
                 else:
-                    merge_profile(existing, item)
+                    merge_profile(existing, profile_item)
             for occurrence_table, catalog_table, property_name, extras_table in (
                 ("profile_skills", "skills", "skills", "profile_skill_extras"),
                 ("profile_equipment", "equipment", "equipment", "profile_equipment_extras"),
@@ -1508,16 +1546,13 @@ class Database:
                     source_ids,
                 )
                 for extra in extra_rows:
-                    item = {
-                        "id": extra["extra_id"],
-                        "name": extra["name"],
-                    }
+                    extra_item = {"id": extra["extra_id"], "name": extra["name"]}
                     if property_name == "skills" and contains_distance_multiple(extra["name"]):
-                        item["is_distance"] = True
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(item)
+                        extra_item["is_distance"] = True
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, o.item_id, "
-                    "o.quantity, o.position, c.name "
+                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, "
+                    "o.item_id, o.quantity, o.position, c.name "
                     f"FROM {occurrence_table} AS o "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
                     f"WHERE o.unit_id IN ({placeholders}) "
@@ -1533,10 +1568,12 @@ class Database:
                             occurrence["profile_id"],
                         )
                     )
-                    profile = profile_items.get(profile_key) if profile_key is not None else None
-                    if profile is not None:
+                    profile_item = (
+                        profile_items.get(profile_key) if profile_key is not None else None
+                    )
+                    if profile_item is not None:
                         append_unique_item(
-                            profile[property_name],
+                            profile_item[property_name],
                             {
                                 "id": occurrence["item_id"],
                                 "name": occurrence["name"],
@@ -1561,9 +1598,9 @@ class Database:
                         characteristic["profile_id"],
                     )
                 )
-                profile = profile_items.get(profile_key) if profile_key is not None else None
-                if profile is not None:
-                    profile["characteristics"].append({"name": characteristic["name"]})
+                profile_item = profile_items.get(profile_key) if profile_key is not None else None
+                if profile_item is not None:
+                    profile_item["characteristics"].append({"name": characteristic["name"]})
             loadout_rows = connection.execute(
                 "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
                 "o.minis, o.disabled "
@@ -1577,13 +1614,15 @@ class Database:
                 army = by_source_army.get((loadout["unit_id"], loadout["army_id"]))
                 if army is None:
                     continue
-                item = {
-                    key: loadout[key] for key in loadout.keys() if key not in {"army_id", "unit_id"}
+                loadout_item = {
+                    key: loadout[key]
+                    for key in loadout.keys()
+                    if key not in {"army_id", "unit_id"}
                 }
-                item["skills"] = []
-                item["equipment"] = []
-                item["weapons"] = []
-                item["orders"] = []
+                loadout_item["skills"] = []
+                loadout_item["equipment"] = []
+                loadout_item["weapons"] = []
+                loadout_item["orders"] = []
                 loadout_key = (
                     army["_occurrence_key"],
                     loadout["group_id"],
@@ -1603,8 +1642,8 @@ class Database:
                     )
                 ] = loadout_key
                 if loadout_key not in loadout_items:
-                    army["loadouts"].append(item)
-                    loadout_items[loadout_key] = item
+                    army["loadouts"].append(loadout_item)
+                    loadout_items[loadout_key] = loadout_item
             order_rows = connection.execute(
                 "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.order_type, "
                 "o.list_count, o.total_count "
@@ -1621,10 +1660,12 @@ class Database:
                         order["option_id"],
                     )
                 )
-                loadout = loadout_items.get(loadout_key) if loadout_key is not None else None
-                if loadout is not None:
+                loadout_item = (
+                    loadout_items.get(loadout_key) if loadout_key is not None else None
+                )
+                if loadout_item is not None:
                     order_type = order["order_type"]
-                    loadout["orders"].append(
+                    loadout_item["orders"].append(
                         {
                             "type": order_type.lower()
                             if isinstance(order_type, str)
@@ -1649,13 +1690,10 @@ class Database:
                     source_ids,
                 )
                 for extra in extra_rows:
-                    item = {
-                        "id": extra["extra_id"],
-                        "name": extra["name"],
-                    }
+                    extra_item = {"id": extra["extra_id"], "name": extra["name"]}
                     if property_name == "skills" and contains_distance_multiple(extra["name"]):
-                        item["is_distance"] = True
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(item)
+                        extra_item["is_distance"] = True
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
                 item_column = "o.item_id"
                 quantity_column = "o.quantity"
                 occurrence_source = f"FROM {occurrence_table} AS o"
@@ -1683,10 +1721,12 @@ class Database:
                             occurrence["option_id"],
                         )
                     )
-                    loadout = loadout_items.get(loadout_key) if loadout_key is not None else None
-                    if loadout is not None:
+                    loadout_item = (
+                        loadout_items.get(loadout_key) if loadout_key is not None else None
+                    )
+                    if loadout_item is not None:
                         append_unique_item(
-                            loadout[property_name],
+                            loadout_item[property_name],
                             {
                                 "id": occurrence["item_id"],
                                 "name": occurrence["name"],
