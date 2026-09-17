@@ -255,16 +255,18 @@ provenance contract.
 ### Current: army roles and logical-unit identity
 
 Army role/playability is derived in the backend from source relationships
-rather than numeric ID patterns or known identity constants. Metadata
-self-parent/child relationships identify main armies and sectorials. A
-self-parented metadata identity that parents an imported playable list but is
-not itself an imported army list is a grouping-only node; its children receive
-the `non_aligned` role. Current source data uses metadata identity `901` for the
-Non-Aligned Armies grouping node. Ordinary source documents identify their
-reinforcement list through the explicit `reinforcements` field. `/api/armies`
-exposes those roles, playability, grouping metadata, and reinforcement parents;
-the browser selector consumes that contract directly. Grouping-only identities
-are exposed as non-playable and cannot be used as selectable `army_id` values.
+rather than numeric ID patterns or known identity constants. Self-parented
+imported ordinary lists that parent other lists remain main armies. An ordinary
+imported list that itself parents ordinary lists but whose metadata parent is a
+different identity is a grouping node; metadata-only referenced parents can
+also be surfaced as grouping nodes. Their children receive the `non_aligned`
+role. Current source data uses imported list `901` for the Non-Aligned Armies
+grouping role even though `901` has a real source roster and metadata parent
+`900`. Ordinary source documents identify their reinforcement list through the
+explicit `reinforcements` field, and reinforcement lists do not participate in
+grouping-node discovery. `/api/armies` exposes role and playability separately
+from source-list existence; grouping identities are non-playable and cannot be
+used as selectable `army_id` values, while their source rows remain preserved.
 
 Mercenary source variants are classified during normalization from their
 source-semantic contract (`canonical == 1`, empty declared `factions`,
@@ -287,6 +289,13 @@ their original source unit. The exporter resolves configured unit aliases plus
 persisted generic and mercenary matches and the database-build reinforcement
 audit into frontend-only `logical_units` and `logical_unit_sources` tables.
 Every source-defined unit maps to exactly one logical unit.
+
+A later data-model refactor may materialize a canonical application payload per
+logical unit and represent army/loadout/source-specific information as explicit
+deltas. That work must be field-by-field and lossless: source IDs, raw rows,
+availability, army membership, and genuine profile/loadout differences remain
+provenance even if repeated invariant fields are promoted to the canonical
+logical-unit payload.
 
 The build-time resolver treats those inputs as identity evidence, combines their
 transitive connected components, selects one deterministic representative,
@@ -551,15 +560,17 @@ Returns `{ "items": [...] }`. Each item exposes `id`, `name`, `slug`,
 legacy source-shape `kind`, explicit `role`, `playable`, `group_id`,
 `group_name`, `group_slug`, `parent_army_ids`, and `unit_count`. Roles are
 derived from imported source relationships rather than Army-ID ranges or known
-identity constants. Self-parented metadata factions that are imported army lists
-are `main`; metadata children of imported playable parents are `sectorial`;
-children of a self-parented metadata identity that is not itself an imported
-army list are `non_aligned`; and lists referenced by ordinary source
-`reinforcements` links are `reinforcement`. Such metadata-only parent identities
-are surfaced as `grouping` items with `playable: false`. Current source data uses
-metadata identity `901` for the Non-Aligned Armies group, but runtime role
-classification does not special-case that ID. Unit counts use source-defined
-units in `army_units`.
+identity constants. Self-parented metadata factions that are imported ordinary
+army lists are `main`; metadata children of ordinary playable parents are
+`sectorial`; children of grouping nodes are `non_aligned`; and lists referenced
+by ordinary source `reinforcements` links are `reinforcement`. A referenced
+parent is a grouping node when it is absent as an imported ordinary list, or
+when it is an imported ordinary list whose own metadata parent is different from
+itself. Current source data uses imported list `901` for the Non-Aligned Armies
+group, with metadata parent `900` and its own source roster; runtime role
+classification does not special-case that ID. Grouping items expose
+`playable: false`, and unit counts still reflect preserved source-defined
+`army_units`.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 

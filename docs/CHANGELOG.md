@@ -110,10 +110,17 @@ All notable changes to this project are documented in this file.
   identities. Non-Aligned grouping identity `901` is surfaced as non-playable,
   direct unit filtering by it is rejected, and the browser army selector
   consumes the backend role contract.
-- Remove the runtime `901` Non-Aligned grouping special case. Grouping-only
-  identities are now derived structurally from self-parented metadata nodes that
-  parent imported playable lists but are not themselves imported army lists.
-  Current source data still uses `901`, while role classification is ID-agnostic.
+- Remove the runtime `901` Non-Aligned grouping special case. Role derivation is
+  now structural: self-parented imported parents remain main armies, while
+  ordinary imported parents that are not self-parented (and referenced
+  metadata-only parents) become grouping nodes. Current source list `901` has
+  metadata parent `900`, parents the NA2 child lists, retains its real source
+  roster, and is still exposed as non-playable without any numeric-ID special case.
+- Document the observed `901` roster shape separately from playability: one
+  standard Rumbler Spec-Ops source entry plus the complete 49-variant optional-
+  mercenary pool in the analyzed snapshot. Record a future design direction to
+  canonicalize invariant logical-unit data while preserving explicit army,
+  loadout, availability, and raw-source deltas.
 - Remove the legacy canonical-faction `1` -> `901` identity override now that
   mercenary logical pairing and army-occurrence availability are explicit.
   Canonical source ID `1` remains mercenary source/origin provenance with no

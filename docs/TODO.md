@@ -150,12 +150,20 @@ history retains implementation detail.
     prefix-stripped profile `display_name` alongside the untouched source `name`
     and normalized `profile_identity`, so browser code no longer carries a
     duplicate reinforcement-prefix regex.
-  - [x] Remove the direct `901` Non-Aligned grouping special case. Grouping-only
-    identities are now derived structurally from metadata: a self-parented
-    metadata identity that is referenced as the parent of an imported playable
-    army list but is not itself an imported army list is surfaced as a
-    non-playable grouping node. Current source data still uses ID `901` for the
-    Non-Aligned Armies group, but runtime classification no longer knows that ID.
+  - [x] Remove the direct `901` Non-Aligned grouping special case. Grouping
+    identities are derived structurally from ordinary imported-list hierarchy:
+    self-parented parents remain main armies, while imported parents that are
+    not self-parented (and referenced metadata-only parents) become non-playable
+    grouping nodes. Current source list `901` has metadata parent `900`, parents
+    the NA2 child lists, and retains a real source roster; runtime classification
+    does not know the numeric ID.
+  - [ ] Decide whether non-playable grouping source rosters such as `901` need a
+    dedicated provenance/inspection API separate from selectable `army_id`
+    filtering. Do not infer that `playable: false` means the source list is empty.
+  - [ ] Evaluate a canonical logical-unit payload/delta model. Audit fields for
+    invariance across each logical unit, promote only justified shared data, and
+    retain source IDs, raw provenance, army availability, and genuine
+    profile/loadout differences as explicit source or delta records.
   - [ ] Revisit unit-symbol semantic name tables during the dedicated symbol
     pipeline refactor; do not move those mappings into unrelated configuration
     in this branch.

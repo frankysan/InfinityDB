@@ -643,30 +643,39 @@ class Database:
                 if metadata_id not in canonical_metadata or metadata_row["id"] == metadata_id:
                     canonical_metadata[metadata_id] = metadata_row
 
-            grouping_ids: set[int] = set()
-            for army in armies.values():
-                if army["id"] in reinforcement_parents:
-                    continue
+            ordinary_army_ids = {
+                army_id
+                for army_id, army in armies.items()
+                if army_id not in reinforcement_parents and army["kind"] != "reinforcement"
+            }
+            parent_ids: set[int] = set()
+            for army_id in ordinary_army_ids:
+                army = armies[army_id]
                 source_army_id = army["source_army_id"]
-                metadata_row = metadata.get(source_army_id) or metadata.get(army["id"])
+                metadata_row = metadata.get(source_army_id) or metadata.get(army_id)
                 parent_id = metadata_row.get("parent") if metadata_row is not None else None
                 if not isinstance(parent_id, int):
                     continue
                 canonical_parent_id = identity_config.canonical_army_id(parent_id)
-                parent_metadata = canonical_metadata.get(canonical_parent_id)
-                parent_parent_id = (
-                    parent_metadata.get("parent") if parent_metadata is not None else None
-                )
-                canonical_parent_parent_id = (
-                    identity_config.canonical_army_id(parent_parent_id)
-                    if isinstance(parent_parent_id, int)
+                if canonical_parent_id != army_id:
+                    parent_ids.add(canonical_parent_id)
+
+            grouping_ids: set[int] = set()
+            for candidate_id in parent_ids:
+                candidate_metadata = canonical_metadata.get(candidate_id)
+                if candidate_metadata is None:
+                    continue
+                if candidate_id not in ordinary_army_ids:
+                    grouping_ids.add(candidate_id)
+                    continue
+                candidate_parent_id = candidate_metadata.get("parent")
+                canonical_candidate_parent_id = (
+                    identity_config.canonical_army_id(candidate_parent_id)
+                    if isinstance(candidate_parent_id, int)
                     else None
                 )
-                if (
-                    canonical_parent_id not in armies
-                    and canonical_parent_parent_id == canonical_parent_id
-                ):
-                    grouping_ids.add(canonical_parent_id)
+                if canonical_candidate_parent_id != candidate_id:
+                    grouping_ids.add(candidate_id)
 
             for army in armies.values():
                 army_id = army["id"]
@@ -683,6 +692,10 @@ class Database:
                 if parent_army_ids:
                     role = ARMY_ROLE_REINFORCEMENT
                     playable = True
+                    group_id = None
+                elif army_id in grouping_ids:
+                    role = ARMY_ROLE_GROUPING
+                    playable = False
                     group_id = None
                 elif canonical_parent_id == army_id:
                     role = ARMY_ROLE_MAIN
