@@ -70,9 +70,12 @@ raw Army JSON
 An `army_lists` record represents an Army source/list identity. Its presence does
 not by itself prove that the identity is independently playable.
 
-Faction 901, Non-Aligned Armies, is a known grouping identity for the associated
-9xx armies rather than a playable army of its own. Its child armies remain
-distinct force/list identities.
+Current source metadata identity `901`, Non-Aligned Armies, is a grouping identity
+for its associated child armies rather than a playable army of its own. Runtime
+classification does not depend on the number `901`: grouping-only identities are
+derived as self-parented metadata parents that are referenced by imported
+playable army lists but are not themselves imported army lists. Their child
+armies remain distinct force/list identities.
 
 The merger's current `army_lists.kind` value is derived rather than supplied as
 a source taxonomy: a source document with a top-level `reinforcements` field is
@@ -82,12 +85,14 @@ reinforcement-file shape, but does not distinguish main armies, sectorials, or
 Non-Aligned forces.
 
 Army metadata provides a separate faction hierarchy. Standard main armies are
-self-parented metadata factions, while their sectorials point to that main-army
-parent. Non-Aligned army lists such as the 9xx forces point to metadata grouping
-identity 901. Reinforcement lists are also explicitly referenced from their
-ordinary army/sectorial source documents through the top-level
-`reinforcements` relationship. These relationships are source evidence and are
-stronger than numeric-ID conventions.
+self-parented metadata factions that also exist as imported army lists, while
+their sectorials point to that playable main-army parent. A self-parented
+metadata parent that is referenced by imported playable lists but is not itself
+an imported army list is a grouping-only identity; current Non-Aligned army
+lists use metadata grouping identity `901` in that role. Reinforcement lists are
+also explicitly referenced from their ordinary army/sectorial source documents
+through the top-level `reinforcements` relationship. These relationships are
+source evidence and are stronger than numeric-ID conventions.
 
 Source canonical-faction ID `1` is materially different from 901. In the
 investigated source snapshot, ID `1` has no army list, is used as the canonical
@@ -158,7 +163,8 @@ numeric ID patterns.
 Source ID `1` and grouping identity `901` are now kept distinct in current
 normalization. ID `1` remains source-side mercenary identity/provenance with no
 application `main_army_id`, while Non-Aligned Army grouping is derived from the
-actual 901 metadata hierarchy.
+metadata hierarchy generically; current source data happens to use metadata
+identity `901` for that grouping node.
 
 Logical-unit identity is now materialized during frontend SQLite creation while
 normalized/source records remain unchanged for provenance. The frontend relation

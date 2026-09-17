@@ -279,6 +279,46 @@ def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Pat
         Database(path).list_units(army_id=901)
 
 
+def test_grouping_role_is_derived_from_metadata_without_known_group_id(tmp_path: Path) -> None:
+    source = metadata_source()
+    source["factions"].extend(
+        [
+            {
+                "id": 7700,
+                "parent": 7700,
+                "name": "Metadata Group",
+                "slug": "metadata-group",
+            },
+            {
+                "id": 7701,
+                "parent": 7700,
+                "name": "Grouped Army",
+                "slug": "grouped-army",
+            },
+        ]
+    )
+    document = master(decode_metadata(json.dumps(source).encode(), "metadata.json"))
+    document["armyLists"]["7701"] = {
+        "_meta": {"slug": "grouped-army", "kind": "army"},
+        "unitIds": [1],
+    }
+    document["units"]["1"]["byArmy"]["7701"] = {}
+
+    normalized = normalize_master(document)
+    path = tmp_path / "infinity.db"
+    export_database(normalized, path)
+    database = Database(path)
+    armies = {army["id"]: army for army in database.list_armies()}
+
+    assert armies[7701]["role"] == "non_aligned"
+    assert armies[7701]["group_id"] == 7700
+    assert armies[7701]["group_name"] == "Metadata Group"
+    assert armies[7700]["role"] == "grouping"
+    assert armies[7700]["playable"] is False
+    with pytest.raises(ValueError, match="grouping-only identity"):
+        database.list_units(army_id=7700)
+
+
 def test_unit_details_use_metadata_parent_for_faction_group(tmp_path: Path) -> None:
     source = metadata_source()
     source["factions"].append(

@@ -110,6 +110,10 @@ All notable changes to this project are documented in this file.
   identities. Non-Aligned grouping identity `901` is surfaced as non-playable,
   direct unit filtering by it is rejected, and the browser army selector
   consumes the backend role contract.
+- Remove the runtime `901` Non-Aligned grouping special case. Grouping-only
+  identities are now derived structurally from self-parented metadata nodes that
+  parent imported playable lists but are not themselves imported army lists.
+  Current source data still uses `901`, while role classification is ID-agnostic.
 - Remove the legacy canonical-faction `1` -> `901` identity override now that
   mercenary logical pairing and army-occurrence availability are explicit.
   Canonical source ID `1` remains mercenary source/origin provenance with no

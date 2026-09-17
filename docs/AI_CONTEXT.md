@@ -374,8 +374,9 @@ changes.
   rule-derived sign-display behavior for Super-Jump and Forward Deployment.
   Reinforcement prefix normalization is now pinned in the identity config and
   unit-detail profile display names are backend-derived. Remaining audit targets
-  are the direct 901 grouping special case and symbol-semantic name tables
-  reserved for the symbol-pipeline refactor.
+  are now limited to symbol-semantic name tables reserved for the symbol-pipeline
+  refactor; the former direct `901` grouping special case is derived from the
+  metadata/playable-list hierarchy instead.
 - 2026-09-17: Special weapon game-rule facts moved out of
   `infinity_army_data.weapon_profiles`. The Armed Turret special profile is a
   cited curated `weapon` record linked to Army weapon ID 226; repository reads
@@ -409,6 +410,10 @@ changes.
   Non-Aligned forces; explicit ordinary-list `reinforcements` links classify
   reinforcement relationships. Grouping identity 901 is exposed as
   non-playable and browser selectors no longer infer roles from Army-ID ranges.
+- 2026-09-17: Army grouping-only identities are derived structurally rather than
+  by recognizing ID `901`: a self-parented metadata identity that parents an
+  imported playable list but is not itself an imported army list becomes a
+  non-playable grouping node. Current source data still uses `901` for NA2.
 - 2026-09-17: Mercenary source identity and Non-Aligned Army grouping are
   separate. ID `1` is retained as mercenary source provenance; 901 groups NA2
   army lists. Dedicated mercenary variants are identified by source semantics,

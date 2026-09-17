@@ -255,14 +255,16 @@ provenance contract.
 ### Current: army roles and logical-unit identity
 
 Army role/playability is derived in the backend from source relationships
-rather than numeric ID patterns. Metadata self-parent/child relationships
-identify main armies and sectorials, metadata parent `901` groups the distinct
-Non-Aligned army lists, and ordinary source documents identify their
+rather than numeric ID patterns or known identity constants. Metadata
+self-parent/child relationships identify main armies and sectorials. A
+self-parented metadata identity that parents an imported playable list but is
+not itself an imported army list is a grouping-only node; its children receive
+the `non_aligned` role. Current source data uses metadata identity `901` for the
+Non-Aligned Armies grouping node. Ordinary source documents identify their
 reinforcement list through the explicit `reinforcements` field. `/api/armies`
 exposes those roles, playability, grouping metadata, and reinforcement parents;
-the browser selector consumes that contract directly. Grouping-only identity
-`901` is exposed as non-playable and cannot be used as a selectable
-`army_id`.
+the browser selector consumes that contract directly. Grouping-only identities
+are exposed as non-playable and cannot be used as selectable `army_id` values.
 
 Mercenary source variants are classified during normalization from their
 source-semantic contract (`canonical == 1`, empty declared `factions`,
@@ -548,13 +550,16 @@ it to detect application or imported-snapshot changes.
 Returns `{ "items": [...] }`. Each item exposes `id`, `name`, `slug`,
 legacy source-shape `kind`, explicit `role`, `playable`, `group_id`,
 `group_name`, `group_slug`, `parent_army_ids`, and `unit_count`. Roles are
-derived from imported source relationships rather than Army-ID ranges:
-self-parented metadata factions are `main`, metadata children are `sectorial`,
-children of metadata identity `901` are `non_aligned`, and lists referenced by
-ordinary source `reinforcements` links are `reinforcement`. When imported
-Non-Aligned children exist, metadata identity `901` is also surfaced as a
-`grouping` item with `playable: false`; it is never a selectable army. Unit
-counts use source-defined units in `army_units`.
+derived from imported source relationships rather than Army-ID ranges or known
+identity constants. Self-parented metadata factions that are imported army lists
+are `main`; metadata children of imported playable parents are `sectorial`;
+children of a self-parented metadata identity that is not itself an imported
+army list are `non_aligned`; and lists referenced by ordinary source
+`reinforcements` links are `reinforcement`. Such metadata-only parent identities
+are surfaced as `grouping` items with `playable: false`. Current source data uses
+metadata identity `901` for the Non-Aligned Armies group, but runtime role
+classification does not special-case that ID. Unit counts use source-defined
+units in `army_units`.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 

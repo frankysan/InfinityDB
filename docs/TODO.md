@@ -150,9 +150,12 @@ history retains implementation detail.
     prefix-stripped profile `display_name` alongside the untouched source `name`
     and normalized `profile_identity`, so browser code no longer carries a
     duplicate reinforcement-prefix regex.
-  - [ ] Remove the remaining direct `901` Non-Aligned grouping special case if
-    grouping-only identities can be derived completely from metadata hierarchy
-    plus playable source army lists.
+  - [x] Remove the direct `901` Non-Aligned grouping special case. Grouping-only
+    identities are now derived structurally from metadata: a self-parented
+    metadata identity that is referenced as the parent of an imported playable
+    army list but is not itself an imported army list is surfaced as a
+    non-playable grouping node. Current source data still uses ID `901` for the
+    Non-Aligned Armies group, but runtime classification no longer knows that ID.
   - [ ] Revisit unit-symbol semantic name tables during the dedicated symbol
     pipeline refactor; do not move those mappings into unrelated configuration
     in this branch.
