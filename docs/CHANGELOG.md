@@ -45,6 +45,9 @@ All notable changes to this project are documented in this file.
   and faction grouping, names, and slugs from Army metadata parent relationships,
   exposing the derived faction metadata through unit API records so browser code
   no longer interprets Army ID suffixes or maintains faction lookup tables.
+- Expose backend-derived trait references alongside raw metadata trait labels,
+  including canonical trait names and catalog slugs, so catalog-detail browser
+  code no longer duplicates trait aliases, misspellings, or slug generation.
 - Increase the Army database compatibility revision to 10; existing databases
   must be rebuilt so they contain the required identity policy metadata.
 

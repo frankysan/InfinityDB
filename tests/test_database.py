@@ -351,6 +351,13 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
             "saving_num": "1",
             "profile": "ARM=0, BTS=0, STR=1, S=1",
             "traits": ["Suppressive Fire"],
+            "trait_references": [
+                {
+                    "label": "Suppressive Fire",
+                    "name": "Suppressive Fire (SF)",
+                    "slug": "suppressive-fire",
+                }
+            ],
             "ranges": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
         }
     ]
@@ -376,6 +383,54 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
     assert trait["name"] == "Suppressive Fire (SF)"
     assert trait["variants"][0]["catalog"] == "weapons"
     assert trait["variants"][0]["item_name"] == "weapons"
+
+
+def test_weapon_profile_trait_references_use_backend_canonical_identity(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": [
+                "Continous Damage",
+                "Disposable (2)",
+                "[PH=10]",
+            ],
+        }
+    ]
+    path = tmp_path / "army.sqlite3"
+    export_database(data, path)
+
+    detail = Database(path).get_catalog_item("weapons", 1)
+
+    assert detail is not None
+    profile = detail["profiles"][0]
+    assert profile["traits"] == [
+        "Continous Damage",
+        "Disposable (2)",
+        "[PH=10]",
+    ]
+    assert profile["trait_references"] == [
+        {
+            "label": "Continous Damage",
+            "name": "Continuous Damage",
+            "slug": "continuous-damage",
+        },
+        {
+            "label": "Disposable (2)",
+            "name": "Disposable (X)",
+            "slug": "disposable-x",
+        },
+        {
+            "label": "[PH=10]",
+            "name": None,
+            "slug": None,
+        },
+    ]
 
 
 def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(

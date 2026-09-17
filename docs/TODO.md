@@ -104,9 +104,9 @@ reference. Git history retains implementation detail.
 - [ ] Move trait rules-reference knowledge into curated data.
   - Migrate concise trait descriptions, canonical identities, aliases,
     misspellings, and citations from `traits.py`.
-  - Remove the duplicate trait-canonicalization table from
-    `catalog-detail.js`; API responses should expose canonical trait identity,
-    name, and slug.
+  - [x] Remove the duplicate trait-canonicalization table from
+    `catalog-detail.js`; API responses expose canonical trait identity, name,
+    and slug while preserving the raw source trait label.
 - [ ] Add `config/symbols/font-aliases.json`.
   - Move Infinity-asset-specific legacy/exported font-reference overrides out
     of `svg_processor.py`.
