@@ -32,7 +32,6 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     assert config.canonical_catalog_id("equipment", 248) == 235
     assert config.canonical_catalog_id("weapons", 228) == 226
     assert config.catalog_source_ids("skills", 20) == (19, 20, 21, 22, 23)
-    assert config.canonical_faction_overrides[1] == 901
     assert config.word_aliases["reconaissance"] == "recon"
     assert "intervention" in config.profile_identity_ignored_words
 

@@ -29,7 +29,6 @@ class IdentityConfig:
     unit_aliases: Mapping[int, int]
     army_aliases: Mapping[int, int]
     catalog_aliases: Mapping[str, Mapping[int, int]]
-    canonical_faction_overrides: Mapping[int, int]
     word_aliases: Mapping[str, str]
     profile_identity_ignored_words: frozenset[str]
 
@@ -162,7 +161,6 @@ def parse_identity_config(document: Any) -> IdentityConfig:
             "units",
             "armies",
             "catalogs",
-            "canonical_faction_overrides",
             "name_normalization",
             "profile_identity",
         },
@@ -190,24 +188,6 @@ def parse_identity_config(document: Any) -> IdentityConfig:
             for catalog in CATALOG_NAMES
         }
     )
-
-    raw_faction_overrides = _object(
-        root.get("canonical_faction_overrides"),
-        "identity config.canonical_faction_overrides",
-    )
-    faction_overrides: dict[int, int] = {}
-    for source_text, target in raw_faction_overrides.items():
-        if not isinstance(source_text, str) or not source_text.isdecimal():
-            raise IdentityConfigError(
-                "identity config.canonical_faction_overrides keys must be positive integer strings"
-            )
-        source_id = _positive_int(
-            int(source_text), f"identity config.canonical_faction_overrides.{source_text}"
-        )
-        target_id = _positive_int(
-            target, f"identity config.canonical_faction_overrides.{source_text}"
-        )
-        faction_overrides[source_id] = target_id
 
     name_normalization = _object(
         root.get("name_normalization"), "identity config.name_normalization"
@@ -247,7 +227,6 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         unit_aliases=unit_aliases,
         army_aliases=army_aliases,
         catalog_aliases=catalog_aliases,
-        canonical_faction_overrides=MappingProxyType(faction_overrides),
         word_aliases=word_aliases,
         profile_identity_ignored_words=frozenset(parsed_ignored_words),
     )

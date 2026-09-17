@@ -63,9 +63,6 @@
       ]
     }
   },
-  "canonical_faction_overrides": {
-    "1": 901
-  },
   "name_normalization": {
     "word_aliases": {
       "armoured": "armored",
