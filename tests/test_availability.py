@@ -34,6 +34,7 @@ def test_canonical_mercenary_source_with_declared_factions_is_standard() -> None
         {
             "id": 51,
             "canonical_faction_id": 1,
+            "main_army_id": 901,
             "slug": "miranda-ashcroft",
             "source_defined": True,
         },
@@ -44,6 +45,7 @@ def test_canonical_mercenary_source_with_declared_factions_is_standard() -> None
     annotate_availability_semantics(data)
 
     assert data["tables"]["units"][0]["source_role"] == "standard"
+    assert data["tables"]["units"][0]["main_army_id"] is None
     assert data["tables"]["army_units"][0]["availability_kind"] == "standard"
 
 
@@ -52,6 +54,7 @@ def test_mercenary_variant_uses_source_markers_not_unit_id_pattern() -> None:
         {
             "id": 50_123,
             "canonical_faction_id": 1,
+            "main_army_id": 901,
             "slug": "merc-example-authorized",
             "source_defined": True,
         },
@@ -61,6 +64,7 @@ def test_mercenary_variant_uses_source_markers_not_unit_id_pattern() -> None:
     annotate_availability_semantics(data)
 
     assert data["tables"]["units"][0]["source_role"] == "mercenary_variant"
+    assert data["tables"]["units"][0]["main_army_id"] is None
     assert data["tables"]["army_units"][0]["availability_kind"] == "mercenary"
 
 

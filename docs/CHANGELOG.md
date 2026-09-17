@@ -35,6 +35,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Remove the legacy canonical-faction `1` -> `901` identity override now that
+  mercenary logical pairing and army-occurrence availability are explicit.
+  Canonical source ID `1` remains mercenary source/origin provenance with no
+  application `main_army_id`; `901` remains the separate Non-Aligned Armies
+  grouping identity. The Army database compatibility revision is now 12, so
+  existing generated databases must be rebuilt.
 - Make repository mercenary filtering consume explicit
   `army_units.availability_kind` provenance. Current normalized snapshots no
   longer use canonical faction `1` plus faction membership to decide whether an
@@ -47,8 +53,8 @@ All notable changes to this project are documented in this file.
   without this metadata retain the legacy grouping fallback.
 - Make `units.source_role` and `army_units.availability_kind` explicit frontend
   SQLite schema fields instead of incidental dynamic columns. The Army database
-  schema is now version 9 and the compatibility revision is 11; existing
-  generated Army databases must be rebuilt.
+  schema is version 9; the cumulative compatibility revision is now 12 and
+  existing generated Army databases must be rebuilt.
 - Document `tools/run_checks.py` as the standard local/agent check entry point,
   with its detailed stage, target, reporting, and exit-code contract in
   `docs/testing.md`.
@@ -73,8 +79,7 @@ All notable changes to this project are documented in this file.
   downloader/packager and curated provenance contract are migrated together.
 - Document the source-data finding that canonical-faction ID `1` represents a
   mercenary source/origin concept distinct from Non-Aligned Armies grouping ID
-  `901`. The existing `1` -> `901` ownership override remains current behavior
-  for now, but is explicitly a migration target rather than a domain invariant.
+  `901`; the former ownership override has since been removed in Unreleased.
 - Document the accepted direction to classify optional mercenary source variants
   during normalization, validate their source-semantic markers, and move
   unambiguous logical-unit deduplication into normalization/database creation
@@ -104,12 +109,10 @@ All notable changes to this project are documented in this file.
 - Expose backend-derived trait references alongside raw metadata trait labels,
   including canonical trait names and catalog slugs, so catalog-detail browser
   code no longer duplicates trait aliases, misspellings, or slug generation.
-- Document the distinction between canonical ownership and army playability:
-  legacy canonical-faction ID `1` maps to Non-Aligned Armies `901` through the
-  identity configuration in the current implementation, while 901 itself is a
-  grouping identity whose explicit non-playable role still needs backend/API
-  modeling. Later source investigation supersedes the assumption that IDs `1`
-  and `901` are semantically equivalent.
+- Document the distinction between canonical source identity and army
+  playability. Source ID `1` and Non-Aligned Armies grouping ID `901` are
+  semantically distinct; 901's explicit non-playable role still needs complete
+  backend/API modeling.
 - Consolidate the standalone Army/symbol pipeline plan into the maintained
   backlog and durable AI context, preserving its pinned-snapshot, complete SVG
   discovery, reference/asset identity, override/cache/network resolution,
