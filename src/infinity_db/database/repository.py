@@ -91,7 +91,7 @@ WEAPON_PROFILE_PLACEHOLDERS = frozenset(
         (226, "Armed Turret", "PARA CC Weapon"),
     }
 )
-REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
+
 NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
 DISTANCE_DIVISOR = Decimal("2.5")
 NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
@@ -118,10 +118,6 @@ def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityC
             "Database has invalid identity configuration metadata; rebuild the database"
         ) from exc
 
-
-def is_reinforcement_army_id(army_id: int) -> bool:
-    """Return whether an army ID denotes a reinforcement-only army."""
-    return army_id % 100 in REINFORCEMENT_ARMY_SUFFIXES
 
 
 def canonical_skill_id(
@@ -321,7 +317,7 @@ def logical_unit_groups(
     for row in rows:
         armies = memberships[row["id"]]
         reinforcement_only = bool(armies) and all(
-            is_reinforcement_army_id(army["id"]) for army in armies
+            army.get("kind") == "reinforcement" for army in armies
         )
         base_identity = unit_base_identity(row, identity_config)
         key = (
@@ -437,7 +433,7 @@ def army_required_flags(
     normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
     if faction_id == 1 and army["id"] not in normal_armies:
         required.add("mercs")
-    if is_reinforcement_army_id(army["id"]):
+    if army.get("kind") == "reinforcement":
         required.add("reinforcement")
     filters = army.get("filters")
     if isinstance(filters, dict):
@@ -569,7 +565,8 @@ class Database:
                 for row in connection.execute("SELECT id, name, slug FROM army_lists")
             }
             for army in connection.execute(
-                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
+                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug, a.kind "
+                "FROM army_units AS au "
                 "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
             ):
                 if army["unit_id"] not in memberships:
@@ -579,7 +576,12 @@ class Database:
                 except (TypeError, json.JSONDecodeError):
                     filters = {}
                 memberships[army["unit_id"]].append(
-                    {"id": army["id"], "name": army_name(army), "filters": filters}
+                    {
+                        "id": army["id"],
+                        "name": army_name(army),
+                        "kind": army["kind"],
+                        "filters": filters,
+                    }
                 )
             normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in rows}
             for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):

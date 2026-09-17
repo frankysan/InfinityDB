@@ -182,6 +182,7 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert armies[101]["slug"] == "zulu_company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
+    assert armies[198]["kind"] == "reinforcement"
     assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
 
 
@@ -759,11 +760,16 @@ def test_unit_list_renders_all_toggle_visible_armies(app: Callable) -> None:
     assert b"return [...armies].sort" in body
 
 
-def test_unit_details_recognizes_98_and_99_as_reinforcement_armies(app: Callable) -> None:
+def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
 
     assert status == 200
-    assert b"[98, 99]" in body
+    assert b"[98, 99]" not in body
+    assert b"function isReinforcementArmy(" not in body
+    assert (
+        b'reinforcement: (army.availability_flags || []).includes("reinforcement"),'
+        in body
+    )
 
 
 def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:

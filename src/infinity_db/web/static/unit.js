@@ -156,9 +156,6 @@ const statColumns = [
   ["W", (profile) => profile.vitality], ["S", (profile) => profile.silhouette],
 ];
 
-function isReinforcementArmy(armyId) {
-  return [98, 99].includes(Number(armyId) % 100);
-}
 const statProperties = {
   CC: "cc", BS: "bs", PH: "ph", WIP: "wip", ARM: "arm", BTS: "bts",
   W: "vitality", S: "silhouette",
@@ -369,7 +366,7 @@ function generalProfiles(profiles, loadouts) {
       type: mostCommon(matchingProfiles, "type"),
       classification: mostCommon(matchingProfiles, "classification"),
       occurrenceCount: matchingProfiles.length,
-      reinforcement: matchingProfiles.every((profile) => isReinforcementArmy(profile.armyId)),
+      reinforcement: matchingProfiles.every((profile) => profile.reinforcement),
       sharedItems: {
         skills: generalProfileSkills(matchingProfiles, matchingLoadouts),
         equipment: commonProfileItems(matchingProfiles, "equipment"),
@@ -659,9 +656,7 @@ function availabilityBadges(flags = []) {
 
 function isStandardArmy(army) {
   const flags = army.availability_flags || [];
-  return !flags.includes("mercs")
-    && !flags.includes("reinforcement")
-    && !isReinforcementArmy(army.id);
+  return !flags.includes("mercs") && !flags.includes("reinforcement");
 }
 
 function isEnabledArmy(army) {
@@ -746,7 +741,9 @@ function render(unit) {
   status.hidden = true;
   const armies = unit.armies.filter(isEnabledArmy);
   const allProfiles = armies.flatMap((army) => army.profiles.map((profile) => ({
-    ...profile, armyId: army.id,
+    ...profile,
+    armyId: army.id,
+    reinforcement: (army.availability_flags || []).includes("reinforcement"),
   })));
   const allLoadouts = armies.flatMap((army) => army.loadouts.map((loadout) => ({
     ...loadout, armyId: army.id,
