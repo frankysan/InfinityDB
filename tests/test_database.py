@@ -15,7 +15,6 @@ from infinity_db.database import Database, export_database, raw_database_path
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
 from infinity_db.database.repository import (
     army_required_flags,
-    canonical_skill_extra_name,
     canonical_skill_id,
     catalog_merge_key,
     merged_catalog_name,
@@ -637,10 +636,10 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
 def test_list_skill_extras_returns_distinct_sorted_pairs(tmp_path: Path, normalized: dict) -> None:
     normalized["tables"]["extras"].extend(
         [
-            {"id": 2, "name": "+5", "source_defined": True},
-            {"id": 3, "name": "PS=5", "source_defined": True},
-            {"id": 4, "name": "+5 CC", "source_defined": True},
-            {"id": 5, "name": "-5", "source_defined": True},
+            {"id": 2, "name": "+5", "type": "DISTANCE", "source_defined": True},
+            {"id": 3, "name": "PS=5", "type": "TEXT", "source_defined": True},
+            {"id": 4, "name": "+5 CC", "type": "TEXT", "source_defined": True},
+            {"id": 5, "name": "-5", "type": "DISTANCE", "source_defined": True},
         ]
     )
     profile_extra = normalized["tables"]["profile_skill_extras"][0]
@@ -693,13 +692,6 @@ def test_list_skill_extras_returns_distinct_sorted_pairs(tmp_path: Path, normali
             "units": [{"id": 1, "name": "Álpha"}],
         },
     ]
-
-
-def test_skill_extra_grouping_uses_skill_specific_sign_conventions() -> None:
-    assert canonical_skill_extra_name("Super-Jump", "+7.5") == "7.5"
-    assert canonical_skill_extra_name("Forward Deployment", "20") == "+20"
-    assert canonical_skill_extra_name("Dodge", "+5") == "+5"
-    assert canonical_skill_extra_name("Dodge", "-5") == "-5"
 
 
 @pytest.mark.parametrize(
@@ -835,7 +827,9 @@ def test_catalog_details_omit_variants_without_visible_units(
 
 
 def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:
-    normalized["tables"]["extras"].append({"id": 2, "name": "+5", "source_defined": True})
+    normalized["tables"]["extras"].append(
+        {"id": 2, "name": "+5", "type": "DISTANCE", "source_defined": True}
+    )
     normalized["tables"]["profile_skill_extras"][0]["extra_id"] = 2
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
@@ -850,6 +844,22 @@ def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dic
         }
     ]
 
+
+def test_unit_details_do_not_infer_distance_from_text_extras(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["extras"].append(
+        {"id": 2, "name": "+5 CC", "type": "TEXT", "source_defined": True}
+    )
+    normalized["tables"]["profile_skill_extras"][0]["extra_id"] = 2
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    assert details["armies"][0]["profiles"][0]["skills"][0]["extras"] == [
+        {"id": 2, "name": "+5 CC"}
+    ]
 
 def test_main_army_prefers_metadata_parent_and_keeps_legacy_fallback(normalized: dict) -> None:
     beta = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 2)
@@ -1539,6 +1549,66 @@ def test_skill_catalog_uses_curated_declaration_categories(
         {"name": "Unclassified", "source": None, "page": None}
     ]
 
+
+def test_skill_catalog_adds_curated_distance_parameter_semantics(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 74, "name": "Super-Jump", "source_defined": True}
+    )
+    normalized["tables"]["extras"][0].update(
+        {"name": "+5", "type": "DISTANCE"}
+    )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = 74
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    database = Database(database_path)
+    catalog = SkillCatalog(database, RulesDatabase(rules_path))
+
+    detail = catalog.get_skill(74)
+    assert detail is not None
+    assert detail["parameter_semantics"] == {
+        "kind": "distance",
+        "positive_sign": "omit",
+    }
+
+    extra = next(item for item in catalog.list_skill_extras() if item["skill_id"] == 74)
+    assert extra["is_distance"] is True
+    assert extra["parameter_semantics"] == {
+        "kind": "distance",
+        "positive_sign": "omit",
+    }
+
+    raw_unit = database.get_unit(1)
+    assert raw_unit is not None
+    raw_skill = raw_unit["armies"][0]["profiles"][0]["skills"][0]
+    assert "parameter_semantics" not in raw_skill
+    enriched_unit = catalog.enrich_unit(raw_unit)
+    skill = enriched_unit["armies"][0]["profiles"][0]["skills"][0]
+    assert skill["parameter_semantics"] == {
+        "kind": "distance",
+        "positive_sign": "omit",
+    }
+
+
+def test_skill_catalog_without_rules_keeps_source_distance_typing(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["extras"][0].update(
+        {"name": "+5", "type": "DISTANCE"}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    catalog = SkillCatalog(Database(database_path), None)
+
+    extra = catalog.list_skill_extras()[0]
+    assert extra["is_distance"] is True
+    assert "parameter_semantics" not in extra
 
 def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
     tmp_path: Path, normalized: dict

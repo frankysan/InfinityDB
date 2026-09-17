@@ -451,7 +451,7 @@ class Application:
         elif path == "/api/skill-extras":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = {"items": self.database.list_skill_extras()}
+                payload = {"items": self.skill_catalog.list_skill_extras()}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -572,6 +572,8 @@ class Application:
                 if unit_id > 2**63 - 1:
                     raise ValueError("unit_id must be between 0 and 9223372036854775807")
                 payload = self.database.get_unit(unit_id)
+                if payload is not None:
+                    payload = self.skill_catalog.enrich_unit(payload)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

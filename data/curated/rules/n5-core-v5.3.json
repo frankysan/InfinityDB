@@ -263,6 +263,24 @@
             "snapshotDate": "2026-09-17",
             "url": "https://infinitythewiki.com/index.php?title=Armed_Turret&oldid=3919",
             "authority": "secondary"
+        },
+        {
+            "id": "wiki-super-jump-oldid-4075",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Super-Jump revision 4075",
+            "version": "N5.3 / oldid 4075",
+            "snapshotDate": "2026-09-17",
+            "url": "https://infinitythewiki.com/index.php?title=Super-Jump&oldid=4075",
+            "authority": "secondary"
+        },
+        {
+            "id": "wiki-forward-deployment-oldid-3076",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Forward Deployment revision 3076",
+            "version": "N5.3 / oldid 3076",
+            "snapshotDate": "2026-09-17",
+            "url": "https://infinitythewiki.com/index.php?title=Forward_Deployment&oldid=3076",
+            "authority": "secondary"
         }
     ],
     "records": [
@@ -403,6 +421,90 @@
             "review": {
                 "status": "draft",
                 "reviewedOn": "2026-09-15"
+            }
+        },
+        {
+            "id": "skill:super-jump",
+            "kind": "skill",
+            "name": "Super-Jump",
+            "labelIds": [
+                "movement",
+                "optional"
+            ],
+            "summary": "A Special Skill that modifies Jump and can add a listed Unit Profile distance to a Jump.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "parameterSemantics": {
+                    "kind": "distance",
+                    "positiveSign": "omit"
+                }
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 74
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-super-jump-oldid-4075",
+                    "path": "index.php?title=Super-Jump&oldid=4075",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Super-Jump"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill:forward-deployment",
+            "kind": "skill",
+            "name": "Forward Deployment",
+            "labelIds": [
+                "superior-deployment",
+                "optional"
+            ],
+            "summary": "A Deployment Skill that allows deployment beyond the Deployment Zone by the distance listed in the Unit Profile.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "deployment-skill",
+                "parameterSemantics": {
+                    "kind": "distance",
+                    "positiveSign": "force"
+                }
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 161
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-forward-deployment-oldid-3076",
+                    "path": "index.php?title=Forward_Deployment&oldid=3076",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Forward Deployment"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
             }
         },
         {

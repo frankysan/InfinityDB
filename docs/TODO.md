@@ -138,10 +138,13 @@ history retains implementation detail.
     into `config/catalogs/weapon-overrides.json`. Normalization applies the exact
     source-row matchers before metadata rows are materialized, while the original
     Army metadata envelope remains preserved for provenance.
-  - [ ] Replace the `+5 CC` distance-detection exception and the special sign
-    handling for `Super-Jump` / `Forward Deployment` with explicit curated skill
-    parameter semantics. The same skill-name knowledge is currently duplicated
-    between repository and browser code.
+  - [x] Make skill-extra distance typing source-driven and move display-only
+    sign conventions into curated skill parameter semantics. Army `extras.type`
+    now decides whether an extra is a distance (`DISTANCE` versus `TEXT`), so
+    numeric text such as `+5 CC` needs no exception. Curated `Super-Jump` and
+    `Forward Deployment` records carry the remaining positive-sign display
+    semantics, and browser code consumes the API contract without skill-name
+    branches.
   - [ ] Move reinforcement-prefix normalization (`REINF` / `REFUERZOS`) into the
     maintained identity policy and remove the browser-side duplicate if backend
     display/profile identity can make it unnecessary.

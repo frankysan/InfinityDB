@@ -12,7 +12,6 @@ from collections import OrderedDict
 from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from datetime import date
-from decimal import Decimal, InvalidOperation
 from functools import wraps
 from pathlib import Path
 from typing import Any, Protocol
@@ -94,10 +93,6 @@ def instance_lru_cache(maxsize: int) -> Callable:
 
     return decorator
 
-
-NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
-DISTANCE_DIVISOR = Decimal("2.5")
-NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
 
 def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityConfig:
     """Load and validate the identity policy pinned into a database snapshot."""
@@ -191,33 +186,6 @@ def accent_insensitive_key(value: object) -> str:
     """Return text suitable for case-, accent-, and punctuation-insensitive matching."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
     return "".join(character for character in decomposed if character.isalnum())
-
-def contains_distance_multiple(value: object) -> bool:
-    """Whether text has no assignment and contains a number divisible by 2.5."""
-    text = str(value or "")
-    if "=" in text or text.upper() in NON_DISTANCE_EXTRAS:
-        return False
-    for number in NUMBER_PATTERN.findall(text):
-        try:
-            if Decimal(number) % DISTANCE_DIVISOR == 0:
-                return True
-        except InvalidOperation:
-            continue
-    return False
-
-def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
-    """Normalize sign conventions that are specific to a distance skill."""
-    skill = str(skill_name or "")
-    extra = str(extra_name or "")
-    if skill == "Super-Jump":
-        return extra.removeprefix("+")
-    if skill == "Forward Deployment" and not extra.startswith("+"):
-        try:
-            if NUMBER_PATTERN.fullmatch(extra) and Decimal(extra) > 0:
-                return f"+{extra}"
-        except InvalidOperation:
-            pass
-    return extra
 
 def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> None:
     """Add an item unless a merged source already contributed the same one."""
@@ -769,6 +737,7 @@ class Database:
                 "SELECT combinations.skill_id, COALESCE(NULLIF(s.name, ''), "
                 "'Skill #' || combinations.skill_id) AS skill_name, combinations.extra_id, "
                 "COALESCE(NULLIF(e.name, ''), 'Extra #' || combinations.extra_id) AS extra_name, "
+                "e.type AS extra_type, "
                 f"u.id AS unit_id, {UNIT_NAME_SQL} AS unit_name "
                 "FROM ("
                 "SELECT ps.item_id AS skill_id, pse.extra_id, ps.unit_id FROM profile_skills AS ps "
@@ -788,19 +757,16 @@ class Database:
             ).fetchall()
             combinations: dict[tuple[Any, Any], dict[str, Any]] = {}
             for row in rows:
-                if not contains_distance_multiple(row["extra_name"]):
+                if row["extra_type"] != "DISTANCE":
                     continue
-                display_extra_name = canonical_skill_extra_name(
-                    row["skill_name"], row["extra_name"]
-                )
-                key = (row["skill_id"], display_extra_name)
+                key = (row["skill_id"], row["extra_name"])
                 item = combinations.setdefault(
                     key,
                     {
                         "skill_id": row["skill_id"],
                         "skill_name": row["skill_name"],
                         "extra_id": row["extra_id"],
-                        "extra_name": display_extra_name,
+                        "extra_name": row["extra_name"],
                         "is_distance": True,
                         "units": [],
                     },
@@ -1268,7 +1234,7 @@ class Database:
                 "SELECT uses.source, uses.skill_id, uses.occurrence_id, uses.unit_id, "
                 + UNIT_NAME_SQL
                 + " AS unit_name, uses.extra_position, "
-                "e.id AS extra_id, e.name AS extra_name "
+                "e.id AS extra_id, e.name AS extra_name, e.type AS extra_type "
                 "FROM units AS u JOIN ("
                 f"SELECT 'profile' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
                 "e.position AS extra_position, e.extra_id FROM profile_skills AS o "
@@ -1303,7 +1269,7 @@ class Database:
                 )
                 if row["extra_id"] is not None:
                     extra = {"id": row["extra_id"], "name": row["extra_name"]}
-                    if contains_distance_multiple(row["extra_name"]):
+                    if row["extra_type"] == "DISTANCE":
                         extra["is_distance"] = True
                     occurrence["extras"].append(extra)
             variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
@@ -1645,7 +1611,7 @@ class Database:
             ):
                 extras_by_occurrence: dict[Any, list[dict[str, Any]]] = {}
                 extra_rows = connection.execute(
-                    "SELECT e.occurrence_id, e.extra_id, x.name "
+                    "SELECT e.occurrence_id, e.extra_id, x.name, x.type AS extra_type "
                     f"FROM {extras_table} AS e "
                     f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
                     "LEFT JOIN extras AS x ON x.id = e.extra_id "
@@ -1655,7 +1621,7 @@ class Database:
                 )
                 for extra in extra_rows:
                     extra_item = {"id": extra["extra_id"], "name": extra["name"]}
-                    if property_name == "skills" and contains_distance_multiple(extra["name"]):
+                    if property_name == "skills" and extra["extra_type"] == "DISTANCE":
                         extra_item["is_distance"] = True
                     extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
                 occurrence_rows = connection.execute(
@@ -1789,7 +1755,7 @@ class Database:
             ):
                 extras_by_occurrence = {}
                 extra_rows = connection.execute(
-                    "SELECT e.occurrence_id, e.extra_id, x.name "
+                    "SELECT e.occurrence_id, e.extra_id, x.name, x.type AS extra_type "
                     f"FROM {extras_table} AS e "
                     f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
                     "LEFT JOIN extras AS x ON x.id = e.extra_id "
@@ -1799,7 +1765,7 @@ class Database:
                 )
                 for extra in extra_rows:
                     extra_item = {"id": extra["extra_id"], "name": extra["name"]}
-                    if property_name == "skills" and contains_distance_multiple(extra["name"]):
+                    if property_name == "skills" and extra["extra_type"] == "DISTANCE":
                         extra_item["is_distance"] = True
                     extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
                 item_column = "o.item_id"

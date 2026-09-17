@@ -1,4 +1,4 @@
-import { cacheBustedUrl, formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { cacheBustedUrl, formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 import { visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 
@@ -28,13 +28,10 @@ function withVisibleUnits(skill, ids) {
   };
 }
 
-function formatVariantName(variant) {
+function formatVariantName(variant, parameterSemantics = null) {
   const extras = variant.extras.map((extra) => {
     if (!extra.is_distance) return extra.name;
-    return formatDistanceExtra(extra.name, {
-      showPositiveSign: variant.skill_name !== "Super-Jump",
-      forcePositiveSign: variant.skill_name === "Forward Deployment",
-    });
+    return formatSkillDistanceExtra(extra.name, parameterSemantics);
   });
   return extras.length ? `${variant.skill_name} (${extras.join(", ")})` : variant.skill_name;
 }
@@ -96,13 +93,13 @@ function rulesReferenceSection(rules) {
   return section;
 }
 
-function variantSection(variant) {
+function variantSection(variant, parameterSemantics) {
   const section = document.createElement("details");
   section.className = "explorer army-profile";
   const heading = document.createElement("summary");
   heading.className = "data-surface-header army-profile-title";
   const title = document.createElement("h2");
-  title.textContent = formatVariantName(variant);
+  title.textContent = formatVariantName(variant, parameterSemantics);
   const count = document.createElement("span");
   count.className = "section-index";
   count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
@@ -142,8 +139,10 @@ function render(skill) {
     meta.textContent = `Skill #${skill.id}${categories ? ` · ${categories}` : ""}`;
   }
   const variants = [...skill.variants].sort((left, right) => (
-    formatVariantName(left).localeCompare(
-      formatVariantName(right), undefined, { sensitivity: "base", numeric: true },
+    formatVariantName(left, skill.parameter_semantics).localeCompare(
+      formatVariantName(right, skill.parameter_semantics),
+      undefined,
+      { sensitivity: "base", numeric: true },
     )
   ));
   const sections = document.createElement("section");
@@ -151,7 +150,7 @@ function render(skill) {
   const children = [];
   if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
   children.push(sections);
-  sections.append(...variants.map(variantSection));
+  sections.append(...variants.map((variant) => variantSection(variant, skill.parameter_semantics)));
   content.replaceChildren(...children);
   status.hidden = true;
   content.hidden = false;

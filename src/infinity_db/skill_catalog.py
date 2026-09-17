@@ -31,6 +31,7 @@ class SkillCatalog:
         self.database = database
         self.rules_database = rules_database
         self._category_index: dict[int, list[dict[str, Any]]] | None = None
+        self._parameter_index: dict[int, dict[str, str]] | None = None
 
     def _ensure_category_index(self) -> None:
         if self._category_index is not None:
@@ -44,6 +45,41 @@ class SkillCatalog:
         for categories in index.values():
             categories.sort(key=lambda item: (item["order"], item["name"], item["page"]))
         self._category_index = index
+
+    def _ensure_parameter_index(self) -> None:
+        if self._parameter_index is not None:
+            return
+        self._parameter_index = (
+            {}
+            if self.rules_database is None
+            else self.rules_database.skill_parameter_semantics()
+        )
+
+    def _parameter_semantics_for_ids(
+        self, skill_ids: set[int]
+    ) -> dict[str, str] | None:
+        self._ensure_parameter_index()
+        assert self._parameter_index is not None
+        values = {
+            tuple(sorted(semantics.items()))
+            for skill_id in skill_ids
+            if (semantics := self._parameter_index.get(skill_id)) is not None
+        }
+        if len(values) > 1:
+            raise ValueError(
+                f"Skill identity {sorted(skill_ids)} has conflicting parameter semantics"
+            )
+        if not values:
+            return None
+        return dict(next(iter(values)))
+
+    def _enrich_skill_item(self, item: dict[str, Any]) -> None:
+        skill_id = item.get("id")
+        if type(skill_id) is not int:
+            return
+        semantics = self._parameter_semantics_for_ids({skill_id})
+        if semantics is not None:
+            item["parameter_semantics"] = semantics
 
     def _categories_for_ids(self, skill_ids: set[int]) -> list[dict[str, Any]]:
         self._ensure_category_index()
@@ -83,6 +119,7 @@ class SkillCatalog:
         items = deepcopy(self.database.list_catalog_items("skills"))
         for item in items:
             item["categories"] = self._categories_for_ids({int(item["id"])})
+            self._enrich_skill_item(item)
         return items
 
     def get_skill(self, skill_id: int) -> dict[str, Any] | None:
@@ -95,6 +132,9 @@ class SkillCatalog:
         if not source_ids:
             source_ids = {int(result["id"])}
         result["categories"] = self._categories_for_ids(source_ids)
+        semantics = self._parameter_semantics_for_ids(source_ids)
+        if semantics is not None:
+            result["parameter_semantics"] = semantics
 
         if self.rules_database is not None:
             rules: dict[str, dict[str, Any]] = {}
@@ -105,4 +145,32 @@ class SkillCatalog:
                     rules.setdefault(record["id"], record)
             if rules:
                 result["rules"] = list(rules.values())
+        return result
+
+    def list_skill_extras(self) -> list[dict[str, Any]]:
+        """Return source-typed distance extras with optional curated display semantics."""
+        items = deepcopy(self.database.list_skill_extras())
+        for item in items:
+            semantics = self._parameter_semantics_for_ids({int(item["skill_id"])})
+            if semantics is not None:
+                item["parameter_semantics"] = semantics
+        return items
+
+    def enrich_unit(self, unit: dict[str, Any]) -> dict[str, Any]:
+        """Attach curated parameter semantics to skill occurrences in a unit payload."""
+        result = deepcopy(unit)
+
+        def walk(value: Any) -> None:
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    if key == "skills" and isinstance(child, list):
+                        for item in child:
+                            if isinstance(item, dict):
+                                self._enrich_skill_item(item)
+                    walk(child)
+            elif isinstance(value, list):
+                for child in value:
+                    walk(child)
+
+        walk(result)
         return result

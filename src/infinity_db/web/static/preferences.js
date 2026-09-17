@@ -49,6 +49,14 @@ export function formatDistanceExtra(value, { showPositiveSign = true, forcePosit
   });
 }
 
+export function formatSkillDistanceExtra(value, parameterSemantics = null) {
+  const positiveSign = parameterSemantics?.positive_sign || "preserve";
+  return formatDistanceExtra(value, {
+    showPositiveSign: positiveSign !== "omit",
+    forcePositiveSign: positiveSign === "force",
+  });
+}
+
 export function initializeDistanceUnitToggle() {
   const toggle = document.getElementById("distance-unit-toggle");
   if (!toggle || toggle.dataset.initialized === "true") return;
