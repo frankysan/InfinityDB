@@ -14,7 +14,15 @@ from typing import Any
 from infinity_army_data.metadata import MetadataError, validate_metadata_envelope
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
 
-from ..identities import IdentityConfig, identity_metadata, load_identity_config
+from ..identities import (
+    IDENTITY_CONFIG_METADATA_KEY,
+    IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    IdentityConfig,
+    IdentityConfigError,
+    identity_metadata,
+    load_identity_config,
+    parse_identity_metadata,
+)
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -86,6 +94,32 @@ def validate_input(data: dict[str, Any]) -> dict[str, tuple[str, ...]]:
     except (KeyError, TypeError, OverflowError, RecursionError) as exc:
         raise ValueError(f"Invalid normalized data: {exc}") from exc
     return table_columns
+
+
+def resolve_identity_config(
+    data: dict[str, Any], explicit: IdentityConfig | None = None
+) -> IdentityConfig:
+    """Resolve the identity policy for export, preferring normalized provenance."""
+    has_document = IDENTITY_CONFIG_METADATA_KEY in data
+    has_hash = IDENTITY_CONFIG_SHA256_METADATA_KEY in data
+    if has_document != has_hash:
+        raise ValueError("Normalized data has incomplete identity configuration metadata")
+
+    if has_document:
+        try:
+            pinned = parse_identity_metadata(
+                data[IDENTITY_CONFIG_METADATA_KEY],
+                data[IDENTITY_CONFIG_SHA256_METADATA_KEY],
+            )
+        except IdentityConfigError as exc:
+            raise ValueError("Normalized data has invalid identity configuration metadata") from exc
+        if explicit is not None and explicit.content_sha256 != pinned.content_sha256:
+            raise ValueError(
+                "Explicit identity configuration does not match the policy pinned in normalized data"
+            )
+        return pinned
+
+    return explicit or load_identity_config()
 
 
 def sql_value(value: Any) -> Any:
@@ -166,12 +200,12 @@ def export_database(
 
     The frontend database contains queryable normalized columns only. A sibling
     ``.raw`` database preserves exact normalized rows, including absent versus
-    null fields, for development use. The authored identity policy is validated
-    at build time and pinned into both database siblings with its deterministic
-    hash so runtime queries never depend on the repository's ``config/`` tree.
+    null fields, for development use. If normalized data already pins an identity
+    policy, export validates and preserves that exact policy; otherwise it falls
+    back to an explicitly supplied policy or the authored project manifest.
     """
     table_columns = validate_input(data)
-    identity_config = identity_config or load_identity_config()
+    identity_config = resolve_identity_config(data, identity_config)
     path = Path(path)
     archive_path = raw_database_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

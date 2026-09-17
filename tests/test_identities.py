@@ -26,6 +26,7 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     assert config.canonical_unit_id(1690) == 300
     assert config.canonical_unit_id(11345) == 1345
     assert config.canonical_army_id(998) == 999
+    assert config.resolve_canonical_faction_id(1) == 901
     assert config.canonical_catalog_id("skills", 20) == 19
     assert config.canonical_catalog_id("skills", 70) == 69
     assert config.canonical_catalog_id("skills", 278) == 201
@@ -51,6 +52,7 @@ def test_unlisted_source_ids_are_not_implicitly_aliased() -> None:
 
     assert config.canonical_unit_id(42) == 42
     assert config.canonical_army_id(101) == 101
+    assert config.resolve_canonical_faction_id(101) == 101
     assert config.canonical_catalog_id("skills", 42) is None
     assert config.catalog_source_ids("skills", 42) == ()
 
@@ -88,6 +90,17 @@ def test_identity_config_requires_canonical_id_in_group(identity_document: dict)
     identity_document["armies"]["groups"][0]["canonical_id"] = 997
 
     with pytest.raises(IdentityConfigError, match="must also appear in source_ids"):
+        parse_identity_config(identity_document)
+
+
+def test_identity_config_rejects_duplicate_canonical_faction_overrides(
+    identity_document: dict,
+) -> None:
+    identity_document["canonical_faction_overrides"].append(
+        {"source_id": 1, "canonical_faction_id": 101}
+    )
+
+    with pytest.raises(IdentityConfigError, match="duplicate source ID 1"):
         parse_identity_config(identity_document)
 
 

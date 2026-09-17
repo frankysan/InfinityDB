@@ -30,6 +30,7 @@ class IdentityConfig:
     content_sha256: str
     unit_aliases: Mapping[int, int]
     army_aliases: Mapping[int, int]
+    canonical_faction_overrides: Mapping[int, int]
     catalog_aliases: Mapping[str, Mapping[int, int]]
     word_aliases: Mapping[str, str]
     profile_identity_ignored_words: frozenset[str]
@@ -44,6 +45,10 @@ class IdentityConfig:
 
     def canonical_army_id(self, source_id: int) -> int:
         return self.army_aliases.get(source_id, source_id)
+
+    def resolve_canonical_faction_id(self, source_id: int) -> int:
+        """Apply an explicit canonical-faction override, when one is configured."""
+        return self.canonical_faction_overrides.get(source_id, source_id)
 
     def canonical_catalog_id(self, catalog: str, source_id: int) -> int | None:
         aliases = self.catalog_aliases.get(catalog)
@@ -138,6 +143,34 @@ def _alias_groups(value: Any, context: str) -> Mapping[int, int]:
     return MappingProxyType(aliases)
 
 
+def _id_overrides(value: Any, context: str) -> Mapping[int, int]:
+    if not isinstance(value, list):
+        raise IdentityConfigError(f"{context} must be an array")
+
+    overrides: dict[int, int] = {}
+    for index, raw_override in enumerate(value):
+        override_context = f"{context}[{index}]"
+        override = _object(raw_override, override_context)
+        _only_keys(
+            override,
+            {"source_id", "canonical_faction_id", "reason"},
+            override_context,
+        )
+        source_id = _positive_int(override.get("source_id"), f"{override_context}.source_id")
+        canonical_faction_id = _positive_int(
+            override.get("canonical_faction_id"),
+            f"{override_context}.canonical_faction_id",
+        )
+        reason = override.get("reason")
+        if reason is not None and (not isinstance(reason, str) or not reason.strip()):
+            raise IdentityConfigError(f"{override_context}.reason must be a non-empty string")
+        if source_id in overrides:
+            raise IdentityConfigError(f"{context} contains duplicate source ID {source_id}")
+        overrides[source_id] = canonical_faction_id
+
+    return MappingProxyType(overrides)
+
+
 def _string_map(value: Any, context: str) -> Mapping[str, str]:
     mapping = _object(value, context)
     result: dict[str, str] = {}
@@ -162,6 +195,7 @@ def parse_identity_config(document: Any) -> IdentityConfig:
             "schema_version",
             "units",
             "armies",
+            "canonical_faction_overrides",
             "catalogs",
             "name_normalization",
             "profile_identity",
@@ -176,6 +210,10 @@ def parse_identity_config(document: Any) -> IdentityConfig:
 
     unit_aliases = _alias_groups(root.get("units"), "identity config.units")
     army_aliases = _alias_groups(root.get("armies"), "identity config.armies")
+    canonical_faction_overrides = _id_overrides(
+        root.get("canonical_faction_overrides"),
+        "identity config.canonical_faction_overrides",
+    )
 
     catalogs = _object(root.get("catalogs"), "identity config.catalogs")
     _only_keys(catalogs, set(CATALOG_NAMES), "identity config.catalogs")
@@ -228,6 +266,7 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         content_sha256=hashlib.sha256(document_json.encode("utf-8")).hexdigest(),
         unit_aliases=unit_aliases,
         army_aliases=army_aliases,
+        canonical_faction_overrides=canonical_faction_overrides,
         catalog_aliases=catalog_aliases,
         word_aliases=word_aliases,
         profile_identity_ignored_words=frozenset(parsed_ignored_words),
