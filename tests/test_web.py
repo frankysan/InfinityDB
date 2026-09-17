@@ -1018,6 +1018,19 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
         assert b"data-surface-header" in body
 
 
+def test_weapon_range_bands_are_derived_from_profile_metadata(app: Callable) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"function weaponRangeBands(variants)" in body
+    assert b"Object.values(profile.ranges || {})" in body
+    assert b"Number(range?.max)" in body
+    assert b"const rangeBands = weaponRangeBands(variants);" in body
+    assert b"maximum / 2.5" in body
+    for fixed_band in [b"maximum: 20", b"maximum: 40", b"maximum: 240"]:
+        assert fixed_band not in body
+
+
 def test_catalog_detail_frontend_uses_backend_trait_references(
     app: Callable,
 ) -> None:

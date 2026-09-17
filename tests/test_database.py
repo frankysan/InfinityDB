@@ -530,7 +530,7 @@ def test_trait_catalog_enriches_catalog_profiles_from_curated_rules(
     ]
 
 
-def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
+def test_armed_turret_uses_its_base_name_with_visible_metadata_profile(
     tmp_path: Path, normalized: dict
 ) -> None:
     data = copy.deepcopy(normalized)
@@ -551,7 +551,6 @@ def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
         ]
     )
     data["tables"]["metadata_weapons"] = [
-        {"position": 1, "id": 226, "name": "Armed Turret", "burst": "-", "damage": "-"},
         {
             "position": 2,
             "id": 226,
@@ -559,15 +558,7 @@ def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
             "mode": "Combi Rifle",
             "burst": "3",
             "damage": "7",
-        },
-        {
-            "position": 3,
-            "id": 226,
-            "name": "Armed Turret",
-            "mode": "PARA CC Weapon",
-            "burst": "1",
-            "damage": "-",
-        },
+        }
     ]
     path = tmp_path / "army.sqlite3"
     export_database(data, path)

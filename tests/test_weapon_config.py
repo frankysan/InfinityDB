@@ -43,6 +43,13 @@ def test_weapon_override_config_contains_current_source_corrections() -> None:
     assert config.profile_overrides[62] == "ARM=0, BTS=0, STR=1, S=1"
     assert config.profile_overrides[220] == "ARM=0, BTS=0, STR=1, S=1"
     assert config.name_overrides[217] == "MULTI Spitfire"
+    assert [
+        (suppression.name, suppression.mode)
+        for suppression in config.metadata_profile_suppressions[226]
+    ] == [
+        ("Armed Turret", None),
+        ("Armed Turret", "PARA CC Weapon"),
+    ]
 
 
 def test_unconfigured_weapon_has_no_source_correction() -> None:
@@ -105,9 +112,26 @@ def test_weapon_override_config_rejects_duplicate_ids() -> None:
         parse_weapon_override_config(document)
 
 
-def test_weapon_override_config_requires_name_or_profile() -> None:
+def test_weapon_override_config_requires_a_correction_action() -> None:
     document = _document("config/catalogs/weapon-overrides.json")
     document["corrections"][0].pop("profile")
 
-    with pytest.raises(WeaponConfigError, match="must define name and/or profile"):
+    with pytest.raises(WeaponConfigError, match="must define name, profile, and/or"):
+        parse_weapon_override_config(document)
+
+
+def test_weapon_override_config_validates_metadata_profile_suppressions() -> None:
+    document = _document("config/catalogs/weapon-overrides.json")
+    turret = next(item for item in document["corrections"] if item["weapon_id"] == 226)
+    turret["suppress_metadata_profiles"] = []
+
+    with pytest.raises(WeaponConfigError, match="must be a non-empty array"):
+        parse_weapon_override_config(document)
+
+    document = _document("config/catalogs/weapon-overrides.json")
+    turret = next(item for item in document["corrections"] if item["weapon_id"] == 226)
+    turret["suppress_metadata_profiles"].append(
+        copy.deepcopy(turret["suppress_metadata_profiles"][0])
+    )
+    with pytest.raises(WeaponConfigError, match="duplicate matcher"):
         parse_weapon_override_config(document)

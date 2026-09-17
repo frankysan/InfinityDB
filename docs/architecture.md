@@ -141,16 +141,26 @@ becoming deployed runtime state. `config/catalogs/weapon-categories.json` owns
 the ordered weapon-family taxonomy, regular-expression patterns, fallback
 category, and explicit weapon-ID category decisions.
 `config/catalogs/weapon-overrides.json` owns corrections for incomplete or
-inconsistent Army weapon metadata, such as missing deployable profiles and known
-source naming anomalies. Normalization validates and consumes both files; their
-effects are materialized into normalized weapon rows, so repository/runtime
-queries do not read the working-tree configuration. Classification mechanics,
+inconsistent Army weapon metadata, such as missing deployable profiles, known
+source naming anomalies, and exact metadata-profile rows that should not become
+display weapon modes. Normalization validates and consumes both files; those
+corrections are applied before normalized metadata rows are materialized, while
+the original Army metadata envelope remains preserved for source provenance.
+Repository/runtime queries therefore do not read the working-tree configuration.
+Classification mechanics,
 validation, and fallback behavior remain Python code. Actual game-rule facts
 such as special weapon statistics, skills, and equipment are not source
 corrections and therefore do not belong in these config files. The Armed Turret
 special profile is now a cited curated `weapon` record in `rules.db`; the Army
 repository exposes only source catalog/profile data, and the application layer
 composes the curated special profile when rules data is available.
+
+Weapon range-table columns are also source-derived rather than maintained domain
+policy. The browser builds one ordered set of range endpoints from the finite,
+positive `max` values in the displayed weapon profiles' imported `distance`
+metadata. Centimetre labels use those source endpoints directly and inch labels
+use the shared 2.5 cm conversion, so a new source range endpoint is displayed
+without updating a hard-coded global range table.
 
 Skill declaration categories follow the same composition boundary. Army snapshots
 identify skills and their usage but do not provide N5 declaration categories. The

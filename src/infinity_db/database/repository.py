@@ -95,14 +95,6 @@ def instance_lru_cache(maxsize: int) -> Callable:
     return decorator
 
 
-# These metadata rows describe the deployable rather than a weapon mode.
-WEAPON_PROFILE_PLACEHOLDERS = frozenset(
-    {
-        (226, "Armed Turret", None),
-        (226, "Armed Turret", "PARA CC Weapon"),
-    }
-)
-
 NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
 DISTANCE_DIVISOR = Decimal("2.5")
 NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
@@ -1190,12 +1182,7 @@ class Database:
                         "traits": traits,
                         "ranges": decoded(profile["distance"], {}),
                     }
-                    if (
-                        profile_item["id"],
-                        profile_item["name"],
-                        profile_item["mode"],
-                    ) not in WEAPON_PROFILE_PLACEHOLDERS:
-                        profiles.append(profile_item)
+                    profiles.append(profile_item)
                 result["profiles"] = profiles
                 if catalog == "weapons":
                     profiles_by_id: dict[int, list[dict[str, Any]]] = {}

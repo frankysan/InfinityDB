@@ -73,6 +73,37 @@ def test_missing_mine_profile_is_supplied_during_normalization() -> None:
     assert mine["profile"] == "ARM=0, BTS=0, STR=1, S=1"
 
 
+def test_configured_non_display_weapon_metadata_profiles_are_suppressed() -> None:
+    source = metadata_source()
+    source["weapons"] = [
+        {"id": 226, "name": "Armed Turret", "burst": "-", "damage": "-"},
+        {
+            "id": 226,
+            "name": "Armed Turret",
+            "mode": "Combi Rifle",
+            "burst": "3",
+            "damage": "7",
+        },
+        {
+            "id": 226,
+            "name": "Armed Turret",
+            "mode": "PARA CC Weapon",
+            "burst": "1",
+            "damage": "-",
+        },
+    ]
+
+    normalized = normalize_master(
+        master(decode_metadata(json.dumps(source).encode(), "metadata.json"))
+    )
+
+    assert [
+        (row["name"], row.get("mode"))
+        for row in normalized["tables"]["metadata_weapons"]
+    ] == [("Armed Turret", "Combi Rifle")]
+    assert len(normalized["armyMetadata"]["data"]["weapons"]) == 3
+
+
 def test_multi_spitfire_name_is_corrected_in_catalog_and_profiles() -> None:
     source = metadata_source()
     source["weapons"] = [{"id": 217, "name": "Spitfire MULTI", "mode": "AP Mode"}]
