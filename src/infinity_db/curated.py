@@ -47,6 +47,42 @@ def load_curated_directory(directory: Path) -> list[tuple[Path, dict[str, Any]]]
     return documents
 
 
+def _validate_weapon_special_profile(profile: object, context: str) -> None:
+    if not isinstance(profile, dict):
+        raise ValueError(f"{context}: must be an object")
+    required = {"stats", "equipment", "skills", "ccWeapon"}
+    missing = required - profile.keys()
+    unknown = profile.keys() - required
+    if missing:
+        raise ValueError(f"{context}: missing fields {sorted(missing)}")
+    if unknown:
+        raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
+
+    stats = profile["stats"]
+    if not isinstance(stats, list) or not stats:
+        raise ValueError(f"{context}.stats: must be a non-empty array")
+    seen_stats: set[str] = set()
+    for index, stat in enumerate(stats):
+        stat_context = f"{context}.stats[{index}]"
+        if (
+            not isinstance(stat, list)
+            or len(stat) != 2
+            or not all(isinstance(value, str) and value.strip() for value in stat)
+        ):
+            raise ValueError(f"{stat_context}: must be [name, value] strings")
+        if stat[0] in seen_stats:
+            raise ValueError(f"{stat_context}: duplicate stat name {stat[0]!r}")
+        seen_stats.add(stat[0])
+
+    for field in ("equipment", "skills"):
+        values = profile[field]
+        if not isinstance(values, list) or any(
+            not isinstance(value, str) or not value.strip() for value in values
+        ):
+            raise ValueError(f"{context}.{field}: must be an array of non-empty strings")
+    _require_string(profile["ccWeapon"], "ccWeapon", context)
+
+
 def load_curated_document(path: Path) -> dict[str, Any]:
     """Load and validate one curated JSON document.
 
@@ -222,6 +258,14 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                             f"facts.sourceIdentity.prefixes[{prefix_index}]",
                             context,
                         )
+        if record["kind"] == "weapon":
+            facts = record.get("facts")
+            if not isinstance(facts, dict):
+                raise ValueError(f"{context}: weapon 'facts' must be an object")
+            if "specialProfile" in facts:
+                _validate_weapon_special_profile(
+                    facts["specialProfile"], f"{context}.facts.specialProfile"
+                )
         if record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")
             if not isinstance(record_labels, list) or not record_labels:

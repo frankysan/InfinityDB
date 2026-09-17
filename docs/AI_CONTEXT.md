@@ -364,8 +364,12 @@ changes.
   `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
   and explicit category decisions; `config/catalogs/weapon-overrides.json` owns
   Army-source name/profile corrections. Normalization consumes those validated
-  build inputs and materializes their effects. Special weapon rules facts are
-  deliberately excluded and remain a curated-rules migration target.
+  build inputs and materializes their effects.
+- 2026-09-17: Special weapon game-rule facts moved out of
+  `infinity_army_data.weapon_profiles`. The Armed Turret special profile is a
+  cited curated `weapon` record linked to Army weapon ID 226; repository reads
+  expose raw Army catalog data and the application composes the special profile
+  from `rules.db` when curated rules are available.
 - 2026-09-16: Rules ingestion is scoped to `data/curated/rules/`. Other curated
   categories may have separate future semantics but are not implicitly rules
   database inputs.

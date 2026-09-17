@@ -15,6 +15,7 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from infinity_db import __display_version__, __version__
+from infinity_db.catalog_rules import CatalogRules
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.trait_catalog import TraitCatalog
@@ -275,6 +276,7 @@ class Application:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
         self.trait_catalog = TraitCatalog(self.database, self.rules_database)
+        self.catalog_rules = CatalogRules(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
             _snapshot_revision(self.rules_database.path)
@@ -496,6 +498,7 @@ class Application:
                     payload = {"error": "Reference item not found"}
                 else:
                     payload = self.trait_catalog.enrich_catalog_item(payload)
+                    payload = self.catalog_rules.enrich_catalog_item(match.group(1), payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}

@@ -104,10 +104,11 @@ history retains implementation detail.
     when a new Army snapshot is imported.
   - Actual game-rule facts are intentionally excluded from this source-correction
     config.
-- [ ] Move `SPECIAL_WEAPON_DETAILS` out of `weapon_profiles.py` and into cited
-  curated rules data when an authoritative source is available.
-  - Preserve special weapon profiles, statistics, skills, equipment, and the
-    source citations that support them.
+- [x] Move `SPECIAL_WEAPON_DETAILS` out of `weapon_profiles.py` and into cited
+  curated rules data.
+  - Armed Turret statistics, equipment, skills, CC weapon, Army weapon linkage,
+    and stable wiki revision citation now live in the curated N5 rules
+    collection and are composed into weapon API responses through `rules.db`.
 - [ ] Move rule-derived skill declaration categories out of
   `skill_categories.py` and into the curated rules layer.
   - Preserve N5 edition/version and printed-page citations.

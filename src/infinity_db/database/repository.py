@@ -22,7 +22,6 @@ from infinity_army_data.availability import (
     STANDARD_AVAILABILITY,
 )
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
-from infinity_army_data.weapon_profiles import special_weapon_detail
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -1216,7 +1215,6 @@ class Database:
                             key=lambda value: (unit_sort_key(item_names[value]), value),
                         )
                     ]
-                    result["special_profile"] = special_weapon_detail(canonical_id)
             return result
 
     @instance_lru_cache(maxsize=128)

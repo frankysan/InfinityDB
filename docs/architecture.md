@@ -147,8 +147,10 @@ effects are materialized into normalized weapon rows, so repository/runtime
 queries do not read the working-tree configuration. Classification mechanics,
 validation, and fallback behavior remain Python code. Actual game-rule facts
 such as special weapon statistics, skills, and equipment are not source
-corrections and therefore do not belong in these config files; they remain a
-curated-rules migration task.
+corrections and therefore do not belong in these config files. The Armed Turret
+special profile is now a cited curated `weapon` record in `rules.db`; the Army
+repository exposes only source catalog/profile data, and the application layer
+composes the curated special profile when rules data is available.
 
 Army presentation and classification currently combine imported relationships
 with merger-derived fields. Faction grouping, display names, and slugs come from

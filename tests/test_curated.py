@@ -220,6 +220,12 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["trait:zone-of-control-zc"]["citations"][0]["sourceId"] == (
         "wiki-traits-oldid-4110"
     )
+    assert records["weapon:armed-turret"]["armyLinks"] == [
+        {"entity": "weapon", "id": 226}
+    ]
+    assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == [
+        "Total Reaction"
+    ]
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
         set(skill_type["descriptions"]) == {"singular", "plural"}
@@ -243,4 +249,31 @@ def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: P
     path.write_text(json.dumps(document), encoding="utf-8")
 
     with pytest.raises(ValueError, match="sourceIdentity.prefixes"):
+        load_curated_document(path)
+
+
+def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"] = [
+        {
+            "id": "weapon:armed-turret",
+            "kind": "weapon",
+            "name": "Armed Turret",
+            "summary": "A deployable weapon.",
+            "facts": {
+                "specialProfile": {
+                    "stats": [["MOV", "--"]],
+                    "equipment": ["360º Visor"],
+                    "skills": ["Total Reaction"],
+                    "ccWeapon": 7,
+                }
+            },
+            "armyLinks": [{"entity": "weapon", "id": 226}],
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 74}],
+        }
+    ]
+    path = tmp_path / "weapon.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="ccWeapon"):
         load_curated_document(path)
