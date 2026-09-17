@@ -248,9 +248,14 @@ comparison snapshot SHA-256, and ordered notable-change notes. Snapshot notes
 are source-controlled human interpretation, not rules-database inputs or
 runtime application data.
 
-Build-specific manifests such as the planned Army-symbol build manifest remain
-future work under `data/manifests/` and are separate from this acquisition
-provenance contract.
+Army-symbol acquisition also writes the version-1
+`data/manifests/army-symbol-build.json`. This generated build-state document is
+separate from immutable snapshot provenance: it binds the selected Army and
+SYMBOLS artifacts, records every downloaded raw asset by URL/hash/archive path,
+preserves every authoritative and audit-only source reference, and stores the
+discovery audit counts. Its current contract is acquisition-only; later symbol
+processing stages will extend the build state with their own validated fields
+rather than making the downloader assign final application paths.
 
 ### Current: army roles and logical-unit identity
 
@@ -394,18 +399,22 @@ and returns a combined representation; the databases do not import from or
 attach to one another.
 
 Asset acquisition and processing is likewise a separate build concern. Current
-tooling preserves raw downloaded assets independently from working/published
-outputs and bundles processed assets for the browser.
+Army-symbol acquisition is source-semantic and snapshot-pinned: every
+`units[].profileGroups[].profiles[].logo` and `metadata.json -> factions[].logo`
+reference is authoritative, maintained static declarations are included,
+`resume[].logo` is audit-only, and a recursive scan fails closed on unknown
+SVG-bearing source fields. URLs are downloaded once while every reference is
+preserved separately in `army-symbol-build.json`. The downloader does not
+generate browser mappings.
 
-**Design direction:** an integrated symbol build tied to an Army snapshot will
-use that exact pinned snapshot throughout discovery and publication. Discovery
-will preserve every source reference/URL independently of later deduplication;
-canonical processing may collapse equivalent assets, but it must not discard
-their source references. Only the publisher will assign final application paths
-and generated browser mappings because only that stage knows the final
-canonical asset. Discovery, source resolution, validation, deduplication,
-conversion, compression, and publishing remain distinct intended stages with
-provenance recorded rather than inferred from final filenames.
+**Design direction:** later processing will consume that exact acquisition state
+through deduplication, text conversion, compression, and publication. Canonical
+processing may collapse equivalent assets, but it must not discard their source
+references. Only the publisher will assign final application paths and generated
+browser mappings because only that stage knows the final canonical asset. Source
+resolution, validation, deduplication, conversion, compression, and publishing
+remain distinct intended stages with provenance recorded rather than inferred
+from final filenames.
 
 ## Module boundaries
 

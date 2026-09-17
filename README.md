@@ -126,17 +126,19 @@ infinity-db build --compact
 infinity-db serve
 ```
 
-The standalone wiki and symbol downloaders follow the same durable-output
+The standalone wiki and Army-symbol downloaders follow the same durable-output
 convention. They create `WIKI YYYYMMDD-HHMMSS.zip` archives under `data/wiki/`
 and `SYMBOLS YYYYMMDD-HHMMSS.zip` archives under `data/raw/symbols/`
 respectively, removing their temporary loose staging files after success. All
 three downloaders also write deterministic snapshot provenance bound to each
 archive SHA-256 under `data/manifests/snapshots/`; these generated records are
-ignored by Git.
+ignored by Git. Army-symbol acquisition additionally writes the current
+`data/manifests/army-symbol-build.json`, preserving raw asset identities and
+every Army/static reference for later processing stages.
 
 ```powershell
 python tools/download_wiki_snapshot.py
-python tools/download_unit_symbols.py "data/raw/JSON 20260910-204106.zip"
+python tools/download_army_symbols.py "data/raw/JSON 20260910-204106.zip"
 ```
 
 The development server listens on all local network interfaces. Open

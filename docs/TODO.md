@@ -250,7 +250,7 @@ history retains implementation detail.
     `--skip-compression`, `--keep-work`, and `--dry-run` are candidate
     orchestrator options as those stages are integrated.
 
-- [ ] Replace first-logo-per-unit symbol discovery with complete source-semantic
+- [x] Replace first-logo-per-unit symbol discovery with complete source-semantic
   discovery keyed by source reference/URL rather than unit ID.
   - Treat every `units[].profileGroups[].profiles[].logo` as authoritative for
     unit/profile symbols and every `metadata.json -> factions[].logo` as
@@ -264,10 +264,10 @@ history retains implementation detail.
   - Preserve every reference even when download URLs repeat or visual
     deduplication later collapses assets. One unit may reference several SVGs,
     and several units/profiles may reference one source SVG.
-  - Rename/refactor `download_unit_symbols.py` to `download_army_symbols.py` so
-    it covers unit/profile and faction assets plus manually declared static
-    symbols, without generating final browser mappings. Preserve its timestamped
-    `SYMBOLS ...zip` snapshot output when the discovery behavior is expanded.
+  - [x] Rename/refactor `download_unit_symbols.py` to `download_army_symbols.py`
+    so it covers unit/profile and faction assets plus validated maintained
+    static symbols, without generating final browser mappings. Preserve its
+    timestamped `SYMBOLS ...zip` snapshot output.
   - Preserve the 2026-09-10 snapshot audit as a regression baseline, not a
     permanent source count: 59 JSON documents (`metadata.json` + 58 Army
     documents), 5,020 profile-logo references / 1,033 unique unit SVG URLs,
@@ -277,22 +277,25 @@ history retains implementation detail.
     unique unit SVGs, missing 172 distinct SVGs; 136 unit IDs referenced more
     than one profile logo.
 
-- [ ] Define `data/manifests/army-symbol-build.json` as the authoritative
-  machine-readable state passed through symbol processing.
-  - Separate `snapshot`, `assets`, and `references`; do not use a filename-keyed
-    structure that conflates source assets with their consumers.
-  - Snapshot records should include the pinned Army archive identity/hash and,
-    when applicable, the corresponding `SYMBOLS ...zip` archive identity/hash,
-    plus language, acquisition timestamp, API base/version if available, and
+- [x] Define the acquisition-only version-1
+  `data/manifests/army-symbol-build.json` as the first authoritative
+  machine-readable state passed into later symbol processing.
+  - [x] Separate `snapshot`, `assets`, and `references`; do not use a
+    filename-keyed structure that conflates source assets with their consumers.
+  - [x] Snapshot records include the pinned Army artifact identity/hash, the
+    corresponding `SYMBOLS ...zip` identity/hash, acquisition timestamp, and
     source-document count.
-  - Asset records should retain kind, source URL/filename/hash, source-resolution
-    method, font classification, alias normalization, duplicate group,
-    canonical source identity, conversion backend/status, compression
-    profile/status, and final published path.
-  - Reference records should retain source document, JSON path, reference kind,
-    unit/faction/army IDs and slugs as applicable, and source asset URL.
-  - Persistent manifest paths must be portable project-relative POSIX-style
-    strings; convert them to native `Path` objects only at filesystem access.
+  - [ ] Enrich the build snapshot record with Army language/API base/version by
+    resolving the selected Army snapshot provenance when orchestration is added.
+  - [x] Acquisition asset records retain source URL/filename/hash, deterministic
+    raw archive path, and source method. Font classification, alias
+    normalization, duplicate/canonical identity, conversion, compression, and
+    final published path remain later-stage manifest extensions.
+  - [x] Reference records retain source document, JSON path, authoritative/audit
+    status, reference kind, unit/faction/army IDs and slugs as applicable,
+    static semantic keys/categories, and source asset URL.
+  - [x] Persistent artifact paths are portable project-relative POSIX-style
+    strings where applicable; raw archive member paths are POSIX-relative.
 
 - [ ] Complete the static-symbol and local-override model as maintained project
   knowledge rather than downloader code.
@@ -300,8 +303,9 @@ history retains implementation detail.
     non-API assets: characteristics `cube`, `cube2`, `hackable`, `peripheral`
     and orders `regular`, `irregular`, `tactical`, `lieutenant`, `impetuous`,
     all under the stable Corvus Belli icon base URL.
-  - [ ] Extend static declarations with semantic metadata such as stable key,
-    source filename, user-facing label, and known source names where needed.
+  - [x] Extend current static declarations with stable key, category, source
+    filename, and user-facing label. Add further known source-name metadata only
+    when a concrete processing/publishing need appears.
   - [ ] Keep local `image_overrides/` outside version control, organized by
     explicit categories such as `units/`, `factions/`, `characteristics/`, and
     `orders/`. Use stable URL-derived logical names/categories as lookup keys,
