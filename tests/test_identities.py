@@ -4,7 +4,15 @@ from pathlib import Path
 
 import pytest
 
-from infinity_db.identities import IdentityConfigError, load_identity_config, parse_identity_config
+from infinity_db.identities import (
+    IDENTITY_CONFIG_METADATA_KEY,
+    IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    IdentityConfigError,
+    identity_metadata,
+    load_identity_config,
+    parse_identity_config,
+    parse_identity_metadata,
+)
 
 
 @pytest.fixture
@@ -32,6 +40,26 @@ def test_unlisted_source_ids_are_not_implicitly_aliased() -> None:
     assert config.canonical_unit_id(42) == 42
     assert config.canonical_army_id(101) == 101
     assert config.canonical_catalog_id("skills", 42) is None
+
+
+def test_identity_metadata_contains_document_and_hash() -> None:
+    config = load_identity_config()
+
+    metadata = identity_metadata(config)
+
+    assert metadata[IDENTITY_CONFIG_METADATA_KEY] == config.document
+    assert metadata[IDENTITY_CONFIG_SHA256_METADATA_KEY] == config.content_sha256
+    assert parse_identity_metadata(
+        metadata[IDENTITY_CONFIG_METADATA_KEY],
+        metadata[IDENTITY_CONFIG_SHA256_METADATA_KEY],
+    ).content_sha256 == config.content_sha256
+
+
+def test_identity_metadata_rejects_hash_mismatch() -> None:
+    config = load_identity_config()
+
+    with pytest.raises(IdentityConfigError, match="hash does not match"):
+        parse_identity_metadata(config.document, "0" * 64)
 
 
 def test_identity_config_rejects_overlapping_alias_groups(identity_document: dict) -> None:
