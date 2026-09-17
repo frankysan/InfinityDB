@@ -267,6 +267,9 @@ explicit `reinforcements` field, and reinforcement lists do not participate in
 grouping-node discovery. `/api/armies` exposes role and playability separately
 from source-list existence; grouping identities are non-playable and cannot be
 used as selectable `army_id` values, while their source rows remain preserved.
+For current NA2 data, InfinityDB intentionally does not expose a separate roster
+query for `901`: its roster remains provenance, and application availability is
+consumed through the playable child army lists that share those units.
 
 Mercenary source variants are classified during normalization from their
 source-semantic contract (`canonical == 1`, empty declared `factions`,

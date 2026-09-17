@@ -106,7 +106,7 @@ All notable changes to this project are documented in this file.
 - Derive army role/playability from authoritative imported relationships
   instead of Army-ID ranges. `/api/armies` now exposes explicit roles,
   playability, grouping metadata, and reinforcement parents for main armies,
-  sectorials, Non-Aligned forces, reinforcement lists, and grouping-only
+  sectorials, Non-Aligned forces, reinforcement lists, and grouping
   identities. Non-Aligned grouping identity `901` is surfaced as non-playable,
   direct unit filtering by it is rejected, and the browser army selector
   consumes the backend role contract.
@@ -118,9 +118,11 @@ All notable changes to this project are documented in this file.
   roster, and is still exposed as non-playable without any numeric-ID special case.
 - Document the observed `901` roster shape separately from playability: one
   standard Rumbler Spec-Ops source entry plus the complete 49-variant optional-
-  mercenary pool in the analyzed snapshot. Record a future design direction to
-  canonicalize invariant logical-unit data while preserving explicit army,
-  loadout, availability, and raw-source deltas.
+  mercenary pool in the analyzed snapshot. Keep that non-playable roster as
+  preserved source provenance without adding a dedicated application roster
+  query; unit availability is consumed through the playable child NA2 lists.
+  Record a future design direction to canonicalize invariant logical-unit data
+  while preserving explicit army, loadout, availability, and raw-source deltas.
 - Remove the legacy canonical-faction `1` -> `901` identity override now that
   mercenary logical pairing and army-occurrence availability are explicit.
   Canonical source ID `1` remains mercenary source/origin provenance with no

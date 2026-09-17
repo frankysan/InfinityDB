@@ -264,8 +264,11 @@ parent relationships provide main-army, sectorial, and Non-Aligned grouping;
 explicit `reinforcements` links provide reinforcement parentage. Grouping
 identity `901` is surfaced as non-playable when its imported child lists are
 present, and the browser selector consumes `role`/`playable` instead of Army-ID
-ranges. Logical-unit consolidation is now a database-build concern rather than
-army playability or query-time generic/reinforcement matching.
+ranges. Its imported 50-unit source roster remains preserved but is not exposed
+as a separate selectable/queryable roster; application unit availability comes
+from the playable child NA2 occurrences. Logical-unit consolidation is now a
+database-build concern rather than army playability or query-time generic/
+reinforcement matching.
 
 ## Principle
 
