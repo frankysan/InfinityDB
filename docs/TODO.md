@@ -126,11 +126,36 @@ history retains implementation detail.
     repositories treat `reinforcementUnitMatches` as authoritative, including an
     explicitly empty result; older databases without the metadata retain the
     legacy query-time label matcher.
-  - Move unambiguous mercenary-variant deduplication into normalization or
-    database creation. Merge alternate source records into one logical
-    application unit while retaining every source unit ID, source occurrence,
-    profile/loadout provenance, and availability reason required by validation
-    and `infinity.raw.db`.
+  - [ ] Materialize complete logical-unit identity during frontend database
+    creation instead of assembling it dynamically in repository reads.
+    - Extract one pure build-time resolver from the current repository grouping
+      logic. Feed it configured unit aliases plus persisted generic, mercenary,
+      and reinforcement identity evidence.
+    - Resolve transitive relationships as graph components and select a
+      deterministic ordinary representative for each component. Explicitly
+      unmatched mercenary/reinforcement source rows remain independent logical
+      units.
+    - Add frontend `logical_units` and `logical_unit_sources` tables. Initially
+      keep the logical ID equal to the representative source-unit ID, but store
+      `representative_unit_id` explicitly so those concepts can be decoupled
+      later.
+    - Enforce that every source-defined unit maps to exactly one logical unit and
+      that every mapped/referenced source ID exists. Reject contradictory
+      identity evidence during database creation.
+    - Preserve all source tables against original source unit IDs. Do not create
+      pre-merged logical profile/loadout/occurrence tables; repository aggregation
+      should follow `logical_unit_sources` so availability and other provenance
+      stay source-specific.
+    - Move legacy generic/mercenary/reinforcement rediscovery behind the database
+      builder as compatibility fallbacks for older normalized inputs. Newly
+      built databases should expose one uniform materialized identity contract.
+    - Switch repository `_unit_graph()` and unit lookup/grouping to consume only
+      the materialized relation for current databases, then remove duplicated
+      read-time identity policy once compatibility coverage permits it.
+    - Add focused resolver, schema-integrity, transitive-grouping, unmatched
+      variant, overlapping availability, legacy-input, and API regression tests;
+      increment schema/compatibility revisions when the materialized tables
+      become required.
   - [x] Replace repository-time `canonical_faction_id == 1` mercenary inference
     with explicit `army_units.availability_kind` provenance for current
     normalized snapshots. Retain the old inference only as a compatibility

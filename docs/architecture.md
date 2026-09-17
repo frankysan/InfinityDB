@@ -213,12 +213,39 @@ availability provenance are persisted and consumed by repository queries. The
 The legacy `1` -> `901` canonical-faction override has now been removed. ID `1`
 remains source provenance for mercenary identity and does not receive an
 application `main_army_id`; 901 remains a separate Non-Aligned Army grouping
-identity. Generic duplicate matching is now persisted during normalization
-and reinforcement-to-standard matching is audited during database creation;
-current repositories consume both results directly. Remaining logical-unit work
-concerns materializing one complete application identity across configured aliases
-and other source variants rather than mercenary/reinforcement rediscovery at
-query time.
+identity. Generic duplicate matching is now persisted during normalization and
+reinforcement-to-standard matching is audited during database creation; current
+repositories consume both results directly.
+
+The next logical-unit step is to materialize the resolved application identity
+in the frontend database. This does **not** merge or rewrite source rows. Source
+unit IDs, army occurrences, profiles, loadouts, options, and availability
+provenance remain attached to their original source unit. Instead, database
+creation will resolve configured unit aliases plus persisted generic,
+mercenary, and reinforcement matches into one explicit logical-unit relation.
+The planned shape is a `logical_units` table with a deterministic representative
+source unit and a `logical_unit_sources` table mapping every source-defined unit
+to exactly one logical unit.
+
+Database creation will own the identity resolver. It will treat the configured
+aliases and persisted match sets as identity evidence, compute their transitive
+connected components, select one deterministic ordinary representative for each
+component, validate that all referenced source IDs exist, and persist the
+resolved mapping. Explicitly unmatched mercenary or reinforcement records form
+their own logical units. The existing legacy generic/reinforcement discovery
+algorithms remain available only while building from older normalized inputs
+that lack the newer persisted evidence; once a frontend database is built, its
+repository read path should consume only the materialized logical identity.
+
+The logical-unit ID should initially remain the representative ordinary source
+unit ID so existing API IDs and URLs stay stable. The schema should nevertheless
+store the representative explicitly, leaving room to decouple application
+identity from source identity later without changing provenance. Repository
+aggregation will continue to follow the mapped source IDs when collecting
+profiles, loadouts, army occurrences, search terms, and other source-backed
+data. It must not pre-aggregate those source tables into logical copies, because
+normal and optional-mercenary occurrences can belong to the same logical unit
+and army while retaining different `availability_kind` semantics.
 
 ## Snapshot acquisition and provenance
 
@@ -500,9 +527,13 @@ total above illustrates the response shape.
 - Current normalized snapshots persist audited generic duplicate-unit matches
   for standard non-reinforcement records, and repository grouping consumes that
   persisted result. The old 10,000-ID/ISC calculation is used only for older
-  databases without the audit metadata. Reinforcement-only variants still join
-  their matching standard unit at query time; configured identity aliases remain
-  pinned project policy rather than normalized source facts.
+  databases without the audit metadata. Database creation now also persists
+  audited reinforcement-to-standard matches; current repositories consume that
+  result, while older databases retain the legacy query-time matcher. Configured
+  identity aliases remain pinned project policy rather than normalized source
+  facts. The planned frontend identity layer will materialize the transitive
+  result of these relationships once per database build instead of reconstructing
+  logical groups on repository reads.
 - `limit` defaults to 50 and must be between 1 and 200; `offset` defaults to 0
   and must be a nonnegative SQLite integer.
 - `search` is limited to 200 characters. Invalid or repeated unit query
