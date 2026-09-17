@@ -18,9 +18,16 @@ from pathlib import Path
 from typing import Any
 
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
-
-from infinity_db.skill_categories import categories_for_skill
 from infinity_army_data.weapon_profiles import special_weapon_detail
+
+from infinity_db.identities import (
+    IDENTITY_CONFIG_METADATA_KEY,
+    IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    IdentityConfig,
+    IdentityConfigError,
+    parse_identity_metadata,
+)
+from infinity_db.skill_categories import categories_for_skill
 from infinity_db.traits import TRAIT_DESCRIPTIONS, canonical_trait_name
 
 from .schema import (
@@ -68,52 +75,6 @@ def instance_lru_cache(maxsize: int) -> Callable:
     return decorator
 
 
-# Source records whose IDs differ without following either of the general
-# duplicate patterns.  The value is the preferred representative ID.
-UNIT_MERGE_ALIASES = {
-    300: 300,
-    1690: 300,
-    10300: 300,
-    1345: 1345,
-    1875: 1345,
-    11345: 1345,
-}
-SKILL_MERGE_ALIASES = {
-    19: 19,
-    20: 19,
-    21: 19,
-    22: 19,
-    23: 19,
-    69: 69,
-    70: 69,
-    201: 201,
-    278: 201,
-    279: 201,
-    240: 240,
-    274: 240,
-}
-SKILL_NAME_EXCEPTION_ALIASES = {
-    201: 201,
-    278: 201,
-    279: 201,
-    240: 240,
-    274: 240,
-}
-CATALOG_NAME_EXCEPTION_ALIASES = {
-    ("equipment", 169): 235,
-    ("equipment", 188): 235,
-    ("equipment", 193): 235,
-    ("equipment", 235): 235,
-    ("equipment", 244): 235,
-    ("equipment", 247): 235,
-    ("equipment", 248): 235,
-    ("weapons", 209): 226,
-    ("weapons", 215): 226,
-    ("weapons", 219): 226,
-    ("weapons", 222): 226,
-    ("weapons", 226): 226,
-    ("weapons", 228): 226,
-}
 # These metadata rows describe the deployable rather than a weapon mode.
 WEAPON_PROFILE_PLACEHOLDERS = frozenset(
     {
@@ -121,31 +82,37 @@ WEAPON_PROFILE_PLACEHOLDERS = frozenset(
         (226, "Armed Turret", "PARA CC Weapon"),
     }
 )
-ARMY_MERGE_ALIASES = {998: 999}
 REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
 NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
 DISTANCE_DIVISOR = Decimal("2.5")
 NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
-UNIT_IDENTITY_WORD_ALIASES = {
-    "armoured": "armored",
-    "reconnaissance": "recon",
-    "reconaissance": "recon",
-}
+
+
+def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityConfig:
+    """Load and validate the identity policy pinned into a database snapshot."""
+    rows = connection.execute(
+        f"SELECT key, value FROM {quote(METADATA_TABLE)} WHERE key IN (?, ?)",
+        (IDENTITY_CONFIG_METADATA_KEY, IDENTITY_CONFIG_SHA256_METADATA_KEY),
+    ).fetchall()
+    values = {row["key"]: row["value"] for row in rows}
+    try:
+        document = json.loads(values[IDENTITY_CONFIG_METADATA_KEY])
+        content_sha256 = json.loads(values[IDENTITY_CONFIG_SHA256_METADATA_KEY])
+    except (KeyError, TypeError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            "Database has invalid identity configuration metadata; rebuild the database"
+        ) from exc
+    try:
+        return parse_identity_metadata(document, content_sha256)
+    except IdentityConfigError as exc:
+        raise ValueError(
+            "Database has invalid identity configuration metadata; rebuild the database"
+        ) from exc
 
 
 def is_reinforcement_army_id(army_id: int) -> bool:
     """Return whether an army ID denotes a reinforcement-only army."""
     return army_id % 100 in REINFORCEMENT_ARMY_SUFFIXES
-
-
-def canonical_army_id(army_id: int) -> int:
-    """Return the preferred ID for army lists that represent one force."""
-    return ARMY_MERGE_ALIASES.get(army_id, army_id)
-
-
-def canonical_skill_id(skill_id: int) -> int:
-    """Return the representative ID for synonymous skill variants."""
-    return SKILL_MERGE_ALIASES.get(skill_id, skill_id)
 
 
 def skill_merge_key(name: object) -> str | None:
@@ -177,6 +144,26 @@ def merged_catalog_name(name: object) -> str:
     if ":" in text:
         return text.split(":", 1)[0].strip()
     return merged_skill_name(text)
+
+
+def configured_catalog_group(
+    identity_config: IdentityConfig,
+    catalog: str,
+    item_id: int,
+    available_ids: set[int],
+) -> tuple[int, tuple[int, ...]] | None:
+    """Return an explicit manifest group restricted to IDs present in this snapshot."""
+    source_ids = tuple(
+        source_id
+        for source_id in identity_config.catalog_source_ids(catalog, item_id)
+        if source_id in available_ids
+    )
+    if not source_ids:
+        return None
+    canonical_id = identity_config.canonical_catalog_id(catalog, item_id)
+    if canonical_id not in source_ids:
+        canonical_id = min(source_ids)
+    return canonical_id, source_ids
 
 
 def trait_slug(name: object) -> str:
@@ -226,24 +213,24 @@ def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
     return extra
 
 
-def unit_group_key(row: sqlite3.Row) -> tuple[int, str]:
+def unit_group_key(row: sqlite3.Row, identity_config: IdentityConfig) -> tuple[int, str]:
     """Identify duplicate unit records that belong to one logical unit."""
     unit_id = row["id"]
-    if unit_id in UNIT_MERGE_ALIASES:
-        return (UNIT_MERGE_ALIASES[unit_id], "")
+    if unit_id in identity_config.unit_aliases:
+        return (identity_config.canonical_unit_id(unit_id), "")
     return (
         unit_id % 10_000,
         (row["isc"] or row["name"]).casefold(),
     )
 
 
-def normalized_unit_identity(value: object) -> str:
+def normalized_unit_identity(value: object, identity_config: IdentityConfig) -> str:
     """Return an order-insensitive, singularized identity for a unit label."""
     identity = re.sub(r"^reinf(?:\.|:)?\s*", "", str(value or ""), flags=re.IGNORECASE)
     decomposed = unicodedata.normalize("NFKD", identity).casefold()
     words = re.findall(r"[^\W_]+", decomposed)
     normalized_words = [
-        UNIT_IDENTITY_WORD_ALIASES.get(
+        identity_config.word_aliases.get(
             root := (
                 word[:-1]
                 if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
@@ -256,7 +243,7 @@ def normalized_unit_identity(value: object) -> str:
     return " ".join(sorted(normalized_words))
 
 
-def unit_match_identities(row: sqlite3.Row) -> set[str]:
+def unit_match_identities(row: sqlite3.Row, identity_config: IdentityConfig) -> set[str]:
     """Return normalized ISC and display-name identities for a unit.
 
     Reinforcement labels are secondary, and the Army data does not always use
@@ -267,13 +254,13 @@ def unit_match_identities(row: sqlite3.Row) -> set[str]:
     return {
         identity
         for value in (row["isc"], row["name"])
-        if (identity := normalized_unit_identity(value))
+        if (identity := normalized_unit_identity(value, identity_config))
     }
 
 
-def unit_base_identity(row: sqlite3.Row) -> str:
+def unit_base_identity(row: sqlite3.Row, identity_config: IdentityConfig) -> str:
     """Return a stable primary identity for a logical unit group."""
-    return min(unit_match_identities(row), default="")
+    return min(unit_match_identities(row, identity_config), default="")
 
 
 def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> None:
@@ -307,7 +294,9 @@ def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
 
 
 def logical_unit_groups(
-    rows: list[sqlite3.Row], memberships: dict[int, list[dict[str, Any]]]
+    rows: list[sqlite3.Row],
+    memberships: dict[int, list[dict[str, Any]]],
+    identity_config: IdentityConfig,
 ) -> list[dict[str, Any]]:
     """Combine 10,000-ID duplicates and their reinforcement-only variants."""
     groups: dict[tuple[Any, ...], dict[str, Any]] = {}
@@ -316,11 +305,11 @@ def logical_unit_groups(
         reinforcement_only = bool(armies) and all(
             is_reinforcement_army_id(army["id"]) for army in armies
         )
-        base_identity = unit_base_identity(row)
+        base_identity = unit_base_identity(row, identity_config)
         key = (
             ("reinforcement", base_identity)
             if reinforcement_only
-            else ("standard", *unit_group_key(row))
+            else ("standard", *unit_group_key(row, identity_config))
         )
         group = groups.setdefault(
             key,
@@ -341,16 +330,16 @@ def logical_unit_groups(
                 "armies": {},
                 "army_occurrences": [],
                 "base_identity": base_identity,
-                "match_identities": set(unit_match_identities(row)),
+                "match_identities": set(unit_match_identities(row, identity_config)),
                 "reinforcement_only": reinforcement_only,
             },
         )
-        group["match_identities"].update(unit_match_identities(row))
+        group["match_identities"].update(unit_match_identities(row, identity_config))
         group["source_ids"].append(row["id"])
         group["names"].append(row["name"])
         for army in armies:
             source_army_id = army["id"]
-            preferred_army_id = canonical_army_id(source_army_id)
+            preferred_army_id = identity_config.canonical_army_id(source_army_id)
             preferred_army = {**army, "id": preferred_army_id}
             if preferred_army_id not in group["armies"] or source_army_id == preferred_army_id:
                 group["armies"][preferred_army_id] = preferred_army
@@ -482,6 +471,11 @@ class Database:
         finally:
             connection.close()
 
+    @instance_lru_cache(maxsize=1)
+    def _identity_config(self) -> IdentityConfig:
+        with self._connect() as connection:
+            return identity_config_from_connection(connection)
+
     def validate(self) -> None:
         """Reject missing, unrelated, unsupported, incomplete, or corrupt databases."""
         with self._connect() as connection:
@@ -523,6 +517,7 @@ class Database:
                     "Database compatibility revision does not match this application; "
                     "rebuild the database"
                 )
+            identity_config_from_connection(connection)
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -543,6 +538,7 @@ class Database:
     @instance_lru_cache(maxsize=1)
     def _unit_graph(self) -> dict[str, Any]:
         """Load the snapshot-wide unit relationships shared by read paths."""
+        identity_config = self._identity_config()
         with self._connect() as connection:
             rows = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
@@ -578,7 +574,7 @@ class Database:
                 for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
                     if row["unit_id"] in search_terms_by_source:
                         search_terms_by_source[row["unit_id"]].add(row["name"])
-        groups = logical_unit_groups(rows, memberships)
+        groups = logical_unit_groups(rows, memberships, identity_config)
         for group in groups:
             group["normal_army_ids"] = set().union(
                 *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
@@ -632,6 +628,7 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
+        identity_config = self._identity_config()
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT a.id, a.name, a.slug, a.kind, u.id AS unit_id "
@@ -643,7 +640,7 @@ class Database:
             armies: dict[int, dict[str, Any]] = {}
             for row in rows:
                 source_army_id = row["id"]
-                preferred_army_id = canonical_army_id(source_army_id)
+                preferred_army_id = identity_config.canonical_army_id(source_army_id)
                 if preferred_army_id not in armies or source_army_id == preferred_army_id:
                     armies[preferred_army_id] = {
                         "id": preferred_army_id,
@@ -729,6 +726,7 @@ class Database:
             metadata_table = metadata_tables[catalog]
         except KeyError as exc:
             raise ValueError(f"Unknown catalog: {catalog}") from exc
+        identity_config = self._identity_config()
 
         with self._connect() as connection:
             if catalog == "weapons":
@@ -802,25 +800,24 @@ class Database:
                 item["use_count"] = len(use_keys.get(item["id"], set()))
                 if catalog == "skills":
                     item["categories"] = categories_for_skill(item["id"])
-            if catalog not in {"skills", "equipment", "weapons"}:
-                return items
             groups: dict[str, list[dict[str, Any]]] = {}
             for item in items:
-                if catalog == "skills":
-                    canonical_id = SKILL_NAME_EXCEPTION_ALIASES.get(item["id"])
-                    merge_key = skill_merge_key(item["name"])
-                else:
-                    canonical_id = CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"]))
-                    merge_key = catalog_merge_key(item["name"])
+                canonical_id = identity_config.canonical_catalog_id(catalog, item["id"])
+                merge_key = (
+                    skill_merge_key(item["name"])
+                    if catalog == "skills"
+                    else catalog_merge_key(item["name"])
+                )
                 key = f"alias:{canonical_id}" if canonical_id is not None else merge_key
                 groups.setdefault(key or f"id:{item['id']}", []).append(item)
             merged = []
             for group in groups.values():
                 canonical_id = next(
                     (
-                        CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"]))
+                        configured
                         for item in group
-                        if CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"])) is not None
+                        if (configured := identity_config.canonical_catalog_id(catalog, item["id"]))
+                        is not None
                     ),
                     None,
                 )
@@ -927,6 +924,7 @@ class Database:
             raise ValueError(f"Unknown catalog: {catalog}")
         if type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX:
             raise ValueError("item_id must be an integer within SQLite's signed 64-bit range")
+        identity_config = self._identity_config()
         item_table, metadata_table, suffix = tables[catalog]
         with self._connect() as connection:
             catalog_items = connection.execute(
@@ -936,15 +934,14 @@ class Database:
             selected = next((row for row in catalog_items if row["id"] == item_id), None)
             if selected is None:
                 return None
-            canonical_id = CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item_id))
-            if canonical_id is not None:
-                source_ids = tuple(
-                    row["id"]
-                    for row in catalog_items
-                    if CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, row["id"])) == canonical_id
-                )
-                if canonical_id not in source_ids:
-                    canonical_id = min(source_ids)
+            configured_group = configured_catalog_group(
+                identity_config,
+                catalog,
+                item_id,
+                {row["id"] for row in catalog_items},
+            )
+            if configured_group is not None:
+                canonical_id, source_ids = configured_group
             else:
                 merge_key = catalog_merge_key(selected["name"])
                 source_ids = tuple(
@@ -1110,6 +1107,7 @@ class Database:
         """Return one skill together with the units that use it."""
         if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
             raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+        identity_config = self._identity_config()
         with self._connect() as connection:
             skills = connection.execute(
                 "SELECT s.id, COALESCE(NULLIF(s.name, ''), NULLIF(m.name, ''), "
@@ -1119,15 +1117,14 @@ class Database:
             skill = next((row for row in skills if row["id"] == skill_id), None)
             if skill is None:
                 return None
-            canonical_id = SKILL_NAME_EXCEPTION_ALIASES.get(skill_id)
-            if canonical_id is not None:
-                source_ids = tuple(
-                    row["id"]
-                    for row in skills
-                    if SKILL_NAME_EXCEPTION_ALIASES.get(row["id"]) == canonical_id
-                )
-                if canonical_id not in source_ids:
-                    canonical_id = min(source_ids)
+            configured_group = configured_catalog_group(
+                identity_config,
+                "skills",
+                skill_id,
+                {row["id"] for row in skills},
+            )
+            if configured_group is not None:
+                canonical_id, source_ids = configured_group
             else:
                 merge_key = skill_merge_key(skill["name"])
                 source_ids = tuple(
@@ -1253,7 +1250,7 @@ class Database:
         ):
             raise ValueError("army_id must be an integer within SQLite's signed 64-bit range")
         if army_id is not None:
-            army_id = canonical_army_id(army_id)
+            army_id = self._identity_config().canonical_army_id(army_id)
         rule_filters = {
             "skills": skill_id,
             "equipment": equipment_id,

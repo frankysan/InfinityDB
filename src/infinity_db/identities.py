@@ -48,6 +48,16 @@ class IdentityConfig:
         aliases = self.catalog_aliases.get(catalog)
         return aliases.get(source_id) if aliases is not None else None
 
+    def catalog_source_ids(self, catalog: str, source_id: int) -> tuple[int, ...]:
+        """Return the explicit alias group containing ``source_id``, when configured."""
+        aliases = self.catalog_aliases.get(catalog)
+        if aliases is None:
+            return ()
+        canonical_id = aliases.get(source_id)
+        if canonical_id is None:
+            return ()
+        return tuple(item_id for item_id, target in aliases.items() if target == canonical_id)
+
 
 def identity_metadata(config: IdentityConfig) -> dict[str, Any]:
     """Return the validated identity policy fields persisted with a database snapshot."""
@@ -55,21 +65,6 @@ def identity_metadata(config: IdentityConfig) -> dict[str, Any]:
         IDENTITY_CONFIG_METADATA_KEY: config.document,
         IDENTITY_CONFIG_SHA256_METADATA_KEY: config.content_sha256,
     }
-
-
-def parse_identity_metadata(document: Any, content_sha256: Any) -> IdentityConfig:
-    """Validate identity policy loaded from persisted snapshot metadata."""
-    if not isinstance(content_sha256, str) or len(content_sha256) != 64:
-        raise IdentityConfigError("identity config metadata must contain a SHA-256 digest")
-    try:
-        int(content_sha256, 16)
-    except ValueError as exc:
-        raise IdentityConfigError("identity config metadata SHA-256 must be hexadecimal") from exc
-
-    config = parse_identity_config(document)
-    if config.content_sha256 != content_sha256.casefold():
-        raise IdentityConfigError("identity config metadata hash does not match its document")
-    return config
 
 
 def _canonical_json(document: Mapping[str, Any]) -> str:
@@ -256,6 +251,16 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         word_aliases=word_aliases,
         profile_identity_ignored_words=frozenset(parsed_ignored_words),
     )
+
+
+def parse_identity_metadata(document: Any, content_sha256: Any) -> IdentityConfig:
+    """Validate a manifest loaded from snapshot metadata and verify its attested hash."""
+    if not isinstance(content_sha256, str):
+        raise IdentityConfigError("identity config metadata hash must be a string")
+    config = parse_identity_config(document)
+    if config.content_sha256 != content_sha256:
+        raise IdentityConfigError("identity config metadata hash does not match its document")
+    return config
 
 
 def load_identity_config(path: Path = DEFAULT_IDENTITY_CONFIG) -> IdentityConfig:

@@ -14,6 +14,7 @@ from typing import Any
 from infinity_army_data.metadata import MetadataError, validate_metadata_envelope
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
 
+from ..identities import IdentityConfig, identity_metadata, load_identity_config
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -117,7 +118,18 @@ def insert_batched(
         connection.executemany(statement, batch)
 
 
-def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+def snapshot_metadata(data: dict[str, Any], identity_config: IdentityConfig) -> dict[str, Any]:
+    """Return the metadata persisted with both database siblings."""
+    metadata = {key: value for key, value in data.items() if key != "tables"}
+    metadata.update(identity_metadata(identity_config))
+    metadata["imported_tables"] = list(data["tables"])
+    metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+    return metadata
+
+
+def create_raw_archive(
+    connection: sqlite3.Connection, data: dict[str, Any], identity_config: IdentityConfig
+) -> None:
     """Store lossless normalized records outside the frontend database."""
     connection.execute(f"PRAGMA application_id = {APPLICATION_ID}")
     connection.execute(
@@ -129,9 +141,7 @@ def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> 
         f"{quote(ROW_JSON)} TEXT NOT NULL, "
         "PRIMARY KEY (table_name, row_position))"
     )
-    metadata = {key: value for key, value in data.items() if key != "tables"}
-    metadata["imported_tables"] = list(data["tables"])
-    metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+    metadata = snapshot_metadata(data, identity_config)
     insert_batched(
         connection,
         f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
@@ -149,14 +159,19 @@ def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> 
     )
 
 
-def export_database(data: dict[str, Any], path: Path) -> None:
+def export_database(
+    data: dict[str, Any], path: Path, *, identity_config: IdentityConfig | None = None
+) -> None:
     """Replace ``path`` only after the complete normalized import passes validation.
 
     The frontend database contains queryable normalized columns only. A sibling
     ``.raw`` database preserves exact normalized rows, including absent versus
-    null fields, for development use.
+    null fields, for development use. The authored identity policy is validated
+    at build time and pinned into both database siblings with its deterministic
+    hash so runtime queries never depend on the repository's ``config/`` tree.
     """
     table_columns = validate_input(data)
+    identity_config = identity_config or load_identity_config()
     path = Path(path)
     archive_path = raw_database_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -174,9 +189,7 @@ def export_database(data: dict[str, Any], path: Path) -> None:
             connection.execute("PRAGMA foreign_keys = ON")
             with connection:
                 create_schema(connection, data["tables"], table_columns=table_columns)
-                metadata = {key: value for key, value in data.items() if key != "tables"}
-                metadata["imported_tables"] = list(data["tables"])
-                metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+                metadata = snapshot_metadata(data, identity_config)
                 insert_batched(
                     connection,
                     f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
@@ -206,7 +219,7 @@ def export_database(data: dict[str, Any], path: Path) -> None:
         archive_connection = sqlite3.connect(archive_temporary)
         try:
             with archive_connection:
-                create_raw_archive(archive_connection, data)
+                create_raw_archive(archive_connection, data, identity_config)
             if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Raw archive integrity check failed")
         finally:
