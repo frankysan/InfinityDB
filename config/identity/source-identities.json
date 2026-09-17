@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "units": {
+    "groups": [
+      {
+        "canonical_id": 300,
+        "source_ids": [300, 1690, 10300],
+        "reason": "Equivalent source records outside the normal duplicate-ID pattern"
+      },
+      {
+        "canonical_id": 1345,
+        "source_ids": [1345, 1875, 11345],
+        "reason": "Equivalent source records outside the normal duplicate-ID pattern"
+      }
+    ]
+  },
+  "armies": {
+    "groups": [
+      {
+        "canonical_id": 999,
+        "source_ids": [998, 999],
+        "reason": "Source army lists represent the same logical force"
+      }
+    ]
+  },
+  "catalogs": {
+    "skills": {
+      "groups": [
+        {
+          "canonical_id": 201,
+          "source_ids": [201, 278, 279]
+        },
+        {
+          "canonical_id": 240,
+          "source_ids": [240, 274]
+        }
+      ]
+    },
+    "equipment": {
+      "groups": [
+        {
+          "canonical_id": 235,
+          "source_ids": [169, 188, 193, 235, 244, 247, 248]
+        }
+      ]
+    },
+    "weapons": {
+      "groups": [
+        {
+          "canonical_id": 226,
+          "source_ids": [209, 215, 219, 222, 226, 228]
+        }
+      ]
+    }
+  },
+  "canonical_faction_overrides": {
+    "1": 901
+  },
+  "name_normalization": {
+    "word_aliases": {
+      "armoured": "armored",
+      "reconnaissance": "recon",
+      "reconaissance": "recon"
+    }
+  },
+  "profile_identity": {
+    "ignored_words": [
+      "troops",
+      "autonomous",
+      "intervention",
+      "unit"
+    ]
+  }
+}
