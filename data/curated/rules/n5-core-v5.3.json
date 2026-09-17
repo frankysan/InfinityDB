@@ -254,6 +254,15 @@
             "snapshotDate": "2026-09-17",
             "url": "https://infinitythewiki.com/index.php?title=Traits&oldid=4110",
             "authority": "secondary"
+        },
+        {
+            "id": "wiki-armed-turret-oldid-3919",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Armed Turret revision 3919",
+            "version": "N5.2 / oldid 3919",
+            "snapshotDate": "2026-09-17",
+            "url": "https://infinitythewiki.com/index.php?title=Armed_Turret&oldid=3919",
+            "authority": "secondary"
         }
     ],
     "records": [
@@ -1250,6 +1259,85 @@
                 "Zone of Control (ZC)",
                 "Zone of Control"
             ]
+        },
+        {
+            "id": "weapon:armed-turret",
+            "kind": "weapon",
+            "name": "Armed Turret",
+            "summary": "A stationary Deployable Weapon that reacts to enemy Orders.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "specialProfile": {
+                    "stats": [
+                        [
+                            "MOV",
+                            "--"
+                        ],
+                        [
+                            "CC",
+                            "5"
+                        ],
+                        [
+                            "BS",
+                            "10"
+                        ],
+                        [
+                            "PH",
+                            "--"
+                        ],
+                        [
+                            "WIP",
+                            "--"
+                        ],
+                        [
+                            "ARM",
+                            "2"
+                        ],
+                        [
+                            "BTS",
+                            "3"
+                        ],
+                        [
+                            "STR",
+                            "1"
+                        ],
+                        [
+                            "S",
+                            "2"
+                        ]
+                    ],
+                    "equipment": [
+                        "360º Visor"
+                    ],
+                    "skills": [
+                        "Total Reaction"
+                    ],
+                    "ccWeapon": "PARA CC Weapon (-3)"
+                }
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": 226
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-armed-turret-oldid-3919",
+                    "path": "index.php?title=Armed_Turret&oldid=3919",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Armed Turret Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
         }
     ]
 }

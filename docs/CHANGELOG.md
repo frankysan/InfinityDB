@@ -47,8 +47,11 @@ All notable changes to this project are documented in this file.
 - Move maintained weapon-family taxonomy, regex classification policy, manual
   category decisions, and Army-source weapon metadata corrections out of Python
   into validated `config/catalogs/` configuration. Classification mechanics
-  remain code, while special weapon game-rule facts remain outside the source
-  correction config pending cited curated-rules migration.
+  remain code and game-rule facts stay outside source-correction configuration.
+- Move the Armed Turret special profile out of Python into a cited curated
+  `weapon` rules record linked to Army weapon ID 226. Weapon API responses now
+  compose that profile from `rules.db`, while the Army repository remains
+  source-data-only and degrades cleanly when curated rules are unavailable.
 - Reconcile reference documentation with the completed logical-unit and army-role
   refactors: source-unit identity is now distinguished from materialized
   application identity, repository-time identity discovery is no longer described

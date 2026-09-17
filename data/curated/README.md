@@ -150,6 +150,12 @@ Supported record kinds include `rule`, `skill`, `equipment`, `weapon`,
 `unit-annotation`.
 
 
+Weapon records may use `facts.specialProfile` for rulebook-defined deployable
+profiles that are not fully represented by Army weapon metadata. The special
+profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon;
+the application composes it into the existing weapon-reference API only when a
+validated `rules.db` is available.
+
 Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
 parameter value is part of the Army text, for example `Disposable (2)` mapping
 to the canonical `Disposable (X)` record. Exact alternate spellings and

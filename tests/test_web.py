@@ -1540,3 +1540,75 @@ def test_missing_database_fails_before_app_starts(tmp_path: Path) -> None:
     with pytest.raises((OSError, ValueError)):
         create_app(database_path)
     assert not database_path.exists()
+
+
+
+def test_weapon_api_adds_curated_special_profile_when_rules_database_is_available(
+    tmp_path: Path,
+) -> None:
+    unit = {
+        "id": 1,
+        "name": "Turret Carrier",
+        "canonical": 101,
+        "factions": [101],
+        "profileGroups": [
+            {
+                "id": 1,
+                "profiles": [{"id": 1, "weapons": [{"id": 226}]}],
+                "options": [],
+            }
+        ],
+    }
+    document = {
+        "version": "test",
+        "units": [unit],
+        "filters": {"weapons": [{"id": 226, "name": "Armed Turret"}]},
+        "reinforcements": None,
+    }
+    source = make_source("101-main.json", json.dumps(document).encode())
+    assert source is not None
+    normalized = normalize_master(merge_sources([source]))
+    normalized["armyMetadata"] = {
+        "sourceFile": "metadata.json",
+        "sourceSha256": "test-metadata",
+        "data": {"factions": []},
+    }
+    normalized["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 226,
+            "name": "Armed Turret",
+            "mode": "Combi Rifle",
+            "burst": "3",
+            "damage": "7",
+        }
+    ]
+
+    database_path = tmp_path / "infinity.db"
+    rules_path = tmp_path / "rules.db"
+    export_database(normalized, database_path)
+    documents = load_curated_directory(
+        Path(__file__).parents[1] / "data" / "curated" / "rules"
+    )
+    export_rules_database(documents, rules_path)
+    rules_app = create_app(database_path, rules_database_path=rules_path)
+
+    status, _, body = request(rules_app, "/api/weapons/226")
+
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["special_profile"]["stats"] == [
+        ["MOV", "--"],
+        ["CC", "5"],
+        ["BS", "10"],
+        ["PH", "--"],
+        ["WIP", "--"],
+        ["ARM", "2"],
+        ["BTS", "3"],
+        ["STR", "1"],
+        ["S", "2"],
+    ]
+    assert payload["special_profile"]["equipment"] == ["360º Visor"]
+    assert payload["special_profile"]["skills"] == ["Total Reaction"]
+    assert payload["special_profile"]["cc_weapon"] == "PARA CC Weapon (-3)"
+    assert [record["id"] for record in payload["rules"]] == ["weapon:armed-turret"]

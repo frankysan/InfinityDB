@@ -589,22 +589,7 @@ def test_armed_turret_uses_its_base_name_and_hides_placeholder_profile(
     assert [(profile["name"], profile["mode"]) for profile in detail["profiles"]] == [
         ("Armed Turret", "Combi Rifle"),
     ]
-    assert detail["special_profile"] == {
-        "stats": [
-            ["MOV", "--"],
-            ["CC", "5"],
-            ["BS", "10"],
-            ["PH", "--"],
-            ["WIP", "--"],
-            ["ARM", "2"],
-            ["BTS", "3"],
-            ["STR", "1"],
-            ["S", "2"],
-        ],
-        "equipment": ["360º Visor"],
-        "skills": ["Total Reaction"],
-        "cc_weapon": "PARA CC Weapon (-3)",
-    }
+    assert "special_profile" not in detail
 
 
 def test_queries_use_actual_army_membership_and_unique_source_units(
