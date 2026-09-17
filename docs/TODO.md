@@ -80,6 +80,24 @@ reference. Git history retains implementation detail.
   - Require versioned schemas, validation on load, deterministic
     serialization where generated, focused regression tests, and portable
     project-relative paths for important manifests.
+- [ ] Model army/faction role and playability explicitly as part of the current
+  identity/list-semantics refactor.
+  - Represent 901 (Non-Aligned Armies) as a grouping identity for its child 9xx
+    armies, not as an independently playable army.
+  - Keep grouping/playability semantics distinct from the already-implemented
+    `1` -> `901` canonical-faction mapping in `source-identities.json`; that
+    mapping establishes canonical ownership only.
+  - Preserve the ordinary `xx01` canonical-ownership derivation unless a
+    separate refactor establishes a better authoritative relationship; do not
+    conflate that algorithm with playability.
+  - Prefer authoritative imported hierarchy/list metadata where available and
+    validated project configuration for semantics the source does not express.
+  - Expose role/playability explicitly from the backend so `/api/armies` and
+    browser selectors can exclude grouping-only identities without hard-coded
+    IDs or `9xx` assumptions.
+  - Add repository/API/UI regression coverage showing that 901 remains usable
+    for canonical ownership/grouping while its child armies remain independently
+    selectable.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.

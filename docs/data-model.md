@@ -27,9 +27,9 @@ raw Army JSON
   manifest. Generic duplicate/name rules remain implementation behavior rather
   than authored alias data.
 - The ordinary whole-army `xx01` derivation remains normalization behavior.
-  Exceptional canonical-faction interpretation, such as the legacy mercenary
-  mapping, is maintained in the identity manifest and supplied explicitly to
-  the normalizer.
+  Exceptional canonical-faction interpretation, including the legacy
+  canonical-faction source ID `1` -> `901` mapping, is maintained in the
+  identity manifest and supplied explicitly to the normalizer.
 - InfinityDB normalization pins the exact validated identity manifest and its
   canonical SHA-256 into `normalized.json`. Database export revalidates that
   provenance and propagates the same policy into both database siblings.
@@ -37,6 +37,31 @@ raw Army JSON
   working tree's `config/` directory at runtime.
 - Peripheral IDs are army-local.
 - Referenced but undefined factions/units/categories are retained as explicit placeholder records rather than discarded.
+
+## Army identities, grouping, and playability
+
+An `army_lists` record represents an Army source/list identity. Its presence does
+not by itself imply that the identity is independently playable.
+
+Faction 901, Non-Aligned Armies, is a grouping identity for the associated 9xx
+armies rather than a playable army of its own. Its child armies remain distinct
+playable army identities.
+
+The source canonical-faction ID `1` is a legacy mercenary designation and maps
+to grouping identity `901` for canonical ownership through the validated
+identity manifest. That identity mapping is separate from playability: resolving
+canonical faction `1` to `901` must not make 901 a selectable army.
+
+Canonical ownership, source-identity mapping, grouping, list kind, and
+playability are separate semantics. The current normalizer still uses the
+ordinary `xx01` derivation for canonical ownership where no exceptional mapping
+applies; grouping and presentation also use imported metadata faction
+relationships. Playability must be modeled separately rather than inferred from
+list presence or numeric ID patterns such as `9xx`.
+
+Army-list occurrences remain authoritative for unit membership and availability,
+while the set of user-selectable armies is determined separately from the
+modeled army/faction semantics.
 
 ## Principle
 
@@ -121,7 +146,10 @@ losslessly into `master.json` and `normalized.json`, and its nine collections
 are available as `metadata_*` SQLite tables. Database export also rejects
 normalized data that does not contain valid Army metadata.
 
-Faction names enrich matching `army_lists` by numeric ID. Army list files remain
-the authority for which armies and units are selectable: metadata-only factions
-never create army lists or unit memberships. Metadata weapon IDs can repeat for
-different modes, so their table uses source position as its key.
+Faction names enrich matching `army_lists` by numeric ID, while faction parent
+relationships provide explicit grouping metadata for presentation. Army list
+files remain authoritative for unit membership and source-derived availability,
+but the presence of an army-list identity does not by itself make that identity
+independently playable. Metadata-only factions never create army lists or unit
+memberships. Metadata weapon IDs can repeat for different modes, so their table
+uses source position as its key.
