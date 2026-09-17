@@ -5,7 +5,9 @@
 ```text
 raw Army JSON
     -> lossless merged master.json
+       + validated identity configuration
     -> normalized relational-style JSON
+       + pinned identity document / SHA-256
     -> validated SQLite database
     -> read-only repository / HTTP API / web UI
 ```
@@ -24,9 +26,15 @@ raw Army JSON
   maintained in the validated `config/identity/source-identities.json`
   manifest. Generic duplicate/name rules remain implementation behavior rather
   than authored alias data.
-- Database export pins the exact validated identity manifest and its canonical
-  SHA-256 into the snapshot metadata. Repository queries consume that pinned
-  policy rather than reading the working tree's `config/` directory at runtime.
+- The ordinary whole-army `xx01` derivation remains normalization behavior.
+  Exceptional canonical-faction interpretation, such as the legacy mercenary
+  mapping, is maintained in the identity manifest and supplied explicitly to
+  the normalizer.
+- InfinityDB normalization pins the exact validated identity manifest and its
+  canonical SHA-256 into `normalized.json`. Database export revalidates that
+  provenance and propagates the same policy into both database siblings.
+  Repository queries consume the database-pinned policy rather than reading the
+  working tree's `config/` directory at runtime.
 - Peripheral IDs are army-local.
 - Referenced but undefined factions/units/categories are retained as explicit placeholder records rather than discarded.
 
@@ -44,8 +52,9 @@ record (including absent versus null fields) for development use. Both databases
 retain `__infinity_metadata`; the schema defines empty frontend tables so API
 queries do not depend on a particular snapshot containing every kind of record.
 The metadata also stores the validated source-identity manifest and its
-canonical hash, making the identity policy part of the immutable database
-snapshot and allowing tampering or incomplete exports to fail validation.
+canonical hash copied from normalized provenance, making the identity policy
+part of the immutable database snapshot and allowing tampering, incomplete
+provenance, or conflicting explicit export policy to fail validation.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 8 and the application
