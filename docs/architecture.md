@@ -150,19 +150,17 @@ Ordinary unit records declare their normal faction availability through
 consistently use canonical faction `1`, an empty `factions` list, a `merc-...`
 slug, and army-specific occurrences that supply optional mercenary
 availability. Many also use 10,000-offset-style unit IDs, but that numeric
-pattern is supporting evidence only. Normalization records mercenary source roles, army-occurrence availability
-provenance, and audited mercenary-to-standard source-unit matches. Repository
-queries consume the persisted match metadata for mercenary logical grouping and
-`army_units.availability_kind` for current-snapshot mercenary filtering; the old
-canonical/faction inference remains only as a legacy-row fallback. Generic
-standard duplicate matching is also audited during normalization and persisted
-as `genericUnitMatches`; current repositories consume that result rather than
-recomputing the 10,000-ID key. The arithmetic rule remains only for older
-databases that lack the audit metadata. Database creation also audits
-reinforcement-only source records against the already grouped standard-unit
-identities using the pinned name-normalization policy and persists unambiguous
-`reinforcementUnitMatches`. Current repositories consume that persisted result;
-databases created before it existed retain the legacy query-time label matcher.
+pattern is supporting evidence only. Normalization records mercenary source
+roles, army-occurrence availability provenance, and audited mercenary-to-standard
+source-unit matches. Generic standard duplicate matching is also audited during
+normalization and persisted as `genericUnitMatches`. Database creation consumes
+those audits plus configured aliases, performs the reinforcement-only identity
+audit using the pinned name-normalization policy, and materializes one
+logical-unit relation. The arithmetic duplicate fallback remains only inside the
+builder for older normalized inputs that lack the persisted audits. Repository
+queries consume the materialized identity and `army_units.availability_kind`;
+the old canonical/faction availability inference remains only as a legacy-row
+fallback.
 
 ### Design direction
 
@@ -213,39 +211,35 @@ availability provenance are persisted and consumed by repository queries. The
 The legacy `1` -> `901` canonical-faction override has now been removed. ID `1`
 remains source provenance for mercenary identity and does not receive an
 application `main_army_id`; 901 remains a separate Non-Aligned Army grouping
-identity. Generic duplicate matching is now persisted during normalization and
-reinforcement-to-standard matching is audited during database creation; current
-repositories consume both results directly.
+identity. Generic duplicate matching is persisted during normalization and
+reinforcement-to-standard matching is audited during database creation; both
+feed the materialized logical-unit identity consumed by repositories.
 
-The next logical-unit step is to materialize the resolved application identity
-in the frontend database. This does **not** merge or rewrite source rows. Source
-unit IDs, army occurrences, profiles, loadouts, options, and availability
-provenance remain attached to their original source unit. Instead, database
-creation will resolve configured unit aliases plus persisted generic,
-mercenary, and reinforcement matches into one explicit logical-unit relation.
-The planned shape is a `logical_units` table with a deterministic representative
-source unit and a `logical_unit_sources` table mapping every source-defined unit
-to exactly one logical unit.
+Logical-unit identity is materialized during frontend database creation. This
+does **not** merge or rewrite source rows: source unit IDs, army occurrences,
+profiles, loadouts, options, and availability provenance remain attached to
+their original source unit. The exporter resolves configured unit aliases plus
+persisted generic and mercenary matches and the database-build reinforcement
+audit into frontend-only `logical_units` and `logical_unit_sources` tables.
+Every source-defined unit maps to exactly one logical unit.
 
-Database creation will own the identity resolver. It will treat the configured
-aliases and persisted match sets as identity evidence, compute their transitive
-connected components, select one deterministic ordinary representative for each
-component, validate that all referenced source IDs exist, and persist the
-resolved mapping. Explicitly unmatched mercenary or reinforcement records form
-their own logical units. The existing legacy generic/reinforcement discovery
-algorithms remain available only while building from older normalized inputs
-that lack the newer persisted evidence; once a frontend database is built, its
-repository read path should consume only the materialized logical identity.
+The build-time resolver treats those inputs as identity evidence, combines their
+transitive connected components, selects one deterministic representative,
+validates missing/conflicting references, and persists the resolved mapping.
+Explicitly unmatched mercenary or reinforcement records form their own logical
+units. Older normalized inputs that lack the persisted generic/mercenary audits
+retain the legacy duplicate fallback inside the builder; repository reads do
+not rediscover logical identity.
 
-The logical-unit ID should initially remain the representative ordinary source
-unit ID so existing API IDs and URLs stay stable. The schema should nevertheless
-store the representative explicitly, leaving room to decouple application
-identity from source identity later without changing provenance. Repository
-aggregation will continue to follow the mapped source IDs when collecting
-profiles, loadouts, army occurrences, search terms, and other source-backed
-data. It must not pre-aggregate those source tables into logical copies, because
-normal and optional-mercenary occurrences can belong to the same logical unit
-and army while retaining different `availability_kind` semantics.
+For schema version 10, the logical-unit ID equals the representative source-unit
+ID so existing API IDs and URLs remain stable. `representative_unit_id` is still
+stored explicitly, leaving room to decouple application identity from source
+identity later without changing provenance. Repository aggregation follows the
+mapped source IDs when collecting profiles, loadouts, army occurrences, search
+terms, and other source-backed data. It does not pre-aggregate those source
+tables into logical copies, because normal and optional-mercenary occurrences
+can belong to the same logical unit and army while retaining different
+`availability_kind` semantics.
 
 ## Snapshot acquisition and provenance
 
@@ -524,16 +518,14 @@ total above illustrates the response shape.
 - Results sort by display name after case-folding, removing diacritics, and
   ignoring punctuation and other non-alphanumeric characters; unit ID breaks
   ties for stable pagination.
-- Current normalized snapshots persist audited generic duplicate-unit matches
-  for standard non-reinforcement records, and repository grouping consumes that
-  persisted result. The old 10,000-ID/ISC calculation is used only for older
-  databases without the audit metadata. Database creation now also persists
-  audited reinforcement-to-standard matches; current repositories consume that
-  result, while older databases retain the legacy query-time matcher. Configured
-  identity aliases remain pinned project policy rather than normalized source
-  facts. The planned frontend identity layer will materialize the transitive
-  result of these relationships once per database build instead of reconstructing
-  logical groups on repository reads.
+- Current normalized snapshots persist audited generic and mercenary unit
+  matches. Database creation consumes those audits, configured aliases, and its
+  reinforcement-to-standard audit to materialize the transitive logical-unit
+  relation. The old 10,000-ID/ISC calculation is retained only as a build-time
+  compatibility fallback for older normalized inputs. Configured identity
+  aliases remain pinned project policy rather than normalized source facts;
+  repository reads use the materialized mapping rather than reconstructing
+  logical groups.
 - `limit` defaults to 50 and must be between 1 and 200; `offset` defaults to 0
   and must be a nonnegative SQLite integer.
 - `search` is limited to 200 characters. Invalid or repeated unit query

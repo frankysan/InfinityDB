@@ -101,25 +101,24 @@ The classifier does not use the common 10,000-ID offset as its semantic rule,
 and contradictory mercenary markers fail normalization rather than being
 silently guessed.
 
-Normalization now also persists `genericUnitMatches` for standard,
+Normalization also persists `genericUnitMatches` for standard,
 non-reinforcement source records whose 10,000-family ID and ISC/display-name
 identity provide an unambiguous duplicate match. Presence of that metadata is
-authoritative even when the list is empty: repository grouping consumes the
+authoritative even when the list is empty: database creation consumes the
 persisted matches and does not rediscover additional generic groups through ID
-arithmetic. Databases built before `genericUnitMatches` was persisted remain
-readable through the legacy arithmetic fallback.
+arithmetic. Older normalized inputs without `genericUnitMatches` retain the
+legacy arithmetic fallback inside the builder.
 
-Mercenary identity remains a separate source-semantic contract. Repository
-logical-unit grouping consumes persisted `mercenaryUnitMatches` /
+Mercenary identity remains a separate source-semantic contract. Database
+creation consumes persisted `mercenaryUnitMatches` /
 `unmatchedMercenaryUnitIds`; matched mercenary records join through their
 recorded standard source unit, while explicitly unmatched variants remain
-separate. Configured alias groups still come from the pinned identity policy. During
-database creation, reinforcement-only source rows are audited against those
+separate. Configured alias groups still come from the pinned identity policy.
+During database creation, reinforcement-only source rows are audited against
 standard logical groups using the same pinned word-alias policy. Unambiguous
-results are persisted as `reinforcementUnitMatches`; current repositories treat
-that metadata as authoritative, while databases without it retain the legacy
-query-time label matcher. An explicitly empty persisted result disables runtime
-reinforcement rediscovery.
+results are persisted as `reinforcementUnitMatches` and feed the same
+materialized logical-unit relation; an explicitly empty result keeps those
+reinforcement records separate.
 
 Mercenary availability has now completed the same read-path migration for
 current normalized snapshots. Repository source occurrences carry
@@ -150,16 +149,9 @@ normalization. ID `1` remains source-side mercenary identity/provenance with no
 application `main_army_id`, while Non-Aligned Army grouping is derived from the
 actual 901 metadata hierarchy.
 
-Continue moving logical-unit identity earlier in the pipeline. The current
-normalizer persists generic duplicate and mercenary-to-standard matches, while
-database creation persists unambiguous reinforcement-to-standard matches using
-the pinned identity policy. The repository honors all three decisions directly.
-Configured aliases and these persisted match sets are still not represented by
-one materialized logical-unit identity.
-
-The accepted next step is to materialize that identity during frontend SQLite
-creation, while leaving normalized/source records unchanged for provenance. The
-planned frontend relation is conceptually:
+Logical-unit identity is now materialized during frontend SQLite creation while
+normalized/source records remain unchanged for provenance. The frontend relation
+is:
 
 ```text
 logical_units
@@ -171,40 +163,37 @@ logical_unit_sources
   logical_unit_id         owning application logical unit
 ```
 
-Initially `logical_units.id` should equal `representative_unit_id`, preserving
-existing unit URLs and API identifiers. Keeping both fields explicit allows a
-future application-owned logical ID without rewriting the source model.
+For schema version 10, `logical_units.id` equals `representative_unit_id`,
+preserving existing unit URLs and API identifiers. Keeping both fields explicit
+allows a future application-owned logical ID without rewriting the source model.
 
-Database creation should resolve the relation from four inputs: configured unit
-aliases in the pinned identity policy, normalized `genericUnitMatches`, normalized
-`mercenaryUnitMatches` / `unmatchedMercenaryUnitIds`, and database-build
-`reinforcementUnitMatches`. These are evidence and provenance; the materialized
-relation is their resolved application identity. The resolver should combine
-transitive relationships as graph components rather than depend on matching
-order. It must choose a deterministic representative, reject references to
-missing source rows or contradictory mappings, and place explicitly unmatched
-mercenary/reinforcement variants in independent logical units.
+Database creation resolves the relation from configured unit aliases in the
+pinned identity policy, normalized `genericUnitMatches`, normalized
+`mercenaryUnitMatches` / `unmatchedMercenaryUnitIds`, and the database-build
+`reinforcementUnitMatches` audit. These remain evidence/provenance; the two
+frontend tables are their resolved application identity. The resolver combines
+transitive relationships as graph components, selects a deterministic
+representative, rejects invalid or contradictory references, and places
+explicitly unmatched mercenary/reinforcement variants in independent logical
+units.
 
-The central invariants are:
+The enforced invariants are:
 
 - every source-defined unit belongs to exactly one persisted logical unit;
-- every logical unit has exactly one deterministic representative source unit;
+- every logical unit has exactly one representative source unit;
 - source rows are never physically merged or rewritten by logical identity;
 - profiles, loadouts, unit options, army occurrences, and availability provenance
   continue to reference their original source unit IDs;
 - `army_units.availability_kind` remains source-occurrence provenance even when
   standard and mercenary occurrences resolve to the same logical unit and army;
-- current repository reads consume the materialized relation and do not repeat
-  generic, mercenary, reinforcement, or alias identity resolution.
+- repository reads consume the materialized relation and do not repeat generic,
+  mercenary, reinforcement, or alias identity resolution.
 
-Legacy matching remains a build-compatibility concern rather than a repository
-concern. When older normalized inputs lack persisted generic, mercenary, or
-reinforcement evidence, database creation may run the existing legacy fallback
-to obtain the mapping before writing `logical_units` and `logical_unit_sources`.
-Every newly built frontend database then exposes the same materialized contract
-regardless of which compatibility path produced it. Once old input support is no
-longer required, those fallbacks can be removed without changing repository
-queries.
+Legacy duplicate matching is now a build-compatibility concern. When older
+normalized inputs lack the persisted generic or mercenary evidence, database
+creation can use the retained legacy fallback before writing the materialized
+relation. Every newly built frontend database therefore exposes the same
+logical-unit contract regardless of which compatibility path produced it.
 
 Normal availability derived from declared `factions` and optional mercenary
 availability derived from mercenary source variants remain distinguishable even
@@ -218,8 +207,8 @@ parent relationships provide main-army, sectorial, and Non-Aligned grouping;
 explicit `reinforcements` links provide reinforcement parentage. Grouping
 identity `901` is surfaced as non-playable when its imported child lists are
 present, and the browser selector consumes `role`/`playable` instead of Army-ID
-ranges. The remaining identity work concerns complete logical-unit consolidation
-rather than army playability or query-time generic/reinforcement matching.
+ranges. Logical-unit consolidation is now a database-build concern rather than
+army playability or query-time generic/reinforcement matching.
 
 ## Principle
 
@@ -248,17 +237,17 @@ normalization-time availability classification part of the generated database
 contract; repository mercenary filtering consumes `availability_kind` directly
 for current snapshots.
 
-The planned logical-unit materialization adds frontend-only `logical_units` and
-`logical_unit_sources` tables during database export. These tables are derived
+Frontend-only `logical_units` and `logical_unit_sources` tables are derived
 application structure, not normalized source facts, and therefore do not replace
 `units` or duplicate profile/loadout/occurrence tables. Repository unit queries
-will map a requested source or representative ID through `logical_unit_sources`,
-then aggregate the associated original source rows. This keeps source provenance
-lossless while making the logical identity itself an explicit database contract.
+map a requested source or representative ID through `logical_unit_sources`, then
+aggregate the associated original source rows. The normalized-input table
+registry remains separate from these derived frontend tables so generated
+application structure cannot be supplied as normalized source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 9 and the application
-compatibility revision is 13. Imports build temporary sibling files, check
+records its schema version. The current schema version is 10 and the application
+compatibility revision is 14. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

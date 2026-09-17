@@ -36,23 +36,26 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Materialize application logical-unit identity during frontend database
+  creation. The exporter resolves configured aliases plus persisted generic,
+  mercenary, and reinforcement evidence into frontend-only `logical_units` and
+  `logical_unit_sources` tables while retaining all source rows and occurrence
+  provenance. Repository reads now consume that materialized mapping; schema
+  version is 10 and database compatibility revision is 14.
 - Audit unambiguous reinforcement-only source-unit identity during database
   creation and persist `reinforcementUnitMatches` alongside the pinned identity
-  policy. Current repository grouping consumes that metadata instead of repeating
-  name/ISC matching at query time; an empty audit is authoritative, while older
-  databases without the key retain the legacy runtime matcher.
+  policy. The audit now feeds materialized logical-unit identity instead of
+  repository-time name/ISC matching; an empty audit remains authoritative.
 - Persist generic standard-unit duplicate matches as `genericUnitMatches` during
-  normalization and make current repository grouping consume that audit instead
-  of recomputing the 10,000-ID/ISC key. An explicitly empty audit disables
-  arithmetic rediscovery, while older databases without the metadata retain the
-  legacy fallback. Reinforcement matching and configured aliases remain separate
-  concerns.
+  normalization. The database builder consumes that audit when materializing
+  logical-unit identity; an explicitly empty audit disables arithmetic
+  rediscovery, while older normalized inputs without the metadata retain the
+  legacy build-time fallback.
 - Derive normalized unit `main_army_id` from imported Army metadata faction
   parents instead of the `xx01` Army-ID convention for current InfinityDB
   builds. Explicit maintained canonical-faction overrides still take
   precedence; the arithmetic rule remains only as a standalone/legacy fallback
-  when metadata cannot resolve the canonical faction. The SQLite schema remains
-  version 9 and the Army database compatibility revision is now 13.
+  when metadata cannot resolve the canonical faction.
 - Derive army role/playability from authoritative imported relationships
   instead of Army-ID ranges. `/api/armies` now exposes explicit roles,
   playability, grouping metadata, and reinforcement parents for main armies,
@@ -77,9 +80,9 @@ All notable changes to this project are documented in this file.
   key. Explicitly unmatched variants stay separate, while older databases
   without this metadata retain the legacy grouping fallback.
 - Make `units.source_role` and `army_units.availability_kind` explicit frontend
-  SQLite schema fields instead of incidental dynamic columns. The Army database
-  schema is version 9; the cumulative compatibility revision is now 13 and
-  existing generated Army databases must be rebuilt.
+  SQLite schema fields instead of incidental dynamic columns. Existing generated
+  Army databases must be rebuilt when the cumulative schema/compatibility
+  revision changes.
 - Document `tools/run_checks.py` as the standard local/agent check entry point,
   with its detailed stage, target, reporting, and exit-code contract in
   `docs/testing.md`.

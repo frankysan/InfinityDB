@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 13
+DATABASE_COMPATIBILITY_VERSION = 14
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -231,6 +231,23 @@ TABLES["option_weapons"] = table(
     ref("template_id", "option_weapon_templates", "id"),
 )
 
+
+DERIVED_TABLES = {
+    "logical_units": table(
+        "id",
+        "representative_unit_id",
+        ref("representative_unit_id", "units", "id"),
+    ),
+    "logical_unit_sources": table(
+        "source_unit_id",
+        "logical_unit_id",
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+}
+
+DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
+
 # Primary keys preserve the source hierarchy, which normally starts with
 # ``army_id``. The public read API also traverses the data by unit and performs
 # reverse catalog lookups by item, neither of which can use those key prefixes.
@@ -274,7 +291,7 @@ def quote(identifier: str) -> str:
 
 
 def columns_for(name: str, rows: list[dict]) -> tuple[str, ...]:
-    definition = TABLES[name]
+    definition = DATABASE_TABLES[name]
     columns = list(dict.fromkeys((*definition.key, *definition.fields)))
     for row in rows:
         for field in row:
@@ -306,7 +323,7 @@ def create_schema(
     connection.execute(
         f"CREATE TABLE {quote(METADATA_TABLE)} (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
     )
-    for name, definition in TABLES.items():
+    for name, definition in DATABASE_TABLES.items():
         columns = (
             table_columns[name]
             if table_columns is not None and name in table_columns
@@ -333,5 +350,9 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     """Create read-path indexes after data loading completes."""
     connection.execute("CREATE INDEX units_name ON units(name COLLATE NOCASE, id)")
     connection.execute("CREATE INDEX army_units_unit ON army_units(unit_id, army_id)")
+    connection.execute(
+        "CREATE INDEX logical_unit_sources_logical "
+        "ON logical_unit_sources(logical_unit_id, source_unit_id)"
+    )
     for index_name, table_name, columns in INDEXES:
         connection.execute(f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})")
