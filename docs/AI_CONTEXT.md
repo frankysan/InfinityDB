@@ -109,11 +109,17 @@ and serves a read-only browser and same-origin HTTP API.
 - Mercenary variants are classified during normalization, their source markers
   are validated, audited mercenary-to-standard mappings are persisted, and
   repository queries consume explicit availability provenance. Generic standard
-  duplicate matching is also audited and persisted during normalization; current
-  repositories do not rediscover those groups through numeric ID arithmetic.
-  **Design direction:** continue moving configured aliases and reinforcement
-  logical-unit identity into a pre-runtime normalized identity layer while
-  preserving every source ID and occurrence.
+  duplicate matching is also audited and persisted during normalization.
+  Database creation additionally persists unambiguous reinforcement-to-standard
+  matches using the pinned name-normalization policy. Current repositories do not
+  rediscover generic or reinforcement identity at query time when those metadata
+  contracts are present. **Design direction:** frontend database creation will
+  resolve configured aliases plus persisted generic, mercenary, and reinforcement
+  evidence into explicit `logical_units` / `logical_unit_sources` relations.
+  Source rows remain unchanged; every source unit maps to exactly one logical
+  unit, and repository reads consume that materialized mapping rather than
+  rebuilding identity dynamically. Legacy rediscovery remains only as a
+  database-build compatibility path for older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized
@@ -368,5 +374,13 @@ changes.
   army lists. Dedicated mercenary variants are identified by source semantics,
   not numeric ID arithmetic. Classification, persisted mercenary-to-standard
   matching, and explicit availability provenance are now normalized before
-  repository use. Broader generic/reinforcement logical-unit consolidation
-  remains future work.
+  repository use.
+- 2026-09-17: The accepted next logical-unit architecture is to materialize one
+  application identity during frontend database creation. Configured aliases and
+  persisted generic, mercenary, and reinforcement matches become build-time
+  identity evidence; the exporter resolves their transitive components into
+  `logical_units` and `logical_unit_sources`. Source/profile/loadout/occurrence
+  rows remain keyed to original source units for provenance, and repository
+  reads will consume the materialized relation. Legacy identity discovery moves
+  behind the builder for older normalized inputs rather than remaining ordinary
+  repository behavior.

@@ -33,11 +33,14 @@ from infinity_army_data.weapon_profiles import special_weapon_detail
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    REINFORCEMENT_MATCH_METHOD,
+    REINFORCEMENT_UNIT_MATCHES_KEY,
     IdentityConfig,
     IdentityConfigError,
     load_identity_config,
     normalized_profile_identity,
     parse_identity_metadata,
+    unit_match_identities,
 )
 from infinity_db.skill_categories import categories_for_skill
 from infinity_db.traits import TRAIT_DESCRIPTIONS, canonical_trait_name
@@ -291,6 +294,86 @@ def mercenary_identity_policy_from_connection(
 
     return matches, frozenset(unmatched)
 
+def reinforcement_identity_policy_from_connection(
+    connection: sqlite3.Connection,
+) -> dict[int, int] | None:
+    """Load database-creation reinforcement identity, when available.
+
+    Current database exports always persist ``reinforcementUnitMatches``, even
+    when no reinforcement source unit has a unique standard match. Presence is
+    therefore authoritative: unlisted reinforcement-only records remain
+    separate. Databases created before this audit was added retain the legacy
+    runtime label matcher.
+    """
+    row = connection.execute(
+        f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+        (REINFORCEMENT_UNIT_MATCHES_KEY,),
+    ).fetchone()
+    if row is None:
+        return None
+    try:
+        raw_matches = json.loads(row["value"])
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ValueError("Database has invalid reinforcement identity metadata") from exc
+    if not isinstance(raw_matches, list):
+        raise ValueError("Database has invalid reinforcement identity metadata")
+
+    matches: dict[int, int] = {}
+    for item in raw_matches:
+        if not isinstance(item, dict) or set(item) != {
+            "reinforcementUnitId",
+            "standardUnitId",
+            "method",
+        }:
+            raise ValueError("Database has invalid reinforcement identity metadata")
+        reinforcement_id = item["reinforcementUnitId"]
+        standard_id = item["standardUnitId"]
+        if (
+            type(reinforcement_id) is not int
+            or reinforcement_id <= 0
+            or type(standard_id) is not int
+            or standard_id <= 0
+            or reinforcement_id == standard_id
+            or item["method"] != REINFORCEMENT_MATCH_METHOD
+            or reinforcement_id in matches
+        ):
+            raise ValueError("Database has invalid reinforcement identity metadata")
+        matches[reinforcement_id] = standard_id
+
+    unit_roles = {
+        item["id"]: item["source_role"]
+        for item in connection.execute(
+            "SELECT id, source_role FROM units WHERE source_defined = 1"
+        )
+    }
+    unit_ids = set(unit_roles)
+    reinforcement_ids = {
+        item["id"]
+        for item in connection.execute(
+            "SELECT u.id "
+            "FROM units AS u "
+            "JOIN army_units AS au ON au.unit_id = u.id "
+            "JOIN army_lists AS a ON a.id = au.army_id "
+            "WHERE u.source_defined = 1 "
+            "GROUP BY u.id "
+            "HAVING COUNT(*) > 0 "
+            "AND SUM(CASE WHEN a.kind = 'reinforcement' THEN 0 ELSE 1 END) = 0"
+        )
+    }
+    if any(
+        reinforcement_id not in reinforcement_ids
+        or standard_id not in unit_ids
+        or standard_id in reinforcement_ids
+        or unit_roles.get(standard_id) == MERCENARY_SOURCE_ROLE
+        for reinforcement_id, standard_id in matches.items()
+    ):
+        raise ValueError(
+            "Database reinforcement identity metadata references invalid source units; "
+            "rebuild the database"
+        )
+    return matches
+
+
 def canonical_skill_id(
     skill_id: int, identity_config: IdentityConfig | None = None
 ) -> int:
@@ -406,38 +489,6 @@ def legacy_unit_group_key(row: RowLike, identity_config: IdentityConfig) -> tupl
         (row["isc"] or row["name"]).casefold(),
     )
 
-def normalized_unit_identity(value: object, identity_config: IdentityConfig) -> str:
-    """Return an order-insensitive, singularized identity for a unit label."""
-    identity = re.sub(r"^reinf(?:\.|:)?\s*", "", str(value or ""), flags=re.IGNORECASE)
-    decomposed = unicodedata.normalize("NFKD", identity).casefold()
-    words = re.findall(r"[^\W_]+", decomposed)
-    normalized_words = [
-        identity_config.word_aliases.get(
-            root := (
-                word[:-1]
-                if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
-                else word
-            ),
-            root,
-        )
-        for word in words
-    ]
-    return " ".join(sorted(normalized_words))
-
-def unit_match_identities(row: RowLike, identity_config: IdentityConfig) -> set[str]:
-    """Return normalized ISC and display-name identities for a unit.
-
-    Reinforcement labels are secondary, and the Army data does not always use
-    the same wording for the ISC and display name.  These identities are used
-    only when joining a reinforcement-only record to a unique standard-unit
-    candidate.
-    """
-    return {
-        identity
-        for value in (row["isc"], row["name"])
-        if (identity := normalized_unit_identity(value, identity_config))
-    }
-
 def unit_base_identity(row: RowLike, identity_config: IdentityConfig) -> str:
     """Return a stable primary identity for a logical unit group."""
     return min(unit_match_identities(row, identity_config), default="")
@@ -478,6 +529,7 @@ def logical_unit_groups(
     generic_matches: Mapping[int, int] | None = None,
     mercenary_matches: Mapping[int, int] | None = None,
     unmatched_mercenary_ids: Collection[int] = (),
+    reinforcement_matches: Mapping[int, int] | None = None,
 ) -> list[dict[str, Any]]:
     """Combine logical source records using persisted normalization identity.
 
@@ -486,7 +538,9 @@ def logical_unit_groups(
     not named by that audit remain separate rather than being rediscovered through
     the legacy 10,000-ID key. Explicit configured unit aliases still take
     precedence, while older databases without generic audit metadata retain the
-    arithmetic fallback. Reinforcement-only matching remains runtime behavior.
+    arithmetic fallback. Current database exports also persist unambiguous
+    reinforcement-to-standard matches; older databases without that metadata
+    retain the legacy runtime label matcher.
     """
     identity_config = identity_config or load_identity_config()
     rows_by_id = {row["id"]: row for row in rows}
@@ -529,6 +583,19 @@ def logical_unit_groups(
             key = ("standard", *standard_key)
         elif mercenary_matches is not None and row["id"] in unmatched_mercenary_ids:
             key = ("unmatched_mercenary", row["id"])
+        elif reinforcement_only and reinforcement_matches is not None:
+            standard_id = reinforcement_matches.get(row["id"])
+            if standard_id is None:
+                key = ("unmatched_reinforcement", row["id"])
+            else:
+                standard = rows_by_id.get(standard_id)
+                if standard is None:
+                    raise ValueError(
+                        f"Reinforcement source unit {row['id']} maps to missing standard unit "
+                        f"{standard_id}"
+                    )
+                standard_key, representative = standard_identity(standard)
+                key = ("standard", *standard_key)
         elif reinforcement_only:
             key = ("reinforcement", base_identity)
         else:
@@ -564,6 +631,8 @@ def logical_unit_groups(
                 "reinforcement_only": reinforcement_only,
             },
         )
+        if not reinforcement_only:
+            group["reinforcement_only"] = False
         group["match_identities"].update(unit_match_identities(row, identity_config))
         group["source_ids"].append(row["id"])
         group["names"].append(row["name"])
@@ -592,7 +661,7 @@ def logical_unit_groups(
             for identity in group["match_identities"]
             for candidate in standard_groups.get(identity, [])
         }.values()
-        if group["reinforcement_only"] and len(candidates) == 1:
+        if reinforcement_matches is None and group["reinforcement_only"] and len(candidates) == 1:
             target = next(iter(candidates))
             target["source_ids"].extend(group["source_ids"])
             target["names"].extend(group["names"])
@@ -782,6 +851,7 @@ class Database:
             identity_config_from_connection(connection)
             generic_unit_identity_policy_from_connection(connection)
             mercenary_identity_policy_from_connection(connection)
+            reinforcement_identity_policy_from_connection(connection)
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -811,6 +881,7 @@ class Database:
             ).fetchall()
             generic_identity = generic_unit_identity_policy_from_connection(connection)
             mercenary_identity = mercenary_identity_policy_from_connection(connection)
+            reinforcement_identity = reinforcement_identity_policy_from_connection(connection)
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
             army_names = {
                 row["id"]: army_name(row)
@@ -857,6 +928,7 @@ class Database:
             unmatched_mercenary_ids=(
                 mercenary_identity[1] if mercenary_identity is not None else ()
             ),
+            reinforcement_matches=reinforcement_identity,
         )
         for group in groups:
             group["normal_army_ids"] = set().union(

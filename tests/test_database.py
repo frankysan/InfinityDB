@@ -11,7 +11,7 @@ from infinity_army_data.normalize import main_army_id, normalize_master, validat
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
 from infinity_army_data.weapon_profiles import weapon_profile_override
 from infinity_db.database import Database, export_database, raw_database_path
-from infinity_db.database.importer import BATCH_SIZE, batched
+from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
 from infinity_db.database.repository import (
     army_required_flags,
     canonical_skill_extra_name,
@@ -35,6 +35,7 @@ from infinity_db.database.schema import (
     create_schema,
     quote,
 )
+from infinity_db.identities import REINFORCEMENT_UNIT_MATCHES_KEY, load_identity_config
 
 
 @pytest.fixture
@@ -191,6 +192,11 @@ def test_database_preserves_every_normalized_table_and_field(
             (DATABASE_COMPATIBILITY_KEY,),
         ).fetchone()[0]
         assert json.loads(compatibility) == DATABASE_COMPATIBILITY_VERSION
+        reinforcement_matches = connection.execute(
+            f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+            (REINFORCEMENT_UNIT_MATCHES_KEY,),
+        ).fetchone()[0]
+        assert json.loads(reinforcement_matches) == []
         indexes = {
             row[1]
             for table_name in TABLES
@@ -1237,6 +1243,160 @@ def test_list_availability_uses_source_specific_occurrences() -> None:
     assert set(
         visible_armies_for_group(group, {"reinforcement"}, canonical_factions, normal_armies)
     ) == {303, 350}
+
+
+def test_database_creation_audits_reinforcement_identity() -> None:
+    data = {
+        "tables": {
+            "units": [
+                {
+                    "id": 35,
+                    "isc": "Armbots: Bulleteer",
+                    "name": "BULLETEER ARMBOTS",
+                    "source_defined": True,
+                    "source_role": "standard",
+                },
+                {
+                    "id": 1649,
+                    "isc": "Reinf. Bulleteers Armbots",
+                    "name": "REINF: ARMBOTS BULLETEERS",
+                    "source_defined": True,
+                    "source_role": "standard",
+                },
+                {
+                    "id": 2649,
+                    "isc": "Reinf. Bulleteers Armbots",
+                    "name": "REFUERZOS: ARMBOTS BULLETEERS",
+                    "source_defined": True,
+                    "source_role": "standard",
+                },
+            ],
+            "army_lists": [
+                {"id": 101, "kind": "faction"},
+                {"id": 199, "kind": "reinforcement"},
+            ],
+            "army_units": [
+                {"army_id": 101, "unit_id": 35},
+                {"army_id": 199, "unit_id": 1649},
+                {"army_id": 199, "unit_id": 2649},
+            ],
+        }
+    }
+
+    assert reinforcement_unit_matches(data, load_identity_config()) == {1649: 35, 2649: 35}
+
+
+def test_database_uses_exported_reinforcement_mapping(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["factions"].append(
+        {
+            "id": 199,
+            "has_army_list": True,
+            "canonical_reference_count": 0,
+            "unit_membership_reference_count": 0,
+        }
+    )
+    normalized["tables"]["army_lists"].append(
+        {
+            "id": 199,
+            "name": "Reinforcements",
+            "slug": "reinf",
+            "kind": "reinforcement",
+        }
+    )
+    normalized["tables"]["units"].append(
+        {
+            "id": 1649,
+            "name": "REINF: Álpha",
+            "isc": "Reinf. Álpha",
+            "canonical_faction_id": None,
+            "main_army_id": None,
+            "source_defined": True,
+        }
+    )
+    normalized["tables"]["army_units"].append({"army_id": 199, "unit_id": 1649})
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        stored = connection.execute(
+            f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+            (REINFORCEMENT_UNIT_MATCHES_KEY,),
+        ).fetchone()[0]
+        assert json.loads(stored) == [
+            {
+                "reinforcementUnitId": 1649,
+                "standardUnitId": 1,
+                "method": "normalized_unit_identity",
+            }
+        ]
+        connection.execute(
+            "UPDATE units SET name = ?, isc = ? WHERE id = 1649",
+            ("DIFFERENT AFTER EXPORT", "Different after export"),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    details = Database(path).get_unit(1649)
+    assert details is not None
+    assert details["id"] == 1
+    assert details["source_ids"] == [1, 1649]
+
+
+def test_persisted_reinforcement_mapping_overrides_runtime_label_match() -> None:
+    rows = [
+        {
+            "id": 35,
+            "isc": "Armbots: Bulleteer",
+            "name": "BULLETEER ARMBOTS",
+            "main_army_id": 101,
+        },
+        {
+            "id": 1649,
+            "isc": "Completely different reinforcement ISC",
+            "name": "COMPLETELY DIFFERENT REINFORCEMENT",
+            "main_army_id": 101,
+        },
+    ]
+    memberships = {
+        35: [{"id": 101, "name": "PanOceania"}],
+        1649: [{"id": 199, "name": "Reinforcements", "kind": "reinforcement"}],
+    }
+
+    groups = logical_unit_groups(rows, memberships, reinforcement_matches={1649: 35})
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == 35
+    assert groups[0]["source_ids"] == [35, 1649]
+
+
+def test_empty_persisted_reinforcement_mapping_disables_runtime_label_match() -> None:
+    rows = [
+        {
+            "id": 35,
+            "isc": "Armbots: Bulleteer",
+            "name": "BULLETEER ARMBOTS",
+            "main_army_id": 101,
+        },
+        {
+            "id": 1649,
+            "isc": "Reinf. Bulleteers Armbots",
+            "name": "REINF: ARMBOTS BULLETEERS",
+            "main_army_id": 101,
+        },
+    ]
+    memberships = {
+        35: [{"id": 101, "name": "PanOceania"}],
+        1649: [{"id": 199, "name": "Reinforcements", "kind": "reinforcement"}],
+    }
+
+    groups = logical_unit_groups(rows, memberships, reinforcement_matches={})
+
+    assert len(groups) == 2
+    assert [group["source_ids"] for group in groups] == [[35], [1649]]
 
 
 def test_reinforcement_only_variants_join_their_standard_unit() -> None:
