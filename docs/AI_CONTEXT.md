@@ -79,10 +79,11 @@ and serves a read-only browser and same-origin HTTP API.
   rule.
 - Current normalized snapshots persist generic standard duplicate-unit matches,
   mercenary-to-standard source-unit matches, and explicit
-  `army_units.availability_kind`. Repository logical grouping consumes the
-  persisted generic and mercenary mappings, while mercenary filtering uses
-  explicit availability provenance. The 10,000-ID generic grouping rule remains
-  only as a compatibility fallback for older databases without
+  `army_units.availability_kind`. Database creation consumes the persisted
+  identity evidence and materializes `logical_units` / `logical_unit_sources`;
+  repository reads consume that relation, while mercenary filtering uses explicit
+  availability provenance. The 10,000-ID generic grouping rule remains only as a
+  builder compatibility fallback for older normalized inputs without
   `genericUnitMatches`.
 - 901 (Non-Aligned Armies) is a grouping identity for its child 9xx armies, not
   an independently playable army. Do not infer playability from ID patterns or
@@ -111,9 +112,9 @@ and serves a read-only browser and same-origin HTTP API.
   repository queries consume explicit availability provenance. Generic standard
   duplicate matching is also audited and persisted during normalization.
   Database creation additionally persists unambiguous reinforcement-to-standard
-  matches using the pinned name-normalization policy. Current repositories do not
-  rediscover generic or reinforcement identity at query time when those metadata
-  contracts are present. Frontend database creation resolves configured aliases
+  matches using the pinned name-normalization policy. Repository queries do not
+  rediscover generic, mercenary, or reinforcement identity at query time.
+  Frontend database creation resolves configured aliases
   plus persisted generic, mercenary, and reinforcement evidence into explicit
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
@@ -354,10 +355,10 @@ changes.
   not presented as existing behavior.
 - 2026-09-17: Generic standard-unit duplicate matching moved from repository-time
   10,000-ID arithmetic into a normalization audit persisted as
-  `genericUnitMatches`. Current repositories treat the persisted audit as
-  authoritative, including an empty result; older databases without the key
-  retain the arithmetic fallback. No SQLite schema or compatibility revision
-  change was required because the metadata contract is backward-compatible.
+  `genericUnitMatches`. Database creation treats the persisted audit as
+  authoritative, including an empty result; older normalized inputs without the
+  key retain the builder's arithmetic fallback. This intermediate persistence
+  step required no SQLite schema or compatibility revision by itself.
 - 2026-09-17: Unit `main_army_id` derivation moved from the ordinary `xx01`
   Army-ID convention to imported metadata faction parents for current
   InfinityDB builds. Explicit maintained overrides still win; `xx01` remains

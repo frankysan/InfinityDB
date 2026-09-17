@@ -89,85 +89,6 @@ history retains implementation detail.
   - Require versioned schemas, validation on load, deterministic serialization
     where generated, focused regression tests, and portable project-relative
     paths for important configuration/manifests.
-- [x] Replace the legacy mercenary/NA2 ownership shortcut with source-semantic
-  army-role and availability modeling.
-  - Treat source canonical-faction ID `1` and Non-Aligned Armies ID `901` as
-    distinct concepts. ID `1` is mercenary source/origin provenance; 901 is a
-    grouping identity for distinct Non-Aligned army lists.
-  - [x] Remove the legacy `1` -> `901` canonical-faction override after
-    mercenary logical pairing and availability provenance became explicit.
-    Canonical source ID `1` now remains source provenance with no application
-    `main_army_id`; compatibility revision 12 requires regenerated databases.
-  - [x] Replace current-build `xx01` main-army inference with the imported
-    metadata faction-parent relationship. Explicit maintained overrides still
-    take precedence, while the arithmetic resolver remains only as a
-    standalone/legacy fallback for canonical factions without usable metadata.
-    Compatibility revision 13 requires regenerated databases.
-  - [x] Validate the observed optional-mercenary source contract during
-    normalization: `canonical == 1`, empty declared `factions`, and a
-    `merc-...` source slug. Report source-schema drift instead of guessing when
-    a future snapshot violates or extends that pattern.
-  - Do not use the common 10,000-offset unit-ID pattern as the mercenary rule.
-    It can support duplicate diagnostics/matching, but the classification must
-    come from source semantics.
-  - Preserve ordinary `factions` membership as normal availability and
-    mercenary-variant army occurrences as optional mercenary availability, even
-    when both occur for the same logical unit and army.
-  - [x] Persist audited mercenary-to-standard source-unit matches during
-    normalization and make repository logical grouping honor those matches when
-    present. Explicitly unmatched variants remain separate; older databases
-    without the metadata retain the legacy generic-grouping fallback.
-  - [x] Persist audited generic standard-unit duplicate matches during
-    normalization and make database creation treat that audit as authoritative,
-    including an explicit empty result. Older normalized inputs without
-    `genericUnitMatches` retain the 10,000-ID/ISC build-time fallback.
-  - [x] Persist unambiguous reinforcement-to-standard source-unit matches during
-    database creation using the pinned name-normalization policy. The audit feeds
-    materialized logical identity, including an explicitly empty result.
-  - [x] Materialize complete logical-unit identity during frontend database
-    creation instead of assembling it dynamically in repository reads.
-    - Extract one pure build-time resolver from the current repository grouping
-      logic. Feed it configured unit aliases plus persisted generic, mercenary,
-      and reinforcement identity evidence.
-    - Resolve transitive relationships as graph components and select a
-      deterministic ordinary representative for each component. Explicitly
-      unmatched mercenary/reinforcement source rows remain independent logical
-      units.
-    - Add frontend `logical_units` and `logical_unit_sources` tables. Initially
-      keep the logical ID equal to the representative source-unit ID, but store
-      `representative_unit_id` explicitly so those concepts can be decoupled
-      later.
-    - Enforce that every source-defined unit maps to exactly one logical unit and
-      that every mapped/referenced source ID exists. Reject contradictory
-      identity evidence during database creation.
-    - Preserve all source tables against original source unit IDs. Do not create
-      pre-merged logical profile/loadout/occurrence tables; repository aggregation
-      should follow `logical_unit_sources` so availability and other provenance
-      stay source-specific.
-    - Keep legacy generic/mercenary duplicate discovery behind the database
-      builder as a compatibility fallback for older normalized inputs, while
-      reinforcement matching remains a database-build audit. Newly built
-      databases expose one uniform materialized identity contract.
-    - Switch repository `_unit_graph()` and unit lookup/grouping to consume only
-      the materialized relation for current databases. The obsolete repository
-      discovery helpers have now been removed; legacy compatibility remains in
-      the builder.
-    - Add focused resolver, schema-integrity, transitive-grouping, unmatched
-      variant, overlapping availability, legacy-input, and API regression tests;
-      increment schema/compatibility revisions when the materialized tables
-      become required.
-  - [x] Remove the now-unused repository-side logical-identity discovery helpers
-    after migrating their meaningful compatibility coverage to the build-time
-    resolver. Retain the actual legacy fallback behavior in the builder while
-    older normalized inputs remain supported.
-  - [x] Replace repository-time `canonical_faction_id == 1` mercenary inference
-    with explicit `army_units.availability_kind` provenance for current
-    normalized snapshots. Retain the old inference only as a compatibility
-    fallback for rows where explicit provenance is absent.
-  - [x] Add source-shaped regression fixtures for normal plus optional mercenary
-    records (for example the observed Miranda Ashcroft, Yuan Yuan, and Valerya
-    patterns), including a case where normal and mercenary occurrences overlap
-    the same army.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.
@@ -563,8 +484,6 @@ history retains implementation detail.
 - [ ] Test a full build and container startup in CI, including the requirement
   that deployment images contain only `infinity.db`, not the development raw
   archive.
-- [ ] Keep README and architecture-version references synchronized with schema
-  and compatibility revisions during every database-format change.
 
 ## Potential product features
 
