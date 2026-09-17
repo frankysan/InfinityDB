@@ -9,7 +9,7 @@ import threading
 import unicodedata
 import weakref
 from collections import OrderedDict
-from collections.abc import Callable, Collection, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from datetime import date
 from decimal import Decimal, InvalidOperation
@@ -18,29 +18,19 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from infinity_army_data.availability import (
-    GENERIC_MATCH_METHOD,
-    GENERIC_UNIT_MATCHES_KEY,
     MERCENARY_AVAILABILITY,
-    MERCENARY_MATCH_METHOD,
-    MERCENARY_SOURCE_ROLE,
-    MERCENARY_UNIT_MATCHES_KEY,
     STANDARD_AVAILABILITY,
-    STANDARD_SOURCE_ROLE,
-    UNMATCHED_MERCENARY_UNIT_IDS_KEY,
 )
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
 from infinity_army_data.weapon_profiles import special_weapon_detail
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
-    REINFORCEMENT_MATCH_METHOD,
-    REINFORCEMENT_UNIT_MATCHES_KEY,
     IdentityConfig,
     IdentityConfigError,
     load_identity_config,
     normalized_profile_identity,
     parse_identity_metadata,
-    unit_match_identities,
 )
 from infinity_db.skill_categories import categories_for_skill
 from infinity_db.traits import TRAIT_DESCRIPTIONS, canonical_trait_name
@@ -140,239 +130,6 @@ def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityC
         raise ValueError(
             "Database has invalid identity configuration metadata; rebuild the database"
         ) from exc
-
-def generic_unit_identity_policy_from_connection(
-    connection: sqlite3.Connection,
-) -> dict[int, int] | None:
-    """Load persisted generic duplicate-unit identity, when available.
-
-    Current normalized snapshots persist ``genericUnitMatches`` even when the
-    audit finds no matches. Its presence therefore makes the persisted result
-    authoritative and disables repository rediscovery through the legacy
-    10,000-ID arithmetic rule. Databases created before the audit was persisted
-    retain that rule as a compatibility fallback.
-    """
-    row = connection.execute(
-        f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
-        (GENERIC_UNIT_MATCHES_KEY,),
-    ).fetchone()
-    if row is None:
-        return None
-    try:
-        raw_matches = json.loads(row["value"])
-    except (TypeError, json.JSONDecodeError) as exc:
-        raise ValueError("Database has invalid generic unit identity metadata") from exc
-    if not isinstance(raw_matches, list):
-        raise ValueError("Database has invalid generic unit identity metadata")
-
-    matches: dict[int, int] = {}
-    for item in raw_matches:
-        if not isinstance(item, dict) or set(item) != {
-            "sourceUnitId",
-            "representativeUnitId",
-            "method",
-        }:
-            raise ValueError("Database has invalid generic unit identity metadata")
-        source_id = item["sourceUnitId"]
-        representative_id = item["representativeUnitId"]
-        if (
-            type(source_id) is not int
-            or source_id <= 0
-            or type(representative_id) is not int
-            or representative_id <= 0
-            or source_id == representative_id
-            or item["method"] != GENERIC_MATCH_METHOD
-            or source_id in matches
-        ):
-            raise ValueError("Database has invalid generic unit identity metadata")
-        matches[source_id] = representative_id
-
-    if set(matches) & set(matches.values()):
-        raise ValueError("Database generic unit identity metadata contains chained matches")
-
-    unit_roles = {
-        row["id"]: row["source_role"]
-        for row in connection.execute(
-            "SELECT id, source_role FROM units WHERE source_defined = 1"
-        )
-    }
-    if any(
-        unit_roles.get(source_id) != STANDARD_SOURCE_ROLE
-        or unit_roles.get(representative_id) != STANDARD_SOURCE_ROLE
-        for source_id, representative_id in matches.items()
-    ):
-        raise ValueError(
-            "Database generic unit identity metadata references invalid source roles; "
-            "rebuild the database"
-        )
-
-    return matches
-
-def mercenary_identity_policy_from_connection(
-    connection: sqlite3.Connection,
-) -> tuple[dict[int, int], frozenset[int]] | None:
-    """Load persisted mercenary-to-standard source identity, when available.
-
-    Databases built before this normalization audit was persisted remain readable
-    and use the legacy generic duplicate grouping. Once either metadata key exists,
-    however, the pair is treated as one complete contract: every source-defined
-    mercenary variant must be either mapped to a standard source unit or listed
-    as explicitly unmatched.
-    """
-    rows = connection.execute(
-        f"SELECT key, value FROM {quote(METADATA_TABLE)} WHERE key IN (?, ?)",
-        (MERCENARY_UNIT_MATCHES_KEY, UNMATCHED_MERCENARY_UNIT_IDS_KEY),
-    ).fetchall()
-    values = {row["key"]: row["value"] for row in rows}
-    if not values:
-        return None
-    if set(values) != {MERCENARY_UNIT_MATCHES_KEY, UNMATCHED_MERCENARY_UNIT_IDS_KEY}:
-        raise ValueError(
-            "Database has incomplete mercenary identity metadata; rebuild the database"
-        )
-
-    try:
-        raw_matches = json.loads(values[MERCENARY_UNIT_MATCHES_KEY])
-        raw_unmatched = json.loads(values[UNMATCHED_MERCENARY_UNIT_IDS_KEY])
-    except (TypeError, json.JSONDecodeError) as exc:
-        raise ValueError("Database has invalid mercenary identity metadata") from exc
-    if not isinstance(raw_matches, list) or not isinstance(raw_unmatched, list):
-        raise ValueError("Database has invalid mercenary identity metadata")
-
-    matches: dict[int, int] = {}
-    for item in raw_matches:
-        if not isinstance(item, dict) or set(item) != {
-            "mercenaryUnitId",
-            "standardUnitId",
-            "method",
-        }:
-            raise ValueError("Database has invalid mercenary identity metadata")
-        mercenary_id = item["mercenaryUnitId"]
-        standard_id = item["standardUnitId"]
-        if (
-            type(mercenary_id) is not int
-            or mercenary_id <= 0
-            or type(standard_id) is not int
-            or standard_id <= 0
-            or item["method"] != MERCENARY_MATCH_METHOD
-            or mercenary_id in matches
-        ):
-            raise ValueError("Database has invalid mercenary identity metadata")
-        matches[mercenary_id] = standard_id
-
-    unmatched: set[int] = set()
-    for unit_id in raw_unmatched:
-        if type(unit_id) is not int or unit_id <= 0 or unit_id in unmatched:
-            raise ValueError("Database has invalid mercenary identity metadata")
-        unmatched.add(unit_id)
-    if set(matches) & unmatched:
-        raise ValueError("Database has conflicting mercenary identity metadata")
-
-    unit_roles = {
-        row["id"]: row["source_role"]
-        for row in connection.execute(
-            "SELECT id, source_role FROM units WHERE source_defined = 1"
-        )
-    }
-    mercenary_ids = {
-        unit_id for unit_id, role in unit_roles.items() if role == MERCENARY_SOURCE_ROLE
-    }
-    if mercenary_ids != set(matches) | unmatched:
-        raise ValueError(
-            "Database mercenary identity metadata does not cover every mercenary source unit; "
-            "rebuild the database"
-        )
-    if any(
-        unit_roles.get(mercenary_id) != MERCENARY_SOURCE_ROLE
-        or unit_roles.get(standard_id) != STANDARD_SOURCE_ROLE
-        for mercenary_id, standard_id in matches.items()
-    ):
-        raise ValueError(
-            "Database mercenary identity metadata references invalid source roles; "
-            "rebuild the database"
-        )
-
-    return matches, frozenset(unmatched)
-
-def reinforcement_identity_policy_from_connection(
-    connection: sqlite3.Connection,
-) -> dict[int, int] | None:
-    """Load database-creation reinforcement identity, when available.
-
-    Current database exports always persist ``reinforcementUnitMatches``, even
-    when no reinforcement source unit has a unique standard match. Presence is
-    therefore authoritative: unlisted reinforcement-only records remain
-    separate. Databases created before this audit was added retain the legacy
-    runtime label matcher.
-    """
-    row = connection.execute(
-        f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
-        (REINFORCEMENT_UNIT_MATCHES_KEY,),
-    ).fetchone()
-    if row is None:
-        return None
-    try:
-        raw_matches = json.loads(row["value"])
-    except (TypeError, json.JSONDecodeError) as exc:
-        raise ValueError("Database has invalid reinforcement identity metadata") from exc
-    if not isinstance(raw_matches, list):
-        raise ValueError("Database has invalid reinforcement identity metadata")
-
-    matches: dict[int, int] = {}
-    for item in raw_matches:
-        if not isinstance(item, dict) or set(item) != {
-            "reinforcementUnitId",
-            "standardUnitId",
-            "method",
-        }:
-            raise ValueError("Database has invalid reinforcement identity metadata")
-        reinforcement_id = item["reinforcementUnitId"]
-        standard_id = item["standardUnitId"]
-        if (
-            type(reinforcement_id) is not int
-            or reinforcement_id <= 0
-            or type(standard_id) is not int
-            or standard_id <= 0
-            or reinforcement_id == standard_id
-            or item["method"] != REINFORCEMENT_MATCH_METHOD
-            or reinforcement_id in matches
-        ):
-            raise ValueError("Database has invalid reinforcement identity metadata")
-        matches[reinforcement_id] = standard_id
-
-    unit_roles = {
-        item["id"]: item["source_role"]
-        for item in connection.execute(
-            "SELECT id, source_role FROM units WHERE source_defined = 1"
-        )
-    }
-    unit_ids = set(unit_roles)
-    reinforcement_ids = {
-        item["id"]
-        for item in connection.execute(
-            "SELECT u.id "
-            "FROM units AS u "
-            "JOIN army_units AS au ON au.unit_id = u.id "
-            "JOIN army_lists AS a ON a.id = au.army_id "
-            "WHERE u.source_defined = 1 "
-            "GROUP BY u.id "
-            "HAVING COUNT(*) > 0 "
-            "AND SUM(CASE WHEN a.kind = 'reinforcement' THEN 0 ELSE 1 END) = 0"
-        )
-    }
-    if any(
-        reinforcement_id not in reinforcement_ids
-        or standard_id not in unit_ids
-        or standard_id in reinforcement_ids
-        or unit_roles.get(standard_id) == MERCENARY_SOURCE_ROLE
-        for reinforcement_id, standard_id in matches.items()
-    ):
-        raise ValueError(
-            "Database reinforcement identity metadata references invalid source units; "
-            "rebuild the database"
-        )
-    return matches
-
 
 def canonical_skill_id(
     skill_id: int, identity_config: IdentityConfig | None = None
@@ -479,20 +236,6 @@ def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
             pass
     return extra
 
-def legacy_unit_group_key(row: RowLike, identity_config: IdentityConfig) -> tuple[int, str]:
-    """Return the pre-audit duplicate key retained for legacy databases."""
-    unit_id = row["id"]
-    if unit_id in identity_config.unit_aliases:
-        return (identity_config.canonical_unit_id(unit_id), "")
-    return (
-        unit_id % 10_000,
-        (row["isc"] or row["name"]).casefold(),
-    )
-
-def unit_base_identity(row: RowLike, identity_config: IdentityConfig) -> str:
-    """Return a stable primary identity for a logical unit group."""
-    return min(unit_match_identities(row, identity_config), default="")
-
 def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> None:
     """Add an item unless a merged source already contributed the same one."""
     if item not in items:
@@ -520,155 +263,6 @@ def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
         )
     ):
         profile["ava"] = ava
-
-def logical_unit_groups(
-    rows: Sequence[RowLike],
-    memberships: Mapping[int, Sequence[Mapping[str, Any]]],
-    identity_config: IdentityConfig | None = None,
-    *,
-    generic_matches: Mapping[int, int] | None = None,
-    mercenary_matches: Mapping[int, int] | None = None,
-    unmatched_mercenary_ids: Collection[int] = (),
-    reinforcement_matches: Mapping[int, int] | None = None,
-) -> list[dict[str, Any]]:
-    """Combine logical source records using persisted normalization identity.
-
-    Current snapshots persist generic duplicate matches and mercenary-to-standard
-    matches. When the generic audit metadata is present it is authoritative: rows
-    not named by that audit remain separate rather than being rediscovered through
-    the legacy 10,000-ID key. Explicit configured unit aliases still take
-    precedence, while older databases without generic audit metadata retain the
-    arithmetic fallback. Current database exports also persist unambiguous
-    reinforcement-to-standard matches; older databases without that metadata
-    retain the legacy runtime label matcher.
-    """
-    identity_config = identity_config or load_identity_config()
-    rows_by_id = {row["id"]: row for row in rows}
-    unmatched_mercenary_ids = frozenset(unmatched_mercenary_ids)
-    generic_representatives = dict(generic_matches or {})
-    if generic_matches is not None:
-        for representative_id in generic_matches.values():
-            generic_representatives.setdefault(representative_id, representative_id)
-
-    def standard_identity(row: RowLike) -> tuple[tuple[Any, ...], RowLike]:
-        unit_id = row["id"]
-        if unit_id in identity_config.unit_aliases:
-            return ("configured", identity_config.canonical_unit_id(unit_id)), row
-        if generic_matches is not None:
-            representative_id = generic_representatives.get(unit_id, unit_id)
-            representative = rows_by_id.get(representative_id)
-            if representative is None:
-                raise ValueError(
-                    f"Generic source unit {unit_id} maps to missing representative unit "
-                    f"{representative_id}"
-                )
-            return ("persisted", representative_id), representative
-        return ("legacy", *legacy_unit_group_key(row, identity_config)), row
-    groups: dict[tuple[Any, ...], dict[str, Any]] = {}
-    for row in rows:
-        armies = memberships[row["id"]]
-        reinforcement_only = bool(armies) and all(
-            army.get("kind") == "reinforcement" for army in armies
-        )
-        base_identity = unit_base_identity(row, identity_config)
-        representative = row
-        if mercenary_matches is not None and row["id"] in mercenary_matches:
-            standard_id = mercenary_matches[row["id"]]
-            standard = rows_by_id.get(standard_id)
-            if standard is None:
-                raise ValueError(
-                    f"Mercenary source unit {row['id']} maps to missing standard unit {standard_id}"
-                )
-            standard_key, representative = standard_identity(standard)
-            key = ("standard", *standard_key)
-        elif mercenary_matches is not None and row["id"] in unmatched_mercenary_ids:
-            key = ("unmatched_mercenary", row["id"])
-        elif reinforcement_only and reinforcement_matches is not None:
-            standard_id = reinforcement_matches.get(row["id"])
-            if standard_id is None:
-                key = ("unmatched_reinforcement", row["id"])
-            else:
-                standard = rows_by_id.get(standard_id)
-                if standard is None:
-                    raise ValueError(
-                        f"Reinforcement source unit {row['id']} maps to missing standard unit "
-                        f"{standard_id}"
-                    )
-                standard_key, representative = standard_identity(standard)
-                key = ("standard", *standard_key)
-        elif reinforcement_only:
-            key = ("reinforcement", base_identity)
-        else:
-            standard_key, representative = standard_identity(row)
-            key = ("standard", *standard_key)
-        group = groups.setdefault(
-            key,
-            {
-                "id": representative["id"],
-                "name": representative["name"],
-                "isc": representative["isc"],
-                "slug": (
-                    representative["slug"] if "slug" in representative.keys() else None
-                ),
-                "canonical_faction_id": (
-                    representative["canonical_faction_id"]
-                    if "canonical_faction_id" in representative.keys()
-                    else None
-                ),
-                # The ordinary source record remains the representative when a
-                # mercenary variant is merged through persisted normalization metadata.
-                "main_army_id": (
-                    representative["main_army_id"]
-                    if "main_army_id" in representative.keys()
-                    else None
-                ),
-                "source_ids": [],
-                "names": [],
-                "armies": {},
-                "army_occurrences": [],
-                "base_identity": base_identity,
-                "match_identities": set(unit_match_identities(row, identity_config)),
-                "reinforcement_only": reinforcement_only,
-            },
-        )
-        if not reinforcement_only:
-            group["reinforcement_only"] = False
-        group["match_identities"].update(unit_match_identities(row, identity_config))
-        group["source_ids"].append(row["id"])
-        group["names"].append(row["name"])
-        for army in armies:
-            source_army_id = army["id"]
-            preferred_army_id = identity_config.canonical_army_id(source_army_id)
-            preferred_army = {**army, "id": preferred_army_id}
-            if preferred_army_id not in group["armies"] or source_army_id == preferred_army_id:
-                group["armies"][preferred_army_id] = preferred_army
-            group["army_occurrences"].append(
-                {
-                    **preferred_army,
-                    "source_id": row["id"],
-                    "source_army_id": source_army_id,
-                }
-            )
-
-    standard_groups: dict[str, list[dict[str, Any]]] = {}
-    for group in groups.values():
-        if not group["reinforcement_only"]:
-            for identity in group["match_identities"]:
-                standard_groups.setdefault(identity, []).append(group)
-    for key, group in list(groups.items()):
-        candidates = {
-            id(candidate): candidate
-            for identity in group["match_identities"]
-            for candidate in standard_groups.get(identity, [])
-        }.values()
-        if reinforcement_matches is None and group["reinforcement_only"] and len(candidates) == 1:
-            target = next(iter(candidates))
-            target["source_ids"].extend(group["source_ids"])
-            target["names"].extend(group["names"])
-            target["armies"].update(group["armies"])
-            target["army_occurrences"].extend(group["army_occurrences"])
-            del groups[key]
-    return list(groups.values())
 
 def army_name(row: RowLike) -> str:
     if row["name"]:
