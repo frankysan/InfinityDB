@@ -89,7 +89,7 @@ history retains implementation detail.
   - Require versioned schemas, validation on load, deterministic serialization
     where generated, focused regression tests, and portable project-relative
     paths for important configuration/manifests.
-- [ ] Add `config/catalogs/weapon-categories.json`.
+- [x] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.
   - Move manual weapon-ID category decisions into the same configuration.
@@ -97,14 +97,17 @@ history retains implementation detail.
     declared category.
   - Keep the classifier implementation in Python: override lookup, ordered
     rule evaluation, and fallback behavior remain code.
-- [ ] Add `config/catalogs/weapon-overrides.json`.
+- [x] Add `config/catalogs/weapon-overrides.json`.
   - Move known Army metadata corrections such as missing weapon profiles and
     source naming anomalies out of `weapon_profiles.py`.
   - Include an optional reason/source note so corrections remain reviewable
     when a new Army snapshot is imported.
-  - Treat actual game-rule facts differently from source corrections: special
-    weapon profiles, statistics, skills, and equipment should move into cited
-    curated rules data when an authoritative source is available.
+  - Actual game-rule facts are intentionally excluded from this source-correction
+    config.
+- [ ] Move `SPECIAL_WEAPON_DETAILS` out of `weapon_profiles.py` and into cited
+  curated rules data when an authoritative source is available.
+  - Preserve special weapon profiles, statistics, skills, equipment, and the
+    source citations that support them.
 - [ ] Move rule-derived skill declaration categories out of
   `skill_categories.py` and into the curated rules layer.
   - Preserve N5 edition/version and printed-page citations.
