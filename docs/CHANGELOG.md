@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add project-level markdownlint configuration that keeps `MD024` duplicate-heading checks within sibling headings, allowing standard changelog headings such as `Added`, `Changed`, and `Fixed` to repeat under different releases.
 - Add `tools/run_checks.py` as the standard development-check orchestrator for
   pytest, Ruff, and Army build validation, with selectable stages/profiles,
   targeted pytest/Ruff paths, fail-fast mode, deterministic exit codes, and
@@ -35,6 +36,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Derive normalized unit `main_army_id` from imported Army metadata faction
+  parents instead of the `xx01` Army-ID convention for current InfinityDB
+  builds. Explicit maintained canonical-faction overrides still take
+  precedence; the arithmetic rule remains only as a standalone/legacy fallback
+  when metadata cannot resolve the canonical faction. The SQLite schema remains
+  version 9 and the Army database compatibility revision is now 13.
 - Derive army role/playability from authoritative imported relationships
   instead of Army-ID ranges. `/api/armies` now exposes explicit roles,
   playability, grouping metadata, and reinforcement parents for main armies,
@@ -46,8 +53,8 @@ All notable changes to this project are documented in this file.
   mercenary logical pairing and army-occurrence availability are explicit.
   Canonical source ID `1` remains mercenary source/origin provenance with no
   application `main_army_id`; `901` remains the separate Non-Aligned Armies
-  grouping identity. The Army database compatibility revision is now 12, so
-  existing generated databases must be rebuilt.
+  grouping identity. That change bumped the Army database compatibility
+  revision to 12 and required existing generated databases to be rebuilt.
 - Make repository mercenary filtering consume explicit
   `army_units.availability_kind` provenance. Current normalized snapshots no
   longer use canonical faction `1` plus faction membership to decide whether an
@@ -60,7 +67,7 @@ All notable changes to this project are documented in this file.
   without this metadata retain the legacy grouping fallback.
 - Make `units.source_role` and `army_units.availability_kind` explicit frontend
   SQLite schema fields instead of incidental dynamic columns. The Army database
-  schema is version 9; the cumulative compatibility revision is now 12 and
+  schema is version 9; the cumulative compatibility revision is now 13 and
   existing generated Army databases must be rebuilt.
 - Document `tools/run_checks.py` as the standard local/agent check entry point,
   with its detailed stage, target, reporting, and exit-code contract in

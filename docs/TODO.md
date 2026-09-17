@@ -98,6 +98,11 @@ history retains implementation detail.
     mercenary logical pairing and availability provenance became explicit.
     Canonical source ID `1` now remains source provenance with no application
     `main_army_id`; compatibility revision 12 requires regenerated databases.
+  - [x] Replace current-build `xx01` main-army inference with the imported
+    metadata faction-parent relationship. Explicit maintained overrides still
+    take precedence, while the arithmetic resolver remains only as a
+    standalone/legacy fallback for canonical factions without usable metadata.
+    Compatibility revision 13 requires regenerated databases.
   - Validate the observed optional-mercenary source contract during
     normalization: `canonical == 1`, empty declared `factions`, and a
     `merc-...` source slug. Report source-schema drift instead of guessing when

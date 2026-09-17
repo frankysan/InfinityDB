@@ -126,6 +126,25 @@ def test_deployable_repeater_profile_is_shown_with_its_equipment(tmp_path: Path)
     ]
 
 
+def test_normalization_uses_metadata_parent_for_main_army_identity() -> None:
+    source = metadata_source()
+    source["factions"][0]["parent"] = 777
+    source["factions"].append(
+        {"id": 777, "parent": 777, "name": "Source-defined parent", "slug": "parent"}
+    )
+    document = master(decode_metadata(json.dumps(source).encode(), "metadata.json"))
+    document["armyLists"]["777"] = {
+        "_meta": {"slug": "parent", "kind": "army"},
+        "unitIds": [],
+    }
+    document["units"]["1"]["shared"]["canonical"] = 101
+
+    normalized = normalize_master(document)
+    validate_normalized(normalized)
+
+    assert normalized["tables"]["units"][0]["main_army_id"] == 777
+
+
 def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> None:
     envelope = decode_metadata(json.dumps(metadata_source()).encode(), "metadata.json")
     normalized = normalize_master(master(envelope))

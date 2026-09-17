@@ -780,15 +780,16 @@ def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dic
     ]
 
 
-def test_main_army_resolves_canonical_sectorials_to_whole_armies(normalized: dict) -> None:
+def test_main_army_prefers_metadata_parent_and_keeps_legacy_fallback(normalized: dict) -> None:
     beta = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 2)
     assert beta["main_army_id"] == 101
 
-    # A sectorial canonical ID resolves to its parent xx01 list, not the
-    # sectorial itself. Exceptional canonical IDs require explicit policy.
-    assert main_army_id(202, {101, 201, 202}) == 201
+    faction_ids = {101, 201, 202, 777, 901}
+    assert main_army_id(202, faction_ids, faction_parents={202: 777}) == 777
+    assert main_army_id(202, faction_ids, faction_parents={202: None}) is None
+    assert main_army_id(202, faction_ids) == 201
     assert main_army_id(1, {101, 201, 901}) is None
-    assert main_army_id(50, {101, 901}, {50: 901}) == 901
+    assert main_army_id(50, {101, 901}, {50: 901}, {50: 101}) == 901
     assert main_army_id(998, {901, 998}) == 901
     assert main_army_id(999, {101, 201}) is None
 
