@@ -59,6 +59,43 @@ def request(
     return response["status"], response["headers"], body
 
 
+def _normalized_css_selector(selector: str) -> str:
+    selector = re.sub(r"\s+", " ", selector.strip())
+    return re.sub(r"\s*([>,+~])\s*", r"\1", selector)
+
+
+def assert_css_rule(
+    styles: bytes,
+    selector: str,
+    declarations: Mapping[str, str],
+) -> None:
+    target = _normalized_css_selector(selector)
+    candidates: list[dict[str, str]] = []
+    for match in re.finditer(rb"([^{}]+)\{([^{}]*)\}", styles):
+        candidate_selector = _normalized_css_selector(match.group(1).decode())
+        if candidate_selector != target:
+            continue
+        parsed: dict[str, str] = {}
+        for declaration in match.group(2).decode().split(";"):
+            if ":" not in declaration:
+                continue
+            name, value = declaration.split(":", 1)
+            parsed[name.strip()] = re.sub(r"\s+", " ", value.strip())
+        candidates.append(parsed)
+
+    expected = {name: re.sub(r"\s+", " ", value.strip()) for name, value in declarations.items()}
+    if any(
+        all(candidate.get(name) == value for name, value in expected.items())
+        for candidate in candidates
+    ):
+        return
+
+    raise AssertionError(
+        f"CSS rule {selector!r} did not contain expected declarations {expected!r}; "
+        f"matching rules: {candidates!r}"
+    )
+
+
 @pytest.fixture
 def app(tmp_path: Path) -> Callable:
     shared = {
@@ -568,9 +605,18 @@ def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b".landing-logo { grid-column: 2; grid-row: 1; align-self: start;" in styles
-    assert b"width: min(30vw, 135px); height: auto;" in styles
-    assert b".landing-hero-content { grid-column: 1 / -1; }" in styles
+    assert_css_rule(
+        styles,
+        ".landing-logo",
+        {
+            "grid-column": "2",
+            "grid-row": "1",
+            "align-self": "start",
+            "width": "min(30vw, 135px)",
+            "height": "auto",
+        },
+    )
+    assert_css_rule(styles, ".landing-hero-content", {"grid-column": "1 / -1"})
 
 
 def test_mobile_unit_list_prioritizes_the_unit_name_column(
@@ -579,10 +625,18 @@ def test_mobile_unit_list_prioritizes_the_unit_name_column(
     status, _, styles = request(app, "/static/styles.css")
 
     assert status == 200
-    assert b"thead th:last-child { width: 156px; }" in styles
-    assert b".army-tags { --symbols-per-row: 4; }" in styles
-    assert b".army-tags-compact { --symbols-per-row: 6; gap: 3px; }" in styles
-    assert b".army-tags-compact .army-symbol { width: 17px; height: 17px; }" in styles
+    assert_css_rule(styles, "thead th:last-child", {"width": "156px"})
+    assert_css_rule(styles, ".army-tags", {"--symbols-per-row": "4"})
+    assert_css_rule(
+        styles,
+        ".army-tags-compact",
+        {"--symbols-per-row": "6", "gap": "3px"},
+    )
+    assert_css_rule(
+        styles,
+        ".army-tags-compact .army-symbol",
+        {"width": "17px", "height": "17px"},
+    )
 
     status, _, unit_list = request(app, "/static/unit-list.js")
     assert status == 200
@@ -594,19 +648,34 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
 
     assert status == 200
     assert b"@media (min-width: 601px) and (max-width: 700px)" in styles
-    assert b"--movement-column-width: 60px;" in styles
-    assert (
-        b'html[data-distance-unit="in"] .attribute-statline { --movement-column-width: 52px; }'
-        in styles
+    assert_css_rule(
+        styles,
+        ".attribute-statline",
+        {
+            "--movement-column-width": "60px",
+            "grid-template-columns": (
+                "var(--movement-column-width) repeat(8, minmax(0, 1fr))"
+            ),
+        },
     )
-    assert (
-        b"grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr));" in styles
+    assert_css_rule(
+        styles,
+        'html[data-distance-unit="in"] .attribute-statline',
+        {"--movement-column-width": "52px"},
     )
-    assert b".attribute-statline > div { padding-inline: 4px; }" in styles
-    assert b"grid-template-columns: 60px repeat(4, minmax(0, 1fr));" in styles
-    assert (
-        b'html[data-distance-unit="in"] .attribute-statline-with-availability '
-        b"{ grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }" in styles
+    assert_css_rule(styles, ".attribute-statline > div", {"padding-inline": "4px"})
+    assert_css_rule(
+        styles,
+        ".attribute-statline, .attribute-statline-with-availability",
+        {"grid-template-columns": "60px repeat(4, minmax(0, 1fr))"},
+    )
+    assert_css_rule(
+        styles,
+        (
+            'html[data-distance-unit="in"] .attribute-statline, '
+            'html[data-distance-unit="in"] .attribute-statline-with-availability'
+        ),
+        {"grid-template-columns": "52px repeat(4, minmax(0, 1fr))"},
     )
 
 
@@ -628,11 +697,22 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b'html:not([data-developer-mode="true"]) .id-column { display: none; }' in styles
-    assert b".settings-menu { margin-top: 32px; }" in styles
-    assert b".compact-menu-panel { position: static; display: flex;" in styles
-    assert b".menu-label { display: none; }" in styles
-    assert b".sidebar { position: relative; z-index: 4;" in styles
+    assert_css_rule(
+        styles,
+        (
+            'html:not([data-developer-mode="true"]) .developer-only, '
+            'html:not([data-developer-mode="true"]) .id-column'
+        ),
+        {"display": "none"},
+    )
+    assert_css_rule(styles, ".settings-menu", {"margin-top": "32px"})
+    assert_css_rule(
+        styles,
+        ".compact-menu-panel",
+        {"position": "static", "display": "flex"},
+    )
+    assert_css_rule(styles, ".menu-label", {"display": "none"})
+    assert_css_rule(styles, ".sidebar", {"position": "relative", "z-index": "4"})
     assert b".cookie-consent-dialog" in styles
     assert b"background: var(--color-surface-default);" in styles
 
@@ -686,7 +766,11 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b'.menu[data-open="true"] > .compact-menu-panel { display: flex; }' in styles
+    assert_css_rule(
+        styles,
+        '.menu[data-open="true"] > .compact-menu-panel',
+        {"display": "flex"},
+    )
     assert b'window.addEventListener("pageshow", closeMenu)' in navigation
 
 
@@ -911,8 +995,8 @@ def test_unit_details_frontend_marks_surface_and_deepspace_profiles(app: Callabl
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b".division-badge-surface { background: #256d1b; }" in styles
-    assert b".division-badge-deepspace { background: #d68623; }" in styles
+    assert_css_rule(styles, ".division-badge-surface", {"background": "#256d1b"})
+    assert_css_rule(styles, ".division-badge-deepspace", {"background": "#d68623"})
 
 
 def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> None:
@@ -953,13 +1037,26 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
 def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    for selector in [
-        b".surface, .explorer",
-        b".surface--subtle",
-        b".surface--highlighted",
-        b".data-table--compact",
-    ]:
-        assert selector in styles
+    assert_css_rule(
+        styles,
+        ".surface, .explorer",
+        {"background": "var(--color-surface-default)"},
+    )
+    assert_css_rule(
+        styles,
+        ".surface--subtle",
+        {"background": "var(--color-surface-subtle)"},
+    )
+    assert_css_rule(
+        styles,
+        ".surface--highlighted",
+        {"background": "var(--surface-highlight)"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--compact",
+        {"--table-cell-size": "11px"},
+    )
 
     for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
         status, _, body = request(app, path)
@@ -988,28 +1085,48 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b".weapon-data-heading" in styles
     assert b'profileRow.className = "weapon-data-row"' in weapon_detail
     assert b'profileStats.className = "weapon-data-value"' in weapon_detail
-    assert b".weapon-data-row { display: grid;" in styles
-    assert b"border-left: 1px solid #e9ece3" in styles
+    assert_css_rule(styles, ".weapon-data-row", {"display": "grid"})
+    assert_css_rule(
+        styles,
+        ".weapon-data-value",
+        {"border-left": "1px solid #e9ece3"},
+    )
     assert b"--surface-data-header: #fafbf8" in styles
-    assert b"thead th { background: var(--surface-data-header);" in styles
-    assert b".weapon-data-heading" in styles
-    assert b".weapon-variants, .weapon-variant, .weapon-profile { width: 100%; }" in styles
-    assert b".weapon-profile .weapon-ranges { display: table;" in styles
-    assert b"width: 100%; table-layout: auto; }" in styles
+    assert_css_rule(
+        styles,
+        "thead th",
+        {"background": "var(--surface-data-header)"},
+    )
+    assert_css_rule(
+        styles,
+        ".weapon-variants, .weapon-variant, .weapon-profile",
+        {"width": "100%"},
+    )
+    assert_css_rule(
+        styles,
+        ".weapon-profile .weapon-ranges",
+        {"display": "table", "width": "100%", "table-layout": "auto"},
+    )
 
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert b'generalProfile.className = "explorer general-profile"' in body
-    assert b".general-profile .profile-title" in styles
-    assert b"background: var(--surface-highlight)" in styles
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .profile-title",
+        {"background": "var(--color-surface-highlight)"},
+    )
 
     status, _, body = request(app, "/about")
     assert status == 200
     assert b"surface surface--highlighted about-callout" in body
     assert b"surface surface--subtle about-disclosure" in body
 
-    assert b".usage-section-group thead th:first-child," in styles
-    assert b".usage-section-group thead th:last-child { width: auto; }" in styles
+    assert_css_rule(
+        styles,
+        ".usage-section-group thead th:first-child, .usage-section-group thead th:last-child",
+        {"width": "auto"},
+    )
 
 
 def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:
