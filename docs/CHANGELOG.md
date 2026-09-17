@@ -36,6 +36,10 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Remove the obsolete repository-side logical-unit identity discovery path now
+  that frontend databases materialize complete identity. Legacy generic and
+  reinforcement compatibility behavior remains build-time only, with its
+  regression coverage moved to the logical-unit resolver/audit tests.
 - Materialize application logical-unit identity during frontend database
   creation. The exporter resolves configured aliases plus persisted generic,
   mercenary, and reinforcement evidence into frontend-only `logical_units` and

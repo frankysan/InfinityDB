@@ -149,14 +149,15 @@ history retains implementation detail.
       reinforcement matching remains a database-build audit. Newly built
       databases expose one uniform materialized identity contract.
     - Switch repository `_unit_graph()` and unit lookup/grouping to consume only
-      the materialized relation for current databases. Cleanup of the now-unused
-      repository discovery helpers is tracked separately below.
+      the materialized relation for current databases. The obsolete repository
+      discovery helpers have now been removed; legacy compatibility remains in
+      the builder.
     - Add focused resolver, schema-integrity, transitive-grouping, unmatched
       variant, overlapping availability, legacy-input, and API regression tests;
       increment schema/compatibility revisions when the materialized tables
       become required.
-  - [ ] Remove the now-unused repository-side logical-identity discovery helpers
-    after their direct compatibility tests have been migrated to the build-time
+  - [x] Remove the now-unused repository-side logical-identity discovery helpers
+    after migrating their meaningful compatibility coverage to the build-time
     resolver. Retain the actual legacy fallback behavior in the builder while
     older normalized inputs remain supported.
   - [x] Replace repository-time `canonical_faction_id == 1` mercenary inference
