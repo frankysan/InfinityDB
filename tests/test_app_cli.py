@@ -10,6 +10,11 @@ import pytest
 
 from infinity_army_data.merge import reconstruct_source
 from infinity_db.cli import build_parser, main
+from infinity_db.identities import (
+    IDENTITY_CONFIG_METADATA_KEY,
+    IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    load_identity_config,
+)
 
 
 @pytest.fixture
@@ -63,9 +68,12 @@ def test_build_creates_verified_json_and_queryable_database(
     normalized_text = (output_dir / "normalized.json").read_text(encoding="utf-8")
     normalized = json.loads(normalized_text)
     validation = json.loads((output_dir / "normalized-validation.json").read_text(encoding="utf-8"))
+    identity_config = load_identity_config()
     assert "\n" not in normalized_text
     assert validation["passed"] is True
     assert normalized["_meta"]["validationPassed"] is True
+    assert normalized[IDENTITY_CONFIG_METADATA_KEY] == identity_config.document
+    assert normalized[IDENTITY_CONFIG_SHA256_METADATA_KEY] == identity_config.content_sha256
     for path in source_directory.glob("*.json"):
         if path.name == "metadata.json":
             continue
@@ -84,6 +92,10 @@ def test_separate_merge_normalize_export_commands(
     monkeypatch.chdir(tmp_path)
     assert main(["merge", str(source_directory)]) == 0
     assert main(["normalize", "data/generated/master.json"]) == 0
+    normalized = json.loads(Path("data/generated/normalized.json").read_text(encoding="utf-8"))
+    identity_config = load_identity_config()
+    assert normalized[IDENTITY_CONFIG_METADATA_KEY] == identity_config.document
+    assert normalized[IDENTITY_CONFIG_SHA256_METADATA_KEY] == identity_config.content_sha256
     assert main(["export", "data/generated/normalized.json"]) == 0
     default_database = tmp_path / "data/generated/infinity.db"
     assert default_database.is_file()
@@ -91,6 +103,43 @@ def test_separate_merge_normalize_export_commands(
     assert main(["export", "data/generated/normalized.json", str(custom_database)]) == 0
     with sqlite3.connect(custom_database) as connection:
         assert connection.execute("SELECT COUNT(*) FROM units").fetchone()[0] == 1
+
+
+def test_normalize_keeps_mercenary_source_identity_separate_from_na2(tmp_path: Path) -> None:
+    master_path = tmp_path / "master.json"
+    normalized_path = tmp_path / "normalized.json"
+    master_path.write_text(
+        json.dumps(
+            {
+                "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
+                "armyLists": {
+                    "901": {
+                        "_meta": {"slug": "non-aligned", "kind": "faction"},
+                        "unitIds": [1],
+                    }
+                },
+                "units": {
+                    "1": {
+                        "shared": {
+                            "id": 1,
+                            "name": "Mercenary",
+                            "canonical": 1,
+                            "factions": [901],
+                        },
+                        "byArmy": {"901": {}},
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert main(["normalize", str(master_path), str(normalized_path)]) == 0
+
+    normalized = json.loads(normalized_path.read_text(encoding="utf-8"))
+    unit = normalized["tables"]["units"][0]
+    assert unit["canonical_faction_id"] == 1
+    assert unit["main_army_id"] is None
 
 
 def test_invalid_source_reports_error_without_database(
@@ -122,10 +171,10 @@ def test_validate_curated_command_parses() -> None:
     assert args.input == Path("data/curated/rules/example.json")
 
 
-def test_build_rules_command_parses() -> None:
+def test_build_rules_command_defaults_to_curated_rules() -> None:
     parser = build_parser()
-    args = parser.parse_args(["build-rules", "data/curated", "--output", "rules.db"])
-    assert args.input == Path("data/curated")
+    args = parser.parse_args(["build-rules", "--output", "rules.db"])
+    assert args.input == Path("data/curated/rules")
     assert args.output == Path("rules.db")
 
 

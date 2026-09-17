@@ -15,8 +15,11 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from infinity_db import __display_version__, __version__
-from infinity_db.database import Database
+from infinity_db.catalog_rules import CatalogRules
+from infinity_db.database import ArmySelectionError, Database
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.trait_catalog import TraitCatalog
 
 LOGGER = logging.getLogger(__name__)
 ASSETS = {
@@ -273,6 +276,9 @@ class Application:
                 self.rules_database = rules_database
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
+        self.trait_catalog = TraitCatalog(self.database, self.rules_database)
+        self.skill_catalog = SkillCatalog(self.database, self.rules_database)
+        self.catalog_rules = CatalogRules(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
             _snapshot_revision(self.rules_database.path)
@@ -445,7 +451,7 @@ class Application:
         elif path == "/api/skill-extras":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = {"items": self.database.list_skill_extras()}
+                payload = {"items": self.skill_catalog.list_skill_extras()}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -453,7 +459,13 @@ class Application:
         elif path in {"/api/skills", "/api/equipment", "/api/weapons"}:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = {"items": self.database.list_catalog_items(path.removeprefix("/api/"))}
+                catalog = path.removeprefix("/api/")
+                items = (
+                    self.skill_catalog.list_skills()
+                    if catalog == "skills"
+                    else self.database.list_catalog_items(catalog)
+                )
+                payload = {"items": items}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read catalog")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -461,7 +473,7 @@ class Application:
         elif path == "/api/traits":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = {"items": self.database.list_traits()}
+                payload = {"items": self.trait_catalog.list_traits()}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read traits")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -470,14 +482,10 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 skill_id = int(match.group(1))
-                payload = self.database.get_skill(skill_id)
+                payload = self.skill_catalog.get_skill(skill_id)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
-                elif self.rules_database is not None:
-                    rules = self.rules_database.records_for_army_link("skill", skill_id)
-                    if rules:
-                        payload = {**payload, "rules": rules}
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -492,6 +500,9 @@ class Application:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
+                else:
+                    payload = self.trait_catalog.enrich_catalog_item(payload)
+                    payload = self.catalog_rules.enrich_catalog_item(match.group(1), payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -502,7 +513,7 @@ class Application:
         elif match := re.fullmatch(r"/api/traits/([a-z0-9-]+)", path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = self.database.get_trait(match.group(1))
+                payload = self.trait_catalog.get_trait(match.group(1))
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Trait not found"}
@@ -547,6 +558,9 @@ class Application:
             else:
                 try:
                     payload = self.database.list_units(**query)
+                except ArmySelectionError as exc:
+                    status = HTTPStatus.BAD_REQUEST
+                    payload = {"error": str(exc)}
                 except (OSError, ValueError, sqlite3.Error):
                     LOGGER.exception("Could not read units")
                     status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -558,6 +572,8 @@ class Application:
                 if unit_id > 2**63 - 1:
                     raise ValueError("unit_id must be between 0 and 9223372036854775807")
                 payload = self.database.get_unit(unit_id)
+                if payload is not None:
+                    payload = self.skill_catalog.enrich_unit(payload)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

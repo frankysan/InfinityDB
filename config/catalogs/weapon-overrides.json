@@ -1,0 +1,55 @@
+{
+  "format": "InfinityDB weapon source corrections",
+  "formatVersion": 1,
+  "corrections": [
+    {
+      "weapon_id": 62,
+      "profile": "ARM=0, BTS=0, STR=1, S=1",
+      "reason": "Army source omits the Monofilament Mine deployable profile."
+    },
+    {
+      "weapon_id": 63,
+      "profile": "ARM=0, BTS=0, STR=1, S=1",
+      "reason": "Army source omits the Viral Mine deployable profile."
+    },
+    {
+      "weapon_id": 196,
+      "profile": "ARM=0, BTS=0, STR=1, S=1",
+      "reason": "Army source omits the Shock Mine deployable profile."
+    },
+    {
+      "weapon_id": 197,
+      "profile": "ARM=0, BTS=0, STR=1, S=1",
+      "reason": "Army source omits the E/M Mine deployable profile."
+    },
+    {
+      "weapon_id": 199,
+      "profile": "ARM=0, BTS=0, STR=1, S=1",
+      "reason": "Army source omits the AP Mine deployable profile."
+    },
+    {
+      "weapon_id": 220,
+      "profile": "ARM=0, BTS=0, STR=1, S=1",
+      "reason": "Army source omits the PARA Mine deployable profile."
+    },
+    {
+      "weapon_id": 217,
+      "name": "MULTI Spitfire",
+      "reason": "Normalize a known Army source naming anomaly to the catalog display name."
+    },
+    {
+      "weapon_id": 226,
+      "suppress_metadata_profiles": [
+        {
+          "name": "Armed Turret",
+          "mode": null
+        },
+        {
+          "name": "Armed Turret",
+          "mode": "PARA CC Weapon"
+        }
+      ],
+      "reason": "These Army metadata rows describe the deployable itself or its built-in CC weapon, not a ranged weapon mode to display beside the Combi Rifle profile."
+    }
+  ]
+}

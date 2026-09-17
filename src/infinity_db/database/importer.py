@@ -6,7 +6,7 @@ import json
 import os
 import sqlite3
 import tempfile
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Mapping
 from itertools import islice
 from pathlib import Path
 from typing import Any
@@ -14,6 +14,17 @@ from typing import Any
 from infinity_army_data.metadata import MetadataError, validate_metadata_envelope
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
 
+from ..identities import (
+    IDENTITY_CONFIG_METADATA_KEY,
+    IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    REINFORCEMENT_MATCH_METHOD,
+    REINFORCEMENT_UNIT_MATCHES_KEY,
+    IdentityConfig,
+    IdentityConfigError,
+    identity_metadata,
+    load_identity_config,
+    parse_identity_metadata,
+)
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -27,6 +38,7 @@ from .schema import (
     create_schema,
     quote,
 )
+from .unit_identity import reinforcement_unit_matches, resolve_logical_unit_identity
 
 BATCH_SIZE = 1_000
 
@@ -87,6 +99,33 @@ def validate_input(data: dict[str, Any]) -> dict[str, tuple[str, ...]]:
     return table_columns
 
 
+def resolve_identity_config(
+    data: dict[str, Any], explicit: IdentityConfig | None = None
+) -> IdentityConfig:
+    """Resolve the identity policy for export, preferring normalized provenance."""
+    has_document = IDENTITY_CONFIG_METADATA_KEY in data
+    has_hash = IDENTITY_CONFIG_SHA256_METADATA_KEY in data
+    if has_document != has_hash:
+        raise ValueError("Normalized data has incomplete identity configuration metadata")
+
+    if has_document:
+        try:
+            pinned = parse_identity_metadata(
+                data[IDENTITY_CONFIG_METADATA_KEY],
+                data[IDENTITY_CONFIG_SHA256_METADATA_KEY],
+            )
+        except IdentityConfigError as exc:
+            raise ValueError("Normalized data has invalid identity configuration metadata") from exc
+        if explicit is not None and explicit.content_sha256 != pinned.content_sha256:
+            raise ValueError(
+                "Explicit identity configuration does not match the policy "
+                "pinned in normalized data"
+            )
+        return pinned
+
+    return explicit or load_identity_config()
+
+
 def sql_value(value: Any) -> Any:
     if isinstance(value, (dict, list)):
         return json_text(value)
@@ -117,7 +156,50 @@ def insert_batched(
         connection.executemany(statement, batch)
 
 
-def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+def reinforcement_identity_metadata(
+    data: dict[str, Any],
+    identity_config: IdentityConfig,
+    reinforcement_matches: Mapping[int, int] | None = None,
+) -> list[dict[str, Any]]:
+    """Return deterministic database metadata for audited reinforcement identity."""
+    matches = (
+        reinforcement_unit_matches(data, identity_config)
+        if reinforcement_matches is None
+        else reinforcement_matches
+    )
+    return [
+        {
+            "reinforcementUnitId": source_id,
+            "standardUnitId": standard_id,
+            "method": REINFORCEMENT_MATCH_METHOD,
+        }
+        for source_id, standard_id in sorted(matches.items())
+    ]
+
+
+def snapshot_metadata(
+    data: dict[str, Any],
+    identity_config: IdentityConfig,
+    reinforcement_matches: Mapping[int, int] | None = None,
+) -> dict[str, Any]:
+    """Return the metadata persisted with both database siblings."""
+    metadata = {key: value for key, value in data.items() if key != "tables"}
+    metadata.update(identity_metadata(identity_config))
+    metadata[REINFORCEMENT_UNIT_MATCHES_KEY] = reinforcement_identity_metadata(
+        data, identity_config, reinforcement_matches
+    )
+    metadata["imported_tables"] = list(data["tables"])
+    metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+    return metadata
+
+
+def create_raw_archive(
+    connection: sqlite3.Connection,
+    data: dict[str, Any],
+    identity_config: IdentityConfig,
+    *,
+    metadata: Mapping[str, Any] | None = None,
+) -> None:
     """Store lossless normalized records outside the frontend database."""
     connection.execute(f"PRAGMA application_id = {APPLICATION_ID}")
     connection.execute(
@@ -129,9 +211,7 @@ def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> 
         f"{quote(ROW_JSON)} TEXT NOT NULL, "
         "PRIMARY KEY (table_name, row_position))"
     )
-    metadata = {key: value for key, value in data.items() if key != "tables"}
-    metadata["imported_tables"] = list(data["tables"])
-    metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+    metadata = dict(metadata or snapshot_metadata(data, identity_config))
     insert_batched(
         connection,
         f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
@@ -149,14 +229,21 @@ def create_raw_archive(connection: sqlite3.Connection, data: dict[str, Any]) -> 
     )
 
 
-def export_database(data: dict[str, Any], path: Path) -> None:
+def export_database(
+    data: dict[str, Any], path: Path, *, identity_config: IdentityConfig | None = None
+) -> None:
     """Replace ``path`` only after the complete normalized import passes validation.
 
     The frontend database contains queryable normalized columns only. A sibling
     ``.raw`` database preserves exact normalized rows, including absent versus
-    null fields, for development use.
+    null fields, for development use. If normalized data already pins an identity
+    policy, export validates and preserves that exact policy; otherwise it falls
+    back to an explicitly supplied policy or the authored project manifest.
     """
     table_columns = validate_input(data)
+    identity_config = resolve_identity_config(data, identity_config)
+    logical_identity = resolve_logical_unit_identity(data, identity_config)
+    metadata = snapshot_metadata(data, identity_config, logical_identity.reinforcement_matches)
     path = Path(path)
     archive_path = raw_database_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -174,9 +261,6 @@ def export_database(data: dict[str, Any], path: Path) -> None:
             connection.execute("PRAGMA foreign_keys = ON")
             with connection:
                 create_schema(connection, data["tables"], table_columns=table_columns)
-                metadata = {key: value for key, value in data.items() if key != "tables"}
-                metadata["imported_tables"] = list(data["tables"])
-                metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
                 insert_batched(
                     connection,
                     f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
@@ -191,6 +275,23 @@ def export_database(data: dict[str, Any], path: Path) -> None:
                         f"INSERT INTO {quote(name)} ({fields}) VALUES ({placeholders})",
                         (tuple(sql_value(row.get(field)) for field in columns) for row in rows),
                     )
+                insert_batched(
+                    connection,
+                    "INSERT INTO logical_units (id, representative_unit_id) VALUES (?, ?)",
+                    (
+                        (row["id"], row["representative_unit_id"])
+                        for row in logical_identity.logical_units
+                    ),
+                )
+                insert_batched(
+                    connection,
+                    "INSERT INTO logical_unit_sources (source_unit_id, logical_unit_id) "
+                    "VALUES (?, ?)",
+                    (
+                        (row["source_unit_id"], row["logical_unit_id"])
+                        for row in logical_identity.logical_unit_sources
+                    ),
+                )
                 create_indexes(connection)
                 # The frontend database is an immutable snapshot. Persist planner
                 # statistics at build time so read-only connections make informed
@@ -206,7 +307,7 @@ def export_database(data: dict[str, Any], path: Path) -> None:
         archive_connection = sqlite3.connect(archive_temporary)
         try:
             with archive_connection:
-                create_raw_archive(archive_connection, data)
+                create_raw_archive(archive_connection, data, identity_config, metadata=metadata)
             if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Raw archive integrity check failed")
         finally:

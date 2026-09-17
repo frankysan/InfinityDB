@@ -1,285 +1,448 @@
 # InfinityDB: AI context
 
-Use this document to orient substantial changes. It records durable project
-decisions, invariants, and non-obvious development constraints.
+Use this document to orient substantial changes. It records durable non-obvious
+project decisions, implementation constraints, and historical choices that help
+agents work consistently without duplicating the canonical architecture or data
+model.
 
-## Documentation hierarchy
+## Documentation hierarchy and status
 
 - `AGENTS.md` contains immediate repository-wide instructions for coding agents.
 - `docs/architecture.md` is authoritative for architecture, engineering
-  principles, subsystem boundaries, and lasting design direction.
+  principles, subsystem boundaries, data-path roles, and lasting design
+  direction.
 - `docs/data-model.md` is authoritative for normalized data semantics and
   persistence structure.
-- This document records durable project context, compatibility invariants, and
-  implementation constraints that help agents make changes consistently.
-- `README.md` remains the user-facing project introduction, setup, and
-  operations guide.
-- `docs/TODO.md` is the maintained backlog.
+- This document records non-obvious constraints and decision history that are
+  useful during implementation.
+- `README.md` is the user-facing project introduction, setup, and operations
+  guide.
+- `docs/TODO.md` is the maintained backlog of unimplemented work.
 - `docs/CHANGELOG.md` records released and unreleased changes.
 
 Before changing a boundary or persistence behavior, read
-`docs/architecture.md` and `docs/data-model.md`.
+`docs/architecture.md` and `docs/data-model.md`. Do not maintain a competing
+copy of their principles here.
 
-Follow the guiding and engineering principles defined in
-`docs/architecture.md`; do not maintain a separate competing copy here.
+Status must remain explicit. Unqualified descriptions in this document should
+refer to current constraints/behavior. Accepted but unimplemented choices are
+marked **Design direction**. The decision log may record an accepted decision
+before implementation, but the current sections and `TODO.md` remain
+responsible for implementation status.
 
-## Purpose and boundaries
+## Purpose and subsystem boundaries
 
-InfinityDB builds a local, validated SQLite reference database from Corvus
-Belli Infinity Army snapshots and serves a read-only browser and same-origin
-HTTP API.
+InfinityDB builds validated local reference databases from Infinity source data
+and serves a read-only browser and same-origin HTTP API.
 
-- `infinity_army_data` interprets, merges, normalizes, and validates source
-  data. It remains useful independently of the database and web application.
-- `infinity_db.database` defines and imports the SQLite snapshot, then exposes
-  read-only repository queries.
+- `infinity_army_data` interprets, merges, normalizes, and validates Army source
+  data independently of the database/web application.
+- `infinity_db.database` owns Army SQLite storage and repository queries.
+- The separate rules-reference database is built from validated curated rules
+  collections, not from raw PDFs or wiki snapshots.
+- Trait rule identity is owned by curated `trait` records in `rules.db`: Army
+  storage preserves raw trait labels/usage, and the application composes them
+  with curated canonical names, aliases, parameterized prefixes, summaries, and
+  citations. If `rules.db` is unavailable, raw traits remain usable without
+  invented canonical rule knowledge.
 - `infinity_db.web` validates HTTP input, serializes repository results, and
   contains the native-module browser UI.
-- Raw Army files are parsed only by the data pipeline. Routes and browser code
-  must use the repository and HTTP API respectively.
-- Standalone acquisition and processing tools remain independently usable and
-  testable rather than becoming hidden side effects of normal application
-  builds.
-- Deployment is a separate concern from acquisition, normalization, database
-  construction, and asset processing.
+- Standalone acquisition and processing tools remain explicitly invoked and
+  independently testable. Normal builds and tests must not acquire network data
+  unexpectedly.
+- Deployment remains separate from acquisition, normalization, database
+  construction, rules curation, and asset processing.
 
-Keep source-format logic, database storage choices, HTTP behavior, browser
-state, asset processing, and deployment behavior in their respective layers.
-Do not add a JavaScript build step unless a clear requirement justifies it.
+## Non-obvious Army data invariants
 
-## Configuration and manifests
-
-InfinityDB distinguishes behavior from maintained project knowledge:
-
-```text
-code        = behavior
-config      = maintained project/domain knowledge
-raw data    = immutable external input
-generated   = reproducible build output
-```
-
-Aliases, mappings, filters, manual overrides, compatibility exceptions, static
-asset declarations, and similar domain knowledge should use validated,
-versioned configuration when they can change independently of implementation
-behavior.
-
-Do not move ordinary implementation constants into configuration merely for
-configurability. Use manifests when the content represents maintained domain
-knowledge, policy, mappings, source declarations, or independently reviewable
-exceptions.
-
-Important configuration contracts should have an explicit schema or schema
-version, validation on load, deterministic serialization when generated, and
-tests for invalid and edge-case inputs.
-
-Persistent manifests should store portable project-relative paths rather than
-machine-specific absolute paths.
-
-## Data and compatibility invariants
-
-- Preserve the merged master document losslessly. The normalized document is
-  relational and query-oriented, but should retain source identity and
-  relationships needed for validation and display.
+- Preserve the merged master document losslessly. The normalized layer is
+  relational/query-oriented but retains source identities and relationships
+  needed for validation and display.
 - Unit IDs are global; nested profile, profile-group, and loadout IDs are only
   unique within their army/unit hierarchy. Use the established composite keys.
-- Retain source-undefined references as explicit placeholders; do not silently
-  discard them.
-- Database creation requires valid `metadata.json`, discovered beside or inside
-  the source or passed with `--metadata`. It enriches display names and
-  reference catalogs, but must not create list membership or alter availability.
-- Army-list data is authoritative for selectable army lists and unit membership.
-- SQLite imports are complete snapshot replacements. Build and validate temporary
-  sibling frontend and raw-archive databases before replacing the working files,
-  so a failed build leaves the prior snapshot usable.
-- PDF-derived rules material belongs in a separate SQLite database from the
-  Army JSON-derived frontend and raw-archive databases. Its import and release
-  lifecycle must be independent; combine Army and rules results only in an
-  application/service layer, never by treating either source as input to the
-  other's pipeline.
-- Nested data remains JSON in the queryable frontend database. Each row's exact
-  normalized representation, including absent versus null fields, belongs in
-  the sibling raw archive; do not remove that fidelity merely to simplify a
-  query.
-- Increment `DATABASE_COMPATIBILITY_VERSION` whenever a code change requires a
-  rebuilt database, even when the SQLite schema is unchanged. Incompatible
-  databases must fail with a rebuild instruction rather than serving stale
-  results.
+- Retain source-undefined references as explicit placeholders rather than
+  silently discarding them.
+- Valid Army API `metadata.json` is required for database creation. It enriches
+  catalogs, names, and faction hierarchy but must not create army membership or
+  alter source-derived availability.
+- Army-list occurrences are authoritative for unit membership and availability.
+  List presence, grouping, list kind, canonical ownership, optional availability
+  category, and playability are separate semantics.
+- The identity configuration no longer maps canonical-faction source ID `1` to
+  `901`. Normalization preserves ID `1` as mercenary source/origin provenance
+  and explicitly leaves `main_army_id` unset for canonical-1 units; 901 remains
+  the distinct Non-Aligned Armies grouping identity.
+- Source investigation shows ID `1` and ID `901` represent different concepts.
+  ID `1` behaves as a mercenary source/origin identity with no army list and no
+  ordinary faction membership role; 901 is the Non-Aligned Armies grouping
+  identity for distinct child army lists. They must not be conflated.
+- Ordinary unit records declare normal faction availability in `factions`.
+  Dedicated optional-mercenary source variants consistently use
+  `canonical: 1`, an empty `factions` list, a `merc-...` slug, and army-specific
+  occurrences that add optional availability. Many use a 10,000-offset-style
+  source ID, but numeric offset is diagnostic evidence only, not the semantic
+  rule.
+- Current normalized snapshots persist generic standard duplicate-unit matches,
+  mercenary-to-standard source-unit matches, and explicit
+  `army_units.availability_kind`. Database creation consumes the persisted
+  identity evidence and materializes `logical_units` / `logical_unit_sources`;
+  repository reads consume that relation, while mercenary filtering uses explicit
+  availability provenance. The 10,000-ID generic grouping rule remains only as a
+  builder compatibility fallback for older normalized inputs without
+  `genericUnitMatches`.
+- 901 (Non-Aligned Armies) is a non-selectable grouping identity for its child
+  9xx armies **and** a real imported Army source list with its own roster. Current
+  metadata has `901.parent = 900`; playability must not be inferred from source-list
+  existence or roster presence. InfinityDB intentionally has no separate 901
+  roster-query surface: preserve that roster as source provenance and consume unit
+  availability through the playable child NA2 lists.
+- The analyzed snapshot gives source list 901 one standard unit (Rumbler
+  Spec-Ops) plus the complete 49-variant optional-mercenary pool. Child NA2 lists
+  have their own standard rosters plus subsets of that pool.
+- The merger's current `army_lists.kind` is derived from source shape: ordinary
+  documents containing `reinforcements` become `army`, while reinforcement
+  documents without it become `reinforcement`. It is not a source-provided
+  main-army/sectorial taxonomy.
+- Army metadata parent relationships carry useful grouping semantics: standard
+  main armies are self-parented, sectorials point to their main army, and NA2
+  forces point to grouping identity 901. Ordinary list documents explicitly
+  reference their reinforcement list through `reinforcements`.
+- Current InfinityDB normalization also uses that metadata parent relationship
+  to derive unit `main_army_id`. Explicit maintained canonical-faction overrides
+  take precedence; the old `xx01` calculation is retained only for standalone or
+  legacy normalization inputs without a usable metadata row for that canonical
+  faction.
+- The backend/API exposes explicit army role/playability semantics derived from
+  metadata parent relationships and ordinary-list `reinforcements` links.
+  `/api/armies` distinguishes main armies, sectorials, Non-Aligned forces,
+  reinforcement lists, and grouping identities; the browser selector
+  consumes that contract rather than Army-ID ranges. Grouping identity `901` is
+  non-playable.
+- Mercenary variants are classified during normalization, their source markers
+  are validated, audited mercenary-to-standard mappings are persisted, and
+  repository queries consume explicit availability provenance. Generic standard
+  duplicate matching is also audited and persisted during normalization.
+  Database creation additionally persists unambiguous reinforcement-to-standard
+  matches using the pinned name-normalization policy. Repository queries do not
+  rediscover generic, mercenary, or reinforcement identity at query time.
+  Frontend database creation resolves configured aliases
+  plus persisted generic, mercenary, and reinforcement evidence into explicit
+  `logical_units` / `logical_unit_sources` relations. Source rows remain
+  unchanged; every source unit maps to exactly one logical unit, and repository
+  reads consume that materialized mapping rather than rebuilding identity
+  dynamically. A future refactor may materialize one canonical application
+  payload per logical unit and store only explicit army/loadout/source deltas,
+  but only after field-level invariance and provenance requirements are audited.
+  Legacy rediscovery remains only as a database-build compatibility path for
+  older normalized inputs.
+- SQLite Army imports replace a complete snapshot. Future user-authored data
+  must remain separate from that replaceable imported state.
+- Nested queryable values may remain JSON in the frontend DB; exact normalized
+  rows, including absent-versus-null distinctions, are preserved in the sibling
+  raw archive.
+- Increment `DATABASE_COMPATIBILITY_VERSION` whenever existing generated Army
+  databases must be rebuilt, even if the SQLite schema version is unchanged.
 
-## Filesystem, portability, and build invariants
+## Snapshot acquisition and provenance
 
-- Target Windows, Linux, and macOS for Python tooling unless a component is
-  explicitly documented as platform-specific.
-- Use portable filesystem APIs and avoid hard-coded user or system paths.
-- Treat raw downloaded inputs as immutable. Transformations write to separate
-  working/generated locations.
-- Persistent generated state should be validated before replacement and written
-  atomically where practical so failed builds leave the prior valid state
-  usable.
-- Generated project paths and names must be deterministic across supported host
-  operating systems.
-- Treat filenames as case-sensitive internally and detect case-only collisions
-  before publishing.
-- External executables should be discovered through explicit configuration,
-  shared discovery helpers, or `shutil.which()` rather than fixed installation
-  paths.
-- Subprocess-heavy tooling should use argument lists rather than shell command
-  strings. Do not make core pipeline behavior depend on CMD, PowerShell, Bash,
-  or shell-specific quoting.
-- Any process-based concurrency must be safe under the Windows `spawn` model.
-- Normal builds and tests must not make unexpected network requests. Network
-  acquisition belongs in explicit downloader/refresh operations.
+### Current
 
-## Third-party assets and symbol processing
+- Army, wiki, and symbol downloaders stage loose files temporarily and persist
+  complete timestamped `JSON`, `WIKI`, or `SYMBOLS` ZIP snapshots. Same-second
+  name collisions receive `-2`, `-3`, and so on rather than overwriting.
+- Raw snapshot archives are immutable after successful acquisition.
+- Each successful acquisition writes a version-1 generated provenance record
+  under `data/manifests/snapshots/`, labeled from the archive filename and
+  bound by its immutable SHA-256.
+  The record stores snapshot type, archive identity, acquisition time, source
+  URL, document count, optional language, and optional input-artifact identity.
+- Generated manifest paths are project-relative POSIX paths when the file is
+  inside the project root; machine-specific absolute paths are never persisted.
+- Generated snapshot manifests are ignored by Git, excluded from Docker build
+  context, and retained until explicitly removed. Rewriting different
+  provenance for an existing archive-labeled record fails. Identical bytes
+  reacquired under a different archive label may have another manifest with the
+  same authoritative SHA-256.
+- Human-authored snapshot descriptions, comparison targets, and notable-change
+  notes use the separate version-1 contract under
+  `data/curated/snapshot-notes/`, also keyed to snapshot SHA-256. Acquisition
+  tooling must never modify that subtree.
+- Corvus Belli's Army `metadata.json` remains source data, not project-generated
+  snapshot metadata.
 
-Downloaded Army data, graphical assets, rules documents, wiki material, and
-other third-party content are not automatically covered by InfinityDB's MIT
-License. Review `THIRD_PARTY_NOTICES.md` before redistribution.
+### Design direction
 
-Corvus Belli graphical assets should remain outside the public repository unless
-redistribution permission clearly allows their inclusion.
+- Future comparison tooling may emit structured generated diff/report data while
+  curated snapshot notes remain human interpretation.
+- Persistent generated project paths should remain portable and case-sensitive
+  internally; detect case-only collisions before publishing.
 
-Local image overrides may contain corrected or technically modified derivatives
-of Corvus Belli assets and therefore remain local/ignored unless their
-redistribution status changes. Configuration may document an expected override
-and its purpose without embedding the asset itself.
+Current curated wiki provenance predates the timestamped ZIP lifecycle. Do not
+invent exact archive/hash associations for legacy wiki references. Migrate them
+when the wiki downloader/packager and curated provenance contract are rewritten
+together.
 
-The symbol pipeline should preserve provenance and distinguish upstream asset
-identity, local source resolution, canonical/deduplicated identity, and final
-published paths. Override resolution follows the project policy:
+External executable discovery should use explicit configuration/shared discovery
+helpers/`shutil.which()` rather than fixed installation paths. Subprocess-heavy
+tools use argument lists, not shell command strings, and process-based
+concurrency must remain safe under the Windows `spawn` model.
+
+## Symbol pipeline
+
+### Current
+
+Downloaded Corvus Belli graphical assets remain outside the public repository
+unless redistribution permission clearly allows inclusion. Local corrected
+image overrides likewise remain ignored unless redistribution status changes.
+
+Army-symbol acquisition is now source-semantic and URL/reference based.
+`tools/download_army_symbols.py` discovers every
+`units[].profileGroups[].profiles[].logo` plus every
+`metadata.json -> factions[].logo`, includes validated maintained static-symbol
+declarations, and treats `resume[].logo` as audit-only. A recursive scan of all
+source strings fails closed on SVG-bearing fields that are not reviewed semantic
+or audit-only locations. A unit may reference several SVGs and several source
+references may share one URL; every reference is preserved while each
+authoritative URL is downloaded only once.
+
+The downloader creates one immutable `SYMBOLS ...zip`, ordinary snapshot
+provenance, and the acquisition-only version-1
+`data/manifests/army-symbol-build.json`. That build manifest separates raw assets
+from consumers, records Army/SYMBOLS artifact hashes, source-document count,
+raw asset URL/filename/archive-path/hash/source-method, every source/static
+reference, and discovery audit counts. It deliberately has no font, duplicate,
+conversion, compression, or published-path state yet. The downloader does not
+generate `army-symbols.js` or `unit-symbol-map.js`.
+
+### Design direction
+
+Later symbol processing must consume the same pinned Army/SYMBOLS identities
+rather than selecting newer snapshots independently. Exact or visual
+deduplication may map several source assets to one canonical asset but must
+retain every original reference.
+
+Source resolution follows the accepted policy:
 
 ```text
 local override
-    -> validated raw cache
-    -> upstream download
+    -> validated selected symbol snapshot/cache
+    -> upstream network when explicit acquisition permits it
 ```
 
-An invalid override must fail explicitly rather than silently falling back to a
+An invalid matching override is an error; it must not silently fall back to a
 different source.
 
-## Local rules-reference documents
+Only the publisher assigns final application paths and generated
+`army-symbols.js` / `unit-symbol-map.js` mappings because only publication knows
+the final canonical asset after deduplication/conversion/compression.
 
-The ignored, user-supplied PDFs in `data/` are potential sources for
-rules-aware product work and data review; they are not inputs to the Army JSON
-merge/normalization/build pipeline:
+The established processing direction is `resvg` for visual duplicate and
+compression validation, persistent `inkscape --shell` workers for text-to-path
+conversion, and standalone reusable stages wrapped by a thin orchestrator. The
+roughly 8-9 second Windows Inkscape startup cost is an accepted external-tool
+limitation; persistent workers are the intended mitigation. Do not restart
+startup profiling without new evidence.
 
-- `data/pdf/rules/n5-rules-v5-1-en.pdf`, `n5-rules-v5-2-en.pdf`, and
-  `n5-rules-v5-3-en.pdf`: N5 core rules revisions.
-- `data/pdf/faq/n5-faqs-v0-0-en.pdf` and `n5-faqs-v0-1-en.pdf`: dated FAQ
-  clarifications.
-- `data/pdf/its/Its-rules-season-18-en.pdf`: current ITS Season 18 rules.
-- `data/pdf/legacy/`: historical ITS Seasons 6-17 and N2/N3 rules.
-- `data/wiki/20260915/`: a local wiki snapshot with HTML pages, originals,
-  and assets.
+## Curated rules-reference constraints
 
-When using these documents, record the document version/date and printed-page
-citation. Keep core rules, FAQ/errata rulings, and ITS season content separate
-so a view cannot silently combine editions or seasons. The official Infinity
-Army app/data remains authoritative for unit availability and list legality;
-live official rules, FAQs, wiki, errata, and event dates may supersede a local
-copy. Use concise original summaries and structured facts, not bulk-extracted
-or served copyrighted PDF text or artwork. Curate core rules, FAQ/errata, and
-ITS records into separate versioned collections; historical sources must not be
-silently blended with current rules.
+### Current
 
-The handoff from research to project data is `data/curated/`. Curated JSON
-files use the `InfinityDB curated reference` format and must preserve source
-identity plus printed-page provenance for every record. Application ingestion
-must use `infinity_db.curated.load_curated_document` (or a validated importer
-built on it), never open files under `data/pdf/` or `data/wiki/`.
-Army links in curated records may point to existing catalog or unit IDs, but
-must not change Army-derived availability, legality, or statistics. The
-current v2 citation model supports printed PDF pages and wiki paths with
-snapshot dates. Version 1 curated files must be migrated before ingestion.
+Raw PDF and wiki research material is not an application input. Human-reviewed
+rules collections live under `data/curated/rules/`; `infinity-db build-rules`
+defaults to that subtree and does not ingest sibling curated categories.
 
-## API and UI rules
+Current local reference families include N5 core rules revisions, N5 FAQs, ITS
+season/historical material, and wiki research. Keep core rules, FAQ/errata
+rulings, ITS seasons, historical sources, and wiki-derived material explicitly
+scoped so a view cannot silently combine incompatible versions.
+
+PDF record citations retain document version/date plus printed-page citations.
+Wiki record citations currently retain snapshot-local paths and `snapshotDate`.
+The checked-in wiki source still references the legacy unpacked mirror identity;
+that is current provenance, not a timestamped-archive guarantee.
+
+The current curated-v2 rules contract includes collection/source metadata,
+maintained `skillTypes` and `labels` vocabularies with `vocabularySources`, typed
+records, Army links, related-record links, review state, and citations. The
+current `vocabularySources` validator requires the mixed legacy locator fields
+`sourceId`, `path`, `snapshotDate`, `heading`, and positive `page`. Version 1
+curated-rule files must be migrated before ingestion. The reserved
+`rules/example.json` template is excluded from directory ingestion.
+
+The rules database has its own schema/versioning and replacement lifecycle. It
+must not import Army JSON data, and Army database construction must not import
+rules data. Application/service code may combine the two only through stable
+application-level identities.
+
+### Design direction
+
+When the wiki downloader/packager is rewritten, migrate legacy wiki source
+identity to exact recorded timestamped archive/hash provenance and replace the
+mixed `vocabularySources` locator with source-appropriate provenance. This is
+tracked as future work and should not be papered over by documentation-only
+changes.
+
+## API and UI constraints
 
 - API routes are same-origin and read-only. Validate request input at the HTTP
-  boundary; return useful client errors without exposing internal exceptions.
-- Keep response shapes stable. Additive fields are preferable to changing or
-  repurposing existing fields.
-- Army filtering derives from actual `army_units` occurrences, not canonical
-  faction references. Source records may be combined into one logical unit only
-  using the repository's established identity rules.
-- Search and display ordering are case-, accent-, and punctuation-insensitive;
-  preserve this behavior for new searchable names.
-- Browser requests belong in `api.js`; shared unit rows belong in
-  `unit-list.js`; page-specific state and rendering belong in their page module.
-- Treat frontend database data as immutable for a running application instance.
-  Snapshot-aware ETags and the version endpoint distinguish a new dataset from
-  a new application release; keep these validators aligned when adding routes.
-  Use native browser modules and stable asset paths rather than directory scans.
-- Every browser route uses the server-rendered shared page shell. Add new pages
-  through `_page()` with breadcrumb and catalog-tag values, and retain the
-  navigation/header/footer markers in their static document.
-- Shared menus use the sidebar-section / compact-topbar pattern: render their
-  labeled options inline beneath sidebar navigation on wide screens, then use
-  the shared compact-menu dropdown behavior beside Navigation in the top bar.
-  New sidebar or topbar menus should follow this pattern by default.
-- Treat `styles.css` as the design-system source of truth. Reuse its root
-  tokens and existing layout/control components; do not add page-local colors,
-  spacing scales, radii, or shell variants when a shared token or component can
-  express the need. Detail renderers must compose the shared `.detail-group`,
-  `.detail-section-title`, `.data-surface-header`, `.data-label`, and `.badge`
-  primitives before adding a semantic modifier.
-- Use the shared default, subdued, and highlighted `.surface` variants for
-  cards and panels. Tables use the comfortable default or
-  `.data-table--compact` for detail and usage data; do not introduce local
-  table padding or density rules.
-- Developer mode is a persistent, default-off browser preference for technical
-  details. Mark inline database identifiers with `.developer-only` and ID table
-  columns with `.id-column`; both must stay hidden unless Developer mode is on.
+  boundary and do not expose internal exceptions.
+- Prefer additive response changes; do not silently repurpose existing fields.
+- Army filtering uses actual `army_units` occurrences, not canonical faction
+  references.
+- **Design direction:** Army selectors should use explicit backend-provided
+  role/playability semantics rather than treating every imported list identity
+  as selectable.
+- Search/display ordering is case-, accent-, and punctuation-insensitive.
+- Browser requests belong in `api.js`; shared unit rows in `unit-list.js`;
+  page-specific rendering/state in the corresponding page module.
+- Frontend database data is immutable for a running application instance.
+  Snapshot-aware ETags and `/api/version` distinguish new imported data from an
+  application release.
+- Every browser route uses the shared server-rendered page shell. New static
+  page documents retain the navigation/header/footer markers expected by
+  `_page()`.
+- Shared menus use the inline-sidebar / compact-topbar pattern.
+- `styles.css` is the design-system source of truth. Reuse established tokens,
+  surfaces, table density, detail-group primitives, and badges rather than
+  adding page-local equivalents.
+- Developer mode is default-off. Technical inline fields use `.developer-only`
+  and ID table columns use `.id-column`.
 
 ## Style and change discipline
 
-- Target Python 3.11, use four-space indentation, and keep Ruff-compatible code
-  (`E`, `F`, `I`, `UP`, `B`; 100-character lines except reviewed SQL strings).
-- Prefer explicit, small functions and clear data transformations over clever
-  abstractions. Preserve existing source field names in normalized/database
-  records unless a deliberate mapping is documented.
-- Update tests with behavior changes. Pipeline changes need lossless,
-  relationship, and import-integrity coverage; repository/API/UI changes need
-  focused behavior coverage. Standalone scripts in `tools/` also need their own
-  dedicated regression tests so filesystem safety, portability, and download
-  logic remain covered independently of the main pipeline.
-- Run substantive test and lint commands through the project's virtual
-  environment, for example:
-  `<venv-python> -m pytest -q` and
+- Target Python 3.11, four-space indentation, and Ruff rules `E`, `F`, `I`,
+  `UP`, `B` with 100-character lines except reviewed SQL strings.
+- Prefer explicit small functions and clear transformations over clever
+  abstractions. Preserve source field names unless a deliberate mapping is
+  documented.
+- Update focused tests with behavior changes. Standalone scripts in `tools/`
+  require dedicated regression coverage for filesystem/URL/portability logic.
+- Run substantive Python tests/lint through the project virtual environment,
+  for example `<venv-python> -m pytest -q` and
   `<venv-python> -m ruff check src/infinity_db src/infinity_army_data/cli.py tests`.
-- Update `README.md` for user-visible behavior and the relevant canonical
-  documentation when changing a documented boundary, invariant, or storage
-  decision.
-- Update `docs/TODO.md` whenever the user or an agent identifies a concrete
-  future improvement, optimization, cleanup, or feature. Keep it actionable,
-  place it in the appropriate section, and mark work complete only after
-  implementation, verification, and documentation are finished.
-- Record meaningful work under `Unreleased` in `docs/CHANGELOG.md`. Do not
-  increment or otherwise alter the release version unless explicitly requested.
-- Keep `__version__` at the released value. While `Unreleased` contains work,
-  the browser footer must use `__display_version__` with a `+dev` suffix; reset
-  it to the release version only as part of an explicitly requested release.
+- Update `README.md` for user-visible behavior/setup/capabilities, canonical
+  architecture/data-model docs for their respective decisions, `TODO.md` for
+  concrete future work, and `CHANGELOG.md` under `Unreleased` for meaningful
+  changes.
+- Keep `__version__` at the released value until an explicit release. While
+  unreleased work exists, the browser footer uses `__display_version__` with
+  the `+dev` suffix.
 
 ## Decision log
 
 - 2026-09-12: Database builds require validated Army API metadata. The importer
-  enforces this too, so a metadata-free normalized document cannot bypass the
-  build command and become a database.
-- 2026-09-12: SQLite is a local, replaceable imported snapshot, not a home for
-  user-authored persistent data. Migrations for user-owned data are deferred
-  until that requirement exists.
+  enforces this too, so metadata-free normalized data cannot bypass the build
+  command and become a database.
+- 2026-09-12: SQLite is a local replaceable imported snapshot, not a home for
+  user-authored persistent data. User-owned migrations are deferred until that
+  requirement exists.
 - 2026-09-12: The browser has no frontend build tool; native modules keep local
   deployment and maintenance simple.
 - 2026-09-12: The browser shell is centrally rendered from navigation, header,
-  and footer fragments. CSS tokens and shared components are the required
-  extension point for consistent visual design across current and future pages.
-- 2026-09-13: Settings follows the shared menu pattern across sidebar and
-  compact top-bar layouts. Unit catalog accents may draw from named main-army
-  colors only through the shared design-system tokens and gradients.
-- 2026-09-14: PDF-derived rules references will use their own SQLite database,
-  independently versioned and updated from the replaceable Army JSON snapshot.
-  This preserves source provenance and prevents a rules-document update from
-  requiring an Army import (or vice versa).
-- 2026-09-16: Engineering principles are canonical in
-  `docs/architecture.md`. Durable project knowledge that can change
-  independently of implementation behavior should use validated manifests or
-  configuration where appropriate. Tooling and generated project paths should
-  remain deterministic and portable across Windows, Linux, and macOS.
+  and footer fragments. CSS tokens/shared components are the extension point for
+  visual consistency.
+- 2026-09-13: Settings uses the shared sidebar/compact-topbar menu pattern. Unit
+  catalog accents may draw from named main-army colors only through the shared
+  design system.
+- 2026-09-14: PDF/wiki-derived rules references use their own SQLite database,
+  independently versioned from the replaceable Army JSON snapshot.
+- 2026-09-16: Engineering principles are canonical in `docs/architecture.md`.
+  Maintained domain knowledge belongs in validated configuration where
+  appropriate; generated project paths remain deterministic and portable.
+- 2026-09-16: The `1` -> `901` canonical-faction ownership override was moved
+  into validated identity configuration. Subsequent source investigation on
+  2026-09-17 found that the two IDs represent different domain concepts.
+- 2026-09-17: After mercenary logical pairing and availability provenance moved
+  to explicit normalized metadata, the legacy `1` -> `901` override was removed.
+  Canonical source ID `1` now remains mercenary provenance with no application
+  `main_army_id`; 901 remains the distinct NA2 grouping identity. Army database
+  compatibility revision 12 requires rebuilding existing generated snapshots.
+- 2026-09-16: Army-linked symbol discovery is reference/URL based, uses one
+  exact pinned Army snapshot, audits unknown SVG locations, and leaves final
+  canonical application paths/mappings to the publisher. This records design
+  direction; the integrated manifest-backed pipeline is not yet implemented.
+- 2026-09-16: Army JSON, wiki, and symbol acquisition use complete timestamped
+  ZIP snapshots rather than long-lived unpacked download directories.
+- 2026-09-16: Snapshot metadata follows the existing data-path model instead of
+  introducing editable sidecars beside raw archives: generated acquisition
+  provenance belongs under `data/manifests/snapshots/` and human notes under
+  `data/curated/snapshot-notes/`.
+- 2026-09-17: The snapshot-provenance and snapshot-note contracts were
+  implemented. Army, wiki, and symbol acquisition now write deterministic
+  SHA-256-addressed provenance records, while curated snapshot notes remain a
+  separate source-controlled human layer that acquisition tooling never edits.
+- 2026-09-17: Weapon catalog policy was split from implementation code.
+  `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
+  and explicit category decisions; `config/catalogs/weapon-overrides.json` owns
+  Army-source name/profile corrections and exact non-display metadata-profile
+  matchers. Normalization consumes those validated build inputs and materializes
+  their effects; the runtime repository does not load catalog configuration.
+- 2026-09-17: The remaining hard-coded-domain audit classified weapon range bands
+  as derivable presentation data, not configuration. Weapon detail rendering now
+  derives ordered range endpoints from imported profile `distance[].max` values.
+  Distance-skill handling is now source-driven: Army `extras.type` determines
+  `DISTANCE` versus text, while curated skill `parameterSemantics` supplies only
+  rule-derived sign-display behavior for Super-Jump and Forward Deployment.
+  Reinforcement prefix normalization is now pinned in the identity config and
+  unit-detail profile display names are backend-derived. Remaining audit targets
+  are now limited to symbol-semantic name tables reserved for the symbol-pipeline
+  refactor; the former direct `901` grouping special case is derived from the
+  metadata/playable-list hierarchy instead.
+- 2026-09-17: Special weapon game-rule facts moved out of
+  `infinity_army_data.weapon_profiles`. The Armed Turret special profile is a
+  cited curated `weapon` record linked to Army weapon ID 226; repository reads
+  expose raw Army catalog data and the application composes the special profile
+  from `rules.db` when curated rules are available.
+- 2026-09-17: Skill declaration categories moved out of Python into cited
+  curated `skill-declaration-category` records linked to Army skill IDs. The Army
+  repository exposes raw skill data only; `SkillCatalog` composes declaration
+  categories and ordinary curated skill rules from `rules.db`, with uncited
+  `Unclassified` as the fallback when no curated declaration is available.
+- 2026-09-16: Rules ingestion is scoped to `data/curated/rules/`. Other curated
+  categories may have separate future semantics but are not implicitly rules
+  database inputs.
+- 2026-09-16: Documentation distinguishes current implementation, accepted
+  design direction, and planned/unimplemented backlog so future architecture is
+  not presented as existing behavior.
+- 2026-09-17: Generic standard-unit duplicate matching moved from repository-time
+  10,000-ID arithmetic into a normalization audit persisted as
+  `genericUnitMatches`. Database creation treats the persisted audit as
+  authoritative, including an empty result; older normalized inputs without the
+  key retain the builder's arithmetic fallback. This intermediate persistence
+  step required no SQLite schema or compatibility revision by itself.
+- 2026-09-17: Unit `main_army_id` derivation moved from the ordinary `xx01`
+  Army-ID convention to imported metadata faction parents for current
+  InfinityDB builds. Explicit maintained overrides still win; `xx01` remains
+  only as a legacy/standalone fallback when metadata cannot resolve the
+  canonical faction. Database compatibility revision 13 requires rebuilding
+  existing generated Army databases.
+- 2026-09-17: Army role/playability moved to an explicit source-derived
+  backend/API contract. Metadata parents classify main, sectorial, and
+  Non-Aligned forces; explicit ordinary-list `reinforcements` links classify
+  reinforcement relationships. Grouping identity 901 is exposed as
+  non-playable and browser selectors no longer infer roles from Army-ID ranges.
+- 2026-09-17: Army grouping identities are derived structurally rather than by
+  recognizing ID `901`. Current source `901` is itself an imported ordinary army
+  list with metadata parent `900`; it parents the NA2 child lists and has a real
+  source roster. Imported parents that are not self-parented become non-playable
+  grouping nodes, while self-parented parents remain main armies. Source-list
+  existence, roster semantics, hierarchy role, and application playability are
+  separate concepts.
+- 2026-09-17: Non-playable grouping rosters do not get a dedicated application
+  query surface. The 901 source roster remains preserved for provenance, while
+  application unit availability is reached through the playable child NA2 army
+  occurrences. This is separate from the future canonical logical-unit/delta model.
+- 2026-09-17: Mercenary source identity and Non-Aligned Army grouping are
+  separate. ID `1` is retained as mercenary source provenance; 901 groups NA2
+  army lists. Dedicated mercenary variants are identified by source semantics,
+  not numeric ID arithmetic. Classification, persisted mercenary-to-standard
+  matching, and explicit availability provenance are now normalized before
+  repository use.
+- 2026-09-17: Logical-unit identity is materialized during frontend database
+  creation. Configured aliases and persisted generic, mercenary, and
+  reinforcement matches are build-time identity evidence; the exporter resolves
+  their transitive components into `logical_units` and `logical_unit_sources`.
+  Source/profile/loadout/occurrence rows remain keyed to original source units
+  for provenance, and repository reads consume the materialized relation. Legacy
+  identity discovery is retained only behind the builder for older normalized
+  inputs.

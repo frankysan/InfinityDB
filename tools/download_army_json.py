@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Manually download one raw Infinity Army JSON snapshot from Corvus Belli's API.
 
-This is deliberately a standalone script.  It is not registered with
+This is deliberately a standalone script. It is not registered with
 ``infinity-db`` or imported by the build pipeline, so network requests occur
 only when this script is explicitly run.
 """
@@ -12,7 +12,6 @@ import argparse
 import re
 import sys
 import tempfile
-import zipfile
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +20,12 @@ from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import decode_document
 from infinity_army_data.metadata import decode_metadata
+from infinity_db.snapshot_provenance import write_snapshot_manifest
+
+try:
+    from tools.snapshot_archive import create_timestamped_archive
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from snapshot_archive import create_timestamped_archive
 
 API_BASE_URL = "https://api.corvusbelli.com/army"
 API_ORIGIN = "https://infinityuniverse.com"
@@ -140,34 +145,48 @@ def archive_snapshot(
     *,
     now: datetime | None = None,
 ) -> Path:
-    """Store exactly one downloaded snapshot in a date-and-time-tagged ZIP file."""
-    timestamp = (now or datetime.now().astimezone()).strftime("%Y%m%d-%H%M%S")
-    destination.mkdir(parents=True, exist_ok=True)
-    archive = destination / f"JSON {timestamp}.zip"
-    sequence = 2
-    while archive.exists():
-        archive = destination / f"JSON {timestamp}-{sequence}.zip"
-        sequence += 1
-    with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED) as output:
-        for path in sorted(files, key=lambda item: item.name):
-            output.write(path, path.name)
-    return archive
+    """Store exactly one downloaded Army snapshot in a timestamped ZIP file."""
+    return create_timestamped_archive(files, destination, prefix="JSON", now=now)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("destination", nargs="?", type=Path, default=Path("data/raw"))
     parser.add_argument("--language", default="en", help="Army API language code (default: en)")
+    parser.add_argument(
+        "--manifest-dir",
+        type=Path,
+        default=Path("data/manifests/snapshots"),
+        help="Generated snapshot manifest directory (default: data/manifests/snapshots)",
+    )
     args = parser.parse_args(argv)
+    archive: Path | None = None
+    manifest: Path | None = None
     try:
         args.destination.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="infinity-army-", dir=args.destination) as staging:
             files = download_snapshot(Path(staging), language=args.language)
-            archive = archive_snapshot(files, args.destination)
+            acquired_at = datetime.now().astimezone()
+            archive = archive_snapshot(files, args.destination, now=acquired_at)
+            manifest = write_snapshot_manifest(
+                archive,
+                args.manifest_dir,
+                snapshot_type="army",
+                acquired_at=acquired_at,
+                source_url=API_BASE_URL,
+                document_count=len(files),
+                project_root=Path.cwd(),
+                language=args.language,
+            )
     except (OSError, ValueError) as exc:
+        if manifest is not None:
+            manifest.unlink(missing_ok=True)
+        if archive is not None:
+            archive.unlink(missing_ok=True)
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     print(f"Downloaded {len(files) - 1} army lists and metadata -> {archive}")
+    print(f"Snapshot provenance -> {manifest}")
     return 0
 
 

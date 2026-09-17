@@ -1,7 +1,7 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
 import { unitSymbol } from "./unit-symbols.js";
-import { distanceUnit, formatDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
+import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
@@ -11,44 +11,18 @@ const unitId = /^\/units\/(\d+)$/.exec(window.location.pathname)?.[1];
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
-const factionGroups = new Map([
-  [1, "PanOceania"],
-  [2, "Yu Jing"],
-  [3, "Ariadna"],
-  [4, "Haqqislam"],
-  [5, "Nomads"],
-  [6, "Combined Army"],
-  [7, "ALEPH"],
-  [8, "Tohaa"],
-  [9, "Non-Aligned Armies"],
-  [10, "O-12"],
-  [11, "JSA"],
-]);
-const factionSlugs = new Map([
-  [1, "panoceania"], [2, "yu-jing"], [3, "ariadna"], [4, "haqqislam"],
-  [5, "nomads"], [6, "combined-army"], [7, "aleph"], [8, "tohaa"],
-  [9, "non-aligned-armies"], [10, "o-12"], [11, "jsa"],
-]);
-
-function factionSlug(armyId) {
-  return factionSlugs.get(Math.floor(Number(armyId) / 100));
-}
-
-function factionGroup(armyId) {
-  const key = Math.floor(Number(armyId) / 100);
-  return {
-    key,
-    name: factionGroups.get(key) || "Other armies",
-    order: key,
-  };
-}
-
 function groupArmiesByFaction(armies) {
   const groups = new Map();
   for (const army of armies) {
-    const group = factionGroup(army.id);
-    if (!groups.has(group.key)) groups.set(group.key, { ...group, armies: [] });
-    groups.get(group.key).armies.push(army);
+    const faction = army.faction;
+    const key = faction?.id ?? "other";
+    if (!groups.has(key)) groups.set(key, {
+      key,
+      name: faction?.name || "Other armies",
+      order: faction?.id ?? Number.MAX_SAFE_INTEGER,
+      armies: [],
+    });
+    groups.get(key).armies.push(army);
   }
   return [...groups.values()]
     .sort((left, right) => left.order - right.order)
@@ -156,9 +130,6 @@ const statColumns = [
   ["W", (profile) => profile.vitality], ["S", (profile) => profile.silhouette],
 ];
 
-function isReinforcementArmy(armyId) {
-  return [98, 99].includes(Number(armyId) % 100);
-}
 const statProperties = {
   CC: "cc", BS: "bs", PH: "ph", WIP: "wip", ARM: "arm", BTS: "bts",
   W: "vitality", S: "silhouette",
@@ -215,35 +186,6 @@ function displayAvailability(value) {
 function identicalStatline(left, right) {
   const rightStatline = generalStatline(right);
   return generalStatline(left).every((value, index) => value === rightStatline[index]);
-}
-
-function baseProfileName(profileName) {
-  return String(profileName || "")
-    .replace(/^(?:REINF|REFUERZOS)(?:\.|:)?\s*/i, "")
-    .trim();
-}
-
-const profileIdentityWordAliases = {
-  armoured: "armored",
-  reconnaissance: "recon",
-  reconaissance: "recon",
-};
-const profileIdentityIgnoredWords = new Set([
-  "troops", "autonomous", "intervention", "unit",
-]);
-
-function profileIdentity(profileName) {
-  const words = baseProfileName(profileName)
-    .normalize("NFKD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .match(/[\p{L}\p{N}]+/gu) || [];
-  return words.filter((word) => !profileIdentityIgnoredWords.has(word)).map((word) => {
-    const singular = word.length > 3 && word.endsWith("s") && !word.endsWith("ss")
-      ? word.slice(0, -1)
-      : word;
-    return profileIdentityWordAliases[singular] || singular;
-  }).sort().join(" ");
 }
 
 const orderTypes = ["regular", "irregular"];
@@ -367,8 +309,8 @@ function profileTitle(profile) {
 function generalProfiles(profiles, loadouts) {
   const byName = new Map();
   for (const profile of profiles) {
-    const profileName = baseProfileName(profile.name);
-    const profileKey = profileIdentity(profile.name);
+    const profileName = String(profile.display_name || profile.name || "").trim();
+    const profileKey = profile.profile_identity;
     if (!byName.has(profileKey)) byName.set(profileKey, {
       profileName, profiles: [],
     });
@@ -391,7 +333,7 @@ function generalProfiles(profiles, loadouts) {
       type: mostCommon(matchingProfiles, "type"),
       classification: mostCommon(matchingProfiles, "classification"),
       occurrenceCount: matchingProfiles.length,
-      reinforcement: matchingProfiles.every((profile) => isReinforcementArmy(profile.armyId)),
+      reinforcement: matchingProfiles.every((profile) => profile.reinforcement),
       sharedItems: {
         skills: generalProfileSkills(matchingProfiles, matchingLoadouts),
         equipment: commonProfileItems(matchingProfiles, "equipment"),
@@ -485,10 +427,7 @@ function profileItems(items, catalog, fallbackLabel) {
       const extraName = extra.name || "Extra";
       if (!extra.name) hiddenIds.push(`Extra #${text(extra.id)}`);
       if (!extra.is_distance) return extraName;
-      return formatDistanceExtra(extraName, {
-        showPositiveSign: item.name !== "Super-Jump",
-        forcePositiveSign: item.name === "Forward Deployment",
-      });
+      return formatSkillDistanceExtra(extraName, item.parameter_semantics);
     });
     const decoratedName = extras.length ? `${name} (${extras.join(", ")})` : name;
     const label = item.quantity != null && Number(item.quantity) !== 1
@@ -681,9 +620,7 @@ function availabilityBadges(flags = []) {
 
 function isStandardArmy(army) {
   const flags = army.availability_flags || [];
-  return !flags.includes("mercs")
-    && !flags.includes("reinforcement")
-    && !isReinforcementArmy(army.id);
+  return !flags.includes("mercs") && !flags.includes("reinforcement");
 }
 
 function isEnabledArmy(army) {
@@ -768,7 +705,9 @@ function render(unit) {
   status.hidden = true;
   const armies = unit.armies.filter(isEnabledArmy);
   const allProfiles = armies.flatMap((army) => army.profiles.map((profile) => ({
-    ...profile, armyId: army.id,
+    ...profile,
+    armyId: army.id,
+    reinforcement: (army.availability_flags || []).includes("reinforcement"),
   })));
   const allLoadouts = armies.flatMap((army) => army.loadouts.map((loadout) => ({
     ...loadout, armyId: army.id,
@@ -777,7 +716,7 @@ function render(unit) {
   const displayedGeneralProfiles = visibleGeneralProfiles(generalProfileRows);
   const generalProfilesSection = document.createElement("section");
   generalProfilesSection.className = "detail-group general-profile-group";
-  const mainFaction = factionSlug(unit.main_army_id);
+  const mainFaction = unit.main_faction?.slug;
   if (mainFaction) generalProfilesSection.classList.add(`general-profile-group--faction-${mainFaction}`);
   const generalHeading = heading(
     displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",

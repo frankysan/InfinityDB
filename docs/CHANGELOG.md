@@ -6,24 +6,203 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add project-level markdownlint configuration that keeps `MD024` duplicate-heading checks within sibling headings, allowing standard changelog headings such as `Added`, `Changed`, and `Fixed` to repeat under different releases.
+- Add `tools/run_checks.py` as the standard development-check orchestrator for
+  pytest, Ruff, and Army build validation, with selectable stages/profiles,
+  targeted pytest/Ruff paths, fail-fast mode, deterministic exit codes, and
+  live console output that can be mirrored to a report file.
+- Add deterministic timestamped check reports under ignored `reports/` when
+  `--report` is used without an explicit path; the filename and report header
+  share the same local run-start timestamp, while an explicitly supplied path
+  remains authoritative.
+- Add normalization-time source semantics for optional mercenaries:
+  source-defined units expose `source_role` (`standard` or
+  `mercenary_variant`) and army occurrences expose `availability_kind`
+  (`standard` or `mercenary`). The classifier validates the observed
+  canonical/factions/slug contract and does not use the common 10,000-ID offset
+  as its semantic rule.
+- Add reduced raw Army-shaped mercenary regression fixtures based on the observed
+  Miranda Ashcroft, Yuan Yuan, and Valerya Gromoz source patterns. The fixtures
+  exercise merge-to-normalization classification, fail-closed contract drift,
+  mercenary-to-standard matching, and same-army standard/optional overlap.
 - Add dedicated regression tests for each standalone tool script in `tools/`,
   covering the Army JSON downloader, wiki mirror downloader, asset symbol
   downloader, symbol reorganizer, and shared file-path sanitizer.
 - Add project-local pytest temp/cache configuration so the suite runs reliably
   from the repository `.venv` on Windows and does not depend on the system temp
   directory.
+- Add the validated `config/identity/source-identities.json` configuration for
+  maintained unit, army, skill, equipment, weapon, and name-normalization
+  identity exceptions.
+- Pin the exact identity configuration and its deterministic SHA-256 into
+  `normalized.json` during InfinityDB normalization and propagate the same
+  validated policy into both generated Army database siblings.
+- Add versioned snapshot-provenance and snapshot-note contracts. Army, wiki,
+  and symbol acquisition now writes deterministic SHA-256-addressed provenance
+  under `data/manifests/snapshots/`, while human annotations remain separate
+  under `data/curated/snapshot-notes/`.
 
 ### Changed
 
+- Replace first-logo-per-unit symbol acquisition with complete source-semantic
+  Army discovery. `download_army_symbols.py` now preserves every profile/faction
+  reference, includes maintained static symbols, audits `resume` and unknown SVG
+  source locations, downloads each authoritative URL once, and no longer
+  generates browser symbol mappings.
+- Add the acquisition-only version-1 `army-symbol-build.json` generated state,
+  separating raw asset URL/hash/archive identity from every Army/static
+  reference so later symbol processing can extend the same manifest without
+  inferring provenance from filenames.
+- Move reinforcement-label prefixes (`REINF` / `REFUERZOS`) into the validated
+  identity policy and derive profile `display_name` values in the backend. The
+  browser now consumes `display_name` and `profile_identity` instead of carrying
+  a duplicate reinforcement-prefix regex. Because existing generated databases
+  pin an older identity-config contract, bump the identity-config schema to 2
+  and Army database compatibility revision to 15 while keeping SQLite schema 10.
+- Make skill-extra distance detection authoritative to imported Army
+  `extras.type` metadata instead of numeric-text heuristics. Numeric text such as
+  `+5 CC` no longer needs an application exception. Move the remaining
+  Super-Jump and Forward Deployment sign-display conventions into cited curated
+  skill parameter semantics consumed through `SkillCatalog`, removing duplicate
+  skill-name branches from backend and browser code.
+- Derive weapon range-table columns from imported profile distance endpoints
+  instead of maintaining a fixed global range-band list. Inch labels use the
+  existing 2.5 cm conversion and remain aligned across all profiles for a weapon.
+- Move Armed Turret non-display metadata-profile suppression out of the runtime
+  repository and into validated weapon source-correction configuration applied
+  during normalization.
+- Move maintained weapon-family taxonomy, regex classification policy, manual
+  category decisions, and Army-source weapon metadata corrections out of Python
+  into validated `config/catalogs/` configuration. Classification mechanics
+  remain code and game-rule facts stay outside source-correction configuration.
+- Move the Armed Turret special profile out of Python into a cited curated
+  `weapon` rules record linked to Army weapon ID 226. Weapon API responses now
+  compose that profile from `rules.db`, while the Army repository remains
+  source-data-only and degrades cleanly when curated rules are unavailable.
+- Move N5 skill declaration categories out of `skill_categories.py` into cited
+  curated `skill-declaration-category` records linked to Army skill IDs. Skill
+  list/detail APIs now compose declaration categories and ordinary skill rules
+  through `SkillCatalog`; the Army repository no longer embeds rule-derived
+  declaration knowledge.
+- Reconcile reference documentation with the completed logical-unit and army-role
+  refactors: source-unit identity is now distinguished from materialized
+  application identity, repository-time identity discovery is no longer described
+  as current behavior, and completed refactor backlog history is removed.
+- Remove the obsolete repository-side logical-unit identity discovery path now
+  that frontend databases materialize complete identity. Legacy duplicate
+  compatibility behavior remains build-time only, with its regression coverage
+  moved to the logical-unit resolver/audit tests.
+- Materialize application logical-unit identity during frontend database
+  creation. The exporter resolves configured aliases plus persisted generic,
+  mercenary, and reinforcement evidence into frontend-only `logical_units` and
+  `logical_unit_sources` tables while retaining all source rows and occurrence
+  provenance. Repository reads now consume that materialized mapping; schema
+  version is 10.
+- Audit unambiguous reinforcement-only source-unit identity during database
+  creation and persist `reinforcementUnitMatches` alongside the pinned identity
+  policy. The audit now feeds materialized logical-unit identity instead of
+  repository-time name/ISC matching; an empty audit remains authoritative.
+- Persist generic standard-unit duplicate matches as `genericUnitMatches` during
+  normalization. The database builder consumes that audit when materializing
+  logical-unit identity; an explicitly empty audit disables arithmetic
+  rediscovery, while older normalized inputs without the metadata retain the
+  legacy build-time fallback.
+- Derive normalized unit `main_army_id` from imported Army metadata faction
+  parents instead of the `xx01` Army-ID convention for current InfinityDB
+  builds. Explicit maintained canonical-faction overrides still take
+  precedence; the arithmetic rule remains only as a standalone/legacy fallback
+  when metadata cannot resolve the canonical faction.
+- Derive army role/playability from authoritative imported relationships
+  instead of Army-ID ranges. `/api/armies` now exposes explicit roles,
+  playability, grouping metadata, and reinforcement parents for main armies,
+  sectorials, Non-Aligned forces, reinforcement lists, and grouping
+  identities. Non-Aligned grouping identity `901` is surfaced as non-playable,
+  direct unit filtering by it is rejected, and the browser army selector
+  consumes the backend role contract.
+- Remove the runtime `901` Non-Aligned grouping special case. Role derivation is
+  now structural: self-parented imported parents remain main armies, while
+  ordinary imported parents that are not self-parented (and referenced
+  metadata-only parents) become grouping nodes. Current source list `901` has
+  metadata parent `900`, parents the NA2 child lists, retains its real source
+  roster, and is still exposed as non-playable without any numeric-ID special case.
+- Document the observed `901` roster shape separately from playability: one
+  standard Rumbler Spec-Ops source entry plus the complete 49-variant optional-
+  mercenary pool in the analyzed snapshot. Keep that non-playable roster as
+  preserved source provenance without adding a dedicated application roster
+  query; unit availability is consumed through the playable child NA2 lists.
+  Record a future design direction to canonicalize invariant logical-unit data
+  while preserving explicit army, loadout, availability, and raw-source deltas.
+- Remove the legacy canonical-faction `1` -> `901` identity override now that
+  mercenary logical pairing and army-occurrence availability are explicit.
+  Canonical source ID `1` remains mercenary source/origin provenance with no
+  application `main_army_id`; `901` remains the separate Non-Aligned Armies
+  grouping identity. That change bumped the Army database compatibility
+  revision to 12 and required existing generated databases to be rebuilt.
+- Make repository mercenary filtering consume explicit
+  `army_units.availability_kind` provenance. Current normalized snapshots no
+  longer use canonical faction `1` plus faction membership to decide whether an
+  army occurrence requires the `mercs` filter; that inference remains only as a
+  fallback for legacy rows without availability provenance.
+- Make `units.source_role` and `army_units.availability_kind` explicit frontend
+  SQLite schema fields instead of incidental dynamic columns. Existing generated
+  Army databases must be rebuilt when the cumulative schema/compatibility
+  revision changes.
+- Document `tools/run_checks.py` as the standard local/agent check entry point,
+  with its detailed stage, target, reporting, and exit-code contract in
+  `docs/testing.md`.
 - Standardize tool-script validation around one regression file per script so
   failures are easier to trace and maintain.
-- Document the decision to keep future PDF-derived rules references in a
+- Standardize Army, wiki, and symbol acquisition on one timestamped ZIP snapshot
+  convention. Wiki and symbol downloads now stage loose files temporarily and
+  persist complete `WIKI YYYYMMDD-HHMMSS.zip` and
+  `SYMBOLS YYYYMMDD-HHMMSS.zip` archives instead of long-lived loose download
+  trees; Army acquisition continues to emit `JSON YYYYMMDD-HHMMSS.zip`.
+- Implement the accepted snapshot-metadata design as generated provenance under
+  `data/manifests/snapshots/` plus separate human annotations under
+  `data/curated/snapshot-notes/`. Generated manifests are SHA-256-bound,
+  validated, deterministic, ignored by Git, excluded from Docker packaging, and
+  never overwrite curated notes.
+- Scope rules-database ingestion to `data/curated/rules/`; `infinity-db
+  build-rules` now defaults to that subtree so other curated data categories are
+  not implicitly treated as rules collections.
+- Clarify documentation status throughout the corpus so current behavior,
+  accepted design direction, and planned/unimplemented work are not presented as
+  equivalent. Legacy wiki provenance remains documented as legacy until the
+  downloader/packager and curated provenance contract are migrated together.
+- Document the source-data finding that canonical-faction ID `1` represents a
+  mercenary source/origin concept distinct from Non-Aligned Armies grouping ID
+  `901`; the former ownership override has since been removed in Unreleased.
+- Document the decision to keep PDF/wiki-derived rules references in a
   separately versioned SQLite database from Army JSON-derived data.
 - Harden the file-path sanitization and wiki mirror logic for cross-platform
   safety while preserving compatible local URLs and asset-file naming.
 - Document the MIT licensing boundary for original project material, external
   data and assets, and deployment dependencies in a third-party notices file
   and related user documentation.
+- Move explicit logical-unit, army-list, catalog, and exceptional canonical-
+  faction identity knowledge out of implementation code and into validated
+  source-identity configuration. Generic duplicate, name-normalization, and
+  whole-army `xx01` derivation algorithms remain implementation behavior.
+- Make database export revalidate identity provenance pinned into normalized
+  data, reject incomplete or conflicting policies, and preserve that exact
+  policy in the immutable database snapshot used by runtime queries.
+- Derive unit profile grouping identities in the backend from the identity
+  policy pinned into the database and expose them through unit-detail API
+  records, so browser code no longer maintains duplicate profile alias and
+  ignored-word tables.
+- Derive reinforcement classification from imported army-list `kind` metadata
+  and faction grouping, names, and slugs from Army metadata parent relationships,
+  exposing the derived faction metadata through unit API records so browser code
+  no longer interprets Army ID suffixes or maintains faction lookup tables.
+- Move trait canonical identities, aliases/misspellings, parameterized source
+  matching, concise summaries, and citations into curated `trait` records in
+  `rules.db`. Army storage now preserves raw trait labels/usage only, while the
+  application composes curated references at read time and falls back to raw
+  labels when the rules database is unavailable.
+- Consolidate the standalone Army/symbol pipeline plan into the maintained
+  backlog and durable AI context, preserving its pinned-snapshot, complete SVG
+  discovery, reference/asset identity, override/cache/network resolution,
+  processing, publishing, cross-platform, failure-policy, and testing decisions.
 
 ## [0.5.1] - 2026-09-14
 
@@ -304,7 +483,7 @@ All notable changes to this project are documented in this file.
 - Manual tools to download Army JSON snapshots and unit symbols.
 - Architecture and data-model documentation, VS Code tasks/debug profiles, and
   automated coverage for the pipeline, database, API, and web interface.
-- Repeatable Linux deployment using Docker Compose, Gunicorn, and Caddy, with
+- Repeatable Linux deployment using Docker Compose, Gunicorn and Caddy, with
   a production WSGI entry point and an image that embeds a validated SQLite
   snapshot.
 

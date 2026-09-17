@@ -1,0 +1,20 @@
+{
+  "version": "fixture",
+  "reinforcements": null,
+  "units": [
+    {
+      "id": 464,
+      "idArmy": 27,
+      "canonical": 404,
+      "isc": "Valerya Gromoz, Mercenary Hacker",
+      "iscAbbr": null,
+      "notes": null,
+      "name": "VALERYA GROMOZ, Mercenary Hacker",
+      "options": [],
+      "slug": "valerya-gromoz-mercenary-hacker",
+      "factions": [404, 502, 902, 908],
+      "profileGroups": [],
+      "filters": {}
+    }
+  ]
+}

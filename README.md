@@ -65,8 +65,9 @@ Current release: **0.5.1** (2026-09-14).
   Army and unit assets use stable ID-and-slug paths, so the browser can serve
   an exact asset without scanning a symbol directory.
 - Includes standalone scripts for downloading Army JSON snapshots, wiki mirror
-  snapshots, and unit symbols; normal build commands do not make network
-  requests.
+  snapshots, and the current unit-symbol set. All three stage loose files
+  temporarily and persist complete timestamped ZIP snapshots; normal build
+  commands do not make network requests.
 - Includes dedicated regression tests for each standalone tool script so the
   wiki mirror, symbol download, symbol reorganizer, Army JSON downloader, and
   shared sanitization logic stay cross-platform and safe to run.
@@ -74,6 +75,21 @@ Current release: **0.5.1** (2026-09-14).
   so browsers refresh safely when either deployed application or data changes.
 - Includes server deployment, update, and image-pruning scripts; see the
   [Linux deployment guide](docs/deployment.md) for the supported workflow.
+
+## Design direction
+
+Accepted architectural direction is documented separately from current
+features. Generated snapshot provenance under `data/manifests/snapshots/` and
+the separate human-authored snapshot-note contract are now implemented. Major
+remaining directions include exact migration of legacy wiki provenance and the
+complete manifest-backed symbol pipeline; see
+[architecture](docs/architecture.md) and [the backlog](docs/TODO.md).
+
+The current curated rules schema records wiki pages by snapshot-local path and
+snapshot date, and the checked-in v5.3 collection still contains legacy
+provenance from the earlier unpacked wiki mirror. Exact timestamped wiki archive
+identity/hash is intentionally deferred until the wiki downloader/packager and
+curated provenance contract are rewritten together.
 
 ## Requirements and setup
 
@@ -110,6 +126,21 @@ infinity-db build --compact
 infinity-db serve
 ```
 
+The standalone wiki and Army-symbol downloaders follow the same durable-output
+convention. They create `WIKI YYYYMMDD-HHMMSS.zip` archives under `data/wiki/`
+and `SYMBOLS YYYYMMDD-HHMMSS.zip` archives under `data/raw/symbols/`
+respectively, removing their temporary loose staging files after success. All
+three downloaders also write deterministic snapshot provenance bound to each
+archive SHA-256 under `data/manifests/snapshots/`; these generated records are
+ignored by Git. Army-symbol acquisition additionally writes the current
+`data/manifests/army-symbol-build.json`, preserving raw asset identities and
+every Army/static reference for later processing stages.
+
+```powershell
+python tools/download_wiki_snapshot.py
+python tools/download_army_symbols.py "data/raw/JSON 20260910-204106.zip"
+```
+
 The development server listens on all local network interfaces. Open
 <http://127.0.0.1:8000> on the development machine, or use its LAN address
 (for example, `http://192.168.1.25:8000`) from another device. Allow Python
@@ -119,20 +150,29 @@ When no input source is supplied, `infinity-db build` imports the newest ZIP in
 `data/raw/`; provide a source path to choose a different snapshot. Every
 database build requires `metadata.json`: keep it beside the source directory or
 ZIP, include one copy in the ZIP, or supply `--metadata PATH`. It supplies
-official faction names and the ammunition, weapon, skill, equipment, and rules
-catalogs. Army-list JSON remains authoritative for unit availability.
+official faction names, faction-parent relationships, and the ammunition,
+weapon, skill, equipment, and rules catalogs. Current builds use those parent
+relationships to derive unit `main_army_id`; Army-list JSON remains
+authoritative for unit availability.
 
-Reference PDFs and the local wiki mirror are developer and agent research
-inputs only. They are never read by the application or the Army build. Curate
-concise, human-reviewed facts with printed-page provenance into JSON files under
-`data/curated/`; validate those intermediary files before a future rules-data
-import:
+Reference PDFs and local wiki snapshots are developer and agent research inputs
+only. They are never read by the application or the Army build. Curate concise,
+human-reviewed rules facts under `data/curated/rules/`; PDF record citations
+retain printed-page provenance, while current wiki record citations retain a
+snapshot-local path and snapshot date. Validate those intermediary files before
+a rules-data import:
 
 ```powershell
 infinity-db validate-curated data/curated/rules/example.json
 ```
 
-The army selector includes main-army, sectorial, and reinforcement lists.
+The army selector consumes backend-derived role and playability semantics.
+Metadata parent relationships distinguish main armies, sectorials, and
+Non-Aligned forces; explicit source reinforcement links identify reinforcement
+lists. Non-Aligned identity `901` is exposed by the API as a non-playable grouping
+node and is not selectable. Its real imported source roster is preserved for
+provenance, but InfinityDB does not expose a separate roster-query surface for
+`901`; unit availability is consumed through the playable child NA2 lists.
 Display names are derived from source slugs when a name is unavailable, and
 reinforcement lists that share the `reinf` slug include their list ID so they
 remain distinguishable.
@@ -141,7 +181,7 @@ remain distinguishable.
 
 ```powershell
 # Run individual data stages
-infinity-db merge "data/raw/JSON 20260909.zip" data/generated/master.json --compact
+infinity-db merge "data/raw/JSON 20260910-204106.zip" data/generated/master.json --compact
 infinity-db normalize data/generated/master.json data/generated/normalized.json --compact
 infinity-db export data/generated/normalized.json data/generated/infinity.db
 
@@ -151,9 +191,12 @@ infinity-db serve --database other-output/infinity.db --port 8001
 # Bind only to this machine when LAN access is not wanted
 infinity-db serve --host 127.0.0.1
 
-# Build the independent rules-reference database from curated JSON
-infinity-db build-rules data/curated --output data/generated/rules.db
+# Build the independent rules-reference database from curated rules JSON
+infinity-db build-rules --output data/generated/rules.db
 ```
+
+`build-rules` defaults to `data/curated/rules/`. Other curated subtrees are not
+rules-database inputs.
 
 `infinity-army` and `python -m infinity_army_data` remain available for the
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
@@ -176,10 +219,10 @@ failed import leaves the prior database available. Rebuilding replaces imported
 data, so keep future user-authored data separately. On Windows, stop the server
 before rebuilding if active readers prevent database replacement.
 
-Future rules-reference material curated from the supplied PDFs will be stored
-in a separate SQLite database. It will retain its own source version and
-printed-page citations, and can be updated independently of the Army
-JSON-derived `infinity.db` and `infinity.raw.db` snapshots.
+Rules-reference material curated from supplied PDFs and wiki research is stored
+in the separate `rules.db`. It retains the provenance required by the current
+curated schema and can be updated independently of the Army JSON-derived
+`infinity.db` and `infinity.raw.db` snapshots.
 
 The application also records a database compatibility revision in every build
 and verifies it at startup. This is independent of the release version: bump
@@ -205,59 +248,92 @@ DOMAIN=infinity.example.com IMAGE_TAG=0.5.1 docker compose up -d --build
 ```
 
 Replace the hostname with the public domain configured at the external TLS
-reverse proxy.
-See the [Linux deployment guide](docs/deployment.md) for prerequisites,
-updates, rollback behavior, and operational commands.
+reverse proxy. See the [Linux deployment guide](docs/deployment.md) for
+prerequisites, updates, rollback behavior, and operational commands.
 
 ## Project layout
 
 ```text
-docs/                       # Architecture and data-model documentation
-data/raw/                   # Ignored source snapshots
-data/generated/             # Ignored database, JSON, and validation artifacts
+docs/                       # Architecture, data model, deployment, testing, and project docs
 src/
   infinity_army_data/       # Army JSON merge, normalization, metadata, and validation
   infinity_db/
-    cli.py                  # Build, export, and local-server commands
+    cli.py                  # Build, export, rules, and local-server commands
     database/               # Schema, importer, and read-only repository queries
-    skill_categories.py     # Skill category definitions for the rules reference
-    traits.py               # Trait definitions and catalog metadata
+    skill_catalog.py        # Compose Army skills with curated rules/declarations
+    trait_catalog.py        # Compose raw Army trait usage with curated rule identities
     web/
       app.py                # WSGI application and API routes
       server.py             # Local development server
       wsgi.py               # WSGI entry point for deployment
       static/               # Browser pages, modules, styles, and symbols
 tests/                      # Pipeline, database, API, web, and tool-script tests
-tools/                      # Manual Army, wiki, and unit-symbol download utilities
-docs/                       # Architecture, data model, and deployment documentation
+tools/                      # Manual acquisition/processing utilities and check runner
 scripts/                    # Linux deployment, update, and image-maintenance scripts
 data/
-  raw/                      # Ignored Army JSON and ZIP source snapshots
-  wiki/                     # Ignored wiki mirror snapshots
-  pdf/                      # Supplied rules and FAQ reference documents
+  raw/                      # Ignored immutable Army/source snapshots
+    symbols/                # Ignored immutable symbol snapshots
+  wiki/                     # Ignored wiki research snapshots
+  pdf/                      # Ignored rules and FAQ research documents
+  curated/
+    rules/                  # Current source-controlled rules-reference collections
+    snapshot-notes/         # Source-controlled human snapshot annotations
+  manifests/                # Ignored generated provenance/build-state records
   generated/                # Ignored database, JSON, and validation artifacts
+reports/                    # Ignored timestamped local development-check reports
 .vscode/                    # Shared build, serve, test, lint, and debug tasks
-Dockerfile                 # Immutable application image for deployment
-compose.yaml               # Gunicorn, Caddy, and application Compose deployment
-Caddyfile                  # Reverse-proxy configuration for the Compose deployment
+Dockerfile                  # Immutable application image for deployment
+compose.yaml                # Gunicorn, Caddy, and application Compose deployment
+Caddyfile                    # Reverse-proxy configuration for the Compose deployment
 ```
 
-See [architecture and development direction](docs/architecture.md) and the
-[data model](docs/data-model.md) for boundaries and extension points.
+See [architecture](docs/architecture.md), the [data model](docs/data-model.md),
+and [the backlog](docs/TODO.md) for current boundaries, accepted design
+direction, and unimplemented work respectively.
 
 ## Development checks
 
+Use `tools/run_checks.py` as the standard development entry point. It
+orchestrates pytest, Ruff, and Army data-build validation while preserving the
+underlying tools as the authoritative checks.
+
 ```powershell
-python -m pytest -q
-python -m ruff check src/infinity_db src/infinity_army_data/cli.py tests
+# Full code checks: pytest, then Ruff
+python tools/run_checks.py --profile code
+
+# Data/build validation
+python tools/run_checks.py --profile data
+
+# All stages
+python tools/run_checks.py --all
+
+# Targeted checks
+python tools/run_checks.py --stage test tests/test_availability.py
+python tools/run_checks.py --stage lint src/infinity_army_data/availability.py tests/test_availability.py
 ```
 
-Tests cover the ingestion and import pipeline, preservation of normalized
-records, safe database replacement, army membership, pagination, search, API
-validation, reference catalogs, unit details, profile data, static-symbol
-delivery, and the standalone tool scripts used for local Army and wiki data
-fetches. VS Code includes build, serve, test, and lint tasks, plus build and
-web-server debug configurations.
+Requested stages continue after a failure by default so one run can report the
+complete state; add `--fail-fast` to stop at the first failure. Positional
+targets are forwarded to pytest/Ruff only. Use `--build-source PATH` to choose a
+specific Army source for the build stage.
+
+Add `--report` to tee the complete live console transcript to an ignored local
+report. Without an explicit path the runner writes
+`reports/CHECKS YYYYMMDD-HHMMSS.txt`, using the same run-start timestamp that is
+recorded in the report header. Supplying a path preserves it instead:
+
+```powershell
+python tools/run_checks.py --profile code --report
+python tools/run_checks.py --profile code --report reports/custom-check.txt
+```
+
+See [development checks](docs/testing.md) for stage/profile definitions,
+reporting behavior, and exit codes. Tests cover the ingestion and import
+pipeline, preservation of normalized records, safe database replacement, army
+membership, pagination, search, API validation, reference catalogs, unit
+details, profile data, static-symbol delivery, and the standalone tool scripts
+used for local Army and wiki data fetches. VS Code includes build, serve, test,
+and lint tasks, plus build and web-server debug configurations.
 
 ## LLM code disclosure
 

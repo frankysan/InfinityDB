@@ -1,0 +1,396 @@
+"""Validated project knowledge for source-identity exceptions and aliases."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import unicodedata
+from collections.abc import Mapping
+from dataclasses import dataclass
+from pathlib import Path
+from types import MappingProxyType
+from typing import Any
+
+IDENTITY_CONFIG_SCHEMA_VERSION = 2
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_IDENTITY_CONFIG = PROJECT_ROOT / "config" / "identity" / "source-identities.json"
+CATALOG_NAMES = ("skills", "equipment", "weapons")
+IDENTITY_CONFIG_METADATA_KEY = "identityConfig"
+IDENTITY_CONFIG_SHA256_METADATA_KEY = "identityConfigSha256"
+REINFORCEMENT_MATCH_METHOD = "normalized_unit_identity"
+REINFORCEMENT_UNIT_MATCHES_KEY = "reinforcementUnitMatches"
+
+
+class IdentityConfigError(ValueError):
+    """Raised when the source-identity manifest is invalid."""
+
+
+@dataclass(frozen=True)
+class IdentityConfig:
+    """Immutable, validated identity policy compiled from the authored manifest."""
+
+    document_json: str
+    content_sha256: str
+    unit_aliases: Mapping[int, int]
+    army_aliases: Mapping[int, int]
+    canonical_faction_overrides: Mapping[int, int]
+    catalog_aliases: Mapping[str, Mapping[int, int]]
+    word_aliases: Mapping[str, str]
+    reinforcement_prefixes: tuple[str, ...]
+    profile_identity_ignored_words: frozenset[str]
+
+    @property
+    def document(self) -> dict[str, Any]:
+        """Return a detached JSON-compatible copy of the validated manifest."""
+        return json.loads(self.document_json)
+
+    def canonical_unit_id(self, source_id: int) -> int:
+        return self.unit_aliases.get(source_id, source_id)
+
+    def canonical_army_id(self, source_id: int) -> int:
+        return self.army_aliases.get(source_id, source_id)
+
+    def resolve_canonical_faction_id(self, source_id: int) -> int:
+        """Apply an explicit canonical-faction override, when one is configured."""
+        return self.canonical_faction_overrides.get(source_id, source_id)
+
+    def canonical_catalog_id(self, catalog: str, source_id: int) -> int | None:
+        aliases = self.catalog_aliases.get(catalog)
+        return aliases.get(source_id) if aliases is not None else None
+
+    def catalog_source_ids(self, catalog: str, source_id: int) -> tuple[int, ...]:
+        """Return the explicit alias group containing ``source_id``, when configured."""
+        aliases = self.catalog_aliases.get(catalog)
+        if aliases is None:
+            return ()
+        canonical_id = aliases.get(source_id)
+        if canonical_id is None:
+            return ()
+        return tuple(item_id for item_id, target in aliases.items() if target == canonical_id)
+
+
+def strip_reinforcement_prefix(value: object, config: IdentityConfig) -> str:
+    """Remove one maintained reinforcement prefix from a source label."""
+    text = str(value or "")
+    if not config.reinforcement_prefixes:
+        return text.strip()
+    prefixes = "|".join(
+        re.escape(prefix)
+        for prefix in sorted(config.reinforcement_prefixes, key=len, reverse=True)
+    )
+    return re.sub(
+        rf"^(?:{prefixes})(?:\.|:)?\s*",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    ).strip()
+
+
+def normalized_unit_identity(value: object, config: IdentityConfig) -> str:
+    """Return the maintained label identity used for reinforcement unit matching."""
+    identity = strip_reinforcement_prefix(value, config)
+    decomposed = unicodedata.normalize("NFKD", identity).casefold()
+    words = re.findall(r"[^\W_]+", decomposed)
+    normalized_words = [
+        config.word_aliases.get(
+            root := (
+                word[:-1]
+                if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
+                else word
+            ),
+            root,
+        )
+        for word in words
+    ]
+    return " ".join(sorted(normalized_words))
+
+
+def unit_match_identities(row: Any, config: IdentityConfig) -> set[str]:
+    """Return normalized ISC and display-name identities for a source unit."""
+    def value(key: str) -> Any:
+        getter = getattr(row, "get", None)
+        return getter(key) if getter is not None else row[key]
+
+    return {
+        identity
+        for raw_value in (value("isc"), value("name"))
+        if (identity := normalized_unit_identity(raw_value, config))
+    }
+
+
+def normalized_profile_identity(value: object, config: IdentityConfig) -> str:
+    """Return the manifest-backed grouping identity for a profile label."""
+    identity = strip_reinforcement_prefix(value, config)
+    decomposed = unicodedata.normalize("NFKD", identity).casefold()
+    text = "".join(
+        character
+        for character in decomposed
+        if not unicodedata.category(character).startswith("M")
+    )
+    words = re.findall(r"[^\W_]+", text)
+    normalized_words = [
+        config.word_aliases.get(
+            root := (
+                word[:-1]
+                if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
+                else word
+            ),
+            root,
+        )
+        for word in words
+        if word not in config.profile_identity_ignored_words
+    ]
+    return " ".join(sorted(normalized_words))
+
+
+def identity_metadata(config: IdentityConfig) -> dict[str, Any]:
+    """Return the validated identity policy fields persisted with a database snapshot."""
+    return {
+        IDENTITY_CONFIG_METADATA_KEY: config.document,
+        IDENTITY_CONFIG_SHA256_METADATA_KEY: config.content_sha256,
+    }
+
+
+def _canonical_json(document: Mapping[str, Any]) -> str:
+    return json.dumps(
+        document,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+
+
+def _object(value: Any, context: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise IdentityConfigError(f"{context} must be an object")
+    return value
+
+
+def _only_keys(value: Mapping[str, Any], allowed: set[str], context: str) -> None:
+    unknown = set(value) - allowed
+    if unknown:
+        raise IdentityConfigError(f"{context} has unknown field(s): {', '.join(sorted(unknown))}")
+
+
+def _positive_int(value: Any, context: str) -> int:
+    if type(value) is not int or value <= 0:
+        raise IdentityConfigError(f"{context} must be a positive integer")
+    return value
+
+
+def _alias_groups(value: Any, context: str) -> Mapping[int, int]:
+    section = _object(value, context)
+    _only_keys(section, {"groups"}, context)
+    groups = section.get("groups")
+    if not isinstance(groups, list):
+        raise IdentityConfigError(f"{context}.groups must be an array")
+
+    aliases: dict[int, int] = {}
+    for index, raw_group in enumerate(groups):
+        group_context = f"{context}.groups[{index}]"
+        group = _object(raw_group, group_context)
+        _only_keys(group, {"canonical_id", "source_ids", "reason"}, group_context)
+
+        canonical_id = _positive_int(group.get("canonical_id"), f"{group_context}.canonical_id")
+        source_ids = group.get("source_ids")
+        if not isinstance(source_ids, list) or len(source_ids) < 2:
+            raise IdentityConfigError(f"{group_context}.source_ids must contain at least two IDs")
+        parsed_ids = [
+            _positive_int(source_id, f"{group_context}.source_ids[{position}]")
+            for position, source_id in enumerate(source_ids)
+        ]
+        if len(set(parsed_ids)) != len(parsed_ids):
+            raise IdentityConfigError(f"{group_context}.source_ids contains duplicate IDs")
+        if canonical_id not in parsed_ids:
+            raise IdentityConfigError(
+                f"{group_context}.canonical_id must also appear in source_ids"
+            )
+
+        reason = group.get("reason")
+        if reason is not None and (not isinstance(reason, str) or not reason.strip()):
+            raise IdentityConfigError(f"{group_context}.reason must be a non-empty string")
+
+        for source_id in parsed_ids:
+            if source_id in aliases:
+                raise IdentityConfigError(
+                    f"{context} source ID {source_id} belongs to more than one alias group"
+                )
+            aliases[source_id] = canonical_id
+
+    return MappingProxyType(aliases)
+
+
+def _id_overrides(value: Any, context: str) -> Mapping[int, int]:
+    if not isinstance(value, list):
+        raise IdentityConfigError(f"{context} must be an array")
+
+    overrides: dict[int, int] = {}
+    for index, raw_override in enumerate(value):
+        override_context = f"{context}[{index}]"
+        override = _object(raw_override, override_context)
+        _only_keys(
+            override,
+            {"source_id", "canonical_faction_id", "reason"},
+            override_context,
+        )
+        source_id = _positive_int(override.get("source_id"), f"{override_context}.source_id")
+        canonical_faction_id = _positive_int(
+            override.get("canonical_faction_id"),
+            f"{override_context}.canonical_faction_id",
+        )
+        reason = override.get("reason")
+        if reason is not None and (not isinstance(reason, str) or not reason.strip()):
+            raise IdentityConfigError(f"{override_context}.reason must be a non-empty string")
+        if source_id in overrides:
+            raise IdentityConfigError(f"{context} contains duplicate source ID {source_id}")
+        overrides[source_id] = canonical_faction_id
+
+    return MappingProxyType(overrides)
+
+
+def _string_map(value: Any, context: str) -> Mapping[str, str]:
+    mapping = _object(value, context)
+    result: dict[str, str] = {}
+    for source, target in mapping.items():
+        if not isinstance(source, str) or not source:
+            raise IdentityConfigError(f"{context} keys must be non-empty strings")
+        if not isinstance(target, str) or not target:
+            raise IdentityConfigError(f"{context}.{source} must be a non-empty string")
+        if source != source.casefold() or target != target.casefold():
+            raise IdentityConfigError(f"{context} entries must use case-folded strings")
+        result[source] = target
+    return MappingProxyType(result)
+
+
+def parse_identity_config(document: Any) -> IdentityConfig:
+    """Validate and compile one source-identity manifest document."""
+
+    root = _object(document, "identity config")
+    _only_keys(
+        root,
+        {
+            "schema_version",
+            "units",
+            "armies",
+            "canonical_faction_overrides",
+            "catalogs",
+            "name_normalization",
+            "profile_identity",
+        },
+        "identity config",
+    )
+    if root.get("schema_version") != IDENTITY_CONFIG_SCHEMA_VERSION:
+        raise IdentityConfigError(
+            "identity config schema_version must be "
+            f"{IDENTITY_CONFIG_SCHEMA_VERSION}"
+        )
+
+    unit_aliases = _alias_groups(root.get("units"), "identity config.units")
+    army_aliases = _alias_groups(root.get("armies"), "identity config.armies")
+    canonical_faction_overrides = _id_overrides(
+        root.get("canonical_faction_overrides"),
+        "identity config.canonical_faction_overrides",
+    )
+
+    catalogs = _object(root.get("catalogs"), "identity config.catalogs")
+    _only_keys(catalogs, set(CATALOG_NAMES), "identity config.catalogs")
+    if set(catalogs) != set(CATALOG_NAMES):
+        missing = set(CATALOG_NAMES) - set(catalogs)
+        raise IdentityConfigError(
+            "identity config.catalogs is missing: " + ", ".join(sorted(missing))
+        )
+    catalog_aliases = MappingProxyType(
+        {
+            catalog: _alias_groups(catalogs[catalog], f"identity config.catalogs.{catalog}")
+            for catalog in CATALOG_NAMES
+        }
+    )
+
+    name_normalization = _object(
+        root.get("name_normalization"), "identity config.name_normalization"
+    )
+    _only_keys(
+        name_normalization,
+        {"word_aliases", "reinforcement_prefixes"},
+        "identity config.name_normalization",
+    )
+    word_aliases = _string_map(
+        name_normalization.get("word_aliases"),
+        "identity config.name_normalization.word_aliases",
+    )
+    raw_reinforcement_prefixes = name_normalization.get("reinforcement_prefixes")
+    if not isinstance(raw_reinforcement_prefixes, list):
+        raise IdentityConfigError(
+            "identity config.name_normalization.reinforcement_prefixes must be an array"
+        )
+    reinforcement_prefixes: list[str] = []
+    for index, prefix in enumerate(raw_reinforcement_prefixes):
+        context = f"identity config.name_normalization.reinforcement_prefixes[{index}]"
+        if not isinstance(prefix, str) or not prefix.strip():
+            raise IdentityConfigError(f"{context} must be a non-empty string")
+        if prefix != prefix.strip() or prefix != prefix.casefold():
+            raise IdentityConfigError(f"{context} must be trimmed and case-folded")
+        reinforcement_prefixes.append(prefix)
+    if len(set(reinforcement_prefixes)) != len(reinforcement_prefixes):
+        raise IdentityConfigError(
+            "identity config.name_normalization.reinforcement_prefixes contains duplicates"
+        )
+
+    profile_identity = _object(root.get("profile_identity"), "identity config.profile_identity")
+    _only_keys(profile_identity, {"ignored_words"}, "identity config.profile_identity")
+    ignored_words = profile_identity.get("ignored_words")
+    if not isinstance(ignored_words, list):
+        raise IdentityConfigError("identity config.profile_identity.ignored_words must be an array")
+    parsed_ignored_words: list[str] = []
+    for index, word in enumerate(ignored_words):
+        if not isinstance(word, str) or not word:
+            raise IdentityConfigError(
+                f"identity config.profile_identity.ignored_words[{index}] "
+                "must be a non-empty string"
+            )
+        if word != word.casefold():
+            raise IdentityConfigError(
+                "identity config.profile_identity.ignored_words entries must be case-folded"
+            )
+        parsed_ignored_words.append(word)
+    if len(set(parsed_ignored_words)) != len(parsed_ignored_words):
+        raise IdentityConfigError(
+            "identity config.profile_identity.ignored_words contains duplicates"
+        )
+
+    document_json = _canonical_json(root)
+    return IdentityConfig(
+        document_json=document_json,
+        content_sha256=hashlib.sha256(document_json.encode("utf-8")).hexdigest(),
+        unit_aliases=unit_aliases,
+        army_aliases=army_aliases,
+        canonical_faction_overrides=canonical_faction_overrides,
+        catalog_aliases=catalog_aliases,
+        word_aliases=word_aliases,
+        reinforcement_prefixes=tuple(reinforcement_prefixes),
+        profile_identity_ignored_words=frozenset(parsed_ignored_words),
+    )
+
+
+def parse_identity_metadata(document: Any, content_sha256: Any) -> IdentityConfig:
+    """Validate a manifest loaded from snapshot metadata and verify its attested hash."""
+    if not isinstance(content_sha256, str):
+        raise IdentityConfigError("identity config metadata hash must be a string")
+    config = parse_identity_config(document)
+    if config.content_sha256 != content_sha256:
+        raise IdentityConfigError("identity config metadata hash does not match its document")
+    return config
+
+
+def load_identity_config(path: Path = DEFAULT_IDENTITY_CONFIG) -> IdentityConfig:
+    """Load and validate the authored source-identity manifest."""
+
+    path = Path(path)
+    try:
+        with path.open(encoding="utf-8") as handle:
+            document = json.load(handle)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise IdentityConfigError(f"Could not read identity config {path}: {exc}") from exc
+    return parse_identity_config(document)

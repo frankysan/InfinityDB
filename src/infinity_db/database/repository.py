@@ -9,27 +9,36 @@ import threading
 import unicodedata
 import weakref
 from collections import OrderedDict
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from datetime import date
-from decimal import Decimal, InvalidOperation
 from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
+from infinity_army_data.availability import (
+    MERCENARY_AVAILABILITY,
+    STANDARD_AVAILABILITY,
+)
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
-
-from infinity_db.skill_categories import categories_for_skill
-from infinity_army_data.weapon_profiles import special_weapon_detail
-from infinity_db.traits import TRAIT_DESCRIPTIONS, canonical_trait_name
+from infinity_db.identities import (
+    IDENTITY_CONFIG_METADATA_KEY,
+    IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    IdentityConfig,
+    IdentityConfigError,
+    load_identity_config,
+    normalized_profile_identity,
+    parse_identity_metadata,
+    strip_reinforcement_prefix,
+)
 
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
+    DATABASE_TABLES,
     METADATA_TABLE,
     SCHEMA_VERSION,
-    TABLES,
     quote,
 )
 
@@ -37,7 +46,24 @@ SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
 UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
+ARMY_ROLE_MAIN = "main"
+ARMY_ROLE_SECTORIAL = "sectorial"
+ARMY_ROLE_NON_ALIGNED = "non_aligned"
+ARMY_ROLE_REINFORCEMENT = "reinforcement"
+ARMY_ROLE_GROUPING = "grouping"
+ARMY_ROLE_UNKNOWN = "unknown"
 
+
+class ArmySelectionError(ValueError):
+    """Raised when an army identity exists but is not a selectable force."""
+
+
+class RowLike(Protocol):
+    """Minimal row interface shared by sqlite3.Row and test dictionaries."""
+
+    def __getitem__(self, key: str) -> Any: ...
+
+    def keys(self) -> Iterable[str]: ...
 
 def instance_lru_cache(maxsize: int) -> Callable:
     """Cache immutable database-query results without retaining Database instances."""
@@ -68,85 +94,33 @@ def instance_lru_cache(maxsize: int) -> Callable:
     return decorator
 
 
-# Source records whose IDs differ without following either of the general
-# duplicate patterns.  The value is the preferred representative ID.
-UNIT_MERGE_ALIASES = {
-    300: 300,
-    1690: 300,
-    10300: 300,
-    1345: 1345,
-    1875: 1345,
-    11345: 1345,
-}
-SKILL_MERGE_ALIASES = {
-    19: 19,
-    20: 19,
-    21: 19,
-    22: 19,
-    23: 19,
-    69: 69,
-    70: 69,
-    201: 201,
-    278: 201,
-    279: 201,
-    240: 240,
-    274: 240,
-}
-SKILL_NAME_EXCEPTION_ALIASES = {
-    201: 201,
-    278: 201,
-    279: 201,
-    240: 240,
-    274: 240,
-}
-CATALOG_NAME_EXCEPTION_ALIASES = {
-    ("equipment", 169): 235,
-    ("equipment", 188): 235,
-    ("equipment", 193): 235,
-    ("equipment", 235): 235,
-    ("equipment", 244): 235,
-    ("equipment", 247): 235,
-    ("equipment", 248): 235,
-    ("weapons", 209): 226,
-    ("weapons", 215): 226,
-    ("weapons", 219): 226,
-    ("weapons", 222): 226,
-    ("weapons", 226): 226,
-    ("weapons", 228): 226,
-}
-# These metadata rows describe the deployable rather than a weapon mode.
-WEAPON_PROFILE_PLACEHOLDERS = frozenset(
-    {
-        (226, "Armed Turret", None),
-        (226, "Armed Turret", "PARA CC Weapon"),
-    }
-)
-ARMY_MERGE_ALIASES = {998: 999}
-REINFORCEMENT_ARMY_SUFFIXES = frozenset({98, 99})
-NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
-DISTANCE_DIVISOR = Decimal("2.5")
-NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
-UNIT_IDENTITY_WORD_ALIASES = {
-    "armoured": "armored",
-    "reconnaissance": "recon",
-    "reconaissance": "recon",
-}
+def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityConfig:
+    """Load and validate the identity policy pinned into a database snapshot."""
+    rows = connection.execute(
+        f"SELECT key, value FROM {quote(METADATA_TABLE)} WHERE key IN (?, ?)",
+        (IDENTITY_CONFIG_METADATA_KEY, IDENTITY_CONFIG_SHA256_METADATA_KEY),
+    ).fetchall()
+    values = {row["key"]: row["value"] for row in rows}
+    try:
+        document = json.loads(values[IDENTITY_CONFIG_METADATA_KEY])
+        content_sha256 = json.loads(values[IDENTITY_CONFIG_SHA256_METADATA_KEY])
+    except (KeyError, TypeError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            "Database has invalid identity configuration metadata; rebuild the database"
+        ) from exc
+    try:
+        return parse_identity_metadata(document, content_sha256)
+    except IdentityConfigError as exc:
+        raise ValueError(
+            "Database has invalid identity configuration metadata; rebuild the database"
+        ) from exc
 
-
-def is_reinforcement_army_id(army_id: int) -> bool:
-    """Return whether an army ID denotes a reinforcement-only army."""
-    return army_id % 100 in REINFORCEMENT_ARMY_SUFFIXES
-
-
-def canonical_army_id(army_id: int) -> int:
-    """Return the preferred ID for army lists that represent one force."""
-    return ARMY_MERGE_ALIASES.get(army_id, army_id)
-
-
-def canonical_skill_id(skill_id: int) -> int:
-    """Return the representative ID for synonymous skill variants."""
-    return SKILL_MERGE_ALIASES.get(skill_id, skill_id)
-
+def canonical_skill_id(
+    skill_id: int, identity_config: IdentityConfig | None = None
+) -> int:
+    """Return the configured representative ID for an explicit skill identity group."""
+    config = identity_config or load_identity_config()
+    return config.canonical_catalog_id("skills", skill_id) or skill_id
 
 def skill_merge_key(name: object) -> str | None:
     """Identify skill labels that differ only by a numeric level or value."""
@@ -155,13 +129,11 @@ def skill_merge_key(name: object) -> str | None:
         return None
     return re.sub(r"\s+", " ", re.sub(r"\d+", "", text)).casefold()
 
-
 def merged_skill_name(name: object) -> str:
     """Turn a numeric skill variant label into its shared display label."""
     text = re.sub(r"\s+", " ", re.sub(r"\d+", "", str(name or "")).strip())
     text = re.sub(r"\s+L$", "", text, flags=re.IGNORECASE)
     return text.rstrip(" =:-()").strip()
-
 
 def catalog_merge_key(name: object) -> str | None:
     """Identify catalog labels that differ only by a numeric level or value."""
@@ -170,7 +142,6 @@ def catalog_merge_key(name: object) -> str | None:
         return text.split(":", 1)[0].strip().casefold() or None
     return skill_merge_key(text)
 
-
 def merged_catalog_name(name: object) -> str:
     """Turn a numeric catalog variant label into its shared display label."""
     text = str(name or "").strip()
@@ -178,109 +149,48 @@ def merged_catalog_name(name: object) -> str:
         return text.split(":", 1)[0].strip()
     return merged_skill_name(text)
 
+def configured_catalog_group(
+    identity_config: IdentityConfig,
+    catalog: str,
+    item_id: int,
+    available_ids: Collection[int],
+) -> tuple[int, tuple[int, ...]] | None:
+    """Return an explicit manifest group restricted to IDs present in this snapshot."""
+    source_ids = tuple(
+        source_id
+        for source_id in identity_config.catalog_source_ids(catalog, item_id)
+        if source_id in available_ids
+    )
+    if not source_ids:
+        return None
+    canonical_id = identity_config.canonical_catalog_id(catalog, item_id)
+    if canonical_id not in source_ids:
+        canonical_id = min(source_ids)
+    return canonical_id, source_ids
 
 def trait_slug(name: object) -> str:
-    """Return the URL-safe identity used by the derived traits catalog."""
-    text = str(name or "").removesuffix(" (SF)")
-    return re.sub(r"[^a-z0-9]+", "-", text.casefold()).strip("-")
+    """Return a URL-safe identity for one raw Army trait label."""
+    return re.sub(r"[^a-z0-9]+", "-", str(name or "").casefold()).strip("-")
 
+def source_trait_name(value: object) -> str:
+    """Return a visible Army trait label, excluding bracketed profile annotations."""
+    name = str(value or "").strip()
+    return "" if name.startswith("[") else name
 
 def unit_sort_key(value: object) -> str:
     """Return a case-insensitive, punctuation-free key for unit-name ordering."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
     return "".join(character for character in decomposed if character.isalnum())
 
-
 def accent_insensitive_key(value: object) -> str:
     """Return text suitable for case-, accent-, and punctuation-insensitive matching."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
     return "".join(character for character in decomposed if character.isalnum())
 
-
-def contains_distance_multiple(value: object) -> bool:
-    """Whether text has no assignment and contains a number divisible by 2.5."""
-    text = str(value or "")
-    if "=" in text or text.upper() in NON_DISTANCE_EXTRAS:
-        return False
-    for number in NUMBER_PATTERN.findall(text):
-        try:
-            if Decimal(number) % DISTANCE_DIVISOR == 0:
-                return True
-        except InvalidOperation:
-            continue
-    return False
-
-
-def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
-    """Normalize sign conventions that are specific to a distance skill."""
-    skill = str(skill_name or "")
-    extra = str(extra_name or "")
-    if skill == "Super-Jump":
-        return extra.removeprefix("+")
-    if skill == "Forward Deployment" and not extra.startswith("+"):
-        try:
-            if NUMBER_PATTERN.fullmatch(extra) and Decimal(extra) > 0:
-                return f"+{extra}"
-        except InvalidOperation:
-            pass
-    return extra
-
-
-def unit_group_key(row: sqlite3.Row) -> tuple[int, str]:
-    """Identify duplicate unit records that belong to one logical unit."""
-    unit_id = row["id"]
-    if unit_id in UNIT_MERGE_ALIASES:
-        return (UNIT_MERGE_ALIASES[unit_id], "")
-    return (
-        unit_id % 10_000,
-        (row["isc"] or row["name"]).casefold(),
-    )
-
-
-def normalized_unit_identity(value: object) -> str:
-    """Return an order-insensitive, singularized identity for a unit label."""
-    identity = re.sub(r"^reinf(?:\.|:)?\s*", "", str(value or ""), flags=re.IGNORECASE)
-    decomposed = unicodedata.normalize("NFKD", identity).casefold()
-    words = re.findall(r"[^\W_]+", decomposed)
-    normalized_words = [
-        UNIT_IDENTITY_WORD_ALIASES.get(
-            root := (
-                word[:-1]
-                if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
-                else word
-            ),
-            root,
-        )
-        for word in words
-    ]
-    return " ".join(sorted(normalized_words))
-
-
-def unit_match_identities(row: sqlite3.Row) -> set[str]:
-    """Return normalized ISC and display-name identities for a unit.
-
-    Reinforcement labels are secondary, and the Army data does not always use
-    the same wording for the ISC and display name.  These identities are used
-    only when joining a reinforcement-only record to a unique standard-unit
-    candidate.
-    """
-    return {
-        identity
-        for value in (row["isc"], row["name"])
-        if (identity := normalized_unit_identity(value))
-    }
-
-
-def unit_base_identity(row: sqlite3.Row) -> str:
-    """Return a stable primary identity for a logical unit group."""
-    return min(unit_match_identities(row), default="")
-
-
 def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> None:
     """Add an item unless a merged source already contributed the same one."""
     if item not in items:
         items.append(item)
-
 
 def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
     """Combine complementary metadata from duplicate source profiles."""
@@ -305,85 +215,7 @@ def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
     ):
         profile["ava"] = ava
 
-
-def logical_unit_groups(
-    rows: list[sqlite3.Row], memberships: dict[int, list[dict[str, Any]]]
-) -> list[dict[str, Any]]:
-    """Combine 10,000-ID duplicates and their reinforcement-only variants."""
-    groups: dict[tuple[Any, ...], dict[str, Any]] = {}
-    for row in rows:
-        armies = memberships[row["id"]]
-        reinforcement_only = bool(armies) and all(
-            is_reinforcement_army_id(army["id"]) for army in armies
-        )
-        base_identity = unit_base_identity(row)
-        key = (
-            ("reinforcement", base_identity)
-            if reinforcement_only
-            else ("standard", *unit_group_key(row))
-        )
-        group = groups.setdefault(
-            key,
-            {
-                "id": row["id"],
-                "name": row["name"],
-                "isc": row["isc"],
-                "slug": row["slug"] if "slug" in row.keys() else None,
-                "canonical_faction_id": (
-                    row["canonical_faction_id"] if "canonical_faction_id" in row.keys() else None
-                ),
-                # The lowest source ID is the logical unit's representative.  This
-                # prevents a merged reinforcement/duplicate from replacing the
-                # canonical army of the ordinary unit.
-                "main_army_id": row["main_army_id"] if "main_army_id" in row.keys() else None,
-                "source_ids": [],
-                "names": [],
-                "armies": {},
-                "army_occurrences": [],
-                "base_identity": base_identity,
-                "match_identities": set(unit_match_identities(row)),
-                "reinforcement_only": reinforcement_only,
-            },
-        )
-        group["match_identities"].update(unit_match_identities(row))
-        group["source_ids"].append(row["id"])
-        group["names"].append(row["name"])
-        for army in armies:
-            source_army_id = army["id"]
-            preferred_army_id = canonical_army_id(source_army_id)
-            preferred_army = {**army, "id": preferred_army_id}
-            if preferred_army_id not in group["armies"] or source_army_id == preferred_army_id:
-                group["armies"][preferred_army_id] = preferred_army
-            group["army_occurrences"].append(
-                {
-                    **preferred_army,
-                    "source_id": row["id"],
-                    "source_army_id": source_army_id,
-                }
-            )
-
-    standard_groups: dict[str, list[dict[str, Any]]] = {}
-    for group in groups.values():
-        if not group["reinforcement_only"]:
-            for identity in group["match_identities"]:
-                standard_groups.setdefault(identity, []).append(group)
-    for key, group in list(groups.items()):
-        candidates = {
-            id(candidate): candidate
-            for identity in group["match_identities"]
-            for candidate in standard_groups.get(identity, [])
-        }.values()
-        if group["reinforcement_only"] and len(candidates) == 1:
-            target = next(iter(candidates))
-            target["source_ids"].extend(group["source_ids"])
-            target["names"].extend(group["names"])
-            target["armies"].update(group["armies"])
-            target["army_occurrences"].extend(group["army_occurrences"])
-            del groups[key]
-    return list(groups.values())
-
-
-def army_name(row: sqlite3.Row) -> str:
+def army_name(row: RowLike) -> str:
     if row["name"]:
         return row["name"]
     if row["slug"] == "reinf":
@@ -394,8 +226,7 @@ def army_name(row: sqlite3.Row) -> str:
             return derived_name
     return f"Army {row['id']}"
 
-
-def unit_optional_modes(group: dict[str, Any]) -> set[str]:
+def unit_optional_modes(group: Mapping[str, Any]) -> set[str]:
     """Return optional modes encoded in a dedicated unit's name or slug."""
     labels = [*group["names"], group.get("slug") or ""]
     normalized = " ".join(
@@ -408,41 +239,50 @@ def unit_optional_modes(group: dict[str, Any]) -> set[str]:
         modes.add("teamops")
     return modes
 
-
 def army_is_available(
-    army: dict[str, Any], group: dict[str, Any], selected_flags: set[str]
+    army: Mapping[str, Any], group: Mapping[str, Any], selected_flags: set[str]
 ) -> bool:
     """Return whether an army occurrence needs only enabled optional modes."""
     return army_required_flags(army, group) <= selected_flags
 
-
 def army_required_flags(
-    army: dict[str, Any],
-    group: dict[str, Any],
+    army: Mapping[str, Any],
+    group: Mapping[str, Any],
     canonical_faction_id: int | None = None,
-    normal_army_ids: set[int] | None = None,
+    normal_army_ids: Collection[int] | None = None,
 ) -> set[str]:
     """Return the optional availability categories required by an occurrence."""
     required = unit_optional_modes(group)
-    faction_id = (
-        group["canonical_faction_id"] if canonical_faction_id is None else canonical_faction_id
-    )
-    normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
-    if faction_id == 1 and army["id"] not in normal_armies:
+    availability_kind = army.get("availability_kind")
+    if availability_kind == MERCENARY_AVAILABILITY:
         required.add("mercs")
-    if is_reinforcement_army_id(army["id"]):
+    elif availability_kind == STANDARD_AVAILABILITY:
+        pass
+    elif availability_kind is None:
+        # Legacy database rows created before normalized availability provenance
+        # was persisted still need the previous canonical/faction inference.
+        faction_id = (
+            group["canonical_faction_id"]
+            if canonical_faction_id is None
+            else canonical_faction_id
+        )
+        normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
+        if faction_id == 1 and army["id"] not in normal_armies:
+            required.add("mercs")
+    else:
+        raise ValueError(f"Unknown army availability kind: {availability_kind!r}")
+    if army.get("kind") == "reinforcement":
         required.add("reinforcement")
     filters = army.get("filters")
     if isinstance(filters, dict):
         required.update(flag for flag in AVAILABILITY_FLAGS if filters.get(flag))
     return required
 
-
 def visible_armies_for_group(
-    group: dict[str, Any],
+    group: Mapping[str, Any],
     selected_flags: set[str],
-    canonical_factions: dict[int, int | None],
-    normal_armies_by_unit: dict[int, set[int]],
+    canonical_factions: Mapping[int, int | None],
+    normal_armies_by_unit: Mapping[int, Collection[int]],
 ) -> dict[int, dict[str, Any]]:
     """Collect armies that have at least one visible source occurrence.
 
@@ -482,6 +322,36 @@ class Database:
         finally:
             connection.close()
 
+    @instance_lru_cache(maxsize=1)
+    def _identity_config(self) -> IdentityConfig:
+        with self._connect() as connection:
+            return identity_config_from_connection(connection)
+
+    @instance_lru_cache(maxsize=1)
+    def _faction_groups(self) -> dict[int, dict[str, Any]]:
+        """Return Army metadata faction groups keyed by source army ID."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT child.id AS army_id, "
+                "COALESCE(child.parent, child.id) AS faction_id, "
+                "parent.name AS faction_name, parent.slug AS faction_slug "
+                "FROM metadata_factions AS child "
+                "LEFT JOIN metadata_factions AS parent "
+                "ON parent.id = COALESCE(child.parent, child.id)"
+            ).fetchall()
+        groups = {
+            row["army_id"]: {
+                "id": row["faction_id"],
+                "name": row["faction_name"],
+                "slug": row["faction_slug"],
+            }
+            for row in rows
+        }
+        for source_id, canonical_id in self._identity_config().army_aliases.items():
+            if canonical_id not in groups and source_id in groups:
+                groups[canonical_id] = groups[source_id]
+        return groups
+
     def validate(self) -> None:
         """Reject missing, unrelated, unsupported, incomplete, or corrupt databases."""
         with self._connect() as connection:
@@ -489,7 +359,7 @@ class Database:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
             if application_id != APPLICATION_ID or version != SCHEMA_VERSION:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
-            for name, definition in TABLES.items():
+            for name, definition in DATABASE_TABLES.items():
                 columns = {
                     row["name"] for row in connection.execute(f"PRAGMA table_info({quote(name)})")
                 }
@@ -523,6 +393,40 @@ class Database:
                     "Database compatibility revision does not match this application; "
                     "rebuild the database"
                 )
+            identity_config_from_connection(connection)
+            source_unit_count = connection.execute(
+                "SELECT COUNT(*) FROM units WHERE source_defined = 1"
+            ).fetchone()[0]
+            mapped_source_count = connection.execute(
+                "SELECT COUNT(*) FROM logical_unit_sources"
+            ).fetchone()[0]
+            invalid_mapping = connection.execute(
+                "SELECT 1 FROM logical_unit_sources AS lus "
+                "JOIN units AS u ON u.id = lus.source_unit_id "
+                "WHERE u.source_defined != 1 LIMIT 1"
+            ).fetchone()
+            invalid_representative = connection.execute(
+                "SELECT 1 FROM logical_units AS lu "
+                "LEFT JOIN logical_unit_sources AS lus "
+                "ON lus.source_unit_id = lu.representative_unit_id "
+                "AND lus.logical_unit_id = lu.id "
+                "WHERE lu.id != lu.representative_unit_id "
+                "OR lus.source_unit_id IS NULL LIMIT 1"
+            ).fetchone()
+            empty_logical_unit = connection.execute(
+                "SELECT 1 FROM logical_units AS lu "
+                "LEFT JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+                "WHERE lus.source_unit_id IS NULL LIMIT 1"
+            ).fetchone()
+            if (
+                source_unit_count != mapped_source_count
+                or invalid_mapping is not None
+                or invalid_representative is not None
+                or empty_logical_unit is not None
+            ):
+                raise ValueError(
+                    "Database has invalid materialized logical-unit identity; rebuild the database"
+                )
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -542,12 +446,21 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def _unit_graph(self) -> dict[str, Any]:
-        """Load the snapshot-wide unit relationships shared by read paths."""
+        """Load materialized logical identity plus source-specific unit relationships."""
+        identity_config = self._identity_config()
         with self._connect() as connection:
             rows = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id, u.canonical_faction_id "
+                "u.main_army_id, u.canonical_faction_id, u.source_role "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
+            ).fetchall()
+            rows_by_id = {row["id"]: row for row in rows}
+            logical_rows = connection.execute(
+                "SELECT lu.id AS logical_unit_id, lu.representative_unit_id, "
+                "lus.source_unit_id "
+                "FROM logical_units AS lu "
+                "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+                "ORDER BY lu.id, lus.source_unit_id"
             ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
             army_names = {
@@ -555,7 +468,9 @@ class Database:
                 for row in connection.execute("SELECT id, name, slug FROM army_lists")
             }
             for army in connection.execute(
-                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug FROM army_units AS au "
+                "SELECT au.unit_id, au.filters, au.availability_kind, "
+                "a.id, a.name, a.slug, a.kind "
+                "FROM army_units AS au "
                 "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
             ):
                 if army["unit_id"] not in memberships:
@@ -565,7 +480,13 @@ class Database:
                 except (TypeError, json.JSONDecodeError):
                     filters = {}
                 memberships[army["unit_id"]].append(
-                    {"id": army["id"], "name": army_name(army), "filters": filters}
+                    {
+                        "id": army["id"],
+                        "name": army_name(army),
+                        "kind": army["kind"],
+                        "filters": filters,
+                        "availability_kind": army["availability_kind"],
+                    }
                 )
             normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in rows}
             for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
@@ -578,14 +499,54 @@ class Database:
                 for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
                     if row["unit_id"] in search_terms_by_source:
                         search_terms_by_source[row["unit_id"]].add(row["name"])
-        groups = logical_unit_groups(rows, memberships)
-        for group in groups:
+
+        sources_by_logical: dict[int, list[int]] = {}
+        representatives: dict[int, int] = {}
+        for row in logical_rows:
+            logical_id = row["logical_unit_id"]
+            representatives[logical_id] = row["representative_unit_id"]
+            sources_by_logical.setdefault(logical_id, []).append(row["source_unit_id"])
+
+        groups: list[dict[str, Any]] = []
+        for logical_id, source_ids in sources_by_logical.items():
+            representative = rows_by_id[representatives[logical_id]]
+            group: dict[str, Any] = {
+                "id": logical_id,
+                "name": representative["name"],
+                "isc": representative["isc"],
+                "slug": representative["slug"],
+                "canonical_faction_id": representative["canonical_faction_id"],
+                "main_army_id": representative["main_army_id"],
+                "source_ids": source_ids,
+                "names": [rows_by_id[source_id]["name"] for source_id in source_ids],
+                "armies": {},
+                "army_occurrences": [],
+            }
+            for source_id in source_ids:
+                for army in memberships[source_id]:
+                    source_army_id = army["id"]
+                    preferred_army_id = identity_config.canonical_army_id(source_army_id)
+                    preferred_army = {**army, "id": preferred_army_id}
+                    if (
+                        preferred_army_id not in group["armies"]
+                        or source_army_id == preferred_army_id
+                    ):
+                        group["armies"][preferred_army_id] = preferred_army
+                    group["army_occurrences"].append(
+                        {
+                            **preferred_army,
+                            "source_id": source_id,
+                            "source_army_id": source_army_id,
+                        }
+                    )
             group["normal_army_ids"] = set().union(
-                *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
+                *(normal_armies_by_unit[source_id] for source_id in source_ids)
             )
             group["search_terms"] = set().union(
-                *(search_terms_by_source[source_id] for source_id in group["source_ids"])
+                *(search_terms_by_source[source_id] for source_id in source_ids)
             )
+            groups.append(group)
+
         groups_by_source = {
             source_id: group for group in groups for source_id in group["source_ids"]
         }
@@ -604,6 +565,7 @@ class Database:
     ) -> dict[int, dict[str, Any]]:
         """Map every visible source unit to its logical-unit list item."""
         graph = self._unit_graph()
+        faction_groups = self._faction_groups()
         canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
         normal_armies_by_unit = graph["normal_armies_by_unit"]
         items_by_source: dict[int, dict[str, Any]] = {}
@@ -620,6 +582,7 @@ class Database:
                 "slug": group["slug"],
                 "main_army_id": group["main_army_id"],
                 "main_army_name": graph["army_names"].get(group["main_army_id"]),
+                "main_faction": faction_groups.get(group["main_army_id"]),
                 "source_ids": group["source_ids"],
                 "army_ids": list(visible_armies),
                 "armies": [
@@ -632,21 +595,40 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
+        """Return imported force lists with explicit source-derived role semantics."""
+        identity_config = self._identity_config()
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT a.id, a.name, a.slug, a.kind, u.id AS unit_id "
+                "SELECT a.id, a.name, a.slug, a.kind, a.reinforcement_id, u.id AS unit_id "
                 "FROM army_lists AS a "
                 "LEFT JOIN army_units AS au ON au.army_id = a.id "
                 "LEFT JOIN units AS u ON u.id = au.unit_id AND u.source_defined = 1 "
                 "ORDER BY a.id"
             ).fetchall()
+            metadata = {
+                row["id"]: dict(row)
+                for row in connection.execute(
+                    "SELECT id, parent, name, slug FROM metadata_factions ORDER BY id"
+                )
+            }
+
+            reinforcement_parents: dict[int, set[int]] = {}
+            for row in connection.execute(
+                "SELECT id, reinforcement_id FROM army_lists "
+                "WHERE reinforcement_id IS NOT NULL ORDER BY id"
+            ):
+                reinforcement_id = identity_config.canonical_army_id(row["reinforcement_id"])
+                parent_id = identity_config.canonical_army_id(row["id"])
+                reinforcement_parents.setdefault(reinforcement_id, set()).add(parent_id)
+
             armies: dict[int, dict[str, Any]] = {}
             for row in rows:
                 source_army_id = row["id"]
-                preferred_army_id = canonical_army_id(source_army_id)
+                preferred_army_id = identity_config.canonical_army_id(source_army_id)
                 if preferred_army_id not in armies or source_army_id == preferred_army_id:
                     armies[preferred_army_id] = {
                         "id": preferred_army_id,
+                        "source_army_id": source_army_id,
                         "name": army_name(row),
                         "slug": row["slug"],
                         "kind": row["kind"],
@@ -654,12 +636,127 @@ class Database:
                     }
                 if row["unit_id"] is not None:
                     armies[preferred_army_id]["unit_ids"].add(row["unit_id"])
+
+            canonical_metadata: dict[int, dict[str, Any]] = {}
+            for metadata_row in metadata.values():
+                metadata_id = identity_config.canonical_army_id(metadata_row["id"])
+                if metadata_id not in canonical_metadata or metadata_row["id"] == metadata_id:
+                    canonical_metadata[metadata_id] = metadata_row
+
+            ordinary_army_ids = {
+                army_id
+                for army_id, army in armies.items()
+                if army_id not in reinforcement_parents and army["kind"] != "reinforcement"
+            }
+            parent_ids: set[int] = set()
+            for army_id in ordinary_army_ids:
+                army = armies[army_id]
+                source_army_id = army["source_army_id"]
+                metadata_row = metadata.get(source_army_id) or metadata.get(army_id)
+                parent_id = metadata_row.get("parent") if metadata_row is not None else None
+                if not isinstance(parent_id, int):
+                    continue
+                canonical_parent_id = identity_config.canonical_army_id(parent_id)
+                if canonical_parent_id != army_id:
+                    parent_ids.add(canonical_parent_id)
+
+            grouping_ids: set[int] = set()
+            for candidate_id in parent_ids:
+                candidate_metadata = canonical_metadata.get(candidate_id)
+                if candidate_metadata is None:
+                    continue
+                if candidate_id not in ordinary_army_ids:
+                    grouping_ids.add(candidate_id)
+                    continue
+                candidate_parent_id = candidate_metadata.get("parent")
+                canonical_candidate_parent_id = (
+                    identity_config.canonical_army_id(candidate_parent_id)
+                    if isinstance(candidate_parent_id, int)
+                    else None
+                )
+                if canonical_candidate_parent_id != candidate_id:
+                    grouping_ids.add(candidate_id)
+
+            for army in armies.values():
+                army_id = army["id"]
+                source_army_id = army["source_army_id"]
+                metadata_row = metadata.get(source_army_id) or metadata.get(army_id)
+                parent_id = metadata_row.get("parent") if metadata_row is not None else None
+                canonical_parent_id = (
+                    identity_config.canonical_army_id(parent_id)
+                    if isinstance(parent_id, int)
+                    else None
+                )
+                parent_army_ids = sorted(reinforcement_parents.get(army_id, ()))
+
+                if parent_army_ids:
+                    role = ARMY_ROLE_REINFORCEMENT
+                    playable = True
+                    group_id = None
+                elif army_id in grouping_ids:
+                    role = ARMY_ROLE_GROUPING
+                    playable = False
+                    group_id = None
+                elif canonical_parent_id == army_id:
+                    role = ARMY_ROLE_MAIN
+                    playable = True
+                    group_id = None
+                elif canonical_parent_id in grouping_ids:
+                    role = ARMY_ROLE_NON_ALIGNED
+                    playable = True
+                    group_id = canonical_parent_id
+                elif canonical_parent_id is not None:
+                    role = ARMY_ROLE_SECTORIAL
+                    playable = True
+                    group_id = canonical_parent_id
+                else:
+                    role = ARMY_ROLE_UNKNOWN
+                    playable = True
+                    group_id = None
+
+                group = canonical_metadata.get(group_id) if group_id is not None else None
+                army.update(
+                    role=role,
+                    playable=playable,
+                    group_id=group_id,
+                    group_name=group.get("name") if group is not None else None,
+                    group_slug=group.get("slug") if group is not None else None,
+                    parent_army_ids=parent_army_ids,
+                )
+
+            for grouping_id in sorted(grouping_ids):
+                if grouping_id in armies:
+                    continue
+                group = canonical_metadata.get(grouping_id)
+                if group is None:
+                    continue
+                armies[grouping_id] = {
+                    "id": grouping_id,
+                    "source_army_id": grouping_id,
+                    "name": group.get("name") or f"Army {grouping_id}",
+                    "slug": group.get("slug"),
+                    "kind": "grouping",
+                    "unit_ids": set(),
+                    "role": ARMY_ROLE_GROUPING,
+                    "playable": False,
+                    "group_id": None,
+                    "group_name": None,
+                    "group_slug": None,
+                    "parent_army_ids": [],
+                }
+
             return [
                 {
                     "id": army["id"],
                     "name": army["name"],
                     "slug": army["slug"],
                     "kind": army["kind"],
+                    "role": army["role"],
+                    "playable": army["playable"],
+                    "group_id": army["group_id"],
+                    "group_name": army["group_name"],
+                    "group_slug": army["group_slug"],
+                    "parent_army_ids": army["parent_army_ids"],
                     "unit_count": len(army["unit_ids"]),
                 }
                 for army in sorted(armies.values(), key=lambda army: army["id"])
@@ -673,6 +770,7 @@ class Database:
                 "SELECT combinations.skill_id, COALESCE(NULLIF(s.name, ''), "
                 "'Skill #' || combinations.skill_id) AS skill_name, combinations.extra_id, "
                 "COALESCE(NULLIF(e.name, ''), 'Extra #' || combinations.extra_id) AS extra_name, "
+                "e.type AS extra_type, "
                 f"u.id AS unit_id, {UNIT_NAME_SQL} AS unit_name "
                 "FROM ("
                 "SELECT ps.item_id AS skill_id, pse.extra_id, ps.unit_id FROM profile_skills AS ps "
@@ -692,22 +790,16 @@ class Database:
             ).fetchall()
             combinations: dict[tuple[Any, Any], dict[str, Any]] = {}
             for row in rows:
-                if not contains_distance_multiple(row["extra_name"]):
+                if row["extra_type"] != "DISTANCE":
                     continue
-                display_extra_name = canonical_skill_extra_name(
-                    row["skill_name"], row["extra_name"]
-                )
-                # The normalized display text is the semantic pair identity.
-                # This retains ordinary sign differences while applying the
-                # known Super-Jump and Forward Deployment conventions.
-                key = (row["skill_id"], display_extra_name)
+                key = (row["skill_id"], row["extra_name"])
                 item = combinations.setdefault(
                     key,
                     {
                         "skill_id": row["skill_id"],
                         "skill_name": row["skill_name"],
                         "extra_id": row["extra_id"],
-                        "extra_name": display_extra_name,
+                        "extra_name": row["extra_name"],
                         "is_distance": True,
                         "units": [],
                     },
@@ -729,6 +821,7 @@ class Database:
             metadata_table = metadata_tables[catalog]
         except KeyError as exc:
             raise ValueError(f"Unknown catalog: {catalog}") from exc
+        identity_config = self._identity_config()
 
         with self._connect() as connection:
             if catalog == "weapons":
@@ -800,27 +893,24 @@ class Database:
                     )
             for item in items:
                 item["use_count"] = len(use_keys.get(item["id"], set()))
-                if catalog == "skills":
-                    item["categories"] = categories_for_skill(item["id"])
-            if catalog not in {"skills", "equipment", "weapons"}:
-                return items
             groups: dict[str, list[dict[str, Any]]] = {}
             for item in items:
-                if catalog == "skills":
-                    canonical_id = SKILL_NAME_EXCEPTION_ALIASES.get(item["id"])
-                    merge_key = skill_merge_key(item["name"])
-                else:
-                    canonical_id = CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"]))
-                    merge_key = catalog_merge_key(item["name"])
+                canonical_id = identity_config.canonical_catalog_id(catalog, item["id"])
+                merge_key = (
+                    skill_merge_key(item["name"])
+                    if catalog == "skills"
+                    else catalog_merge_key(item["name"])
+                )
                 key = f"alias:{canonical_id}" if canonical_id is not None else merge_key
                 groups.setdefault(key or f"id:{item['id']}", []).append(item)
             merged = []
             for group in groups.values():
                 canonical_id = next(
                     (
-                        CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"]))
+                        configured
                         for item in group
-                        if CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item["id"])) is not None
+                        if (configured := identity_config.canonical_catalog_id(catalog, item["id"]))
+                        is not None
                     ),
                     None,
                 )
@@ -838,8 +928,8 @@ class Database:
             return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
 
     @instance_lru_cache(maxsize=1)
-    def list_traits(self) -> list[dict[str, Any]]:
-        """Return distinct rules traits carried by catalogued profiles."""
+    def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
+        """Return raw Army trait labels mapped to the catalog items that carry them."""
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT DISTINCT w.id AS item_id, m.type, m.properties "
@@ -854,47 +944,47 @@ class Database:
             if not isinstance(traits, list):
                 traits = [traits]
             for trait in traits:
-                trait_name = canonical_trait_name(trait)
+                trait_name = source_trait_name(trait)
                 if trait_name:
                     catalog = {"EQUIPMENT": "equipment", "SKILL": "skills"}.get(
                         row["type"], "weapons"
                     )
                     items_by_trait.setdefault(trait_name, set()).add((catalog, row["item_id"]))
+        return {
+            name: tuple(sorted(items))
+            for name, items in sorted(items_by_trait.items(), key=lambda item: unit_sort_key(item[0]))
+        }
+
+    @instance_lru_cache(maxsize=1)
+    def list_traits(self) -> list[dict[str, Any]]:
+        """Return distinct raw Army trait labels carried by catalogued profiles."""
         traits = []
         slug_counts: dict[str, int] = {}
-        for name in sorted(items_by_trait, key=unit_sort_key):
+        for name, items in self.trait_usage_index().items():
             base_slug = trait_slug(name) or "trait"
             slug_counts[base_slug] = slug_counts.get(base_slug, 0) + 1
             slug = base_slug if slug_counts[base_slug] == 1 else f"{base_slug}-{slug_counts[base_slug]}"
-            traits.append({"id": slug, "name": name, "use_count": len(items_by_trait[name]), "description": TRAIT_DESCRIPTIONS.get(name)})
+            traits.append({
+                "id": slug,
+                "name": name,
+                "use_count": len(items),
+                "description": None,
+            })
         return traits
 
     @instance_lru_cache(maxsize=128)
     def get_trait(self, item_slug: str) -> dict[str, Any] | None:
-        """Return one trait with each matching item's visible unit usage."""
+        """Return one raw Army trait label with matching visible unit usage."""
         trait = next((item for item in self.list_traits() if item["id"] == item_slug), None)
         if trait is None:
             return None
-        with self._connect() as connection:
-            rows = connection.execute(
-                "SELECT DISTINCT w.id, m.type, m.properties FROM weapons AS w JOIN metadata_weapons AS m ON m.id = w.id"
-            ).fetchall()
-        weapon_ids = []
-        for row in rows:
-            try:
-                profile_traits = json.loads(row["properties"] or "[]")
-            except json.JSONDecodeError:
-                profile_traits = []
-            if not isinstance(profile_traits, list):
-                profile_traits = [profile_traits]
-            if trait["name"] in {canonical_trait_name(value) for value in profile_traits}:
-                catalog = {"EQUIPMENT": "equipment", "SKILL": "skills"}.get(
-                    row["type"], "weapons"
-                )
-                weapon_ids.append((catalog, row["id"]))
         variants = []
-        for catalog, item_id in sorted(set(weapon_ids)):
-            item = self.get_skill(item_id) if catalog == "skills" else self.get_catalog_item(catalog, item_id)
+        for catalog, item_id in self.trait_usage_index().get(trait["name"], ()):
+            item = (
+                self.get_skill(item_id)
+                if catalog == "skills"
+                else self.get_catalog_item(catalog, item_id)
+            )
             if item is None:
                 continue
             units = {
@@ -910,7 +1000,8 @@ class Database:
                         "item_name": item["name"],
                         "extras": [],
                         "units": sorted(
-                            units.values(), key=lambda unit: (unit_sort_key(unit["name"]), unit["id"])
+                            units.values(),
+                            key=lambda unit: (unit_sort_key(unit["name"]), unit["id"]),
                         ),
                     }
                 )
@@ -927,6 +1018,7 @@ class Database:
             raise ValueError(f"Unknown catalog: {catalog}")
         if type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX:
             raise ValueError("item_id must be an integer within SQLite's signed 64-bit range")
+        identity_config = self._identity_config()
         item_table, metadata_table, suffix = tables[catalog]
         with self._connect() as connection:
             catalog_items = connection.execute(
@@ -936,15 +1028,14 @@ class Database:
             selected = next((row for row in catalog_items if row["id"] == item_id), None)
             if selected is None:
                 return None
-            canonical_id = CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, item_id))
-            if canonical_id is not None:
-                source_ids = tuple(
-                    row["id"]
-                    for row in catalog_items
-                    if CATALOG_NAME_EXCEPTION_ALIASES.get((catalog, row["id"])) == canonical_id
-                )
-                if canonical_id not in source_ids:
-                    canonical_id = min(source_ids)
+            configured_group = configured_catalog_group(
+                identity_config,
+                catalog,
+                item_id,
+                {row["id"] for row in catalog_items},
+            )
+            if configured_group is not None:
+                canonical_id, source_ids = configured_group
             else:
                 merge_key = catalog_merge_key(selected["name"])
                 source_ids = tuple(
@@ -992,7 +1083,8 @@ class Database:
                 ") AS uses ON uses.unit_id = u.id "
                 "LEFT JOIN extras AS e ON e.id = uses.extra_id "
                 "WHERE u.source_defined = 1 "
-                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position, unit_sort_key(unit_name), u.id",
+                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position, "
+                "unit_sort_key(unit_name), u.id",
                 source_ids * 3,
             ).fetchall()
             occurrences: dict[tuple[str, Any], dict[str, Any]] = {}
@@ -1006,7 +1098,9 @@ class Database:
                     },
                 )
                 if row["extra_id"] is not None:
-                    occurrence["extras"].append({"id": row["extra_id"], "name": row["extra_name"]})
+                    occurrence["extras"].append(
+                        {"id": row["extra_id"], "name": row["extra_name"]}
+                    )
             units_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
             item_names = {row["id"]: row["name"] for row in catalog_items}
             variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
@@ -1029,11 +1123,17 @@ class Database:
                 if unit is not None and unit not in variant["units"]:
                     variant["units"].append(unit)
             for variant in variants.values():
-                variant["units"].sort(key=lambda unit: (unit_sort_key(unit["name"]), unit["id"]))
+                variant["units"].sort(
+                    key=lambda unit: (unit_sort_key(unit["name"]), unit["id"])
+                )
             result = {
                 **dict(item),
                 "id": canonical_id,
-                "name": merged_catalog_name(item["name"]) if len(source_ids) > 1 else item["name"],
+                "name": (
+                    merged_catalog_name(item["name"])
+                    if len(source_ids) > 1
+                    else item["name"]
+                ),
                 "variants": [variant for variant in variants.values() if variant["units"]],
             }
             if catalog in {"equipment", "weapons"}:
@@ -1043,9 +1143,6 @@ class Database:
                     )
                     profile_parameters: tuple[Any, ...] = source_ids
                 else:
-                    # The Army metadata exposes deployable equipment in its
-                    # weapon-profile collection. Match the equipment catalog
-                    # record by both source ID and label to avoid ID collisions.
                     profile_filter = "m.id = ? AND m.type = 'EQUIPMENT' AND m.name = ?"
                     profile_parameters = (canonical_id, item["name"])
                 profile_rows = connection.execute(
@@ -1067,10 +1164,10 @@ class Database:
                         return json.loads(value)
                     except json.JSONDecodeError:
                         return value
-
                 profiles = []
                 for profile in profile_rows:
-                    item = {
+                    traits = decoded(profile["properties"], [])
+                    profile_item = {
                         "id": profile["id"],
                         "name": profile["name"],
                         "mode": profile["mode"],
@@ -1081,11 +1178,10 @@ class Database:
                         "saving": profile["saving"],
                         "saving_num": profile["savingNum"],
                         "profile": profile["profile"],
-                        "traits": decoded(profile["properties"], []),
+                        "traits": traits,
                         "ranges": decoded(profile["distance"], {}),
                     }
-                    if (item["id"], item["name"], item["mode"]) not in WEAPON_PROFILE_PLACEHOLDERS:
-                        profiles.append(item)
+                    profiles.append(profile_item)
                 result["profiles"] = profiles
                 if catalog == "weapons":
                     profiles_by_id: dict[int, list[dict[str, Any]]] = {}
@@ -1102,14 +1198,44 @@ class Database:
                             key=lambda value: (unit_sort_key(item_names[value]), value),
                         )
                     ]
-                    result["special_profile"] = special_weapon_detail(canonical_id)
             return result
+
+    @instance_lru_cache(maxsize=128)
+    def skill_source_ids(self, skill_id: int) -> tuple[int, ...]:
+        """Return source skill IDs represented by one application skill identity."""
+        if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
+            raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+        identity_config = self._identity_config()
+        with self._connect() as connection:
+            skills = connection.execute(
+                "SELECT s.id, COALESCE(NULLIF(s.name, ''), NULLIF(m.name, ''), "
+                "'Skill #' || s.id) AS name "
+                "FROM skills AS s LEFT JOIN metadata_skills AS m ON m.id = s.id"
+            ).fetchall()
+        skill = next((row for row in skills if row["id"] == skill_id), None)
+        if skill is None:
+            return ()
+        configured_group = configured_catalog_group(
+            identity_config,
+            "skills",
+            skill_id,
+            {row["id"] for row in skills},
+        )
+        if configured_group is not None:
+            return configured_group[1]
+        merge_key = skill_merge_key(skill["name"])
+        return tuple(
+            row["id"]
+            for row in skills
+            if merge_key is not None and skill_merge_key(row["name"]) == merge_key
+        ) or (skill_id,)
 
     @instance_lru_cache(maxsize=128)
     def get_skill(self, skill_id: int) -> dict[str, Any] | None:
         """Return one skill together with the units that use it."""
         if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
             raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+        identity_config = self._identity_config()
         with self._connect() as connection:
             skills = connection.execute(
                 "SELECT s.id, COALESCE(NULLIF(s.name, ''), NULLIF(m.name, ''), "
@@ -1119,15 +1245,14 @@ class Database:
             skill = next((row for row in skills if row["id"] == skill_id), None)
             if skill is None:
                 return None
-            canonical_id = SKILL_NAME_EXCEPTION_ALIASES.get(skill_id)
-            if canonical_id is not None:
-                source_ids = tuple(
-                    row["id"]
-                    for row in skills
-                    if SKILL_NAME_EXCEPTION_ALIASES.get(row["id"]) == canonical_id
-                )
-                if canonical_id not in source_ids:
-                    canonical_id = min(source_ids)
+            configured_group = configured_catalog_group(
+                identity_config,
+                "skills",
+                skill_id,
+                {row["id"] for row in skills},
+            )
+            if configured_group is not None:
+                canonical_id, source_ids = configured_group
             else:
                 merge_key = skill_merge_key(skill["name"])
                 source_ids = tuple(
@@ -1142,18 +1267,19 @@ class Database:
                 "SELECT uses.source, uses.skill_id, uses.occurrence_id, uses.unit_id, "
                 + UNIT_NAME_SQL
                 + " AS unit_name, uses.extra_position, "
-                "e.id AS extra_id, e.name AS extra_name "
+                "e.id AS extra_id, e.name AS extra_name, e.type AS extra_type "
                 "FROM units AS u JOIN ("
                 f"SELECT 'profile' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
                 "e.position AS extra_position, e.extra_id FROM profile_skills AS o "
                 "LEFT JOIN profile_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"WHERE o.item_id IN ({placeholders}) "
-                "UNION ALL SELECT 'option' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
-                "e.position AS extra_position, e.extra_id FROM option_skills AS o "
+                "UNION ALL SELECT 'option' AS source, o.item_id AS skill_id, o.occurrence_id, "
+                "o.unit_id, e.position AS extra_position, e.extra_id FROM option_skills AS o "
                 "LEFT JOIN option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"WHERE o.item_id IN ({placeholders}) "
-                "UNION ALL SELECT 'unit_option' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
-                "e.position AS extra_position, e.extra_id FROM unit_option_skills AS o "
+                "UNION ALL SELECT 'unit_option' AS source, o.item_id AS skill_id, "
+                "o.occurrence_id, o.unit_id, e.position AS extra_position, e.extra_id "
+                "FROM unit_option_skills AS o "
                 "LEFT JOIN unit_option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
                 f"WHERE o.item_id IN ({placeholders})"
                 ") AS uses ON uses.unit_id = u.id "
@@ -1170,19 +1296,13 @@ class Database:
                     key,
                     {
                         "skill_id": row["skill_id"],
-                        "unit": {
-                            "id": row["unit_id"],
-                            "name": row["unit_name"],
-                        },
+                        "unit": {"id": row["unit_id"], "name": row["unit_name"]},
                         "extras": [],
                     },
                 )
                 if row["extra_id"] is not None:
-                    extra = {
-                        "id": row["extra_id"],
-                        "name": row["extra_name"],
-                    }
-                    if contains_distance_multiple(row["extra_name"]):
+                    extra = {"id": row["extra_id"], "name": row["extra_name"]}
+                    if row["extra_type"] == "DISTANCE":
                         extra["is_distance"] = True
                     occurrence["extras"].append(extra)
             variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
@@ -1214,11 +1334,6 @@ class Database:
                 variant["units"] = sorted(
                     items.values(), key=lambda item: (unit_sort_key(item["name"]), item["id"])
                 )
-            categories = {
-                (category["name"], category["source"], category["page"]): category
-                for source_id in source_ids
-                for category in categories_for_skill(source_id)
-            }
             return {
                 **dict(representative),
                 "id": canonical_id,
@@ -1227,7 +1342,6 @@ class Database:
                     if len(source_ids) > 1
                     else representative["name"]
                 ),
-                "categories": list(categories.values()),
                 "variants": [variant for variant in variants.values() if variant["units"]],
             }
 
@@ -1253,7 +1367,12 @@ class Database:
         ):
             raise ValueError("army_id must be an integer within SQLite's signed 64-bit range")
         if army_id is not None:
-            army_id = canonical_army_id(army_id)
+            army_id = self._identity_config().canonical_army_id(army_id)
+            army = next((item for item in self.list_armies() if item["id"] == army_id), None)
+            if army is not None and not army["playable"]:
+                raise ArmySelectionError(
+                    f"army_id {army_id} is a grouping-only identity, not a selectable army"
+                )
         rule_filters = {
             "skills": skill_id,
             "equipment": equipment_id,
@@ -1263,8 +1382,14 @@ class Database:
             if item_id is not None and (
                 type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX
             ):
-                parameter = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[name]
-                raise ValueError(f"{parameter}_id must be an integer within SQLite's signed 64-bit range")
+                parameter = {
+                    "skills": "skill",
+                    "equipment": "equipment",
+                    "weapons": "weapon",
+                }[name]
+                raise ValueError(
+                    f"{parameter}_id must be an integer within SQLite's signed 64-bit range"
+                )
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -1307,12 +1432,16 @@ class Database:
                             f"UNION SELECT unit_id FROM unit_option_{catalog} WHERE item_id = ?"
                         )
                     matching_sources_by_rule[catalog] = {
-                        row["unit_id"] for row in connection.execute(query, (item_id, item_id, item_id))
+                        row["unit_id"]
+                        for row in connection.execute(query, (item_id, item_id, item_id))
                     }
         graph = self._unit_graph()
+        faction_groups = self._faction_groups()
         army_names = graph["army_names"]
         groups = graph["groups"]
-        canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
+        canonical_factions = {
+            row["id"]: row["canonical_faction_id"] for row in graph["rows"]
+        }
         normal_armies_by_unit = graph["normal_armies_by_unit"]
         search_key = accent_insensitive_key(search)
         grouped = []
@@ -1346,7 +1475,8 @@ class Database:
                     continue
             grouped.append({**group, "armies": visible_armies})
         grouped.sort(
-            key=lambda group: (unit_sort_key(group["name"]), group["id"]), reverse=descending
+            key=lambda group: (unit_sort_key(group["name"]), group["id"]),
+            reverse=descending,
         )
         total = len(grouped)
         items = [
@@ -1357,10 +1487,12 @@ class Database:
                 "slug": group["slug"],
                 "main_army_id": group["main_army_id"],
                 "main_army_name": army_names.get(group["main_army_id"]),
+                "main_faction": faction_groups.get(group["main_army_id"]),
                 "source_ids": group["source_ids"],
                 "army_ids": list(group["armies"]),
                 "armies": [
-                    {"id": army["id"], "name": army["name"]} for army in group["armies"].values()
+                    {"id": army["id"], "name": army["name"]}
+                    for army in group["armies"].values()
                 ],
             }
             for group in grouped[offset : offset + limit]
@@ -1391,6 +1523,7 @@ class Database:
         """Return a browsable unit and its army-specific profiles and loadouts."""
         if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:
             raise ValueError("unit_id must be a nonnegative SQLite signed 64-bit integer")
+        identity_config = self._identity_config()
         with self._connect() as connection:
             selected = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
@@ -1401,13 +1534,16 @@ class Database:
             if selected is None:
                 return None
             graph = self._unit_graph()
+            faction_groups = self._faction_groups()
             siblings = graph["rows"]
             army_names = graph["army_names"]
             group = graph["groups_by_source"][selected["id"]]
             source_ids = group["source_ids"]
             unit = next(sibling for sibling in siblings if sibling["id"] == group["id"])
             normal_army_ids = graph["normal_armies_by_unit"]
-            canonical_factions = {row["id"]: row["canonical_faction_id"] for row in siblings}
+            canonical_factions = {
+                row["id"]: row["canonical_faction_id"] for row in siblings
+            }
             placeholders = ", ".join("?" for _ in source_ids)
             armies_by_occurrence: dict[tuple[int, tuple[str, ...]], dict[str, Any]] = {}
             by_source_army: dict[tuple[int, int], dict[str, Any]] = {}
@@ -1429,6 +1565,7 @@ class Database:
                     {
                         "id": occurrence["id"],
                         "name": occurrence["name"],
+                        "faction": faction_groups.get(occurrence["source_army_id"]),
                         "availability_flags": list(flags),
                         "profiles": [],
                         "loadouts": [],
@@ -1456,13 +1593,21 @@ class Database:
                 army = by_source_army.get((profile["unit_id"], profile["army_id"]))
                 if army is None:
                     continue
-                item = {
-                    key: profile[key] for key in profile.keys() if key not in {"army_id", "unit_id"}
+                profile_item = {
+                    key: profile[key]
+                    for key in profile.keys()
+                    if key not in {"army_id", "unit_id"}
                 }
-                item["skills"] = []
-                item["equipment"] = []
-                item["weapons"] = []
-                item["characteristics"] = []
+                profile_item["display_name"] = strip_reinforcement_prefix(
+                    profile["name"], identity_config
+                )
+                profile_item["profile_identity"] = normalized_profile_identity(
+                    profile["name"], identity_config
+                )
+                profile_item["skills"] = []
+                profile_item["equipment"] = []
+                profile_item["weapons"] = []
+                profile_item["characteristics"] = []
                 profile_key = (
                     army["_occurrence_key"],
                     profile["group_id"],
@@ -1491,10 +1636,10 @@ class Database:
                 ] = profile_key
                 existing = profile_items.get(profile_key)
                 if existing is None:
-                    army["profiles"].append(item)
-                    profile_items[profile_key] = item
+                    army["profiles"].append(profile_item)
+                    profile_items[profile_key] = profile_item
                 else:
-                    merge_profile(existing, item)
+                    merge_profile(existing, profile_item)
             for occurrence_table, catalog_table, property_name, extras_table in (
                 ("profile_skills", "skills", "skills", "profile_skill_extras"),
                 ("profile_equipment", "equipment", "equipment", "profile_equipment_extras"),
@@ -1502,7 +1647,7 @@ class Database:
             ):
                 extras_by_occurrence: dict[Any, list[dict[str, Any]]] = {}
                 extra_rows = connection.execute(
-                    "SELECT e.occurrence_id, e.extra_id, x.name "
+                    "SELECT e.occurrence_id, e.extra_id, x.name, x.type AS extra_type "
                     f"FROM {extras_table} AS e "
                     f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
                     "LEFT JOIN extras AS x ON x.id = e.extra_id "
@@ -1511,16 +1656,13 @@ class Database:
                     source_ids,
                 )
                 for extra in extra_rows:
-                    item = {
-                        "id": extra["extra_id"],
-                        "name": extra["name"],
-                    }
-                    if property_name == "skills" and contains_distance_multiple(extra["name"]):
-                        item["is_distance"] = True
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(item)
+                    extra_item = {"id": extra["extra_id"], "name": extra["name"]}
+                    if property_name == "skills" and extra["extra_type"] == "DISTANCE":
+                        extra_item["is_distance"] = True
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, o.item_id, "
-                    "o.quantity, o.position, c.name "
+                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, "
+                    "o.item_id, o.quantity, o.position, c.name "
                     f"FROM {occurrence_table} AS o "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
                     f"WHERE o.unit_id IN ({placeholders}) "
@@ -1536,10 +1678,12 @@ class Database:
                             occurrence["profile_id"],
                         )
                     )
-                    profile = profile_items.get(profile_key) if profile_key is not None else None
-                    if profile is not None:
+                    profile_item = (
+                        profile_items.get(profile_key) if profile_key is not None else None
+                    )
+                    if profile_item is not None:
                         append_unique_item(
-                            profile[property_name],
+                            profile_item[property_name],
                             {
                                 "id": occurrence["item_id"],
                                 "name": occurrence["name"],
@@ -1564,9 +1708,9 @@ class Database:
                         characteristic["profile_id"],
                     )
                 )
-                profile = profile_items.get(profile_key) if profile_key is not None else None
-                if profile is not None:
-                    profile["characteristics"].append({"name": characteristic["name"]})
+                profile_item = profile_items.get(profile_key) if profile_key is not None else None
+                if profile_item is not None:
+                    profile_item["characteristics"].append({"name": characteristic["name"]})
             loadout_rows = connection.execute(
                 "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
                 "o.minis, o.disabled "
@@ -1580,13 +1724,15 @@ class Database:
                 army = by_source_army.get((loadout["unit_id"], loadout["army_id"]))
                 if army is None:
                     continue
-                item = {
-                    key: loadout[key] for key in loadout.keys() if key not in {"army_id", "unit_id"}
+                loadout_item = {
+                    key: loadout[key]
+                    for key in loadout.keys()
+                    if key not in {"army_id", "unit_id"}
                 }
-                item["skills"] = []
-                item["equipment"] = []
-                item["weapons"] = []
-                item["orders"] = []
+                loadout_item["skills"] = []
+                loadout_item["equipment"] = []
+                loadout_item["weapons"] = []
+                loadout_item["orders"] = []
                 loadout_key = (
                     army["_occurrence_key"],
                     loadout["group_id"],
@@ -1606,8 +1752,8 @@ class Database:
                     )
                 ] = loadout_key
                 if loadout_key not in loadout_items:
-                    army["loadouts"].append(item)
-                    loadout_items[loadout_key] = item
+                    army["loadouts"].append(loadout_item)
+                    loadout_items[loadout_key] = loadout_item
             order_rows = connection.execute(
                 "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.order_type, "
                 "o.list_count, o.total_count "
@@ -1624,10 +1770,12 @@ class Database:
                         order["option_id"],
                     )
                 )
-                loadout = loadout_items.get(loadout_key) if loadout_key is not None else None
-                if loadout is not None:
+                loadout_item = (
+                    loadout_items.get(loadout_key) if loadout_key is not None else None
+                )
+                if loadout_item is not None:
                     order_type = order["order_type"]
-                    loadout["orders"].append(
+                    loadout_item["orders"].append(
                         {
                             "type": order_type.lower()
                             if isinstance(order_type, str)
@@ -1643,7 +1791,7 @@ class Database:
             ):
                 extras_by_occurrence = {}
                 extra_rows = connection.execute(
-                    "SELECT e.occurrence_id, e.extra_id, x.name "
+                    "SELECT e.occurrence_id, e.extra_id, x.name, x.type AS extra_type "
                     f"FROM {extras_table} AS e "
                     f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
                     "LEFT JOIN extras AS x ON x.id = e.extra_id "
@@ -1652,13 +1800,10 @@ class Database:
                     source_ids,
                 )
                 for extra in extra_rows:
-                    item = {
-                        "id": extra["extra_id"],
-                        "name": extra["name"],
-                    }
-                    if property_name == "skills" and contains_distance_multiple(extra["name"]):
-                        item["is_distance"] = True
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(item)
+                    extra_item = {"id": extra["extra_id"], "name": extra["name"]}
+                    if property_name == "skills" and extra["extra_type"] == "DISTANCE":
+                        extra_item["is_distance"] = True
+                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
                 item_column = "o.item_id"
                 quantity_column = "o.quantity"
                 occurrence_source = f"FROM {occurrence_table} AS o"
@@ -1686,10 +1831,12 @@ class Database:
                             occurrence["option_id"],
                         )
                     )
-                    loadout = loadout_items.get(loadout_key) if loadout_key is not None else None
-                    if loadout is not None:
+                    loadout_item = (
+                        loadout_items.get(loadout_key) if loadout_key is not None else None
+                    )
+                    if loadout_item is not None:
                         append_unique_item(
-                            loadout[property_name],
+                            loadout_item[property_name],
                             {
                                 "id": occurrence["item_id"],
                                 "name": occurrence["name"],
@@ -1697,6 +1844,7 @@ class Database:
                                 "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
                             },
                         )
+            main_faction = faction_groups.get(group["main_army_id"])
             for army in armies:
                 del army["_occurrence_key"]
         return {
@@ -1708,6 +1856,8 @@ class Database:
             "notes": unit["notes"],
             "main_army_id": group["main_army_id"],
             "main_army_name": army_names.get(group["main_army_id"]),
+            "main_faction": main_faction,
             "source_ids": source_ids,
             "armies": armies,
         }
+

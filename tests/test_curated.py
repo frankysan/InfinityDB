@@ -212,8 +212,133 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["skill:camouflage"]["labelIds"] == ["optional"]
     assert records["skill:camouflage"]["facts"]["typeId"] == "automatic"
     assert records["skill:camouflage"]["armyLinks"] == [{"entity": "skill", "id": 29}]
+    assert records["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
+    assert records["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
+        "Disposable ("
+    ]
+    assert records["trait:zone-of-control-zc"]["name"] == "Zone of Control (ZoC)"
+    assert records["trait:zone-of-control-zc"]["citations"][0]["sourceId"] == (
+        "wiki-traits-oldid-4110"
+    )
+    assert records["weapon:armed-turret"]["armyLinks"] == [
+        {"entity": "weapon", "id": 226}
+    ]
+    assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == [
+        "Total Reaction"
+    ]
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
         set(skill_type["descriptions"]) == {"singular", "plural"}
         for skill_type in document["skillTypes"]
     )
+
+
+def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"] = [
+        {
+            "id": "trait:disposable-x",
+            "kind": "trait",
+            "name": "Disposable (X)",
+            "summary": "Limited uses.",
+            "facts": {"sourceIdentity": {"prefixes": "Disposable ("}},
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 170}],
+        }
+    ]
+    path = tmp_path / "trait.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="sourceIdentity.prefixes"):
+        load_curated_document(path)
+
+
+def test_skill_parameter_semantics_are_validated(tmp_path: Path) -> None:
+    document = valid_document()
+    record = next(record for record in document["records"] if record["kind"] == "skill")
+    record["facts"]["parameterSemantics"] = {
+        "kind": "distance",
+        "positiveSign": "omit",
+    }
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    loaded = load_curated_document(path)
+    assert loaded["records"][0]["facts"]["parameterSemantics"] == {
+        "kind": "distance",
+        "positiveSign": "omit",
+    }
+
+    record["facts"]["parameterSemantics"]["positiveSign"] = "sometimes"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="positiveSign"):
+        load_curated_document(path)
+
+def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"] = [
+        {
+            "id": "weapon:armed-turret",
+            "kind": "weapon",
+            "name": "Armed Turret",
+            "summary": "A deployable weapon.",
+            "facts": {
+                "specialProfile": {
+                    "stats": [["MOV", "--"]],
+                    "equipment": ["360º Visor"],
+                    "skills": ["Total Reaction"],
+                    "ccWeapon": 7,
+                }
+            },
+            "armyLinks": [{"entity": "weapon", "id": 226}],
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 74}],
+        }
+    ]
+    path = tmp_path / "weapon.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="ccWeapon"):
+        load_curated_document(path)
+
+
+def test_skill_declaration_category_requires_valid_order_and_skill_links(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    document["records"].append(
+        {
+            "id": "skill-declaration-category:automatic:p12",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked skill is declared as Automatic.",
+            "facts": {"order": 10},
+            "armyLinks": [{"entity": "skill", "id": 19}],
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
+        }
+    )
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    assert load_curated_document(path)["records"][-1]["facts"]["order"] == 10
+
+    document["records"][-1]["armyLinks"] = [{"entity": "weapon", "id": 19}]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must reference integer skill ids"):
+        load_curated_document(path)
+
+    document = valid_document()
+    declaration = {
+        "id": "skill-declaration-category:automatic:p12",
+        "kind": "skill-declaration-category",
+        "name": "Automatic",
+        "summary": "The linked skill is declared as Automatic.",
+        "facts": {"order": 10},
+        "armyLinks": [{"entity": "skill", "id": 19}],
+        "citations": [
+            {"sourceId": "n5-core-v5.3", "page": 12},
+            {"sourceId": "n5-core-v5.3", "page": 13},
+        ],
+    }
+    document["records"].append(declaration)
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="requires exactly one citation"):
+        load_curated_document(path)

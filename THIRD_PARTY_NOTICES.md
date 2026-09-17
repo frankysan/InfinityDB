@@ -8,25 +8,31 @@ application.
 ## Corvus Belli Infinity materials
 
 InfinityDB can consume Army JSON snapshots and API metadata from the official
-[Infinity Army API](https://api.corvusbelli.com/army), and can download unit
-symbols from `assets.corvusbelli.net`. Those data records, names, marks, and
-artwork remain subject to the rights and terms of their respective owners.
-InfinityDB does not relicense them under MIT.
+[Infinity Army API](https://api.corvusbelli.com/army), and can acquire graphical
+assets from Corvus Belli asset hosts for local processing and browser use.
+Those data records, names, marks, and artwork remain subject to the rights and
+terms of their respective owners. InfinityDB does not relicense them under MIT.
 
-Raw snapshots in `data/raw/`, generated databases in `data/generated/`, and
-downloaded symbols under `src/infinity_db/web/static/` are replaceable data or
-assets rather than original MIT-licensed project material. Before redistributing
-a wheel, Docker image, database snapshot, or bundled symbols, verify that the
-source terms permit that use and retain any required attribution.
+Raw Army and symbol snapshots in `data/raw/`, generated databases in
+`data/generated/`, and bundled Corvus Belli-derived graphical assets under
+`src/infinity_db/web/static/` are replaceable data or assets rather than
+original MIT-licensed project material. Before redistributing a wheel, Docker
+image, database snapshot, or bundled graphical assets, verify that the source
+terms permit that use and retain any required attribution.
 
 ## Infinity Wiki and rules documents
 
-The optional wiki mirror under `data/wiki/` and user-supplied rules documents
-under `data/pdf/` are research material. They are ignored by Git and are not
-part of the normal application package or Docker build. Their text, images, and
-other contents must not be redistributed as MIT-licensed project material.
-Curated facts derived from rules documents must retain their source edition and
-printed-page citation.
+The optional wiki research material under `data/wiki/` and user-supplied rules
+documents under `data/pdf/` are ignored by Git and are not part of the normal
+application package or Docker build. Their text, images, and other contents must
+not be redistributed as MIT-licensed project material.
+
+Curated facts retain provenance appropriate to the source contract. PDF-derived
+facts use document edition/version/date and printed-page citations. Current
+wiki-derived record citations use snapshot-local path and snapshot date; legacy
+wiki provenance should not be relabeled as an exact timestamped archive/hash
+until that provenance is migrated by the downloader/packager and curated-data
+work.
 
 ## Runtime and deployment dependencies
 

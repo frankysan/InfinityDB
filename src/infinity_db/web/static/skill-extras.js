@@ -1,4 +1,4 @@
-import { cacheBustedUrl, formatDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { cacheBustedUrl, formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -24,10 +24,7 @@ function renderItems(items) {
     skill.textContent = item.skill_name;
     const extra = document.createElement("td");
     extra.textContent = item.is_distance
-      ? formatDistanceExtra(item.extra_name, {
-        showPositiveSign: item.skill_name !== "Super-Jump",
-        forcePositiveSign: item.skill_name === "Forward Deployment",
-      })
+      ? formatSkillDistanceExtra(item.extra_name, item.parameter_semantics)
       : item.extra_name;
     const units = document.createElement("td");
     units.className = "modifier-unit-links";

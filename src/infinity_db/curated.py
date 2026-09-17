@@ -47,6 +47,42 @@ def load_curated_directory(directory: Path) -> list[tuple[Path, dict[str, Any]]]
     return documents
 
 
+def _validate_weapon_special_profile(profile: object, context: str) -> None:
+    if not isinstance(profile, dict):
+        raise ValueError(f"{context}: must be an object")
+    required = {"stats", "equipment", "skills", "ccWeapon"}
+    missing = required - profile.keys()
+    unknown = profile.keys() - required
+    if missing:
+        raise ValueError(f"{context}: missing fields {sorted(missing)}")
+    if unknown:
+        raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
+
+    stats = profile["stats"]
+    if not isinstance(stats, list) or not stats:
+        raise ValueError(f"{context}.stats: must be a non-empty array")
+    seen_stats: set[str] = set()
+    for index, stat in enumerate(stats):
+        stat_context = f"{context}.stats[{index}]"
+        if (
+            not isinstance(stat, list)
+            or len(stat) != 2
+            or not all(isinstance(value, str) and value.strip() for value in stat)
+        ):
+            raise ValueError(f"{stat_context}: must be [name, value] strings")
+        if stat[0] in seen_stats:
+            raise ValueError(f"{stat_context}: duplicate stat name {stat[0]!r}")
+        seen_stats.add(stat[0])
+
+    for field in ("equipment", "skills"):
+        values = profile[field]
+        if not isinstance(values, list) or any(
+            not isinstance(value, str) or not value.strip() for value in values
+        ):
+            raise ValueError(f"{context}.{field}: must be an array of non-empty strings")
+    _require_string(profile["ccWeapon"], "ccWeapon", context)
+
+
 def load_curated_document(path: Path) -> dict[str, Any]:
     """Load and validate one curated JSON document.
 
@@ -195,6 +231,100 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             facts = record.get("facts")
             if not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids:
                 raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
+            parameter_semantics = facts.get("parameterSemantics")
+            if parameter_semantics is not None:
+                if not isinstance(parameter_semantics, dict):
+                    raise ValueError(
+                        f"{context}: skill 'facts.parameterSemantics' must be an object"
+                    )
+                if set(parameter_semantics) != {"kind", "positiveSign"}:
+                    raise ValueError(
+                        f"{context}: skill 'facts.parameterSemantics' must contain only "
+                        "'kind' and 'positiveSign'"
+                    )
+                if parameter_semantics["kind"] != "distance":
+                    raise ValueError(
+                        f"{context}: skill parameter semantics 'kind' must be 'distance'"
+                    )
+                if parameter_semantics["positiveSign"] not in {"preserve", "omit", "force"}:
+                    raise ValueError(
+                        f"{context}: skill parameter semantics 'positiveSign' must be one of "
+                        "'preserve', 'omit', or 'force'"
+                    )
+        if record["kind"] == "trait":
+            facts = record.get("facts")
+            if facts is not None:
+                source_identity = facts.get("sourceIdentity")
+                if source_identity is not None:
+                    if not isinstance(source_identity, dict):
+                        raise ValueError(
+                            f"{context}: trait 'facts.sourceIdentity' must be an object"
+                        )
+                    unknown = source_identity.keys() - {"prefixes"}
+                    if unknown:
+                        raise ValueError(
+                            f"{context}: trait 'facts.sourceIdentity' has unsupported fields "
+                            f"{sorted(unknown)}"
+                        )
+                    prefixes = source_identity.get("prefixes")
+                    if not isinstance(prefixes, list) or not prefixes:
+                        raise ValueError(
+                            f"{context}: trait 'facts.sourceIdentity.prefixes' must be a "
+                            "non-empty array"
+                        )
+                    for prefix_index, prefix in enumerate(prefixes):
+                        _require_string(
+                            prefix,
+                            f"facts.sourceIdentity.prefixes[{prefix_index}]",
+                            context,
+                        )
+        if record["kind"] == "weapon":
+            facts = record.get("facts")
+            if not isinstance(facts, dict):
+                raise ValueError(f"{context}: weapon 'facts' must be an object")
+            if "specialProfile" in facts:
+                _validate_weapon_special_profile(
+                    facts["specialProfile"], f"{context}.facts.specialProfile"
+                )
+        if record["kind"] == "skill-declaration-category":
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or set(facts) != {"order"}:
+                raise ValueError(
+                    f"{context}: skill declaration category 'facts' must contain only 'order'"
+                )
+            if type(facts["order"]) is not int or facts["order"] < 0:
+                raise ValueError(
+                    f"{context}: skill declaration category 'facts.order' must be "
+                    "a non-negative integer"
+                )
+            links = record.get("armyLinks")
+            if not isinstance(links, list) or not links:
+                raise ValueError(
+                    f"{context}: skill declaration category requires non-empty 'armyLinks'"
+                )
+            for link in links:
+                if (
+                    not isinstance(link, dict)
+                    or link.get("entity") != "skill"
+                    or type(link.get("id")) is not int
+                ):
+                    raise ValueError(
+                        f"{context}: skill declaration category armyLinks must reference "
+                        "integer skill ids"
+                    )
+            if len(record["citations"]) != 1:
+                raise ValueError(
+                    f"{context}: skill declaration category requires exactly one citation"
+                )
+            citation_source = record["citations"][0].get("sourceId")
+            citation_kind = next(
+                (source["kind"] for source in sources if source["id"] == citation_source),
+                None,
+            )
+            if citation_kind != "pdf":
+                raise ValueError(
+                    f"{context}: skill declaration category citation must reference a PDF"
+                )
         if record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")
             if not isinstance(record_labels, list) or not record_labels:

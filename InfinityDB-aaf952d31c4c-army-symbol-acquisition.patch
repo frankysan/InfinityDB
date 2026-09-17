@@ -1,0 +1,2101 @@
+diff --git a/README.md b/README.md
+index 03c3292..635e6f5 100644
+--- a/README.md
++++ b/README.md
+@@ -126,17 +126,19 @@ infinity-db build --compact
+ infinity-db serve
+ ```
+ 
+-The standalone wiki and symbol downloaders follow the same durable-output
++The standalone wiki and Army-symbol downloaders follow the same durable-output
+ convention. They create `WIKI YYYYMMDD-HHMMSS.zip` archives under `data/wiki/`
+ and `SYMBOLS YYYYMMDD-HHMMSS.zip` archives under `data/raw/symbols/`
+ respectively, removing their temporary loose staging files after success. All
+ three downloaders also write deterministic snapshot provenance bound to each
+ archive SHA-256 under `data/manifests/snapshots/`; these generated records are
+-ignored by Git.
++ignored by Git. Army-symbol acquisition additionally writes the current
++`data/manifests/army-symbol-build.json`, preserving raw asset identities and
++every Army/static reference for later processing stages.
+ 
+ ```powershell
+ python tools/download_wiki_snapshot.py
+-python tools/download_unit_symbols.py "data/raw/JSON 20260910-204106.zip"
++python tools/download_army_symbols.py "data/raw/JSON 20260910-204106.zip"
+ ```
+ 
+ The development server listens on all local network interfaces. Open
+diff --git a/config/symbols/static-symbols.json b/config/symbols/static-symbols.json
+index aacd091..fda2919 100644
+--- a/config/symbols/static-symbols.json
++++ b/config/symbols/static-symbols.json
+@@ -1,19 +1,60 @@
+ {
+-  "schema_version": 1,
++  "schema_version": 2,
+   "base_url": "https://assets.corvusbelli.net/army/img/icon/",
+-  "assets": {
+-    "characteristics": [
+-      "cube.svg",
+-      "cube2.svg",
+-      "hackable.svg",
+-      "peripheral.svg"
+-    ],
+-    "orders": [
+-      "regular.svg",
+-      "irregular.svg",
+-      "tactical.svg",
+-      "lieutenant.svg",
+-      "impetuous.svg"
+-    ]
+-  }
++  "assets": [
++    {
++      "key": "cube",
++      "category": "characteristics",
++      "filename": "cube.svg",
++      "label": "Cube"
++    },
++    {
++      "key": "cube2",
++      "category": "characteristics",
++      "filename": "cube2.svg",
++      "label": "Cube 2"
++    },
++    {
++      "key": "hackable",
++      "category": "characteristics",
++      "filename": "hackable.svg",
++      "label": "Hackable"
++    },
++    {
++      "key": "peripheral",
++      "category": "characteristics",
++      "filename": "peripheral.svg",
++      "label": "Peripheral"
++    },
++    {
++      "key": "regular",
++      "category": "orders",
++      "filename": "regular.svg",
++      "label": "Regular Order"
++    },
++    {
++      "key": "irregular",
++      "category": "orders",
++      "filename": "irregular.svg",
++      "label": "Irregular Order"
++    },
++    {
++      "key": "tactical",
++      "category": "orders",
++      "filename": "tactical.svg",
++      "label": "Tactical Order"
++    },
++    {
++      "key": "lieutenant",
++      "category": "orders",
++      "filename": "lieutenant.svg",
++      "label": "Lieutenant Order"
++    },
++    {
++      "key": "impetuous",
++      "category": "orders",
++      "filename": "impetuous.svg",
++      "label": "Impetuous Order"
++    }
++  ]
+ }
+diff --git a/docs/AI_CONTEXT.md b/docs/AI_CONTEXT.md
+index 94392c5..debbae7 100644
+--- a/docs/AI_CONTEXT.md
++++ b/docs/AI_CONTEXT.md
+@@ -195,29 +195,31 @@ Downloaded Corvus Belli graphical assets remain outside the public repository
+ unless redistribution permission clearly allows inclusion. Local corrected
+ image overrides likewise remain ignored unless redistribution status changes.
+ 
+-Current acquisition can create timestamped symbol archives, and the repository
+-contains standalone processing/reorganization tooling plus bundled browser
+-assets. The complete manifest-backed build described below is not yet the
+-current integrated workflow.
++Army-symbol acquisition is now source-semantic and URL/reference based.
++`tools/download_army_symbols.py` discovers every
++`units[].profileGroups[].profiles[].logo` plus every
++`metadata.json -> factions[].logo`, includes validated maintained static-symbol
++declarations, and treats `resume[].logo` as audit-only. A recursive scan of all
++source strings fails closed on SVG-bearing fields that are not reviewed semantic
++or audit-only locations. A unit may reference several SVGs and several source
++references may share one URL; every reference is preserved while each
++authoritative URL is downloaded only once.
++
++The downloader creates one immutable `SYMBOLS ...zip`, ordinary snapshot
++provenance, and the acquisition-only version-1
++`data/manifests/army-symbol-build.json`. That build manifest separates raw assets
++from consumers, records Army/SYMBOLS artifact hashes, source-document count,
++raw asset URL/filename/archive-path/hash/source-method, every source/static
++reference, and discovery audit counts. It deliberately has no font, duplicate,
++conversion, compression, or published-path state yet. The downloader does not
++generate `army-symbols.js` or `unit-symbol-map.js`.
+ 
+ ### Design direction
+ 
+-A symbol build associated with an Army snapshot will use the same exact pinned
+-Army snapshot throughout discovery and publication. Pin archive identity and
+-SHA-256 plus source metadata needed for reproducibility; no downstream stage may
+-select a newer snapshot independently.
+-
+-Authoritative Army-API symbol discovery comes from every
+-`units[].profileGroups[].profiles[].logo` reference plus
+-`metadata.json -> factions[].logo`. `resume[].logo` is only a
+-consistency/validation source. Recursively scan source strings for additional
+-SVG references as a schema-drift audit; unknown SVG-bearing fields must be
+-reported rather than silently ignored.
+-
+-Symbol discovery/reference identity is URL/reference based rather than unit-ID
+-based. A unit may reference several source SVGs, and several units/profiles may
+-reference the same SVG. Exact or visual deduplication may map several source
+-assets to one canonical asset but must retain every original reference.
++Later symbol processing must consume the same pinned Army/SYMBOLS identities
++rather than selecting newer snapshots independently. Exact or visual
++deduplication may map several source assets to one canonical asset but must
++retain every original reference.
+ 
+ Source resolution follows the accepted policy:
+ 
+diff --git a/docs/CHANGELOG.md b/docs/CHANGELOG.md
+index 95a88c8..2e90808 100644
+--- a/docs/CHANGELOG.md
++++ b/docs/CHANGELOG.md
+@@ -44,6 +44,15 @@ All notable changes to this project are documented in this file.
+ 
+ ### Changed
+ 
++- Replace first-logo-per-unit symbol acquisition with complete source-semantic
++  Army discovery. `download_army_symbols.py` now preserves every profile/faction
++  reference, includes maintained static symbols, audits `resume` and unknown SVG
++  source locations, downloads each authoritative URL once, and no longer
++  generates browser symbol mappings.
++- Add the acquisition-only version-1 `army-symbol-build.json` generated state,
++  separating raw asset URL/hash/archive identity from every Army/static
++  reference so later symbol processing can extend the same manifest without
++  inferring provenance from filenames.
+ - Move reinforcement-label prefixes (`REINF` / `REFUERZOS`) into the validated
+   identity policy and derive profile `display_name` values in the backend. The
+   browser now consumes `display_name` and `profile_identity` instead of carrying
+diff --git a/docs/TODO.md b/docs/TODO.md
+index ddd88f3..59cfc2e 100644
+--- a/docs/TODO.md
++++ b/docs/TODO.md
+@@ -250,7 +250,7 @@ history retains implementation detail.
+     `--skip-compression`, `--keep-work`, and `--dry-run` are candidate
+     orchestrator options as those stages are integrated.
+ 
+-- [ ] Replace first-logo-per-unit symbol discovery with complete source-semantic
++- [x] Replace first-logo-per-unit symbol discovery with complete source-semantic
+   discovery keyed by source reference/URL rather than unit ID.
+   - Treat every `units[].profileGroups[].profiles[].logo` as authoritative for
+     unit/profile symbols and every `metadata.json -> factions[].logo` as
+@@ -264,10 +264,10 @@ history retains implementation detail.
+   - Preserve every reference even when download URLs repeat or visual
+     deduplication later collapses assets. One unit may reference several SVGs,
+     and several units/profiles may reference one source SVG.
+-  - Rename/refactor `download_unit_symbols.py` to `download_army_symbols.py` so
+-    it covers unit/profile and faction assets plus manually declared static
+-    symbols, without generating final browser mappings. Preserve its timestamped
+-    `SYMBOLS ...zip` snapshot output when the discovery behavior is expanded.
++  - [x] Rename/refactor `download_unit_symbols.py` to `download_army_symbols.py`
++    so it covers unit/profile and faction assets plus validated maintained
++    static symbols, without generating final browser mappings. Preserve its
++    timestamped `SYMBOLS ...zip` snapshot output.
+   - Preserve the 2026-09-10 snapshot audit as a regression baseline, not a
+     permanent source count: 59 JSON documents (`metadata.json` + 58 Army
+     documents), 5,020 profile-logo references / 1,033 unique unit SVG URLs,
+@@ -277,22 +277,25 @@ history retains implementation detail.
+     unique unit SVGs, missing 172 distinct SVGs; 136 unit IDs referenced more
+     than one profile logo.
+ 
+-- [ ] Define `data/manifests/army-symbol-build.json` as the authoritative
+-  machine-readable state passed through symbol processing.
+-  - Separate `snapshot`, `assets`, and `references`; do not use a filename-keyed
+-    structure that conflates source assets with their consumers.
+-  - Snapshot records should include the pinned Army archive identity/hash and,
+-    when applicable, the corresponding `SYMBOLS ...zip` archive identity/hash,
+-    plus language, acquisition timestamp, API base/version if available, and
++- [x] Define the acquisition-only version-1
++  `data/manifests/army-symbol-build.json` as the first authoritative
++  machine-readable state passed into later symbol processing.
++  - [x] Separate `snapshot`, `assets`, and `references`; do not use a
++    filename-keyed structure that conflates source assets with their consumers.
++  - [x] Snapshot records include the pinned Army artifact identity/hash, the
++    corresponding `SYMBOLS ...zip` identity/hash, acquisition timestamp, and
+     source-document count.
+-  - Asset records should retain kind, source URL/filename/hash, source-resolution
+-    method, font classification, alias normalization, duplicate group,
+-    canonical source identity, conversion backend/status, compression
+-    profile/status, and final published path.
+-  - Reference records should retain source document, JSON path, reference kind,
+-    unit/faction/army IDs and slugs as applicable, and source asset URL.
+-  - Persistent manifest paths must be portable project-relative POSIX-style
+-    strings; convert them to native `Path` objects only at filesystem access.
++  - [ ] Enrich the build snapshot record with Army language/API base/version by
++    resolving the selected Army snapshot provenance when orchestration is added.
++  - [x] Acquisition asset records retain source URL/filename/hash, deterministic
++    raw archive path, and source method. Font classification, alias
++    normalization, duplicate/canonical identity, conversion, compression, and
++    final published path remain later-stage manifest extensions.
++  - [x] Reference records retain source document, JSON path, authoritative/audit
++    status, reference kind, unit/faction/army IDs and slugs as applicable,
++    static semantic keys/categories, and source asset URL.
++  - [x] Persistent artifact paths are portable project-relative POSIX-style
++    strings where applicable; raw archive member paths are POSIX-relative.
+ 
+ - [ ] Complete the static-symbol and local-override model as maintained project
+   knowledge rather than downloader code.
+@@ -300,8 +303,9 @@ history retains implementation detail.
+     non-API assets: characteristics `cube`, `cube2`, `hackable`, `peripheral`
+     and orders `regular`, `irregular`, `tactical`, `lieutenant`, `impetuous`,
+     all under the stable Corvus Belli icon base URL.
+-  - [ ] Extend static declarations with semantic metadata such as stable key,
+-    source filename, user-facing label, and known source names where needed.
++  - [x] Extend current static declarations with stable key, category, source
++    filename, and user-facing label. Add further known source-name metadata only
++    when a concrete processing/publishing need appears.
+   - [ ] Keep local `image_overrides/` outside version control, organized by
+     explicit categories such as `units/`, `factions/`, `characteristics/`, and
+     `orders/`. Use stable URL-derived logical names/categories as lookup keys,
+diff --git a/docs/architecture.md b/docs/architecture.md
+index f0ecf16..3c23d19 100644
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -248,9 +248,14 @@ comparison snapshot SHA-256, and ordered notable-change notes. Snapshot notes
+ are source-controlled human interpretation, not rules-database inputs or
+ runtime application data.
+ 
+-Build-specific manifests such as the planned Army-symbol build manifest remain
+-future work under `data/manifests/` and are separate from this acquisition
+-provenance contract.
++Army-symbol acquisition also writes the version-1
++`data/manifests/army-symbol-build.json`. This generated build-state document is
++separate from immutable snapshot provenance: it binds the selected Army and
++SYMBOLS artifacts, records every downloaded raw asset by URL/hash/archive path,
++preserves every authoritative and audit-only source reference, and stores the
++discovery audit counts. Its current contract is acquisition-only; later symbol
++processing stages will extend the build state with their own validated fields
++rather than making the downloader assign final application paths.
+ 
+ ### Current: army roles and logical-unit identity
+ 
+@@ -394,18 +399,22 @@ and returns a combined representation; the databases do not import from or
+ attach to one another.
+ 
+ Asset acquisition and processing is likewise a separate build concern. Current
+-tooling preserves raw downloaded assets independently from working/published
+-outputs and bundles processed assets for the browser.
+-
+-**Design direction:** an integrated symbol build tied to an Army snapshot will
+-use that exact pinned snapshot throughout discovery and publication. Discovery
+-will preserve every source reference/URL independently of later deduplication;
+-canonical processing may collapse equivalent assets, but it must not discard
+-their source references. Only the publisher will assign final application paths
+-and generated browser mappings because only that stage knows the final
+-canonical asset. Discovery, source resolution, validation, deduplication,
+-conversion, compression, and publishing remain distinct intended stages with
+-provenance recorded rather than inferred from final filenames.
++Army-symbol acquisition is source-semantic and snapshot-pinned: every
++`units[].profileGroups[].profiles[].logo` and `metadata.json -> factions[].logo`
++reference is authoritative, maintained static declarations are included,
++`resume[].logo` is audit-only, and a recursive scan fails closed on unknown
++SVG-bearing source fields. URLs are downloaded once while every reference is
++preserved separately in `army-symbol-build.json`. The downloader does not
++generate browser mappings.
++
++**Design direction:** later processing will consume that exact acquisition state
++through deduplication, text conversion, compression, and publication. Canonical
++processing may collapse equivalent assets, but it must not discard their source
++references. Only the publisher will assign final application paths and generated
++browser mappings because only that stage knows the final canonical asset. Source
++resolution, validation, deduplication, conversion, compression, and publishing
++remain distinct intended stages with provenance recorded rather than inferred
++from final filenames.
+ 
+ ## Module boundaries
+ 
+diff --git a/src/infinity_db/symbol_manifest.py b/src/infinity_db/symbol_manifest.py
+new file mode 100644
+index 0000000..663cb72
+--- /dev/null
++++ b/src/infinity_db/symbol_manifest.py
+@@ -0,0 +1,299 @@
++"""Versioned acquisition state for Army symbol builds."""
++
++from __future__ import annotations
++
++import json
++import re
++from datetime import datetime
++from pathlib import Path, PurePosixPath
++from typing import Any
++
++from infinity_db.snapshot_provenance import portable_project_path, sha256_file
++
++SYMBOL_BUILD_FORMAT = "InfinityDB army symbol build"
++SYMBOL_BUILD_VERSION = 1
++REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
++SOURCE_METHODS = frozenset({"network"})
++_SHA256_RE = re.compile(r"[0-9a-f]{64}")
++
++
++class SymbolManifestError(ValueError):
++    """The symbol-build manifest is invalid."""
++
++
++def artifact_record(path: Path, *, project_root: Path) -> dict[str, str]:
++    """Return a portable identity record for one immutable artifact."""
++    record = {"name": path.name, "sha256": sha256_file(path)}
++    if portable := portable_project_path(path, project_root=project_root):
++        record["path"] = portable
++    return record
++
++
++def build_symbol_manifest(
++    *,
++    army_artifact: Path,
++    symbol_artifact: Path,
++    acquired_at: datetime,
++    source_document_count: int,
++    assets: list[dict[str, Any]],
++    references: list[dict[str, Any]],
++    audit: dict[str, int],
++    project_root: Path,
++) -> dict[str, Any]:
++    """Build and validate the acquisition-only version-1 symbol manifest."""
++    document = {
++        "format": SYMBOL_BUILD_FORMAT,
++        "formatVersion": SYMBOL_BUILD_VERSION,
++        "snapshot": {
++            "armyArtifact": artifact_record(army_artifact, project_root=project_root),
++            "symbolArtifact": artifact_record(symbol_artifact, project_root=project_root),
++            "acquiredAt": acquired_at.isoformat(timespec="seconds"),
++            "sourceDocumentCount": source_document_count,
++        },
++        "assets": sorted(assets, key=lambda item: item["url"]),
++        "references": sorted(
++            references,
++            key=lambda item: (
++                item["sourceDocument"],
++                item["jsonPath"],
++                item["kind"],
++                item["assetUrl"],
++            ),
++        ),
++        "audit": dict(sorted(audit.items())),
++    }
++    validate_symbol_manifest(document)
++    return document
++
++
++def write_symbol_manifest(document: dict[str, Any], path: Path) -> Path:
++    """Atomically replace the generated current symbol-build manifest."""
++    validate_symbol_manifest(document)
++    payload = json.dumps(
++        document,
++        ensure_ascii=False,
++        sort_keys=True,
++        indent=2,
++        allow_nan=False,
++    ) + "\n"
++    path.parent.mkdir(parents=True, exist_ok=True)
++    temporary = path.with_suffix(path.suffix + ".tmp")
++    temporary.write_text(payload, encoding="utf-8", newline="\n")
++    temporary.replace(path)
++    return path
++
++
++def load_symbol_manifest(path: Path) -> dict[str, Any]:
++    """Load and validate one generated symbol-build manifest."""
++    try:
++        document = json.loads(path.read_text(encoding="utf-8"))
++    except (OSError, json.JSONDecodeError) as exc:
++        raise SymbolManifestError(f"Could not load symbol manifest {path}: {exc}") from exc
++    validate_symbol_manifest(document)
++    return document
++
++
++def validate_symbol_manifest(document: Any) -> None:
++    """Validate the acquisition-only version-1 symbol-build contract."""
++    root = _object(document, "symbol manifest")
++    _only_keys(
++        root,
++        {"format", "formatVersion", "snapshot", "assets", "references", "audit"},
++        "symbol manifest",
++    )
++    if root.get("format") != SYMBOL_BUILD_FORMAT:
++        raise SymbolManifestError(f"symbol manifest.format must be {SYMBOL_BUILD_FORMAT!r}")
++    if root.get("formatVersion") != SYMBOL_BUILD_VERSION:
++        raise SymbolManifestError(
++            f"symbol manifest.formatVersion must be {SYMBOL_BUILD_VERSION}"
++        )
++
++    snapshot = _object(root.get("snapshot"), "symbol manifest.snapshot")
++    _only_keys(
++        snapshot,
++        {"armyArtifact", "symbolArtifact", "acquiredAt", "sourceDocumentCount"},
++        "symbol manifest.snapshot",
++    )
++    _artifact(snapshot.get("armyArtifact"), "symbol manifest.snapshot.armyArtifact")
++    _artifact(snapshot.get("symbolArtifact"), "symbol manifest.snapshot.symbolArtifact")
++    acquired_at = _string(snapshot.get("acquiredAt"), "symbol manifest.snapshot.acquiredAt")
++    try:
++        parsed = datetime.fromisoformat(acquired_at)
++    except ValueError as exc:
++        raise SymbolManifestError(
++            "symbol manifest.snapshot.acquiredAt must be an ISO-8601 datetime"
++        ) from exc
++    if parsed.tzinfo is None or parsed.utcoffset() is None:
++        raise SymbolManifestError(
++            "symbol manifest.snapshot.acquiredAt must include a timezone offset"
++        )
++    source_count = snapshot.get("sourceDocumentCount")
++    if type(source_count) is not int or source_count < 1:
++        raise SymbolManifestError(
++            "symbol manifest.snapshot.sourceDocumentCount must be a positive integer"
++        )
++
++    assets = root.get("assets")
++    if not isinstance(assets, list):
++        raise SymbolManifestError("symbol manifest.assets must be an array")
++    asset_urls: set[str] = set()
++    archive_paths: set[str] = set()
++    for index, asset in enumerate(assets):
++        context = f"symbol manifest.assets[{index}]"
++        row = _object(asset, context)
++        _only_keys(
++            row,
++            {"url", "sourceFilename", "archivePath", "sha256", "sourceMethod"},
++            context,
++        )
++        url = _string(row.get("url"), f"{context}.url")
++        if url in asset_urls:
++            raise SymbolManifestError(f"{context}.url is duplicated: {url}")
++        asset_urls.add(url)
++        _string(row.get("sourceFilename"), f"{context}.sourceFilename")
++        archive_path = _portable_path(row.get("archivePath"), f"{context}.archivePath")
++        if archive_path in archive_paths:
++            raise SymbolManifestError(
++                f"{context}.archivePath is duplicated: {archive_path}"
++            )
++        archive_paths.add(archive_path)
++        _sha256(row.get("sha256"), f"{context}.sha256")
++        method = _string(row.get("sourceMethod"), f"{context}.sourceMethod")
++        if method not in SOURCE_METHODS:
++            raise SymbolManifestError(
++                f"{context}.sourceMethod must be one of: {', '.join(sorted(SOURCE_METHODS))}"
++            )
++
++    references = root.get("references")
++    if not isinstance(references, list):
++        raise SymbolManifestError("symbol manifest.references must be an array")
++    for index, reference in enumerate(references):
++        context = f"symbol manifest.references[{index}]"
++        row = _object(reference, context)
++        allowed = {
++            "kind",
++            "authoritative",
++            "sourceDocument",
++            "jsonPath",
++            "assetUrl",
++            "armyId",
++            "armySlug",
++            "unitId",
++            "unitSlug",
++            "profileName",
++            "factionId",
++            "factionSlug",
++            "staticKey",
++            "staticCategory",
++            "label",
++        }
++        _only_keys(row, allowed, context)
++        kind = _string(row.get("kind"), f"{context}.kind")
++        if kind not in REFERENCE_KINDS:
++            raise SymbolManifestError(
++                f"{context}.kind must be one of: {', '.join(sorted(REFERENCE_KINDS))}"
++            )
++        if type(row.get("authoritative")) is not bool:
++            raise SymbolManifestError(f"{context}.authoritative must be boolean")
++        _string(row.get("sourceDocument"), f"{context}.sourceDocument")
++        _string(row.get("jsonPath"), f"{context}.jsonPath")
++        asset_url = _string(row.get("assetUrl"), f"{context}.assetUrl")
++        if row["authoritative"] and asset_url not in asset_urls:
++            raise SymbolManifestError(
++                f"{context}.assetUrl does not identify a downloaded asset: {asset_url}"
++            )
++        for field in ("armyId", "unitId", "factionId"):
++            if field in row and type(row[field]) is not int:
++                raise SymbolManifestError(f"{context}.{field} must be an integer")
++        for field in (
++            "armySlug",
++            "unitSlug",
++            "profileName",
++            "factionSlug",
++            "staticKey",
++            "staticCategory",
++            "label",
++        ):
++            if field in row:
++                _string(row[field], f"{context}.{field}")
++
++    audit = _object(root.get("audit"), "symbol manifest.audit")
++    required_audit = {
++        "unitProfileReferenceCount",
++        "uniqueUnitUrlCount",
++        "factionReferenceCount",
++        "uniqueFactionUrlCount",
++        "semanticReferenceCount",
++        "uniqueSemanticUrlCount",
++        "resumeReferenceCount",
++        "uniqueResumeUrlCount",
++        "staticReferenceCount",
++        "recursiveReferenceCount",
++        "uniqueRecursiveUrlCount",
++        "uniqueDownloadedUrlCount",
++        "unknownReferenceCount",
++    }
++    _only_keys(audit, required_audit, "symbol manifest.audit")
++    missing = required_audit - set(audit)
++    if missing:
++        raise SymbolManifestError(
++            "symbol manifest.audit is missing field(s): " + ", ".join(sorted(missing))
++        )
++    for field in sorted(required_audit):
++        value = audit[field]
++        if type(value) is not int or value < 0:
++            raise SymbolManifestError(
++                f"symbol manifest.audit.{field} must be a non-negative integer"
++            )
++    if audit["uniqueDownloadedUrlCount"] != len(asset_urls):
++        raise SymbolManifestError(
++            "symbol manifest.audit.uniqueDownloadedUrlCount must equal the asset count"
++        )
++    if audit["unknownReferenceCount"] != 0:
++        raise SymbolManifestError(
++            "symbol manifest.audit.unknownReferenceCount must be zero for a published manifest"
++        )
++
++
++def _artifact(value: Any, context: str) -> None:
++    record = _object(value, context)
++    _only_keys(record, {"name", "path", "sha256"}, context)
++    _string(record.get("name"), f"{context}.name")
++    _sha256(record.get("sha256"), f"{context}.sha256")
++    if "path" in record:
++        _portable_path(record["path"], f"{context}.path")
++
++
++def _portable_path(value: Any, context: str) -> str:
++    text = _string(value, context)
++    path = PurePosixPath(text)
++    if "\\" in text or path.is_absolute() or ".." in path.parts or re.match(r"^[A-Za-z]:/", text):
++        raise SymbolManifestError(f"{context} must be a portable relative POSIX path")
++    return text
++
++
++def _sha256(value: Any, context: str) -> str:
++    text = _string(value, context)
++    if not _SHA256_RE.fullmatch(text):
++        raise SymbolManifestError(f"{context} must be a lowercase SHA-256 digest")
++    return text
++
++
++def _string(value: Any, context: str) -> str:
++    if not isinstance(value, str) or not value.strip():
++        raise SymbolManifestError(f"{context} must be a non-empty string")
++    return value
++
++
++def _object(value: Any, context: str) -> dict[str, Any]:
++    if not isinstance(value, dict):
++        raise SymbolManifestError(f"{context} must be an object")
++    return value
++
++
++def _only_keys(value: dict[str, Any], allowed: set[str], context: str) -> None:
++    unknown = set(value) - allowed
++    if unknown:
++        raise SymbolManifestError(
++            f"{context} has unknown field(s): {', '.join(sorted(unknown))}"
++        )
+diff --git a/tests/test_download_army_symbols.py b/tests/test_download_army_symbols.py
+new file mode 100644
+index 0000000..ef6e74a
+--- /dev/null
++++ b/tests/test_download_army_symbols.py
+@@ -0,0 +1,385 @@
++import importlib.util
++import json
++import zipfile
++from datetime import datetime
++from pathlib import Path
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++def load_module():
++    module_path = ROOT / "tools" / "download_army_symbols.py"
++    spec = importlib.util.spec_from_file_location("download_army_symbols", module_path)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def unit_url(name: str) -> str:
++    return f"https://assets.corvusbelli.net/army/img/logo/units/{name}.svg"
++
++
++def faction_url(name: str) -> str:
++    return f"https://assets.corvusbelli.net/army/img/logo/factions/{name}.svg"
++
++
++def static_config(path: Path, assets: list[dict[str, str]] | None = None) -> Path:
++    path.write_text(
++        json.dumps(
++            {
++                "schema_version": 2,
++                "base_url": "https://assets.corvusbelli.net/army/img/icon/",
++                "assets": assets or [],
++            }
++        ),
++        encoding="utf-8",
++    )
++    return path
++
++
++def source_documents(module):
++    first = unit_url("unit-a-1")
++    second = unit_url("unit-a-2")
++    shared = unit_url("shared")
++    return [
++        module.SourceDocument(
++            "metadata.json",
++            {
++                "factions": [
++                    {"id": 101, "slug": "panoceania", "logo": faction_url("panoceania")},
++                    {"id": 102, "slug": "sectorial", "logo": faction_url("panoceania")},
++                ]
++            },
++        ),
++        module.SourceDocument(
++            "101-panoceania.json",
++            {
++                "units": [
++                    {
++                        "id": 1,
++                        "slug": "unit-a",
++                        "profileGroups": [
++                            {
++                                "profiles": [
++                                    {"name": "A", "logo": first},
++                                    {"name": "B", "logo": second},
++                                ]
++                            }
++                        ],
++                    },
++                    {
++                        "id": 2,
++                        "slug": "unit-b",
++                        "profileGroups": [{"profiles": [{"logo": shared}]}],
++                    },
++                ],
++                "resume": [
++                    {"id": 1, "slug": "unit-a", "logo": first},
++                    {"id": 2, "slug": "unit-b", "logo": shared},
++                ],
++            },
++        ),
++        module.SourceDocument(
++            "102-sectorial.json",
++            {
++                "units": [
++                    {
++                        "id": 2,
++                        "slug": "unit-b",
++                        "profileGroups": [{"profiles": [{"logo": shared}]}],
++                    }
++                ],
++                "resume": [{"id": 2, "slug": "unit-b", "logo": shared}],
++            },
++        ),
++    ]
++
++
++def test_destination_name_preserves_svg_extension() -> None:
++    module = load_module()
++
++    name = module.destination_name(
++        "https://assets.corvusbelli.net/army/img/logo/units/Special:Recent Changes?new=1*.svg"
++    )
++    assert name == "special-recent-changes-new-1.svg"
++
++
++def test_complete_discovery_preserves_every_reference_and_unique_url() -> None:
++    module = load_module()
++    static = [
++        {
++            "key": "cube",
++            "category": "characteristics",
++            "filename": "cube.svg",
++            "label": "Cube",
++            "url": "https://assets.corvusbelli.net/army/img/icon/cube.svg",
++        }
++    ]
++
++    discovery = module.discover_symbols(
++        source_documents(module),
++        static_symbols=static,
++        static_source="config/symbols/static-symbols.json",
++    )
++
++    assert discovery.audit == {
++        "unitProfileReferenceCount": 4,
++        "uniqueUnitUrlCount": 3,
++        "factionReferenceCount": 2,
++        "uniqueFactionUrlCount": 1,
++        "semanticReferenceCount": 6,
++        "uniqueSemanticUrlCount": 4,
++        "resumeReferenceCount": 3,
++        "uniqueResumeUrlCount": 2,
++        "staticReferenceCount": 1,
++        "recursiveReferenceCount": 9,
++        "uniqueRecursiveUrlCount": 4,
++        "uniqueDownloadedUrlCount": 5,
++        "unknownReferenceCount": 0,
++    }
++    assert len(discovery.references) == 10
++    assert len(discovery.authoritative_urls) == 5
++
++    unit_refs = [row for row in discovery.references if row["kind"] == "unit-profile"]
++    assert [row["profileName"] for row in unit_refs[:2]] == ["A", "B"]
++    shared = unit_url("shared")
++    assert sum(row["assetUrl"] == shared for row in unit_refs) == 2
++
++    faction_refs = [row for row in discovery.references if row["kind"] == "faction"]
++    assert len(faction_refs) == 2
++    assert faction_refs[0]["assetUrl"] == faction_refs[1]["assetUrl"]
++
++    resume_refs = [row for row in discovery.references if row["kind"] == "resume-audit"]
++    assert all(row["authoritative"] is False for row in resume_refs)
++
++
++def test_unknown_svg_source_field_fails_closed() -> None:
++    module = load_module()
++    documents = source_documents(module)
++    documents[1].data["unexpected"] = {"icon": unit_url("future-source-field")}
++
++    with pytest.raises(ValueError, match="Unknown SVG-bearing") as excinfo:
++        module.discover_symbols(
++            documents,
++            static_symbols=[],
++            static_source="config/symbols/static-symbols.json",
++        )
++    assert "$.unexpected.icon" in str(excinfo.value)
++
++
++def test_resume_logo_is_audit_only_and_not_download_authority() -> None:
++    module = load_module()
++    documents = [
++        module.SourceDocument(
++            "101-test.json",
++            {
++                "units": [],
++                "resume": [{"id": 9, "slug": "audit-only", "logo": unit_url("resume-only")}],
++            },
++        )
++    ]
++
++    discovery = module.discover_symbols(
++        documents,
++        static_symbols=[],
++        static_source="config/symbols/static-symbols.json",
++    )
++
++    assert discovery.authoritative_urls == set()
++    assert discovery.audit["resumeReferenceCount"] == 1
++    assert discovery.audit["recursiveReferenceCount"] == 1
++
++
++def test_archive_paths_separate_categories_and_disambiguate_collisions() -> None:
++    module = load_module()
++    first = "https://assets.corvusbelli.net/army/img/logo/units/shared.svg"
++    second = "https://assets.corvusbelli.net/army/img/logo/units/shared.svg?variant=2"
++    discovery = module.Discovery(
++        references=[
++            {
++                "kind": "unit-profile",
++                "authoritative": True,
++                "sourceDocument": "101-test.json",
++                "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
++                "assetUrl": first,
++            },
++            {
++                "kind": "unit-profile",
++                "authoritative": True,
++                "sourceDocument": "101-test.json",
++                "jsonPath": "$.units[0].profileGroups[0].profiles[1].logo",
++                "assetUrl": second,
++            },
++        ],
++        authoritative_urls={first, second},
++        audit={},
++        source_document_count=1,
++    )
++
++    paths = module.archive_paths(discovery)
++    assert paths[first].startswith("units/")
++    assert paths[second].startswith("units/")
++    assert paths[first] != paths[second]
++    assert "--" in paths[first]
++    assert "--" in paths[second]
++
++
++def test_static_symbol_config_validates_semantic_metadata(tmp_path: Path) -> None:
++    module = load_module()
++    path = static_config(
++        tmp_path / "static.json",
++        [
++            {
++                "key": "cube",
++                "category": "characteristics",
++                "filename": "cube.svg",
++                "label": "Cube",
++            }
++        ],
++    )
++
++    rows = module.load_static_symbols(path)
++    assert rows == [
++        {
++            "key": "cube",
++            "category": "characteristics",
++            "filename": "cube.svg",
++            "label": "Cube",
++            "url": "https://assets.corvusbelli.net/army/img/icon/cube.svg",
++        }
++    ]
++
++
++
++def test_static_symbol_config_rejects_unsafe_category(tmp_path: Path) -> None:
++    module = load_module()
++    path = static_config(
++        tmp_path / "static.json",
++        [
++            {
++                "key": "cube",
++                "category": "../characteristics",
++                "filename": "cube.svg",
++                "label": "Cube",
++            }
++        ],
++    )
++
++    with pytest.raises(ValueError, match="category must use lowercase slug syntax"):
++        module.load_static_symbols(path)
++
++def test_archive_symbols_uses_timestamp_and_complete_staging_set(tmp_path: Path) -> None:
++    module = load_module()
++    staging = tmp_path / "staging"
++    (staging / "units").mkdir(parents=True)
++    (staging / "factions").mkdir(parents=True)
++    first = staging / "units" / "first.svg"
++    second = staging / "factions" / "second.svg"
++    first.write_text("<svg id='first'/>", encoding="utf-8")
++    second.write_text("<svg id='second'/>", encoding="utf-8")
++
++    archive = module.archive_symbols(
++        [second, first],
++        tmp_path / "archives",
++        root=staging,
++        now=datetime(2026, 9, 16, 21, 30, 45),
++    )
++
++    assert archive.name == "SYMBOLS 20260916-213045.zip"
++    with zipfile.ZipFile(archive) as output:
++        assert output.namelist() == ["factions/second.svg", "units/first.svg"]
++
++
++def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -> None:
++    module = load_module()
++    source = tmp_path / "army.zip"
++    destination = tmp_path / "symbols"
++    manifest_directory = tmp_path / "manifests"
++    build_manifest = tmp_path / "army-symbol-build.json"
++    static = static_config(tmp_path / "static.json")
++
++    with zipfile.ZipFile(source, "w") as archive:
++        archive.writestr(
++            "metadata.json",
++            json.dumps(
++                {"factions": [{"id": 101, "slug": "test", "logo": faction_url("test")}]}
++            ),
++        )
++        archive.writestr(
++            "101-test.json",
++            json.dumps(
++                {
++                    "units": [
++                        {
++                            "id": 1,
++                            "slug": "test-unit",
++                            "profileGroups": [
++                                {"profiles": [{"logo": unit_url("test-unit")}]}
++                            ],
++                        }
++                    ],
++                    "resume": [{"id": 1, "slug": "test-unit", "logo": unit_url("test-unit")}],
++                }
++            ),
++        )
++
++    class Response:
++        def __enter__(self):
++            return self
++
++        def __exit__(self, *_args):
++            return None
++
++        def read(self):
++            return b"<svg/>"
++
++    monkeypatch.setattr(module, "urlopen", lambda *_args, **_kwargs: Response())
++
++    assert (
++        module.main(
++            [
++                str(source),
++                str(destination),
++                "--static-symbols",
++                str(static),
++                "--build-manifest",
++                str(build_manifest),
++                "--manifest-dir",
++                str(manifest_directory),
++                "--delay",
++                "0",
++            ]
++        )
++        == 0
++    )
++
++    archives = list(destination.glob("SYMBOLS *.zip"))
++    manifests = list(manifest_directory.glob("*.json"))
++    assert len(archives) == 1
++    assert len(manifests) == 1
++
++    from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
++    from infinity_db.symbol_manifest import load_symbol_manifest
++
++    snapshot = load_snapshot_manifest(manifests[0], archive=archives[0])
++    assert snapshot["snapshot"]["type"] == "symbols"
++    assert snapshot["snapshot"]["documentCount"] == 2
++    assert snapshot["inputArtifact"]["sha256"] == sha256_file(source)
++    assert snapshot["source"] == {"url": module.ASSET_ROOT_URL}
++
++    build = load_symbol_manifest(build_manifest)
++    assert build["snapshot"]["sourceDocumentCount"] == 2
++    assert build["snapshot"]["armyArtifact"]["sha256"] == sha256_file(source)
++    assert build["snapshot"]["symbolArtifact"]["sha256"] == sha256_file(archives[0])
++    assert len(build["assets"]) == 2
++    assert build["audit"]["semanticReferenceCount"] == 2
++    assert build["audit"]["resumeReferenceCount"] == 1
++    assert build["audit"]["unknownReferenceCount"] == 0
++    assert {row["kind"] for row in build["references"]} == {
++        "unit-profile",
++        "faction",
++        "resume-audit",
++    }
+diff --git a/tests/test_download_unit_symbols.py b/tests/test_download_unit_symbols.py
+deleted file mode 100644
+index 3d36b2d..0000000
+--- a/tests/test_download_unit_symbols.py
++++ /dev/null
+@@ -1,97 +0,0 @@
+-import importlib.util
+-import zipfile
+-from datetime import datetime
+-from pathlib import Path
+-
+-ROOT = Path(__file__).resolve().parents[1]
+-
+-
+-def load_module():
+-    module_path = ROOT / "tools" / "download_unit_symbols.py"
+-    spec = importlib.util.spec_from_file_location("download_unit_symbols", module_path)
+-    assert spec is not None and spec.loader is not None
+-    module = importlib.util.module_from_spec(spec)
+-    spec.loader.exec_module(module)
+-    return module
+-
+-
+-def test_destination_name_preserves_svg_extension() -> None:
+-    module = load_module()
+-
+-    name = module.destination_name(
+-        "https://assets.corvusbelli.net/army/img/logo/units/Special:Recent Changes?new=1*.svg"
+-    )
+-    assert name == "special-recent-changes-new-1.svg"
+-
+-
+-def test_archive_symbols_uses_timestamp_and_complete_staging_set(tmp_path: Path) -> None:
+-    module = load_module()
+-    staging = tmp_path / "staging"
+-    staging.mkdir()
+-    first = staging / "first.svg"
+-    second = staging / "second.svg"
+-    first.write_text("<svg id='first'/>", encoding="utf-8")
+-    second.write_text("<svg id='second'/>", encoding="utf-8")
+-
+-    archive = module.archive_symbols(
+-        [second, first],
+-        tmp_path / "archives",
+-        root=staging,
+-        now=datetime(2026, 9, 16, 21, 30, 45),
+-    )
+-
+-    assert archive.name == "SYMBOLS 20260916-213045.zip"
+-    with zipfile.ZipFile(archive) as output:
+-        assert output.namelist() == ["first.svg", "second.svg"]
+-
+-
+-def test_main_writes_snapshot_provenance_with_input_hash(tmp_path: Path, monkeypatch) -> None:
+-    module = load_module()
+-    source = tmp_path / "army.json"
+-    destination = tmp_path / "symbols"
+-    manifest_directory = tmp_path / "manifests"
+-    source.write_text(
+-        '{"army": {"units": [{"id": 1, "slug": "test-unit", "profileGroups": '
+-        '[{"profiles": [{"logo": '
+-        '"https://assets.corvusbelli.net/army/img/logo/units/test-unit.svg"}]}]}]}}',
+-        encoding="utf-8",
+-    )
+-
+-    class Response:
+-        def __enter__(self):
+-            return self
+-
+-        def __exit__(self, *_args):
+-            return None
+-
+-        def read(self):
+-            return b"<svg/>"
+-
+-    monkeypatch.setattr(module, "urlopen", lambda *_args, **_kwargs: Response())
+-
+-    assert (
+-        module.main(
+-            [
+-                str(source),
+-                str(destination),
+-                "--manifest-dir",
+-                str(manifest_directory),
+-                "--delay",
+-                "0",
+-            ]
+-        )
+-        == 0
+-    )
+-
+-    archives = list(destination.glob("SYMBOLS *.zip"))
+-    manifests = list(manifest_directory.glob("*.json"))
+-    assert len(archives) == 1
+-    assert len(manifests) == 1
+-
+-    from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
+-
+-    document = load_snapshot_manifest(manifests[0], archive=archives[0])
+-    assert document["snapshot"]["type"] == "symbols"
+-    assert document["snapshot"]["documentCount"] == 1
+-    assert document["inputArtifact"]["sha256"] == sha256_file(source)
+-    assert document["source"] == {"url": module.ASSET_BASE_URL}
+diff --git a/tests/test_download_wiki_snapshot.py b/tests/test_download_wiki_snapshot.py
+index a2c4dad..f492640 100644
+--- a/tests/test_download_wiki_snapshot.py
++++ b/tests/test_download_wiki_snapshot.py
+@@ -68,12 +68,12 @@ def test_sanitize_posix_path_components() -> None:
+     assert "/" not in name
+ 
+ 
+-def test_download_unit_symbols_sanitizes_windows_invalid_names() -> None:
++def test_download_army_symbols_sanitizes_windows_invalid_names() -> None:
+     import importlib.util
+     from pathlib import Path
+ 
+-    module_path = Path(__file__).resolve().parents[1] / "tools" / "download_unit_symbols.py"
+-    spec = importlib.util.spec_from_file_location("download_unit_symbols", module_path)
++    module_path = Path(__file__).resolve().parents[1] / "tools" / "download_army_symbols.py"
++    spec = importlib.util.spec_from_file_location("download_army_symbols", module_path)
+     assert spec is not None and spec.loader is not None
+     tool = importlib.util.module_from_spec(spec)
+     spec.loader.exec_module(tool)
+diff --git a/tests/test_symbol_manifest.py b/tests/test_symbol_manifest.py
+new file mode 100644
+index 0000000..73c4230
+--- /dev/null
++++ b/tests/test_symbol_manifest.py
+@@ -0,0 +1,156 @@
++from datetime import UTC, datetime
++from pathlib import Path
++
++import pytest
++
++from infinity_db.symbol_manifest import (
++    SymbolManifestError,
++    build_symbol_manifest,
++    validate_symbol_manifest,
++)
++
++
++def artifact(path: Path, body: bytes) -> Path:
++    path.write_bytes(body)
++    return path
++
++
++def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -> None:
++    army = artifact(tmp_path / "army.zip", b"army")
++    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
++    url = "https://assets.corvusbelli.net/army/img/logo/units/shared.svg"
++    assets = [
++        {
++            "url": url,
++            "sourceFilename": "shared.svg",
++            "archivePath": "units/shared.svg",
++            "sha256": "1" * 64,
++            "sourceMethod": "network",
++        }
++    ]
++    references = [
++        {
++            "kind": "unit-profile",
++            "authoritative": True,
++            "sourceDocument": "101-a.json",
++            "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
++            "assetUrl": url,
++            "unitId": 1,
++        },
++        {
++            "kind": "unit-profile",
++            "authoritative": True,
++            "sourceDocument": "102-b.json",
++            "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
++            "assetUrl": url,
++            "unitId": 1,
++        },
++    ]
++    audit = {
++        "unitProfileReferenceCount": 2,
++        "uniqueUnitUrlCount": 1,
++        "factionReferenceCount": 0,
++        "uniqueFactionUrlCount": 0,
++        "semanticReferenceCount": 2,
++        "uniqueSemanticUrlCount": 1,
++        "resumeReferenceCount": 0,
++        "uniqueResumeUrlCount": 0,
++        "staticReferenceCount": 0,
++        "recursiveReferenceCount": 2,
++        "uniqueRecursiveUrlCount": 1,
++        "uniqueDownloadedUrlCount": 1,
++        "unknownReferenceCount": 0,
++    }
++
++    document = build_symbol_manifest(
++        army_artifact=army,
++        symbol_artifact=symbols,
++        acquired_at=datetime(2026, 9, 17, 20, 0, tzinfo=UTC),
++        source_document_count=2,
++        assets=assets,
++        references=references,
++        audit=audit,
++        project_root=tmp_path,
++    )
++
++    assert len(document["assets"]) == 1
++    assert len(document["references"]) == 2
++    assert document["snapshot"]["armyArtifact"]["path"] == "army.zip"
++    assert document["snapshot"]["symbolArtifact"]["path"] == "symbols.zip"
++
++
++def test_resume_audit_reference_may_point_to_non_downloaded_url(tmp_path: Path) -> None:
++    army = artifact(tmp_path / "army.zip", b"army")
++    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
++    document = build_symbol_manifest(
++        army_artifact=army,
++        symbol_artifact=symbols,
++        acquired_at=datetime(2026, 9, 17, 20, 0, tzinfo=UTC),
++        source_document_count=1,
++        assets=[],
++        references=[
++            {
++                "kind": "resume-audit",
++                "authoritative": False,
++                "sourceDocument": "101-a.json",
++                "jsonPath": "$.resume[0].logo",
++                "assetUrl": "https://assets.corvusbelli.net/army/img/logo/units/audit-only.svg",
++            }
++        ],
++        audit={
++            "unitProfileReferenceCount": 0,
++            "uniqueUnitUrlCount": 0,
++            "factionReferenceCount": 0,
++            "uniqueFactionUrlCount": 0,
++            "semanticReferenceCount": 0,
++            "uniqueSemanticUrlCount": 0,
++            "resumeReferenceCount": 1,
++            "uniqueResumeUrlCount": 1,
++            "staticReferenceCount": 0,
++            "recursiveReferenceCount": 1,
++            "uniqueRecursiveUrlCount": 1,
++            "uniqueDownloadedUrlCount": 0,
++            "unknownReferenceCount": 0,
++        },
++        project_root=tmp_path,
++    )
++
++    validate_symbol_manifest(document)
++
++
++def test_authoritative_reference_must_point_to_downloaded_asset(tmp_path: Path) -> None:
++    army = artifact(tmp_path / "army.zip", b"army")
++    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
++    with pytest.raises(SymbolManifestError, match="does not identify a downloaded asset"):
++        build_symbol_manifest(
++            army_artifact=army,
++            symbol_artifact=symbols,
++            acquired_at=datetime(2026, 9, 17, 20, 0, tzinfo=UTC),
++            source_document_count=1,
++            assets=[],
++            references=[
++                {
++                    "kind": "faction",
++                    "authoritative": True,
++                    "sourceDocument": "metadata.json",
++                    "jsonPath": "$.factions[0].logo",
++                    "assetUrl": "https://assets.corvusbelli.net/army/img/logo/factions/test.svg",
++                }
++            ],
++            audit={
++                "unitProfileReferenceCount": 0,
++                "uniqueUnitUrlCount": 0,
++                "factionReferenceCount": 1,
++                "uniqueFactionUrlCount": 1,
++                "semanticReferenceCount": 1,
++                "uniqueSemanticUrlCount": 1,
++                "resumeReferenceCount": 0,
++                "uniqueResumeUrlCount": 0,
++                "staticReferenceCount": 0,
++                "recursiveReferenceCount": 1,
++                "uniqueRecursiveUrlCount": 1,
++                "uniqueDownloadedUrlCount": 0,
++                "unknownReferenceCount": 0,
++            },
++            project_root=tmp_path,
++        )
+diff --git a/tools/download_army_symbols.py b/tools/download_army_symbols.py
+new file mode 100644
+index 0000000..d48aaa9
+--- /dev/null
++++ b/tools/download_army_symbols.py
+@@ -0,0 +1,548 @@
++"""Discover and download every authoritative symbol referenced by one Army snapshot."""
++
++from __future__ import annotations
++
++import argparse
++import hashlib
++import json
++import re
++import sys
++import tempfile
++import time
++import zipfile
++from datetime import datetime
++from pathlib import Path
++from typing import Any, NamedTuple
++from urllib.parse import urlparse
++from urllib.request import urlopen
++
++from infinity_db.snapshot_provenance import portable_project_path, write_snapshot_manifest
++from infinity_db.symbol_manifest import build_symbol_manifest, write_symbol_manifest
++
++try:
++    from tools.path_sanitization import sanitize_filename
++    from tools.snapshot_archive import create_timestamped_archive
++except ImportError:  # pragma: no cover - direct script execution fallback
++    from path_sanitization import sanitize_filename
++    from snapshot_archive import create_timestamped_archive
++
++ASSET_HOST = "assets.corvusbelli.net"
++ASSET_ROOT_PATH = "/army/img/"
++ASSET_ROOT_URL = f"https://{ASSET_HOST}{ASSET_ROOT_PATH}"
++DEFAULT_STATIC_CONFIG = Path("config/symbols/static-symbols.json")
++DEFAULT_BUILD_MANIFEST = Path("data/manifests/army-symbol-build.json")
++SVG_NAME = re.compile(r"[a-z0-9-]+\.svg$")
++ARMY_FILE = re.compile(r"^(?P<id>\d+)-(?P<slug>.+)\.json$", re.IGNORECASE)
++STATIC_IDENTIFIER = re.compile(r"[a-z0-9-]+")
++
++
++class SourceDocument(NamedTuple):
++    name: str
++    data: dict[str, Any]
++
++
++class Discovery(NamedTuple):
++    references: list[dict[str, Any]]
++    authoritative_urls: set[str]
++    audit: dict[str, int]
++    source_document_count: int
++
++
++def destination_name(url: str) -> str:
++    """Return one deterministic, Windows-safe SVG filename for an asset URL."""
++    parsed = urlparse(url)
++    if parsed.scheme != "https" or parsed.netloc != ASSET_HOST:
++        raise ValueError(f"Unsupported symbol host: {url}")
++    if not parsed.path.startswith(ASSET_ROOT_PATH):
++        raise ValueError(f"Unsupported symbol path: {url}")
++
++    tail = url.removeprefix(f"https://{ASSET_HOST}{ASSET_ROOT_PATH}")
++    tail = tail.rsplit("/", 1)[-1].split("#", 1)[0]
++    if ".svg" in tail.lower():
++        stem = tail[: tail.lower().rfind(".svg")]
++        name = f"{stem}.svg"
++    else:
++        name = Path(parsed.path).name
++
++    if not SVG_NAME.fullmatch(name):
++        name = sanitize_filename(name)
++    return name
++
++
++def load_source_documents(path: Path) -> list[SourceDocument]:
++    """Load raw Army JSON documents from a ZIP/directory or a legacy master JSON."""
++    documents: list[SourceDocument] = []
++    if path.is_file() and zipfile.is_zipfile(path):
++        with zipfile.ZipFile(path) as archive:
++            for name in sorted(archive.namelist()):
++                if name.endswith("/") or not name.lower().endswith(".json"):
++                    continue
++                data = json.loads(archive.read(name))
++                if isinstance(data, dict):
++                    documents.append(SourceDocument(Path(name).name, data))
++    elif path.is_dir():
++        for file in sorted(path.glob("*.json")):
++            data = json.loads(file.read_text(encoding="utf-8-sig"))
++            if isinstance(data, dict):
++                documents.append(SourceDocument(file.name, data))
++    else:
++        data = json.loads(path.read_text(encoding="utf-8"))
++        if not isinstance(data, dict):
++            raise ValueError("master list must be an object keyed by Army source filename")
++        for name, value in sorted(data.items()):
++            if isinstance(value, dict):
++                filename = name if str(name).lower().endswith(".json") else f"{name}.json"
++                documents.append(SourceDocument(Path(filename).name, value))
++    if not documents:
++        raise ValueError("No JSON source documents were found")
++    return documents
++
++
++def load_static_symbols(path: Path) -> list[dict[str, str]]:
++    """Load and validate the maintained static-symbol declaration file."""
++    try:
++        document = json.loads(path.read_text(encoding="utf-8"))
++    except (OSError, json.JSONDecodeError) as exc:
++        raise ValueError(f"Could not load static symbols {path}: {exc}") from exc
++    if not isinstance(document, dict):
++        raise ValueError("static symbols must be a JSON object")
++    if set(document) != {"schema_version", "base_url", "assets"}:
++        raise ValueError("static symbols must contain schema_version, base_url, and assets")
++    if document["schema_version"] != 2:
++        raise ValueError("static symbols schema_version must be 2")
++    base_url = document["base_url"]
++    if not isinstance(base_url, str) or not base_url.startswith("https://"):
++        raise ValueError("static symbols base_url must be an HTTPS URL")
++    assets = document["assets"]
++    if not isinstance(assets, list):
++        raise ValueError("static symbols assets must be an array")
++
++    result: list[dict[str, str]] = []
++    keys: set[str] = set()
++    declarations: set[tuple[str, str]] = set()
++    for index, asset in enumerate(assets):
++        context = f"static symbols assets[{index}]"
++        if not isinstance(asset, dict) or set(asset) != {"key", "category", "filename", "label"}:
++            raise ValueError(f"{context} must contain key, category, filename, and label")
++        row: dict[str, str] = {}
++        for field in ("key", "category", "filename", "label"):
++            value = asset[field]
++            if not isinstance(value, str) or not value.strip():
++                raise ValueError(f"{context}.{field} must be a non-empty string")
++            row[field] = value
++        for field in ("key", "category"):
++            if not STATIC_IDENTIFIER.fullmatch(row[field]):
++                raise ValueError(f"{context}.{field} must use lowercase slug syntax")
++        if row["key"] in keys:
++            raise ValueError(f"{context}.key is duplicated: {row['key']}")
++        keys.add(row["key"])
++        declaration = (row["category"], row["filename"])
++        if declaration in declarations:
++            raise ValueError(f"{context} duplicates {row['category']}/{row['filename']}")
++        declarations.add(declaration)
++        if (
++            Path(row["filename"]).name != row["filename"]
++            or not row["filename"].lower().endswith(".svg")
++        ):
++            raise ValueError(f"{context}.filename must be one SVG filename")
++        row["url"] = base_url.rstrip("/") + "/" + row["filename"]
++        destination_name(row["url"])
++        result.append(row)
++    return result
++
++
++def discover_symbols(
++    documents: list[SourceDocument],
++    *,
++    static_symbols: list[dict[str, str]],
++    static_source: str,
++) -> Discovery:
++    """Discover authoritative Army/static symbols and audit all raw SVG references."""
++    semantic: list[dict[str, Any]] = []
++    resume: list[dict[str, Any]] = []
++    known_locations: set[tuple[str, str]] = set()
++
++    for document in documents:
++        if document.name == "metadata.json":
++            factions = document.data.get("factions", [])
++            if not isinstance(factions, list):
++                raise ValueError("metadata.json factions must be an array")
++            for index, faction in enumerate(factions):
++                if not isinstance(faction, dict):
++                    continue
++                logo = faction.get("logo")
++                if not isinstance(logo, str):
++                    continue
++                path = f"$.factions[{index}].logo"
++                reference: dict[str, Any] = {
++                    "kind": "faction",
++                    "authoritative": True,
++                    "sourceDocument": document.name,
++                    "jsonPath": path,
++                    "assetUrl": logo,
++                }
++                if type(faction.get("id")) is int:
++                    reference["factionId"] = faction["id"]
++                if isinstance(faction.get("slug"), str) and faction["slug"].strip():
++                    reference["factionSlug"] = faction["slug"]
++                semantic.append(reference)
++                known_locations.add((document.name, path))
++            continue
++
++        units = document.data.get("units")
++        if not isinstance(units, list):
++            continue
++        army_match = ARMY_FILE.match(document.name)
++        army_id = int(army_match.group("id")) if army_match else None
++        army_slug = army_match.group("slug") if army_match else None
++        for unit_index, unit in enumerate(units):
++            if not isinstance(unit, dict):
++                continue
++            unit_id = unit.get("id") if type(unit.get("id")) is int else None
++            unit_slug = unit.get("slug") if isinstance(unit.get("slug"), str) else None
++            groups = unit.get("profileGroups", [])
++            if isinstance(groups, list):
++                for group_index, group in enumerate(groups):
++                    if not isinstance(group, dict):
++                        continue
++                    profiles = group.get("profiles", [])
++                    if not isinstance(profiles, list):
++                        continue
++                    for profile_index, profile in enumerate(profiles):
++                        if not isinstance(profile, dict):
++                            continue
++                        logo = profile.get("logo")
++                        if not isinstance(logo, str):
++                            continue
++                        path = (
++                            f"$.units[{unit_index}].profileGroups[{group_index}]"
++                            f".profiles[{profile_index}].logo"
++                        )
++                        reference = {
++                            "kind": "unit-profile",
++                            "authoritative": True,
++                            "sourceDocument": document.name,
++                            "jsonPath": path,
++                            "assetUrl": logo,
++                        }
++                        if army_id is not None:
++                            reference["armyId"] = army_id
++                        if army_slug:
++                            reference["armySlug"] = army_slug
++                        if unit_id is not None:
++                            reference["unitId"] = unit_id
++                        if unit_slug:
++                            reference["unitSlug"] = unit_slug
++                        profile_name = profile.get("name") or profile.get("isc")
++                        if isinstance(profile_name, str) and profile_name.strip():
++                            reference["profileName"] = profile_name
++                        semantic.append(reference)
++                        known_locations.add((document.name, path))
++
++        resume_rows = document.data.get("resume", [])
++        if isinstance(resume_rows, list):
++            for resume_index, row in enumerate(resume_rows):
++                if not isinstance(row, dict) or not isinstance(row.get("logo"), str):
++                    continue
++                path = f"$.resume[{resume_index}].logo"
++                reference = {
++                    "kind": "resume-audit",
++                    "authoritative": False,
++                    "sourceDocument": document.name,
++                    "jsonPath": path,
++                    "assetUrl": row["logo"],
++                }
++                if army_id is not None:
++                    reference["armyId"] = army_id
++                if army_slug:
++                    reference["armySlug"] = army_slug
++                if type(row.get("id")) is int:
++                    reference["unitId"] = row["id"]
++                if isinstance(row.get("slug"), str) and row["slug"].strip():
++                    reference["unitSlug"] = row["slug"]
++                resume.append(reference)
++                known_locations.add((document.name, path))
++
++    recursive: list[tuple[str, str, str]] = []
++    for document in documents:
++        recursive.extend(
++            (document.name, json_path, value)
++            for json_path, value in _string_values(document.data)
++            if ".svg" in value.casefold()
++        )
++    unknown = [
++        item for item in recursive if (item[0], item[1]) not in known_locations
++    ]
++    if unknown:
++        details = "\n".join(f"  {name} {path}: {url}" for name, path, url in unknown[:20])
++        extra = "" if len(unknown) <= 20 else f"\n  ... and {len(unknown) - 20} more"
++        raise ValueError(
++            "Unknown SVG-bearing Army source fields were found:\n" + details + extra
++        )
++
++    static_refs: list[dict[str, Any]] = []
++    for index, asset in enumerate(static_symbols):
++        static_refs.append(
++            {
++                "kind": "static",
++                "authoritative": True,
++                "sourceDocument": static_source,
++                "jsonPath": f"$.assets[{index}]",
++                "assetUrl": asset["url"],
++                "staticKey": asset["key"],
++                "staticCategory": asset["category"],
++                "label": asset["label"],
++            }
++        )
++
++    for reference in [*semantic, *resume, *static_refs]:
++        destination_name(reference["assetUrl"])
++
++    authoritative_urls = {
++        reference["assetUrl"] for reference in [*semantic, *static_refs]
++    }
++    unit_refs = [row for row in semantic if row["kind"] == "unit-profile"]
++    faction_refs = [row for row in semantic if row["kind"] == "faction"]
++    semantic_urls = {reference["assetUrl"] for reference in semantic}
++    audit = {
++        "unitProfileReferenceCount": len(unit_refs),
++        "uniqueUnitUrlCount": len({row["assetUrl"] for row in unit_refs}),
++        "factionReferenceCount": len(faction_refs),
++        "uniqueFactionUrlCount": len({row["assetUrl"] for row in faction_refs}),
++        "semanticReferenceCount": len(semantic),
++        "uniqueSemanticUrlCount": len(semantic_urls),
++        "resumeReferenceCount": len(resume),
++        "uniqueResumeUrlCount": len({row["assetUrl"] for row in resume}),
++        "staticReferenceCount": len(static_refs),
++        "recursiveReferenceCount": len(recursive),
++        "uniqueRecursiveUrlCount": len({url for _, _, url in recursive}),
++        "uniqueDownloadedUrlCount": len(authoritative_urls),
++        "unknownReferenceCount": 0,
++    }
++    return Discovery(
++        references=[*semantic, *resume, *static_refs],
++        authoritative_urls=authoritative_urls,
++        audit=audit,
++        source_document_count=len(documents),
++    )
++
++
++def _string_values(value: Any, path: str = "$"):
++    if isinstance(value, dict):
++        for key, child in value.items():
++            yield from _string_values(child, f"{path}.{key}")
++    elif isinstance(value, list):
++        for index, child in enumerate(value):
++            yield from _string_values(child, f"{path}[{index}]")
++    elif isinstance(value, str):
++        yield path, value
++
++
++def archive_paths(discovery: Discovery) -> dict[str, str]:
++    """Assign deterministic raw-archive paths without conflating consumer references."""
++    categories: dict[str, set[str]] = {url: set() for url in discovery.authoritative_urls}
++    for reference in discovery.references:
++        url = reference["assetUrl"]
++        if url not in categories or not reference["authoritative"]:
++            continue
++        kind = reference["kind"]
++        if kind == "unit-profile":
++            categories[url].add("units")
++        elif kind == "faction":
++            categories[url].add("factions")
++        elif kind == "static":
++            categories[url].add(f"static/{reference['staticCategory']}")
++
++    candidates: dict[str, str] = {}
++    for url in sorted(discovery.authoritative_urls):
++        category = sorted(categories[url])[0] if categories[url] else "unclassified"
++        candidates[url] = f"{category}/{destination_name(url)}"
++
++    by_candidate: dict[str, list[str]] = {}
++    for url, candidate in candidates.items():
++        by_candidate.setdefault(candidate.casefold(), []).append(url)
++    for urls in by_candidate.values():
++        if len(urls) < 2:
++            continue
++        for url in urls:
++            path = Path(candidates[url])
++            suffix = hashlib.sha256(url.encode("utf-8")).hexdigest()[:12]
++            candidates[url] = (path.parent / f"{path.stem}--{suffix}{path.suffix}").as_posix()
++    return candidates
++
++
++def _write_bytes(path: Path, body: bytes) -> None:
++    temporary = path.with_suffix(path.suffix + ".tmp")
++    temporary.parent.mkdir(parents=True, exist_ok=True)
++    temporary.write_bytes(body)
++    temporary.replace(path)
++
++
++def archive_symbols(
++    files: list[Path],
++    destination: Path,
++    *,
++    root: Path,
++    now: datetime | None = None,
++) -> Path:
++    """Store exactly one complete symbol acquisition as a timestamped ZIP snapshot."""
++    return create_timestamped_archive(
++        files,
++        destination,
++        prefix="SYMBOLS",
++        root=root,
++        now=now,
++    )
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("source", type=Path, help="Raw Army ZIP/directory or legacy master JSON")
++    parser.add_argument(
++        "destination",
++        nargs="?",
++        type=Path,
++        default=Path("data/raw/symbols"),
++        help="Directory used to store timestamped symbol ZIP snapshots",
++    )
++    parser.add_argument(
++        "--static-symbols",
++        type=Path,
++        default=DEFAULT_STATIC_CONFIG,
++        help="Maintained static-symbol declarations",
++    )
++    parser.add_argument(
++        "--build-manifest",
++        type=Path,
++        default=DEFAULT_BUILD_MANIFEST,
++        help="Generated acquisition/build manifest",
++    )
++    parser.add_argument(
++        "--manifest-dir",
++        type=Path,
++        default=Path("data/manifests/snapshots"),
++        help="Generated snapshot manifest directory (default: data/manifests/snapshots)",
++    )
++    parser.add_argument(
++        "--delay", type=float, default=0.2, help="Seconds to wait between downloads (default: 0.2)"
++    )
++    parser.add_argument("--dry-run", action="store_true")
++    args = parser.parse_args(argv)
++
++    if args.delay < 0:
++        raise ValueError("--delay must not be negative")
++    if not args.source.is_file():
++        raise ValueError("source must be an immutable Army ZIP or JSON file")
++    documents = load_source_documents(args.source)
++    static_symbols = load_static_symbols(args.static_symbols)
++    project_root = Path.cwd()
++    static_source = (
++        portable_project_path(args.static_symbols, project_root=project_root)
++        or args.static_symbols.name
++    )
++    discovery = discover_symbols(
++        documents,
++        static_symbols=static_symbols,
++        static_source=static_source,
++    )
++    print(
++        "Unit/profile logos: "
++        f"{discovery.audit['unitProfileReferenceCount']} references / "
++        f"{discovery.audit['uniqueUnitUrlCount']} unique URLs"
++    )
++    print(
++        "Faction logos: "
++        f"{discovery.audit['factionReferenceCount']} references / "
++        f"{discovery.audit['uniqueFactionUrlCount']} unique URLs"
++    )
++    print(
++        "Resume audit: "
++        f"{discovery.audit['resumeReferenceCount']} references / "
++        f"{discovery.audit['uniqueResumeUrlCount']} unique URLs"
++    )
++    print(
++        "Recursive SVG audit: "
++        f"{discovery.audit['recursiveReferenceCount']} references / "
++        f"{discovery.audit['uniqueRecursiveUrlCount']} unique URLs / "
++        f"{discovery.audit['unknownReferenceCount']} unknown locations"
++    )
++    print(f"Static declarations: {discovery.audit['staticReferenceCount']}")
++    print(f"Unique assets to download: {len(discovery.authoritative_urls)}")
++    if args.dry_run:
++        return 0
++
++    args.destination.mkdir(parents=True, exist_ok=True)
++    archive: Path | None = None
++    snapshot_manifest: Path | None = None
++    try:
++        paths = archive_paths(discovery)
++        with tempfile.TemporaryDirectory(
++            prefix="infinity-symbols-", dir=args.destination
++        ) as staging:
++            staging_path = Path(staging)
++            files: list[Path] = []
++            assets: list[dict[str, str]] = []
++            urls = sorted(discovery.authoritative_urls)
++            for index, url in enumerate(urls, start=1):
++                relative = paths[url]
++                with urlopen(url, timeout=30) as response:
++                    body = response.read()
++                if b"<svg" not in body[:1024].lower():
++                    raise ValueError(f"Expected an SVG response: {url}")
++                path = staging_path / Path(relative)
++                _write_bytes(path, body)
++                files.append(path)
++                assets.append(
++                    {
++                        "url": url,
++                        "sourceFilename": Path(urlparse(url).path).name or destination_name(url),
++                        "archivePath": relative,
++                        "sha256": hashlib.sha256(body).hexdigest(),
++                        "sourceMethod": "network",
++                    }
++                )
++                print(f"[{index}/{len(urls)}] {relative}")
++                if index < len(urls) and args.delay:
++                    time.sleep(args.delay)
++
++            acquired_at = datetime.now().astimezone()
++            archive = archive_symbols(
++                files, args.destination, root=staging_path, now=acquired_at
++            )
++            snapshot_manifest = write_snapshot_manifest(
++                archive,
++                args.manifest_dir,
++                snapshot_type="symbols",
++                acquired_at=acquired_at,
++                source_url=ASSET_ROOT_URL,
++                document_count=len(files),
++                project_root=project_root,
++                input_artifact=args.source,
++            )
++            build_manifest = build_symbol_manifest(
++                army_artifact=args.source,
++                symbol_artifact=archive,
++                acquired_at=acquired_at,
++                source_document_count=discovery.source_document_count,
++                assets=assets,
++                references=discovery.references,
++                audit=discovery.audit,
++                project_root=project_root,
++            )
++            write_symbol_manifest(build_manifest, args.build_manifest)
++    except (OSError, ValueError) as exc:
++        if snapshot_manifest is not None:
++            snapshot_manifest.unlink(missing_ok=True)
++        if archive is not None:
++            archive.unlink(missing_ok=True)
++        print(f"ERROR: {exc}", file=sys.stderr)
++        return 1
++
++    print(f"Downloaded {len(files)} symbols -> {archive}")
++    print(f"Snapshot provenance -> {snapshot_manifest}")
++    print(f"Symbol build manifest -> {args.build_manifest}")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/tools/download_unit_symbols.py b/tools/download_unit_symbols.py
+deleted file mode 100644
+index eb70353..0000000
+--- a/tools/download_unit_symbols.py
++++ /dev/null
+@@ -1,238 +0,0 @@
+-"""Download the primary unit symbols referenced by an Army snapshot into a timestamped ZIP."""
+-
+-from __future__ import annotations
+-
+-import argparse
+-import json
+-import re
+-import sys
+-import tempfile
+-import time
+-import zipfile
+-from collections.abc import Iterable
+-from datetime import datetime
+-from pathlib import Path
+-from urllib.parse import urlparse
+-from urllib.request import urlopen
+-
+-from infinity_db.snapshot_provenance import write_snapshot_manifest
+-
+-try:
+-    from tools.path_sanitization import sanitize_filename
+-    from tools.snapshot_archive import create_timestamped_archive
+-except ImportError:  # pragma: no cover - direct script execution fallback
+-    from path_sanitization import sanitize_filename
+-    from snapshot_archive import create_timestamped_archive
+-
+-ASSET_HOST = "assets.corvusbelli.net"
+-ASSET_PATH = "/army/img/logo/units/"
+-ASSET_BASE_URL = f"https://{ASSET_HOST}{ASSET_PATH}"
+-SVG_NAME = re.compile(r"[a-z0-9-]+\.svg$")
+-
+-
+-def primary_logos(armies: Iterable[dict]) -> set[str]:
+-    """Return one deterministic profile-logo URL for every referenced unit ID."""
+-    by_unit: dict[int, str] = {}
+-    for army in armies:
+-        for unit in army.get("units", []):
+-            unit_id = unit.get("id")
+-            if not isinstance(unit_id, int) or unit_id in by_unit:
+-                continue
+-            logo = next(
+-                (
+-                    profile["logo"]
+-                    for group in unit.get("profileGroups", [])
+-                    for profile in group.get("profiles", [])
+-                    if isinstance(profile.get("logo"), str)
+-                ),
+-                None,
+-            )
+-            if logo is not None:
+-                by_unit[unit_id] = logo
+-    return set(by_unit.values())
+-
+-
+-def primary_symbol_slugs(armies: Iterable[dict]) -> dict[str, str]:
+-    """Map each source unit slug to its primary profile-logo filename stem."""
+-    by_unit: dict[int, tuple[str, str]] = {}
+-    for army in armies:
+-        for unit in army.get("units", []):
+-            unit_id = unit.get("id")
+-            slug = unit.get("slug")
+-            if not isinstance(unit_id, int) or not isinstance(slug, str) or unit_id in by_unit:
+-                continue
+-            logo = next(
+-                (
+-                    profile["logo"]
+-                    for group in unit.get("profileGroups", [])
+-                    for profile in group.get("profiles", [])
+-                    if isinstance(profile.get("logo"), str)
+-                ),
+-                None,
+-            )
+-            if logo is not None:
+-                by_unit[unit_id] = (slug, destination_name(logo).removesuffix(".svg"))
+-    return dict(sorted({slug: symbol for slug, symbol in by_unit.values()}.items()))
+-
+-
+-def write_manifest(armies: Iterable[dict], path: Path) -> None:
+-    """Write a browser module mapping database slugs to canonical icon slugs."""
+-    mappings = primary_symbol_slugs(armies)
+-    entries = ",\n".join(
+-        f"  [{json.dumps(slug)}, {json.dumps(symbol)}]" for slug, symbol in mappings.items()
+-    )
+-    path.write_text(
+-        "const unitSymbolSlugs = new Map([\n" + entries + "\n]);\n\n"
+-        "export function unitSymbolSlug(unitSlug) {\n"
+-        "  return unitSymbolSlugs.get(unitSlug);\n"
+-        "}\n",
+-        encoding="utf-8",
+-        newline="\n",
+-    )
+-
+-
+-def destination_name(url: str) -> str:
+-    parsed = urlparse(url)
+-    if parsed.scheme != "https" or parsed.netloc != ASSET_HOST:
+-        raise ValueError(f"Unsupported symbol host: {url}")
+-    if not parsed.path.startswith(ASSET_PATH):
+-        raise ValueError(f"Unsupported symbol path: {url}")
+-
+-    tail = url.removeprefix(f"https://{ASSET_HOST}{ASSET_PATH}")
+-    tail = tail.split("#", 1)[0]
+-    if ".svg" in tail.lower():
+-        stem = tail[: tail.lower().rfind(".svg")]
+-        name = f"{stem}.svg"
+-    else:
+-        name = Path(parsed.path).name
+-
+-    if not SVG_NAME.fullmatch(name):
+-        name = sanitize_filename(name)
+-    return name
+-
+-
+-def load_armies(path: Path) -> list[dict]:
+-    """Load Army documents from either a legacy master list or a raw API ZIP."""
+-    if zipfile.is_zipfile(path):
+-        with zipfile.ZipFile(path) as archive:
+-            armies = []
+-            for name in sorted(archive.namelist()):
+-                if not name.lower().endswith(".json"):
+-                    continue
+-                data = json.loads(archive.read(name))
+-                if isinstance(data, dict) and isinstance(data.get("units"), list):
+-                    armies.append(data)
+-            return armies
+-    data = json.loads(path.read_text(encoding="utf-8"))
+-    if not isinstance(data, dict):
+-        raise ValueError("master list must be an object keyed by Army source filename")
+-    return [army for army in data.values() if isinstance(army, dict)]
+-
+-
+-def _write_bytes(path: Path, body: bytes) -> None:
+-    temporary = path.with_suffix(path.suffix + ".tmp")
+-    temporary.write_bytes(body)
+-    temporary.replace(path)
+-
+-
+-def archive_symbols(
+-    files: list[Path],
+-    destination: Path,
+-    *,
+-    root: Path,
+-    now: datetime | None = None,
+-) -> Path:
+-    """Store exactly one symbol download as a timestamped ZIP snapshot."""
+-    return create_timestamped_archive(
+-        files,
+-        destination,
+-        prefix="SYMBOLS",
+-        root=root,
+-        now=now,
+-    )
+-
+-
+-def main(argv: list[str] | None = None) -> int:
+-    parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument("source", type=Path, help="Raw Army ZIP or legacy master-list JSON")
+-    parser.add_argument(
+-        "destination",
+-        nargs="?",
+-        type=Path,
+-        default=Path("data/raw/symbols"),
+-        help="Directory used to store timestamped symbol ZIP snapshots",
+-    )
+-    parser.add_argument("--manifest", type=Path, help="Write a browser symbol-slug map")
+-    parser.add_argument(
+-        "--manifest-dir",
+-        type=Path,
+-        default=Path("data/manifests/snapshots"),
+-        help="Generated snapshot manifest directory (default: data/manifests/snapshots)",
+-    )
+-    parser.add_argument(
+-        "--delay", type=float, default=0.2, help="Seconds to wait between downloads (default: 0.2)"
+-    )
+-    parser.add_argument("--dry-run", action="store_true")
+-    args = parser.parse_args(argv)
+-
+-    if args.delay < 0:
+-        raise ValueError("--delay must not be negative")
+-    armies = load_armies(args.source)
+-    if args.manifest:
+-        write_manifest(armies, args.manifest)
+-    urls = sorted(primary_logos(armies))
+-    print(f"Primary symbols: {len(urls)}")
+-    if args.dry_run:
+-        print(f"Would download: {len(urls)}")
+-        return 0
+-
+-    args.destination.mkdir(parents=True, exist_ok=True)
+-    archive: Path | None = None
+-    snapshot_manifest: Path | None = None
+-    try:
+-        with tempfile.TemporaryDirectory(
+-            prefix="infinity-symbols-", dir=args.destination
+-        ) as staging:
+-            staging_path = Path(staging)
+-            files: list[Path] = []
+-            for index, url in enumerate(urls, start=1):
+-                name = destination_name(url)
+-                with urlopen(url, timeout=30) as response:
+-                    body = response.read()
+-                if b"<svg" not in body[:1024]:
+-                    raise ValueError(f"Expected an SVG response: {url}")
+-                path = staging_path / name
+-                _write_bytes(path, body)
+-                files.append(path)
+-                print(f"[{index}/{len(urls)}] {name}")
+-                if index < len(urls) and args.delay:
+-                    time.sleep(args.delay)
+-            acquired_at = datetime.now().astimezone()
+-            archive = archive_symbols(
+-                files, args.destination, root=staging_path, now=acquired_at
+-            )
+-            snapshot_manifest = write_snapshot_manifest(
+-                archive,
+-                args.manifest_dir,
+-                snapshot_type="symbols",
+-                acquired_at=acquired_at,
+-                source_url=ASSET_BASE_URL,
+-                document_count=len(files),
+-                project_root=Path.cwd(),
+-                input_artifact=args.source,
+-            )
+-    except (OSError, ValueError) as exc:
+-        if snapshot_manifest is not None:
+-            snapshot_manifest.unlink(missing_ok=True)
+-        if archive is not None:
+-            archive.unlink(missing_ok=True)
+-        print(f"ERROR: {exc}", file=sys.stderr)
+-        return 1
+-
+-    print(f"Downloaded {len(files)} symbols -> {archive}")
+-    print(f"Snapshot provenance -> {snapshot_manifest}")
+-    return 0
+-
+-
+-if __name__ == "__main__":
+-    raise SystemExit(main())

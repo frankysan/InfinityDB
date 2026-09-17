@@ -1,53 +1,90 @@
-# Curated reference data
+# Curated data
 
-This directory is the only handoff from the local wiki mirror and PDF
-documents to project data ingestion. Developers and agents may read the
-reference material in `data/wiki/` and `data/pdf/`, then write concise,
-human-reviewed facts here as JSON. The application and its build pipeline must
-never read those raw reference trees directly.
+`data/curated/` contains source-controlled, human-reviewed information derived
+from external sources. Curated material is distinct from immutable external
+inputs under `data/raw/`, `data/wiki/`, and `data/pdf/`, and from generated
+provenance under `data/manifests/`.
 
-## Available reference families
+## Current curated data
 
-The local reference corpus currently includes:
+`rules/` contains validated rules-reference collections and is the only curated
+subtree currently consumed by application build tooling. `infinity-db
+build-rules` defaults to `data/curated/rules/`.
 
-- N5 core rules v5.1, v5.2, and v5.3 in `data/pdf/rules/`.
-- N5 FAQ v0.0 and v0.1 in `data/pdf/faq/`.
-- ITS Seasons 6 through 18 in `data/pdf/its/` and `data/pdf/legacy/`.
-- A 20260915 wiki snapshot containing 589 HTML pages, preserved originals,
-  and downloaded assets in `data/wiki/20260915/`.
+The sections below document the implemented `curated/rules/` contract.
+
+## Other curated categories
+
+`data/curated/snapshot-notes/` defines the current versioned contract for
+human-maintained snapshot descriptions, comparison targets, and notable-change
+notes associated with immutable snapshots by SHA-256. Those notes remain
+separate from generated snapshot provenance and are not rules-database inputs.
+Acquisition tooling never writes or consumes this subtree; see
+[`snapshot-notes/README.md`](snapshot-notes/README.md).
+
+## Curated rules reference data
+
+This directory is the handoff from local wiki/PDF research to rules-data
+ingestion. Developers and agents may read reference material in `data/wiki/`
+and `data/pdf/`, then write concise, human-reviewed facts under
+`data/curated/rules/`. The application and its build pipeline never read those
+raw reference trees directly.
+
+### Available reference families
+
+The local reference corpus may include:
+
+- N5 core rules revisions under `data/pdf/rules/`.
+- N5 FAQ revisions under `data/pdf/faq/`.
+- ITS seasons under `data/pdf/its/` and `data/pdf/legacy/`.
+- Wiki research snapshots under `data/wiki/`; the current downloader writes
+  `WIKI YYYYMMDD-HHMMSS.zip` archives.
 
 Core rules can provide curated skills, equipment, weapons, ammunition, traits,
 states, attributes, timing, modifiers, deployment, hacking, fireteams, and
-interactions. FAQ records should represent dated clarifications or rulings.
-ITS records should remain season-scoped and can represent scenarios,
-objectives, scoring, deployment, and mission constraints. Wiki pages are
-useful for discovery, aliases, cross-links, and concise explanations, but do
-not override the applicable official rules or Army data.
+interactions. FAQ records represent dated clarifications or rulings. ITS records
+remain season-scoped and can represent scenarios, objectives, scoring,
+deployment, and mission constraints. Wiki pages are useful for discovery,
+aliases, cross-links, and concise explanations, but do not override applicable
+official rules or Army data.
 
-## Current v2 contract
+### Current v2 contract
 
-Place one collection per subject or release under `data/curated/`, for example
-`rules/n5-core-v5.3.json`. Each file must have:
+Place one collection per subject or release under `data/curated/rules/`, for
+example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
 - `formatVersion`: `2`
 - `collection`: `id`, `title`, `domain`, `status`, `effectiveFrom`, and
-    `authority`
-- `sources`: PDF or wiki source records with version, authority, path, and
-    source-specific publication metadata
+  `authority`
+- `sources`: PDF or wiki source records with version, authority, a local path or
+  URL, and source-specific publication metadata
+- `vocabularySources`: source references for maintained skill-type and label
+  vocabularies
+- `skillTypes`: declared skill-type vocabulary
+- `labels`: declared label vocabulary
 - `records`: concise original summaries with typed `kind`, `id`, `name`,
-    `summary`, optional facts/links, and one or more `citations`
+  `summary`, optional facts/links, and one or more `citations`
 
-Every source reference currently uses `sourceId` and the **printed** `page`
-number. Add `locator` or other structured fields when useful, but do not
-bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
+Record citations distinguish PDF and wiki sources. PDF citations require a
+positive **printed** `page` number. Wiki record citations require a `path` and
+`snapshotDate`; the corresponding source may identify a preserved local mirror
+or an exact pinned revision URL.
+
+`vocabularySources` is currently a legacy exception: each entry is required to
+contain `sourceId`, `path`, `snapshotDate`, `heading`, and a positive `page`,
+regardless of the cleaner source-specific record-citation model. The checked-in
+v5.3 collection therefore carries wiki path/date provenance together with page
+numbers for vocabulary definitions. Treat that as current schema behavior, not
+as the intended general rule for wiki provenance.
+
+Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be
 blended accidentally.
 
-## Document shape
+### Document shape
 
-The current top-level `format`, `formatVersion`, `collection`, `sources`, and
-`records` fields are structured as follows:
+The main collection structure is:
 
 ```json
 {
@@ -61,6 +98,12 @@ The current top-level `format`, `formatVersion`, `collection`, `sources`, and
         "effectiveFrom": "2026-08-10",
         "authority": "primary"
     },
+    "vocabularySources": {
+        "skillTypes": [],
+        "labels": []
+    },
+    "skillTypes": [],
+    "labels": [],
     "sources": [
         {
             "id": "n5-core-v5.3-pdf",
@@ -101,18 +144,44 @@ The current top-level `format`, `formatVersion`, `collection`, `sources`, and
 }
 ```
 
-Supported record kinds should include `rule`, `skill`, `equipment`, `weapon`,
-`ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
-`faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`,
-and `unit-annotation`.
+Supported record kinds include `rule`, `skill`, `skill-declaration-category`,
+`equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
+`faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
+`unit-annotation`.
 
-Army links may target existing `skills`, `equipment`, `weapons`,
-`ammunition`, `extras`, `characteristics`, `troop_types`, `units`, or profile
-occurrences. They annotate Army data; they do not establish list legality or
-replace Army-derived statistics.
 
-PDF citations require a positive printed `page`. Wiki citations should instead
-use a local path, snapshot date, and optional heading or anchor, for example:
+Weapon records may use `facts.specialProfile` for rulebook-defined deployable
+profiles that are not fully represented by Army weapon metadata. The special
+profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon;
+the application composes it into the existing weapon-reference API only when a
+validated `rules.db` is available.
+
+Skill declaration category records represent rule-derived declaration labels that
+are absent from Army source data. They use `facts.order` for deterministic display
+ordering, link only to Army `skill` IDs, and require exactly one PDF citation with a
+positive printed page. The application treats the absence of such a record as
+`Unclassified`; do not create uncited category records to represent missing rules
+classification.
+
+Skill records may use `facts.parameterSemantics` when a rule-derived parameter
+needs display behavior that Army source data does not encode. The current schema
+supports `{"kind": "distance", "positiveSign": "preserve|omit|force"}`. This
+field does not decide whether an Army extra is a distance: imported
+`extras.type == "DISTANCE"` remains authoritative for that source semantic.
+
+Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
+parameter value is part of the Army text, for example `Disposable (2)` mapping
+to the canonical `Disposable (X)` record. Exact alternate spellings and
+misspellings belong in the normal `aliases` array. This is source-identity data;
+the matching algorithm remains application code.
+
+Army links may target existing `skills`, `equipment`, `weapons`, `ammunition`,
+`extras`, `characteristics`, `troop_types`, `units`, or profile occurrences.
+They annotate Army data; they do not establish list legality or replace
+Army-derived statistics.
+
+A wiki record citation currently uses the snapshot date and a path within the
+selected mirror, for example:
 
 ```json
 {
@@ -123,18 +192,39 @@ use a local path, snapshot date, and optional heading or anchor, for example:
 }
 ```
 
-Version 1 files are no longer accepted by the loader and must be migrated to
-this collection/source/citation structure before ingestion.
+The checked-in `n5-core-v5.3.json` wiki `sources` record still identifies the
+legacy unpacked mirror at `data/wiki/20260915/`. That provenance predates the
+current timestamped-ZIP downloader and must not be rewritten to an exact
+`WIKI ...zip` archive/hash unless a migration can establish which archive was
+actually used.
+
+### Design direction — wiki provenance migration
+
+When the wiki downloader/packager and curated provenance contract are rewritten,
+migrate wiki sources to exact recorded timestamped archive identity/hash and
+make vocabulary provenance source-specific instead of requiring the current
+mixed wiki/page locator. Generated acquisition provenance belongs under
+`data/manifests/snapshots/`; curated rules will reference the source
+identity they actually used rather than duplicating downloader state.
+
+Version 1 curated-rule files are no longer accepted by the loader and must be
+migrated to the v2 collection/source/citation structure before ingestion.
 
 The starter file `rules/example.json` is intentionally empty and is never an
 ingestion input. Directory ingestion skips that reserved filename. Validate all
-real collections with:
+rules collections with:
 
 ```powershell
-infinity-db validate-curated data/curated
+infinity-db validate-curated data/curated/rules
 ```
 
-To validate one collection directly, provide its path instead.
+To validate one collection directly, provide its path instead. Build the rules
+database with:
 
-Curated files are source-controlled project data. Raw PDFs and wiki snapshots
-remain ignored, local-only research material, and are never packaged or served.
+```powershell
+infinity-db build-rules
+```
+
+Curated rules files are source-controlled project data. Raw PDFs and wiki
+snapshots remain ignored, local-only research material, and are never packaged
+or served.

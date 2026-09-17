@@ -59,6 +59,43 @@ def request(
     return response["status"], response["headers"], body
 
 
+def _normalized_css_selector(selector: str) -> str:
+    selector = re.sub(r"\s+", " ", selector.strip())
+    return re.sub(r"\s*([>,+~])\s*", r"\1", selector)
+
+
+def assert_css_rule(
+    styles: bytes,
+    selector: str,
+    declarations: Mapping[str, str],
+) -> None:
+    target = _normalized_css_selector(selector)
+    candidates: list[dict[str, str]] = []
+    for match in re.finditer(rb"([^{}]+)\{([^{}]*)\}", styles):
+        candidate_selector = _normalized_css_selector(match.group(1).decode())
+        if candidate_selector != target:
+            continue
+        parsed: dict[str, str] = {}
+        for declaration in match.group(2).decode().split(";"):
+            if ":" not in declaration:
+                continue
+            name, value = declaration.split(":", 1)
+            parsed[name.strip()] = re.sub(r"\s+", " ", value.strip())
+        candidates.append(parsed)
+
+    expected = {name: re.sub(r"\s+", " ", value.strip()) for name, value in declarations.items()}
+    if any(
+        all(candidate.get(name) == value for name, value in expected.items())
+        for candidate in candidates
+    ):
+        return
+
+    raise AssertionError(
+        f"CSS rule {selector!r} did not contain expected declarations {expected!r}; "
+        f"matching rules: {candidates!r}"
+    )
+
+
 @pytest.fixture
 def app(tmp_path: Path) -> Callable:
     shared = {
@@ -182,7 +219,66 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert armies[101]["slug"] == "zulu_company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
+    assert armies[198]["kind"] == "reinforcement"
     assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
+
+
+def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> None:
+    unit = {"id": 1, "name": "Shared Unit", "canonical": 101, "factions": [101]}
+    documents = [
+        ("101-main.json", True, 198),
+        ("102-sectorial.json", True, None),
+        ("901-non-aligned.json", True, None),
+        ("902-independent.json", True, None),
+        ("198-main-reinforcements.json", False, None),
+    ]
+    sources = []
+    for filename, ordinary, reinforcement_id in documents:
+        document = {"version": "test", "units": [unit]}
+        if ordinary:
+            document["reinforcements"] = reinforcement_id
+        source = make_source(filename, json.dumps(document).encode())
+        assert source is not None
+        sources.append(source)
+
+    normalized = normalize_master(merge_sources(sources))
+    normalized["armyMetadata"] = {
+        "sourceFile": "metadata.json",
+        "sourceSha256": "test-metadata",
+        "data": {"factions": []},
+    }
+    normalized["tables"]["metadata_factions"] = [
+        {"id": 101, "parent": 101, "name": "Main Army", "slug": "main-army"},
+        {"id": 102, "parent": 101, "name": "Sectorial", "slug": "sectorial"},
+        {"id": 198, "parent": 101, "name": "Reinforcements", "slug": "reinforcements"},
+        {
+            "id": 901,
+            "parent": 900,
+            "name": "Non-Aligned Armies",
+            "slug": "non-aligned-armies",
+        },
+        {"id": 902, "parent": 901, "name": "Independent Army", "slug": "independent-army"},
+    ]
+    database_path = tmp_path / "roles.db"
+    export_database(normalized, database_path)
+    role_app = create_app(database_path)
+
+    status, _, body = request(role_app, "/api/armies")
+    assert status == 200
+    armies = {item["id"]: item for item in json.loads(body)["items"]}
+    assert armies[101]["role"] == "main"
+    assert armies[102]["role"] == "sectorial"
+    assert armies[102]["group_id"] == 101
+    assert armies[198]["role"] == "reinforcement"
+    assert armies[198]["parent_army_ids"] == [101]
+    assert armies[902]["role"] == "non_aligned"
+    assert armies[902]["group_id"] == 901
+    assert armies[901]["role"] == "grouping"
+    assert armies[901]["playable"] is False
+
+    status, _, body = request(role_app, "/api/units", query="army_id=901")
+    assert status == 400
+    assert "grouping-only identity" in json.loads(body)["error"]
 
 
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
@@ -281,6 +377,8 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     for army in unit["armies"]:
         assert army["profiles"][0]["type"] == "Line Trooper"
         assert army["profiles"][0]["classification"] == "Light Infantry"
+        assert army["profiles"][0]["profile_identity"] == "profile ranger"
+        assert army["profiles"][0]["display_name"] == army["profiles"][0]["name"]
         assert army["profiles"][0]["skills"] == [
             {
                 "id": 11,
@@ -509,9 +607,18 @@ def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b".landing-logo { grid-column: 2; grid-row: 1; align-self: start;" in styles
-    assert b"width: min(30vw, 135px); height: auto;" in styles
-    assert b".landing-hero-content { grid-column: 1 / -1; }" in styles
+    assert_css_rule(
+        styles,
+        ".landing-logo",
+        {
+            "grid-column": "2",
+            "grid-row": "1",
+            "align-self": "start",
+            "width": "min(30vw, 135px)",
+            "height": "auto",
+        },
+    )
+    assert_css_rule(styles, ".landing-hero-content", {"grid-column": "1 / -1"})
 
 
 def test_mobile_unit_list_prioritizes_the_unit_name_column(
@@ -520,10 +627,18 @@ def test_mobile_unit_list_prioritizes_the_unit_name_column(
     status, _, styles = request(app, "/static/styles.css")
 
     assert status == 200
-    assert b"thead th:last-child { width: 156px; }" in styles
-    assert b".army-tags { --symbols-per-row: 4; }" in styles
-    assert b".army-tags-compact { --symbols-per-row: 6; gap: 3px; }" in styles
-    assert b".army-tags-compact .army-symbol { width: 17px; height: 17px; }" in styles
+    assert_css_rule(styles, "thead th:last-child", {"width": "156px"})
+    assert_css_rule(styles, ".army-tags", {"--symbols-per-row": "4"})
+    assert_css_rule(
+        styles,
+        ".army-tags-compact",
+        {"--symbols-per-row": "6", "gap": "3px"},
+    )
+    assert_css_rule(
+        styles,
+        ".army-tags-compact .army-symbol",
+        {"width": "17px", "height": "17px"},
+    )
 
     status, _, unit_list = request(app, "/static/unit-list.js")
     assert status == 200
@@ -535,19 +650,34 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
 
     assert status == 200
     assert b"@media (min-width: 601px) and (max-width: 700px)" in styles
-    assert b"--movement-column-width: 60px;" in styles
-    assert (
-        b'html[data-distance-unit="in"] .attribute-statline { --movement-column-width: 52px; }'
-        in styles
+    assert_css_rule(
+        styles,
+        ".attribute-statline",
+        {
+            "--movement-column-width": "60px",
+            "grid-template-columns": (
+                "var(--movement-column-width) repeat(8, minmax(0, 1fr))"
+            ),
+        },
     )
-    assert (
-        b"grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr));" in styles
+    assert_css_rule(
+        styles,
+        'html[data-distance-unit="in"] .attribute-statline',
+        {"--movement-column-width": "52px"},
     )
-    assert b".attribute-statline > div { padding-inline: 4px; }" in styles
-    assert b"grid-template-columns: 60px repeat(4, minmax(0, 1fr));" in styles
-    assert (
-        b'html[data-distance-unit="in"] .attribute-statline-with-availability '
-        b"{ grid-template-columns: 52px repeat(4, minmax(0, 1fr)); }" in styles
+    assert_css_rule(styles, ".attribute-statline > div", {"padding-inline": "4px"})
+    assert_css_rule(
+        styles,
+        ".attribute-statline, .attribute-statline-with-availability",
+        {"grid-template-columns": "60px repeat(4, minmax(0, 1fr))"},
+    )
+    assert_css_rule(
+        styles,
+        (
+            'html[data-distance-unit="in"] .attribute-statline, '
+            'html[data-distance-unit="in"] .attribute-statline-with-availability'
+        ),
+        {"grid-template-columns": "52px repeat(4, minmax(0, 1fr))"},
     )
 
 
@@ -569,11 +699,22 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b'html:not([data-developer-mode="true"]) .id-column { display: none; }' in styles
-    assert b".settings-menu { margin-top: 32px; }" in styles
-    assert b".compact-menu-panel { position: static; display: flex;" in styles
-    assert b".menu-label { display: none; }" in styles
-    assert b".sidebar { position: relative; z-index: 4;" in styles
+    assert_css_rule(
+        styles,
+        (
+            'html:not([data-developer-mode="true"]) .developer-only, '
+            'html:not([data-developer-mode="true"]) .id-column'
+        ),
+        {"display": "none"},
+    )
+    assert_css_rule(styles, ".settings-menu", {"margin-top": "32px"})
+    assert_css_rule(
+        styles,
+        ".compact-menu-panel",
+        {"position": "static", "display": "flex"},
+    )
+    assert_css_rule(styles, ".menu-label", {"display": "none"})
+    assert_css_rule(styles, ".sidebar", {"position": "relative", "z-index": "4"})
     assert b".cookie-consent-dialog" in styles
     assert b"background: var(--color-surface-default);" in styles
 
@@ -627,7 +768,11 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b'.menu[data-open="true"] > .compact-menu-panel { display: flex; }' in styles
+    assert_css_rule(
+        styles,
+        '.menu[data-open="true"] > .compact-menu-panel',
+        {"display": "flex"},
+    )
     assert b'window.addEventListener("pageshow", closeMenu)' in navigation
 
 
@@ -751,18 +896,49 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
 
 
+def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:
+    status, _, body = request(app, "/static/app.js")
+
+    assert status == 200
+    assert b"Math.floor(Number(army.id) / 100)" not in body
+    assert b"army.playable !== false" in body
+    assert b'army.role === "reinforcement"' in body
+    assert b'army.role === "sectorial" || army.role === "non_aligned"' in body
+    assert b'army.role === "non_aligned" && army.group_id' in body
+
+
 def test_unit_list_renders_all_toggle_visible_armies(app: Callable) -> None:
     status, _, body = request(app, "/static/unit-list.js")
 
     assert status == 200
     assert b"return [...armies].sort" in body
+    assert b"const factionSlugs" not in body
+    assert b"function factionSlug(" not in body
+    assert b"Math.floor(Number(armyId) / 100)" not in body
+    assert b"const faction = unit.main_faction?.slug;" in body
 
 
-def test_unit_details_recognizes_98_and_99_as_reinforcement_armies(app: Callable) -> None:
+def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
 
     assert status == 200
-    assert b"[98, 99]" in body
+    assert b"[98, 99]" not in body
+    assert b"function isReinforcementArmy(" not in body
+    assert (
+        b'reinforcement: (army.availability_flags || []).includes("reinforcement"),'
+        in body
+    )
+
+
+def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+
+    assert status == 200
+    assert b"const factionGroups" not in body
+    assert b"const factionSlugs" not in body
+    assert b"Math.floor(Number(armyId) / 100)" not in body
+    assert b"const faction = army.faction;" in body
+    assert b"const mainFaction = unit.main_faction?.slug;" in body
 
 
 def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:
@@ -771,10 +947,13 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b'document.createElement("details")' in body
     assert b"function isStandardArmy(army)" in body
     assert b"section.open = expanded" in body
-    assert b"function profileIdentity(profileName)" in body
-    assert b"(?:REINF|REFUERZOS)" in body
-    assert b'reconaissance: "recon"' in body
-    assert b'"troops", "autonomous", "intervention", "unit"' in body
+    assert b"const profileKey = profile.profile_identity;" in body
+    assert b"profile.display_name || profile.name" in body
+    assert b"(?:REINF|REFUERZOS)" not in body
+    assert b"function baseProfileName(" not in body
+    assert b"function profileIdentity(" not in body
+    assert b"profileIdentityWordAliases" not in body
+    assert b"profileIdentityIgnoredWords" not in body
 
 
 def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None:
@@ -820,8 +999,8 @@ def test_unit_details_frontend_marks_surface_and_deepspace_profiles(app: Callabl
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b".division-badge-surface { background: #256d1b; }" in styles
-    assert b".division-badge-deepspace { background: #d68623; }" in styles
+    assert_css_rule(styles, ".division-badge-surface", {"background": "#256d1b"})
+    assert_css_rule(styles, ".division-badge-deepspace", {"background": "#d68623"})
 
 
 def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> None:
@@ -843,16 +1022,58 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
         assert b"data-surface-header" in body
 
 
+def test_weapon_range_bands_are_derived_from_profile_metadata(app: Callable) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"function weaponRangeBands(variants)" in body
+    assert b"Object.values(profile.ranges || {})" in body
+    assert b"Number(range?.max)" in body
+    assert b"const rangeBands = weaponRangeBands(variants);" in body
+    assert b"maximum / 2.5" in body
+    for fixed_band in [b"maximum: 20", b"maximum: 40", b"maximum: 240"]:
+        assert fixed_band not in body
+
+
+def test_catalog_detail_frontend_uses_backend_trait_references(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"profile.trait_references" in body
+    assert b"function weaponTraitLinks(traits)" in body
+    assert b"const label = trait.label || trait.name ||" in body
+    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
+    assert b"function canonicalTraitName(" not in body
+    assert b"function traitSlug(" not in body
+    assert b"Continous Damage" not in body
+    assert b"BioWeapon" not in body
+
+
 def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    for selector in [
-        b".surface, .explorer",
-        b".surface--subtle",
-        b".surface--highlighted",
-        b".data-table--compact",
-    ]:
-        assert selector in styles
+    assert_css_rule(
+        styles,
+        ".surface, .explorer",
+        {"background": "var(--color-surface-default)"},
+    )
+    assert_css_rule(
+        styles,
+        ".surface--subtle",
+        {"background": "var(--color-surface-subtle)"},
+    )
+    assert_css_rule(
+        styles,
+        ".surface--highlighted",
+        {"background": "var(--surface-highlight)"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--compact",
+        {"--table-cell-size": "11px"},
+    )
 
     for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
         status, _, body = request(app, path)
@@ -868,40 +1089,61 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b"variantTitle" not in weapon_detail
     assert b'profileHeading.textContent = "Profile";' in weapon_detail
     assert b'traitsHeading.textContent = "Traits";' in weapon_detail
-    assert b"if (traitNames.length)" in weapon_detail
-    assert b"function weaponTraitLinks(traitNames)" in weapon_detail
-    assert b"function canonicalTraitName(trait)" in weapon_detail
+    assert b"if (traitReferences.length)" in weapon_detail
+    assert b"function weaponTraitLinks(traits)" in weapon_detail
+    assert b"function canonicalTraitName(" not in weapon_detail
+    assert b"function traitSlug(" not in weapon_detail
     assert b"function traitUsageSectionGroup(item)" in weapon_detail
     assert (
         b"title.textContent = catalogName[0].toUpperCase() + catalogName.slice(1);" in weapon_detail
     )
     assert b'title.className = "trait-catalog-heading";' in weapon_detail
-    assert b"link.href = `/traits/${encodeURIComponent(traitSlug(trait))}`;" in weapon_detail
+    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in weapon_detail
     assert b".weapon-data-heading" in styles
     assert b'profileRow.className = "weapon-data-row"' in weapon_detail
     assert b'profileStats.className = "weapon-data-value"' in weapon_detail
-    assert b".weapon-data-row { display: grid;" in styles
-    assert b"border-left: 1px solid #e9ece3" in styles
+    assert_css_rule(styles, ".weapon-data-row", {"display": "grid"})
+    assert_css_rule(
+        styles,
+        ".weapon-data-value",
+        {"border-left": "1px solid #e9ece3"},
+    )
     assert b"--surface-data-header: #fafbf8" in styles
-    assert b"thead th { background: var(--surface-data-header);" in styles
-    assert b".weapon-data-heading" in styles
-    assert b".weapon-variants, .weapon-variant, .weapon-profile { width: 100%; }" in styles
-    assert b".weapon-profile .weapon-ranges { display: table;" in styles
-    assert b"width: 100%; table-layout: auto; }" in styles
+    assert_css_rule(
+        styles,
+        "thead th",
+        {"background": "var(--surface-data-header)"},
+    )
+    assert_css_rule(
+        styles,
+        ".weapon-variants, .weapon-variant, .weapon-profile",
+        {"width": "100%"},
+    )
+    assert_css_rule(
+        styles,
+        ".weapon-profile .weapon-ranges",
+        {"display": "table", "width": "100%", "table-layout": "auto"},
+    )
 
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert b'generalProfile.className = "explorer general-profile"' in body
-    assert b".general-profile .profile-title" in styles
-    assert b"background: var(--surface-highlight)" in styles
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .profile-title",
+        {"background": "var(--color-surface-highlight)"},
+    )
 
     status, _, body = request(app, "/about")
     assert status == 200
     assert b"surface surface--highlighted about-callout" in body
     assert b"surface surface--subtle about-disclosure" in body
 
-    assert b".usage-section-group thead th:first-child," in styles
-    assert b".usage-section-group thead th:last-child { width: auto; }" in styles
+    assert_css_rule(
+        styles,
+        ".usage-section-group thead th:first-child, .usage-section-group thead th:last-child",
+        {"width": "auto"},
+    )
 
 
 def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:
@@ -985,6 +1227,19 @@ def test_developer_cache_toggle_is_served(app: Callable) -> None:
     assert b'id="disable-cache-toggle"' in body
     assert b"developer-toggle developer-only" in body
 
+
+def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> None:
+    status, _, preferences = request(app, "/static/preferences.js")
+    assert status == 200
+    assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in preferences
+    assert b"parameterSemantics?.positive_sign" in preferences
+
+    for asset in ("skill.js", "skill-extras.js", "unit.js"):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"parameter_semantics" in body
+        assert b"Super-Jump" not in body
+        assert b"Forward Deployment" not in body
 
 def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/skill-extras")
@@ -1094,6 +1349,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                         "slug": "ranger-prototype",
                         "main_army_id": None,
                         "main_army_name": None,
+                        "main_faction": None,
                         "source_ids": [1],
                         "army_ids": [101, 201],
                         "armies": [
@@ -1116,6 +1372,52 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body)["error"] == "Skill not found"
 
 
+def test_trait_apis_compose_army_usage_with_curated_rules(
+    app: Callable, tmp_path: Path
+) -> None:
+    with sqlite3.connect(app.database.path) as connection:
+        connection.execute(
+            "INSERT INTO metadata_weapons (position, id, type, name, properties) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (1, 31, "BS", "Combi Rifle", json.dumps(["Continous Damage", "Disposable (2)"])),
+        )
+        connection.commit()
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/traits")
+    assert status == 200
+    traits = {item["id"]: item for item in json.loads(body)["items"]}
+    assert traits["continuous-damage"]["name"] == "Continuous Damage"
+    assert traits["disposable-x"]["name"] == "Disposable (X)"
+
+    status, _, body = request(rules_app, "/api/weapons/31")
+    assert status == 200
+    profile = json.loads(body)["profiles"][0]
+    assert profile["traits"] == ["Continous Damage", "Disposable (2)"]
+    assert profile["trait_references"] == [
+        {
+            "label": "Continous Damage",
+            "name": "Continuous Damage",
+            "slug": "continuous-damage",
+        },
+        {
+            "label": "Disposable (2)",
+            "name": "Disposable (X)",
+            "slug": "disposable-x",
+        },
+    ]
+
+    status, _, body = request(rules_app, "/api/traits/continuous-damage")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["description"].startswith("After a failed Saving Roll")
+    assert payload["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4110"
+
+
 def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
@@ -1124,6 +1426,12 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     skill_record["id"] = "skill:stealth"
     skill_record["name"] = "Stealth"
     skill_record["armyLinks"] = [{"entity": "skill", "id": 11}]
+    declaration = next(
+        record
+        for record in document["records"]
+        if record["id"] == "skill-declaration-category:automatic:p87"
+    )
+    declaration["armyLinks"].append({"entity": "skill", "id": 11})
     rules_path = tmp_path / "rules.db"
     export_rules_database([(root / "curated.json", document)], rules_path)
     rules_app = create_app(app.database.path, rules_path)
@@ -1132,9 +1440,19 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
 
     assert status == 200
     payload = json.loads(body)
+    assert payload["categories"] == [
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+    ]
     assert payload["rules"][0]["id"] == "skill:stealth"
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
     assert payload["rules"][0]["citations"][0]["page"] == 87
+
+    status, _, body = request(rules_app, "/api/skills")
+    assert status == 200
+    stealth = next(item for item in json.loads(body)["items"] if item["id"] == 11)
+    assert stealth["categories"] == [
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+    ]
 
 
 def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:
@@ -1268,3 +1586,74 @@ def test_missing_database_fails_before_app_starts(tmp_path: Path) -> None:
     with pytest.raises((OSError, ValueError)):
         create_app(database_path)
     assert not database_path.exists()
+
+
+def test_weapon_api_adds_curated_special_profile_when_rules_database_is_available(
+    tmp_path: Path,
+) -> None:
+    unit = {
+        "id": 1,
+        "name": "Turret Carrier",
+        "canonical": 101,
+        "factions": [101],
+        "profileGroups": [
+            {
+                "id": 1,
+                "profiles": [{"id": 1, "weapons": [{"id": 226}]}],
+                "options": [],
+            }
+        ],
+    }
+    document = {
+        "version": "test",
+        "units": [unit],
+        "filters": {"weapons": [{"id": 226, "name": "Armed Turret"}]},
+        "reinforcements": None,
+    }
+    source = make_source("101-main.json", json.dumps(document).encode())
+    assert source is not None
+    normalized = normalize_master(merge_sources([source]))
+    normalized["armyMetadata"] = {
+        "sourceFile": "metadata.json",
+        "sourceSha256": "test-metadata",
+        "data": {"factions": []},
+    }
+    normalized["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 226,
+            "name": "Armed Turret",
+            "mode": "Combi Rifle",
+            "burst": "3",
+            "damage": "7",
+        }
+    ]
+
+    database_path = tmp_path / "infinity.db"
+    rules_path = tmp_path / "rules.db"
+    export_database(normalized, database_path)
+    documents = load_curated_directory(
+        Path(__file__).parents[1] / "data" / "curated" / "rules"
+    )
+    export_rules_database(documents, rules_path)
+    rules_app = create_app(database_path, rules_database_path=rules_path)
+
+    status, _, body = request(rules_app, "/api/weapons/226")
+
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["special_profile"]["stats"] == [
+        ["MOV", "--"],
+        ["CC", "5"],
+        ["BS", "10"],
+        ["PH", "--"],
+        ["WIP", "--"],
+        ["ARM", "2"],
+        ["BTS", "3"],
+        ["STR", "1"],
+        ["S", "2"],
+    ]
+    assert payload["special_profile"]["equipment"] == ["360º Visor"]
+    assert payload["special_profile"]["skills"] == ["Total Reaction"]
+    assert payload["special_profile"]["cc_weapon"] == "PARA CC Weapon (-3)"
+    assert [record["id"] for record in payload["rules"]] == ["weapon:armed-turret"]
