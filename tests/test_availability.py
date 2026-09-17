@@ -4,6 +4,7 @@ import pytest
 
 import infinity_army_data.cli as cli
 from infinity_army_data.availability import (
+    MERCENARY_MATCH_METHOD,
     annotate_availability_semantics,
     audit_mercenary_logical_matches,
 )
@@ -89,6 +90,14 @@ def test_mercenary_mapping_audit_matches_standard_duplicate_family() -> None:
 
     assert matches == {10051: 51}
     assert unmatched == ()
+    assert data["mercenaryUnitMatches"] == [
+        {
+            "mercenaryUnitId": 10051,
+            "standardUnitId": 51,
+            "method": MERCENARY_MATCH_METHOD,
+        }
+    ]
+    assert data["unmatchedMercenaryUnitIds"] == []
 
 
 def test_mercenary_mapping_audit_does_not_match_numeric_family_alone() -> None:
@@ -117,6 +126,8 @@ def test_mercenary_mapping_audit_does_not_match_numeric_family_alone() -> None:
 
     assert matches == {}
     assert unmatched == (10064,)
+    assert data["mercenaryUnitMatches"] == []
+    assert data["unmatchedMercenaryUnitIds"] == [10064]
 
 
 @pytest.mark.parametrize(
@@ -174,3 +185,5 @@ def test_normalize_pipeline_applies_availability_annotation(
 
     assert result["tables"]["units"][0]["source_role"] == "mercenary_variant"
     assert result["tables"]["army_units"][0]["availability_kind"] == "mercenary"
+    assert result["mercenaryUnitMatches"] == []
+    assert result["unmatchedMercenaryUnitIds"] == [10464]
