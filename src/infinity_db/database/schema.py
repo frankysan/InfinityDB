@@ -256,7 +256,7 @@ INDEXES = (
     ("option_skills_unit", "option_skills", "unit_id"),
     ("option_skills_item", "option_skills", "item_id"),
     ("option_equipment_unit", "option_equipment", "unit_id"),
-    ("option_equipment_item", "option_equipment", "unit_id"),
+    ("option_equipment_item", "option_equipment", "item_id"),
     ("option_weapons_unit", "option_weapons", "unit_id"),
     ("option_weapons_template", "option_weapons", "template_id"),
     ("option_weapon_templates_item", "option_weapon_templates", "item_id"),
