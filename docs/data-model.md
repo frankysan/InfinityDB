@@ -373,6 +373,14 @@ own canonical names, aliases/misspellings, parameterized source-label prefixes,
 concise summaries, and citations. The application joins those sources at read
 time; the Army database does not copy curated trait knowledge into its snapshot.
 
+Skill declaration categories are another application-level composition. Army-derived
+`skills` and their usage remain source data, while current curated
+`skill-declaration-category` records carry the N5 declaration label, deterministic
+display order, Army skill links, and printed-page citation. `SkillCatalog` joins
+those records at read time and keeps uncited `Unclassified` as the fallback for
+skills without a curated declaration. The Army database does not materialize these
+rules facts.
+
 ### Design direction
 
 When the wiki downloader/packager and curated provenance contract are rewritten,

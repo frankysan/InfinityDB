@@ -370,6 +370,11 @@ changes.
   cited curated `weapon` record linked to Army weapon ID 226; repository reads
   expose raw Army catalog data and the application composes the special profile
   from `rules.db` when curated rules are available.
+- 2026-09-17: Skill declaration categories moved out of Python into cited
+  curated `skill-declaration-category` records linked to Army skill IDs. The Army
+  repository exposes raw skill data only; `SkillCatalog` composes declaration
+  categories and ordinary curated skill rules from `rules.db`, with uncited
+  `Unclassified` as the fallback when no curated declaration is available.
 - 2026-09-16: Rules ingestion is scoped to `data/curated/rules/`. Other curated
   categories may have separate future semantics but are not implicitly rules
   database inputs.

@@ -478,6 +478,39 @@ class RulesDatabase:
             ).fetchall()
             return self._records_from_rows(connection, rows)
 
+    def skill_declaration_categories(self) -> list[dict[str, Any]]:
+        """Return curated skill declaration categories keyed to Army skill ids."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT CAST(l.external_id AS INTEGER) AS skill_id, r.name, r.facts_json, "
+                "s.title AS source_title, s.version AS source_version, c.page "
+                "FROM records AS r JOIN collections AS col ON col.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "JOIN record_citations AS c ON c.collection_id = r.collection_id "
+                "AND c.record_id = r.id "
+                "JOIN sources AS s ON s.collection_id = c.collection_id "
+                "AND s.id = c.source_id "
+                "WHERE r.kind = 'skill-declaration-category' "
+                "AND col.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY skill_id, r.collection_id, r.id, c.position"
+            ).fetchall()
+            result = []
+            for row in rows:
+                facts = _decode_json(row["facts_json"], {})
+                result.append(
+                    {
+                        "skill_id": row["skill_id"],
+                        "name": row["name"],
+                        "order": facts["order"],
+                        "source_title": row["source_title"],
+                        "source_version": row["source_version"],
+                        "page": row["page"],
+                    }
+                )
+            return result
+
     def records_by_kind(self, kind: str, *, current_only: bool = True) -> list[dict[str, Any]]:
         """Return curated records of one kind, preferring current collections."""
         with self._connect() as connection:

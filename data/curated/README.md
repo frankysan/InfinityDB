@@ -144,8 +144,8 @@ The main collection structure is:
 }
 ```
 
-Supported record kinds include `rule`, `skill`, `equipment`, `weapon`,
-`ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
+Supported record kinds include `rule`, `skill`, `skill-declaration-category`,
+`equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
 `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
 
@@ -155,6 +155,13 @@ profiles that are not fully represented by Army weapon metadata. The special
 profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon;
 the application composes it into the existing weapon-reference API only when a
 validated `rules.db` is available.
+
+Skill declaration category records represent rule-derived declaration labels that
+are absent from Army source data. They use `facts.order` for deterministic display
+ordering, link only to Army `skill` IDs, and require exactly one PDF citation with a
+positive printed page. The application treats the absence of such a record as
+`Unclassified`; do not create uncited category records to represent missing rules
+classification.
 
 Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
 parameter value is part of the Army text, for example `Disposable (2)` mapping

@@ -52,6 +52,11 @@ All notable changes to this project are documented in this file.
   `weapon` rules record linked to Army weapon ID 226. Weapon API responses now
   compose that profile from `rules.db`, while the Army repository remains
   source-data-only and degrades cleanly when curated rules are unavailable.
+- Move N5 skill declaration categories out of `skill_categories.py` into cited
+  curated `skill-declaration-category` records linked to Army skill IDs. Skill
+  list/detail APIs now compose declaration categories and ordinary skill rules
+  through `SkillCatalog`; the Army repository no longer embeds rule-derived
+  declaration knowledge.
 - Reconcile reference documentation with the completed logical-unit and army-role
   refactors: source-unit identity is now distinguished from materialized
   application identity, repository-time identity discovery is no longer described

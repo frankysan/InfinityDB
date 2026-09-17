@@ -21,7 +21,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 36
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 101
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -99,3 +99,36 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
         "ccWeapon": "PARA CC Weapon (-3)",
     }
     assert records[0]["citations"][0]["heading"] == "Armed Turret Profile"
+
+
+def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+
+    database = RulesDatabase(output)
+    categories = [
+        category
+        for category in database.skill_declaration_categories()
+        if category["skill_id"] == 89
+    ]
+
+    assert categories == [
+        {
+            "skill_id": 89,
+            "name": "Deployment",
+            "order": 20,
+            "source_title": "N5 Core Rules",
+            "source_version": "5.3",
+            "page": 111,
+        },
+        {
+            "skill_id": 89,
+            "name": "Long Skill",
+            "order": 40,
+            "source_title": "N5 Core Rules",
+            "source_version": "5.3",
+            "page": 111,
+        },
+    ]

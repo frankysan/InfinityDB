@@ -109,11 +109,15 @@ history retains implementation detail.
   - Armed Turret statistics, equipment, skills, CC weapon, Army weapon linkage,
     and stable wiki revision citation now live in the curated N5 rules
     collection and are composed into weapon API responses through `rules.db`.
-- [ ] Move rule-derived skill declaration categories out of
-  `skill_categories.py` and into the curated rules layer.
-  - Preserve N5 edition/version and printed-page citations.
-  - Let application code query validated curated records rather than embed the
-    rules facts in Python.
+- [x] Move rule-derived skill declaration categories out of Python and into
+  the curated rules layer.
+  - N5 declaration categories now live in cited `skill-declaration-category`
+    records linked to Army skill IDs, preserving edition/version and printed-page
+    citations.
+  - `SkillCatalog` composes declarations and ordinary skill rules from `rules.db`;
+    the Army repository exposes source skill data only.
+  - Skills without a curated declaration record remain `Unclassified` without a
+    fabricated source citation.
 - [x] Move trait rules-reference knowledge into curated data.
   - Concise summaries, canonical identities, exact aliases/misspellings,
     parameterized source-label prefixes, and citations now live in curated
