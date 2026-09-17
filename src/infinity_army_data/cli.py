@@ -9,7 +9,11 @@ from datetime import datetime
 from pathlib import Path
 
 from . import __version__
-from .availability import annotate_availability_semantics, audit_mercenary_logical_matches
+from .availability import (
+    annotate_availability_semantics,
+    audit_generic_logical_matches,
+    audit_mercenary_logical_matches,
+)
 from .merge import load_sources, merge_sources, validate_master
 from .merge import write_json as write_master
 from .metadata import MetadataError, decode_metadata, load_metadata
@@ -119,6 +123,7 @@ def _normalize(
         canonical_faction_overrides=canonical_faction_overrides,
     )
     annotate_availability_semantics(normalized)
+    audit_generic_logical_matches(normalized)
     mercenary_matches, unmatched_mercenaries = audit_mercenary_logical_matches(normalized)
     if normalized_metadata is not None:
         conflicts = set(normalized_metadata) & set(normalized)

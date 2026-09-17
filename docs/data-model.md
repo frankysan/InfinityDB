@@ -31,8 +31,9 @@ raw Army JSON
   catalogs.
 - Explicit source-equivalent unit, army, skill, equipment, and weapon IDs are
   maintained in validated `config/identity/source-identities.json`
-  configuration. Generic duplicate/name rules remain implementation behavior
-  rather than authored alias data.
+  configuration. Generic duplicate/name matching remains implementation
+  behavior rather than authored alias data; normalization now persists the
+  resulting generic unit matches for current snapshots.
 - Current InfinityDB builds derive a unit's application `main_army_id` from
   the imported Army metadata parent for its canonical faction. Maintained
   canonical-faction overrides take precedence when explicitly configured. The
@@ -100,15 +101,20 @@ The classifier does not use the common 10,000-ID offset as its semantic rule,
 and contradictory mercenary markers fail normalization rather than being
 silently guessed.
 
-Repository logical-unit grouping now consumes the persisted
-`mercenaryUnitMatches` / `unmatchedMercenaryUnitIds` metadata when it is
-available. A matched mercenary source record is grouped through its recorded
-standard source unit even if the mercenary record's own generic duplicate key
-changes, while an explicitly unmatched mercenary record is kept separate rather
-than falling back to the common 10,000-ID rule. Databases built before these
-metadata fields remain readable through the legacy generic grouping fallback.
-Other duplicate families and reinforcement-only matching are still resolved at
-query time.
+Normalization now also persists `genericUnitMatches` for standard,
+non-reinforcement source records whose 10,000-family ID and ISC/display-name
+identity provide an unambiguous duplicate match. Presence of that metadata is
+authoritative even when the list is empty: repository grouping consumes the
+persisted matches and does not rediscover additional generic groups through ID
+arithmetic. Databases built before `genericUnitMatches` was persisted remain
+readable through the legacy arithmetic fallback.
+
+Mercenary identity remains a separate source-semantic contract. Repository
+logical-unit grouping consumes persisted `mercenaryUnitMatches` /
+`unmatchedMercenaryUnitIds`; matched mercenary records join through their
+recorded standard source unit, while explicitly unmatched variants remain
+separate. Configured alias groups still come from the pinned identity policy,
+and reinforcement-only matching remains query-time behavior.
 
 Mercenary availability has now completed the same read-path migration for
 current normalized snapshots. Repository source occurrences carry
@@ -137,10 +143,11 @@ application `main_army_id`, while Non-Aligned Army grouping is derived from the
 actual 901 metadata hierarchy.
 
 Continue moving logical-unit identity earlier in the pipeline. The current
-normalizer now persists audited mercenary-to-standard matches and the repository
-honors those matches directly, but generic duplicate families, configured alias
-groups, and reinforcement-only joins are not yet represented by one normalized
-logical-unit identity. A future normalized/database identity layer may collapse
+normalizer now persists both generic duplicate matches and audited
+mercenary-to-standard matches, and the repository honors those results directly.
+Configured alias groups and reinforcement-only joins are still not represented
+by one normalized logical-unit identity. A future normalized/database identity
+layer may collapse
 those source records for application queries while preserving every source unit
 ID, army occurrence, profile/loadout provenance, and the reason an army
 occurrence exists.

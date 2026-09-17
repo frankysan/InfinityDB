@@ -4,19 +4,22 @@ import pytest
 
 import infinity_army_data.cli as cli
 from infinity_army_data.availability import (
+    GENERIC_MATCH_METHOD,
     MERCENARY_MATCH_METHOD,
     annotate_availability_semantics,
+    audit_generic_logical_matches,
     audit_mercenary_logical_matches,
 )
 
 
-def normalized_units(*units, memberships=(), occurrences=()):
+def normalized_units(*units, memberships=(), occurrences=(), army_lists=()):
     return {
         "_meta": {
             "tableCounts": {
                 "units": len(units),
                 "unit_factions": len(memberships),
                 "army_units": len(occurrences),
+                "army_lists": len(army_lists),
             },
             "warningCount": 0,
         },
@@ -24,6 +27,7 @@ def normalized_units(*units, memberships=(), occurrences=()):
             "units": [dict(unit) for unit in units],
             "unit_factions": [dict(row) for row in memberships],
             "army_units": [dict(row) for row in occurrences],
+            "army_lists": [dict(row) for row in army_lists],
         },
         "warnings": [],
     }
@@ -66,6 +70,87 @@ def test_mercenary_variant_uses_source_markers_not_unit_id_pattern() -> None:
     assert data["tables"]["units"][0]["source_role"] == "mercenary_variant"
     assert data["tables"]["units"][0]["main_army_id"] is None
     assert data["tables"]["army_units"][0]["availability_kind"] == "mercenary"
+
+
+def test_generic_mapping_audit_persists_standard_duplicate_family() -> None:
+    data = normalized_units(
+        {
+            "id": 64,
+            "canonical_faction_id": 202,
+            "isc": "Alpha Unit",
+            "name": "ALPHA UNIT",
+            "slug": "alpha-unit",
+            "source_defined": True,
+        },
+        {
+            "id": 10064,
+            "canonical_faction_id": 202,
+            "isc": "Alpha Unit",
+            "name": "ALPHA UNIT",
+            "slug": "alpha-unit-duplicate",
+            "source_defined": True,
+        },
+        memberships=[
+            {"unit_id": 64, "faction_id": 202},
+            {"unit_id": 10064, "faction_id": 202},
+        ],
+        occurrences=[
+            {"army_id": 202, "unit_id": 64},
+            {"army_id": 202, "unit_id": 10064},
+        ],
+        army_lists=[{"id": 202, "kind": "sectorial"}],
+    )
+
+    annotate_availability_semantics(data)
+    matches = audit_generic_logical_matches(data)
+
+    assert matches == {10064: 64}
+    assert data["genericUnitMatches"] == [
+        {
+            "sourceUnitId": 10064,
+            "representativeUnitId": 64,
+            "method": GENERIC_MATCH_METHOD,
+        }
+    ]
+
+
+def test_generic_mapping_audit_excludes_reinforcement_only_units() -> None:
+    data = normalized_units(
+        {
+            "id": 64,
+            "canonical_faction_id": 202,
+            "isc": "Alpha Unit",
+            "name": "ALPHA UNIT",
+            "slug": "alpha-unit",
+            "source_defined": True,
+        },
+        {
+            "id": 10064,
+            "canonical_faction_id": 202,
+            "isc": "Alpha Unit",
+            "name": "ALPHA UNIT",
+            "slug": "alpha-unit-reinforcement",
+            "source_defined": True,
+        },
+        memberships=[
+            {"unit_id": 64, "faction_id": 202},
+            {"unit_id": 10064, "faction_id": 202},
+        ],
+        occurrences=[
+            {"army_id": 202, "unit_id": 64},
+            {"army_id": 998, "unit_id": 10064},
+        ],
+        army_lists=[
+            {"id": 202, "kind": "sectorial"},
+            {"id": 998, "kind": "reinforcement"},
+        ],
+    )
+
+    annotate_availability_semantics(data)
+    matches = audit_generic_logical_matches(data)
+
+    assert matches == {}
+    assert data["genericUnitMatches"] == []
 
 
 def test_mercenary_mapping_audit_matches_standard_duplicate_family() -> None:
@@ -189,5 +274,6 @@ def test_normalize_pipeline_applies_availability_annotation(
 
     assert result["tables"]["units"][0]["source_role"] == "mercenary_variant"
     assert result["tables"]["army_units"][0]["availability_kind"] == "mercenary"
+    assert result["genericUnitMatches"] == []
     assert result["mercenaryUnitMatches"] == []
     assert result["unmatchedMercenaryUnitIds"] == [10464]

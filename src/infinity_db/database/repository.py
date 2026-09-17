@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from infinity_army_data.availability import (
+    GENERIC_MATCH_METHOD,
+    GENERIC_UNIT_MATCHES_KEY,
     MERCENARY_AVAILABILITY,
     MERCENARY_MATCH_METHOD,
     MERCENARY_SOURCE_ROLE,
@@ -74,7 +76,6 @@ class RowLike(Protocol):
 
     def keys(self) -> Iterable[str]: ...
 
-
 def instance_lru_cache(maxsize: int) -> Callable:
     """Cache immutable database-query results without retaining Database instances."""
 
@@ -116,7 +117,6 @@ NUMBER_PATTERN = re.compile(r"[+-]?\d+(?:\.\d+)?")
 DISTANCE_DIVISOR = Decimal("2.5")
 NON_DISTANCE_EXTRAS = frozenset({"+5 CC"})
 
-
 def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityConfig:
     """Load and validate the identity policy pinned into a database snapshot."""
     rows = connection.execute(
@@ -138,6 +138,72 @@ def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityC
             "Database has invalid identity configuration metadata; rebuild the database"
         ) from exc
 
+def generic_unit_identity_policy_from_connection(
+    connection: sqlite3.Connection,
+) -> dict[int, int] | None:
+    """Load persisted generic duplicate-unit identity, when available.
+
+    Current normalized snapshots persist ``genericUnitMatches`` even when the
+    audit finds no matches. Its presence therefore makes the persisted result
+    authoritative and disables repository rediscovery through the legacy
+    10,000-ID arithmetic rule. Databases created before the audit was persisted
+    retain that rule as a compatibility fallback.
+    """
+    row = connection.execute(
+        f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+        (GENERIC_UNIT_MATCHES_KEY,),
+    ).fetchone()
+    if row is None:
+        return None
+    try:
+        raw_matches = json.loads(row["value"])
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ValueError("Database has invalid generic unit identity metadata") from exc
+    if not isinstance(raw_matches, list):
+        raise ValueError("Database has invalid generic unit identity metadata")
+
+    matches: dict[int, int] = {}
+    for item in raw_matches:
+        if not isinstance(item, dict) or set(item) != {
+            "sourceUnitId",
+            "representativeUnitId",
+            "method",
+        }:
+            raise ValueError("Database has invalid generic unit identity metadata")
+        source_id = item["sourceUnitId"]
+        representative_id = item["representativeUnitId"]
+        if (
+            type(source_id) is not int
+            or source_id <= 0
+            or type(representative_id) is not int
+            or representative_id <= 0
+            or source_id == representative_id
+            or item["method"] != GENERIC_MATCH_METHOD
+            or source_id in matches
+        ):
+            raise ValueError("Database has invalid generic unit identity metadata")
+        matches[source_id] = representative_id
+
+    if set(matches) & set(matches.values()):
+        raise ValueError("Database generic unit identity metadata contains chained matches")
+
+    unit_roles = {
+        row["id"]: row["source_role"]
+        for row in connection.execute(
+            "SELECT id, source_role FROM units WHERE source_defined = 1"
+        )
+    }
+    if any(
+        unit_roles.get(source_id) != STANDARD_SOURCE_ROLE
+        or unit_roles.get(representative_id) != STANDARD_SOURCE_ROLE
+        for source_id, representative_id in matches.items()
+    ):
+        raise ValueError(
+            "Database generic unit identity metadata references invalid source roles; "
+            "rebuild the database"
+        )
+
+    return matches
 
 def mercenary_identity_policy_from_connection(
     connection: sqlite3.Connection,
@@ -225,14 +291,12 @@ def mercenary_identity_policy_from_connection(
 
     return matches, frozenset(unmatched)
 
-
 def canonical_skill_id(
     skill_id: int, identity_config: IdentityConfig | None = None
 ) -> int:
     """Return the configured representative ID for an explicit skill identity group."""
     config = identity_config or load_identity_config()
     return config.canonical_catalog_id("skills", skill_id) or skill_id
-
 
 def skill_merge_key(name: object) -> str | None:
     """Identify skill labels that differ only by a numeric level or value."""
@@ -241,13 +305,11 @@ def skill_merge_key(name: object) -> str | None:
         return None
     return re.sub(r"\s+", " ", re.sub(r"\d+", "", text)).casefold()
 
-
 def merged_skill_name(name: object) -> str:
     """Turn a numeric skill variant label into its shared display label."""
     text = re.sub(r"\s+", " ", re.sub(r"\d+", "", str(name or "")).strip())
     text = re.sub(r"\s+L$", "", text, flags=re.IGNORECASE)
     return text.rstrip(" =:-()").strip()
-
 
 def catalog_merge_key(name: object) -> str | None:
     """Identify catalog labels that differ only by a numeric level or value."""
@@ -256,14 +318,12 @@ def catalog_merge_key(name: object) -> str | None:
         return text.split(":", 1)[0].strip().casefold() or None
     return skill_merge_key(text)
 
-
 def merged_catalog_name(name: object) -> str:
     """Turn a numeric catalog variant label into its shared display label."""
     text = str(name or "").strip()
     if ":" in text:
         return text.split(":", 1)[0].strip()
     return merged_skill_name(text)
-
 
 def configured_catalog_group(
     identity_config: IdentityConfig,
@@ -284,12 +344,10 @@ def configured_catalog_group(
         canonical_id = min(source_ids)
     return canonical_id, source_ids
 
-
 def trait_slug(name: object) -> str:
     """Return the URL-safe identity used by the derived traits catalog."""
     text = str(name or "").removesuffix(" (SF)")
     return re.sub(r"[^a-z0-9]+", "-", text.casefold()).strip("-")
-
 
 def trait_reference(value: object, trait_slugs: Mapping[str, str]) -> dict[str, Any]:
     """Describe a source trait with its backend-owned catalog identity."""
@@ -301,18 +359,15 @@ def trait_reference(value: object, trait_slugs: Mapping[str, str]) -> dict[str, 
         "slug": trait_slugs.get(name),
     }
 
-
 def unit_sort_key(value: object) -> str:
     """Return a case-insensitive, punctuation-free key for unit-name ordering."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
     return "".join(character for character in decomposed if character.isalnum())
 
-
 def accent_insensitive_key(value: object) -> str:
     """Return text suitable for case-, accent-, and punctuation-insensitive matching."""
     decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
     return "".join(character for character in decomposed if character.isalnum())
-
 
 def contains_distance_multiple(value: object) -> bool:
     """Whether text has no assignment and contains a number divisible by 2.5."""
@@ -326,7 +381,6 @@ def contains_distance_multiple(value: object) -> bool:
         except InvalidOperation:
             continue
     return False
-
 
 def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
     """Normalize sign conventions that are specific to a distance skill."""
@@ -342,9 +396,8 @@ def canonical_skill_extra_name(skill_name: object, extra_name: object) -> str:
             pass
     return extra
 
-
-def unit_group_key(row: RowLike, identity_config: IdentityConfig) -> tuple[int, str]:
-    """Identify duplicate unit records that belong to one logical unit."""
+def legacy_unit_group_key(row: RowLike, identity_config: IdentityConfig) -> tuple[int, str]:
+    """Return the pre-audit duplicate key retained for legacy databases."""
     unit_id = row["id"]
     if unit_id in identity_config.unit_aliases:
         return (identity_config.canonical_unit_id(unit_id), "")
@@ -352,7 +405,6 @@ def unit_group_key(row: RowLike, identity_config: IdentityConfig) -> tuple[int, 
         unit_id % 10_000,
         (row["isc"] or row["name"]).casefold(),
     )
-
 
 def normalized_unit_identity(value: object, identity_config: IdentityConfig) -> str:
     """Return an order-insensitive, singularized identity for a unit label."""
@@ -372,7 +424,6 @@ def normalized_unit_identity(value: object, identity_config: IdentityConfig) -> 
     ]
     return " ".join(sorted(normalized_words))
 
-
 def unit_match_identities(row: RowLike, identity_config: IdentityConfig) -> set[str]:
     """Return normalized ISC and display-name identities for a unit.
 
@@ -387,17 +438,14 @@ def unit_match_identities(row: RowLike, identity_config: IdentityConfig) -> set[
         if (identity := normalized_unit_identity(value, identity_config))
     }
 
-
 def unit_base_identity(row: RowLike, identity_config: IdentityConfig) -> str:
     """Return a stable primary identity for a logical unit group."""
     return min(unit_match_identities(row, identity_config), default="")
-
 
 def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> None:
     """Add an item unless a merged source already contributed the same one."""
     if item not in items:
         items.append(item)
-
 
 def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
     """Combine complementary metadata from duplicate source profiles."""
@@ -422,25 +470,46 @@ def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
     ):
         profile["ava"] = ava
 
-
 def logical_unit_groups(
     rows: Sequence[RowLike],
     memberships: Mapping[int, Sequence[Mapping[str, Any]]],
     identity_config: IdentityConfig | None = None,
     *,
+    generic_matches: Mapping[int, int] | None = None,
     mercenary_matches: Mapping[int, int] | None = None,
     unmatched_mercenary_ids: Collection[int] = (),
 ) -> list[dict[str, Any]]:
-    """Combine logical source records while honoring persisted mercenary identity.
+    """Combine logical source records using persisted normalization identity.
 
-    Generic duplicate and reinforcement grouping remain runtime behavior for now.
-    When normalization has persisted mercenary identity metadata, that mapping is
-    authoritative for mercenary variants and the 10,000-ID duplicate rule is not
-    used to decide their standard-unit pairing.
+    Current snapshots persist generic duplicate matches and mercenary-to-standard
+    matches. When the generic audit metadata is present it is authoritative: rows
+    not named by that audit remain separate rather than being rediscovered through
+    the legacy 10,000-ID key. Explicit configured unit aliases still take
+    precedence, while older databases without generic audit metadata retain the
+    arithmetic fallback. Reinforcement-only matching remains runtime behavior.
     """
     identity_config = identity_config or load_identity_config()
     rows_by_id = {row["id"]: row for row in rows}
     unmatched_mercenary_ids = frozenset(unmatched_mercenary_ids)
+    generic_representatives = dict(generic_matches or {})
+    if generic_matches is not None:
+        for representative_id in generic_matches.values():
+            generic_representatives.setdefault(representative_id, representative_id)
+
+    def standard_identity(row: RowLike) -> tuple[tuple[Any, ...], RowLike]:
+        unit_id = row["id"]
+        if unit_id in identity_config.unit_aliases:
+            return ("configured", identity_config.canonical_unit_id(unit_id)), row
+        if generic_matches is not None:
+            representative_id = generic_representatives.get(unit_id, unit_id)
+            representative = rows_by_id.get(representative_id)
+            if representative is None:
+                raise ValueError(
+                    f"Generic source unit {unit_id} maps to missing representative unit "
+                    f"{representative_id}"
+                )
+            return ("persisted", representative_id), representative
+        return ("legacy", *legacy_unit_group_key(row, identity_config)), row
     groups: dict[tuple[Any, ...], dict[str, Any]] = {}
     for row in rows:
         armies = memberships[row["id"]]
@@ -451,18 +520,20 @@ def logical_unit_groups(
         representative = row
         if mercenary_matches is not None and row["id"] in mercenary_matches:
             standard_id = mercenary_matches[row["id"]]
-            representative = rows_by_id.get(standard_id)
-            if representative is None:
+            standard = rows_by_id.get(standard_id)
+            if standard is None:
                 raise ValueError(
                     f"Mercenary source unit {row['id']} maps to missing standard unit {standard_id}"
                 )
-            key = ("standard", *unit_group_key(representative, identity_config))
+            standard_key, representative = standard_identity(standard)
+            key = ("standard", *standard_key)
         elif mercenary_matches is not None and row["id"] in unmatched_mercenary_ids:
             key = ("unmatched_mercenary", row["id"])
         elif reinforcement_only:
             key = ("reinforcement", base_identity)
         else:
-            key = ("standard", *unit_group_key(row, identity_config))
+            standard_key, representative = standard_identity(row)
+            key = ("standard", *standard_key)
         group = groups.setdefault(
             key,
             {
@@ -530,7 +601,6 @@ def logical_unit_groups(
             del groups[key]
     return list(groups.values())
 
-
 def army_name(row: RowLike) -> str:
     if row["name"]:
         return row["name"]
@@ -541,7 +611,6 @@ def army_name(row: RowLike) -> str:
         if derived_name:
             return derived_name
     return f"Army {row['id']}"
-
 
 def unit_optional_modes(group: Mapping[str, Any]) -> set[str]:
     """Return optional modes encoded in a dedicated unit's name or slug."""
@@ -556,13 +625,11 @@ def unit_optional_modes(group: Mapping[str, Any]) -> set[str]:
         modes.add("teamops")
     return modes
 
-
 def army_is_available(
     army: Mapping[str, Any], group: Mapping[str, Any], selected_flags: set[str]
 ) -> bool:
     """Return whether an army occurrence needs only enabled optional modes."""
     return army_required_flags(army, group) <= selected_flags
-
 
 def army_required_flags(
     army: Mapping[str, Any],
@@ -596,7 +663,6 @@ def army_required_flags(
     if isinstance(filters, dict):
         required.update(flag for flag in AVAILABILITY_FLAGS if filters.get(flag))
     return required
-
 
 def visible_armies_for_group(
     group: Mapping[str, Any],
@@ -714,6 +780,7 @@ class Database:
                     "rebuild the database"
                 )
             identity_config_from_connection(connection)
+            generic_unit_identity_policy_from_connection(connection)
             mercenary_identity_policy_from_connection(connection)
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
@@ -742,6 +809,7 @@ class Database:
                 "u.main_army_id, u.canonical_faction_id, u.source_role "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
+            generic_identity = generic_unit_identity_policy_from_connection(connection)
             mercenary_identity = mercenary_identity_policy_from_connection(connection)
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
             army_names = {
@@ -784,6 +852,7 @@ class Database:
             rows,
             memberships,
             identity_config,
+            generic_matches=generic_identity,
             mercenary_matches=(mercenary_identity[0] if mercenary_identity is not None else None),
             unmatched_mercenary_ids=(
                 mercenary_identity[1] if mercenary_identity is not None else ()

@@ -117,6 +117,10 @@ history retains implementation detail.
     normalization and make repository logical grouping honor those matches when
     present. Explicitly unmatched variants remain separate; older databases
     without the metadata retain the legacy generic-grouping fallback.
+  - [x] Persist audited generic standard-unit duplicate matches during
+    normalization and make repository grouping treat that audit as authoritative
+    when present, including an explicit empty result. Older databases without
+    `genericUnitMatches` retain the 10,000-ID/ISC compatibility fallback.
   - Move unambiguous mercenary-variant deduplication into normalization or
     database creation. Merge alternate source records into one logical
     application unit while retaining every source unit ID, source occurrence,

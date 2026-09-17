@@ -36,6 +36,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Persist generic standard-unit duplicate matches as `genericUnitMatches` during
+  normalization and make current repository grouping consume that audit instead
+  of recomputing the 10,000-ID/ISC key. An explicitly empty audit disables
+  arithmetic rediscovery, while older databases without the metadata retain the
+  legacy fallback. Reinforcement matching and configured aliases remain separate
+  concerns.
 - Derive normalized unit `main_army_id` from imported Army metadata faction
   parents instead of the `xx01` Army-ID convention for current InfinityDB
   builds. Explicit maintained canonical-faction overrides still take

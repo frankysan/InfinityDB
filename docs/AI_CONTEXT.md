@@ -77,11 +77,13 @@ and serves a read-only browser and same-origin HTTP API.
   occurrences that add optional availability. Many use a 10,000-offset-style
   source ID, but numeric offset is diagnostic evidence only, not the semantic
   rule.
-- Current normalized snapshots persist mercenary-to-standard source-unit matches
-  and explicit `army_units.availability_kind`. Repository logical grouping uses
-  the persisted mercenary mappings, and mercenary filtering uses explicit
-  availability provenance. Legacy databases without those fields retain narrow
-  compatibility fallbacks.
+- Current normalized snapshots persist generic standard duplicate-unit matches,
+  mercenary-to-standard source-unit matches, and explicit
+  `army_units.availability_kind`. Repository logical grouping consumes the
+  persisted generic and mercenary mappings, while mercenary filtering uses
+  explicit availability provenance. The 10,000-ID generic grouping rule remains
+  only as a compatibility fallback for older databases without
+  `genericUnitMatches`.
 - 901 (Non-Aligned Armies) is a grouping identity for its child 9xx armies, not
   an independently playable army. Do not infer playability from ID patterns or
   the existence of an `army_lists` record.
@@ -106,10 +108,12 @@ and serves a read-only browser and same-origin HTTP API.
   non-playable.
 - Mercenary variants are classified during normalization, their source markers
   are validated, audited mercenary-to-standard mappings are persisted, and
-  repository queries consume explicit availability provenance. **Design
-  direction:** continue moving the remaining generic duplicate, configured
-  alias, and reinforcement logical-unit identity into a pre-runtime normalized
-  identity layer while preserving every source ID and occurrence.
+  repository queries consume explicit availability provenance. Generic standard
+  duplicate matching is also audited and persisted during normalization; current
+  repositories do not rediscover those groups through numeric ID arithmetic.
+  **Design direction:** continue moving configured aliases and reinforcement
+  logical-unit identity into a pre-runtime normalized identity layer while
+  preserving every source ID and occurrence.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized
@@ -342,6 +346,12 @@ changes.
 - 2026-09-16: Documentation distinguishes current implementation, accepted
   design direction, and planned/unimplemented backlog so future architecture is
   not presented as existing behavior.
+- 2026-09-17: Generic standard-unit duplicate matching moved from repository-time
+  10,000-ID arithmetic into a normalization audit persisted as
+  `genericUnitMatches`. Current repositories treat the persisted audit as
+  authoritative, including an empty result; older databases without the key
+  retain the arithmetic fallback. No SQLite schema or compatibility revision
+  change was required because the metadata contract is backward-compatible.
 - 2026-09-17: Unit `main_army_id` derivation moved from the ordinary `xx01`
   Army-ID convention to imported metadata faction parents for current
   InfinityDB builds. Explicit maintained overrides still win; `xx01` remains

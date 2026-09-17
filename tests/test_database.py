@@ -824,6 +824,103 @@ def test_duplicate_10000_id_family_is_one_logical_unit(tmp_path: Path, normalize
     assert {army["id"] for army in details["armies"]} == {101, 201, 301}
 
 
+def test_database_uses_persisted_generic_mapping(tmp_path: Path, normalized: dict) -> None:
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    original["source_role"] = "standard"
+    normalized["tables"]["units"].append(
+        {
+            "id": 10_001,
+            "name": "Different source label",
+            "isc": "Different source ISC",
+            "canonical_faction_id": None,
+            "main_army_id": None,
+            "source_defined": True,
+            "source_role": "standard",
+        }
+    )
+    normalized["tables"]["army_units"].append(
+        {"army_id": 301, "unit_id": 10_001, "availability_kind": "standard"}
+    )
+    normalized["genericUnitMatches"] = [
+        {
+            "sourceUnitId": 10_001,
+            "representativeUnitId": 1,
+            "method": "generic_duplicate_key",
+        }
+    ]
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    alpha = next(unit for unit in database.list_units()["items"] if unit["id"] == 1)
+    assert alpha["source_ids"] == [1, 10_001]
+    assert alpha["army_ids"] == [101, 201, 301]
+    assert database.list_units()["total"] == 3
+
+    details = database.get_unit(10_001)
+    assert details is not None
+    assert details["id"] == 1
+    assert details["source_ids"] == [1, 10_001]
+
+
+def test_database_empty_generic_audit_prevents_legacy_grouping(
+    tmp_path: Path, normalized: dict
+) -> None:
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    normalized["tables"]["units"].append(
+        {
+            "id": 10_001,
+            "name": original["name"],
+            "isc": original["isc"],
+            "canonical_faction_id": None,
+            "source_defined": True,
+        }
+    )
+    normalized["tables"]["army_units"].append({"army_id": 301, "unit_id": 10_001})
+    normalized["genericUnitMatches"] = []
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert database.list_units()["total"] == 4
+    duplicate = database.get_unit(10_001)
+    assert duplicate is not None
+    assert duplicate["id"] == 10_001
+    assert duplicate["source_ids"] == [10_001]
+
+
+def test_persisted_generic_mapping_overrides_legacy_duplicate_key() -> None:
+    rows = [
+        {"id": 64, "name": "ALPHA", "isc": "Alpha Unit", "main_army_id": 201},
+        {
+            "id": 10064,
+            "name": "DIFFERENT SOURCE LABEL",
+            "isc": "Different Source ISC",
+            "main_army_id": 201,
+        },
+    ]
+    memberships = {64: [], 10064: []}
+
+    groups = logical_unit_groups(rows, memberships, generic_matches={10064: 64})
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == 64
+    assert groups[0]["source_ids"] == [64, 10064]
+
+
+def test_empty_persisted_generic_mapping_disables_legacy_duplicate_key() -> None:
+    rows = [
+        {"id": 64, "name": "ALPHA", "isc": "Alpha Unit", "main_army_id": 201},
+        {"id": 10064, "name": "ALPHA", "isc": "Alpha Unit", "main_army_id": 201},
+    ]
+    memberships = {64: [], 10064: []}
+
+    groups = logical_unit_groups(rows, memberships, generic_matches={})
+
+    assert len(groups) == 2
+    assert [group["source_ids"] for group in groups] == [[64], [10064]]
+
+
 def test_persisted_mercenary_mapping_overrides_generic_duplicate_key() -> None:
     rows = [
         {
