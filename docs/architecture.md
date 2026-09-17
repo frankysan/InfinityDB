@@ -158,7 +158,11 @@ canonical/faction inference remains only as a legacy-row fallback. Generic
 standard duplicate matching is also audited during normalization and persisted
 as `genericUnitMatches`; current repositories consume that result rather than
 recomputing the 10,000-ID key. The arithmetic rule remains only for older
-databases that lack the audit metadata.
+databases that lack the audit metadata. Database creation also audits
+reinforcement-only source records against the already grouped standard-unit
+identities using the pinned name-normalization policy and persists unambiguous
+`reinforcementUnitMatches`. Current repositories consume that persisted result;
+databases created before it existed retain the legacy query-time label matcher.
 
 ### Design direction
 
@@ -210,9 +214,11 @@ The legacy `1` -> `901` canonical-faction override has now been removed. ID `1`
 remains source provenance for mercenary identity and does not receive an
 application `main_army_id`; 901 remains a separate Non-Aligned Army grouping
 identity. Generic duplicate matching is now persisted during normalization
-and consumed directly by current repositories. Remaining logical-unit work
-concerns configured-alias consolidation and reinforcement identity rather than
-mercenary availability or runtime 10,000-ID rediscovery.
+and reinforcement-to-standard matching is audited during database creation;
+current repositories consume both results directly. Remaining logical-unit work
+concerns materializing one complete application identity across configured aliases
+and other source variants rather than mercenary/reinforcement rediscovery at
+query time.
 
 ## Snapshot acquisition and provenance
 

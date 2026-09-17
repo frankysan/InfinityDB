@@ -121,6 +121,11 @@ history retains implementation detail.
     normalization and make repository grouping treat that audit as authoritative
     when present, including an explicit empty result. Older databases without
     `genericUnitMatches` retain the 10,000-ID/ISC compatibility fallback.
+  - [x] Persist unambiguous reinforcement-to-standard source-unit matches during
+    database creation using the pinned name-normalization policy. Current
+    repositories treat `reinforcementUnitMatches` as authoritative, including an
+    explicitly empty result; older databases without the metadata retain the
+    legacy query-time label matcher.
   - Move unambiguous mercenary-variant deduplication into normalization or
     database creation. Merge alternate source records into one logical
     application unit while retaining every source unit ID, source occurrence,

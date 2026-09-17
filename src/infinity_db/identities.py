@@ -18,6 +18,8 @@ DEFAULT_IDENTITY_CONFIG = PROJECT_ROOT / "config" / "identity" / "source-identit
 CATALOG_NAMES = ("skills", "equipment", "weapons")
 IDENTITY_CONFIG_METADATA_KEY = "identityConfig"
 IDENTITY_CONFIG_SHA256_METADATA_KEY = "identityConfigSha256"
+REINFORCEMENT_MATCH_METHOD = "normalized_unit_identity"
+REINFORCEMENT_UNIT_MATCHES_KEY = "reinforcementUnitMatches"
 
 
 class IdentityConfigError(ValueError):
@@ -65,6 +67,38 @@ class IdentityConfig:
         if canonical_id is None:
             return ()
         return tuple(item_id for item_id, target in aliases.items() if target == canonical_id)
+
+
+def normalized_unit_identity(value: object, config: IdentityConfig) -> str:
+    """Return the maintained label identity used for reinforcement unit matching."""
+    identity = re.sub(r"^reinf(?:\.|:)?\s*", "", str(value or ""), flags=re.IGNORECASE)
+    decomposed = unicodedata.normalize("NFKD", identity).casefold()
+    words = re.findall(r"[^\W_]+", decomposed)
+    normalized_words = [
+        config.word_aliases.get(
+            root := (
+                word[:-1]
+                if len(word) > 3 and word.endswith("s") and not word.endswith("ss")
+                else word
+            ),
+            root,
+        )
+        for word in words
+    ]
+    return " ".join(sorted(normalized_words))
+
+
+def unit_match_identities(row: Any, config: IdentityConfig) -> set[str]:
+    """Return normalized ISC and display-name identities for a source unit."""
+    def value(key: str) -> Any:
+        getter = getattr(row, "get", None)
+        return getter(key) if getter is not None else row[key]
+
+    return {
+        identity
+        for raw_value in (value("isc"), value("name"))
+        if (identity := normalized_unit_identity(raw_value, config))
+    }
 
 
 def normalized_profile_identity(value: object, config: IdentityConfig) -> str:

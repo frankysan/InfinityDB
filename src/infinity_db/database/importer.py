@@ -11,17 +11,25 @@ from itertools import islice
 from pathlib import Path
 from typing import Any
 
+from infinity_army_data.availability import (
+    GENERIC_MATCH_METHOD,
+    GENERIC_UNIT_MATCHES_KEY,
+    MERCENARY_SOURCE_ROLE,
+)
 from infinity_army_data.metadata import MetadataError, validate_metadata_envelope
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
 
 from ..identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    REINFORCEMENT_MATCH_METHOD,
+    REINFORCEMENT_UNIT_MATCHES_KEY,
     IdentityConfig,
     IdentityConfigError,
     identity_metadata,
     load_identity_config,
     parse_identity_metadata,
+    unit_match_identities,
 )
 from .schema import (
     APPLICATION_ID,
@@ -153,10 +161,120 @@ def insert_batched(
         connection.executemany(statement, batch)
 
 
+def reinforcement_unit_matches(
+    data: dict[str, Any], identity_config: IdentityConfig
+) -> dict[int, int]:
+    """Audit unambiguous reinforcement-only source units against standard groups."""
+    tables = data["tables"]
+    units = {
+        row["id"]: row
+        for row in tables.get("units", [])
+        if row.get("source_defined") is not False and isinstance(row.get("id"), int)
+    }
+    army_kinds = {
+        row.get("id"): row.get("kind")
+        for row in tables.get("army_lists", [])
+        if isinstance(row.get("id"), int)
+    }
+    memberships: dict[int, list[int]] = {unit_id: [] for unit_id in units}
+    for row in tables.get("army_units", []):
+        unit_id = row.get("unit_id")
+        army_id = row.get("army_id")
+        if unit_id in memberships and isinstance(army_id, int):
+            memberships[unit_id].append(army_id)
+
+    reinforcement_ids = {
+        unit_id
+        for unit_id, army_ids in memberships.items()
+        if army_ids and all(army_kinds.get(army_id) == "reinforcement" for army_id in army_ids)
+    }
+
+    generic_matches: dict[int, int] | None = None
+    raw_generic = data.get(GENERIC_UNIT_MATCHES_KEY)
+    if raw_generic is not None:
+        if not isinstance(raw_generic, list):
+            raise ValueError("Normalized data has invalid generic unit identity metadata")
+        generic_matches = {}
+        for item in raw_generic:
+            if (
+                not isinstance(item, dict)
+                or set(item) != {"sourceUnitId", "representativeUnitId", "method"}
+                or type(item["sourceUnitId"]) is not int
+                or type(item["representativeUnitId"]) is not int
+                or item["method"] != GENERIC_MATCH_METHOD
+                or item["sourceUnitId"] in generic_matches
+            ):
+                raise ValueError("Normalized data has invalid generic unit identity metadata")
+            generic_matches[item["sourceUnitId"]] = item["representativeUnitId"]
+
+    def standard_group_key(unit_id: int) -> tuple[object, ...]:
+        if unit_id in identity_config.unit_aliases:
+            return ("configured", identity_config.canonical_unit_id(unit_id))
+        if generic_matches is not None:
+            return ("persisted", generic_matches.get(unit_id, unit_id))
+        unit = units[unit_id]
+        label = unit.get("isc") or unit.get("name") or ""
+        return ("legacy", unit_id % 10_000, str(label).casefold())
+
+    standard_groups: dict[tuple[object, ...], list[int]] = {}
+    for unit_id, unit in sorted(units.items()):
+        if unit_id in reinforcement_ids or unit.get("source_role") == MERCENARY_SOURCE_ROLE:
+            continue
+        standard_groups.setdefault(standard_group_key(unit_id), []).append(unit_id)
+
+    identities_by_group: dict[tuple[object, ...], set[str]] = {}
+    representative_by_group: dict[tuple[object, ...], int] = {}
+    for key, source_ids in standard_groups.items():
+        representative_by_group[key] = min(source_ids)
+        identities = identities_by_group.setdefault(key, set())
+        for source_id in source_ids:
+            identities.update(unit_match_identities(units[source_id], identity_config))
+
+    reinforcement_groups: dict[str, list[int]] = {}
+    reinforcement_identities: dict[str, set[str]] = {}
+    for reinforcement_id in sorted(reinforcement_ids):
+        identities = unit_match_identities(units[reinforcement_id], identity_config)
+        base_identity = min(identities, default="")
+        reinforcement_groups.setdefault(base_identity, []).append(reinforcement_id)
+        reinforcement_identities.setdefault(base_identity, set()).update(identities)
+
+    matches: dict[int, int] = {}
+    for base_identity, source_ids in reinforcement_groups.items():
+        identities = reinforcement_identities[base_identity]
+        candidates = [
+            key
+            for key, standard_identities in identities_by_group.items()
+            if identities & standard_identities
+        ]
+        if len(candidates) == 1:
+            standard_id = representative_by_group[candidates[0]]
+            matches.update({source_id: standard_id for source_id in source_ids})
+    return matches
+
+
+def reinforcement_identity_metadata(
+    data: dict[str, Any], identity_config: IdentityConfig
+) -> list[dict[str, Any]]:
+    """Return deterministic database metadata for audited reinforcement identity."""
+    return [
+        {
+            "reinforcementUnitId": source_id,
+            "standardUnitId": standard_id,
+            "method": REINFORCEMENT_MATCH_METHOD,
+        }
+        for source_id, standard_id in sorted(
+            reinforcement_unit_matches(data, identity_config).items()
+        )
+    ]
+
+
 def snapshot_metadata(data: dict[str, Any], identity_config: IdentityConfig) -> dict[str, Any]:
     """Return the metadata persisted with both database siblings."""
     metadata = {key: value for key, value in data.items() if key != "tables"}
     metadata.update(identity_metadata(identity_config))
+    metadata[REINFORCEMENT_UNIT_MATCHES_KEY] = reinforcement_identity_metadata(
+        data, identity_config
+    )
     metadata["imported_tables"] = list(data["tables"])
     metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
     return metadata

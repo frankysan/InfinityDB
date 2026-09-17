@@ -109,11 +109,13 @@ and serves a read-only browser and same-origin HTTP API.
 - Mercenary variants are classified during normalization, their source markers
   are validated, audited mercenary-to-standard mappings are persisted, and
   repository queries consume explicit availability provenance. Generic standard
-  duplicate matching is also audited and persisted during normalization; current
-  repositories do not rediscover those groups through numeric ID arithmetic.
-  **Design direction:** continue moving configured aliases and reinforcement
-  logical-unit identity into a pre-runtime normalized identity layer while
-  preserving every source ID and occurrence.
+  duplicate matching is also audited and persisted during normalization.
+  Database creation additionally persists unambiguous reinforcement-to-standard
+  matches using the pinned name-normalization policy. Current repositories do not
+  rediscover generic or reinforcement identity at query time when those metadata
+  contracts are present. **Design direction:** materialize one complete logical
+  application identity across configured aliases and persisted source variants
+  while preserving every source ID and occurrence.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized
@@ -368,5 +370,5 @@ changes.
   army lists. Dedicated mercenary variants are identified by source semantics,
   not numeric ID arithmetic. Classification, persisted mercenary-to-standard
   matching, and explicit availability provenance are now normalized before
-  repository use. Broader generic/reinforcement logical-unit consolidation
+  repository use. Broader materialized logical-unit consolidation
   remains future work.

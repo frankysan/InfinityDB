@@ -36,6 +36,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Audit unambiguous reinforcement-only source-unit identity during database
+  creation and persist `reinforcementUnitMatches` alongside the pinned identity
+  policy. Current repository grouping consumes that metadata instead of repeating
+  name/ISC matching at query time; an empty audit is authoritative, while older
+  databases without the key retain the legacy runtime matcher.
 - Persist generic standard-unit duplicate matches as `genericUnitMatches` during
   normalization and make current repository grouping consume that audit instead
   of recomputing the 10,000-ID/ISC key. An explicitly empty audit disables
