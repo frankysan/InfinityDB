@@ -10,6 +10,7 @@ Before making substantial changes, read:
 - `docs/data-model.md` — normalized data and persistence semantics.
 - `docs/AI_CONTEXT.md` — durable project decisions, invariants, and development
   context.
+- `docs/testing.md` — standard development-check orchestration and reporting.
 
 The engineering principles in `docs/architecture.md` are authoritative for
 technical design decisions.
@@ -24,11 +25,32 @@ Virtual-environment interpreters are normally:
 - Windows: `.venv\Scripts\python.exe`
 - Linux/macOS: `.venv/bin/python`
 
-Run tools through that interpreter, for example:
+Use `tools/run_checks.py` as the standard entry point for repository checks. It
+invokes pytest, Ruff, and data-build validation through the same Python
+interpreter that launched the runner and keeps stage selection/reporting
+consistent across local development and agent handoffs. Examples:
 
 ```text
-<venv-python> -m pytest
-<venv-python> -m ruff check src tests
+<venv-python> tools/run_checks.py --profile code
+<venv-python> tools/run_checks.py --profile data
+<venv-python> tools/run_checks.py --all
+<venv-python> tools/run_checks.py --stage test tests/test_availability.py
+<venv-python> tools/run_checks.py --profile code --report
+```
+
+With `--report` and no path, the runner writes an ignored repository-local
+`reports/CHECKS YYYYMMDD-HHMMSS.txt` file using the same run-start timestamp as
+the report header. An explicit report path overrides that convention. Requested
+stages continue after failures by default; use `--fail-fast` when appropriate.
+See `docs/testing.md` for the complete contract.
+
+Direct pytest/Ruff commands remain appropriate when debugging those tools in
+isolation, and package installation still runs through the virtual-environment
+Python, for example:
+
+```text
+<venv-python> -m pytest tests/test_specific.py -q
+<venv-python> -m ruff check path/to/file.py
 <venv-python> -m pip install ...
 ```
 
