@@ -12,6 +12,7 @@ from infinity_db.database.schema import METADATA_TABLE, quote
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
+    identity_metadata,
     load_identity_config,
     parse_identity_config,
 )
@@ -101,6 +102,59 @@ def test_export_pins_identity_manifest_and_hash_in_both_database_siblings(tmp_pa
             metadata_value(database_path, IDENTITY_CONFIG_SHA256_METADATA_KEY)
             == config.content_sha256
         )
+
+
+def test_export_prefers_identity_policy_pinned_in_normalized_data(tmp_path: Path) -> None:
+    document = load_identity_config().document
+    document["units"]["groups"].append(
+        {
+            "canonical_id": 41,
+            "source_ids": [41, 42],
+            "reason": "Test-only normalized provenance",
+        }
+    )
+    config = parse_identity_config(document)
+    data = normalized_empty()
+    data.update(identity_metadata(config))
+    path = tmp_path / "infinity.db"
+
+    export_database(data, path)
+
+    for database_path in (path, raw_database_path(path)):
+        assert metadata_value(database_path, IDENTITY_CONFIG_METADATA_KEY) == config.document
+        assert (
+            metadata_value(database_path, IDENTITY_CONFIG_SHA256_METADATA_KEY)
+            == config.content_sha256
+        )
+
+
+def test_export_rejects_explicit_identity_policy_mismatch(tmp_path: Path) -> None:
+    pinned = load_identity_config()
+    document = pinned.document
+    document["units"]["groups"].append(
+        {
+            "canonical_id": 41,
+            "source_ids": [41, 42],
+            "reason": "Test-only mismatched policy",
+        }
+    )
+    explicit = parse_identity_config(document)
+    data = normalized_empty()
+    data.update(identity_metadata(pinned))
+    path = tmp_path / "infinity.db"
+
+    with pytest.raises(ValueError, match="does not match the policy pinned"):
+        export_database(data, path, identity_config=explicit)
+
+    assert not path.exists()
+
+
+def test_export_rejects_incomplete_normalized_identity_metadata(tmp_path: Path) -> None:
+    data = normalized_empty()
+    data[IDENTITY_CONFIG_METADATA_KEY] = load_identity_config().document
+
+    with pytest.raises(ValueError, match="incomplete identity configuration metadata"):
+        export_database(data, tmp_path / "infinity.db")
 
 
 def test_database_validation_rejects_tampered_identity_metadata(tmp_path: Path) -> None:

@@ -728,9 +728,10 @@ def test_main_army_resolves_canonical_sectorials_to_whole_armies(normalized: dic
     assert beta["main_army_id"] == 101
 
     # A sectorial canonical ID resolves to its parent xx01 list, not the
-    # sectorial itself.
+    # sectorial itself. Exceptional canonical IDs require explicit policy.
     assert main_army_id(202, {101, 201, 202}) == 201
-    assert main_army_id(1, {101, 201, 901}) == 901
+    assert main_army_id(1, {101, 201, 901}) is None
+    assert main_army_id(1, {101, 201, 901}, {1: 901}) == 901
     assert main_army_id(998, {901, 998}) == 901
     assert main_army_id(999, {101, 201}) is None
 

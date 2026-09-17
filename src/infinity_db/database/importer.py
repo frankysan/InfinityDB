@@ -115,7 +115,8 @@ def resolve_identity_config(
             raise ValueError("Normalized data has invalid identity configuration metadata") from exc
         if explicit is not None and explicit.content_sha256 != pinned.content_sha256:
             raise ValueError(
-                "Explicit identity configuration does not match the policy pinned in normalized data"
+                "Explicit identity configuration does not match the policy "
+                "pinned in normalized data"
             )
         return pinned
 

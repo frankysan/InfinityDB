@@ -35,7 +35,7 @@ import argparse
 import json
 import sys
 from collections import Counter, defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -160,15 +160,18 @@ def collect_faction_ids(master: dict[str, Any]) -> tuple[set[int], Counter[int],
     return ids, canonical_refs, membership_refs
 
 
-def main_army_id(canonical_faction_id: Any, faction_ids: set[int]) -> int | None:
+def main_army_id(
+    canonical_faction_id: Any,
+    faction_ids: set[int],
+    canonical_faction_overrides: Mapping[int, int] | None = None,
+) -> int | None:
     """Resolve canonical ownership to its whole-army group ID (``xx01``)."""
     if not isinstance(canonical_faction_id, int):
         return None
-    # Canonical 1 is the legacy mercenary designation, which corresponds to
-    # Non-Aligned Armies rather than PanOceania.  Other canonical IDs use the
-    # current hundred-based army namespace.
-    candidate = (
-        901 if canonical_faction_id == 1 else canonical_faction_id - canonical_faction_id % 100 + 1
+    overrides = canonical_faction_overrides or {}
+    candidate = overrides.get(
+        canonical_faction_id,
+        canonical_faction_id - canonical_faction_id % 100 + 1,
     )
     return candidate if candidate in faction_ids and candidate % 100 == 1 else None
 
@@ -585,7 +588,11 @@ def deduplicate_option_weapons(tables: dict[str, list[dict[str, Any]]]) -> None:
     tables["option_weapon_templates"] = templates
 
 
-def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
+def normalize_master(
+    master: dict[str, Any],
+    *,
+    canonical_faction_overrides: Mapping[int, int] | None = None,
+) -> dict[str, Any]:
     b = Builder()
     army_lists = master["armyLists"]
     units = master["units"]
@@ -684,7 +691,11 @@ def normalize_master(master: dict[str, Any]) -> dict[str, Any]:
             id=unit_id,
             id_army=shared.get("idArmy"),
             canonical_faction_id=shared.get("canonical"),
-            main_army_id=main_army_id(shared.get("canonical"), faction_ids),
+            main_army_id=main_army_id(
+                shared.get("canonical"),
+                faction_ids,
+                canonical_faction_overrides,
+            ),
             isc=shared.get("isc"),
             isc_abbr=shared.get("iscAbbr"),
             name=shared.get("name"),
