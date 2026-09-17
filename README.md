@@ -255,7 +255,7 @@ src/
   infinity_db/
     cli.py                  # Build, export, rules, and local-server commands
     database/               # Schema, importer, and read-only repository queries
-    skill_categories.py     # Skill category definitions for the rules reference
+    skill_catalog.py        # Compose Army skills with curated rules/declarations
     trait_catalog.py        # Compose raw Army trait usage with curated rule identities
     web/
       app.py                # WSGI application and API routes

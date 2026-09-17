@@ -277,3 +277,47 @@ def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: 
 
     with pytest.raises(ValueError, match="ccWeapon"):
         load_curated_document(path)
+
+
+def test_skill_declaration_category_requires_valid_order_and_skill_links(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    document["records"].append(
+        {
+            "id": "skill-declaration-category:automatic:p12",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked skill is declared as Automatic.",
+            "facts": {"order": 10},
+            "armyLinks": [{"entity": "skill", "id": 19}],
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
+        }
+    )
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    assert load_curated_document(path)["records"][-1]["facts"]["order"] == 10
+
+    document["records"][-1]["armyLinks"] = [{"entity": "weapon", "id": 19}]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must reference integer skill ids"):
+        load_curated_document(path)
+
+    document = valid_document()
+    declaration = {
+        "id": "skill-declaration-category:automatic:p12",
+        "kind": "skill-declaration-category",
+        "name": "Automatic",
+        "summary": "The linked skill is declared as Automatic.",
+        "facts": {"order": 10},
+        "armyLinks": [{"entity": "skill", "id": 19}],
+        "citations": [
+            {"sourceId": "n5-core-v5.3", "page": 12},
+            {"sourceId": "n5-core-v5.3", "page": 13},
+        ],
+    }
+    document["records"].append(declaration)
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="requires exactly one citation"):
+        load_curated_document(path)

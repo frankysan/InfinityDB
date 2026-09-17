@@ -31,7 +31,6 @@ from infinity_db.identities import (
     normalized_profile_identity,
     parse_identity_metadata,
 )
-from infinity_db.skill_categories import categories_for_skill
 
 from .schema import (
     APPLICATION_ID,
@@ -903,8 +902,6 @@ class Database:
                     )
             for item in items:
                 item["use_count"] = len(use_keys.get(item["id"], set()))
-                if catalog == "skills":
-                    item["categories"] = categories_for_skill(item["id"])
             groups: dict[str, list[dict[str, Any]]] = {}
             for item in items:
                 canonical_id = identity_config.canonical_catalog_id(catalog, item["id"])
@@ -1218,6 +1215,36 @@ class Database:
             return result
 
     @instance_lru_cache(maxsize=128)
+    def skill_source_ids(self, skill_id: int) -> tuple[int, ...]:
+        """Return source skill IDs represented by one application skill identity."""
+        if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
+            raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+        identity_config = self._identity_config()
+        with self._connect() as connection:
+            skills = connection.execute(
+                "SELECT s.id, COALESCE(NULLIF(s.name, ''), NULLIF(m.name, ''), "
+                "'Skill #' || s.id) AS name "
+                "FROM skills AS s LEFT JOIN metadata_skills AS m ON m.id = s.id"
+            ).fetchall()
+        skill = next((row for row in skills if row["id"] == skill_id), None)
+        if skill is None:
+            return ()
+        configured_group = configured_catalog_group(
+            identity_config,
+            "skills",
+            skill_id,
+            {row["id"] for row in skills},
+        )
+        if configured_group is not None:
+            return configured_group[1]
+        merge_key = skill_merge_key(skill["name"])
+        return tuple(
+            row["id"]
+            for row in skills
+            if merge_key is not None and skill_merge_key(row["name"]) == merge_key
+        ) or (skill_id,)
+
+    @instance_lru_cache(maxsize=128)
     def get_skill(self, skill_id: int) -> dict[str, Any] | None:
         """Return one skill together with the units that use it."""
         if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
@@ -1321,11 +1348,6 @@ class Database:
                 variant["units"] = sorted(
                     items.values(), key=lambda item: (unit_sort_key(item["name"]), item["id"])
                 )
-            categories = {
-                (category["name"], category["source"], category["page"]): category
-                for source_id in source_ids
-                for category in categories_for_skill(source_id)
-            }
             return {
                 **dict(representative),
                 "id": canonical_id,
@@ -1334,7 +1356,6 @@ class Database:
                     if len(source_ids) > 1
                     else representative["name"]
                 ),
-                "categories": list(categories.values()),
                 "variants": [variant for variant in variants.values() if variant["units"]],
             }
 

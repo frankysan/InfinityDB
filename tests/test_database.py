@@ -37,6 +37,7 @@ from infinity_db.database.schema import (
 )
 from infinity_db.identities import REINFORCEMENT_UNIT_MATCHES_KEY, load_identity_config
 from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
 
@@ -800,14 +801,12 @@ def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normal
             "name": "Strategos",
             "wiki": None,
             "use_count": 0,
-            "categories": [{"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}],
         }
     ]
     assert database.get_skill(70) == {
         "id": 69,
         "name": "Strategos",
         "wiki": None,
-        "categories": [{"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}],
         "variants": [],
     }
 
@@ -1500,3 +1499,67 @@ def test_database_with_different_compatibility_revision_requires_rebuild(
 def test_repository_rejects_invalid_query_arguments(tmp_path: Path, arguments: dict) -> None:
     with pytest.raises(ValueError, match=next(iter(arguments))):
         Database(tmp_path / "missing.sqlite3").list_units(**arguments)
+
+
+def test_skill_catalog_uses_curated_declaration_categories(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 69, "name": "Strategos L1", "source_defined": True},
+            {"id": 70, "name": "Strategos L2", "source_defined": True},
+            {"id": 89, "name": "Holoprojector Deployment", "source_defined": True},
+            {"id": 201, "name": "Discover", "source_defined": True},
+            {"id": 278, "name": "Discover L2", "source_defined": True},
+            {"id": 279, "name": "Discover L3", "source_defined": True},
+            {"id": 260, "name": "Unclassified Example", "source_defined": True},
+        ]
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    strategos = next(item for item in catalog.list_skills() if item["id"] == 69)
+    assert strategos["categories"] == [
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}
+    ]
+    detail = catalog.get_skill(70)
+    assert detail is not None
+    assert detail["categories"] == [
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}
+    ]
+    multi = next(item for item in catalog.list_skills() if item["id"] == 89)
+    assert multi["categories"] == [
+        {"name": "Deployment", "source": "N5 Core Rules v5.3", "page": 111},
+        {"name": "Long Skill", "source": "N5 Core Rules v5.3", "page": 111},
+    ]
+    mixed = catalog.get_skill(278)
+    assert mixed is not None
+    assert mixed["categories"] == [
+        {"name": "Basic Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
+        {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
+        {"name": "Unclassified", "source": None, "page": None},
+    ]
+    unclassified = next(item for item in catalog.list_skills() if item["id"] == 260)
+    assert unclassified["categories"] == [
+        {"name": "Unclassified", "source": None, "page": None}
+    ]
+
+
+def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 69, "name": "Strategos L1", "source_defined": True}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    catalog = SkillCatalog(Database(database_path), None)
+
+    strategos = next(item for item in catalog.list_skills() if item["id"] == 69)
+    assert strategos["categories"] == [
+        {"name": "Unclassified", "source": None, "page": None}
+    ]

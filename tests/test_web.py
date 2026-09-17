@@ -1396,6 +1396,12 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     skill_record["id"] = "skill:stealth"
     skill_record["name"] = "Stealth"
     skill_record["armyLinks"] = [{"entity": "skill", "id": 11}]
+    declaration = next(
+        record
+        for record in document["records"]
+        if record["id"] == "skill-declaration-category:automatic:p87"
+    )
+    declaration["armyLinks"].append({"entity": "skill", "id": 11})
     rules_path = tmp_path / "rules.db"
     export_rules_database([(root / "curated.json", document)], rules_path)
     rules_app = create_app(app.database.path, rules_path)
@@ -1404,9 +1410,19 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
 
     assert status == 200
     payload = json.loads(body)
+    assert payload["categories"] == [
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+    ]
     assert payload["rules"][0]["id"] == "skill:stealth"
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
     assert payload["rules"][0]["citations"][0]["page"] == 87
+
+    status, _, body = request(rules_app, "/api/skills")
+    assert status == 200
+    stealth = next(item for item in json.loads(body)["items"] if item["id"] == 11)
+    assert stealth["categories"] == [
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+    ]
 
 
 def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:

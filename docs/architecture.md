@@ -152,6 +152,15 @@ special profile is now a cited curated `weapon` record in `rules.db`; the Army
 repository exposes only source catalog/profile data, and the application layer
 composes the curated special profile when rules data is available.
 
+Skill declaration categories follow the same composition boundary. Army snapshots
+identify skills and their usage but do not provide N5 declaration categories. The
+curated N5 collection stores those rule-derived declarations as
+`skill-declaration-category` records linked to Army skill IDs and cited by printed
+rulebook page. The Army repository exposes raw skill catalog/usage data only;
+`SkillCatalog` composes declaration categories and other curated skill records from
+`rules.db`. Without a valid rules database, skills remain browsable and declaration
+categories fall back to uncited `Unclassified` rather than hidden Python rules data.
+
 Army presentation and classification currently combine imported relationships
 with merger-derived fields. Faction grouping, display names, and slugs come from
 `metadata_factions.parent`, `name`, and `slug`; repository responses expose this
@@ -609,6 +618,13 @@ data rather than Python tables. Without a valid `rules.db`, raw Army trait label
 remain browsable and linkable but no curated canonicalization or summary is
 invented. Browser rendering consumes these backend-derived references and does
 not canonicalize trait text or generate trait slugs independently.
+
+Skill list/detail responses obtain declaration categories from current curated
+`skill-declaration-category` records in `rules.db`. Category records themselves are
+composition metadata and are not emitted as ordinary skill `rules`; other curated
+skill records remain available through that field. If rules data is unavailable or
+a skill has no curated declaration, the API reports an uncited `Unclassified`
+category.
 
 `GET /api/traits` returns the shared-traits catalog composed from raw Army usage
 and optional current curated trait records. `GET /api/traits/{slug}` returns a

@@ -1338,6 +1338,2173 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
             }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p86",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 265
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 86
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p87",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 25
+                },
+                {
+                    "entity": "skill",
+                    "id": 29
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 87
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p88",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 82
+                },
+                {
+                    "entity": "skill",
+                    "id": 191
+                },
+                {
+                    "entity": "skill",
+                    "id": 262
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 88
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p89",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 215
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 89
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p90",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 26
+                },
+                {
+                    "entity": "skill",
+                    "id": 84
+                },
+                {
+                    "entity": "skill",
+                    "id": 207
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 90
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p91",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 85
+                },
+                {
+                    "entity": "skill",
+                    "id": 86
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 91
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p92",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 38
+                },
+                {
+                    "entity": "skill",
+                    "id": 259
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 92
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p93",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 250
+                },
+                {
+                    "entity": "skill",
+                    "id": 258
+                },
+                {
+                    "entity": "skill",
+                    "id": 261
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 93
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p94",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 252
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 94
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p95",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 247
+                },
+                {
+                    "entity": "skill",
+                    "id": 1000
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 95
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p96",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 162
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 96
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p97",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 256
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 97
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p98",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 55
+                },
+                {
+                    "entity": "skill",
+                    "id": 281
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 98
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p99",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 52
+                },
+                {
+                    "entity": "skill",
+                    "id": 272
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 99
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p100",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 19
+                },
+                {
+                    "entity": "skill",
+                    "id": 20
+                },
+                {
+                    "entity": "skill",
+                    "id": 21
+                },
+                {
+                    "entity": "skill",
+                    "id": 22
+                },
+                {
+                    "entity": "skill",
+                    "id": 23
+                },
+                {
+                    "entity": "skill",
+                    "id": 156
+                },
+                {
+                    "entity": "skill",
+                    "id": 268
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p101",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 39
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 101
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p102",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 28
+                },
+                {
+                    "entity": "skill",
+                    "id": 235
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 102
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p103",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 248
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 103
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p104",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 109
+                },
+                {
+                    "entity": "skill",
+                    "id": 211
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 104
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p105",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 122
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 105
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p106",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 243
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p109",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 72
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 109
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p110",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 83
+                },
+                {
+                    "entity": "skill",
+                    "id": 255
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 110
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p111",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 237
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 111
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p112",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 67
+                },
+                {
+                    "entity": "skill",
+                    "id": 164
+                },
+                {
+                    "entity": "skill",
+                    "id": 189
+                },
+                {
+                    "entity": "skill",
+                    "id": 251
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p113",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 69
+                },
+                {
+                    "entity": "skill",
+                    "id": 70
+                },
+                {
+                    "entity": "skill",
+                    "id": 119
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 113
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p114",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 74
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 114
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p115",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 213
+                },
+                {
+                    "entity": "skill",
+                    "id": 270
+                },
+                {
+                    "entity": "skill",
+                    "id": 275
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 115
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p116",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 62
+                },
+                {
+                    "entity": "skill",
+                    "id": 276
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 116
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p117",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 246
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 117
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:automatic:p118",
+            "kind": "skill-declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 58
+                },
+                {
+                    "entity": "skill",
+                    "id": 61
+                },
+                {
+                    "entity": "skill",
+                    "id": 220
+                },
+                {
+                    "entity": "skill",
+                    "id": 267
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 118
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:deployment:p89",
+            "kind": "skill-declaration-category",
+            "name": "Deployment",
+            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 20
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 33
+                },
+                {
+                    "entity": "skill",
+                    "id": 47
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 89
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:deployment:p92",
+            "kind": "skill-declaration-category",
+            "name": "Deployment",
+            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 20
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 161
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 92
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:deployment:p93",
+            "kind": "skill-declaration-category",
+            "name": "Deployment",
+            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 20
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 249
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 93
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:deployment:p94",
+            "kind": "skill-declaration-category",
+            "name": "Deployment",
+            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 20
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 238
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 94
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:deployment:p102",
+            "kind": "skill-declaration-category",
+            "name": "Deployment",
+            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 20
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 56
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 102
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:deployment:p111",
+            "kind": "skill-declaration-category",
+            "name": "Deployment",
+            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 20
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 89
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 111
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p40",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 201
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 40
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p45",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 240
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 45
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p78",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 131
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 78
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p79",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 40
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 79
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p86",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 254
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 86
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p90",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 53
+                },
+                {
+                    "entity": "skill",
+                    "id": 277
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 90
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p91",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 49
+                },
+                {
+                    "entity": "skill",
+                    "id": 273
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 91
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p92",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 59
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 92
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p103",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 73
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 103
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p105",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 64
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 105
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p112",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 65
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:basic-short-skill:p118",
+            "kind": "skill-declaration-category",
+            "name": "Basic Short Skill",
+            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 30
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 242
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 118
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:long-skill:p25",
+            "kind": "skill-declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 40
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 263
+                },
+                {
+                    "entity": "skill",
+                    "id": 271
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 25
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:long-skill:p89",
+            "kind": "skill-declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 40
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 35
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 89
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:long-skill:p111",
+            "kind": "skill-declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 40
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 89
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 111
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:entire-order:p86",
+            "kind": "skill-declaration-category",
+            "name": "Entire Order",
+            "summary": "The linked Army skills are declared as Entire Order in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 50
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 24
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 86
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p40",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 201
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 40
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p45",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 240
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 45
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p78",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 131
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 78
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p79",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 40
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 79
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p86",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 254
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 86
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p90",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 53
+                },
+                {
+                    "entity": "skill",
+                    "id": 277
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 90
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p91",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 49
+                },
+                {
+                    "entity": "skill",
+                    "id": 273
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 91
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p92",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 59
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 92
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p103",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 73
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 103
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p105",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 64
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 105
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p112",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 65
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "skill-declaration-category:aro:p118",
+            "kind": "skill-declaration-category",
+            "name": "ARO",
+            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "order": 60
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 242
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 118
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
         }
     ]
 }

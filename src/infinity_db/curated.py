@@ -266,6 +266,45 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
                 )
+        if record["kind"] == "skill-declaration-category":
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or set(facts) != {"order"}:
+                raise ValueError(
+                    f"{context}: skill declaration category 'facts' must contain only 'order'"
+                )
+            if type(facts["order"]) is not int or facts["order"] < 0:
+                raise ValueError(
+                    f"{context}: skill declaration category 'facts.order' must be "
+                    "a non-negative integer"
+                )
+            links = record.get("armyLinks")
+            if not isinstance(links, list) or not links:
+                raise ValueError(
+                    f"{context}: skill declaration category requires non-empty 'armyLinks'"
+                )
+            for link in links:
+                if (
+                    not isinstance(link, dict)
+                    or link.get("entity") != "skill"
+                    or type(link.get("id")) is not int
+                ):
+                    raise ValueError(
+                        f"{context}: skill declaration category armyLinks must reference "
+                        "integer skill ids"
+                    )
+            if len(record["citations"]) != 1:
+                raise ValueError(
+                    f"{context}: skill declaration category requires exactly one citation"
+                )
+            citation_source = record["citations"][0].get("sourceId")
+            citation_kind = next(
+                (source["kind"] for source in sources if source["id"] == citation_source),
+                None,
+            )
+            if citation_kind != "pdf":
+                raise ValueError(
+                    f"{context}: skill declaration category citation must reference a PDF"
+                )
         if record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")
             if not isinstance(record_labels, list) or not record_labels:
