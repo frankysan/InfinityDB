@@ -6,6 +6,20 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add `tools/run_checks.py` as the standard development-check orchestrator for
+  pytest, Ruff, and Army build validation, with selectable stages/profiles,
+  targeted pytest/Ruff paths, fail-fast mode, deterministic exit codes, and
+  live console output that can be mirrored to a report file.
+- Add deterministic timestamped check reports under ignored `reports/` when
+  `--report` is used without an explicit path; the filename and report header
+  share the same local run-start timestamp, while an explicitly supplied path
+  remains authoritative.
+- Add normalization-time source semantics for optional mercenaries:
+  source-defined units expose `source_role` (`standard` or
+  `mercenary_variant`) and army occurrences expose `availability_kind`
+  (`standard` or `mercenary`). The classifier validates the observed
+  canonical/factions/slug contract and does not use the common 10,000-ID offset
+  as its semantic rule.
 - Add dedicated regression tests for each standalone tool script in `tools/`,
   covering the Army JSON downloader, wiki mirror downloader, asset symbol
   downloader, symbol reorganizer, and shared file-path sanitizer.
@@ -21,6 +35,13 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Make `units.source_role` and `army_units.availability_kind` explicit frontend
+  SQLite schema fields instead of incidental dynamic columns. The Army database
+  schema is now version 9 and the compatibility revision is 11; existing
+  generated Army databases must be rebuilt.
+- Document `tools/run_checks.py` as the standard local/agent check entry point,
+  with its detailed stage, target, reporting, and exit-code contract in
+  `docs/testing.md`.
 - Standardize tool-script validation around one regression file per script so
   failures are easier to trace and maintain.
 - Standardize Army, wiki, and symbol acquisition on one timestamped ZIP snapshot
@@ -83,8 +104,6 @@ All notable changes to this project are documented in this file.
   backlog and durable AI context, preserving its pinned-snapshot, complete SVG
   discovery, reference/asset identity, override/cache/network resolution,
   processing, publishing, cross-platform, failure-policy, and testing decisions.
-- Increase the Army database compatibility revision to 10; existing databases
-  must be rebuilt so they contain the required identity policy metadata.
 
 ## [0.5.1] - 2026-09-14
 
