@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from . import __version__
-from .availability import annotate_availability_semantics
+from .availability import annotate_availability_semantics, audit_mercenary_logical_matches
 from .merge import load_sources, merge_sources, validate_master
 from .merge import write_json as write_master
 from .metadata import MetadataError, decode_metadata, load_metadata
@@ -119,6 +119,7 @@ def _normalize(
         canonical_faction_overrides=canonical_faction_overrides,
     )
     annotate_availability_semantics(normalized)
+    mercenary_matches, unmatched_mercenaries = audit_mercenary_logical_matches(normalized)
     if normalized_metadata is not None:
         conflicts = set(normalized_metadata) & set(normalized)
         if conflicts:
@@ -137,6 +138,18 @@ def _normalize(
     print(f"Normalized -> {output}")
     print(f"Tables: {len(meta['tableCounts'])}")
     print(f"Validation checks: {validation['checkCount']} passed")
+    mercenary_total = len(mercenary_matches) + len(unmatched_mercenaries)
+    if mercenary_total:
+        print(
+            f"Mercenary mapping audit: {len(mercenary_matches)}/{mercenary_total} "
+            "matched standard logical groups"
+        )
+    if unmatched_mercenaries:
+        print(
+            "Unmatched mercenary source IDs: "
+            + ", ".join(map(str, unmatched_mercenaries)),
+            file=sys.stderr,
+        )
     print(f"Warnings: {meta['warningCount']}")
     print(f"Validation report: {report}")
     return normalized
