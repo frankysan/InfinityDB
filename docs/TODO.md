@@ -142,10 +142,20 @@ reference. Git history retains implementation detail.
   - [x] Keep acquisition and processing tools independently runnable for
     debugging and targeted maintenance; orchestration must call reusable logic
     rather than duplicate it.
+  - [x] Standardize standalone acquisition output through the shared snapshot
+    archive helper. Army, wiki, and symbol downloaders stage loose files in a
+    temporary directory and persist only complete `JSON YYYYMMDD-HHMMSS.zip`,
+    `WIKI YYYYMMDD-HHMMSS.zip`, or `SYMBOLS YYYYMMDD-HHMMSS.zip` archives.
+    Timestamp collisions receive `-2`, `-3`, and so on rather than overwriting
+    an existing snapshot.
   - [x] Keep `download_army_json.py` explicitly invoked and networked only on
     demand. It already downloads/validates metadata, downloads every faction
     listed by metadata, validates each Army document, stages through temporary
     files, and writes one complete timestamped ZIP snapshot.
+  - [x] Make the wiki and current symbol downloaders follow the same durable
+    output lifecycle as Army acquisition. The wiki downloader no longer keeps
+    a dated unpacked mirror as its primary output, and the symbol downloader no
+    longer incrementally fills a long-lived loose destination directory.
   - [ ] Add a thin `tools/build_symbols.py` orchestrator with mutually exclusive
     offline `--snapshot PATH` and explicit online `--fetch-snapshot` modes.
     Once selected or downloaded, pin archive path/name, SHA-256, language,
@@ -175,7 +185,8 @@ reference. Git history retains implementation detail.
     and several units/profiles may reference one source SVG.
   - Rename/refactor `download_unit_symbols.py` to `download_army_symbols.py` so
     it covers unit/profile and faction assets plus manually declared static
-    symbols, without generating final browser mappings.
+    symbols, without generating final browser mappings. Preserve its timestamped
+    `SYMBOLS ...zip` snapshot output when the discovery behavior is expanded.
   - Preserve the 2026-09-10 snapshot audit as a regression baseline, not a
     permanent source count: 59 JSON documents (`metadata.json` + 58 Army
     documents), 5,020 profile-logo references / 1,033 unique unit SVG URLs,
@@ -189,8 +200,10 @@ reference. Git history retains implementation detail.
   machine-readable state passed through symbol processing.
   - Separate `snapshot`, `assets`, and `references`; do not use a filename-keyed
     structure that conflates source assets with their consumers.
-  - Snapshot records should include archive identity/hash, language, acquisition
-    timestamp, API base/version if available, and source-document count.
+  - Snapshot records should include the pinned Army archive identity/hash and,
+    when applicable, the corresponding `SYMBOLS ...zip` archive identity/hash,
+    plus language, acquisition timestamp, API base/version if available, and
+    source-document count.
   - Asset records should retain kind, source URL/filename/hash, source-resolution
     method, font classification, alias normalization, duplicate group,
     canonical source identity, conversion backend/status, compression
@@ -213,9 +226,10 @@ reference. Git history retains implementation detail.
     `orders/`. Use stable URL-derived logical names/categories as lookup keys,
     not generated publication filenames.
   - [ ] Resolve each asset strictly in this order: matching local override,
-    existing validated immutable raw cache, then upstream network download.
-    A valid override suppresses all network access for that asset; an invalid
-    matching override is an error and must not silently fall back upstream.
+    existing validated immutable symbol snapshot/cache, then upstream network
+    download. A valid override suppresses all network access for that asset; an
+    invalid matching override is an error and must not silently fall back
+    upstream.
   - [ ] Report unused overrides and filename collisions. Preserve provenance
     such as origin URL, resolved local source, source method, source/override
     SHA-256, and whether an upstream download occurred.
@@ -226,17 +240,24 @@ reference. Git history retains implementation detail.
   - [ ] Run overrides through the normal processing pipeline by default. Add a
     `publish_as_is` escape hatch only if a concrete future use case justifies it.
 
-- [ ] Make downloaded/raw symbols immutable and keep source, work, generated
-  state, reports, and published assets conceptually separate.
-  - Use roots equivalent to `data/raw/army/`, `data/raw/symbols/{units,
-    factions,characteristics,orders}/`, `data/work/symbols/`,
-    `data/manifests/`, `data/reports/`, local `image_overrides/`, and the final
-    `src/infinity_db/web/static/` publication tree.
-  - Never rename, move, rewrite, normalize, compress, or delete downloaded raw
-    Army JSON or SVG source files during later processing.
-  - Reuse validated raw files before network access and do not overwrite them
-    unless explicit refresh behavior is requested. Treat URL-to-filename
-    collisions as errors requiring deterministic disambiguation.
+- [ ] Treat timestamped symbol archives as the immutable raw acquisition
+  artifacts and keep extraction/work, generated state, reports, overrides, and
+  published assets conceptually separate.
+  - [x] The current symbol downloader stages a complete run temporarily and
+    writes one `SYMBOLS YYYYMMDD-HHMMSS.zip` archive rather than leaving loose
+    downloaded SVGs in the destination directory.
+  - Use roots equivalent to `data/raw/` for Army `JSON ...zip` snapshots,
+    `data/raw/symbols/` for `SYMBOLS ...zip` snapshots, `data/work/symbols/` for
+    transient extracted/processed files, `data/manifests/`, `data/reports/`,
+    local `image_overrides/`, and the final `src/infinity_db/web/static/`
+    publication tree.
+  - Never rename, rewrite, normalize, compress, or delete a timestamped raw
+    archive during later processing. Extract selected archives into temporary or
+    work locations when loose SVG files are needed.
+  - Reuse validated archived assets/cache before network access where practical;
+    explicit refresh creates a new timestamped archive rather than mutating an
+    old one. Treat URL-to-filename collisions as errors requiring deterministic
+    disambiguation.
 
 - [ ] Consolidate SVG audit, font handling, and complete-set duplicate detection
   around one structured manifest.
@@ -301,11 +322,14 @@ reference. Git history retains implementation detail.
 
 - [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
   small shared symbol-pipeline utility layer.
+  - [x] `snapshot_archive.py` centralizes the timestamped ZIP naming, collision
+    handling, and deterministic archive member ordering shared by the Army,
+    wiki, and symbol downloaders.
   - `download_army_json.py`: expose snapshot identity/result to callers while
     keeping its standalone CLI and explicit network behavior.
   - `download_army_symbols.py`: own complete discovery, static declarations,
     override/cache/network source resolution, recursive SVG audit, and manifest
-    reference/asset updates.
+    reference/asset updates while retaining complete timestamped archive output.
   - `svg_processor.py`: keep font audit, alias normalization, complete-set
     duplicate detection, deterministic representative ranking, persistent
     Inkscape conversion, and reports; add structured manifest updates and
@@ -322,11 +346,13 @@ reference. Git history retains implementation detail.
 
 - [ ] Make every integrated symbol stage idempotent and traceable before adding
   sophisticated incremental caching.
-  - Never overwrite a timestamped Army snapshot; pin it once selected.
+  - [x] Timestamped Army, wiki, and symbol acquisition never overwrites an
+    existing archive; same-second collisions receive a deterministic numeric
+    suffix.
   - Changes to an override SHA-256 invalidate downstream processing for that
-    asset. Removing an override falls back to validated raw cache or network by
-    the normal resolution rules.
-  - Reuse validated raw downloads and rebuild work deterministically.
+    asset. Removing an override falls back to validated symbol archives/cache or
+    network by the normal resolution rules.
+  - Reuse validated archived downloads and rebuild work deterministically.
   - After the integrated build is stable, consider cache keys based on snapshot
     SHA-256, source SVG SHA-256, processor/tool versions, font-alias config,
     duplicate renderer/settings, conversion backend/settings, and compression
@@ -336,8 +362,9 @@ reference. Git history retains implementation detail.
   - Partial/invalid snapshot acquisition must not continue or replace prior
     snapshots/publication.
   - Unknown SVG source locations require explicit review.
-  - Invalid matching overrides fail; failed network downloads leave raw files
-    untouched and prevent incomplete publication.
+  - Invalid matching overrides fail; failed network downloads leave existing
+    archives untouched and prevent creation/publication of an incomplete
+    replacement snapshot.
   - SVG parse/font errors are retained and reported rather than discarded.
   - Duplicate-render uncertainty keeps assets unique.
   - Text conversion failure retains the verified source rather than claiming a
@@ -364,6 +391,8 @@ reference. Git history retains implementation detail.
 
 - [ ] Add focused end-to-end and cross-platform regression coverage for the
   integrated Army/symbol pipeline.
+  - [x] Dedicated Army, wiki, and symbol downloader tests cover their timestamped
+    archive naming and deterministic archive contents.
   - Snapshot/discovery tests: metadata/faction validation, complete archive,
     snapshot identity/hash, all profile/faction logos, multiple logos for one
     unit, one logo shared by units, duplicate URLs, static declarations,
@@ -388,11 +417,12 @@ reference. Git history retains implementation detail.
     generated filenames before orchestration otherwise duplicates those rules.
 
 - [ ] Preserve the intended normal workflow once orchestration exists:
-  `snapshot -> discover API symbols -> add static symbols -> audit unknown SVG
-  sources -> resolve override/cache/network -> classify fonts -> deduplicate ->
-  select canonical -> convert text -> compress -> publish -> generate mappings ->
-  validate -> report`. Offline rebuilds use a known snapshot; fresh acquisition
-  is an explicit separate mode.
+  `Army snapshot -> discover API symbols -> add static symbols -> audit unknown
+  SVG sources -> resolve override/archive-cache/network -> write complete symbol
+  snapshot -> extract/work classify fonts -> deduplicate -> select canonical ->
+  convert text -> compress -> publish -> generate mappings -> validate -> report`.
+  Offline rebuilds use known timestamped archives; fresh acquisition is an
+  explicit separate mode.
 
 ## Reliability and operations
 

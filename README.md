@@ -65,8 +65,9 @@ Current release: **0.5.1** (2026-09-14).
   Army and unit assets use stable ID-and-slug paths, so the browser can serve
   an exact asset without scanning a symbol directory.
 - Includes standalone scripts for downloading Army JSON snapshots, wiki mirror
-  snapshots, and unit symbols; normal build commands do not make network
-  requests.
+  snapshots, and unit symbols. All three stage loose files temporarily and
+  persist complete timestamped ZIP snapshots; normal build commands do not make
+  network requests.
 - Includes dedicated regression tests for each standalone tool script so the
   wiki mirror, symbol download, symbol reorganizer, Army JSON downloader, and
   shared sanitization logic stay cross-platform and safe to run.
@@ -108,6 +109,16 @@ in the browser sidebar.
 python tools/download_army_json.py data/raw
 infinity-db build --compact
 infinity-db serve
+```
+
+The standalone wiki and symbol downloaders follow the same durable-output
+convention. They create `WIKI YYYYMMDD-HHMMSS.zip` archives under `data/wiki/`
+and `SYMBOLS YYYYMMDD-HHMMSS.zip` archives under `data/raw/symbols/`
+respectively, removing their temporary loose staging files after success.
+
+```powershell
+python tools/download_wiki_snapshot.py
+python tools/download_unit_symbols.py "data/raw/JSON 20260910-204106.zip"
 ```
 
 The development server listens on all local network interfaces. Open

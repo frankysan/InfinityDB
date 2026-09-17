@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Manually download one raw Infinity Army JSON snapshot from Corvus Belli's API.
 
-This is deliberately a standalone script.  It is not registered with
+This is deliberately a standalone script. It is not registered with
 ``infinity-db`` or imported by the build pipeline, so network requests occur
 only when this script is explicitly run.
 """
@@ -12,7 +12,6 @@ import argparse
 import re
 import sys
 import tempfile
-import zipfile
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +20,11 @@ from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import decode_document
 from infinity_army_data.metadata import decode_metadata
+
+try:
+    from tools.snapshot_archive import create_timestamped_archive
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from snapshot_archive import create_timestamped_archive
 
 API_BASE_URL = "https://api.corvusbelli.com/army"
 API_ORIGIN = "https://infinityuniverse.com"
@@ -140,18 +144,8 @@ def archive_snapshot(
     *,
     now: datetime | None = None,
 ) -> Path:
-    """Store exactly one downloaded snapshot in a date-and-time-tagged ZIP file."""
-    timestamp = (now or datetime.now().astimezone()).strftime("%Y%m%d-%H%M%S")
-    destination.mkdir(parents=True, exist_ok=True)
-    archive = destination / f"JSON {timestamp}.zip"
-    sequence = 2
-    while archive.exists():
-        archive = destination / f"JSON {timestamp}-{sequence}.zip"
-        sequence += 1
-    with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED) as output:
-        for path in sorted(files, key=lambda item: item.name):
-            output.write(path, path.name)
-    return archive
+    """Store exactly one downloaded Army snapshot in a timestamped ZIP file."""
+    return create_timestamped_archive(files, destination, prefix="JSON", now=now)
 
 
 def main(argv: list[str] | None = None) -> int:

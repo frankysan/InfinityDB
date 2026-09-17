@@ -121,6 +121,13 @@ machine-specific absolute paths.
 - Use portable filesystem APIs and avoid hard-coded user or system paths.
 - Treat raw downloaded inputs as immutable. Transformations write to separate
   working/generated locations.
+- Standalone Army, wiki, and symbol downloaders use one durable snapshot-output
+  convention: download into temporary staging, then persist only a complete
+  timestamped ZIP archive. Their names are `JSON YYYYMMDD-HHMMSS.zip`,
+  `WIKI YYYYMMDD-HHMMSS.zip`, and `SYMBOLS YYYYMMDD-HHMMSS.zip`; if an archive
+  with that exact timestamp already exists, append `-2`, `-3`, and so on rather
+  than overwriting it. Loose download trees are transient working state, not
+  the durable acquisition artifact.
 - Persistent generated state should be validated before replacement and written
   atomically where practical so failed builds leave the prior valid state
   usable.
@@ -168,7 +175,9 @@ different source.
 A symbol build associated with an Army snapshot must use that one exact pinned
 snapshot throughout discovery and publication. Pin the archive identity,
 SHA-256, language, acquisition timestamp, and API base URL; no downstream stage
-may independently select a newer snapshot.
+may independently select a newer snapshot. The durable symbol-download artifact
+is the complete timestamped `SYMBOLS ...zip` snapshot; extraction into loose
+files belongs to temporary/work processing rather than long-lived raw storage.
 
 Authoritative Army-API symbol discovery comes from every
 `units[].profileGroups[].profiles[].logo` reference plus
@@ -204,8 +213,8 @@ merge/normalization/build pipeline:
   clarifications.
 - `data/pdf/its/Its-rules-season-18-en.pdf`: current ITS Season 18 rules.
 - `data/pdf/legacy/`: historical ITS Seasons 6-17 and N2/N3 rules.
-- `data/wiki/20260915/`: a local wiki snapshot with HTML pages, originals,
-  and assets.
+- `data/wiki/WIKI YYYYMMDD-HHMMSS.zip`: timestamped local wiki mirror
+  snapshots containing rewritten HTML pages and downloaded assets.
 
 When using these documents, record the document version/date and printed-page
 citation. Keep core rules, FAQ/errata rulings, and ITS season content separate
@@ -225,7 +234,7 @@ built on it), never open files under `data/pdf/` or `data/wiki/`.
 Army links in curated records may point to existing catalog or unit IDs, but
 must not change Army-derived availability, legality, or statistics. The
 current v2 citation model supports printed PDF pages and wiki paths with
-snapshot dates. Version 1 curated files must be migrated before ingestion.
+snapshot timestamps. Version 1 curated files must be migrated before ingestion.
 
 ## API and UI rules
 
@@ -331,3 +340,7 @@ snapshot dates. Version 1 curated files must be migrated before ingestion.
   logos and metadata faction logos are authoritative, recursive SVG scanning is
   a schema-drift audit, and only the publisher assigns final canonical asset
   paths and generated application mappings.
+- 2026-09-16: Army JSON, wiki mirror, and symbol acquisition use the same
+  timestamped ZIP snapshot convention. Downloaders stage loose files only
+  temporarily and persist complete `JSON`, `WIKI`, or `SYMBOLS` archives rather
+  than long-lived unpacked download directories.

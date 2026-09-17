@@ -1,4 +1,4 @@
-"""Download the primary unit symbols referenced by an Army master-list snapshot."""
+"""Download the primary unit symbols referenced by an Army snapshot into a timestamped ZIP."""
 
 from __future__ import annotations
 
@@ -6,17 +6,21 @@ import argparse
 import json
 import re
 import sys
+import tempfile
 import time
 import zipfile
 from collections.abc import Iterable
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
 try:
     from tools.path_sanitization import sanitize_filename
+    from tools.snapshot_archive import create_timestamped_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
     from path_sanitization import sanitize_filename
+    from snapshot_archive import create_timestamped_archive
 
 ASSET_HOST = "assets.corvusbelli.net"
 ASSET_PATH = "/army/img/logo/units/"
@@ -122,16 +126,45 @@ def load_armies(path: Path) -> list[dict]:
     return [army for army in data.values() if isinstance(army, dict)]
 
 
-def main() -> int:
+def _write_bytes(path: Path, body: bytes) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_bytes(body)
+    temporary.replace(path)
+
+
+def archive_symbols(
+    files: list[Path],
+    destination: Path,
+    *,
+    root: Path,
+    now: datetime | None = None,
+) -> Path:
+    """Store exactly one symbol download as a timestamped ZIP snapshot."""
+    return create_timestamped_archive(
+        files,
+        destination,
+        prefix="SYMBOLS",
+        root=root,
+        now=now,
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path, help="Raw Army ZIP or legacy master-list JSON")
-    parser.add_argument("destination", type=Path)
+    parser.add_argument(
+        "destination",
+        nargs="?",
+        type=Path,
+        default=Path("data/raw/symbols"),
+        help="Directory used to store timestamped symbol ZIP snapshots",
+    )
     parser.add_argument("--manifest", type=Path, help="Write a browser symbol-slug map")
     parser.add_argument(
         "--delay", type=float, default=0.2, help="Seconds to wait between downloads (default: 0.2)"
     )
     parser.add_argument("--dry-run", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.delay < 0:
         raise ValueError("--delay must not be negative")
@@ -139,28 +172,34 @@ def main() -> int:
     if args.manifest:
         write_manifest(armies, args.manifest)
     urls = sorted(primary_logos(armies))
-    existing = {path.name for path in args.destination.rglob("*.svg")}
-    pending = []
-    for url in urls:
-        name = destination_name(url)
-        if name not in existing:
-            pending.append((url, name))
-    print(f"Primary symbols: {len(urls)}; already present: {len(urls) - len(pending)}")
+    print(f"Primary symbols: {len(urls)}")
     if args.dry_run:
-        print(f"Would download: {len(pending)}")
+        print(f"Would download: {len(urls)}")
         return 0
 
     args.destination.mkdir(parents=True, exist_ok=True)
-    for index, (url, name) in enumerate(pending, start=1):
-        with urlopen(url, timeout=30) as response:
-            body = response.read()
-        if b"<svg" not in body[:1024]:
-            raise ValueError(f"Expected an SVG response: {url}")
-        (args.destination / name).write_bytes(body)
-        print(f"[{index}/{len(pending)}] {name}")
-        if index < len(pending) and args.delay:
-            time.sleep(args.delay)
-    print(f"Downloaded: {len(pending)}")
+    try:
+        with tempfile.TemporaryDirectory(prefix="infinity-symbols-", dir=args.destination) as staging:
+            staging_path = Path(staging)
+            files: list[Path] = []
+            for index, url in enumerate(urls, start=1):
+                name = destination_name(url)
+                with urlopen(url, timeout=30) as response:
+                    body = response.read()
+                if b"<svg" not in body[:1024]:
+                    raise ValueError(f"Expected an SVG response: {url}")
+                path = staging_path / name
+                _write_bytes(path, body)
+                files.append(path)
+                print(f"[{index}/{len(urls)}] {name}")
+                if index < len(urls) and args.delay:
+                    time.sleep(args.delay)
+            archive = archive_symbols(files, args.destination, root=staging_path)
+    except (OSError, ValueError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"Downloaded {len(files)} symbols -> {archive}")
     return 0
 
 

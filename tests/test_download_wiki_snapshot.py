@@ -1,4 +1,6 @@
 import importlib.util
+import zipfile
+from datetime import datetime
 from pathlib import Path
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "tools" / "download_wiki_snapshot.py"
@@ -27,6 +29,30 @@ def test_rewrite_relative_links_to_local_paths() -> None:
     assert 'href="wiki/Main_Page"' in rewritten
     assert 'src="assets/logo.png"' in rewritten
     assert 'src="js/app.js"' in rewritten
+
+
+def test_archive_wiki_uses_timestamp_and_relative_paths(tmp_path: Path) -> None:
+    staging = tmp_path / "staging"
+    page = staging / "Electromagnetic_(E_M)_Ammunition"
+    asset = staging / "assets" / "logo.svg"
+    page.parent.mkdir(parents=True)
+    asset.parent.mkdir(parents=True)
+    page.write_text("wiki", encoding="utf-8")
+    asset.write_text("<svg/>", encoding="utf-8")
+
+    archive = module.archive_wiki(
+        [page, asset],
+        tmp_path / "archives",
+        root=staging,
+        now=datetime(2026, 9, 16, 21, 30, 45),
+    )
+
+    assert archive.name == "WIKI 20260916-213045.zip"
+    with zipfile.ZipFile(archive) as output:
+        assert output.namelist() == [
+            "Electromagnetic_(E_M)_Ammunition",
+            "assets/logo.svg",
+        ]
 
 
 def test_sanitize_windows_path_components() -> None:
