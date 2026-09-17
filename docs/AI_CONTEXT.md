@@ -360,6 +360,12 @@ changes.
   implemented. Army, wiki, and symbol acquisition now write deterministic
   SHA-256-addressed provenance records, while curated snapshot notes remain a
   separate source-controlled human layer that acquisition tooling never edits.
+- 2026-09-17: Weapon catalog policy was split from implementation code.
+  `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
+  and explicit category decisions; `config/catalogs/weapon-overrides.json` owns
+  Army-source name/profile corrections. Normalization consumes those validated
+  build inputs and materializes their effects. Special weapon rules facts are
+  deliberately excluded and remain a curated-rules migration target.
 - 2026-09-16: Rules ingestion is scoped to `data/curated/rules/`. Other curated
   categories may have separate future semantics but are not implicitly rules
   database inputs.

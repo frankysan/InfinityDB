@@ -44,6 +44,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Move maintained weapon-family taxonomy, regex classification policy, manual
+  category decisions, and Army-source weapon metadata corrections out of Python
+  into validated `config/catalogs/` configuration. Classification mechanics
+  remain code, while special weapon game-rule facts remain outside the source
+  correction config pending cited curated-rules migration.
 - Reconcile reference documentation with the completed logical-unit and army-role
   refactors: source-unit identity is now distinguished from materialized
   application identity, repository-time identity discovery is no longer described

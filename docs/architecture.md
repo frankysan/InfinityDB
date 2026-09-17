@@ -136,6 +136,20 @@ rules. This keeps deployments self-contained and prevents later working-tree
 configuration changes from silently changing the meaning of an existing
 normalized or SQLite snapshot.
 
+Weapon catalog policy now follows the same code/config ownership rule without
+becoming deployed runtime state. `config/catalogs/weapon-categories.json` owns
+the ordered weapon-family taxonomy, regular-expression patterns, fallback
+category, and explicit weapon-ID category decisions.
+`config/catalogs/weapon-overrides.json` owns corrections for incomplete or
+inconsistent Army weapon metadata, such as missing deployable profiles and known
+source naming anomalies. Normalization validates and consumes both files; their
+effects are materialized into normalized weapon rows, so repository/runtime
+queries do not read the working-tree configuration. Classification mechanics,
+validation, and fallback behavior remain Python code. Actual game-rule facts
+such as special weapon statistics, skills, and equipment are not source
+corrections and therefore do not belong in these config files; they remain a
+curated-rules migration task.
+
 Army presentation and classification currently combine imported relationships
 with merger-derived fields. Faction grouping, display names, and slugs come from
 `metadata_factions.parent`, `name`, and `slug`; repository responses expose this

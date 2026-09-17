@@ -1,0 +1,187 @@
+{
+  "format": "InfinityDB weapon category config",
+  "formatVersion": 1,
+  "fallbackCategory": "Uncategorized",
+  "categories": [
+    {
+      "name": "Bows",
+      "patterns": [
+        "\\bbow\\b"
+      ]
+    },
+    {
+      "name": "Carbines",
+      "patterns": [
+        "\\bcarbine\\b"
+      ]
+    },
+    {
+      "name": "CC Weapons",
+      "patterns": [
+        "\\bcc weapon\\b",
+        "\\bclose combat weapon\\b"
+      ]
+    },
+    {
+      "name": "Disposable Support Weapons",
+      "patterns": [
+        "\\bpanzerfaust\\b",
+        "\\bfaust\\b",
+        "\\bdeployer\\b"
+      ]
+    },
+    {
+      "name": "Flamethrowers",
+      "patterns": [
+        "\\bflamethrower\\b"
+      ]
+    },
+    {
+      "name": "Grenade Launchers",
+      "patterns": [
+        "\\bgrenade launcher\\b",
+        "\\bgl\\b"
+      ]
+    },
+    {
+      "name": "Grenades",
+      "patterns": [
+        "\\bgrenades?\\b"
+      ]
+    },
+    {
+      "name": "Heavy Machine Guns",
+      "patterns": [
+        "\\bheavy machine gun\\b",
+        "\\bhmg\\b"
+      ]
+    },
+    {
+      "name": "Marksman Rifles",
+      "patterns": [
+        "\\bmarksman rifle\\b"
+      ]
+    },
+    {
+      "name": "Mines",
+      "patterns": [
+        "\\bmine\\b"
+      ]
+    },
+    {
+      "name": "Pheroware Tactics (PT)",
+      "patterns": [
+        "\\bpheroware\\b",
+        "\\bpt\\b"
+      ]
+    },
+    {
+      "name": "Pistols",
+      "patterns": [
+        "\\bpistol\\b"
+      ]
+    },
+    {
+      "name": "Red Furies",
+      "patterns": [
+        "\\bred fury\\b"
+      ]
+    },
+    {
+      "name": "Riotstoppers",
+      "patterns": [
+        "\\briotstopper\\b"
+      ]
+    },
+    {
+      "name": "Rocket Launchers",
+      "patterns": [
+        "\\brocket launcher\\b"
+      ]
+    },
+    {
+      "name": "Shotguns",
+      "patterns": [
+        "\\bshotgun\\b"
+      ]
+    },
+    {
+      "name": "Sniper Rifles",
+      "patterns": [
+        "\\bsniper rifle\\b"
+      ]
+    },
+    {
+      "name": "Spitfires",
+      "patterns": [
+        "\\bspitfire\\b"
+      ]
+    },
+    {
+      "name": "Submachine Guns",
+      "patterns": [
+        "\\bsubmachine gun\\b",
+        "\\bsubmachinegun\\b",
+        "\\bsmg\\b"
+      ]
+    },
+    {
+      "name": "Thunderbolts",
+      "patterns": [
+        "\\bthunderbolt\\b"
+      ]
+    },
+    {
+      "name": "Rifles",
+      "patterns": [
+        "\\brifle\\b"
+      ]
+    },
+    {
+      "name": "Uncategorized",
+      "patterns": []
+    }
+  ],
+  "overrides": [
+    {
+      "weapon_id": 177,
+      "category": "CC Weapons",
+      "reason": "Name-based classification is ambiguous for this Army weapon ID."
+    },
+    {
+      "weapon_id": 1,
+      "category": "Disposable Support Weapons",
+      "reason": "Name-based classification is ambiguous for this Army weapon ID."
+    },
+    {
+      "weapon_id": 14,
+      "category": "Disposable Support Weapons",
+      "reason": "Name-based classification is ambiguous for this Army weapon ID."
+    },
+    {
+      "weapon_id": 82,
+      "category": "Disposable Support Weapons",
+      "reason": "Name-based classification is ambiguous for this Army weapon ID."
+    },
+    {
+      "weapon_id": 174,
+      "category": "Mines",
+      "reason": "Name-based classification is ambiguous for this Army weapon ID."
+    },
+    {
+      "weapon_id": 96,
+      "category": "Mines",
+      "reason": "Name-based classification is ambiguous for this Army weapon ID."
+    },
+    {
+      "weapon_id": 182,
+      "category": "Mines",
+      "reason": "Name-based classification is ambiguous for this Army weapon ID."
+    },
+    {
+      "weapon_id": 18,
+      "category": "Uncategorized",
+      "reason": "Keep this Army weapon ID outside the maintained family taxonomy."
+    }
+  ]
+}
