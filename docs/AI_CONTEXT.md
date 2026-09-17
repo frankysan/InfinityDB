@@ -93,7 +93,9 @@ and serves a read-only browser and same-origin HTTP API.
 - 901 (Non-Aligned Armies) is a non-selectable grouping identity for its child
   9xx armies **and** a real imported Army source list with its own roster. Current
   metadata has `901.parent = 900`; playability must not be inferred from source-list
-  existence or roster presence.
+  existence or roster presence. InfinityDB intentionally has no separate 901
+  roster-query surface: preserve that roster as source provenance and consume unit
+  availability through the playable child NA2 lists.
 - The analyzed snapshot gives source list 901 one standard unit (Rumbler
   Spec-Ops) plus the complete 49-variant optional-mercenary pool. Child NA2 lists
   have their own standard rosters plus subsets of that pool.
@@ -113,7 +115,7 @@ and serves a read-only browser and same-origin HTTP API.
 - The backend/API exposes explicit army role/playability semantics derived from
   metadata parent relationships and ordinary-list `reinforcements` links.
   `/api/armies` distinguishes main armies, sectorials, Non-Aligned forces,
-  reinforcement lists, and grouping-only identities; the browser selector
+  reinforcement lists, and grouping identities; the browser selector
   consumes that contract rather than Army-ID ranges. Grouping identity `901` is
   non-playable.
 - Mercenary variants are classified during normalization, their source markers
@@ -424,6 +426,10 @@ changes.
   grouping nodes, while self-parented parents remain main armies. Source-list
   existence, roster semantics, hierarchy role, and application playability are
   separate concepts.
+- 2026-09-17: Non-playable grouping rosters do not get a dedicated application
+  query surface. The 901 source roster remains preserved for provenance, while
+  application unit availability is reached through the playable child NA2 army
+  occurrences. This is separate from the future canonical logical-unit/delta model.
 - 2026-09-17: Mercenary source identity and Non-Aligned Army grouping are
   separate. ID `1` is retained as mercenary source provenance; 901 groups NA2
   army lists. Dedicated mercenary variants are identified by source semantics,

@@ -86,6 +86,9 @@ history retains implementation detail.
       state rather than hand-authored project knowledge.
     - Code continues to own algorithms, schemas, parser mechanics, generic
       normalization behavior, validation, and application behavior.
+  - The non-symbol audit is complete. Remaining maintained domain-name mapping
+    work is limited to the unit-symbol semantics already tracked under the
+    dedicated symbol-pipeline refactor below.
   - Require versioned schemas, validation on load, deterministic serialization
     where generated, focused regression tests, and portable project-relative
     paths for important configuration/manifests.
@@ -125,7 +128,7 @@ history retains implementation detail.
   - [x] Remove the duplicate trait-canonicalization table from
     `catalog-detail.js`; API responses expose canonical trait identity, name,
     and slug while preserving the raw source trait label.
-- [ ] Review remaining hard-coded domain tables with the same decision rule:
+- [x] Review remaining hard-coded domain tables with the same decision rule:
   prefer derivation from authoritative imported data first, validated
   configuration second, cited curated rules third when the value is external
   rules knowledge, and code only when the value is implementation behavior.
@@ -157,20 +160,31 @@ history retains implementation detail.
     grouping nodes. Current source list `901` has metadata parent `900`, parents
     the NA2 child lists, and retains a real source roster; runtime classification
     does not know the numeric ID.
-  - [ ] Decide whether non-playable grouping source rosters such as `901` need a
-    dedicated provenance/inspection API separate from selectable `army_id`
-    filtering. Do not infer that `playable: false` means the source list is empty.
-  - [ ] Evaluate a canonical logical-unit payload/delta model. Audit fields for
-    invariance across each logical unit, promote only justified shared data, and
-    retain source IDs, raw provenance, army availability, and genuine
-    profile/loadout differences as explicit source or delta records.
-  - [ ] Revisit unit-symbol semantic name tables during the dedicated symbol
-    pipeline refactor; do not move those mappings into unrelated configuration
-    in this branch.
+  - [x] Keep non-playable grouping source rosters such as `901` as preserved
+    source/provenance data without adding a dedicated application roster API.
+    `playable: false` does not imply an empty source list; application unit access
+    remains through the playable child army occurrences that carry availability.
+  - [x] Revisit unit-symbol semantic name tables during the dedicated symbol
+    pipeline refactor rather than moving those mappings into unrelated
+    configuration in this branch. The remaining work is tracked under the symbol
+    pipeline section below.
   - Keep API-source table wiring such as `METADATA_TABLES`, schema definitions,
     generic merge/normalization algorithms, Unicode normalization mechanics,
     database behavior, distance-unit conversion, range-modifier CSS classes, and
     UI preference mechanics in code.
+
+## Canonical logical-unit model
+
+- [ ] Evaluate a canonical logical-unit payload/delta model.
+  - Audit fields for invariance across every materialized logical unit before
+    promoting them to shared canonical data.
+  - Store army-specific membership/availability, loadout/profile differences,
+    and other true variations as explicit deltas rather than repeated full unit
+    payloads where this can be done losslessly.
+  - Preserve source IDs, exact raw provenance, and reconstructability of the
+    imported Army data even when invariant application fields are deduplicated.
+  - Treat this as a data-model refactor distinct from the completed maintained-
+    domain-knowledge extraction work.
 
 ## Army snapshot and symbol pipeline
 

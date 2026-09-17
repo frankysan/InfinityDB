@@ -167,10 +167,13 @@ infinity-db validate-curated data/curated/rules/example.json
 The army selector consumes backend-derived role and playability semantics.
 Metadata parent relationships distinguish main armies, sectorials, and
 Non-Aligned forces; explicit source reinforcement links identify reinforcement
-lists. Non-Aligned grouping identity `901` is exposed by the API as grouping-only
-and is not selectable. Display names are derived from source slugs when a name
-is unavailable, and reinforcement lists that share the `reinf` slug include
-their list ID so they remain distinguishable.
+lists. Non-Aligned identity `901` is exposed by the API as a non-playable grouping
+node and is not selectable. Its real imported source roster is preserved for
+provenance, but InfinityDB does not expose a separate roster-query surface for
+`901`; unit availability is consumed through the playable child NA2 lists.
+Display names are derived from source slugs when a name is unavailable, and
+reinforcement lists that share the `reinf` slug include their list ID so they
+remain distinguishable.
 
 ## Commands
 
@@ -272,8 +275,8 @@ data/
   pdf/                      # Ignored rules and FAQ research documents
   curated/
     rules/                  # Current source-controlled rules-reference collections
-    snapshot-notes/         # Planned human-reviewed snapshot annotations
-  manifests/                # Planned generated provenance/build-state location
+    snapshot-notes/         # Source-controlled human snapshot annotations
+  manifests/                # Ignored generated provenance/build-state records
   generated/                # Ignored database, JSON, and validation artifacts
 reports/                    # Ignored timestamped local development-check reports
 .vscode/                    # Shared build, serve, test, lint, and debug tasks
