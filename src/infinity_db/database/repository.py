@@ -49,9 +49,9 @@ from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
+    DATABASE_TABLES,
     METADATA_TABLE,
     SCHEMA_VERSION,
-    TABLES,
     quote,
 )
 
@@ -814,7 +814,7 @@ class Database:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
             if application_id != APPLICATION_ID or version != SCHEMA_VERSION:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
-            for name, definition in TABLES.items():
+            for name, definition in DATABASE_TABLES.items():
                 columns = {
                     row["name"] for row in connection.execute(f"PRAGMA table_info({quote(name)})")
                 }
@@ -849,9 +849,39 @@ class Database:
                     "rebuild the database"
                 )
             identity_config_from_connection(connection)
-            generic_unit_identity_policy_from_connection(connection)
-            mercenary_identity_policy_from_connection(connection)
-            reinforcement_identity_policy_from_connection(connection)
+            source_unit_count = connection.execute(
+                "SELECT COUNT(*) FROM units WHERE source_defined = 1"
+            ).fetchone()[0]
+            mapped_source_count = connection.execute(
+                "SELECT COUNT(*) FROM logical_unit_sources"
+            ).fetchone()[0]
+            invalid_mapping = connection.execute(
+                "SELECT 1 FROM logical_unit_sources AS lus "
+                "JOIN units AS u ON u.id = lus.source_unit_id "
+                "WHERE u.source_defined != 1 LIMIT 1"
+            ).fetchone()
+            invalid_representative = connection.execute(
+                "SELECT 1 FROM logical_units AS lu "
+                "LEFT JOIN logical_unit_sources AS lus "
+                "ON lus.source_unit_id = lu.representative_unit_id "
+                "AND lus.logical_unit_id = lu.id "
+                "WHERE lu.id != lu.representative_unit_id "
+                "OR lus.source_unit_id IS NULL LIMIT 1"
+            ).fetchone()
+            empty_logical_unit = connection.execute(
+                "SELECT 1 FROM logical_units AS lu "
+                "LEFT JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+                "WHERE lus.source_unit_id IS NULL LIMIT 1"
+            ).fetchone()
+            if (
+                source_unit_count != mapped_source_count
+                or invalid_mapping is not None
+                or invalid_representative is not None
+                or empty_logical_unit is not None
+            ):
+                raise ValueError(
+                    "Database has invalid materialized logical-unit identity; rebuild the database"
+                )
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -871,7 +901,7 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def _unit_graph(self) -> dict[str, Any]:
-        """Load the snapshot-wide unit relationships shared by read paths."""
+        """Load materialized logical identity plus source-specific unit relationships."""
         identity_config = self._identity_config()
         with self._connect() as connection:
             rows = connection.execute(
@@ -879,9 +909,14 @@ class Database:
                 "u.main_army_id, u.canonical_faction_id, u.source_role "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
-            generic_identity = generic_unit_identity_policy_from_connection(connection)
-            mercenary_identity = mercenary_identity_policy_from_connection(connection)
-            reinforcement_identity = reinforcement_identity_policy_from_connection(connection)
+            rows_by_id = {row["id"]: row for row in rows}
+            logical_rows = connection.execute(
+                "SELECT lu.id AS logical_unit_id, lu.representative_unit_id, "
+                "lus.source_unit_id "
+                "FROM logical_units AS lu "
+                "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+                "ORDER BY lu.id, lus.source_unit_id"
+            ).fetchall()
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
             army_names = {
                 row["id"]: army_name(row)
@@ -919,24 +954,54 @@ class Database:
                 for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
                     if row["unit_id"] in search_terms_by_source:
                         search_terms_by_source[row["unit_id"]].add(row["name"])
-        groups = logical_unit_groups(
-            rows,
-            memberships,
-            identity_config,
-            generic_matches=generic_identity,
-            mercenary_matches=(mercenary_identity[0] if mercenary_identity is not None else None),
-            unmatched_mercenary_ids=(
-                mercenary_identity[1] if mercenary_identity is not None else ()
-            ),
-            reinforcement_matches=reinforcement_identity,
-        )
-        for group in groups:
+
+        sources_by_logical: dict[int, list[int]] = {}
+        representatives: dict[int, int] = {}
+        for row in logical_rows:
+            logical_id = row["logical_unit_id"]
+            representatives[logical_id] = row["representative_unit_id"]
+            sources_by_logical.setdefault(logical_id, []).append(row["source_unit_id"])
+
+        groups: list[dict[str, Any]] = []
+        for logical_id, source_ids in sources_by_logical.items():
+            representative = rows_by_id[representatives[logical_id]]
+            group: dict[str, Any] = {
+                "id": logical_id,
+                "name": representative["name"],
+                "isc": representative["isc"],
+                "slug": representative["slug"],
+                "canonical_faction_id": representative["canonical_faction_id"],
+                "main_army_id": representative["main_army_id"],
+                "source_ids": source_ids,
+                "names": [rows_by_id[source_id]["name"] for source_id in source_ids],
+                "armies": {},
+                "army_occurrences": [],
+            }
+            for source_id in source_ids:
+                for army in memberships[source_id]:
+                    source_army_id = army["id"]
+                    preferred_army_id = identity_config.canonical_army_id(source_army_id)
+                    preferred_army = {**army, "id": preferred_army_id}
+                    if (
+                        preferred_army_id not in group["armies"]
+                        or source_army_id == preferred_army_id
+                    ):
+                        group["armies"][preferred_army_id] = preferred_army
+                    group["army_occurrences"].append(
+                        {
+                            **preferred_army,
+                            "source_id": source_id,
+                            "source_army_id": source_army_id,
+                        }
+                    )
             group["normal_army_ids"] = set().union(
-                *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])
+                *(normal_armies_by_unit[source_id] for source_id in source_ids)
             )
             group["search_terms"] = set().union(
-                *(search_terms_by_source[source_id] for source_id in group["source_ids"])
+                *(search_terms_by_source[source_id] for source_id in source_ids)
             )
+            groups.append(group)
+
         groups_by_source = {
             source_id: group for group in groups for source_id in group["source_ids"]
         }

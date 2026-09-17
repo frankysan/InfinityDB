@@ -197,6 +197,17 @@ def test_database_preserves_every_normalized_table_and_field(
             (REINFORCEMENT_UNIT_MATCHES_KEY,),
         ).fetchone()[0]
         assert json.loads(reinforcement_matches) == []
+        assert connection.execute(
+            "SELECT id, representative_unit_id FROM logical_units ORDER BY id"
+        ).fetchall() == [(1, 1), (2, 2), (3, 3)]
+        assert connection.execute(
+            "SELECT source_unit_id, logical_unit_id FROM logical_unit_sources "
+            "ORDER BY source_unit_id"
+        ).fetchall() == [(1, 1), (2, 2), (3, 3)]
+        assert any(
+            row[1] == "logical_unit_sources_logical"
+            for row in connection.execute("PRAGMA index_list(logical_unit_sources)")
+        )
         indexes = {
             row[1]
             for table_name in TABLES
@@ -1696,6 +1707,22 @@ def test_secondary_indexes_are_created_after_schema_setup() -> None:
         assert "units_name" in indexes_after
     finally:
         connection.close()
+
+
+def test_database_validation_rejects_incomplete_logical_unit_mapping(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute("DELETE FROM logical_unit_sources WHERE source_unit_id = 1")
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(ValueError, match="materialized logical-unit identity"):
+        Database(path).validate()
 
 
 def test_database_with_different_compatibility_revision_requires_rebuild(

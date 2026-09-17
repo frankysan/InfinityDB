@@ -118,15 +118,13 @@ history retains implementation detail.
     present. Explicitly unmatched variants remain separate; older databases
     without the metadata retain the legacy generic-grouping fallback.
   - [x] Persist audited generic standard-unit duplicate matches during
-    normalization and make repository grouping treat that audit as authoritative
-    when present, including an explicit empty result. Older databases without
-    `genericUnitMatches` retain the 10,000-ID/ISC compatibility fallback.
+    normalization and make database creation treat that audit as authoritative,
+    including an explicit empty result. Older normalized inputs without
+    `genericUnitMatches` retain the 10,000-ID/ISC build-time fallback.
   - [x] Persist unambiguous reinforcement-to-standard source-unit matches during
-    database creation using the pinned name-normalization policy. Current
-    repositories treat `reinforcementUnitMatches` as authoritative, including an
-    explicitly empty result; older databases without the metadata retain the
-    legacy query-time label matcher.
-  - [ ] Materialize complete logical-unit identity during frontend database
+    database creation using the pinned name-normalization policy. The audit feeds
+    materialized logical identity, including an explicitly empty result.
+  - [x] Materialize complete logical-unit identity during frontend database
     creation instead of assembling it dynamically in repository reads.
     - Extract one pure build-time resolver from the current repository grouping
       logic. Feed it configured unit aliases plus persisted generic, mercenary,
@@ -146,16 +144,21 @@ history retains implementation detail.
       pre-merged logical profile/loadout/occurrence tables; repository aggregation
       should follow `logical_unit_sources` so availability and other provenance
       stay source-specific.
-    - Move legacy generic/mercenary/reinforcement rediscovery behind the database
-      builder as compatibility fallbacks for older normalized inputs. Newly
-      built databases should expose one uniform materialized identity contract.
+    - Keep legacy generic/mercenary duplicate discovery behind the database
+      builder as a compatibility fallback for older normalized inputs, while
+      reinforcement matching remains a database-build audit. Newly built
+      databases expose one uniform materialized identity contract.
     - Switch repository `_unit_graph()` and unit lookup/grouping to consume only
-      the materialized relation for current databases, then remove duplicated
-      read-time identity policy once compatibility coverage permits it.
+      the materialized relation for current databases. Cleanup of the now-unused
+      repository discovery helpers is tracked separately below.
     - Add focused resolver, schema-integrity, transitive-grouping, unmatched
       variant, overlapping availability, legacy-input, and API regression tests;
       increment schema/compatibility revisions when the materialized tables
       become required.
+  - [ ] Remove the now-unused repository-side logical-identity discovery helpers
+    after their direct compatibility tests have been migrated to the build-time
+    resolver. Retain the actual legacy fallback behavior in the builder while
+    older normalized inputs remain supported.
   - [x] Replace repository-time `canonical_faction_id == 1` mercenary inference
     with explicit `army_units.availability_kind` provenance for current
     normalized snapshots. Retain the old inference only as a compatibility
