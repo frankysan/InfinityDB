@@ -89,24 +89,63 @@ history retains implementation detail.
   - Require versioned schemas, validation on load, deterministic serialization
     where generated, focused regression tests, and portable project-relative
     paths for important configuration/manifests.
-- [ ] Model army/faction role and playability explicitly as part of the current
-  identity/list-semantics refactor.
+- [ ] Replace the legacy mercenary/NA2 ownership shortcut with source-semantic
+  army-role and availability modeling.
+  - Treat source canonical-faction ID `1` and Non-Aligned Armies ID `901` as
+    distinct concepts. ID `1` is mercenary source/origin provenance; 901 is a
+    grouping identity for distinct Non-Aligned army lists.
+  - Keep the currently implemented `1` -> `901` override in place only until a
+    coherent replacement reaches normalization, database export, repository,
+    API, and UI together; do not remove it in isolation and silently change
+    current output midway through the refactor.
+  - Validate the observed optional-mercenary source contract during
+    normalization: `canonical == 1`, empty declared `factions`, and a
+    `merc-...` source slug. Report source-schema drift instead of guessing when
+    a future snapshot violates or extends that pattern.
+  - Do not use the common 10,000-offset unit-ID pattern as the mercenary rule.
+    It can support duplicate diagnostics/matching, but the classification must
+    come from source semantics.
+  - Preserve ordinary `factions` membership as normal availability and
+    mercenary-variant army occurrences as optional mercenary availability, even
+    when both occur for the same logical unit and army.
+  - Move unambiguous mercenary-variant deduplication into normalization or
+    database creation. Merge alternate source records into one logical
+    application unit while retaining every source unit ID, source occurrence,
+    profile/loadout provenance, and availability reason required by validation
+    and `infinity.raw.db`.
+  - Replace repository-time `canonical_faction_id == 1` mercenary inference with
+    explicit normalized availability provenance/category once the new model is
+    available.
+  - Remove the `1` -> `901` entry from `source-identities.json` only when the
+    replacement model is authoritative, and update pinned identity provenance,
+    schema/compatibility revisions, generated snapshots, and regression tests
+    together.
+  - Add source-shaped regression fixtures for normal plus optional mercenary
+    records (for example the observed Miranda Ashcroft, Yuan Yuan, and Valerya
+    patterns), including a case where normal and mercenary occurrences overlap
+    the same army.
+- [ ] Model army/faction role and playability explicitly as a related but
+  separate part of the identity/list-semantics refactor.
+  - Derive standard main-army versus sectorial grouping from metadata parent
+    relationships where the main faction is self-parented and sectorials point
+    to it; do not use the first `xx01` ID as the role classifier.
   - Represent 901 (Non-Aligned Armies) as a grouping identity for its child 9xx
-    armies, not as an independently playable army.
-  - Keep grouping/playability semantics distinct from the already-implemented
-    `1` -> `901` canonical-faction mapping in `source-identities.json`; that
-    mapping establishes canonical ownership only.
-  - Preserve the ordinary `xx01` canonical-ownership derivation unless a
-    separate refactor establishes a better authoritative relationship; do not
-    conflate that algorithm with playability.
-  - Prefer authoritative imported hierarchy/list metadata where available and
-    validated project configuration for semantics the source does not express.
+    army lists, not as an independently playable army and not as the meaning of
+    mercenary source identity `1`.
+  - Derive reinforcement relationships from the explicit top-level
+    `reinforcements` references in ordinary source lists; treat current
+    `army_lists.kind` as a merger-derived representation of that file shape,
+    not as a full source taxonomy.
+  - Prefer authoritative imported hierarchy/list relationships first and
+    validated project configuration only for semantics the source genuinely
+    cannot express.
   - Expose role/playability explicitly from the backend so `/api/armies` and
-    browser selectors can exclude grouping-only identities without hard-coded
-    IDs or `9xx` assumptions.
-  - Add repository/API/UI regression coverage showing that 901 remains usable
-    for canonical ownership/grouping while its child armies remain independently
-    selectable.
+    browser selectors can distinguish grouping-only identities, independent
+    armies/sectorials/NA2 forces, and reinforcement lists without numeric-ID
+    heuristics.
+  - Add repository/API/UI regression coverage showing that 901 is grouping-only,
+    its child armies remain distinct/selectable, and optional mercenary units do
+    not imply NA2 ownership.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.

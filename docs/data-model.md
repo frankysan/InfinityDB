@@ -33,10 +33,14 @@ raw Army JSON
   maintained in validated `config/identity/source-identities.json`
   configuration. Generic duplicate/name rules remain implementation behavior
   rather than authored alias data.
-- The ordinary whole-army `xx01` derivation remains normalization behavior.
-  Exceptional canonical-faction interpretation, including the legacy
-  canonical-faction source ID `1` -> `901` mapping, is maintained in identity
-  configuration and supplied explicitly to the normalizer.
+- The ordinary whole-army `xx01` derivation remains current normalization
+  behavior. The current identity configuration also contains a legacy
+  canonical-faction override from source ID `1` to army/group ID `901`.
+  Investigation of the source data now shows that this override conflates two
+  different source concepts: ID `1` behaves as a mercenary source/origin
+  identity, while `901` is the Non-Aligned Armies grouping identity. The mapping
+  therefore remains current implementation behavior until migrated, but is not
+  an accepted domain invariant.
 - InfinityDB normalization pins the exact validated identity configuration and
   its canonical SHA-256 into `normalized.json`. Database export revalidates that
   provenance and propagates the same policy into both database siblings.
@@ -46,7 +50,7 @@ raw Army JSON
 - Referenced but undefined factions/units/categories are retained as explicit
   placeholder records rather than discarded.
 
-## Army identities, grouping, and playability
+## Army identities, grouping, playability, and mercenary availability
 
 ### Current
 
@@ -55,29 +59,90 @@ not by itself prove that the identity is independently playable.
 
 Faction 901, Non-Aligned Armies, is a known grouping identity for the associated
 9xx armies rather than a playable army of its own. Its child armies remain
-distinct playable army identities.
+distinct force/list identities.
 
-The source canonical-faction ID `1` is a legacy mercenary designation and maps
-to grouping identity `901` for canonical ownership through validated identity
-configuration. That identity mapping is separate from playability: resolving
-canonical faction `1` to `901` does not make 901 a selectable army.
+The merger's current `army_lists.kind` value is derived rather than supplied as
+a source taxonomy: a source document with a top-level `reinforcements` field is
+labeled `army`, while a source document without that field is labeled
+`reinforcement`. It therefore distinguishes the current ordinary-list versus
+reinforcement-file shape, but does not distinguish main armies, sectorials, or
+Non-Aligned forces.
 
-Canonical ownership, source-identity mapping, grouping, list kind, and
-playability are separate semantics. The normalizer currently uses the ordinary
-`xx01` derivation for canonical ownership where no exceptional mapping applies;
-grouping and presentation also use imported metadata faction relationships.
-Army-list occurrences remain authoritative for unit membership and
-availability.
+Army metadata provides a separate faction hierarchy. Standard main armies are
+self-parented metadata factions, while their sectorials point to that main-army
+parent. Non-Aligned army lists such as the 9xx forces point to metadata grouping
+identity 901. Reinforcement lists are also explicitly referenced from their
+ordinary army/sectorial source documents through the top-level
+`reinforcements` relationship. These relationships are source evidence and are
+stronger than numeric-ID conventions.
 
-The current normalized/database/API model does **not** yet expose a complete
-explicit role/playability field. Clients therefore must not infer playability
-from list presence or numeric ID patterns such as `9xx`.
+Source canonical-faction ID `1` is materially different from 901. In the
+investigated source snapshot, ID `1` has no army list, is used as the canonical
+identity for mercenary-related unit records, and is not used as a normal unit
+membership faction. The current `1` -> `901` identity-config mapping therefore
+should be understood as legacy InfinityDB interpretation policy, not evidence
+that ID `1` means Non-Aligned Armies.
+
+Normal unit availability and optional mercenary availability are also distinct
+source concepts. Ordinary unit records declare normal faction availability in
+`factions`. The source additionally contains dedicated mercenary variants that
+consistently use `canonical: 1`, an empty `factions` list, a `merc-...` slug, and
+army-specific occurrences that supply optional mercenary availability. Many of
+those records also use a 10,000-offset-style source ID, but that numeric pattern
+is supporting evidence only and is not a semantic contract.
+
+Current repository queries reconstruct this distinction after database creation.
+They union declared `unit_factions` as the unit's normal army set, then mark an
+army occurrence as `mercs` when its source record has canonical faction `1` and
+the army is outside that normal set. Logical-unit grouping also combines common
+10,000-ID duplicate families and selected explicit aliases at query time. This
+produces the intended UI behavior today but leaves source-semantic
+classification and some deduplication later in the pipeline than necessary.
+
+Canonical ownership, source identity, army grouping, army-list kind, optional
+availability category, and playability are separate semantics. The current
+normalized/database/API model does **not** yet expose a complete explicit
+role/playability model, nor does normalized data explicitly classify a source
+unit occurrence as normal versus optional mercenary availability. Clients must
+not infer these semantics from numeric ID patterns.
 
 ### Design direction
 
-Model role/playability explicitly and expose it from the backend so the set of
-user-selectable armies is determined from modeled semantics rather than
-hard-coded IDs, list presence, or numeric patterns.
+Treat source ID `1` and grouping identity `901` as distinct concepts. Preserve
+ID `1` as source-side mercenary identity/provenance and derive Non-Aligned Army
+grouping from the actual 901 metadata hierarchy. Remove the legacy `1` -> `901`
+override only as part of a coherent normalization/database/API migration so
+existing behavior is not silently broken midway through the refactor.
+
+Classify mercenary variants during normalization using source semantics rather
+than repository-time inference. The observed contract to validate is
+`canonical == 1`, empty declared `factions`, and a `merc-...` source slug.
+Validation should report any future source record that violates or extends that
+pattern. A 10,000-offset ID may help diagnose matching records but must not be
+the rule that determines mercenary semantics.
+
+Use that classification to improve logical-unit deduplication before runtime.
+When a mercenary alternate record can be matched unambiguously to its ordinary
+logical unit, normalization or database creation should combine their logical
+identity while preserving every source unit ID, army occurrence, and
+availability provenance needed for validation and the raw archive. The frontend
+repository should consume the resulting explicit logical identity and
+availability category instead of rediscovering them from canonical ID `1`,
+`factions`, and numeric duplicate patterns on every read.
+
+The exact normalized schema for this provenance is not fixed yet. The important
+boundary is that deduplication may collapse several source records into one
+logical application unit without discarding the source records or the reason an
+army occurrence exists. Normal availability derived from declared `factions`
+and optional mercenary availability derived from mercenary source variants must
+remain distinguishable even when they occur for the same logical unit and army.
+
+Model army role/playability explicitly as a related but separate concern. Prefer
+metadata parent relationships for main-army/sectorial/Non-Aligned grouping and
+the explicit `reinforcements` links for reinforcement relationships. Expose the
+result from the backend so selectable armies are determined from modeled source
+semantics and reviewed project policy rather than hard-coded IDs or list
+presence.
 
 ## Principle
 

@@ -108,8 +108,15 @@ source unit, army-list, skill, equipment, and weapon IDs plus identity-name
 aliases. Generic matching and duplicate-detection algorithms remain code. The
 ordinary whole-army `xx01` derivation also remains code; exceptional
 interpretation policy lives in configuration and is supplied explicitly to the
-generic normalizer. In particular, legacy canonical-faction source ID `1` maps
-to `901` (Non-Aligned Armies) for canonical ownership.
+generic normalizer.
+
+The current identity configuration contains a legacy canonical-faction override
+from source ID `1` to `901` (Non-Aligned Armies), and current normalization uses
+that mapping for canonical ownership. Source investigation now shows that these
+IDs represent different concepts: source ID `1` behaves as a mercenary
+source/origin identity with no army list, while `901` is the metadata grouping
+identity for Non-Aligned armies. Treat the mapping as current implementation
+policy awaiting migration, not as a durable domain invariant.
 
 The authored identity configuration is a build input, not a deployed runtime
 file. InfinityDB normalization validates it, supplies normalization-time
@@ -125,18 +132,26 @@ rules. This keeps deployments self-contained and prevents later working-tree
 configuration changes from silently changing the meaning of an existing
 normalized or SQLite snapshot.
 
-Army presentation and classification use explicit imported relationships rather
-than numeric ID conventions. Reinforcement status comes from `army_lists.kind`.
-Faction grouping, display names, and slugs come from `metadata_factions.parent`,
-`name`, and `slug`; repository responses expose this as `main_faction` for unit
-summaries/details and `faction` for each army occurrence. Browser code consumes
-those fields and must not infer faction or reinforcement semantics from Army ID
-prefixes or suffixes.
+Army presentation and classification currently combine imported relationships
+with merger-derived fields. Faction grouping, display names, and slugs come from
+`metadata_factions.parent`, `name`, and `slug`; repository responses expose this
+as `main_faction` for unit summaries/details and `faction` for each army
+occurrence. The merger sets `army_lists.kind` to `army` for source documents
+that contain a top-level `reinforcements` field and to `reinforcement` for those
+that do not. That field therefore captures the current ordinary-list versus
+reinforcement-file shape, but it is not an upstream main-army/sectorial
+classification. Browser code consumes these backend fields and must not infer
+faction or reinforcement semantics from Army ID prefixes or suffixes.
 
-Canonical ownership and playability are separate semantics. The `1` -> `901`
-identity-configuration mapping establishes ownership only: 901 is a grouping
-identity for the associated 9xx armies rather than an independently playable
-army.
+Mercenary units and Non-Aligned Armies are also separate source concepts.
+Ordinary unit records declare their normal faction availability through
+`factions`. The source additionally contains dedicated mercenary variants that
+consistently use canonical faction `1`, an empty `factions` list, a `merc-...`
+slug, and army-specific occurrences that supply optional mercenary
+availability. Many also use 10,000-offset-style unit IDs, but that numeric
+pattern is supporting evidence only. Current repository queries reconstruct
+mercenary availability after database creation by comparing a canonical-1
+source occurrence with the logical unit's declared normal faction set.
 
 ### Design direction
 
@@ -167,10 +182,30 @@ where generated, and have focused regression tests. Persistent project paths
 stored in future manifests should use portable project-relative
 representations rather than machine-specific absolute paths.
 
-Army role/playability also needs an explicit backend representation so API and
+Army role/playability needs an explicit backend representation so API and
 browser selectors do not infer it from list presence or numeric ID patterns.
-Until that is implemented, the known grouping-only status of 901 is a domain
-invariant but not a complete API/UI playability model.
+Prefer source relationships over numeric conventions: standard metadata
+self-parent/child relationships provide main-army and sectorial grouping,
+metadata parent 901 groups the distinct Non-Aligned army lists, and ordinary
+source documents explicitly reference their reinforcement list through the
+`reinforcements` field. The known grouping-only status of 901 remains a domain
+invariant, but a complete API/UI playability model is not implemented yet.
+
+Mercenary source variants should be classified during normalization rather than
+rediscovered in repository queries. Validate the observed source contract
+(`canonical == 1`, empty declared `factions`, `merc-...` slug) and report schema
+drift. Use that source-semantic classification to combine an alternate
+mercenary record with its ordinary logical unit during normalization or database
+creation when the match is unambiguous, while retaining every source unit ID,
+army occurrence, and availability provenance in normalized/raw data. Do not use
+the 10,000-ID offset as the semantic rule.
+
+Once that normalized model exists, remove the legacy `1` -> `901` canonical-
+faction override as part of the same coherent migration. ID `1` should remain
+available as source provenance for mercenary identity rather than being
+relabelled as a Non-Aligned Army. Repository/API code should consume explicit
+logical-unit and availability semantics instead of deriving `mercs` from the
+canonical-ID exception at read time.
 
 ## Snapshot acquisition and provenance
 
@@ -433,10 +468,11 @@ total above illustrates the response shape.
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
 - Army membership comes from `army_units`, not canonical faction or declared
   faction references.
-- `main_army_id` represents canonical whole-army/group ownership and is not
-  synonymous with independent playability. Ordinary ownership uses the `xx01`
-  derivation; exceptional mappings come from the pinned identity policy. In
-  particular, legacy canonical-faction ID `1` maps to grouping identity `901`.
+- `main_army_id` currently represents canonical whole-army/group ownership.
+  Ordinary ownership uses the `xx01` derivation and exceptional mappings come
+  from the pinned identity policy, including the legacy `1` -> `901` override.
+  That override is current behavior but is now documented as a migration target,
+  not accepted source semantics.
 - `main_faction` is derived from the matching metadata-faction parent record;
   browser code consumes it directly instead of deriving a faction from Army IDs.
 - Search matches accent- and punctuation-insensitive, case-folded name
@@ -444,9 +480,11 @@ total above illustrates the response shape.
 - Results sort by display name after case-folding, removing diacritics, and
   ignoring punctuation and other non-alphanumeric characters; unit ID breaks
   ties for stable pagination.
-- Source records that share a 10,000-ID family and ISC identity are presented
-  as one logical unit. Reinforcement-only variants join their matching standard
-  unit; its list entry and details page combine all army-specific data.
+- Source records that share a 10,000-ID family and ISC identity are currently
+  presented as one logical unit. Reinforcement-only variants join their matching
+  standard unit; mercenary source occurrences are evaluated separately before
+  visible army memberships are collapsed. This is runtime deduplication, not yet
+  the intended normalized logical-unit model.
 - `limit` defaults to 50 and must be between 1 and 200; `offset` defaults to 0
   and must be a nonnegative SQLite integer.
 - `search` is limited to 200 characters. Invalid or repeated unit query
@@ -467,7 +505,8 @@ unit summaries; each army occurrence also includes its derived `faction` object
 or null. Profile records include a backend-derived `profile_identity` used by
 the browser to group equivalent labels under the identity policy pinned into
 the database. A reinforcement-only source variant is folded into a uniquely
-matching standard unit. Unknown unit IDs return 404.
+matching standard unit. Current mercenary availability is evaluated from source
+occurrences at repository-query time. Unknown unit IDs return 404.
 
 ### `GET /api/skill-extras`
 

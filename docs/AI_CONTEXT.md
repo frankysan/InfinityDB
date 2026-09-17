@@ -61,16 +61,47 @@ and serves a read-only browser and same-origin HTTP API.
   catalogs, names, and faction hierarchy but must not create army membership or
   alter source-derived availability.
 - Army-list occurrences are authoritative for unit membership and availability.
-  List presence, grouping, list kind, canonical ownership, and playability are
-  separate semantics.
-- Legacy canonical-faction source ID `1` maps to `901` through validated
-  source-identity configuration for canonical ownership only.
+  List presence, grouping, list kind, canonical ownership, optional availability
+  category, and playability are separate semantics.
+- The current identity configuration still maps canonical-faction source ID `1`
+  to `901`, and current normalization uses that mapping for canonical ownership.
+  This is legacy implementation behavior under migration, not a durable source
+  invariant.
+- Source investigation shows ID `1` and ID `901` represent different concepts.
+  ID `1` behaves as a mercenary source/origin identity with no army list and no
+  ordinary faction membership role; 901 is the Non-Aligned Armies grouping
+  identity for distinct child army lists. Do not use the current `1` -> `901`
+  override as evidence that mercenary units belong canonically to NA2.
+- Ordinary unit records declare normal faction availability in `factions`.
+  Dedicated optional-mercenary source variants consistently use
+  `canonical: 1`, an empty `factions` list, a `merc-...` slug, and army-specific
+  occurrences that add optional availability. Many use a 10,000-offset-style
+  source ID, but numeric offset is diagnostic evidence only, not the semantic
+  rule.
+- Current repository queries reconstruct mercenary availability by comparing a
+  canonical-1 source occurrence against the logical unit's declared normal
+  faction set, and logical-unit grouping still performs common 10,000-family
+  deduplication at read time.
 - 901 (Non-Aligned Armies) is a grouping identity for its child 9xx armies, not
   an independently playable army. Do not infer playability from ID patterns or
   the existence of an `army_lists` record.
+- The merger's current `army_lists.kind` is derived from source shape: ordinary
+  documents containing `reinforcements` become `army`, while reinforcement
+  documents without it become `reinforcement`. It is not a source-provided
+  main-army/sectorial taxonomy.
+- Army metadata parent relationships carry useful grouping semantics: standard
+  main armies are self-parented, sectorials point to their main army, and NA2
+  forces point to grouping identity 901. Ordinary list documents explicitly
+  reference their reinforcement list through `reinforcements`.
 - The current backend/API does not yet expose complete explicit
   role/playability semantics. **Design direction:** selectors should eventually
   consume backend-provided role/playability rather than list presence or IDs.
+- **Design direction:** classify mercenary variants during normalization,
+  validate their source markers, and merge unambiguous alternate mercenary
+  records into one logical application unit before runtime while preserving
+  every source ID, occurrence, and availability provenance. Repository queries
+  should consume explicit normalized availability semantics instead of deriving
+  `mercs` from canonical ID `1`.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized
@@ -278,9 +309,11 @@ changes.
 - 2026-09-16: Engineering principles are canonical in `docs/architecture.md`.
   Maintained domain knowledge belongs in validated configuration where
   appropriate; generated project paths remain deterministic and portable.
-- 2026-09-16: Legacy canonical-faction ID `1` -> `901` is an ownership-policy
-  mapping distinct from playability. 901 is grouping-only; explicit
-  role/playability semantics remain required for selectors/APIs.
+- 2026-09-16: The `1` -> `901` canonical-faction ownership override was moved
+  into validated identity configuration. Subsequent source investigation on
+  2026-09-17 found that the two IDs represent different domain concepts, so the
+  override remains current behavior only until the mercenary/army-role model is
+  migrated coherently.
 - 2026-09-16: Army-linked symbol discovery is reference/URL based, uses one
   exact pinned Army snapshot, audits unknown SVG locations, and leaves final
   canonical application paths/mappings to the publisher. This records design
@@ -298,3 +331,10 @@ changes.
 - 2026-09-16: Documentation distinguishes current implementation, accepted
   design direction, and planned/unimplemented backlog so future architecture is
   not presented as existing behavior.
+- 2026-09-17: Mercenary source identity and Non-Aligned Army grouping are
+  separate. ID `1` is retained as mercenary source provenance; 901 groups NA2
+  army lists. Dedicated mercenary variants are identified by source semantics,
+  not numeric ID arithmetic. Accepted design direction moves their
+  classification and unambiguous logical-unit deduplication into normalization
+  or database creation while preserving all source records and availability
+  provenance.
