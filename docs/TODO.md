@@ -108,6 +108,10 @@ history retains implementation detail.
   - Preserve ordinary `factions` membership as normal availability and
     mercenary-variant army occurrences as optional mercenary availability, even
     when both occur for the same logical unit and army.
+  - [x] Persist audited mercenary-to-standard source-unit matches during
+    normalization and make repository logical grouping honor those matches when
+    present. Explicitly unmatched variants remain separate; older databases
+    without the metadata retain the legacy generic-grouping fallback.
   - Move unambiguous mercenary-variant deduplication into normalization or
     database creation. Merge alternate source records into one logical
     application unit while retaining every source unit ID, source occurrence,
