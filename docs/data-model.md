@@ -100,22 +100,31 @@ The classifier does not use the common 10,000-ID offset as its semantic rule,
 and contradictory mercenary markers fail normalization rather than being
 silently guessed.
 
-Current repository queries have not yet migrated to those explicit fields. They
-still union declared `unit_factions` as the logical unit's normal army set, then
-mark an army occurrence as `mercs` when its source record has canonical faction
-`1` and the army is outside that normal set. Logical-unit grouping also combines
-common 10,000-ID duplicate families and selected explicit aliases at query time.
-The new normalized/database classification therefore coexists intentionally
-with the legacy read path while the deduplication and repository migration are
-implemented incrementally.
+Repository logical-unit grouping now consumes the persisted
+`mercenaryUnitMatches` / `unmatchedMercenaryUnitIds` metadata when it is
+available. A matched mercenary source record is grouped through its recorded
+standard source unit even if the mercenary record's own generic duplicate key
+changes, while an explicitly unmatched mercenary record is kept separate rather
+than falling back to the common 10,000-ID rule. Databases built before these
+metadata fields remain readable through the legacy generic grouping fallback.
+Other duplicate families and reinforcement-only matching are still resolved at
+query time.
+
+Mercenary *availability* has not yet completed the same read-path migration.
+Repository queries still union declared `unit_factions` as the logical unit's
+normal army set and mark an army occurrence as `mercs` when its source record
+has canonical faction `1` and the army is outside that normal set. The explicit
+`army_units.availability_kind` field is therefore current normalized/database
+data but is not yet authoritative for runtime filtering.
 
 Canonical ownership, source identity, army grouping, army-list kind, optional
 availability category, and playability are separate semantics. The current
-normalized/database model now exposes mercenary source role and availability
-category explicitly, but the API/runtime model does **not** yet expose a
-complete explicit army role/playability model or an authoritative pre-runtime
-logical-unit identity for mercenary alternates. Clients must not infer those
-remaining semantics from numeric ID patterns.
+normalized/database model exposes mercenary source role, availability category,
+and the audited mercenary-to-standard source relationship explicitly. It still
+does **not** expose one complete pre-runtime logical-unit identity covering all
+duplicate and reinforcement cases, nor a complete explicit army
+role/playability model. Clients must not infer those remaining semantics from
+numeric ID patterns.
 
 ### Design direction
 
@@ -125,22 +134,21 @@ grouping from the actual 901 metadata hierarchy. Remove the legacy `1` -> `901`
 override only as part of a coherent normalization/database/API migration so
 existing behavior is not silently broken midway through the refactor.
 
-Use the current source-semantic mercenary classification to improve logical-unit
-deduplication before runtime. When a mercenary alternate record can be matched
-unambiguously to its ordinary logical unit, normalization or database creation
-should combine their logical identity while preserving every source unit ID,
-army occurrence, and availability provenance needed for validation and the raw
-archive. The frontend repository should consume the resulting explicit logical
-identity and existing availability category instead of rediscovering them from
-canonical ID `1`, `factions`, and numeric duplicate patterns on every read.
+Continue moving logical-unit identity earlier in the pipeline. The current
+normalizer now persists audited mercenary-to-standard matches and the repository
+honors those matches directly, but generic duplicate families, configured alias
+groups, and reinforcement-only joins are not yet represented by one normalized
+logical-unit identity. A future normalized/database identity layer may collapse
+those source records for application queries while preserving every source unit
+ID, army occurrence, profile/loadout provenance, and the reason an army
+occurrence exists.
 
-The remaining provenance/logical-identity schema for deduplicated source records
-is not fixed yet. The important boundary is that deduplication may collapse
-several source records into one logical application unit without discarding the
-source records or the reason an army occurrence exists. Normal availability
-derived from declared `factions` and optional mercenary availability derived
-from mercenary source variants must remain distinguishable even when they occur
-for the same logical unit and army.
+Migrate runtime availability filtering separately. Normal availability derived
+from declared `factions` and optional mercenary availability derived from
+mercenary source variants must remain distinguishable even when they occur for
+the same logical unit and army; the repository should eventually consume the
+explicit normalized availability category instead of reconstructing mercenary
+status from canonical ID `1` and faction membership.
 
 Model army role/playability explicitly as a related but separate concern. Prefer
 metadata parent relationships for main-army/sectorial/Non-Aligned grouping and

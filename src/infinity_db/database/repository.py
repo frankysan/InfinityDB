@@ -17,6 +17,13 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Protocol
 
+from infinity_army_data.availability import (
+    MERCENARY_MATCH_METHOD,
+    MERCENARY_SOURCE_ROLE,
+    MERCENARY_UNIT_MATCHES_KEY,
+    STANDARD_SOURCE_ROLE,
+    UNMATCHED_MERCENARY_UNIT_IDS_KEY,
+)
 from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
 from infinity_army_data.weapon_profiles import special_weapon_detail
 from infinity_db.identities import (
@@ -118,6 +125,92 @@ def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityC
             "Database has invalid identity configuration metadata; rebuild the database"
         ) from exc
 
+
+def mercenary_identity_policy_from_connection(
+    connection: sqlite3.Connection,
+) -> tuple[dict[int, int], frozenset[int]] | None:
+    """Load persisted mercenary-to-standard source identity, when available.
+
+    Databases built before this normalization audit was persisted remain readable
+    and use the legacy generic duplicate grouping. Once either metadata key exists,
+    however, the pair is treated as one complete contract: every source-defined
+    mercenary variant must be either mapped to a standard source unit or listed
+    as explicitly unmatched.
+    """
+    rows = connection.execute(
+        f"SELECT key, value FROM {quote(METADATA_TABLE)} WHERE key IN (?, ?)",
+        (MERCENARY_UNIT_MATCHES_KEY, UNMATCHED_MERCENARY_UNIT_IDS_KEY),
+    ).fetchall()
+    values = {row["key"]: row["value"] for row in rows}
+    if not values:
+        return None
+    if set(values) != {MERCENARY_UNIT_MATCHES_KEY, UNMATCHED_MERCENARY_UNIT_IDS_KEY}:
+        raise ValueError(
+            "Database has incomplete mercenary identity metadata; rebuild the database"
+        )
+
+    try:
+        raw_matches = json.loads(values[MERCENARY_UNIT_MATCHES_KEY])
+        raw_unmatched = json.loads(values[UNMATCHED_MERCENARY_UNIT_IDS_KEY])
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ValueError("Database has invalid mercenary identity metadata") from exc
+    if not isinstance(raw_matches, list) or not isinstance(raw_unmatched, list):
+        raise ValueError("Database has invalid mercenary identity metadata")
+
+    matches: dict[int, int] = {}
+    for item in raw_matches:
+        if not isinstance(item, dict) or set(item) != {
+            "mercenaryUnitId",
+            "standardUnitId",
+            "method",
+        }:
+            raise ValueError("Database has invalid mercenary identity metadata")
+        mercenary_id = item["mercenaryUnitId"]
+        standard_id = item["standardUnitId"]
+        if (
+            type(mercenary_id) is not int
+            or mercenary_id <= 0
+            or type(standard_id) is not int
+            or standard_id <= 0
+            or item["method"] != MERCENARY_MATCH_METHOD
+            or mercenary_id in matches
+        ):
+            raise ValueError("Database has invalid mercenary identity metadata")
+        matches[mercenary_id] = standard_id
+
+    unmatched: set[int] = set()
+    for unit_id in raw_unmatched:
+        if type(unit_id) is not int or unit_id <= 0 or unit_id in unmatched:
+            raise ValueError("Database has invalid mercenary identity metadata")
+        unmatched.add(unit_id)
+    if set(matches) & unmatched:
+        raise ValueError("Database has conflicting mercenary identity metadata")
+
+    unit_roles = {
+        row["id"]: row["source_role"]
+        for row in connection.execute(
+            "SELECT id, source_role FROM units WHERE source_defined = 1"
+        )
+    }
+    mercenary_ids = {
+        unit_id for unit_id, role in unit_roles.items() if role == MERCENARY_SOURCE_ROLE
+    }
+    if mercenary_ids != set(matches) | unmatched:
+        raise ValueError(
+            "Database mercenary identity metadata does not cover every mercenary source unit; "
+            "rebuild the database"
+        )
+    if any(
+        unit_roles.get(mercenary_id) != MERCENARY_SOURCE_ROLE
+        or unit_roles.get(standard_id) != STANDARD_SOURCE_ROLE
+        for mercenary_id, standard_id in matches.items()
+    ):
+        raise ValueError(
+            "Database mercenary identity metadata references invalid source roles; "
+            "rebuild the database"
+        )
+
+    return matches, frozenset(unmatched)
 
 
 def canonical_skill_id(
@@ -321,9 +414,20 @@ def logical_unit_groups(
     rows: Sequence[RowLike],
     memberships: Mapping[int, Sequence[Mapping[str, Any]]],
     identity_config: IdentityConfig | None = None,
+    *,
+    mercenary_matches: Mapping[int, int] | None = None,
+    unmatched_mercenary_ids: Collection[int] = (),
 ) -> list[dict[str, Any]]:
-    """Combine 10,000-ID duplicates and their reinforcement-only variants."""
+    """Combine logical source records while honoring persisted mercenary identity.
+
+    Generic duplicate and reinforcement grouping remain runtime behavior for now.
+    When normalization has persisted mercenary identity metadata, that mapping is
+    authoritative for mercenary variants and the 10,000-ID duplicate rule is not
+    used to decide their standard-unit pairing.
+    """
     identity_config = identity_config or load_identity_config()
+    rows_by_id = {row["id"]: row for row in rows}
+    unmatched_mercenary_ids = frozenset(unmatched_mercenary_ids)
     groups: dict[tuple[Any, ...], dict[str, Any]] = {}
     for row in rows:
         armies = memberships[row["id"]]
@@ -331,25 +435,42 @@ def logical_unit_groups(
             army.get("kind") == "reinforcement" for army in armies
         )
         base_identity = unit_base_identity(row, identity_config)
-        key = (
-            ("reinforcement", base_identity)
-            if reinforcement_only
-            else ("standard", *unit_group_key(row, identity_config))
-        )
+        representative = row
+        if mercenary_matches is not None and row["id"] in mercenary_matches:
+            standard_id = mercenary_matches[row["id"]]
+            representative = rows_by_id.get(standard_id)
+            if representative is None:
+                raise ValueError(
+                    f"Mercenary source unit {row['id']} maps to missing standard unit {standard_id}"
+                )
+            key = ("standard", *unit_group_key(representative, identity_config))
+        elif mercenary_matches is not None and row["id"] in unmatched_mercenary_ids:
+            key = ("unmatched_mercenary", row["id"])
+        elif reinforcement_only:
+            key = ("reinforcement", base_identity)
+        else:
+            key = ("standard", *unit_group_key(row, identity_config))
         group = groups.setdefault(
             key,
             {
-                "id": row["id"],
-                "name": row["name"],
-                "isc": row["isc"],
-                "slug": row["slug"] if "slug" in row.keys() else None,
-                "canonical_faction_id": (
-                    row["canonical_faction_id"] if "canonical_faction_id" in row.keys() else None
+                "id": representative["id"],
+                "name": representative["name"],
+                "isc": representative["isc"],
+                "slug": (
+                    representative["slug"] if "slug" in representative.keys() else None
                 ),
-                # The lowest source ID is the logical unit's representative.  This
-                # prevents a merged reinforcement/duplicate from replacing the
-                # canonical army of the ordinary unit.
-                "main_army_id": row["main_army_id"] if "main_army_id" in row.keys() else None,
+                "canonical_faction_id": (
+                    representative["canonical_faction_id"]
+                    if "canonical_faction_id" in representative.keys()
+                    else None
+                ),
+                # The ordinary source record remains the representative when a
+                # mercenary variant is merged through persisted normalization metadata.
+                "main_army_id": (
+                    representative["main_army_id"]
+                    if "main_army_id" in representative.keys()
+                    else None
+                ),
                 "source_ids": [],
                 "names": [],
                 "armies": {},
@@ -568,6 +689,7 @@ class Database:
                     "rebuild the database"
                 )
             identity_config_from_connection(connection)
+            mercenary_identity_policy_from_connection(connection)
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -592,9 +714,10 @@ class Database:
         with self._connect() as connection:
             rows = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id, u.canonical_faction_id "
+                "u.main_army_id, u.canonical_faction_id, u.source_role "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
+            mercenary_identity = mercenary_identity_policy_from_connection(connection)
             memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
             army_names = {
                 row["id"]: army_name(row)
@@ -630,7 +753,15 @@ class Database:
                 for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
                     if row["unit_id"] in search_terms_by_source:
                         search_terms_by_source[row["unit_id"]].add(row["name"])
-        groups = logical_unit_groups(rows, memberships, identity_config)
+        groups = logical_unit_groups(
+            rows,
+            memberships,
+            identity_config,
+            mercenary_matches=(mercenary_identity[0] if mercenary_identity is not None else None),
+            unmatched_mercenary_ids=(
+                mercenary_identity[1] if mercenary_identity is not None else ()
+            ),
+        )
         for group in groups:
             group["normal_army_ids"] = set().union(
                 *(normal_armies_by_unit[source_id] for source_id in group["source_ids"])

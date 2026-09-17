@@ -35,6 +35,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Make repository logical-unit grouping consume persisted
+  `mercenaryUnitMatches` / `unmatchedMercenaryUnitIds` metadata when present,
+  so mercenary pairing no longer depends on the variant's 10,000-ID duplicate
+  key. Explicitly unmatched variants stay separate, while older databases
+  without this metadata retain the legacy grouping fallback.
 - Make `units.source_role` and `army_units.availability_kind` explicit frontend
   SQLite schema fields instead of incidental dynamic columns. The Army database
   schema is now version 9 and the compatibility revision is 11; existing

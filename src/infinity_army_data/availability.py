@@ -12,6 +12,8 @@ MERCENARY_AVAILABILITY = "mercenary"
 MERCENARY_CANONICAL_FACTION_ID = 1
 MERCENARY_SLUG_PREFIX = "merc-"
 MERCENARY_MATCH_METHOD = "generic_duplicate_key"
+MERCENARY_UNIT_MATCHES_KEY = "mercenaryUnitMatches"
+UNMATCHED_MERCENARY_UNIT_IDS_KEY = "unmatchedMercenaryUnitIds"
 
 
 def annotate_availability_semantics(normalized: dict[str, Any]) -> None:
@@ -144,7 +146,7 @@ def audit_mercenary_logical_matches(
             unmatched.append(unit_id)
 
     unmatched_ids = tuple(sorted(unmatched))
-    normalized["mercenaryUnitMatches"] = [
+    normalized[MERCENARY_UNIT_MATCHES_KEY] = [
         {
             "mercenaryUnitId": mercenary_unit_id,
             "standardUnitId": standard_unit_id,
@@ -152,6 +154,6 @@ def audit_mercenary_logical_matches(
         }
         for mercenary_unit_id, standard_unit_id in sorted(matches.items())
     ]
-    normalized["unmatchedMercenaryUnitIds"] = list(unmatched_ids)
+    normalized[UNMATCHED_MERCENARY_UNIT_IDS_KEY] = list(unmatched_ids)
 
     return matches, unmatched_ids

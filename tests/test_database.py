@@ -823,6 +823,119 @@ def test_duplicate_10000_id_family_is_one_logical_unit(tmp_path: Path, normalize
     assert {army["id"] for army in details["armies"]} == {101, 201, 301}
 
 
+def test_persisted_mercenary_mapping_overrides_generic_duplicate_key() -> None:
+    rows = [
+        {
+            "id": 51,
+            "name": "MIRANDA ASHCROFT",
+            "isc": "Miranda Ashcroft",
+            "main_army_id": 201,
+        },
+        {
+            "id": 10051,
+            "name": "DIFFERENT SOURCE LABEL",
+            "isc": "Different Source ISC",
+            "main_army_id": 901,
+        },
+    ]
+    memberships = {
+        51: [{"id": 202, "name": "Imperial Service"}],
+        10051: [{"id": 101, "name": "PanOceania"}],
+    }
+
+    groups = logical_unit_groups(
+        rows,
+        memberships,
+        mercenary_matches={10051: 51},
+    )
+
+    assert len(groups) == 1
+    assert groups[0]["id"] == 51
+    assert groups[0]["name"] == "MIRANDA ASHCROFT"
+    assert groups[0]["source_ids"] == [51, 10051]
+    assert list(groups[0]["armies"]) == [202, 101]
+
+
+def test_explicitly_unmatched_mercenary_does_not_use_generic_duplicate_key() -> None:
+    rows = [
+        {"id": 64, "name": "SAME", "isc": "Same ISC", "main_army_id": 201},
+        {"id": 10064, "name": "SAME", "isc": "Same ISC", "main_army_id": 901},
+    ]
+    memberships = {
+        64: [{"id": 202, "name": "Standard Army"}],
+        10064: [{"id": 101, "name": "Mercenary Army"}],
+    }
+
+    groups = logical_unit_groups(
+        rows,
+        memberships,
+        mercenary_matches={},
+        unmatched_mercenary_ids={10064},
+    )
+
+    assert len(groups) == 2
+    assert [group["source_ids"] for group in groups] == [[64], [10064]]
+
+
+def test_database_uses_persisted_mercenary_mapping_for_logical_unit(
+    tmp_path: Path, normalized: dict
+) -> None:
+    for unit in normalized["tables"]["units"]:
+        if unit["source_defined"]:
+            unit["source_role"] = "standard"
+
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    mercenary_id = 10_001
+    normalized["tables"]["units"].append(
+        {
+            "id": mercenary_id,
+            "name": "DIFFERENT SOURCE LABEL",
+            "isc": "Different Source ISC",
+            "slug": "merc-different-source-label",
+            "canonical_faction_id": 1,
+            "main_army_id": original["main_army_id"],
+            "source_defined": True,
+            "source_role": "mercenary_variant",
+        }
+    )
+    if not any(faction["id"] == 1 for faction in normalized["tables"]["factions"]):
+        normalized["tables"]["factions"].append(
+            {
+                "id": 1,
+                "has_army_list": False,
+                "canonical_reference_count": 1,
+                "unit_membership_reference_count": 0,
+            }
+        )
+    normalized["tables"]["army_units"].append(
+        {
+            "army_id": 301,
+            "unit_id": mercenary_id,
+            "availability_kind": "mercenary",
+        }
+    )
+    normalized["mercenaryUnitMatches"] = [
+        {
+            "mercenaryUnitId": mercenary_id,
+            "standardUnitId": 1,
+            "method": "generic_duplicate_key",
+        }
+    ]
+    normalized["unmatchedMercenaryUnitIds"] = []
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    alpha = next(unit for unit in database.list_units(mercs=True)["items"] if unit["id"] == 1)
+    assert alpha["source_ids"] == [1, mercenary_id]
+    assert 301 in alpha["army_ids"]
+    details = database.get_unit(mercenary_id)
+    assert details is not None
+    assert details["id"] == 1
+    assert details["source_ids"] == [1, mercenary_id]
+
+
 def test_explicit_unit_merge_alias_is_one_logical_unit() -> None:
     rows = [
         {"id": 1345, "name": "First record", "isc": "First ISC", "main_army_id": 101},
