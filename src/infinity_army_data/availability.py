@@ -85,3 +85,55 @@ def annotate_availability_semantics(normalized: dict[str, Any]) -> None:
         occurrence["availability_kind"] = (
             MERCENARY_AVAILABILITY if role == MERCENARY_SOURCE_ROLE else STANDARD_AVAILABILITY
         )
+
+
+def _generic_duplicate_key(unit: dict[str, Any]) -> tuple[int, str] | None:
+    """Return the common source duplicate key used as mercenary matching evidence."""
+    unit_id = unit.get("id")
+    label = unit.get("isc") or unit.get("name")
+    if not isinstance(unit_id, int) or not isinstance(label, str) or not label:
+        return None
+    return unit_id % 10_000, label.casefold()
+
+
+def audit_mercenary_logical_matches(
+    normalized: dict[str, Any],
+) -> tuple[dict[int, int], tuple[int, ...]]:
+    """Audit mercenary variants against standard records without changing identity.
+
+    This intentionally uses the common 10,000-family ID relationship only as a
+    candidate key and also requires the same ISC/display-name identity used by
+    the current generic duplicate grouping. Classification remains entirely
+    source-semantic. Unmatched variants are reported rather than rejected because
+    a future mercenary-only source record could still be valid source data.
+
+    Returns ``(matches, unmatched)`` where ``matches`` maps mercenary source IDs
+    to the lowest standard source ID in the matching generic duplicate group.
+    """
+    tables = normalized.get("tables")
+    if not isinstance(tables, dict):
+        raise ValueError("Normalized data must contain a tables object")
+
+    standard_groups: dict[tuple[int, str], list[int]] = defaultdict(list)
+    mercenary_units: list[dict[str, Any]] = []
+    for unit in tables.get("units", []):
+        role = unit.get("source_role")
+        if role == STANDARD_SOURCE_ROLE:
+            key = _generic_duplicate_key(unit)
+            if key is not None:
+                standard_groups[key].append(unit["id"])
+        elif role == MERCENARY_SOURCE_ROLE:
+            mercenary_units.append(unit)
+
+    matches: dict[int, int] = {}
+    unmatched: list[int] = []
+    for unit in mercenary_units:
+        unit_id = unit["id"]
+        key = _generic_duplicate_key(unit)
+        candidates = standard_groups.get(key, ()) if key is not None else ()
+        if candidates:
+            matches[unit_id] = min(candidates)
+        else:
+            unmatched.append(unit_id)
+
+    return matches, tuple(sorted(unmatched))
