@@ -46,7 +46,6 @@ SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
 UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
-NON_ALIGNED_GROUP_ID = 901
 ARMY_ROLE_MAIN = "main"
 ARMY_ROLE_SECTORIAL = "sectorial"
 ARMY_ROLE_NON_ALIGNED = "non_aligned"
@@ -638,6 +637,46 @@ class Database:
                 if row["unit_id"] is not None:
                     armies[preferred_army_id]["unit_ids"].add(row["unit_id"])
 
+            canonical_metadata: dict[int, dict[str, Any]] = {}
+            for metadata_row in metadata.values():
+                metadata_id = identity_config.canonical_army_id(metadata_row["id"])
+                if metadata_id not in canonical_metadata or metadata_row["id"] == metadata_id:
+                    canonical_metadata[metadata_id] = metadata_row
+
+            ordinary_army_ids = {
+                army_id
+                for army_id, army in armies.items()
+                if army_id not in reinforcement_parents and army["kind"] != "reinforcement"
+            }
+            parent_ids: set[int] = set()
+            for army_id in ordinary_army_ids:
+                army = armies[army_id]
+                source_army_id = army["source_army_id"]
+                metadata_row = metadata.get(source_army_id) or metadata.get(army_id)
+                parent_id = metadata_row.get("parent") if metadata_row is not None else None
+                if not isinstance(parent_id, int):
+                    continue
+                canonical_parent_id = identity_config.canonical_army_id(parent_id)
+                if canonical_parent_id != army_id:
+                    parent_ids.add(canonical_parent_id)
+
+            grouping_ids: set[int] = set()
+            for candidate_id in parent_ids:
+                candidate_metadata = canonical_metadata.get(candidate_id)
+                if candidate_metadata is None:
+                    continue
+                if candidate_id not in ordinary_army_ids:
+                    grouping_ids.add(candidate_id)
+                    continue
+                candidate_parent_id = candidate_metadata.get("parent")
+                canonical_candidate_parent_id = (
+                    identity_config.canonical_army_id(candidate_parent_id)
+                    if isinstance(candidate_parent_id, int)
+                    else None
+                )
+                if canonical_candidate_parent_id != candidate_id:
+                    grouping_ids.add(candidate_id)
+
             for army in armies.values():
                 army_id = army["id"]
                 source_army_id = army["source_army_id"]
@@ -650,22 +689,22 @@ class Database:
                 )
                 parent_army_ids = sorted(reinforcement_parents.get(army_id, ()))
 
-                if army_id == NON_ALIGNED_GROUP_ID:
-                    role = ARMY_ROLE_GROUPING
-                    playable = False
-                    group_id = None
-                elif parent_army_ids:
+                if parent_army_ids:
                     role = ARMY_ROLE_REINFORCEMENT
                     playable = True
+                    group_id = None
+                elif army_id in grouping_ids:
+                    role = ARMY_ROLE_GROUPING
+                    playable = False
                     group_id = None
                 elif canonical_parent_id == army_id:
                     role = ARMY_ROLE_MAIN
                     playable = True
                     group_id = None
-                elif canonical_parent_id == NON_ALIGNED_GROUP_ID:
+                elif canonical_parent_id in grouping_ids:
                     role = ARMY_ROLE_NON_ALIGNED
                     playable = True
-                    group_id = NON_ALIGNED_GROUP_ID
+                    group_id = canonical_parent_id
                 elif canonical_parent_id is not None:
                     role = ARMY_ROLE_SECTORIAL
                     playable = True
@@ -675,11 +714,7 @@ class Database:
                     playable = True
                     group_id = None
 
-                group = (
-                    (metadata.get(parent_id) or metadata.get(group_id))
-                    if group_id is not None
-                    else None
-                )
+                group = canonical_metadata.get(group_id) if group_id is not None else None
                 army.update(
                     role=role,
                     playable=playable,
@@ -689,29 +724,26 @@ class Database:
                     parent_army_ids=parent_army_ids,
                 )
 
-            if (
-                NON_ALIGNED_GROUP_ID not in armies
-                and any(
-                    army["group_id"] == NON_ALIGNED_GROUP_ID
-                    for army in armies.values()
-                )
-            ):
-                group = metadata.get(NON_ALIGNED_GROUP_ID)
-                if group is not None:
-                    armies[NON_ALIGNED_GROUP_ID] = {
-                        "id": NON_ALIGNED_GROUP_ID,
-                        "source_army_id": NON_ALIGNED_GROUP_ID,
-                        "name": group.get("name") or f"Army {NON_ALIGNED_GROUP_ID}",
-                        "slug": group.get("slug"),
-                        "kind": "grouping",
-                        "unit_ids": set(),
-                        "role": ARMY_ROLE_GROUPING,
-                        "playable": False,
-                        "group_id": None,
-                        "group_name": None,
-                        "group_slug": None,
-                        "parent_army_ids": [],
-                    }
+            for grouping_id in sorted(grouping_ids):
+                if grouping_id in armies:
+                    continue
+                group = canonical_metadata.get(grouping_id)
+                if group is None:
+                    continue
+                armies[grouping_id] = {
+                    "id": grouping_id,
+                    "source_army_id": grouping_id,
+                    "name": group.get("name") or f"Army {grouping_id}",
+                    "slug": group.get("slug"),
+                    "kind": "grouping",
+                    "unit_ids": set(),
+                    "role": ARMY_ROLE_GROUPING,
+                    "playable": False,
+                    "group_id": None,
+                    "group_name": None,
+                    "group_slug": None,
+                    "parent_army_ids": [],
+                }
 
             return [
                 {

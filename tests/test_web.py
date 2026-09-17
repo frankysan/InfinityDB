@@ -228,6 +228,7 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     documents = [
         ("101-main.json", True, 198),
         ("102-sectorial.json", True, None),
+        ("901-non-aligned.json", True, None),
         ("902-independent.json", True, None),
         ("198-main-reinforcements.json", False, None),
     ]
@@ -252,7 +253,7 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
         {"id": 198, "parent": 101, "name": "Reinforcements", "slug": "reinforcements"},
         {
             "id": 901,
-            "parent": 901,
+            "parent": 900,
             "name": "Non-Aligned Armies",
             "slug": "non-aligned-armies",
         },

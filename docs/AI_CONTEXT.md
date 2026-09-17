@@ -90,9 +90,13 @@ and serves a read-only browser and same-origin HTTP API.
   availability provenance. The 10,000-ID generic grouping rule remains only as a
   builder compatibility fallback for older normalized inputs without
   `genericUnitMatches`.
-- 901 (Non-Aligned Armies) is a grouping identity for its child 9xx armies, not
-  an independently playable army. Do not infer playability from ID patterns or
-  the existence of an `army_lists` record.
+- 901 (Non-Aligned Armies) is a non-selectable grouping identity for its child
+  9xx armies **and** a real imported Army source list with its own roster. Current
+  metadata has `901.parent = 900`; playability must not be inferred from source-list
+  existence or roster presence.
+- The analyzed snapshot gives source list 901 one standard unit (Rumbler
+  Spec-Ops) plus the complete 49-variant optional-mercenary pool. Child NA2 lists
+  have their own standard rosters plus subsets of that pool.
 - The merger's current `army_lists.kind` is derived from source shape: ordinary
   documents containing `reinforcements` become `army`, while reinforcement
   documents without it become `reinforcement`. It is not a source-provided
@@ -124,8 +128,11 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. Legacy rediscovery remains only as a database-build compatibility
-  path for older normalized inputs.
+  dynamically. A future refactor may materialize one canonical application
+  payload per logical unit and store only explicit army/loadout/source deltas,
+  but only after field-level invariance and provenance requirements are audited.
+  Legacy rediscovery remains only as a database-build compatibility path for
+  older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized
@@ -374,8 +381,9 @@ changes.
   rule-derived sign-display behavior for Super-Jump and Forward Deployment.
   Reinforcement prefix normalization is now pinned in the identity config and
   unit-detail profile display names are backend-derived. Remaining audit targets
-  are the direct 901 grouping special case and symbol-semantic name tables
-  reserved for the symbol-pipeline refactor.
+  are now limited to symbol-semantic name tables reserved for the symbol-pipeline
+  refactor; the former direct `901` grouping special case is derived from the
+  metadata/playable-list hierarchy instead.
 - 2026-09-17: Special weapon game-rule facts moved out of
   `infinity_army_data.weapon_profiles`. The Armed Turret special profile is a
   cited curated `weapon` record linked to Army weapon ID 226; repository reads
@@ -409,6 +417,13 @@ changes.
   Non-Aligned forces; explicit ordinary-list `reinforcements` links classify
   reinforcement relationships. Grouping identity 901 is exposed as
   non-playable and browser selectors no longer infer roles from Army-ID ranges.
+- 2026-09-17: Army grouping identities are derived structurally rather than by
+  recognizing ID `901`. Current source `901` is itself an imported ordinary army
+  list with metadata parent `900`; it parents the NA2 child lists and has a real
+  source roster. Imported parents that are not self-parented become non-playable
+  grouping nodes, while self-parented parents remain main armies. Source-list
+  existence, roster semantics, hierarchy role, and application playability are
+  separate concepts.
 - 2026-09-17: Mercenary source identity and Non-Aligned Army grouping are
   separate. ID `1` is retained as mercenary source provenance; 901 groups NA2
   army lists. Dedicated mercenary variants are identified by source semantics,

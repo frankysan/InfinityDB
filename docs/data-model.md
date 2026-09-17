@@ -70,9 +70,13 @@ raw Army JSON
 An `army_lists` record represents an Army source/list identity. Its presence does
 not by itself prove that the identity is independently playable.
 
-Faction 901, Non-Aligned Armies, is a known grouping identity for the associated
-9xx armies rather than a playable army of its own. Its child armies remain
-distinct force/list identities.
+Current source identity `901`, Non-Aligned Armies, is both an imported Army list
+and the metadata parent of its associated child armies, but it is not selectable
+as an independent army in InfinityDB. In the investigated source shape, metadata
+records `901.parent = 900`, while child lists such as `902`, `904`, `905`, `908`,
+and `909` point to parent `901`. Runtime classification therefore treats source-list
+existence, hierarchy role, roster semantics, and application playability as
+separate dimensions rather than assuming that a grouping identity is metadata-only.
 
 The merger's current `army_lists.kind` value is derived rather than supplied as
 a source taxonomy: a source document with a top-level `reinforcements` field is
@@ -82,12 +86,36 @@ reinforcement-file shape, but does not distinguish main armies, sectorials, or
 Non-Aligned forces.
 
 Army metadata provides a separate faction hierarchy. Standard main armies are
-self-parented metadata factions, while their sectorials point to that main-army
-parent. Non-Aligned army lists such as the 9xx forces point to metadata grouping
-identity 901. Reinforcement lists are also explicitly referenced from their
-ordinary army/sectorial source documents through the top-level
-`reinforcements` relationship. These relationships are source evidence and are
-stronger than numeric-ID conventions.
+self-parented metadata factions that also exist as imported ordinary army lists,
+while their sectorials point to that playable main-army parent. A referenced
+parent that is itself an imported ordinary list but is **not** self-parented is
+a grouping node; a referenced metadata parent that has no imported army list may
+also be surfaced as a grouping node. Children of either grouping shape receive
+the `non_aligned` role. Reinforcement lists are excluded from this derivation and
+are instead identified through the explicit top-level `reinforcements`
+relationship on their ordinary army/sectorial source document. These
+relationships are source evidence and are stronger than numeric-ID conventions.
+
+The analyzed 2026-09-10 snapshot shows why source roster semantics must remain
+separate from application playability. Source list `901` contains one standard
+unit (Rumbler Spec-Ops) plus the complete 49-variant optional-mercenary pool,
+while each child list contains its own standard roster plus a subset of that
+mercenary catalogue:
+
+| Army | Standard source units | Mercenary variants | Standard units represented in 901 logical pool |
+| --- | ---: | ---: | ---: |
+| 901 Non-Aligned Armies | 1 | 49 | 1 |
+| 902 Druze | 37 | 42 | 21 |
+| 904 Ikari | 38 | 45 | 16 |
+| 905 StarCo | 35 | 42 | 15 |
+| 908 Dahshat | 41 | 43 | 16 |
+| 909 White Company | 46 | 38 | 19 |
+
+Only Rumbler Spec-Ops is directly present as the same standard source ID in all
+six lists. The larger logical overlap comes from standard child units whose
+optional-mercenary variant is present in `901`. InfinityDB therefore preserves
+the `901` source roster and its occurrence provenance even though `901` is
+non-playable in the army selector/API filter contract.
 
 Source canonical-faction ID `1` is materially different from 901. In the
 investigated source snapshot, ID `1` has no army list, is used as the canonical
@@ -158,7 +186,8 @@ numeric ID patterns.
 Source ID `1` and grouping identity `901` are now kept distinct in current
 normalization. ID `1` remains source-side mercenary identity/provenance with no
 application `main_army_id`, while Non-Aligned Army grouping is derived from the
-actual 901 metadata hierarchy.
+metadata hierarchy generically; current source data happens to use metadata
+identity `901` for that grouping node.
 
 Logical-unit identity is now materialized during frontend SQLite creation while
 normalized/source records remain unchanged for provenance. The frontend relation
@@ -199,6 +228,22 @@ The enforced invariants are:
   standard and mercenary occurrences resolve to the same logical unit and army;
 - repository reads consume the materialized relation and do not repeat generic,
   mercenary, reinforcement, or alias identity resolution.
+
+### Design direction: canonical logical-unit payload and source deltas
+
+The current materialized relation answers **which source rows belong to one
+logical unit**, but repository/API assembly still reads shared data from source
+rows. A later normalization/modeling pass should evaluate whether each logical
+unit can have one canonical application payload for fields proven invariant
+across its source rows, with army occurrences, profiles/loadouts, and other
+source-specific records storing only meaningful differences.
+
+That future deduplication must remain lossless: original source IDs, raw rows,
+army membership, availability provenance, source/profile identity, and genuine
+loadout/profile differences must remain recoverable. Fields should be promoted
+to the canonical logical-unit payload only after an audit demonstrates that they
+are invariant or that an explicit precedence rule is justified. This is a
+design direction, not current behavior.
 
 Legacy duplicate matching is now a build-compatibility concern. When older
 normalized inputs lack the persisted generic or mercenary evidence, database
