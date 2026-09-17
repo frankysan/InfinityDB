@@ -89,7 +89,7 @@ history retains implementation detail.
   - Require versioned schemas, validation on load, deterministic serialization
     where generated, focused regression tests, and portable project-relative
     paths for important configuration/manifests.
-- [ ] Replace the legacy mercenary/NA2 ownership shortcut with source-semantic
+- [x] Replace the legacy mercenary/NA2 ownership shortcut with source-semantic
   army-role and availability modeling.
   - Treat source canonical-faction ID `1` and Non-Aligned Armies ID `901` as
     distinct concepts. ID `1` is mercenary source/origin provenance; 901 is a
@@ -103,7 +103,7 @@ history retains implementation detail.
     take precedence, while the arithmetic resolver remains only as a
     standalone/legacy fallback for canonical factions without usable metadata.
     Compatibility revision 13 requires regenerated databases.
-  - Validate the observed optional-mercenary source contract during
+  - [x] Validate the observed optional-mercenary source contract during
     normalization: `canonical == 1`, empty declared `factions`, and a
     `merc-...` source slug. Report source-schema drift instead of guessing when
     a future snapshot violates or extends that pattern.
@@ -164,7 +164,7 @@ history retains implementation detail.
     with explicit `army_units.availability_kind` provenance for current
     normalized snapshots. Retain the old inference only as a compatibility
     fallback for rows where explicit provenance is absent.
-  - Add source-shaped regression fixtures for normal plus optional mercenary
+  - [x] Add source-shaped regression fixtures for normal plus optional mercenary
     records (for example the observed Miranda Ashcroft, Yuan Yuan, and Valerya
     patterns), including a case where normal and mercenary occurrences overlap
     the same army.

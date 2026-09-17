@@ -1,0 +1,34 @@
+{
+  "version": "fixture",
+  "reinforcements": null,
+  "units": [
+    {
+      "id": 378,
+      "idArmy": 11,
+      "canonical": 1,
+      "isc": "Yuan Yuan",
+      "iscAbbr": null,
+      "notes": null,
+      "name": "YUAN YUAN",
+      "options": [],
+      "slug": "yuan-yuan",
+      "factions": [401, 403, 902, 904, 1103],
+      "profileGroups": [],
+      "filters": {}
+    },
+    {
+      "id": 10378,
+      "idArmy": 10011,
+      "canonical": 1,
+      "isc": "Yuan Yuan",
+      "iscAbbr": null,
+      "notes": null,
+      "name": "YUAN YUAN",
+      "options": [],
+      "slug": "merc-yuan-yuan",
+      "factions": [],
+      "profileGroups": [],
+      "filters": {}
+    }
+  ]
+}

@@ -10,6 +10,10 @@ from infinity_army_data.availability import (
     audit_generic_logical_matches,
     audit_mercenary_logical_matches,
 )
+from infinity_army_data.merge import load_sources, merge_sources
+from infinity_army_data.normalize import normalize_master
+
+FIXTURE_DIR = Path(__file__).parent / "fixtures" / "mercenary_source_roles"
 
 
 def normalized_units(*units, memberships=(), occurrences=(), army_lists=()):
@@ -277,3 +281,74 @@ def test_normalize_pipeline_applies_availability_annotation(
     assert result["genericUnitMatches"] == []
     assert result["mercenaryUnitMatches"] == []
     assert result["unmatchedMercenaryUnitIds"] == [10464]
+
+
+def test_source_shaped_mercenary_patterns_survive_merge_and_normalization() -> None:
+    sources, skipped = load_sources(FIXTURE_DIR)
+    assert skipped == []
+
+    normalized = normalize_master(merge_sources(sources))
+    annotate_availability_semantics(normalized)
+    matches, unmatched = audit_mercenary_logical_matches(normalized)
+
+    units = {row["id"]: row for row in normalized["tables"]["units"]}
+    assert units[51]["source_role"] == "standard"
+    assert units[51]["main_army_id"] is None
+    assert units[10051]["source_role"] == "mercenary_variant"
+    assert units[378]["source_role"] == "standard"
+    assert units[378]["main_army_id"] is None
+    assert units[10378]["source_role"] == "mercenary_variant"
+    assert units[464]["source_role"] == "standard"
+    assert units[10464]["source_role"] == "mercenary_variant"
+
+    availability = {
+        (row["army_id"], row["unit_id"]): row["availability_kind"]
+        for row in normalized["tables"]["army_units"]
+    }
+    assert availability[(202, 51)] == "standard"
+    assert availability[(101, 10051)] == "mercenary"
+    assert availability[(401, 378)] == "standard"
+    assert availability[(401, 10378)] == "mercenary"
+    assert availability[(404, 464)] == "standard"
+    assert availability[(101, 10464)] == "mercenary"
+
+    assert matches == {10051: 51, 10378: 378, 10464: 464}
+    assert unmatched == ()
+
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("canonical", 2, "canonical faction"),
+        ("factions", [101], "normal faction"),
+        ("slug", "miranda-ashcroft-authorized", "source contract may have changed"),
+    ],
+)
+def test_source_shaped_mercenary_contract_drift_fails_closed(
+    field: str, value: object, message: str
+) -> None:
+    sources, _ = load_sources(FIXTURE_DIR)
+    panoceania = next(source for source in sources if source.faction_id == 101)
+    miranda = next(unit for unit in panoceania.data["units"] if unit["id"] == 10051)
+    miranda[field] = value
+
+    normalized = normalize_master(merge_sources(sources))
+    with pytest.raises(ValueError, match=message):
+        annotate_availability_semantics(normalized)
+
+def test_source_shaped_overlap_preserves_standard_and_optional_availability() -> None:
+    sources, _ = load_sources(FIXTURE_DIR)
+    normalized = normalize_master(merge_sources(sources))
+    annotate_availability_semantics(normalized)
+
+    yuan_occurrences = [
+        row
+        for row in normalized["tables"]["army_units"]
+        if row["army_id"] == 401 and row["unit_id"] in {378, 10378}
+    ]
+
+    assert [(row["unit_id"], row["availability_kind"]) for row in yuan_occurrences] == [
+        (378, "standard"),
+        (10378, "mercenary"),
+    ]

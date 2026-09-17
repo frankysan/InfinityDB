@@ -1,0 +1,20 @@
+{
+  "version": "fixture",
+  "reinforcements": null,
+  "units": [
+    {
+      "id": 51,
+      "idArmy": 51,
+      "canonical": 1,
+      "isc": "Miranda Ashcroft, Authorized Bounty Hunter",
+      "iscAbbr": "Miranda Ashcroft, Authorized",
+      "notes": null,
+      "name": "MIRANDA ASHCROFT, Authorized Bounty Hunter",
+      "options": [],
+      "slug": "miranda-ashcroft-authorized",
+      "factions": [202, 504, 703, 908],
+      "profileGroups": [],
+      "filters": {}
+    }
+  ]
+}

@@ -21,6 +21,10 @@ All notable changes to this project are documented in this file.
   (`standard` or `mercenary`). The classifier validates the observed
   canonical/factions/slug contract and does not use the common 10,000-ID offset
   as its semantic rule.
+- Add reduced raw Army-shaped mercenary regression fixtures based on the observed
+  Miranda Ashcroft, Yuan Yuan, and Valerya Gromoz source patterns. The fixtures
+  exercise merge-to-normalization classification, fail-closed contract drift,
+  mercenary-to-standard matching, and same-army standard/optional overlap.
 - Add dedicated regression tests for each standalone tool script in `tools/`,
   covering the Army JSON downloader, wiki mirror downloader, asset symbol
   downloader, symbol reorganizer, and shared file-path sanitizer.
