@@ -10,6 +10,9 @@ __pycache__/
 dist/
 build/
 
+# Local check reports
+reports/
+
 # VS Code local overrides
 .vscode/*.local.json
 
