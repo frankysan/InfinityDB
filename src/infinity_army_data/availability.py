@@ -11,6 +11,7 @@ STANDARD_AVAILABILITY = "standard"
 MERCENARY_AVAILABILITY = "mercenary"
 MERCENARY_CANONICAL_FACTION_ID = 1
 MERCENARY_SLUG_PREFIX = "merc-"
+MERCENARY_MATCH_METHOD = "generic_duplicate_key"
 
 
 def annotate_availability_semantics(normalized: dict[str, Any]) -> None:
@@ -99,13 +100,19 @@ def _generic_duplicate_key(unit: dict[str, Any]) -> tuple[int, str] | None:
 def audit_mercenary_logical_matches(
     normalized: dict[str, Any],
 ) -> tuple[dict[int, int], tuple[int, ...]]:
-    """Audit mercenary variants against standard records without changing identity.
+    """Audit and persist mercenary-variant matches to standard source records.
 
     This intentionally uses the common 10,000-family ID relationship only as a
     candidate key and also requires the same ISC/display-name identity used by
     the current generic duplicate grouping. Classification remains entirely
     source-semantic. Unmatched variants are reported rather than rejected because
     a future mercenary-only source record could still be valid source data.
+
+    The audit result is persisted as top-level normalized provenance in
+    ``mercenaryUnitMatches`` and ``unmatchedMercenaryUnitIds``. Each match records
+    the mercenary source ID, the lowest standard source ID in the matching
+    generic duplicate group, and the matching method. This does not collapse or
+    rewrite any normalized source row.
 
     Returns ``(matches, unmatched)`` where ``matches`` maps mercenary source IDs
     to the lowest standard source ID in the matching generic duplicate group.
@@ -136,4 +143,15 @@ def audit_mercenary_logical_matches(
         else:
             unmatched.append(unit_id)
 
-    return matches, tuple(sorted(unmatched))
+    unmatched_ids = tuple(sorted(unmatched))
+    normalized["mercenaryUnitMatches"] = [
+        {
+            "mercenaryUnitId": mercenary_unit_id,
+            "standardUnitId": standard_unit_id,
+            "method": MERCENARY_MATCH_METHOD,
+        }
+        for mercenary_unit_id, standard_unit_id in sorted(matches.items())
+    ]
+    normalized["unmatchedMercenaryUnitIds"] = list(unmatched_ids)
+
+    return matches, unmatched_ids
