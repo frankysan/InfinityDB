@@ -142,26 +142,31 @@ and serves a read-only browser and same-origin HTTP API.
   complete timestamped `JSON`, `WIKI`, or `SYMBOLS` ZIP snapshots. Same-second
   name collisions receive `-2`, `-3`, and so on rather than overwriting.
 - Raw snapshot archives are immutable after successful acquisition.
-- Current downloaders do not write InfinityDB-owned snapshot provenance under
-  `data/manifests/`, and there is no populated/consumed curated snapshot-note
-  contract yet.
+- Each successful acquisition writes a version-1 generated provenance record
+  under `data/manifests/snapshots/`, labeled from the archive filename and
+  bound by its immutable SHA-256.
+  The record stores snapshot type, archive identity, acquisition time, source
+  URL, document count, optional language, and optional input-artifact identity.
+- Generated manifest paths are project-relative POSIX paths when the file is
+  inside the project root; machine-specific absolute paths are never persisted.
+- Generated snapshot manifests are ignored by Git, excluded from Docker build
+  context, and retained until explicitly removed. Rewriting different
+  provenance for an existing archive-labeled record fails. Identical bytes
+  reacquired under a different archive label may have another manifest with the
+  same authoritative SHA-256.
+- Human-authored snapshot descriptions, comparison targets, and notable-change
+  notes use the separate version-1 contract under
+  `data/curated/snapshot-notes/`, also keyed to snapshot SHA-256. Acquisition
+  tooling must never modify that subtree.
 - Corvus Belli's Army `metadata.json` remains source data, not project-generated
   snapshot metadata.
 
 ### Design direction
 
-- Downloader-generated snapshot provenance will live under
-  `data/manifests/snapshots/` and bind to an archive by SHA-256.
-- Human-authored snapshot descriptions, comparison targets, and notable-change
-  notes will live separately under `data/curated/snapshot-notes/`, also keyed to
-  the snapshot SHA-256.
-- Generated tooling must never overwrite curated snapshot notes; editing notes
-  must never mutate the raw archive or generated provenance.
-- Persistence/version-control/package policy for generated manifests is not yet
-  implemented and should be finalized together with the first manifest writer.
-- Persistent generated project paths should use portable project-relative forms;
-  treat filenames as case-sensitive internally and detect case-only collisions
-  before publishing.
+- Future comparison tooling may emit structured generated diff/report data while
+  curated snapshot notes remain human interpretation.
+- Persistent generated project paths should remain portable and case-sensitive
+  internally; detect case-only collisions before publishing.
 
 Current curated wiki provenance predates the timestamped ZIP lifecycle. Do not
 invent exact archive/hash associations for legacy wiki references. Migrate them
@@ -348,10 +353,13 @@ changes.
 - 2026-09-16: Army JSON, wiki, and symbol acquisition use complete timestamped
   ZIP snapshots rather than long-lived unpacked download directories.
 - 2026-09-16: Snapshot metadata follows the existing data-path model instead of
-  introducing editable sidecars beside raw archives. The accepted design puts
-  generated acquisition provenance under `data/manifests/snapshots/` and human
-  notes under `data/curated/snapshot-notes/`; the writers/contracts are not yet
-  implemented.
+  introducing editable sidecars beside raw archives: generated acquisition
+  provenance belongs under `data/manifests/snapshots/` and human notes under
+  `data/curated/snapshot-notes/`.
+- 2026-09-17: The snapshot-provenance and snapshot-note contracts were
+  implemented. Army, wiki, and symbol acquisition now write deterministic
+  SHA-256-addressed provenance records, while curated snapshot notes remain a
+  separate source-controlled human layer that acquisition tooling never edits.
 - 2026-09-16: Rules ingestion is scoped to `data/curated/rules/`. Other curated
   categories may have separate future semantics but are not implicitly rules
   database inputs.

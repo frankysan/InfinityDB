@@ -82,8 +82,8 @@ history retains implementation detail.
       external sources. `data/curated/rules/` is the current rules-database
       input; any sibling curated category must have explicitly implemented
       semantics before it is treated as an application input.
-    - Planned `data/manifests/` contains generated build/acquisition provenance
-      and state rather than hand-authored project knowledge.
+    - `data/manifests/` contains generated build/acquisition provenance and
+      state rather than hand-authored project knowledge.
     - Code continues to own algorithms, schemas, parser mechanics, generic
       normalization behavior, validation, and application behavior.
   - Require versioned schemas, validation on load, deterministic serialization
@@ -148,33 +148,23 @@ history retains implementation detail.
     output lifecycle as Army acquisition. The wiki downloader no longer keeps
     a dated unpacked mirror as its primary output, and the symbol downloader no
     longer incrementally fills a long-lived loose destination directory.
-  - [ ] Add shared, versioned snapshot-provenance and annotation contracts using
+  - [x] Add shared, versioned snapshot-provenance and annotation contracts using
     the existing data-path design rather than adjacent sidecars.
-    - Store downloader-generated provenance under `data/manifests/snapshots/`.
-      Each record binds to one immutable Army, wiki, or symbol archive by
-      SHA-256 and may retain archive path/name, snapshot type, acquisition
-      timestamp, source/language or base URL, document count, and other
-      downloader-known source facts without duplicating Corvus Belli's source
-      `metadata.json`.
-    - Store human-authored descriptions, comparison targets, and ordered notable
-      change notes separately under `data/curated/snapshot-notes/`, also bound to
-      the immutable snapshot by SHA-256. Archive filenames are useful labels but
-      not the authoritative identity.
-    - Decide and implement the generated-manifest persistence policy together
-      with the first manifest writer: Git ignore behavior, Docker/package
-      exclusion, cleanup/retention, and whether any generated manifest class is
-      intentionally version-controlled. Do not infer that policy from today's
-      absence of `data/manifests/` ignore rules.
-    - Have acquisition tools create/update generated snapshot manifests only;
-      generated tooling must never rewrite or overwrite curated snapshot notes.
-      Editing curated notes must never mutate the archive or generated
-      provenance.
-    - Future snapshot-comparison tooling may write structured generated diff
-      data/reports under manifest/report paths, while curated notes remain the
-      human interpretation of those results.
-    - Add schema validation, deterministic generated serialization, archive-hash
-      verification, annotation-reference tests, and coverage for all three
-      snapshot types.
+    - Army, wiki, and symbol acquisition now write deterministic SHA-256-bound
+      provenance under `data/manifests/snapshots/`, with archive-hash
+      verification and portable project-relative paths where applicable.
+    - Human-authored descriptions, comparison targets, and ordered notable
+      changes use the separate versioned contract under
+      `data/curated/snapshot-notes/`; acquisition tooling never mutates them.
+    - Generated manifests are ignored by Git, excluded from Docker build
+      context, retained until explicitly removed, and never replace Corvus
+      Belli's source `metadata.json`.
+    - Regression coverage validates all three snapshot types, symbol input
+      provenance, deterministic serialization, immutable archive-labeled
+      records bound to SHA-256, archive verification, and annotation references.
+  - [ ] Let future snapshot-comparison tooling write structured generated diff
+    data/reports under manifest/report paths while curated snapshot notes remain
+    the human interpretation of those results.
   - [ ] Rewrite the wiki downloader/packager provenance handoff together with
     the curated wiki provenance contract.
     - Preserve the current checked-in legacy wiki source identity until an
@@ -280,7 +270,7 @@ history retains implementation detail.
     downloaded SVGs in the destination directory.
   - Use roots equivalent to `data/raw/` for Army `JSON ...zip` snapshots,
     `data/raw/symbols/` for `SYMBOLS ...zip` snapshots, `data/work/symbols/` for
-    transient extracted/processed files, planned `data/manifests/`,
+    transient extracted/processed files, generated `data/manifests/`,
     `data/reports/`, local `image_overrides/`, and the final
     `src/infinity_db/web/static/` publication tree.
   - Never rename, rewrite, normalize, compress, or delete a timestamped raw

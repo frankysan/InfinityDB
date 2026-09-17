@@ -97,3 +97,39 @@ def test_reorganize_symbols_slugifies_windows_invalid_names() -> None:
     spec.loader.exec_module(tool)
 
     assert tool.slugify("Special:Recent Changes?new=1*") == "special-recent-changes-new-1"
+
+
+def test_main_writes_snapshot_provenance(tmp_path: Path, monkeypatch) -> None:
+    snapshot_root = tmp_path / "wiki"
+    manifest_directory = tmp_path / "manifests"
+
+    def fake_download(_root_url: str, staging: Path) -> list[Path]:
+        page = staging / "index.html"
+        page.write_text("<html></html>", encoding="utf-8")
+        return [page]
+
+    monkeypatch.setattr(module, "download_wiki", fake_download)
+
+    assert (
+        module.main(
+            [
+                "--root",
+                str(snapshot_root),
+                "--manifest-dir",
+                str(manifest_directory),
+            ]
+        )
+        == 0
+    )
+
+    archives = list(snapshot_root.glob("WIKI *.zip"))
+    manifests = list(manifest_directory.glob("*.json"))
+    assert len(archives) == 1
+    assert len(manifests) == 1
+
+    from infinity_db.snapshot_provenance import load_snapshot_manifest
+
+    document = load_snapshot_manifest(manifests[0], archive=archives[0])
+    assert document["snapshot"]["type"] == "wiki"
+    assert document["snapshot"]["documentCount"] == 1
+    assert document["source"] == {"url": module.ROOT_URL}

@@ -76,15 +76,17 @@ architectural statements describe the current implementation.
 ### Current
 
 InfinityDB currently separates executable behavior, maintained project
-knowledge, immutable source material, human-reviewed rules data, and reproducible
-build output:
+knowledge, immutable source material, human-reviewed curated data, and
+reproducible build output:
 
 ```text
-code                  = behavior
-config/               = maintained project/domain knowledge
-raw source data       = immutable external input
-data/curated/rules/   = source-controlled human-reviewed rules data
-data/generated/       = reproducible database/JSON build output
+code                         = behavior
+config/                      = maintained project/domain knowledge
+raw source data              = immutable external input
+data/manifests/snapshots/    = generated acquisition provenance
+data/curated/rules/          = source-controlled human-reviewed rules data
+data/curated/snapshot-notes/ = source-controlled human snapshot annotations
+data/generated/              = reproducible database/JSON build output
 ```
 
 Aliases, mappings, filters, manual overrides, compatibility exceptions, static
@@ -92,10 +94,11 @@ asset declarations, and similar maintained domain knowledge belong in
 validated, versioned configuration when they can change independently of the
 code that interprets them.
 
-`data/curated/rules/` is different from configuration: it contains
-human-reviewed information derived from identified external sources and retains
-source provenance. It is the only curated subtree currently consumed by the
-rules-database build.
+`data/curated/` is different from configuration: it contains human-reviewed
+information derived from identified external sources and retains source
+provenance. `data/curated/rules/` is the only curated subtree currently consumed
+by the rules-database build; `data/curated/snapshot-notes/` is a separate
+human-annotation contract and is not an application input.
 
 This is not a requirement to make every constant configurable. Values that
 define implementation behavior remain in code. Configuration is for maintained
@@ -162,34 +165,46 @@ queries consume the materialized identity and `army_units.availability_kind`;
 the old canonical/faction availability inference remains only as a legacy-row
 fallback.
 
-### Design direction: manifests and snapshot notes
+### Current: manifests and snapshot notes
 
-Two additional data roles are accepted but are not yet implemented as produced
-artifacts:
+InfinityDB now separates generated snapshot provenance from human-reviewed
+snapshot annotations:
 
 ```text
-data/manifests/              = generated provenance and build state
+data/manifests/snapshots/    = generated acquisition provenance
 data/curated/snapshot-notes/ = human-reviewed snapshot annotations
 ```
 
-Generated manifests are not maintained project knowledge. Snapshot-acquisition
-provenance will live under `data/manifests/snapshots/`; build-specific state such
-as the planned Army-symbol build manifest may live under `data/manifests/` as
-well. Human-written snapshot descriptions and notable-change notes will live
-under `data/curated/snapshot-notes/` and remain separate from generated state.
+Generated manifests are not maintained project knowledge. Each Army, wiki, or
+symbol acquisition writes a versioned `InfinityDB snapshot provenance` JSON
+record labeled from the archive filename and bound to the immutable archive
+SHA-256. The manifest stores the snapshot type, archive name and project-relative
+path when available, acquisition
+timestamp, source URL, document count, optional language, and optional
+input-artifact provenance. Symbol acquisition currently records the exact Army
+source artifact hash used by the downloader.
 
-No current downloader writes `data/manifests/snapshots/`, and no current runtime
-or build consumes `data/curated/snapshot-notes/`. Version-control, ignore, and
-packaging policy for generated manifests therefore remains an implementation
-decision to finalize when the manifest writer is introduced; the current
-`.gitignore`/`.dockerignore` behavior is not evidence of a completed manifest
-lifecycle.
+Manifest serialization is deterministic and validation can re-hash the archive.
+Persistent paths are written only in project-relative POSIX form; external files
+retain name/hash identity without embedding machine-specific absolute paths. An
+archive-labeled record is immutable: identical regeneration is idempotent and
+conflicting provenance for the same manifest label fails rather than rewriting
+history. Reacquiring byte-identical content under a different archive label may
+therefore produce another provenance record with the same authoritative SHA-256.
 
-Important configuration, curated-data, and generated-manifest contracts should
-define a schema or schema version, validate on load, serialize deterministically
-where generated, and have focused regression tests. Persistent project paths
-stored in future manifests should use portable project-relative
-representations rather than machine-specific absolute paths.
+Generated snapshot manifests are ignored by Git, excluded from Docker build
+context, and retained until explicitly removed. Acquisition tooling never
+creates, rewrites, or deletes files under `data/curated/snapshot-notes/`.
+
+Human notes use the separately versioned `InfinityDB snapshot note` contract and
+bind to a snapshot by SHA-256. They may contain a description, an optional
+comparison snapshot SHA-256, and ordered notable-change notes. Snapshot notes
+are source-controlled human interpretation, not rules-database inputs or
+runtime application data.
+
+Build-specific manifests such as the planned Army-symbol build manifest remain
+future work under `data/manifests/` and are separate from this acquisition
+provenance contract.
 
 ### Current: army roles and logical-unit identity
 
@@ -263,22 +278,22 @@ provenance from the earlier unpacked wiki mirror. That is current historical
 source identity and must not be silently rewritten to a timestamped ZIP that was
 not actually recorded at curation time.
 
+The downloaders also write generated provenance outside the immutable archive
+under `data/manifests/snapshots/`. Each version-1 record mirrors the archive
+label in its filename, binds to the archive SHA-256, and can verify that hash
+before use. Archive labels and portable project-relative paths are
+descriptive; the SHA-256 is authoritative identity.
+The manifest directory is generated local state and is not committed, included
+in Python package data, or shipped in the application container.
+
+Human interpretation has a separate lifecycle under
+`data/curated/snapshot-notes/`. Those versioned notes bind to the same immutable
+snapshot SHA-256 and are never modified by acquisition tooling.
+
 ### Design direction
 
-Downloader-known snapshot provenance will be generated outside the immutable
-archive in a versioned record under `data/manifests/snapshots/` and will bind to
-the archive by SHA-256. Appropriate generated fields include archive
-identity/path, snapshot type, acquisition timestamp, source/base URL, language,
-source-document count, and downloader-known source facts.
-
-Human interpretation has a different lifecycle. Descriptions, comparison
-targets, and notable-change notes will live under
-`data/curated/snapshot-notes/` and also bind to the immutable snapshot by
-SHA-256. Generated tooling must not overwrite human-written notes, and editing
-those notes must never mutate the raw archive or generated provenance.
-Automated comparison output may later be recorded in generated manifests or
-reports while curated notes remain the human interpretation.
-
+Automated snapshot-comparison output may later be recorded in generated
+manifests or reports while curated notes remain the human interpretation.
 Exact timestamped archive identity/hash for wiki-derived curated rules is also a
 design direction, not a current guarantee. Migrate the legacy wiki provenance
 when the wiki downloader/packager and curated provenance contract are rewritten
@@ -424,14 +439,14 @@ files. Database builds fail when no metadata snapshot is provided beside,
 inside, or explicitly alongside the Army source.
 
 Corvus Belli's `metadata.json` is source data. It is conceptually distinct from
-the planned InfinityDB-generated snapshot-provenance records under
-`data/manifests/snapshots/`, which are not implemented yet.
+the InfinityDB-generated acquisition provenance written under
+`data/manifests/snapshots/`.
 
 ## SQLite persistence
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 9 and database compatibility revision of 13; it
+schema has a schema version of 10 and database compatibility revision of 14; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

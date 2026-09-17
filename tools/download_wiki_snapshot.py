@@ -19,6 +19,8 @@ from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
+from infinity_db.snapshot_provenance import write_snapshot_manifest
+
 try:
     from tools.path_sanitization import sanitize_path_component, sanitize_relative_path
     from tools.snapshot_archive import create_timestamped_archive
@@ -206,6 +208,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=Path("data/wiki"),
         help="Directory used to store timestamped wiki ZIP snapshots (default: data/wiki)",
     )
+    parser.add_argument(
+        "--manifest-dir",
+        type=Path,
+        default=Path("data/manifests/snapshots"),
+        help="Generated snapshot manifest directory (default: data/manifests/snapshots)",
+    )
     return parser.parse_args(argv)
 
 
@@ -213,6 +221,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     snapshot_root = (Path.cwd() / args.root).resolve()
     snapshot_root.mkdir(parents=True, exist_ok=True)
+    archive: Path | None = None
+    manifest: Path | None = None
 
     try:
         with tempfile.TemporaryDirectory(prefix="infinity-wiki-", dir=snapshot_root) as staging:
@@ -221,12 +231,29 @@ def main(argv: list[str] | None = None) -> int:
             if not files:
                 print("No wiki pages were downloaded.", file=sys.stderr)
                 return 1
-            archive = archive_wiki(files, snapshot_root, root=staging_path)
+            acquired_at = datetime.now().astimezone()
+            archive = archive_wiki(
+                files, snapshot_root, root=staging_path, now=acquired_at
+            )
+            manifest = write_snapshot_manifest(
+                archive,
+                args.manifest_dir,
+                snapshot_type="wiki",
+                acquired_at=acquired_at,
+                source_url=ROOT_URL,
+                document_count=len(files),
+                project_root=Path.cwd(),
+            )
     except (OSError, ValueError) as exc:
+        if manifest is not None:
+            manifest.unlink(missing_ok=True)
+        if archive is not None:
+            archive.unlink(missing_ok=True)
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
     print(f"Downloaded {len(files)} wiki files -> {archive}")
+    print(f"Snapshot provenance -> {manifest}")
     return 0
 
 

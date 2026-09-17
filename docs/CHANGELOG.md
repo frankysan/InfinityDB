@@ -37,6 +37,10 @@ All notable changes to this project are documented in this file.
 - Pin the exact identity configuration and its deterministic SHA-256 into
   `normalized.json` during InfinityDB normalization and propagate the same
   validated policy into both generated Army database siblings.
+- Add versioned snapshot-provenance and snapshot-note contracts. Army, wiki,
+  and symbol acquisition now writes deterministic SHA-256-addressed provenance
+  under `data/manifests/snapshots/`, while human annotations remain separate
+  under `data/curated/snapshot-notes/`.
 
 ### Changed
 
@@ -100,11 +104,11 @@ All notable changes to this project are documented in this file.
   persist complete `WIKI YYYYMMDD-HHMMSS.zip` and
   `SYMBOLS YYYYMMDD-HHMMSS.zip` archives instead of long-lived loose download
   trees; Army acquisition continues to emit `JSON YYYYMMDD-HHMMSS.zip`.
-- Document the accepted snapshot-metadata design as generated provenance under
+- Implement the accepted snapshot-metadata design as generated provenance under
   `data/manifests/snapshots/` plus separate human annotations under
-  `data/curated/snapshot-notes/`, replacing the earlier adjacent-sidecar design.
-  These paths/contracts remain unimplemented until the corresponding writers are
-  added.
+  `data/curated/snapshot-notes/`. Generated manifests are SHA-256-bound,
+  validated, deterministic, ignored by Git, excluded from Docker packaging, and
+  never overwrite curated notes.
 - Scope rules-database ingestion to `data/curated/rules/`; `infinity-db
   build-rules` now defaults to that subtree so other curated data categories are
   not implicitly treated as rules collections.

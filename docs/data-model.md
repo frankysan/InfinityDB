@@ -260,30 +260,63 @@ planner statistics in the immutable snapshot.
 ### Current
 
 Timestamped `JSON`, `WIKI`, and `SYMBOLS` ZIP files are immutable acquisition
-artifacts. Current downloaders create those archives and do not create separate
-InfinityDB snapshot-provenance manifests or curated snapshot-note files.
+artifacts. Each successful downloader run also writes one version-1 `InfinityDB
+snapshot provenance` JSON record under `data/manifests/snapshots/`, labeled
+from the archive filename and bound to the archive SHA-256.
 
-Corvus Belli's Army `metadata.json` is source data. It is distinct from any
-future InfinityDB-owned acquisition provenance.
+The generated manifest has this logical shape:
+
+```text
+format / formatVersion
+snapshot:
+  type
+  archive:
+    name
+    sha256
+    path?          # project-relative POSIX form only
+  acquiredAt       # timezone-aware ISO-8601
+  documentCount
+source:
+  url
+  language?        # Army snapshots
+inputArtifact?     # current symbol acquisition input
+  name
+  sha256
+  path?            # project-relative POSIX form only
+```
+
+The archive SHA-256 is authoritative snapshot identity. Archive filenames and
+paths are labels/provenance and may change independently. Paths are omitted when
+the corresponding file is outside the project root so generated provenance
+never embeds machine-specific absolute paths. Loading a manifest can re-hash an
+archive and reject mismatches.
+
+Manifest JSON is serialized deterministically. A second write of identical
+provenance for the same manifest label is idempotent; different provenance for
+that label is rejected. Reacquiring identical bytes under a different archive
+label may create another record with the same authoritative SHA-256. Generated
+manifests are ignored by Git, excluded from Docker build context, and not
+automatically pruned.
+
+Corvus Belli's Army `metadata.json` remains source data. It is distinct from
+InfinityDB-owned acquisition provenance.
+
+Human-authored snapshot annotations use a separate version-1 `InfinityDB
+snapshot note` contract under `data/curated/snapshot-notes/`. Each note requires
+`snapshotSha256`, a human description, and an ordered `notableChanges` array; an
+optional `compareToSha256` may identify a different comparison snapshot.
+Acquisition tools never create, rewrite, or delete these curated notes.
+
+Snapshot notes are not rules-database inputs and do not become runtime
+application data. The current contract is a source-controlled annotation format
+and validation boundary only.
 
 ### Design direction
 
-Downloader-known provenance will live in generated records under
-`data/manifests/snapshots/`, outside the immutable ZIP and separate from Corvus
-Belli's source `metadata.json`. A snapshot manifest will identify its archive by
-SHA-256 and may retain archive path/name, snapshot type, acquisition timestamp,
-language, source/base URL, document counts, and other reproducibility facts.
-
-Human-authored descriptions, comparison targets, and notable-change notes will
-live separately under `data/curated/snapshot-notes/` and reference the
-corresponding immutable snapshot by SHA-256. Editing those notes must not alter
-the raw archive or generated provenance. Snapshot notes are not rules-database
-inputs and do not become runtime application data unless a future feature
-explicitly defines such an ingestion path.
-
-No current code writes or consumes either of these planned snapshot-metadata
-paths. Their generated-file persistence/ignore/package policy is therefore not
-yet part of the implemented data model.
+Future snapshot-comparison tooling may emit generated diff/report data while
+curated snapshot notes remain the human interpretation. The later
+`army-symbol-build.json` processing manifest is a separate build-specific
+contract and is not represented by acquisition manifests.
 
 ## PDF- and wiki-derived rules storage
 

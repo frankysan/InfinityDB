@@ -79,11 +79,11 @@ Current release: **0.5.1** (2026-09-14).
 ## Design direction
 
 Accepted architectural direction is documented separately from current
-features. Major unimplemented directions include generated snapshot provenance
-under `data/manifests/snapshots/` with separate human-authored snapshot notes,
-and a complete manifest-backed symbol pipeline. These are **not current
-features**; see [architecture](docs/architecture.md) for the intended boundaries
-and [the backlog](docs/TODO.md) for concrete implementation work.
+features. Generated snapshot provenance under `data/manifests/snapshots/` and
+the separate human-authored snapshot-note contract are now implemented. Major
+remaining directions include exact migration of legacy wiki provenance and the
+complete manifest-backed symbol pipeline; see
+[architecture](docs/architecture.md) and [the backlog](docs/TODO.md).
 
 The current curated rules schema records wiki pages by snapshot-local path and
 snapshot date, and the checked-in v5.3 collection still contains legacy
@@ -129,7 +129,10 @@ infinity-db serve
 The standalone wiki and symbol downloaders follow the same durable-output
 convention. They create `WIKI YYYYMMDD-HHMMSS.zip` archives under `data/wiki/`
 and `SYMBOLS YYYYMMDD-HHMMSS.zip` archives under `data/raw/symbols/`
-respectively, removing their temporary loose staging files after success.
+respectively, removing their temporary loose staging files after success. All
+three downloaders also write deterministic snapshot provenance bound to each
+archive SHA-256 under `data/manifests/snapshots/`; these generated records are
+ignored by Git.
 
 ```powershell
 python tools/download_wiki_snapshot.py
