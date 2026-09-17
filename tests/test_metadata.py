@@ -137,12 +137,96 @@ def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> No
             "name": "Official First",
             "slug": "source-slug",
             "kind": "army",
+            "role": "main",
+            "playable": True,
+            "group_id": None,
+            "group_name": None,
+            "group_slug": None,
+            "parent_army_ids": [],
             "unit_count": 1,
         }
     ]
     with sqlite3.connect(path) as connection:
         assert connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
         assert connection.execute("SELECT COUNT(*) FROM metadata_weapons").fetchone()[0] == 2
+
+
+def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Path) -> None:
+    source = metadata_source()
+    source["factions"].extend(
+        [
+            {
+                "id": 102,
+                "parent": 101,
+                "name": "Official Sectorial",
+                "slug": "official-sectorial",
+            },
+            {
+                "id": 198,
+                "parent": 101,
+                "name": "First Reinforcements",
+                "slug": "first-reinforcements",
+            },
+            {
+                "id": 901,
+                "parent": 901,
+                "name": "Non-Aligned Armies",
+                "slug": "non-aligned-armies",
+            },
+            {
+                "id": 902,
+                "parent": 901,
+                "name": "Independent Company",
+                "slug": "independent-company",
+            },
+        ]
+    )
+    document = master(decode_metadata(json.dumps(source).encode(), "metadata.json"))
+    document["armyLists"]["101"]["reinforcements"] = 198
+    document["armyLists"]["102"] = {
+        "_meta": {"slug": "source-sectorial", "kind": "army"},
+        "unitIds": [1],
+    }
+    document["armyLists"]["198"] = {
+        "_meta": {"slug": "source-reinforcements", "kind": "reinforcement"},
+        "unitIds": [1],
+    }
+    document["armyLists"]["902"] = {
+        "_meta": {"slug": "source-na2", "kind": "army"},
+        "unitIds": [1],
+    }
+    document["units"]["1"]["byArmy"].update({"102": {}, "198": {}, "902": {}})
+
+    normalized = normalize_master(document)
+    path = tmp_path / "infinity.db"
+    export_database(normalized, path)
+    armies = {army["id"]: army for army in Database(path).list_armies()}
+
+    assert armies[101]["role"] == "main"
+    assert armies[101]["playable"] is True
+    assert armies[102]["role"] == "sectorial"
+    assert armies[102]["group_id"] == 101
+    assert armies[102]["group_name"] == "Official First"
+    assert armies[198]["role"] == "reinforcement"
+    assert armies[198]["parent_army_ids"] == [101]
+    assert armies[902]["role"] == "non_aligned"
+    assert armies[902]["group_id"] == 901
+    assert armies[902]["group_name"] == "Non-Aligned Armies"
+    assert armies[901] == {
+        "id": 901,
+        "name": "Non-Aligned Armies",
+        "slug": "non-aligned-armies",
+        "kind": "grouping",
+        "role": "grouping",
+        "playable": False,
+        "group_id": None,
+        "group_name": None,
+        "group_slug": None,
+        "parent_army_ids": [],
+        "unit_count": 0,
+    }
+    with pytest.raises(ValueError, match="grouping-only identity"):
+        Database(path).list_units(army_id=901)
 
 
 def test_unit_details_use_metadata_parent_for_faction_group(tmp_path: Path) -> None:

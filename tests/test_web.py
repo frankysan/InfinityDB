@@ -186,6 +186,63 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
 
 
+def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> None:
+    unit = {"id": 1, "name": "Shared Unit", "canonical": 101, "factions": [101]}
+    documents = [
+        ("101-main.json", True, 198),
+        ("102-sectorial.json", True, None),
+        ("902-independent.json", True, None),
+        ("198-main-reinforcements.json", False, None),
+    ]
+    sources = []
+    for filename, ordinary, reinforcement_id in documents:
+        document = {"version": "test", "units": [unit]}
+        if ordinary:
+            document["reinforcements"] = reinforcement_id
+        source = make_source(filename, json.dumps(document).encode())
+        assert source is not None
+        sources.append(source)
+
+    normalized = normalize_master(merge_sources(sources))
+    normalized["armyMetadata"] = {
+        "sourceFile": "metadata.json",
+        "sourceSha256": "test-metadata",
+        "data": {"factions": []},
+    }
+    normalized["tables"]["metadata_factions"] = [
+        {"id": 101, "parent": 101, "name": "Main Army", "slug": "main-army"},
+        {"id": 102, "parent": 101, "name": "Sectorial", "slug": "sectorial"},
+        {"id": 198, "parent": 101, "name": "Reinforcements", "slug": "reinforcements"},
+        {
+            "id": 901,
+            "parent": 901,
+            "name": "Non-Aligned Armies",
+            "slug": "non-aligned-armies",
+        },
+        {"id": 902, "parent": 901, "name": "Independent Army", "slug": "independent-army"},
+    ]
+    database_path = tmp_path / "roles.db"
+    export_database(normalized, database_path)
+    role_app = create_app(database_path)
+
+    status, _, body = request(role_app, "/api/armies")
+    assert status == 200
+    armies = {item["id"]: item for item in json.loads(body)["items"]}
+    assert armies[101]["role"] == "main"
+    assert armies[102]["role"] == "sectorial"
+    assert armies[102]["group_id"] == 101
+    assert armies[198]["role"] == "reinforcement"
+    assert armies[198]["parent_army_ids"] == [101]
+    assert armies[902]["role"] == "non_aligned"
+    assert armies[902]["group_id"] == 901
+    assert armies[901]["role"] == "grouping"
+    assert armies[901]["playable"] is False
+
+    status, _, body = request(role_app, "/api/units", query="army_id=901")
+    assert status == 400
+    assert "grouping-only identity" in json.loads(body)["error"]
+
+
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
     for army_id, expected in [(101, {1, 3}), (201, {1, 2})]:
         status, _, body = request(
@@ -751,6 +808,17 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     status, headers, _ = request(app, "/api/armies")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+
+
+def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:
+    status, _, body = request(app, "/static/app.js")
+
+    assert status == 200
+    assert b"Math.floor(Number(army.id) / 100)" not in body
+    assert b"army.playable !== false" in body
+    assert b'army.role === "reinforcement"' in body
+    assert b'army.role === "sectorial" || army.role === "non_aligned"' in body
+    assert b'army.role === "non_aligned" && army.group_id' in body
 
 
 def test_unit_list_renders_all_toggle_visible_armies(app: Callable) -> None:

@@ -15,7 +15,7 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from infinity_db import __display_version__, __version__
-from infinity_db.database import Database
+from infinity_db.database import ArmySelectionError, Database
 from infinity_db.rules_database import RulesDatabase
 
 LOGGER = logging.getLogger(__name__)
@@ -547,6 +547,9 @@ class Application:
             else:
                 try:
                     payload = self.database.list_units(**query)
+                except ArmySelectionError as exc:
+                    status = HTTPStatus.BAD_REQUEST
+                    payload = {"error": str(exc)}
                 except (OSError, ValueError, sqlite3.Error):
                     LOGGER.exception("Could not read units")
                     status = HTTPStatus.SERVICE_UNAVAILABLE
