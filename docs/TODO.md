@@ -117,9 +117,10 @@ history retains implementation detail.
     application unit while retaining every source unit ID, source occurrence,
     profile/loadout provenance, and availability reason required by validation
     and `infinity.raw.db`.
-  - Replace repository-time `canonical_faction_id == 1` mercenary inference with
-    explicit normalized availability provenance/category once the new model is
-    available.
+  - [x] Replace repository-time `canonical_faction_id == 1` mercenary inference
+    with explicit `army_units.availability_kind` provenance for current
+    normalized snapshots. Retain the old inference only as a compatibility
+    fallback for rows where explicit provenance is absent.
   - Remove the `1` -> `901` entry from `source-identities.json` only when the
     replacement model is authoritative, and update pinned identity provenance,
     schema/compatibility revisions, generated snapshots, and regression tests

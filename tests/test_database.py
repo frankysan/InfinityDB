@@ -1039,21 +1039,20 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
     original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
     duplicate_id = 10_001
     duplicate = copy.deepcopy(original)
-    duplicate.update(id=duplicate_id, canonical_faction_id=1)
+    # Keep the same non-mercenary canonical faction deliberately: the explicit
+    # army occurrence provenance, not canonical faction 1, must mark this source
+    # record as optional mercenary availability.
+    duplicate.update(id=duplicate_id)
     normalized["tables"]["units"].append(duplicate)
-    normalized["tables"]["factions"].append(
-        {
-            "id": 1,
-            "has_army_list": False,
-            "canonical_reference_count": 1,
-            "unit_membership_reference_count": 0,
-        }
-    )
     for table in ("army_units", "profile_groups", "profiles"):
         for row in list(normalized["tables"][table]):
             if row.get("unit_id") == 1 and row.get("army_id") == 101:
+                if table == "army_units":
+                    row["availability_kind"] = "standard"
                 duplicate = copy.deepcopy(row)
                 duplicate["unit_id"] = duplicate_id
+                if table == "army_units":
+                    duplicate["availability_kind"] = "mercenary"
                 normalized["tables"][table].append(duplicate)
 
     path = tmp_path / "army.sqlite3"
@@ -1081,6 +1080,24 @@ def test_reinforcement_classification_uses_army_kind_not_id_suffix() -> None:
     ) == {"reinforcement"}
 
 
+def test_explicit_availability_kind_is_authoritative_for_mercenary_flags() -> None:
+    group = {
+        "canonical_faction_id": 1,
+        "normal_army_ids": set(),
+        "names": ["TEST"],
+        "slug": "test",
+    }
+
+    assert army_required_flags(
+        {"id": 101, "availability_kind": "standard"},
+        group,
+    ) == set()
+    assert army_required_flags(
+        {"id": 101, "availability_kind": "mercenary"},
+        {**group, "canonical_faction_id": 301, "normal_army_ids": {101}},
+    ) == {"mercs"}
+
+
 def test_list_availability_uses_source_specific_occurrences() -> None:
     group = {
         "canonical_faction_id": 301,
@@ -1088,18 +1105,31 @@ def test_list_availability_uses_source_specific_occurrences() -> None:
         "names": ["WOLFGANG"],
         "slug": "wolfgang",
         "army_occurrences": [
-            {"source_id": 1555, "id": 303, "name": "Kosmoflot"},
-            {"source_id": 11555, "id": 101, "name": "PanOceania"},
+            {
+                "source_id": 1555,
+                "id": 303,
+                "name": "Kosmoflot",
+                "availability_kind": "standard",
+            },
+            {
+                "source_id": 11555,
+                "id": 101,
+                "name": "PanOceania",
+                "availability_kind": "mercenary",
+            },
             {
                 "source_id": 1634,
                 "id": 350,
                 "name": "Reinforcements",
                 "kind": "reinforcement",
+                "availability_kind": "standard",
             },
         ],
     }
-    canonical_factions = {1555: 301, 11555: 1, 1634: 350}
-    normal_armies = {1555: {303}, 11555: set(), 1634: set()}
+    # Deliberately contradict the old canonical/faction heuristic: explicit
+    # occurrence provenance must determine mercenary visibility when present.
+    canonical_factions = {1555: 1, 11555: 301, 1634: 1}
+    normal_armies = {1555: set(), 11555: {101}, 1634: set()}
 
     assert set(visible_armies_for_group(group, set(), canonical_factions, normal_armies)) == {303}
     assert set(visible_armies_for_group(group, {"mercs"}, canonical_factions, normal_armies)) == {

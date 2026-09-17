@@ -110,12 +110,14 @@ metadata fields remain readable through the legacy generic grouping fallback.
 Other duplicate families and reinforcement-only matching are still resolved at
 query time.
 
-Mercenary *availability* has not yet completed the same read-path migration.
-Repository queries still union declared `unit_factions` as the logical unit's
-normal army set and mark an army occurrence as `mercs` when its source record
-has canonical faction `1` and the army is outside that normal set. The explicit
-`army_units.availability_kind` field is therefore current normalized/database
-data but is not yet authoritative for runtime filtering.
+Mercenary availability has now completed the same read-path migration for
+current normalized snapshots. Repository source occurrences carry
+`army_units.availability_kind`, and `mercenary` occurrences require the `mercs`
+filter while `standard` occurrences do not. Canonical faction `1` and declared
+faction membership are no longer the authority for mercenary filtering when
+explicit availability provenance is present. A legacy fallback retains the
+previous canonical/faction inference only for database rows where
+`availability_kind` is absent.
 
 Canonical ownership, source identity, army grouping, army-list kind, optional
 availability category, and playability are separate semantics. The current
@@ -143,12 +145,12 @@ those source records for application queries while preserving every source unit
 ID, army occurrence, profile/loadout provenance, and the reason an army
 occurrence exists.
 
-Migrate runtime availability filtering separately. Normal availability derived
-from declared `factions` and optional mercenary availability derived from
-mercenary source variants must remain distinguishable even when they occur for
-the same logical unit and army; the repository should eventually consume the
-explicit normalized availability category instead of reconstructing mercenary
-status from canonical ID `1` and faction membership.
+Normal availability derived from declared `factions` and optional mercenary
+availability derived from mercenary source variants remain distinguishable even
+when they occur for the same logical unit and army. The repository now consumes
+that explicit normalized availability category. The remaining migration work is
+to remove the legacy canonical/faction fallback once databases without explicit
+availability provenance no longer need to be supported.
 
 Model army role/playability explicitly as a related but separate concern. Prefer
 metadata parent relationships for main-army/sectorial/Non-Aligned grouping and
