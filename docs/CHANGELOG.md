@@ -40,6 +40,14 @@ All notable changes to this project are documented in this file.
   accepted design direction, and planned/unimplemented work are not presented as
   equivalent. Legacy wiki provenance remains documented as legacy until the
   downloader/packager and curated provenance contract are migrated together.
+- Document the source-data finding that canonical-faction ID `1` represents a
+  mercenary source/origin concept distinct from Non-Aligned Armies grouping ID
+  `901`. The existing `1` -> `901` ownership override remains current behavior
+  for now, but is explicitly a migration target rather than a domain invariant.
+- Document the accepted direction to classify optional mercenary source variants
+  during normalization, validate their source-semantic markers, and move
+  unambiguous logical-unit deduplication into normalization/database creation
+  while preserving every source ID, occurrence, and availability provenance.
 - Document the decision to keep PDF/wiki-derived rules references in a
   separately versioned SQLite database from Army JSON-derived data.
 - Harden the file-path sanitization and wiki mirror logic for cross-platform
@@ -67,8 +75,10 @@ All notable changes to this project are documented in this file.
   code no longer duplicates trait aliases, misspellings, or slug generation.
 - Document the distinction between canonical ownership and army playability:
   legacy canonical-faction ID `1` maps to Non-Aligned Armies `901` through the
-  identity configuration, while 901 itself is a grouping identity whose
-  explicit non-playable role still needs backend/API modeling.
+  identity configuration in the current implementation, while 901 itself is a
+  grouping identity whose explicit non-playable role still needs backend/API
+  modeling. Later source investigation supersedes the assumption that IDs `1`
+  and `901` are semantically equivalent.
 - Consolidate the standalone Army/symbol pipeline plan into the maintained
   backlog and durable AI context, preserving its pinned-snapshot, complete SVG
   discovery, reference/asset identity, override/cache/network resolution,
