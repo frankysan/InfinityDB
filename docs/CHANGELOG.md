@@ -12,10 +12,10 @@ All notable changes to this project are documented in this file.
 - Add project-local pytest temp/cache configuration so the suite runs reliably
   from the repository `.venv` on Windows and does not depend on the system temp
   directory.
-- Add the validated `config/identity/source-identities.json` manifest for
+- Add the validated `config/identity/source-identities.json` configuration for
   maintained unit, army, skill, equipment, weapon, and name-normalization
   identity exceptions.
-- Pin the exact identity manifest and its deterministic SHA-256 into
+- Pin the exact identity configuration and its deterministic SHA-256 into
   `normalized.json` during InfinityDB normalization and propagate the same
   validated policy into both generated Army database siblings.
 
@@ -28,12 +28,19 @@ All notable changes to this project are documented in this file.
   persist complete `WIKI YYYYMMDD-HHMMSS.zip` and
   `SYMBOLS YYYYMMDD-HHMMSS.zip` archives instead of long-lived loose download
   trees; Army acquisition continues to emit `JSON YYYYMMDD-HHMMSS.zip`.
-- Document a shared snapshot-sidecar metadata design for Army, wiki, and symbol
-  archives. Editable InfinityDB descriptions, comparison targets, and notable
-  change notes remain outside immutable raw ZIPs and bind to them by archive
-  filename and SHA-256, separate from generated acquisition provenance and from
-  Corvus Belli's source `metadata.json`.
-- Document the decision to keep future PDF-derived rules references in a
+- Document the accepted snapshot-metadata design as generated provenance under
+  `data/manifests/snapshots/` plus separate human annotations under
+  `data/curated/snapshot-notes/`, replacing the earlier adjacent-sidecar design.
+  These paths/contracts remain unimplemented until the corresponding writers are
+  added.
+- Scope rules-database ingestion to `data/curated/rules/`; `infinity-db
+  build-rules` now defaults to that subtree so other curated data categories are
+  not implicitly treated as rules collections.
+- Clarify documentation status throughout the corpus so current behavior,
+  accepted design direction, and planned/unimplemented work are not presented as
+  equivalent. Legacy wiki provenance remains documented as legacy until the
+  downloader/packager and curated provenance contract are migrated together.
+- Document the decision to keep PDF/wiki-derived rules references in a
   separately versioned SQLite database from Army JSON-derived data.
 - Harden the file-path sanitization and wiki mirror logic for cross-platform
   safety while preserving compatible local URLs and asset-file naming.
@@ -41,9 +48,9 @@ All notable changes to this project are documented in this file.
   data and assets, and deployment dependencies in a third-party notices file
   and related user documentation.
 - Move explicit logical-unit, army-list, catalog, and exceptional canonical-
-  faction identity knowledge out of implementation code and into the validated
-  source-identity manifest. Generic duplicate, name-normalization, and whole-
-  army `xx01` derivation algorithms remain implementation behavior.
+  faction identity knowledge out of implementation code and into validated
+  source-identity configuration. Generic duplicate, name-normalization, and
+  whole-army `xx01` derivation algorithms remain implementation behavior.
 - Make database export revalidate identity provenance pinned into normalized
   data, reject incomplete or conflicting policies, and preserve that exact
   policy in the immutable database snapshot used by runtime queries.
@@ -60,8 +67,8 @@ All notable changes to this project are documented in this file.
   code no longer duplicates trait aliases, misspellings, or slug generation.
 - Document the distinction between canonical ownership and army playability:
   legacy canonical-faction ID `1` maps to Non-Aligned Armies `901` through the
-  identity manifest, while 901 itself is a grouping identity whose explicit
-  non-playable role still needs backend/API modeling.
+  identity configuration, while 901 itself is a grouping identity whose
+  explicit non-playable role still needs backend/API modeling.
 - Consolidate the standalone Army/symbol pipeline plan into the maintained
   backlog and durable AI context, preserving its pinned-snapshot, complete SVG
   discovery, reference/asset identity, override/cache/network resolution,
@@ -348,7 +355,7 @@ All notable changes to this project are documented in this file.
 - Manual tools to download Army JSON snapshots and unit symbols.
 - Architecture and data-model documentation, VS Code tasks/debug profiles, and
   automated coverage for the pipeline, database, API, and web interface.
-- Repeatable Linux deployment using Docker Compose, Gunicorn, and Caddy, with
+- Repeatable Linux deployment using Docker Compose, Gunicorn and Caddy, with
   a production WSGI entry point and an image that embeds a validated SQLite
   snapshot.
 

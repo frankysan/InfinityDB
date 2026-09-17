@@ -171,10 +171,10 @@ def test_validate_curated_command_parses() -> None:
     assert args.input == Path("data/curated/rules/example.json")
 
 
-def test_build_rules_command_parses() -> None:
+def test_build_rules_command_defaults_to_curated_rules() -> None:
     parser = build_parser()
-    args = parser.parse_args(["build-rules", "data/curated", "--output", "rules.db"])
-    assert args.input == Path("data/curated")
+    args = parser.parse_args(["build-rules", "--output", "rules.db"])
+    assert args.input == Path("data/curated/rules")
     assert args.output == Path("rules.db")
 
 

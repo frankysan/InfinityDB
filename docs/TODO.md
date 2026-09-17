@@ -4,11 +4,18 @@ This is the working backlog for performance work, data-pipeline improvements,
 and possible product additions. Items are intentionally grouped by outcome
 rather than by implementation layer.
 
-`TODO.md` is forward-looking. Keep completed substeps while their parent task is
-still open because they clarify progress and remaining scope. Once a standalone
-or parent task is complete, remove it after any durable outcome is recorded in
-`CHANGELOG.md`, architecture/data-model documentation, or another appropriate
-reference. Git history retains implementation detail.
+Everything represented by an open checkbox is **planned/unimplemented work**,
+even when its parent task contains completed substeps. This file does not define
+current application behavior or claim that an accepted architecture is already
+implemented; current behavior belongs in the relevant reference documentation,
+while lasting design direction belongs in `docs/architecture.md` or
+`docs/data-model.md`.
+
+Keep completed substeps while their parent task is still open because they
+clarify progress and remaining scope. Once a standalone or parent task is
+complete, remove it after any durable outcome is recorded in `CHANGELOG.md`,
+architecture/data-model documentation, or another appropriate reference. Git
+history retains implementation detail.
 
 ## Next: performance
 
@@ -63,7 +70,7 @@ reference. Git history retains implementation detail.
 - [ ] Establish a migration policy for future persistent user-authored data;
   imported snapshots are intentionally replaced wholesale today.
 
-## Configuration and domain-knowledge manifests
+## Configuration and domain knowledge
 
 - [ ] Extract hard-coded Infinity-specific aliases, assumptions, corrections,
   and manual mappings from implementation code where they represent maintained
@@ -71,15 +78,17 @@ reference. Git history retains implementation detail.
   - Keep the distinction explicit:
     - `config/` contains InfinityDB-maintained interpretation, correction,
       mapping, and compatibility policy.
-    - `data/curated/` contains human-reviewed facts derived from authoritative
-      rules sources and retains source/version/citation information.
-    - `data/manifests/` contains generated build provenance and state rather
-      than hand-authored project knowledge.
+    - `data/curated/` contains human-reviewed information derived from identified
+      external sources. `data/curated/rules/` is the current rules-database
+      input; any sibling curated category must have explicitly implemented
+      semantics before it is treated as an application input.
+    - Planned `data/manifests/` contains generated build/acquisition provenance
+      and state rather than hand-authored project knowledge.
     - Code continues to own algorithms, schemas, parser mechanics, generic
       normalization behavior, validation, and application behavior.
-  - Require versioned schemas, validation on load, deterministic
-    serialization where generated, focused regression tests, and portable
-    project-relative paths for important manifests.
+  - Require versioned schemas, validation on load, deterministic serialization
+    where generated, focused regression tests, and portable project-relative
+    paths for important configuration/manifests.
 - [ ] Model army/faction role and playability explicitly as part of the current
   identity/list-semantics refactor.
   - Represent 901 (Non-Aligned Armies) as a grouping identity for its child 9xx
@@ -101,7 +110,7 @@ reference. Git history retains implementation detail.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.
-  - Move manual weapon-ID category decisions into the same manifest.
+  - Move manual weapon-ID category decisions into the same configuration.
   - Preserve category-rule order and validate that override targets name a
     declared category.
   - Keep the classifier implementation in Python: override lookup, ordered
@@ -126,8 +135,8 @@ reference. Git history retains implementation detail.
     `catalog-detail.js`; API responses expose canonical trait identity, name,
     and slug while preserving the raw source trait label.
 - [ ] Review remaining hard-coded domain tables with the same decision rule:
-  prefer derivation from authoritative imported data first, a validated
-  manifest second, and code only when the value is implementation behavior.
+  prefer derivation from authoritative imported data first, validated
+  configuration second, and code only when the value is implementation behavior.
   - In particular, review fixed weapon-range display bands before creating any
     new config; derive them from weapon metadata if that can produce the
     intended UI.
@@ -156,28 +165,46 @@ reference. Git history retains implementation detail.
     output lifecycle as Army acquisition. The wiki downloader no longer keeps
     a dated unpacked mirror as its primary output, and the symbol downloader no
     longer incrementally fills a long-lived loose destination directory.
-  - [ ] Add a shared, versioned snapshot sidecar metadata contract for every
-    persisted Army, wiki, and symbol archive.
-    - Store the sidecar adjacent to its archive as
-      `<archive-stem>.metadata.json`; bind it to the immutable ZIP by archive
-      filename and SHA-256 rather than embedding editable notes in the ZIP.
-    - Keep generated provenance separate from human annotation. Provenance
-      should include snapshot type, acquisition timestamp, source/language or
-      base URL where applicable, archive SHA-256, and other downloader-known
-      source facts without duplicating Corvus Belli's source `metadata.json`.
-    - Start the editable annotation schema with optional `description`, optional
-      `compared_to` snapshot identity, and an ordered `changes` list for notable
-      differences or release notes. Do not require a structured diff model yet.
-    - Allow annotations to be added or revised after acquisition without
-      changing the raw archive or its hash. Validate the referenced archive
-      hash before consuming, displaying, or updating a sidecar.
-    - Have downloaders create an initial sidecar automatically and provide a
-      shared CLI/helper for atomically editing annotation fields later. Preserve
-      existing human notes when generated provenance is refreshed or augmented.
-    - Future snapshot-comparison tooling may append structured diff data, but it
-      must not overwrite hand-written descriptions or change notes.
-    - Add schema validation, deterministic serialization, hash-mismatch tests,
-      edit-preservation tests, and coverage for all three snapshot types.
+  - [ ] Add shared, versioned snapshot-provenance and annotation contracts using
+    the existing data-path design rather than adjacent sidecars.
+    - Store downloader-generated provenance under `data/manifests/snapshots/`.
+      Each record binds to one immutable Army, wiki, or symbol archive by
+      SHA-256 and may retain archive path/name, snapshot type, acquisition
+      timestamp, source/language or base URL, document count, and other
+      downloader-known source facts without duplicating Corvus Belli's source
+      `metadata.json`.
+    - Store human-authored descriptions, comparison targets, and ordered notable
+      change notes separately under `data/curated/snapshot-notes/`, also bound to
+      the immutable snapshot by SHA-256. Archive filenames are useful labels but
+      not the authoritative identity.
+    - Decide and implement the generated-manifest persistence policy together
+      with the first manifest writer: Git ignore behavior, Docker/package
+      exclusion, cleanup/retention, and whether any generated manifest class is
+      intentionally version-controlled. Do not infer that policy from today's
+      absence of `data/manifests/` ignore rules.
+    - Have acquisition tools create/update generated snapshot manifests only;
+      generated tooling must never rewrite or overwrite curated snapshot notes.
+      Editing curated notes must never mutate the archive or generated
+      provenance.
+    - Future snapshot-comparison tooling may write structured generated diff
+      data/reports under manifest/report paths, while curated notes remain the
+      human interpretation of those results.
+    - Add schema validation, deterministic generated serialization, archive-hash
+      verification, annotation-reference tests, and coverage for all three
+      snapshot types.
+  - [ ] Rewrite the wiki downloader/packager provenance handoff together with
+    the curated wiki provenance contract.
+    - Preserve the current checked-in legacy wiki source identity until an
+      authoritative migration can establish which timestamped archive replaces
+      it; do not fabricate archive/hash provenance from the date alone.
+    - Migrate curated wiki sources to exact recorded `WIKI ...zip` identity/hash
+      once the new packager provides that identity.
+    - Replace the current mixed `vocabularySources` locator requirement
+      (`path`/`snapshotDate`/`heading`/`page`) with source-appropriate provenance
+      so wiki vocabulary references do not require a printed-page field merely
+      because PDF vocabulary references need one.
+    - Update the curated loader/schema, existing v5.3 collection, examples,
+      validation tests, and documentation together.
   - [ ] Add a thin `tools/build_symbols.py` orchestrator with mutually exclusive
     offline `--snapshot PATH` and explicit online `--fetch-snapshot` modes.
     Once selected or downloaded, pin archive path/name, SHA-256, language,
@@ -270,9 +297,9 @@ reference. Git history retains implementation detail.
     downloaded SVGs in the destination directory.
   - Use roots equivalent to `data/raw/` for Army `JSON ...zip` snapshots,
     `data/raw/symbols/` for `SYMBOLS ...zip` snapshots, `data/work/symbols/` for
-    transient extracted/processed files, `data/manifests/`, `data/reports/`,
-    local `image_overrides/`, and the final `src/infinity_db/web/static/`
-    publication tree.
+    transient extracted/processed files, planned `data/manifests/`,
+    `data/reports/`, local `image_overrides/`, and the final
+    `src/infinity_db/web/static/` publication tree.
   - Never rename, rewrite, normalize, compress, or delete a timestamped raw
     archive during later processing. Extract selected archives into temporary or
     work locations when loose SVG files are needed.
@@ -480,27 +507,26 @@ reference. Git history retains implementation detail.
 
 ## Potential product features
 
-- [ ] Establish a versioned, curated rules-reference overlay from the supplied
-  N5 v5.3 rulebook (`data/eng-n5-update-5-3.pdf`, dated 2026-08-10).
-  - Store the overlay in its own SQLite database, with independent schema,
-    versioning, and atomic replacement. Do not add PDF-derived facts to
-    `infinity.db` or `infinity.raw.db`; application code may combine results by
-    stable rule identity only after each database is queried independently.
-  - Keep it separate from the replaceable Infinity Army snapshot and key its
-    entries by canonical rule identity (skill, equipment, ammunition, trait,
-    state, Fireteam concept, and glossary term), with rulebook version and
-    printed-page citation.
+- [ ] Expand the existing versioned curated rules-reference infrastructure with
+  substantially broader N5 v5.3 coverage from
+  `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10).
+  - [x] Keep curated rules in their own source-controlled JSON layer and
+    independent `rules.db`; do not add PDF-derived facts to `infinity.db` or
+    `infinity.raw.db`.
+  - Expand canonical rule identities across skills, equipment, ammunition,
+    traits, states, Fireteam concepts, glossary terms, and other useful rule
+    domains, retaining rulebook version and printed-page citation.
   - Store original, concise editorial summaries and structured facts (labels,
     requirements, effects, restrictions, related rules, and page locators),
-    rather than bulk-extracting or serving the copyrighted PDF text or artwork.
+    rather than bulk-extracting or serving copyrighted PDF text or artwork.
     Confirm permissions and attribution/linking requirements before publishing
     any rule-derived prose.
   - Add a coverage report that flags Army metadata items with no matching
     reference entry, ambiguous names/levels/MOD variants, and entries whose
-    cited rulebook version is stale. The PDF labels changed text visually, but
-    a prior-version comparison is needed before claiming a specific change.
-- [ ] Add a dated FAQ/errata layer to the rules-reference overlay, starting
-  with `data/eng-faqs-n5-v0-1.pdf` (2026-08-25, four printed FAQ pages).
+    cited rulebook version is stale. A prior-version comparison is needed before
+    claiming a specific change between rulebook revisions.
+- [ ] Add a dated FAQ/errata layer to the existing rules-reference system from
+  current material under `data/pdf/faq/`.
   - Model each ruling as a question, concise answer, rule/topic links,
     applicable scope, document version/date, and source-page citation; do not
     flatten it into the base-rule summary. This preserves the distinction
@@ -512,21 +538,19 @@ reference. Git history retains implementation detail.
     Coordinated Orders; and Fireteam creation/bonuses/integrity. The FAQ also
     contains scenario-specific rulings, so scope them to the relevant ITS
     season and mission rather than presenting them as universal core rules.
-  - Define an explicit source-precedence and effective-date policy. ITS Season
-    18 says official rules, FAQs, Wiki, errata, and army lists published up to
-    one week before an event apply (p. 9); an on-screen answer must show its
-    source date/version and never silently blend conflicting documents.
-- [ ] Build a versioned ITS reference library, with Season 18 as current
-  (`data/its-18-en.pdf`, v2026.09.01) and Season 17 as an archived, selectable
-  reference (`data/its-rules-season-17-en-v1.0.2.pdf`, internally v0.2).
+  - Define an explicit source-precedence and effective-date policy. An on-screen
+    answer must show its source date/version and never silently blend conflicting
+    documents.
+- [ ] Build a versioned ITS reference library from material under
+  `data/pdf/its/` and `data/pdf/legacy/`, keeping the current season distinct
+  from archived seasons.
   - Keep season content isolated by season and effective date. A user choosing
     a prior event must see its matching scenario, objectives, extras, and FAQ
-    rulings—not a mix of Season 17 and Season 18 rules. Retain a curated,
-    human-reviewed change log/diff rather than relying on raw PDF text diffing.
-  - Treat the official Army app/site as the authority for army-list legality,
-    as the ITS rules require. InfinityDB may provide read-only explanation and
-    planning support, but must label its snapshot/date and avoid claiming
-    tournament validation.
+    rulings rather than a mixture of seasons. Retain a curated, human-reviewed
+    change log/diff rather than relying on raw PDF text diffing.
+  - Treat the official Army app/site as the authority for army-list legality.
+    InfinityDB may provide read-only explanation and planning support, but must
+    label its snapshot/date and avoid claiming tournament validation.
 - [ ] Add ITS scenario list and detail pages backed by a curated seasonal data
   model, rather than PDF excerpts.
   - Capture structured, cited scenario facts: objectives and scoring, game
@@ -534,39 +558,28 @@ reference. Git history retains implementation detail.
     deployment map or geometry, exclusion zones, token types/diameters,
     classified-objective setup, reinforcement suitability, tactical-support
     options, and scenario-specific rules/elements.
-  - Season 18 supplies Resilience Operations plus 15 standard scenarios and
-    five Direct Action scenarios (contents pp. 37-132); Season 17 remains a
-    useful historical comparison. Scenario pages should expose the selected
-    season prominently and link terms such as CivEvac, Casevac, HVT, Key Ops,
-    zones, and tactical elements to the relevant rules/state references.
+  - Scenario pages should expose the selected season prominently and link
+    season-specific terms to the relevant rules/state references.
 - [ ] Add mission-aware list capability guidance once saved-list support exists.
   - Derive a transparent checklist from the selected ITS scenario and the
-    imported profile data: ITS Specialist Troops (Hackers, Doctors, Engineers,
-    Forward Observers, Paramedics, Chain of Command, Specialist Operative),
-    relevant equipment/skills, Reinforcement or Team-Ops constraints, and
-    scenario interactions. Explain missing capabilities without declaring a
-    list illegal or strategically inadequate.
+    imported profile data: ITS Specialist Troops, relevant equipment/skills,
+    Reinforcement or Team-Ops constraints, and scenario interactions. Explain
+    missing capabilities without declaring a list illegal or strategically
+    inadequate.
   - Keep temporary scenario-granted skills, designated Troopers, classified
     cards, tactical support, and private information out of static unit
-    profiles. They belong to a per-game/session layer, which is not yet part
-    of InfinityDB's replaceable imported snapshot.
+    profiles. They belong to a per-game/session layer, which is not yet part of
+    InfinityDB's replaceable imported snapshot.
 - [ ] Provide an optional ITS organizer/event companion only after
   user-authored persistent storage and migrations are established.
   - Support season-aware event setup: published scenarios, allowed extras,
     player count/round guidance, pairings, byes, score entry, and a printable
     control-sheet checklist. Do not infer an official ranking submission or
     replace the Online Tournament Manager.
-  - Include setup aids from the ITS documents (token sizing, terrain guidance,
-    table/deployment configuration, and mission elements), but make event
-    organizer choices and any local participant data clearly separate from
-    official records.
-- [ ] Use the rulebook to complete the existing Skills, Equipment, Weapons,
-  Ammunition, and Traits reference pages.
-  - The current catalogs expose Army metadata, reverse unit uses, and only a
-    small set of concise Trait descriptions. The v5.3 rules provide structured
-    labels, requirements, effects, restrictions, levels, and interactions for
-    common/special skills (pp. 75-118), equipment (pp. 119-127), and weapon
-    and ammunition rules (quick-reference chart from p. 176).
+  - Include setup aids from ITS documents while keeping organizer choices and
+    local participant data clearly separate from official records.
+- [ ] Use curated rules coverage to complete the existing Skills, Equipment,
+  Weapons, Ammunition, and Traits reference experience.
   - Add cited, concise summaries and cross-links between a rule, its variants,
     relevant states, ammunition, traits, and unit/loadout uses; make MOD scope
     explicit so profile annotations such as `(+1B)`, `(-3)`, `PH=`, rerolls,
@@ -574,58 +587,43 @@ reference. Git history retains implementation detail.
 - [ ] Add a rules glossary and profile-notation help layer to unit details.
   - Explain the existing profile fields and symbols in context: training/order,
     troop type, classification, ISC, Hackable, Peripheral, equipment versus
-    BS weapons, melee weapons, and the profile/loadout separators (rulebook
-    pp. 7-9 and glossary p. 173). Use tooltips or a linked glossary rather than
-    making every profile row denser.
+    BS weapons, melee weapons, and profile/loadout separators. Use tooltips or a
+    linked glossary rather than making every profile row denser.
   - Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
-    Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever
-    it changes how profile data should be read.
-- [ ] Turn the existing Fireteam eligibility and list/detail-page backlog into
-  a rule-aware Fireteams feature.
+    Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
+    changes how profile data should be read.
+- [ ] Build a rule-aware Fireteams feature covering both unit eligibility and
+  army Fireteam list/detail views.
   - The imported schema already retains `fireteams`, types, members, and
     descriptions, but the browser does not expose them. Present each army's
     current Army-data chart as authoritative, with membership restrictions,
     min/max requirements, FTO/wildcard notes, and source-data provenance.
-  - Pair it with concise v5.3 general rules: formation/coherency, leader,
-    integrity, active/reactive behavior, Fireteam levels, and bonuses
-    (pp. 132-136). Clearly separate general rules from army-specific chart
-    exceptions and warn that Infinity Army is the current chart authority.
+  - Pair it with concise general Fireteam rules while clearly separating general
+    rules from army-specific chart exceptions and retaining Infinity Army as the
+    current chart authority.
 - [ ] Add a Game States reference catalog and contextual state links.
-  - The rulebook defines activation, effects, cancellation, and Null-State
-    status for states on pp. 157-172, while InfinityDB currently has no state
-    catalog. Create cited state pages and link them from skills, equipment,
-    weapon traits, and future Fireteam guidance.
+  - Create cited state pages and link them from skills, equipment, weapon
+    traits, and future Fireteam guidance.
   - Surface interactions that affect the existing UI's concepts, especially
     marker forms, Hidden Deployment, Suppressive Fire, Isolated, Unconscious,
     Possessed, and Peripherals; do not infer a unit's current in-game state
     from its static Army profile.
 - [ ] Add a weapon-and-ammunition quick-reference view built from existing
-  weapon profiles plus a curated rules overlay.
-  - Existing weapon pages already show profiles, traits, ranges, and special
-    weapon data. The v5.3 weapon chart supplies the player-facing reading
-    model—range bands, PS, Burst, ammunition, saving-roll attribute/count,
-    and traits (p. 176 onward)—and the rules explain their game effects.
-  - Normalize display of multi-mode/multi-ammunition profiles, link
-    ammunition names and traits to their effects, and provide a unit-neutral
-    comparison/filter view. Validate it against Army metadata; do not copy the
-    chart wholesale into the application.
+  weapon profiles plus curated rules data.
+  - Normalize display of multi-mode/multi-ammunition profiles, link ammunition
+    names and traits to their effects, and provide a unit-neutral
+    comparison/filter view. Validate it against Army metadata; do not copy
+    source charts wholesale into the application.
 - [ ] Add optional play-aid pages for core procedures, distinct from the unit
   database: order expenditure/ARO sequence, modifiers, movement/combat
-  resolution, command tokens, and Fireteam quick reference. The rulebook
-  explicitly organizes these as repeatable game flows (basic rules pp. 6-74,
-  command pp. 128-131, quick-reference charts pp. 176-195); concise,
-  cited checklists would make the existing catalog more useful at the table.
+  resolution, command tokens, and Fireteam quick reference. Use concise cited
+  checklists rather than source excerpts.
 - [ ] When a saved army-list builder is introduced, use the rules reference to
   add game-mode and list-review guidance—not hidden-information disclosure.
-  The v5.3 game modes specify table/deployment/points/SWC guidance (p. 6) and
-  the rules distinguish private from open list information (p. 7). Keep any
-  share/export view privacy-aware and treat the Army app/data as authoritative
-  for list legality.
-- [ ] Add fuller rules summaries for skills, equipment, ammunition, and
-  remaining traits.
-- [ ] Add a curated Infinity Wiki URL mapping for traits when authoritative links are available.
-- [ ] Show unit Fireteam eligibility on the unit-details page.
-- [ ] Add Fireteam list and detail pages.
+  Keep any share/export view privacy-aware and treat the Army app/data as
+  authoritative for list legality.
+- [ ] Add a curated Infinity Wiki URL mapping for traits when authoritative
+  links are available.
 - [ ] Create a unit-model image repository.
 - [ ] Add a per-user model-collection tracker.
 - [ ] Saved army lists, favourites, and personal notes stored separately from
