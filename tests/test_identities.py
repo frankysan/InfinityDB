@@ -10,6 +10,7 @@ from infinity_db.identities import (
     IdentityConfigError,
     identity_metadata,
     load_identity_config,
+    normalized_profile_identity,
     parse_identity_config,
     parse_identity_metadata,
 )
@@ -35,6 +36,19 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     assert config.catalog_source_ids("skills", 20) == (19, 20, 21, 22, 23)
     assert config.word_aliases["reconaissance"] == "recon"
     assert "intervention" in config.profile_identity_ignored_words
+
+
+def test_profile_identity_uses_manifest_backed_policy() -> None:
+    config = load_identity_config()
+
+    assert (
+        normalized_profile_identity(
+            "REFUERZOS: R\u00e9conaissance Intervention Troops",
+            config,
+        )
+        == "recon"
+    )
+    assert normalized_profile_identity("Armoured Unit", config) == "armored"
 
 
 def test_default_identity_manifest_is_independent_of_working_directory(

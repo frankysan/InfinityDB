@@ -99,10 +99,13 @@ and writes the exact document and its deterministic SHA-256 into
 `normalized.json`. Database export revalidates that pinned provenance, rejects
 incomplete or conflicting identity metadata, and propagates the same policy to
 the frontend and raw database metadata. Repository queries revalidate and
-consume the policy pinned into that immutable database snapshot. This keeps
-deployments self-contained and prevents later working-tree configuration
-changes from silently changing the meaning of an existing normalized or SQLite
-snapshot.
+consume the policy pinned into that immutable database snapshot. Unit-detail
+queries also derive each profile's `profile_identity` from that pinned policy;
+browser grouping consumes the backend-derived identity and keeps only display
+formatting, so browser assets do not duplicate profile alias or ignored-word
+rules. This keeps deployments self-contained and prevents later working-tree
+configuration changes from silently changing the meaning of an existing
+normalized or SQLite snapshot.
 
 ## Data flow
 
@@ -314,7 +317,9 @@ item has `id`, `name`, `main_army_id`, `army_ids`, and `armies` (`id` and
 
 Returns one logical unit, including its general data and the profiles,
 loadouts, availability, skills, equipment, and weapons that apply to each army
-where it occurs. A reinforcement-only source variant is folded into a uniquely
+where it occurs. Profile records include a backend-derived `profile_identity`
+used by the browser to group equivalent labels under the identity policy pinned
+into the database. A reinforcement-only source variant is folded into a uniquely
 matching standard unit. Unknown unit IDs return 404.
 
 ### `GET /api/skill-extras`

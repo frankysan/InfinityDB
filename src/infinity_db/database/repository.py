@@ -25,6 +25,7 @@ from infinity_db.identities import (
     IdentityConfig,
     IdentityConfigError,
     load_identity_config,
+    normalized_profile_identity,
     parse_identity_metadata,
 )
 from infinity_db.skill_categories import categories_for_skill
@@ -1429,6 +1430,7 @@ class Database:
         """Return a browsable unit and its army-specific profiles and loadouts."""
         if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:
             raise ValueError("unit_id must be a nonnegative SQLite signed 64-bit integer")
+        identity_config = self._identity_config()
         with self._connect() as connection:
             selected = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
@@ -1501,6 +1503,9 @@ class Database:
                     for key in profile.keys()
                     if key not in {"army_id", "unit_id"}
                 }
+                profile_item["profile_identity"] = normalized_profile_identity(
+                    profile["name"], identity_config
+                )
                 profile_item["skills"] = []
                 profile_item["equipment"] = []
                 profile_item["weapons"] = []

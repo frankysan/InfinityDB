@@ -2,50 +2,28 @@
 
 This is the working backlog for performance work, data-pipeline improvements,
 and possible product additions. Items are intentionally grouped by outcome
-rather than by implementation layer. Check an item only after its tests and
-documentation are complete.
+rather than by implementation layer.
+
+`TODO.md` is forward-looking. Keep completed substeps while their parent task is
+still open because they clarify progress and remaining scope. Once a standalone
+or parent task is complete, remove it after any durable outcome is recorded in
+`CHANGELOG.md`, architecture/data-model documentation, or another appropriate
+reference. Git history retains implementation detail.
 
 ## Next: performance
 
-- [x] Build one private, per-`Database` cached unit graph.
-  - Load source units, army memberships, parsed availability filters, unit
-    factions, search terms, and logical-unit groups once per database snapshot.
-  - Include a `source_unit_id -> logical group` lookup for detail routes.
-  - Have `list_units`, `get_unit`, `get_skill`, and catalog-detail routes use
-    this shared graph rather than rebuilding it independently.
-  - Keep cached graph data immutable, or copy only request-local structures,
-    so optional-unit filters cannot mutate state shared by requests.
-- [x] Replace catalog-detail pagination through `list_units(limit=500,
-  offset=...)` with an internal helper that returns the complete visible-unit
-  mapping once.
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
   representative snapshot before and after each performance change.
-- [x] Review catalog extra joins. Detail queries previously unioned extra-link
-  tables before joining them. Review confirmed SQLite materializes every
-  source table and creates an automatic temporary index; rewrite each source
-  branch to join its matching extras table through its `(occurrence_id,
-  position)` primary key.
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.
 
 ## Database and data pipeline
 
-- [x] Optimize the JSON-to-SQLite import after benchmarking the following
-  measured hot paths (current generated snapshot: 25.2 MB normalized JSON,
-  198,647 normalized rows, 13.7 MB frontend DB, and 37.7 MB raw archive):
-  - [x] Cache each table's derived column tuple after input validation. It is
-    currently scanned once by `validate_input`, again by `create_schema`, and
-    again before its frontend insert.
-  - [x] Feed `executemany` in bounded batches (especially the raw archive's single
-    198k-row list) so serialization and parameter tuples are not all retained
-    at once.
-  - [x] Build secondary indexes after loading table data, then run `ANALYZE`; keep
-    primary keys and foreign-key validation intact. This avoids maintaining the
-    read-only indexes during every insert.
-  - Generated-snapshot smoke export: 8.45 seconds, 13.4 MB frontend DB, and
-    37.7 MB raw archive. Repeat this measurement on CI or a fixed development
-    host before treating it as a performance regression baseline.
+- [ ] Establish a reproducible build/export performance baseline on CI or a
+  fixed development host. A 2026-09-14 generated-snapshot smoke export measured
+  8.45 seconds, 13.4 MB for the frontend DB, and 37.7 MB for the raw archive;
+  treat those numbers as provisional until repeated in a controlled environment.
 - [ ] Remove redundant whole-document work in the combined build/export path.
   Export validation serializes the complete normalized object to reject invalid
   JSON, while the raw archive serializes every row again and normalization has
@@ -79,11 +57,6 @@ documentation are complete.
   process stops between replacing either output.
 - [ ] Add database-size reporting to `infinity-db build` so snapshot growth is
   visible in build output and CI.
-- [x] Add query-plan regression tests for the high-volume `unit_id`, `item_id`,
-  and weapon-template lookup paths.
-- [x] Run `ANALYZE` after importing and indexing the immutable frontend snapshot,
-  then verify `sqlite_stat1` is present. This gives SQLite durable cardinality
-  statistics for join-order decisions without adding request-time work.
 - [ ] Decide whether dynamic, source-only columns should remain in the frontend
   schema or move exclusively to the raw archive once no runtime query consumes
   them.
@@ -107,25 +80,6 @@ documentation are complete.
   - Require versioned schemas, validation on load, deterministic
     serialization where generated, focused regression tests, and portable
     project-relative paths for important manifests.
-- [ ] Complete `config/identity/source-identities.json` as the canonical home
-  for source-identity exceptions and aliases.
-  - [x] Move explicit unit, army, skill, equipment, and weapon merge aliases
-    out of `database/repository.py`.
-  - [x] Represent alias groups declaratively around a canonical source ID
-    rather than duplicating pairwise mappings.
-  - [x] Move exceptional canonical-faction mappings such as the legacy
-    mercenary ownership case into the manifest while keeping the normal
-    whole-army `xx01` derivation algorithm in code.
-  - [x] Centralize source spelling/word aliases and profile-identity ignored
-    words, including known source misspellings.
-  - [x] Pin the validated identity document and SHA-256 into InfinityDB
-    `normalized.json`, revalidate them during export, and propagate the same
-    policy into both database siblings for runtime use.
-  - [x] Record short reason/provenance notes for exceptional mappings where
-    useful for future review.
-  - [ ] Remove the duplicated profile-identity aliases and ignored-word table
-    from `unit.js`. Expose or derive the manifest-backed grouping identity from
-    the backend so the browser does not independently reinterpret source names.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.
@@ -219,9 +173,6 @@ documentation are complete.
   archive.
 - [ ] Keep README and architecture-version references synchronized with schema
   and compatibility revisions during every database-format change.
-- [x] Send snapshot-aware ETags for successful API responses and expose the
-  snapshot revision to the browser refresh check so clients recognize a
-  refreshed dataset.
 
 ## Potential product features
 
@@ -366,7 +317,6 @@ documentation are complete.
   the rules distinguish private from open list information (p. 7). Keep any
   share/export view privacy-aware and treat the Army app/data as authoritative
   for list legality.
-- [x] Add list and detail pages for traits.
 - [ ] Add fuller rules summaries for skills, equipment, ammunition, and
   remaining traits.
 - [ ] Add a curated Infinity Wiki URL mapping for traits when authoritative links are available.
@@ -395,10 +345,3 @@ documentation are complete.
   and updated data between two snapshots.
 - [ ] Low priority: optionally highlight added, removed, and updated data
   elsewhere in the application when comparing snapshots.
-
-## Completed baseline
-
-- [x] Add targeted secondary indexes for unit-detail and catalog reverse lookup
-  paths, including weapon-template joins.
-- [x] Split lossless `__row_json` records into `infinity.raw.db`; keep the lean
-  `infinity.db` for the frontend and deployment image.
