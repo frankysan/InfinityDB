@@ -154,7 +154,11 @@ pattern is supporting evidence only. Normalization records mercenary source role
 provenance, and audited mercenary-to-standard source-unit matches. Repository
 queries consume the persisted match metadata for mercenary logical grouping and
 `army_units.availability_kind` for current-snapshot mercenary filtering; the old
-canonical/faction inference remains only as a legacy-row fallback.
+canonical/faction inference remains only as a legacy-row fallback. Generic
+standard duplicate matching is also audited during normalization and persisted
+as `genericUnitMatches`; current repositories consume that result rather than
+recomputing the 10,000-ID key. The arithmetic rule remains only for older
+databases that lack the audit metadata.
 
 ### Design direction
 
@@ -205,9 +209,10 @@ availability provenance are persisted and consumed by repository queries. The
 The legacy `1` -> `901` canonical-faction override has now been removed. ID `1`
 remains source provenance for mercenary identity and does not receive an
 application `main_army_id`; 901 remains a separate Non-Aligned Army grouping
-identity. Remaining logical-unit work concerns the broader generic duplicate,
-configured-alias, and reinforcement identity layer rather than mercenary
-availability inference.
+identity. Generic duplicate matching is now persisted during normalization
+and consumed directly by current repositories. Remaining logical-unit work
+concerns configured-alias consolidation and reinforcement identity rather than
+mercenary availability or runtime 10,000-ID rediscovery.
 
 ## Snapshot acquisition and provenance
 
@@ -472,11 +477,13 @@ total above illustrates the response shape.
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
 - Army membership comes from `army_units`, not canonical faction or declared
   faction references.
-- `main_army_id` currently represents canonical whole-army/group ownership.
-  Ordinary ownership uses the `xx01` derivation and exceptional mappings come
-  from the pinned identity policy. Canonical source ID `1` is explicitly excluded
-  from application main-army ownership and remains mercenary source provenance;
-  Non-Aligned grouping uses the separate metadata identity `901`.
+- `main_army_id` represents canonical whole-army/group ownership. Current
+  InfinityDB builds derive it from imported metadata faction parents, with
+  explicit maintained overrides taking precedence. The `xx01` derivation is
+  retained only for standalone/legacy normalization without usable metadata.
+  Canonical source ID `1` is explicitly excluded from application main-army
+  ownership and remains mercenary source provenance; Non-Aligned grouping uses
+  the separate metadata identity `901`.
 - `main_faction` is derived from the matching metadata-faction parent record;
   browser code consumes it directly instead of deriving a faction from Army IDs.
 - Search matches accent- and punctuation-insensitive, case-folded name
@@ -484,11 +491,12 @@ total above illustrates the response shape.
 - Results sort by display name after case-folding, removing diacritics, and
   ignoring punctuation and other non-alphanumeric characters; unit ID breaks
   ties for stable pagination.
-- Source records that share a 10,000-ID family and ISC identity are currently
-  presented as one logical unit. Reinforcement-only variants join their matching
-  standard unit; mercenary source occurrences are evaluated separately before
-  visible army memberships are collapsed. This is runtime deduplication, not yet
-  the intended normalized logical-unit model.
+- Current normalized snapshots persist audited generic duplicate-unit matches
+  for standard non-reinforcement records, and repository grouping consumes that
+  persisted result. The old 10,000-ID/ISC calculation is used only for older
+  databases without the audit metadata. Reinforcement-only variants still join
+  their matching standard unit at query time; configured identity aliases remain
+  pinned project policy rather than normalized source facts.
 - `limit` defaults to 50 and must be between 1 and 200; `offset` defaults to 0
   and must be a nonnegative SQLite integer.
 - `search` is limited to 200 characters. Invalid or repeated unit query

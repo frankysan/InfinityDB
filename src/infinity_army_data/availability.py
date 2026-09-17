@@ -11,10 +11,11 @@ STANDARD_AVAILABILITY = "standard"
 MERCENARY_AVAILABILITY = "mercenary"
 MERCENARY_CANONICAL_FACTION_ID = 1
 MERCENARY_SLUG_PREFIX = "merc-"
-MERCENARY_MATCH_METHOD = "generic_duplicate_key"
+GENERIC_MATCH_METHOD = "generic_duplicate_key"
+GENERIC_UNIT_MATCHES_KEY = "genericUnitMatches"
+MERCENARY_MATCH_METHOD = GENERIC_MATCH_METHOD
 MERCENARY_UNIT_MATCHES_KEY = "mercenaryUnitMatches"
 UNMATCHED_MERCENARY_UNIT_IDS_KEY = "unmatchedMercenaryUnitIds"
-
 
 def annotate_availability_semantics(normalized: dict[str, Any]) -> None:
     """Annotate source unit roles and army occurrences from explicit source markers.
@@ -96,7 +97,6 @@ def annotate_availability_semantics(normalized: dict[str, Any]) -> None:
             MERCENARY_AVAILABILITY if role == MERCENARY_SOURCE_ROLE else STANDARD_AVAILABILITY
         )
 
-
 def _generic_duplicate_key(unit: dict[str, Any]) -> tuple[int, str] | None:
     """Return the common source duplicate key used as mercenary matching evidence."""
     unit_id = unit.get("id")
@@ -105,6 +105,71 @@ def _generic_duplicate_key(unit: dict[str, Any]) -> tuple[int, str] | None:
         return None
     return unit_id % 10_000, label.casefold()
 
+def audit_generic_logical_matches(normalized: dict[str, Any]) -> dict[int, int]:
+    """Audit and persist generic duplicate source-unit matches.
+
+    The common 10,000-family source-ID relationship is only matching evidence:
+    candidates must also share the same ISC/display-name identity.  Mercenary
+    variants are excluded because their source-semantic mapping is audited
+    separately, and reinforcement-only records remain a separate repository
+    matching concern.
+
+    The persisted ``genericUnitMatches`` list is authoritative when present.
+    An empty list therefore means that normalization found no generic duplicate
+    groups and current repositories must not rediscover any through ID
+    arithmetic. Older databases that lack the key retain the legacy fallback.
+    """
+    tables = normalized.get("tables")
+    if not isinstance(tables, dict):
+        raise ValueError("Normalized data must contain a tables object")
+
+    army_kinds = {
+        row.get("id"): row.get("kind")
+        for row in tables.get("army_lists", [])
+        if isinstance(row.get("id"), int)
+    }
+    occurrence_armies: dict[int, list[int]] = defaultdict(list)
+    for occurrence in tables.get("army_units", []):
+        unit_id = occurrence.get("unit_id")
+        army_id = occurrence.get("army_id")
+        if isinstance(unit_id, int) and isinstance(army_id, int):
+            occurrence_armies[unit_id].append(army_id)
+
+    groups: dict[tuple[int, str], list[int]] = defaultdict(list)
+    for unit in tables.get("units", []):
+        unit_id = unit.get("id")
+        if not isinstance(unit_id, int) or unit.get("source_defined") is False:
+            continue
+        if unit.get("source_role") != STANDARD_SOURCE_ROLE:
+            continue
+        armies = occurrence_armies.get(unit_id, ())
+        reinforcement_only = bool(armies) and all(
+            army_kinds.get(army_id) == "reinforcement" for army_id in armies
+        )
+        if reinforcement_only:
+            continue
+        key = _generic_duplicate_key(unit)
+        if key is not None:
+            groups[key].append(unit_id)
+
+    matches: dict[int, int] = {}
+    for source_ids in groups.values():
+        if len(source_ids) < 2:
+            continue
+        representative_id = min(source_ids)
+        for source_id in source_ids:
+            if source_id != representative_id:
+                matches[source_id] = representative_id
+
+    normalized[GENERIC_UNIT_MATCHES_KEY] = [
+        {
+            "sourceUnitId": source_id,
+            "representativeUnitId": representative_id,
+            "method": GENERIC_MATCH_METHOD,
+        }
+        for source_id, representative_id in sorted(matches.items())
+    ]
+    return matches
 
 def audit_mercenary_logical_matches(
     normalized: dict[str, Any],
