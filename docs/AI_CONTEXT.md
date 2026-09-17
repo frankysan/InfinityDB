@@ -195,29 +195,31 @@ Downloaded Corvus Belli graphical assets remain outside the public repository
 unless redistribution permission clearly allows inclusion. Local corrected
 image overrides likewise remain ignored unless redistribution status changes.
 
-Current acquisition can create timestamped symbol archives, and the repository
-contains standalone processing/reorganization tooling plus bundled browser
-assets. The complete manifest-backed build described below is not yet the
-current integrated workflow.
+Army-symbol acquisition is now source-semantic and URL/reference based.
+`tools/download_army_symbols.py` discovers every
+`units[].profileGroups[].profiles[].logo` plus every
+`metadata.json -> factions[].logo`, includes validated maintained static-symbol
+declarations, and treats `resume[].logo` as audit-only. A recursive scan of all
+source strings fails closed on SVG-bearing fields that are not reviewed semantic
+or audit-only locations. A unit may reference several SVGs and several source
+references may share one URL; every reference is preserved while each
+authoritative URL is downloaded only once.
+
+The downloader creates one immutable `SYMBOLS ...zip`, ordinary snapshot
+provenance, and the acquisition-only version-1
+`data/manifests/army-symbol-build.json`. That build manifest separates raw assets
+from consumers, records Army/SYMBOLS artifact hashes, source-document count,
+raw asset URL/filename/archive-path/hash/source-method, every source/static
+reference, and discovery audit counts. It deliberately has no font, duplicate,
+conversion, compression, or published-path state yet. The downloader does not
+generate `army-symbols.js` or `unit-symbol-map.js`.
 
 ### Design direction
 
-A symbol build associated with an Army snapshot will use the same exact pinned
-Army snapshot throughout discovery and publication. Pin archive identity and
-SHA-256 plus source metadata needed for reproducibility; no downstream stage may
-select a newer snapshot independently.
-
-Authoritative Army-API symbol discovery comes from every
-`units[].profileGroups[].profiles[].logo` reference plus
-`metadata.json -> factions[].logo`. `resume[].logo` is only a
-consistency/validation source. Recursively scan source strings for additional
-SVG references as a schema-drift audit; unknown SVG-bearing fields must be
-reported rather than silently ignored.
-
-Symbol discovery/reference identity is URL/reference based rather than unit-ID
-based. A unit may reference several source SVGs, and several units/profiles may
-reference the same SVG. Exact or visual deduplication may map several source
-assets to one canonical asset but must retain every original reference.
+Later symbol processing must consume the same pinned Army/SYMBOLS identities
+rather than selecting newer snapshots independently. Exact or visual
+deduplication may map several source assets to one canonical asset but must
+retain every original reference.
 
 Source resolution follows the accepted policy:
 

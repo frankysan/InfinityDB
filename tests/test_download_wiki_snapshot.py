@@ -68,12 +68,12 @@ def test_sanitize_posix_path_components() -> None:
     assert "/" not in name
 
 
-def test_download_unit_symbols_sanitizes_windows_invalid_names() -> None:
+def test_download_army_symbols_sanitizes_windows_invalid_names() -> None:
     import importlib.util
     from pathlib import Path
 
-    module_path = Path(__file__).resolve().parents[1] / "tools" / "download_unit_symbols.py"
-    spec = importlib.util.spec_from_file_location("download_unit_symbols", module_path)
+    module_path = Path(__file__).resolve().parents[1] / "tools" / "download_army_symbols.py"
+    spec = importlib.util.spec_from_file_location("download_army_symbols", module_path)
     assert spec is not None and spec.loader is not None
     tool = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(tool)

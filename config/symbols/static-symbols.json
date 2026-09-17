@@ -1,19 +1,60 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "base_url": "https://assets.corvusbelli.net/army/img/icon/",
-  "assets": {
-    "characteristics": [
-      "cube.svg",
-      "cube2.svg",
-      "hackable.svg",
-      "peripheral.svg"
-    ],
-    "orders": [
-      "regular.svg",
-      "irregular.svg",
-      "tactical.svg",
-      "lieutenant.svg",
-      "impetuous.svg"
-    ]
-  }
+  "assets": [
+    {
+      "key": "cube",
+      "category": "characteristics",
+      "filename": "cube.svg",
+      "label": "Cube"
+    },
+    {
+      "key": "cube2",
+      "category": "characteristics",
+      "filename": "cube2.svg",
+      "label": "Cube 2"
+    },
+    {
+      "key": "hackable",
+      "category": "characteristics",
+      "filename": "hackable.svg",
+      "label": "Hackable"
+    },
+    {
+      "key": "peripheral",
+      "category": "characteristics",
+      "filename": "peripheral.svg",
+      "label": "Peripheral"
+    },
+    {
+      "key": "regular",
+      "category": "orders",
+      "filename": "regular.svg",
+      "label": "Regular Order"
+    },
+    {
+      "key": "irregular",
+      "category": "orders",
+      "filename": "irregular.svg",
+      "label": "Irregular Order"
+    },
+    {
+      "key": "tactical",
+      "category": "orders",
+      "filename": "tactical.svg",
+      "label": "Tactical Order"
+    },
+    {
+      "key": "lieutenant",
+      "category": "orders",
+      "filename": "lieutenant.svg",
+      "label": "Lieutenant Order"
+    },
+    {
+      "key": "impetuous",
+      "category": "orders",
+      "filename": "impetuous.svg",
+      "label": "Impetuous Order"
+    }
+  ]
 }
