@@ -1,0 +1,34 @@
+{
+  "version": "fixture",
+  "reinforcements": null,
+  "units": [
+    {
+      "id": 10051,
+      "idArmy": 10051,
+      "canonical": 1,
+      "isc": "Miranda Ashcroft, Authorized Bounty Hunter",
+      "iscAbbr": "Miranda Ashcroft, Authorized",
+      "notes": null,
+      "name": "MIRANDA ASHCROFT, Authorized Bounty Hunter",
+      "options": [],
+      "slug": "merc-miranda-ashcroft-authorized",
+      "factions": [],
+      "profileGroups": [],
+      "filters": {}
+    },
+    {
+      "id": 10464,
+      "idArmy": 10027,
+      "canonical": 1,
+      "isc": "Valerya Gromoz, Mercenary Hacker",
+      "iscAbbr": null,
+      "notes": null,
+      "name": "VALERYA GROMOZ, Mercenary Hacker",
+      "options": [],
+      "slug": "merc-valerya-gromoz-mercenary-hacker",
+      "factions": [],
+      "profileGroups": [],
+      "filters": {}
+    }
+  ]
+}
