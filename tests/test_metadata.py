@@ -145,6 +145,42 @@ def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> No
         assert connection.execute("SELECT COUNT(*) FROM metadata_weapons").fetchone()[0] == 2
 
 
+def test_unit_details_use_metadata_parent_for_faction_group(tmp_path: Path) -> None:
+    source = metadata_source()
+    source["factions"].append(
+        {
+            "id": 777,
+            "parent": 101,
+            "name": "Official Sectorial",
+            "slug": "official-sectorial",
+        }
+    )
+    document = master(decode_metadata(json.dumps(source).encode(), "metadata.json"))
+    document["units"]["1"]["shared"]["canonical"] = 101
+    document["armyLists"]["777"] = {
+        "_meta": {"slug": "source-sectorial", "kind": "sectorial"},
+        "unitIds": [1],
+    }
+    document["units"]["1"]["byArmy"]["777"] = {}
+
+    normalized = normalize_master(document)
+    path = tmp_path / "infinity.db"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+
+    assert details is not None
+    faction = {
+        "id": 101,
+        "name": "Official First",
+        "slug": "official-first",
+    }
+    assert details["main_faction"] == faction
+    armies = {army["id"]: army for army in details["armies"]}
+    assert armies[101]["faction"] == faction
+    assert armies[777]["faction"] == faction
+
+
 @pytest.mark.parametrize(
     "source",
     [

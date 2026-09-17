@@ -758,6 +758,10 @@ def test_unit_list_renders_all_toggle_visible_armies(app: Callable) -> None:
 
     assert status == 200
     assert b"return [...armies].sort" in body
+    assert b"const factionSlugs" not in body
+    assert b"function factionSlug(" not in body
+    assert b"Math.floor(Number(armyId) / 100)" not in body
+    assert b"const faction = unit.main_faction?.slug;" in body
 
 
 def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -> None:
@@ -770,6 +774,17 @@ def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -
         b'reinforcement: (army.availability_flags || []).includes("reinforcement"),'
         in body
     )
+
+
+def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+
+    assert status == 200
+    assert b"const factionGroups" not in body
+    assert b"const factionSlugs" not in body
+    assert b"Math.floor(Number(armyId) / 100)" not in body
+    assert b"const faction = army.faction;" in body
+    assert b"const mainFaction = unit.main_faction?.slug;" in body
 
 
 def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:
@@ -1102,6 +1117,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                         "slug": "ranger-prototype",
                         "main_army_id": None,
                         "main_army_name": None,
+                        "main_faction": None,
                         "source_ids": [1],
                         "army_ids": [101, 201],
                         "armies": [

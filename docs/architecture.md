@@ -107,6 +107,14 @@ rules. This keeps deployments self-contained and prevents later working-tree
 configuration changes from silently changing the meaning of an existing
 normalized or SQLite snapshot.
 
+Army presentation and classification use explicit imported relationships rather
+than numeric ID conventions. Reinforcement status comes from `army_lists.kind`.
+Faction grouping, display names, and slugs come from `metadata_factions.parent`,
+`name`, and `slug`; repository responses expose this as `main_faction` for unit
+summaries/details and `faction` for each army occurrence. Browser code consumes
+those fields and must not infer faction or reinforcement semantics from Army ID
+prefixes or suffixes.
+
 ## Data flow
 
 ```text
@@ -226,10 +234,12 @@ document root; use `.developer-only` for inline technical details and
 by default.
 
 The required API `metadata.json` is a supplemental snapshot. Its records are
-preserved separately and enrich display names for matching army IDs. It never
-creates an army list or changes unit membership, which continue to come solely
-from the army JSON files. Database builds fail when no metadata snapshot is
-provided beside, inside, or explicitly alongside the Army source.
+preserved separately and enrich display names for matching army IDs. Faction
+records also provide explicit parent relationships, names, and slugs used for
+unit presentation and grouping. Metadata never creates an army list or changes
+unit membership, which continue to come solely from the army JSON files.
+Database builds fail when no metadata snapshot is provided beside, inside, or
+explicitly alongside the Army source.
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
@@ -286,14 +296,18 @@ units in `army_units`.
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
 Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each
-item has `id`, `name`, `main_army_id`, `army_ids`, and `armies` (`id` and
-`name` per membership). The zero total above illustrates the response shape.
+item has `id`, `name`, `main_army_id`, `main_faction`, `army_ids`, and `armies`
+(`id` and `name` per membership). `main_faction` is either null or an object
+with `id`, `name`, and `slug`, derived from imported Army metadata. The zero
+total above illustrates the response shape.
 
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
 - Army membership comes from `army_units`, not canonical faction or declared
   faction references.
 - `main_army_id` is derived from canonical ownership and always references a
   whole-army faction group (`xx01`); it is null when that mapping is unavailable.
+- `main_faction` is derived from the matching metadata-faction parent record;
+  browser code consumes it directly instead of deriving a faction from Army IDs.
 - Search matches accent- and punctuation-insensitive, case-folded name
   substrings, including Unicode.
 - Results sort by display name after case-folding, removing diacritics, and
@@ -317,9 +331,11 @@ item has `id`, `name`, `main_army_id`, `army_ids`, and `armies` (`id` and
 
 Returns one logical unit, including its general data and the profiles,
 loadouts, availability, skills, equipment, and weapons that apply to each army
-where it occurs. Profile records include a backend-derived `profile_identity`
-used by the browser to group equivalent labels under the identity policy pinned
-into the database. A reinforcement-only source variant is folded into a uniquely
+where it occurs. The response includes the same `main_faction` object used by
+unit summaries; each army occurrence also includes its derived `faction` object
+or null. Profile records include a backend-derived `profile_identity` used by
+the browser to group equivalent labels under the identity policy pinned into
+the database. A reinforcement-only source variant is folded into a uniquely
 matching standard unit. Unknown unit IDs return 404.
 
 ### `GET /api/skill-extras`
