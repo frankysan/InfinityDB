@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from . import __version__
+from .availability import annotate_availability_semantics
 from .merge import load_sources, merge_sources, validate_master
 from .merge import write_json as write_master
 from .metadata import MetadataError, decode_metadata, load_metadata
@@ -117,6 +118,7 @@ def _normalize(
         master,
         canonical_faction_overrides=canonical_faction_overrides,
     )
+    annotate_availability_semantics(normalized)
     if normalized_metadata is not None:
         conflicts = set(normalized_metadata) & set(normalized)
         if conflicts:
