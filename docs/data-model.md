@@ -33,7 +33,9 @@ raw Army JSON
   catalogs.
 - Explicit source-equivalent unit, army, skill, equipment, and weapon IDs are
   maintained in validated `config/identity/source-identities.json`
-  configuration. Generic duplicate/name matching remains implementation
+  configuration. That policy also owns reinforcement-label prefixes used by
+  unit/profile identity normalization and backend profile display names. Generic
+  duplicate/name matching remains implementation
   behavior rather than authored alias data; normalization now persists the
   resulting generic unit matches for current snapshots.
 - Weapon-family classification policy is maintained in validated
@@ -257,7 +259,7 @@ application structure cannot be supplied as normalized source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 10 and the application
-compatibility revision is 14. Imports build temporary sibling files, check
+compatibility revision is 15. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

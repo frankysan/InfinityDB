@@ -12,7 +12,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
-IDENTITY_CONFIG_SCHEMA_VERSION = 1
+IDENTITY_CONFIG_SCHEMA_VERSION = 2
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_IDENTITY_CONFIG = PROJECT_ROOT / "config" / "identity" / "source-identities.json"
 CATALOG_NAMES = ("skills", "equipment", "weapons")
@@ -37,6 +37,7 @@ class IdentityConfig:
     canonical_faction_overrides: Mapping[int, int]
     catalog_aliases: Mapping[str, Mapping[int, int]]
     word_aliases: Mapping[str, str]
+    reinforcement_prefixes: tuple[str, ...]
     profile_identity_ignored_words: frozenset[str]
 
     @property
@@ -69,9 +70,26 @@ class IdentityConfig:
         return tuple(item_id for item_id, target in aliases.items() if target == canonical_id)
 
 
+def strip_reinforcement_prefix(value: object, config: IdentityConfig) -> str:
+    """Remove one maintained reinforcement prefix from a source label."""
+    text = str(value or "")
+    if not config.reinforcement_prefixes:
+        return text.strip()
+    prefixes = "|".join(
+        re.escape(prefix)
+        for prefix in sorted(config.reinforcement_prefixes, key=len, reverse=True)
+    )
+    return re.sub(
+        rf"^(?:{prefixes})(?:\.|:)?\s*",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    ).strip()
+
+
 def normalized_unit_identity(value: object, config: IdentityConfig) -> str:
     """Return the maintained label identity used for reinforcement unit matching."""
-    identity = re.sub(r"^reinf(?:\.|:)?\s*", "", str(value or ""), flags=re.IGNORECASE)
+    identity = strip_reinforcement_prefix(value, config)
     decomposed = unicodedata.normalize("NFKD", identity).casefold()
     words = re.findall(r"[^\W_]+", decomposed)
     normalized_words = [
@@ -103,12 +121,7 @@ def unit_match_identities(row: Any, config: IdentityConfig) -> set[str]:
 
 def normalized_profile_identity(value: object, config: IdentityConfig) -> str:
     """Return the manifest-backed grouping identity for a profile label."""
-    identity = re.sub(
-        r"^(?:reinf|refuerzos)(?:\.|:)?\s*",
-        "",
-        str(value or ""),
-        flags=re.IGNORECASE,
-    )
+    identity = strip_reinforcement_prefix(value, config)
     decomposed = unicodedata.normalize("NFKD", identity).casefold()
     text = "".join(
         character
@@ -298,11 +311,32 @@ def parse_identity_config(document: Any) -> IdentityConfig:
     name_normalization = _object(
         root.get("name_normalization"), "identity config.name_normalization"
     )
-    _only_keys(name_normalization, {"word_aliases"}, "identity config.name_normalization")
+    _only_keys(
+        name_normalization,
+        {"word_aliases", "reinforcement_prefixes"},
+        "identity config.name_normalization",
+    )
     word_aliases = _string_map(
         name_normalization.get("word_aliases"),
         "identity config.name_normalization.word_aliases",
     )
+    raw_reinforcement_prefixes = name_normalization.get("reinforcement_prefixes")
+    if not isinstance(raw_reinforcement_prefixes, list):
+        raise IdentityConfigError(
+            "identity config.name_normalization.reinforcement_prefixes must be an array"
+        )
+    reinforcement_prefixes: list[str] = []
+    for index, prefix in enumerate(raw_reinforcement_prefixes):
+        context = f"identity config.name_normalization.reinforcement_prefixes[{index}]"
+        if not isinstance(prefix, str) or not prefix.strip():
+            raise IdentityConfigError(f"{context} must be a non-empty string")
+        if prefix != prefix.strip() or prefix != prefix.casefold():
+            raise IdentityConfigError(f"{context} must be trimmed and case-folded")
+        reinforcement_prefixes.append(prefix)
+    if len(set(reinforcement_prefixes)) != len(reinforcement_prefixes):
+        raise IdentityConfigError(
+            "identity config.name_normalization.reinforcement_prefixes contains duplicates"
+        )
 
     profile_identity = _object(root.get("profile_identity"), "identity config.profile_identity")
     _only_keys(profile_identity, {"ignored_words"}, "identity config.profile_identity")
@@ -335,6 +369,7 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         canonical_faction_overrides=canonical_faction_overrides,
         catalog_aliases=catalog_aliases,
         word_aliases=word_aliases,
+        reinforcement_prefixes=tuple(reinforcement_prefixes),
         profile_identity_ignored_words=frozenset(parsed_ignored_words),
     )
 

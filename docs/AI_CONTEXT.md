@@ -372,9 +372,10 @@ changes.
   Distance-skill handling is now source-driven: Army `extras.type` determines
   `DISTANCE` versus text, while curated skill `parameterSemantics` supplies only
   rule-derived sign-display behavior for Super-Jump and Forward Deployment.
-  Remaining audit targets are reinforcement prefix normalization, the direct 901
-  grouping special case, and symbol-semantic name tables reserved for the
-  symbol-pipeline refactor.
+  Reinforcement prefix normalization is now pinned in the identity config and
+  unit-detail profile display names are backend-derived. Remaining audit targets
+  are the direct 901 grouping special case and symbol-semantic name tables
+  reserved for the symbol-pipeline refactor.
 - 2026-09-17: Special weapon game-rule facts moved out of
   `infinity_army_data.weapon_profiles`. The Armed Turret special profile is a
   cited curated `weapon` record linked to Army weapon ID 226; repository reads

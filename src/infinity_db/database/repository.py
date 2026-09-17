@@ -29,6 +29,7 @@ from infinity_db.identities import (
     load_identity_config,
     normalized_profile_identity,
     parse_identity_metadata,
+    strip_reinforcement_prefix,
 )
 
 from .schema import (
@@ -1565,6 +1566,9 @@ class Database:
                     for key in profile.keys()
                     if key not in {"army_id", "unit_id"}
                 }
+                profile_item["display_name"] = strip_reinforcement_prefix(
+                    profile["name"], identity_config
+                )
                 profile_item["profile_identity"] = normalized_profile_identity(
                     profile["name"], identity_config
                 )
