@@ -40,6 +40,11 @@ and serves a read-only browser and same-origin HTTP API.
 - `infinity_db.database` owns Army SQLite storage and repository queries.
 - The separate rules-reference database is built from validated curated rules
   collections, not from raw PDFs or wiki snapshots.
+- Trait rule identity is owned by curated `trait` records in `rules.db`: Army
+  storage preserves raw trait labels/usage, and the application composes them
+  with curated canonical names, aliases, parameterized prefixes, summaries, and
+  citations. If `rules.db` is unavailable, raw traits remain usable without
+  invented canonical rule knowledge.
 - `infinity_db.web` validates HTTP input, serializes repository results, and
   contains the native-module browser UI.
 - Standalone acquisition and processing tools remain explicitly invoked and

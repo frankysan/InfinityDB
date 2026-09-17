@@ -212,8 +212,35 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["skill:camouflage"]["labelIds"] == ["optional"]
     assert records["skill:camouflage"]["facts"]["typeId"] == "automatic"
     assert records["skill:camouflage"]["armyLinks"] == [{"entity": "skill", "id": 29}]
+    assert records["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
+    assert records["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
+        "Disposable ("
+    ]
+    assert records["trait:zone-of-control-zc"]["name"] == "Zone of Control (ZoC)"
+    assert records["trait:zone-of-control-zc"]["citations"][0]["sourceId"] == (
+        "wiki-traits-oldid-4110"
+    )
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
         set(skill_type["descriptions"]) == {"singular", "plural"}
         for skill_type in document["skillTypes"]
     )
+
+
+def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"] = [
+        {
+            "id": "trait:disposable-x",
+            "kind": "trait",
+            "name": "Disposable (X)",
+            "summary": "Limited uses.",
+            "facts": {"sourceIdentity": {"prefixes": "Disposable ("}},
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 170}],
+        }
+    ]
+    path = tmp_path / "trait.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="sourceIdentity.prefixes"):
+        load_curated_document(path)

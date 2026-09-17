@@ -17,6 +17,7 @@ from urllib.parse import parse_qs
 from infinity_db import __display_version__, __version__
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.trait_catalog import TraitCatalog
 
 LOGGER = logging.getLogger(__name__)
 ASSETS = {
@@ -273,6 +274,7 @@ class Application:
                 self.rules_database = rules_database
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
+        self.trait_catalog = TraitCatalog(self.database, self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
             _snapshot_revision(self.rules_database.path)
@@ -461,7 +463,7 @@ class Application:
         elif path == "/api/traits":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = {"items": self.database.list_traits()}
+                payload = {"items": self.trait_catalog.list_traits()}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read traits")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -492,6 +494,8 @@ class Application:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
+                else:
+                    payload = self.trait_catalog.enrich_catalog_item(payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -502,7 +506,7 @@ class Application:
         elif match := re.fullmatch(r"/api/traits/([a-z0-9-]+)", path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = self.database.get_trait(match.group(1))
+                payload = self.trait_catalog.get_trait(match.group(1))
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Trait not found"}

@@ -569,15 +569,20 @@ reference link when the metadata snapshot provides one.
 Each variant includes the relevant extras and logical units that use it. Weapon
 details additionally include metadata weapon profiles, such as ammunition,
 traits, and range data, when present in the supplied metadata snapshot.
-Metadata weapon/equipment profiles retain the raw `traits` value and also expose
-`trait_references`. Each reference contains the raw `label`, canonical `name`
-(or null), and trait-catalog `slug` (or null). Browser rendering consumes these
-backend-derived references for trait links and does not canonicalize trait text
-or generate trait slugs independently.
+Metadata weapon/equipment profiles retain the raw `traits` value. The application
+composition layer also exposes `trait_references`: each reference preserves the
+raw `label` and, when a matching curated trait record is available in `rules.db`,
+adds that record's canonical `name` and stable trait-catalog `slug`. Exact source
+aliases/misspellings and parameterized source-label prefixes are curated rule
+data rather than Python tables. Without a valid `rules.db`, raw Army trait labels
+remain browsable and linkable but no curated canonicalization or summary is
+invented. Browser rendering consumes these backend-derived references and does
+not canonicalize trait text or generate trait slugs independently.
 
-`GET /api/traits` returns the derived shared-traits catalog.
-`GET /api/traits/{slug}` returns a trait's concise rules summary, when
-available, and its use grouped across skills, equipment, and weapons.
+`GET /api/traits` returns the shared-traits catalog composed from raw Army usage
+and optional current curated trait records. `GET /api/traits/{slug}` returns a
+trait's usage grouped across skills, equipment, and weapons; when curated rules
+are available it also includes the cited rule record and its concise summary.
 
 Future implementation work is tracked in `docs/TODO.md`; this document records
 current architecture and clearly labeled lasting design direction rather than

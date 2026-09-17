@@ -137,9 +137,11 @@ All notable changes to this project are documented in this file.
   and faction grouping, names, and slugs from Army metadata parent relationships,
   exposing the derived faction metadata through unit API records so browser code
   no longer interprets Army ID suffixes or maintains faction lookup tables.
-- Expose backend-derived trait references alongside raw metadata trait labels,
-  including canonical trait names and catalog slugs, so catalog-detail browser
-  code no longer duplicates trait aliases, misspellings, or slug generation.
+- Move trait canonical identities, aliases/misspellings, parameterized source
+  matching, concise summaries, and citations into curated `trait` records in
+  `rules.db`. Army storage now preserves raw trait labels/usage only, while the
+  application composes curated references at read time and falls back to raw
+  labels when the rules database is unavailable.
 - Consolidate the standalone Army/symbol pipeline plan into the maintained
   backlog and durable AI context, preserving its pinned-snapshot, complete SVG
   discovery, reference/asset identity, override/cache/network resolution,

@@ -195,6 +195,33 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             facts = record.get("facts")
             if not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids:
                 raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
+        if record["kind"] == "trait":
+            facts = record.get("facts")
+            if facts is not None:
+                source_identity = facts.get("sourceIdentity")
+                if source_identity is not None:
+                    if not isinstance(source_identity, dict):
+                        raise ValueError(
+                            f"{context}: trait 'facts.sourceIdentity' must be an object"
+                        )
+                    unknown = source_identity.keys() - {"prefixes"}
+                    if unknown:
+                        raise ValueError(
+                            f"{context}: trait 'facts.sourceIdentity' has unsupported fields "
+                            f"{sorted(unknown)}"
+                        )
+                    prefixes = source_identity.get("prefixes")
+                    if not isinstance(prefixes, list) or not prefixes:
+                        raise ValueError(
+                            f"{context}: trait 'facts.sourceIdentity.prefixes' must be a "
+                            "non-empty array"
+                        )
+                    for prefix_index, prefix in enumerate(prefixes):
+                        _require_string(
+                            prefix,
+                            f"facts.sourceIdentity.prefixes[{prefix_index}]",
+                            context,
+                        )
         if record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")
             if not isinstance(record_labels, list) or not record_labels:

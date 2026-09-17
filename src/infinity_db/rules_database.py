@@ -405,6 +405,67 @@ class RulesDatabase:
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
 
+    def _records_from_rows(
+        self, connection: sqlite3.Connection, rows: list[sqlite3.Row]
+    ) -> list[dict[str, Any]]:
+        records = []
+        for row in rows:
+            record = {
+                "id": row["id"],
+                "kind": row["kind"],
+                "name": row["name"],
+                "summary": row["summary"],
+                "aliases": _decode_json(row["aliases_json"], []),
+                "label_ids": _decode_json(row["label_ids_json"], []),
+                "scope": _decode_json(row["scope_json"], None),
+                "facts": _decode_json(row["facts_json"], None),
+                "review": _decode_json(row["review_json"], None),
+            }
+            label_ids = record["label_ids"]
+            if label_ids:
+                placeholders = ", ".join("?" for _ in label_ids)
+                label_rows = connection.execute(
+                    "SELECT id, name, description FROM labels "
+                    "WHERE collection_id = ? AND id IN (" + placeholders + ")",
+                    (row["collection_id"], *label_ids),
+                ).fetchall()
+                record["labels"] = [dict(label) for label in label_rows]
+            facts = record["facts"]
+            if isinstance(facts, dict) and facts.get("typeId"):
+                skill_type = connection.execute(
+                    "SELECT id, name, labels_json, descriptions_json FROM skill_types "
+                    "WHERE collection_id = ? AND id = ?",
+                    (row["collection_id"], facts["typeId"]),
+                ).fetchone()
+                if skill_type is not None:
+                    record["skill_type"] = {
+                        "id": skill_type["id"],
+                        "name": skill_type["name"],
+                        "labels": _decode_json(skill_type["labels_json"], []),
+                        "descriptions": _decode_json(skill_type["descriptions_json"], {}),
+                    }
+            record["citations"] = [
+                dict(citation)
+                for citation in connection.execute(
+                    "SELECT c.source_id, s.title AS source_title, s.version AS source_version, "
+                    "c.page, c.path, c.snapshot_date, c.heading, c.section "
+                    "FROM record_citations AS c JOIN sources AS s "
+                    "ON s.collection_id = c.collection_id AND s.id = c.source_id "
+                    "WHERE c.collection_id = ? AND c.record_id = ? ORDER BY c.position",
+                    (row["collection_id"], row["id"]),
+                ).fetchall()
+            ]
+            record["related_records"] = [
+                relation["related_record_id"]
+                for relation in connection.execute(
+                    "SELECT related_record_id FROM record_relations "
+                    "WHERE collection_id = ? AND record_id = ? ORDER BY position",
+                    (row["collection_id"], row["id"]),
+                ).fetchall()
+            ]
+            records.append(record)
+        return records
+
     def records_for_army_link(self, entity: str, external_id: int) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
@@ -415,60 +476,23 @@ class RulesDatabase:
                 "ORDER BY r.collection_id, r.id",
                 (entity, str(external_id)),
             ).fetchall()
-            records = []
-            for row in rows:
-                record = {
-                    "id": row["id"],
-                    "kind": row["kind"],
-                    "name": row["name"],
-                    "summary": row["summary"],
-                    "aliases": _decode_json(row["aliases_json"], []),
-                    "label_ids": _decode_json(row["label_ids_json"], []),
-                    "scope": _decode_json(row["scope_json"], None),
-                    "facts": _decode_json(row["facts_json"], None),
-                    "review": _decode_json(row["review_json"], None),
-                }
-                label_ids = record["label_ids"]
-                if label_ids:
-                    placeholders = ", ".join("?" for _ in label_ids)
-                    label_rows = connection.execute(
-                        "SELECT id, name, description FROM labels "
-                        "WHERE collection_id = ? AND id IN (" + placeholders + ")",
-                        (row["collection_id"], *label_ids),
-                    ).fetchall()
-                    record["labels"] = [dict(label) for label in label_rows]
-                facts = record["facts"]
-                if isinstance(facts, dict) and facts.get("typeId"):
-                    skill_type = connection.execute(
-                        "SELECT id, name, labels_json, descriptions_json FROM skill_types "
-                        "WHERE collection_id = ? AND id = ?",
-                        (row["collection_id"], facts["typeId"]),
-                    ).fetchone()
-                    if skill_type is not None:
-                        record["skill_type"] = {
-                            "id": skill_type["id"],
-                            "name": skill_type["name"],
-                            "labels": _decode_json(skill_type["labels_json"], []),
-                            "descriptions": _decode_json(skill_type["descriptions_json"], {}),
-                        }
-                record["citations"] = [
-                    dict(citation)
-                    for citation in connection.execute(
-                        "SELECT c.source_id, s.title AS source_title, s.version AS source_version, "
-                        "c.page, c.path, c.snapshot_date, c.heading, c.section "
-                        "FROM record_citations AS c JOIN sources AS s "
-                        "ON s.collection_id = c.collection_id AND s.id = c.source_id "
-                        "WHERE c.collection_id = ? AND c.record_id = ? ORDER BY c.position",
-                        (row["collection_id"], row["id"]),
-                    ).fetchall()
-                ]
-                record["related_records"] = [
-                    relation["related_record_id"]
-                    for relation in connection.execute(
-                        "SELECT related_record_id FROM record_relations "
-                        "WHERE collection_id = ? AND record_id = ? ORDER BY position",
-                        (row["collection_id"], row["id"]),
-                    ).fetchall()
-                ]
-                records.append(record)
-            return records
+            return self._records_from_rows(connection, rows)
+
+    def records_by_kind(self, kind: str, *, current_only: bool = True) -> list[dict[str, Any]]:
+        """Return curated records of one kind, preferring current collections."""
+        with self._connect() as connection:
+            if current_only:
+                rows = connection.execute(
+                    "SELECT r.* FROM records AS r JOIN collections AS c "
+                    "ON c.id = r.collection_id "
+                    "WHERE r.kind = ? AND c.status = 'current' "
+                    "ORDER BY r.collection_id, r.id",
+                    (kind,),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    "SELECT r.* FROM records AS r WHERE r.kind = ? "
+                    "ORDER BY r.collection_id, r.id",
+                    (kind,),
+                ).fetchall()
+            return self._records_from_rows(connection, rows)

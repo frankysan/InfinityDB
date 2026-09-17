@@ -302,8 +302,9 @@ Historical documents must not be silently merged into current rules.
 The current curated-v2 document has collection identity, source records, typed
 fact records, maintained vocabularies, scope, Army links, related-record links,
 review state, and citations. Record citations are source-specific: PDF citations
-require positive printed page numbers; wiki record citations require a
-snapshot-local path and `snapshotDate`.
+require positive printed page numbers; wiki record citations require a path and
+`snapshotDate`. A wiki source may identify a preserved local mirror or an exact
+pinned revision URL; provenance must describe the source actually reviewed.
 
 `vocabularySources` is a current legacy exception to that cleaner model. The
 loader requires every vocabulary-source entry to contain `sourceId`, `path`,
@@ -326,6 +327,12 @@ application ID, compatibility version, and replaceable snapshot lifecycle.
 A curated rule fact may reference stable application-level identities, but
 neither database is an import source for the other; any combined view is
 assembled by application code.
+
+Trait identity is one implemented example of that composition boundary. Army
+metadata stores raw trait labels and usage, while current curated `trait` records
+own canonical names, aliases/misspellings, parameterized source-label prefixes,
+concise summaries, and citations. The application joins those sources at read
+time; the Army database does not copy curated trait knowledge into its snapshot.
 
 ### Design direction
 

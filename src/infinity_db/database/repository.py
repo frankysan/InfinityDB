@@ -33,7 +33,6 @@ from infinity_db.identities import (
     parse_identity_metadata,
 )
 from infinity_db.skill_categories import categories_for_skill
-from infinity_db.traits import TRAIT_DESCRIPTIONS, canonical_trait_name
 
 from .schema import (
     APPLICATION_ID,
@@ -185,19 +184,13 @@ def configured_catalog_group(
     return canonical_id, source_ids
 
 def trait_slug(name: object) -> str:
-    """Return the URL-safe identity used by the derived traits catalog."""
-    text = str(name or "").removesuffix(" (SF)")
-    return re.sub(r"[^a-z0-9]+", "-", text.casefold()).strip("-")
+    """Return a URL-safe identity for one raw Army trait label."""
+    return re.sub(r"[^a-z0-9]+", "-", str(name or "").casefold()).strip("-")
 
-def trait_reference(value: object, trait_slugs: Mapping[str, str]) -> dict[str, Any]:
-    """Describe a source trait with its backend-owned catalog identity."""
-    label = str(value or "").strip()
-    name = canonical_trait_name(label)
-    return {
-        "label": label,
-        "name": name or None,
-        "slug": trait_slugs.get(name),
-    }
+def source_trait_name(value: object) -> str:
+    """Return a visible Army trait label, excluding bracketed profile annotations."""
+    name = str(value or "").strip()
+    return "" if name.startswith("[") else name
 
 def unit_sort_key(value: object) -> str:
     """Return a case-insensitive, punctuation-free key for unit-name ordering."""
@@ -948,8 +941,8 @@ class Database:
             return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
 
     @instance_lru_cache(maxsize=1)
-    def list_traits(self) -> list[dict[str, Any]]:
-        """Return distinct rules traits carried by catalogued profiles."""
+    def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
+        """Return raw Army trait labels mapped to the catalog items that carry them."""
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT DISTINCT w.id AS item_id, m.type, m.properties "
@@ -964,52 +957,42 @@ class Database:
             if not isinstance(traits, list):
                 traits = [traits]
             for trait in traits:
-                trait_name = canonical_trait_name(trait)
+                trait_name = source_trait_name(trait)
                 if trait_name:
                     catalog = {"EQUIPMENT": "equipment", "SKILL": "skills"}.get(
                         row["type"], "weapons"
                     )
                     items_by_trait.setdefault(trait_name, set()).add((catalog, row["item_id"]))
+        return {
+            name: tuple(sorted(items))
+            for name, items in sorted(items_by_trait.items(), key=lambda item: unit_sort_key(item[0]))
+        }
+
+    @instance_lru_cache(maxsize=1)
+    def list_traits(self) -> list[dict[str, Any]]:
+        """Return distinct raw Army trait labels carried by catalogued profiles."""
         traits = []
         slug_counts: dict[str, int] = {}
-        for name in sorted(items_by_trait, key=unit_sort_key):
+        for name, items in self.trait_usage_index().items():
             base_slug = trait_slug(name) or "trait"
             slug_counts[base_slug] = slug_counts.get(base_slug, 0) + 1
             slug = base_slug if slug_counts[base_slug] == 1 else f"{base_slug}-{slug_counts[base_slug]}"
             traits.append({
                 "id": slug,
                 "name": name,
-                "use_count": len(items_by_trait[name]),
-                "description": TRAIT_DESCRIPTIONS.get(name),
+                "use_count": len(items),
+                "description": None,
             })
         return traits
 
     @instance_lru_cache(maxsize=128)
     def get_trait(self, item_slug: str) -> dict[str, Any] | None:
-        """Return one trait with each matching item's visible unit usage."""
+        """Return one raw Army trait label with matching visible unit usage."""
         trait = next((item for item in self.list_traits() if item["id"] == item_slug), None)
         if trait is None:
             return None
-        with self._connect() as connection:
-            rows = connection.execute(
-                "SELECT DISTINCT w.id, m.type, m.properties FROM weapons AS w "
-                "JOIN metadata_weapons AS m ON m.id = w.id"
-            ).fetchall()
-        weapon_ids = []
-        for row in rows:
-            try:
-                profile_traits = json.loads(row["properties"] or "[]")
-            except json.JSONDecodeError:
-                profile_traits = []
-            if not isinstance(profile_traits, list):
-                profile_traits = [profile_traits]
-            if trait["name"] in {canonical_trait_name(value) for value in profile_traits}:
-                catalog = {"EQUIPMENT": "equipment", "SKILL": "skills"}.get(
-                    row["type"], "weapons"
-                )
-                weapon_ids.append((catalog, row["id"]))
         variants = []
-        for catalog, item_id in sorted(set(weapon_ids)):
+        for catalog, item_id in self.trait_usage_index().get(trait["name"], ()):
             item = (
                 self.get_skill(item_id)
                 if catalog == "skills"
@@ -1194,19 +1177,9 @@ class Database:
                         return json.loads(value)
                     except json.JSONDecodeError:
                         return value
-
-                trait_slugs = {
-                    trait["name"]: trait["id"] for trait in self.list_traits()
-                }
                 profiles = []
                 for profile in profile_rows:
                     traits = decoded(profile["properties"], [])
-                    if isinstance(traits, list):
-                        trait_values = traits
-                    elif traits:
-                        trait_values = [traits]
-                    else:
-                        trait_values = []
                     profile_item = {
                         "id": profile["id"],
                         "name": profile["name"],
@@ -1219,9 +1192,6 @@ class Database:
                         "saving_num": profile["savingNum"],
                         "profile": profile["profile"],
                         "traits": traits,
-                        "trait_references": [
-                            trait_reference(value, trait_slugs) for value in trait_values
-                        ],
                         "ranges": decoded(profile["distance"], {}),
                     }
                     if (
