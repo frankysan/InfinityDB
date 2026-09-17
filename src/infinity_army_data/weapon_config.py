@@ -42,11 +42,20 @@ class WeaponCategoryConfig:
 
 
 @dataclass(frozen=True)
+class WeaponMetadataProfileSuppression:
+    """One exact Army metadata weapon row that should not become a display profile."""
+
+    name: str
+    mode: str | None
+
+
+@dataclass(frozen=True)
 class WeaponOverrideConfig:
     """Validated corrections for incomplete or inconsistent Army weapon metadata."""
 
     profile_overrides: Mapping[int, str]
     name_overrides: Mapping[int, str]
+    metadata_profile_suppressions: Mapping[int, tuple[WeaponMetadataProfileSuppression, ...]]
 
 
 def _object(value: Any, context: str) -> dict[str, Any]:
@@ -179,11 +188,16 @@ def parse_weapon_override_config(document: Any) -> WeaponOverrideConfig:
 
     profile_overrides: dict[int, str] = {}
     name_overrides: dict[int, str] = {}
+    metadata_profile_suppressions: dict[int, tuple[WeaponMetadataProfileSuppression, ...]] = {}
     seen_ids: set[int] = set()
     for index, raw_correction in enumerate(corrections):
         context = f"weapon override config.corrections[{index}]"
         correction = _object(raw_correction, context)
-        _only_keys(correction, {"weapon_id", "name", "profile", "reason"}, context)
+        _only_keys(
+            correction,
+            {"weapon_id", "name", "profile", "suppress_metadata_profiles", "reason"},
+            context,
+        )
         weapon_id = _positive_int(correction.get("weapon_id"), f"{context}.weapon_id")
         if weapon_id in seen_ids:
             raise WeaponConfigError(f"weapon override config has duplicate weapon ID {weapon_id}")
@@ -191,12 +205,50 @@ def parse_weapon_override_config(document: Any) -> WeaponOverrideConfig:
 
         name = correction.get("name")
         profile = correction.get("profile")
-        if name is None and profile is None:
-            raise WeaponConfigError(f"{context} must define name and/or profile")
+        raw_suppressions = correction.get("suppress_metadata_profiles")
+        if name is None and profile is None and raw_suppressions is None:
+            raise WeaponConfigError(
+                f"{context} must define name, profile, and/or suppress_metadata_profiles"
+            )
         if name is not None:
             name_overrides[weapon_id] = _non_empty_string(name, f"{context}.name")
         if profile is not None:
             profile_overrides[weapon_id] = _non_empty_string(profile, f"{context}.profile")
+        if raw_suppressions is not None:
+            if not isinstance(raw_suppressions, list) or not raw_suppressions:
+                raise WeaponConfigError(
+                    f"{context}.suppress_metadata_profiles must be a non-empty array"
+                )
+            suppressions: list[WeaponMetadataProfileSuppression] = []
+            seen_suppressions: set[tuple[str, str | None]] = set()
+            for suppression_index, raw_suppression in enumerate(raw_suppressions):
+                suppression_context = (
+                    f"{context}.suppress_metadata_profiles[{suppression_index}]"
+                )
+                suppression = _object(raw_suppression, suppression_context)
+                _only_keys(suppression, {"name", "mode"}, suppression_context)
+                suppression_name = _non_empty_string(
+                    suppression.get("name"), f"{suppression_context}.name"
+                )
+                suppression_mode = suppression.get("mode")
+                if suppression_mode is not None:
+                    suppression_mode = _non_empty_string(
+                        suppression_mode, f"{suppression_context}.mode"
+                    )
+                suppression_key = (suppression_name, suppression_mode)
+                if suppression_key in seen_suppressions:
+                    raise WeaponConfigError(
+                        f"{context}.suppress_metadata_profiles has duplicate matcher "
+                        f"{suppression_key!r}"
+                    )
+                seen_suppressions.add(suppression_key)
+                suppressions.append(
+                    WeaponMetadataProfileSuppression(
+                        name=suppression_name,
+                        mode=suppression_mode,
+                    )
+                )
+            metadata_profile_suppressions[weapon_id] = tuple(suppressions)
         reason = correction.get("reason")
         if reason is not None:
             _non_empty_string(reason, f"{context}.reason")
@@ -204,6 +256,7 @@ def parse_weapon_override_config(document: Any) -> WeaponOverrideConfig:
     return WeaponOverrideConfig(
         profile_overrides=MappingProxyType(profile_overrides),
         name_overrides=MappingProxyType(name_overrides),
+        metadata_profile_suppressions=MappingProxyType(metadata_profile_suppressions),
     )
 
 

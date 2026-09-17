@@ -44,6 +44,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Derive weapon range-table columns from imported profile distance endpoints
+  instead of maintaining a fixed global range-band list. Inch labels use the
+  existing 2.5 cm conversion and remain aligned across all profiles for a weapon.
+- Move Armed Turret non-display metadata-profile suppression out of the runtime
+  repository and into validated weapon source-correction configuration applied
+  during normalization.
 - Move maintained weapon-family taxonomy, regex classification policy, manual
   category decisions, and Army-source weapon metadata corrections out of Python
   into validated `config/catalogs/` configuration. Classification mechanics

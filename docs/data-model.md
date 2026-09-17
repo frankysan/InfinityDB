@@ -39,9 +39,11 @@ raw Army JSON
 - Weapon-family classification policy is maintained in validated
   `config/catalogs/weapon-categories.json`, while known Army weapon metadata
   corrections are maintained separately in `config/catalogs/weapon-overrides.json`.
-  Normalization applies those authored build inputs and persists their effects
-  into normalized weapon rows; the frontend database does not need the config
-  files at runtime.
+  Those corrections include source name/profile fixes and exact metadata weapon
+  rows that should not become display profiles. Normalization applies the authored
+  build inputs before normalized catalog/metadata rows are materialized, while the
+  original Army metadata envelope remains unchanged for provenance. The frontend
+  database does not need the config files at runtime.
 - Current InfinityDB builds derive a unit's application `main_army_id` from
   the imported Army metadata parent for its canonical faction. Maintained
   canonical-faction overrides take precedence when explicitly configured. The

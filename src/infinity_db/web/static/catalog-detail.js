@@ -8,15 +8,6 @@ const name = document.getElementById("item-name");
 const meta = document.getElementById("item-meta");
 const status = document.getElementById("item-status");
 const content = document.getElementById("item-content");
-const rangeBands = [
-  { label: '8"', maximum: 20 },
-  { label: '16"', maximum: 40 },
-  { label: '24"', maximum: 60 },
-  { label: '32"', maximum: 80 },
-  { label: '40"', maximum: 100 },
-  { label: '48"', maximum: 120 },
-  { label: '96"', maximum: 240 },
-];
 const rangeModifierClasses = {
   "0": "range-modifier-0",
   "+3": "range-modifier-plus-3",
@@ -90,8 +81,21 @@ function rangeModifier(ranges, maximum) {
   return matchingRange?.mod || "";
 }
 
-function rangeBandLabel(band) {
-  return distanceUnit() === "in" ? band.label : `${band.maximum} cm`;
+function weaponRangeBands(variants) {
+  const maximums = new Set();
+  for (const variant of variants || []) {
+    for (const profile of variant.profiles || []) {
+      for (const range of Object.values(profile.ranges || {})) {
+        const maximum = Number(range?.max);
+        if (Number.isFinite(maximum) && maximum > 0) maximums.add(maximum);
+      }
+    }
+  }
+  return [...maximums].sort((left, right) => left - right);
+}
+
+function rangeBandLabel(maximum) {
+  return distanceUnit() === "in" ? `${maximum / 2.5}"` : `${maximum} cm`;
 }
 
 function specialWeaponProfile(profile) {
@@ -139,6 +143,7 @@ function specialWeaponProfile(profile) {
 function weaponVariants(variants) {
   const section = document.createElement("section");
   section.className = "weapon-variants";
+  const rangeBands = weaponRangeBands(variants);
 
   for (const variant of variants) {
     const variantSection = document.createElement("section");
@@ -169,23 +174,23 @@ function weaponVariants(variants) {
     statTable.append(statBody);
     card.append(statTable);
 
-    const modifiers = rangeBands.map((band) => rangeModifier(profile.ranges, band.maximum));
+    const modifiers = rangeBands.map((maximum) => rangeModifier(profile.ranges, maximum));
     if (modifiers.some(Boolean)) {
       const rangeTable = document.createElement("table");
       rangeTable.className = "data-table--compact weapon-ranges";
       const rangeHeader = document.createElement("thead");
       const headerRow = document.createElement("tr");
-      for (const band of rangeBands) {
+      for (const maximum of rangeBands) {
         const cell = document.createElement("th");
-        cell.textContent = rangeBandLabel(band);
+        cell.textContent = rangeBandLabel(maximum);
         headerRow.append(cell);
       }
       rangeHeader.append(headerRow);
       const rangeBody = document.createElement("tbody");
       const rangeRow = document.createElement("tr");
-      for (const [index, band] of rangeBands.entries()) {
+      for (const [index, maximum] of rangeBands.entries()) {
         const cell = document.createElement("td");
-        cell.dataset.label = rangeBandLabel(band);
+        cell.dataset.label = rangeBandLabel(maximum);
         const modifier = modifiers[index];
         cell.textContent = modifier;
         if (rangeModifierClasses[modifier]) cell.classList.add(rangeModifierClasses[modifier]);

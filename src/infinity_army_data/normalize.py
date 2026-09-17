@@ -41,7 +41,11 @@ from typing import Any
 
 from .metadata import METADATA_TABLES, MetadataError, normalize_metadata, validate_metadata_envelope
 from .weapon_categories import weapon_category
-from .weapon_profiles import weapon_name_override, weapon_profile_override
+from .weapon_profiles import (
+    weapon_metadata_profile_suppressed,
+    weapon_name_override,
+    weapon_profile_override,
+)
 
 FORMAT_NAME = "Infinity Army normalized JSON"
 FORMAT_VERSION = 1
@@ -614,6 +618,13 @@ def normalize_master(
         try:
             validate_metadata_envelope(metadata)
             metadata_rows = normalize_metadata(metadata)
+            metadata_rows["metadata_weapons"] = [
+                row
+                for row in metadata_rows["metadata_weapons"]
+                if not weapon_metadata_profile_suppressed(
+                    row["id"], row.get("name"), row.get("mode")
+                )
+            ]
             for row in metadata_rows["metadata_weapons"]:
                 name = weapon_name_override(row["id"])
                 if name is not None:

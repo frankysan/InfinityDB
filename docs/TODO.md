@@ -127,13 +127,34 @@ history retains implementation detail.
     and slug while preserving the raw source trait label.
 - [ ] Review remaining hard-coded domain tables with the same decision rule:
   prefer derivation from authoritative imported data first, validated
-  configuration second, and code only when the value is implementation behavior.
-  - In particular, review fixed weapon-range display bands before creating any
-    new config; derive them from weapon metadata if that can produce the
-    intended UI.
+  configuration second, cited curated rules third when the value is external
+  rules knowledge, and code only when the value is implementation behavior.
+  - [x] Derive weapon-range display bands from the sorted union of finite,
+    positive `metadata_weapons.distance[].max` values used by the displayed
+    weapon profiles. Inch labels are derived from the same centimetre endpoints
+    through the existing 2.5 cm conversion; no maintained range-band config is
+    needed.
+  - [x] Move Armed Turret metadata-profile suppression out of the repository and
+    into `config/catalogs/weapon-overrides.json`. Normalization applies the exact
+    source-row matchers before metadata rows are materialized, while the original
+    Army metadata envelope remains preserved for provenance.
+  - [ ] Replace the `+5 CC` distance-detection exception and the special sign
+    handling for `Super-Jump` / `Forward Deployment` with explicit curated skill
+    parameter semantics. The same skill-name knowledge is currently duplicated
+    between repository and browser code.
+  - [ ] Move reinforcement-prefix normalization (`REINF` / `REFUERZOS`) into the
+    maintained identity policy and remove the browser-side duplicate if backend
+    display/profile identity can make it unnecessary.
+  - [ ] Remove the remaining direct `901` Non-Aligned grouping special case if
+    grouping-only identities can be derived completely from metadata hierarchy
+    plus playable source army lists.
+  - [ ] Revisit unit-symbol semantic name tables during the dedicated symbol
+    pipeline refactor; do not move those mappings into unrelated configuration
+    in this branch.
   - Keep API-source table wiring such as `METADATA_TABLES`, schema definitions,
     generic merge/normalization algorithms, Unicode normalization mechanics,
-    database behavior, and UI preference mechanics in code.
+    database behavior, distance-unit conversion, range-modifier CSS classes, and
+    UI preference mechanics in code.
 
 ## Army snapshot and symbol pipeline
 

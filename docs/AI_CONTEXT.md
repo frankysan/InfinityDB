@@ -363,8 +363,15 @@ changes.
 - 2026-09-17: Weapon catalog policy was split from implementation code.
   `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
   and explicit category decisions; `config/catalogs/weapon-overrides.json` owns
-  Army-source name/profile corrections. Normalization consumes those validated
-  build inputs and materializes their effects.
+  Army-source name/profile corrections and exact non-display metadata-profile
+  matchers. Normalization consumes those validated build inputs and materializes
+  their effects; the runtime repository does not load catalog configuration.
+- 2026-09-17: The remaining hard-coded-domain audit classified weapon range bands
+  as derivable presentation data, not configuration. Weapon detail rendering now
+  derives ordered range endpoints from imported profile `distance[].max` values.
+  Remaining audit targets are distance-skill parameter semantics, reinforcement
+  prefix normalization, the direct 901 grouping special case, and symbol-semantic
+  name tables reserved for the symbol-pipeline refactor.
 - 2026-09-17: Special weapon game-rule facts moved out of
   `infinity_army_data.weapon_profiles`. The Armed Turret special profile is a
   cited curated `weapon` record linked to Army weapon ID 226; repository reads
