@@ -10,6 +10,7 @@ import pytest
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
 from infinity_army_data.weapon_profiles import weapon_profile_override
+from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database, raw_database_path
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
 from infinity_db.database.repository import (
@@ -35,6 +36,8 @@ from infinity_db.database.schema import (
     quote,
 )
 from infinity_db.identities import REINFORCEMENT_UNIT_MATCHES_KEY, load_identity_config
+from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.trait_catalog import TraitCatalog
 
 
 @pytest.fixture
@@ -367,13 +370,6 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
             "saving_num": "1",
             "profile": "ARM=0, BTS=0, STR=1, S=1",
             "traits": ["Suppressive Fire"],
-            "trait_references": [
-                {
-                    "label": "Suppressive Fire",
-                    "name": "Suppressive Fire (SF)",
-                    "slug": "suppressive-fire",
-                }
-            ],
             "ranges": {"short": {"max": 20, "mod": "+3"}, "med": {"max": 40, "mod": "0"}},
         }
     ]
@@ -387,21 +383,19 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
     assert Database(path).list_traits() == [
         {
             "id": "suppressive-fire",
-            "name": "Suppressive Fire (SF)",
+            "name": "Suppressive Fire",
             "use_count": 1,
-            "description": (
-                "Allows the user to enter Suppressive Fire State and use its SF Mode profile."
-            ),
+            "description": None,
         }
     ]
     trait = Database(path).get_trait("suppressive-fire")
     assert trait is not None
-    assert trait["name"] == "Suppressive Fire (SF)"
+    assert trait["name"] == "Suppressive Fire"
     assert trait["variants"][0]["catalog"] == "weapons"
     assert trait["variants"][0]["item_name"] == "weapons"
 
 
-def test_weapon_profile_trait_references_use_backend_canonical_identity(
+def test_weapon_profile_preserves_only_raw_traits_before_application_composition(
     tmp_path: Path, normalized: dict
 ) -> None:
     data = copy.deepcopy(normalized)
@@ -430,21 +424,107 @@ def test_weapon_profile_trait_references_use_backend_canonical_identity(
         "Disposable (2)",
         "[PH=10]",
     ]
-    assert profile["trait_references"] == [
+    assert "trait_references" not in profile
+
+
+def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
         {
-            "label": "Continous Damage",
-            "name": "Continuous Damage",
-            "slug": "continuous-damage",
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": [
+                "Suppressive Fire",
+                "Continous Damage",
+                "Disposable (2)",
+                "[PH=10]",
+            ],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+    rules_database.validate()
+    catalog = TraitCatalog(Database(database_path), rules_database)
+
+    assert catalog.reference("Suppressive Fire") == {
+        "label": "Suppressive Fire",
+        "name": "Suppressive Fire (SF)",
+        "slug": "suppressive-fire",
+    }
+    assert catalog.reference("Continous Damage") == {
+        "label": "Continous Damage",
+        "name": "Continuous Damage",
+        "slug": "continuous-damage",
+    }
+    assert catalog.reference("Disposable (2)") == {
+        "label": "Disposable (2)",
+        "name": "Disposable (X)",
+        "slug": "disposable-x",
+    }
+    assert catalog.reference("[PH=10]") == {
+        "label": "[PH=10]",
+        "name": None,
+        "slug": None,
+    }
+
+    traits = {item["id"]: item for item in catalog.list_traits()}
+    assert traits["suppressive-fire"] == {
+        "id": "suppressive-fire",
+        "name": "Suppressive Fire (SF)",
+        "use_count": 1,
+        "description": (
+            "Allows the user to enter Suppressive Fire State and use its SF Mode profile."
+        ),
+    }
+    detail = catalog.get_trait("continuous-damage")
+    assert detail is not None
+    assert detail["name"] == "Continuous Damage"
+    assert detail["rules"][0]["id"] == "trait:continuous-damage"
+    assert detail["rules"][0]["citations"][0]["heading"] == "Continuous Damage"
+
+
+def test_trait_catalog_enriches_catalog_profiles_from_curated_rules(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": ["Bioweapon (DA+Shock)", "Target (VITA)"],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    item = Database(database_path).get_catalog_item("weapons", 1)
+    assert item is not None
+    enriched = catalog.enrich_catalog_item(item)
+    assert enriched["profiles"][0]["trait_references"] == [
+        {
+            "label": "Bioweapon (DA+Shock)",
+            "name": "BioWeapon",
+            "slug": "bioweapon",
         },
         {
-            "label": "Disposable (2)",
-            "name": "Disposable (X)",
-            "slug": "disposable-x",
-        },
-        {
-            "label": "[PH=10]",
-            "name": None,
-            "slug": None,
+            "label": "Target (VITA)",
+            "name": "Target (Attribute)",
+            "slug": "target-attribute",
         },
     ]
 

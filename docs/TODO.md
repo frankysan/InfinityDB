@@ -110,9 +110,10 @@ history retains implementation detail.
   - Preserve N5 edition/version and printed-page citations.
   - Let application code query validated curated records rather than embed the
     rules facts in Python.
-- [ ] Move trait rules-reference knowledge into curated data.
-  - Migrate concise trait descriptions, canonical identities, aliases,
-    misspellings, and citations from `traits.py`.
+- [x] Move trait rules-reference knowledge into curated data.
+  - Concise summaries, canonical identities, exact aliases/misspellings,
+    parameterized source-label prefixes, and citations now live in curated
+    `trait` records and are consumed through `rules.db`.
   - [x] Remove the duplicate trait-canonicalization table from
     `catalog-detail.js`; API responses expose canonical trait identity, name,
     and slug while preserving the raw source trait label.

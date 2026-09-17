@@ -245,6 +245,15 @@
             "localPath": "data/wiki/20260915/",
             "url": "https://infinitythewiki.com/",
             "authority": "secondary"
+        },
+        {
+            "id": "wiki-traits-oldid-4110",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Traits revision 4110",
+            "version": "N5.3 / oldid 4110",
+            "snapshotDate": "2026-09-17",
+            "url": "https://infinitythewiki.com/index.php?title=Traits&oldid=4110",
+            "authority": "secondary"
         }
     ],
     "records": [
@@ -386,6 +395,861 @@
                 "status": "draft",
                 "reviewedOn": "2026-09-15"
             }
+        },
+        {
+            "id": "trait:anti-materiel",
+            "kind": "trait",
+            "name": "Anti-materiel",
+            "summary": "Its Special Ammunition can affect structures and scenery.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Anti-materiel"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:arm-0",
+            "kind": "trait",
+            "name": "ARM = 0",
+            "summary": "Reduces the target's ARM Attribute to 0 for Saving Rolls.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "ARM = 0"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:aro",
+            "kind": "trait",
+            "name": "ARO",
+            "summary": "Only usable in ARO.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "ARO"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:bioweapon",
+            "kind": "trait",
+            "name": "BioWeapon",
+            "summary": "Applies DA+Shock Special Ammunition against targets with VITA.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "BioWeapon"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "aliases": [
+                "Bioweapon"
+            ],
+            "facts": {
+                "sourceIdentity": {
+                    "prefixes": [
+                        "BioWeapon (",
+                        "Bioweapon ("
+                    ]
+                }
+            }
+        },
+        {
+            "id": "trait:boost",
+            "kind": "trait",
+            "name": "Boost",
+            "summary": "Applies the Boost rule when an enemy declares or executes an Order or ARO in its Zone of Control.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Boost"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:bs-weapon-ph",
+            "kind": "trait",
+            "name": "BS Weapon (PH)",
+            "summary": "Makes BS Attacks using PH instead of BS; BS rules and MODs affect PH instead.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "BS Weapon (PH)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:bs-weapon-wip",
+            "kind": "trait",
+            "name": "BS Weapon (WIP)",
+            "summary": "Makes BS Attacks using WIP instead of BS; BS rules and MODs affect WIP instead.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "BS Weapon (WIP)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:bts-0",
+            "kind": "trait",
+            "name": "BTS = 0",
+            "summary": "Reduces the target's BTS Attribute to 0 for Saving Rolls.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "BTS = 0"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:burst-b",
+            "kind": "trait",
+            "name": "Burst (B)",
+            "summary": "Indicates how many dice are rolled when using the weapon or piece of Equipment.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Burst (B)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:burst-single-target",
+            "kind": "trait",
+            "name": "Burst: Single Target",
+            "summary": "All shots in the Burst must choose one target.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Burst: Single Target"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:cc",
+            "kind": "trait",
+            "name": "CC",
+            "summary": "Can be used to make CC Attacks.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "CC"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:concealed",
+            "kind": "trait",
+            "name": "Concealed",
+            "summary": "Uses the effects of Camouflaged State; its concealing marker has Silhouette 2.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Concealed"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:continuous-damage",
+            "kind": "trait",
+            "name": "Continuous Damage",
+            "summary": "After a failed Saving Roll, the target keeps making Saving Rolls until one succeeds or it enters Dead State.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Continuous Damage"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "aliases": [
+                "Continous Damage"
+            ]
+        },
+        {
+            "id": "trait:deployable",
+            "kind": "trait",
+            "name": "Deployable",
+            "summary": "May be deployed as an independent battlefield element with its own profile and Attributes.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Deployable"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:direct-template",
+            "kind": "trait",
+            "name": "Direct Template",
+            "summary": "Uses Direct Template rules, firing the indicated Template.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Direct Template"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "facts": {
+                "sourceIdentity": {
+                    "prefixes": [
+                        "Direct Template ("
+                    ]
+                }
+            }
+        },
+        {
+            "id": "trait:disposable-x",
+            "kind": "trait",
+            "name": "Disposable (X)",
+            "summary": "Has limited uses. Each use is expended when declared, and all modes share the available uses.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Disposable (X)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "facts": {
+                "sourceIdentity": {
+                    "prefixes": [
+                        "Disposable ("
+                    ]
+                }
+            }
+        },
+        {
+            "id": "trait:double-shot",
+            "kind": "trait",
+            "name": "Double Shot",
+            "summary": "In the Active Turn, may apply +1 Burst; with Disposable (2), this spends both uses.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Double Shot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:impact-template",
+            "kind": "trait",
+            "name": "Impact Template",
+            "summary": "Places the indicated Template at the point of impact.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Impact Template"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "facts": {
+                "sourceIdentity": {
+                    "prefixes": [
+                        "Impact Template ("
+                    ]
+                }
+            }
+        },
+        {
+            "id": "trait:improvised",
+            "kind": "trait",
+            "name": "Improvised",
+            "summary": "Imposes a -6 MOD to the user's relevant Attribute.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Improvised"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:indiscriminate",
+            "kind": "trait",
+            "name": "Indiscriminate",
+            "summary": "May be used or deployed despite Camouflage and Hiding Markers in its Area of Effect.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Indiscriminate"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:intuitive-attack",
+            "kind": "trait",
+            "name": "Intuitive Attack",
+            "summary": "Can be used to make Intuitive Attacks.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Intuitive Attack"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:non-lethal",
+            "kind": "trait",
+            "name": "Non-Lethal",
+            "summary": "Never inflicts Wounds or requires Saving Rolls, regardless of ammunition added by other rules.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Non-Lethal"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:non-reloadable",
+            "kind": "trait",
+            "name": "Non-Reloadable",
+            "summary": "Its expended Disposable uses cannot be regained.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Non-Reloadable"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:perimeter",
+            "kind": "trait",
+            "name": "Perimeter",
+            "summary": "When placed, applies Deployable and Perimeter, placing it completely inside the user's Zone of Control.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Perimeter"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:prior-deployment",
+            "kind": "trait",
+            "name": "Prior Deployment",
+            "summary": "Must be placed during the Deployment Phase.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Prior Deployment"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:reflective",
+            "kind": "trait",
+            "name": "Reflective",
+            "summary": "Also affects Troopers with Marksmanship, Multispectral Visors, or specified equivalent Equipment.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Reflective"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:silent-x",
+            "kind": "trait",
+            "name": "Silent (X)",
+            "summary": "When used inside the target's Zone of Control but outside LoF, applies its bracketed MOD to Face to Face Dodge Rolls.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Silent (X)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "facts": {
+                "sourceIdentity": {
+                    "prefixes": [
+                        "Silent ("
+                    ]
+                }
+            }
+        },
+        {
+            "id": "trait:speculative-attack",
+            "kind": "trait",
+            "name": "Speculative Attack",
+            "summary": "Can be used to make Speculative Attacks.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Speculative Attack"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:state",
+            "kind": "trait",
+            "name": "State",
+            "summary": "Causes the target to enter the Game State indicated in its profile.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "facts": {
+                "sourceIdentity": {
+                    "prefixes": [
+                        "State:"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "trait:suppressive-fire",
+            "kind": "trait",
+            "name": "Suppressive Fire (SF)",
+            "summary": "Allows the user to enter Suppressive Fire State and use its SF Mode profile.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Suppressive Fire (SF)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "aliases": [
+                "Suppressive Fire"
+            ]
+        },
+        {
+            "id": "trait:target-attribute",
+            "kind": "trait",
+            "name": "Target (Attribute)",
+            "summary": "Only affects targets with the indicated VITA or STR Attribute.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Target (Attribute)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "facts": {
+                "sourceIdentity": {
+                    "prefixes": [
+                        "Target ("
+                    ]
+                }
+            }
+        },
+        {
+            "id": "trait:targetless",
+            "kind": "trait",
+            "name": "Targetless",
+            "summary": "Can fire without designating an enemy target; in the Reactive Turn it requires LoF to the Active Trooper.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Targetless"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            }
+        },
+        {
+            "id": "trait:zone-of-control-zc",
+            "kind": "trait",
+            "name": "Zone of Control (ZoC)",
+            "summary": "Its range is the user's Zone of Control (8 inches).",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "path": "index.php?title=Traits&oldid=4110",
+                    "snapshotDate": "2026-09-17",
+                    "heading": "Zone of Control (ZoC)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-17"
+            },
+            "aliases": [
+                "Zone of Control (ZC)",
+                "Zone of Control"
+            ]
         }
     ]
 }

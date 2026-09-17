@@ -253,7 +253,7 @@ src/
     cli.py                  # Build, export, rules, and local-server commands
     database/               # Schema, importer, and read-only repository queries
     skill_categories.py     # Skill category definitions for the rules reference
-    traits.py               # Trait definitions and catalog metadata
+    trait_catalog.py        # Compose raw Army trait usage with curated rule identities
     web/
       app.py                # WSGI application and API routes
       server.py             # Local development server

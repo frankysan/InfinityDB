@@ -66,8 +66,9 @@ example `rules/n5-core-v5.3.json`. Each file contains:
   `summary`, optional facts/links, and one or more `citations`
 
 Record citations distinguish PDF and wiki sources. PDF citations require a
-positive **printed** `page` number. Wiki record citations require a
-snapshot-local `path` and `snapshotDate`.
+positive **printed** `page` number. Wiki record citations require a `path` and
+`snapshotDate`; the corresponding source may identify a preserved local mirror
+or an exact pinned revision URL.
 
 `vocabularySources` is currently a legacy exception: each entry is required to
 contain `sourceId`, `path`, `snapshotDate`, `heading`, and a positive `page`,
@@ -146,6 +147,13 @@ Supported record kinds include `rule`, `skill`, `equipment`, `weapon`,
 `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
 `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
+
+
+Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
+parameter value is part of the Army text, for example `Disposable (2)` mapping
+to the canonical `Disposable (X)` record. Exact alternate spellings and
+misspellings belong in the normal `aliases` array. This is source-identity data;
+the matching algorithm remains application code.
 
 Army links may target existing `skills`, `equipment`, `weapons`, `ammunition`,
 `extras`, `characteristics`, `troop_types`, `units`, or profile occurrences.

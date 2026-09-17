@@ -1342,6 +1342,52 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body)["error"] == "Skill not found"
 
 
+def test_trait_apis_compose_army_usage_with_curated_rules(
+    app: Callable, tmp_path: Path
+) -> None:
+    with sqlite3.connect(app.database.path) as connection:
+        connection.execute(
+            "INSERT INTO metadata_weapons (position, id, type, name, properties) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (1, 31, "BS", "Combi Rifle", json.dumps(["Continous Damage", "Disposable (2)"])),
+        )
+        connection.commit()
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/traits")
+    assert status == 200
+    traits = {item["id"]: item for item in json.loads(body)["items"]}
+    assert traits["continuous-damage"]["name"] == "Continuous Damage"
+    assert traits["disposable-x"]["name"] == "Disposable (X)"
+
+    status, _, body = request(rules_app, "/api/weapons/31")
+    assert status == 200
+    profile = json.loads(body)["profiles"][0]
+    assert profile["traits"] == ["Continous Damage", "Disposable (2)"]
+    assert profile["trait_references"] == [
+        {
+            "label": "Continous Damage",
+            "name": "Continuous Damage",
+            "slug": "continuous-damage",
+        },
+        {
+            "label": "Disposable (2)",
+            "name": "Disposable (X)",
+            "slug": "disposable-x",
+        },
+    ]
+
+    status, _, body = request(rules_app, "/api/traits/continuous-damage")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["description"].startswith("After a failed Saving Roll")
+    assert payload["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4110"
+
+
 def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
