@@ -33,12 +33,14 @@ raw Army JSON
   maintained in validated `config/identity/source-identities.json`
   configuration. Generic duplicate/name rules remain implementation behavior
   rather than authored alias data.
-- The ordinary whole-army `xx01` derivation remains current normalization
-  behavior. Source canonical-faction ID `1` is explicitly excluded from that
-  application main-army derivation: it remains mercenary source/origin provenance
-  with `main_army_id = null`, while `901` remains the distinct Non-Aligned Armies
-  grouping identity. The former legacy `1` -> `901` identity-config override has
-  been removed.
+- Current InfinityDB builds derive a unit's application `main_army_id` from
+  the imported Army metadata parent for its canonical faction. Maintained
+  canonical-faction overrides take precedence when explicitly configured. The
+  old whole-army `xx01` calculation remains only as a standalone/legacy
+  normalization fallback when no usable metadata row exists for that canonical
+  faction. Source canonical-faction ID `1` remains mercenary source/origin
+  provenance with `main_army_id = null`, while `901` remains the distinct
+  Non-Aligned Armies grouping identity.
 - InfinityDB normalization pins the exact validated identity configuration and
   its canonical SHA-256 into `normalized.json`. Database export revalidates that
   provenance and propagates the same policy into both database siblings.
@@ -187,7 +189,7 @@ for current snapshots.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 9 and the application
-compatibility revision is 12. Imports build temporary sibling files, check
+compatibility revision is 13. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

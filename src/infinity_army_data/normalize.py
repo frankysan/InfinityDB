@@ -164,16 +164,25 @@ def main_army_id(
     canonical_faction_id: Any,
     faction_ids: set[int],
     canonical_faction_overrides: Mapping[int, int] | None = None,
+    faction_parents: Mapping[int, int | None] | None = None,
 ) -> int | None:
-    """Resolve canonical ownership to its whole-army group ID (``xx01``)."""
+    """Resolve canonical ownership to an application main-army/group identity.
+
+    Explicit maintained overrides take precedence.  When Army metadata contains
+    the canonical faction, its parent relationship is authoritative.  The old
+    ``xx01`` derivation remains only as a fallback for inputs that do not carry
+    a usable metadata row for that canonical faction.
+    """
     if not isinstance(canonical_faction_id, int):
         return None
     overrides = canonical_faction_overrides or {}
-    candidate = overrides.get(
-        canonical_faction_id,
-        canonical_faction_id - canonical_faction_id % 100 + 1,
-    )
-    return candidate if candidate in faction_ids and candidate % 100 == 1 else None
+    if canonical_faction_id in overrides:
+        candidate = overrides[canonical_faction_id]
+    elif faction_parents is not None and canonical_faction_id in faction_parents:
+        candidate = faction_parents[canonical_faction_id]
+    else:
+        candidate = canonical_faction_id - canonical_faction_id % 100 + 1
+    return candidate if isinstance(candidate, int) and candidate in faction_ids else None
 
 
 def build_catalogs(master: dict[str, Any], b: Builder) -> dict[str, set[Any]]:
@@ -600,6 +609,7 @@ def normalize_master(
     metadata = master.get("armyMetadata")
     metadata_rows: dict[str, list[dict[str, Any]]] = {}
     metadata_faction_names: dict[int, str] = {}
+    metadata_faction_parents: dict[int, int | None] | None = None
     if metadata is not None:
         try:
             validate_metadata_envelope(metadata)
@@ -614,8 +624,10 @@ def normalize_master(
                         row["profile"] = profile
         except MetadataError as exc:
             raise NormalizationError(f"Invalid Army metadata: {exc}") from exc
+        metadata_faction_parents = {}
         for row in metadata_rows["metadata_factions"]:
             metadata_faction_names[row["id"]] = row["name"]
+            metadata_faction_parents[row["id"]] = row.get("parent")
     for table_name, _ in METADATA_TABLES.values():
         metadata_rows.setdefault(table_name, [])
 
@@ -695,6 +707,7 @@ def normalize_master(
                 shared.get("canonical"),
                 faction_ids,
                 canonical_faction_overrides,
+                metadata_faction_parents,
             ),
             isc=shared.get("isc"),
             isc_abbr=shared.get("iscAbbr"),
@@ -1294,14 +1307,13 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
         "all canonical faction references resolve",
     )
     check(
-        "unit main army -> whole army group",
+        "unit main army -> faction",
         all(
             row.get("main_army_id") is None
             or row["main_army_id"] in faction_ids_scalar
-            and row["main_army_id"] % 100 == 1
             for row in t.get("units", [])
         ),
-        "all main-army references resolve to whole-army group IDs",
+        "all main-army references resolve to faction identities",
     )
     check(
         "unit_factions -> unit/faction",

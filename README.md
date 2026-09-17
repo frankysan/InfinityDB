@@ -145,8 +145,10 @@ When no input source is supplied, `infinity-db build` imports the newest ZIP in
 `data/raw/`; provide a source path to choose a different snapshot. Every
 database build requires `metadata.json`: keep it beside the source directory or
 ZIP, include one copy in the ZIP, or supply `--metadata PATH`. It supplies
-official faction names and the ammunition, weapon, skill, equipment, and rules
-catalogs. Army-list JSON remains authoritative for unit availability.
+official faction names, faction-parent relationships, and the ammunition,
+weapon, skill, equipment, and rules catalogs. Current builds use those parent
+relationships to derive unit `main_army_id`; Army-list JSON remains
+authoritative for unit availability.
 
 Reference PDFs and local wiki snapshots are developer and agent research inputs
 only. They are never read by the application or the Army build. Curate concise,

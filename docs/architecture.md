@@ -105,10 +105,12 @@ source-derived facts.
 `config/identity/source-identities.json` is the first repository-wide example
 of the code/config split. It owns maintained logical-identity exceptions for
 source unit, army-list, skill, equipment, and weapon IDs plus identity-name
-aliases. Generic matching and duplicate-detection algorithms remain code. The
-ordinary whole-army `xx01` derivation also remains code; exceptional
-interpretation policy lives in configuration and is supplied explicitly to the
-generic normalizer.
+aliases. Generic matching and duplicate-detection algorithms remain code.
+Current InfinityDB builds derive unit `main_army_id` from the imported Army
+metadata faction-parent relationship, with maintained canonical-faction
+overrides taking precedence. The former `xx01` arithmetic remains only as a
+standalone/legacy normalization fallback when no usable metadata row exists for
+the canonical faction.
 
 Source canonical-faction ID `1` and Non-Aligned Armies grouping ID `901` are
 now kept distinct in normalization. ID `1` remains mercenary source/origin
@@ -395,7 +397,7 @@ the planned InfinityDB-generated snapshot-provenance records under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 9 and database compatibility revision of 12; it
+schema has a schema version of 9 and database compatibility revision of 13; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

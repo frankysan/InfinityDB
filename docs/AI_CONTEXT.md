@@ -93,6 +93,11 @@ and serves a read-only browser and same-origin HTTP API.
   main armies are self-parented, sectorials point to their main army, and NA2
   forces point to grouping identity 901. Ordinary list documents explicitly
   reference their reinforcement list through `reinforcements`.
+- Current InfinityDB normalization also uses that metadata parent relationship
+  to derive unit `main_army_id`. Explicit maintained canonical-faction overrides
+  take precedence; the old `xx01` calculation is retained only for standalone or
+  legacy normalization inputs without a usable metadata row for that canonical
+  faction.
 - The backend/API exposes explicit army role/playability semantics derived from
   metadata parent relationships and ordinary-list `reinforcements` links.
   `/api/armies` distinguishes main armies, sectorials, Non-Aligned forces,
@@ -337,6 +342,12 @@ changes.
 - 2026-09-16: Documentation distinguishes current implementation, accepted
   design direction, and planned/unimplemented backlog so future architecture is
   not presented as existing behavior.
+- 2026-09-17: Unit `main_army_id` derivation moved from the ordinary `xx01`
+  Army-ID convention to imported metadata faction parents for current
+  InfinityDB builds. Explicit maintained overrides still win; `xx01` remains
+  only as a legacy/standalone fallback when metadata cannot resolve the
+  canonical faction. Database compatibility revision 13 requires rebuilding
+  existing generated Army databases.
 - 2026-09-17: Army role/playability moved to an explicit source-derived
   backend/API contract. Metadata parents classify main, sectorial, and
   Non-Aligned forces; explicit ordinary-list `reinforcements` links classify
