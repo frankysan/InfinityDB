@@ -94,10 +94,10 @@ history retains implementation detail.
   - Treat source canonical-faction ID `1` and Non-Aligned Armies ID `901` as
     distinct concepts. ID `1` is mercenary source/origin provenance; 901 is a
     grouping identity for distinct Non-Aligned army lists.
-  - Keep the currently implemented `1` -> `901` override in place only until a
-    coherent replacement reaches normalization, database export, repository,
-    API, and UI together; do not remove it in isolation and silently change
-    current output midway through the refactor.
+  - [x] Remove the legacy `1` -> `901` canonical-faction override after
+    mercenary logical pairing and availability provenance became explicit.
+    Canonical source ID `1` now remains source provenance with no application
+    `main_army_id`; compatibility revision 12 requires regenerated databases.
   - Validate the observed optional-mercenary source contract during
     normalization: `canonical == 1`, empty declared `factions`, and a
     `merc-...` source slug. Report source-schema drift instead of guessing when
@@ -121,10 +121,6 @@ history retains implementation detail.
     with explicit `army_units.availability_kind` provenance for current
     normalized snapshots. Retain the old inference only as a compatibility
     fallback for rows where explicit provenance is absent.
-  - Remove the `1` -> `901` entry from `source-identities.json` only when the
-    replacement model is authoritative, and update pinned identity provenance,
-    schema/compatibility revisions, generated snapshots, and regression tests
-    together.
   - Add source-shaped regression fixtures for normal plus optional mercenary
     records (for example the observed Miranda Ashcroft, Yuan Yuan, and Valerya
     patterns), including a case where normal and mercenary occurrences overlap

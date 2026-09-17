@@ -34,13 +34,11 @@ raw Army JSON
   configuration. Generic duplicate/name rules remain implementation behavior
   rather than authored alias data.
 - The ordinary whole-army `xx01` derivation remains current normalization
-  behavior. The current identity configuration also contains a legacy
-  canonical-faction override from source ID `1` to army/group ID `901`.
-  Investigation of the source data now shows that this override conflates two
-  different source concepts: ID `1` behaves as a mercenary source/origin
-  identity, while `901` is the Non-Aligned Armies grouping identity. The mapping
-  therefore remains current implementation behavior until migrated, but is not
-  an accepted domain invariant.
+  behavior. Source canonical-faction ID `1` is explicitly excluded from that
+  application main-army derivation: it remains mercenary source/origin provenance
+  with `main_army_id = null`, while `901` remains the distinct Non-Aligned Armies
+  grouping identity. The former legacy `1` -> `901` identity-config override has
+  been removed.
 - InfinityDB normalization pins the exact validated identity configuration and
   its canonical SHA-256 into `normalized.json`. Database export revalidates that
   provenance and propagates the same policy into both database siblings.
@@ -79,9 +77,9 @@ stronger than numeric-ID conventions.
 Source canonical-faction ID `1` is materially different from 901. In the
 investigated source snapshot, ID `1` has no army list, is used as the canonical
 identity for mercenary-related unit records, and is not used as a normal unit
-membership faction. The current `1` -> `901` identity-config mapping therefore
-should be understood as legacy InfinityDB interpretation policy, not evidence
-that ID `1` means Non-Aligned Armies.
+membership faction. InfinityDB no longer maps source ID `1` to `901`: normalization preserves
+canonical source identity `1` while explicitly leaving its application
+`main_army_id` unset.
 
 Normal unit availability and optional mercenary availability are also distinct
 source concepts. Ordinary unit records declare normal faction availability in
@@ -130,11 +128,10 @@ numeric ID patterns.
 
 ### Design direction
 
-Treat source ID `1` and grouping identity `901` as distinct concepts. Preserve
-ID `1` as source-side mercenary identity/provenance and derive Non-Aligned Army
-grouping from the actual 901 metadata hierarchy. Remove the legacy `1` -> `901`
-override only as part of a coherent normalization/database/API migration so
-existing behavior is not silently broken midway through the refactor.
+Source ID `1` and grouping identity `901` are now kept distinct in current
+normalization. ID `1` remains source-side mercenary identity/provenance with no
+application `main_army_id`, while Non-Aligned Army grouping is derived from the
+actual 901 metadata hierarchy.
 
 Continue moving logical-unit identity earlier in the pipeline. The current
 normalizer now persists audited mercenary-to-standard matches and the repository
@@ -183,11 +180,12 @@ validation.
 `units.source_role` and `army_units.availability_kind` are explicit frontend
 schema fields rather than incidental dynamic columns. This makes the
 normalization-time availability classification part of the generated database
-contract even though repository queries do not consume it yet.
+contract; repository mercenary filtering consumes `availability_kind` directly
+for current snapshots.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 9 and the application
-compatibility revision is 11. Imports build temporary sibling files, check
+compatibility revision is 12. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

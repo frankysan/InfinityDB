@@ -75,6 +75,13 @@ def annotate_availability_semantics(normalized: dict[str, Any]) -> None:
                 )
             role = STANDARD_SOURCE_ROLE
 
+        # Canonical faction 1 is mercenary source/origin provenance, not an
+        # application army/group identity.  Without this exception the generic
+        # xx01 resolver would turn it into main_army_id=1 after removal of the
+        # legacy 1 -> 901 override.
+        if canonical_faction_id == MERCENARY_CANONICAL_FACTION_ID:
+            unit["main_army_id"] = None
+
         unit["source_role"] = role
         source_roles[unit_id] = role
 

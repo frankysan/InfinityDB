@@ -105,7 +105,7 @@ def test_separate_merge_normalize_export_commands(
         assert connection.execute("SELECT COUNT(*) FROM units").fetchone()[0] == 1
 
 
-def test_normalize_applies_manifest_canonical_faction_override(tmp_path: Path) -> None:
+def test_normalize_keeps_mercenary_source_identity_separate_from_na2(tmp_path: Path) -> None:
     master_path = tmp_path / "master.json"
     normalized_path = tmp_path / "normalized.json"
     master_path.write_text(
@@ -139,7 +139,7 @@ def test_normalize_applies_manifest_canonical_faction_override(tmp_path: Path) -
     normalized = json.loads(normalized_path.read_text(encoding="utf-8"))
     unit = normalized["tables"]["units"][0]
     assert unit["canonical_faction_id"] == 1
-    assert unit["main_army_id"] == 901
+    assert unit["main_army_id"] is None
 
 
 def test_invalid_source_reports_error_without_database(
