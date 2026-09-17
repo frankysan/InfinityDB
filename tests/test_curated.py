@@ -252,6 +252,27 @@ def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: P
         load_curated_document(path)
 
 
+def test_skill_parameter_semantics_are_validated(tmp_path: Path) -> None:
+    document = valid_document()
+    record = next(record for record in document["records"] if record["kind"] == "skill")
+    record["facts"]["parameterSemantics"] = {
+        "kind": "distance",
+        "positiveSign": "omit",
+    }
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    loaded = load_curated_document(path)
+    assert loaded["records"][0]["facts"]["parameterSemantics"] == {
+        "kind": "distance",
+        "positiveSign": "omit",
+    }
+
+    record["facts"]["parameterSemantics"]["positiveSign"] = "sometimes"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="positiveSign"):
+        load_curated_document(path)
+
 def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: Path) -> None:
     document = valid_document()
     document["records"] = [

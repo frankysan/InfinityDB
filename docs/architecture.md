@@ -171,6 +171,16 @@ rulebook page. The Army repository exposes raw skill catalog/usage data only;
 `rules.db`. Without a valid rules database, skills remain browsable and declaration
 categories fall back to uncited `Unclassified` rather than hidden Python rules data.
 
+Skill-extra distance semantics are split according to source authority. Army
+`extras.type` is authoritative for whether an extra is a distance; the repository
+therefore marks `DISTANCE` extras directly and does not infer distance meaning from
+numeric text. Rule-derived presentation details live in curated skill records.
+`Super-Jump` and `Forward Deployment` currently use
+`facts.parameterSemantics` to state how a positive distance sign should be
+displayed. `SkillCatalog` composes that semantic hint into skill, modifier, and
+unit API payloads, and browser code formats distances without recognizing skill
+names.
+
 Army presentation and classification currently combine imported relationships
 with merger-derived fields. Faction grouping, display names, and slugs come from
 `metadata_factions.parent`, `name`, and `slug`; repository responses expose this
@@ -603,9 +613,11 @@ matching standard unit. Current mercenary availability is evaluated from explici
 
 ### `GET /api/skill-extras`
 
-Returns `{ "items": [...] }` of distinct skill/extra combinations whose extra
-contains a distance value, together with the units using each combination.
-The Skill Modifiers browser page consumes this endpoint.
+Returns `{ "items": [...] }` of distinct skill/extra combinations whose imported
+Army extra has `type = DISTANCE`, together with the units using each combination.
+When curated rules define skill parameter semantics, each item also carries the
+corresponding `parameter_semantics` display hint. The Skill Modifiers browser
+page consumes this endpoint.
 
 ### Rules-reference endpoints
 

@@ -21,7 +21,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 101
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 103
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -100,6 +100,17 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
     }
     assert records[0]["citations"][0]["heading"] == "Armed Turret Profile"
 
+
+def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+
+    assert RulesDatabase(output).skill_parameter_semantics() == {
+        74: {"kind": "distance", "positive_sign": "omit"},
+        161: {"kind": "distance", "positive_sign": "force"},
+    }
 
 def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]

@@ -383,6 +383,14 @@ those records at read time and keeps uncited `Unclassified` as the fallback for
 skills without a curated declaration. The Army database does not materialize these
 rules facts.
 
+Skill parameter interpretation follows the same source/curated split. The imported
+Army `extras.type` field determines whether an extra is a distance; this source
+semantic is preserved into the frontend database and drives `is_distance` in
+repository responses. Curated `skill` records may additionally carry
+`facts.parameterSemantics` for rule-derived display behavior such as whether a
+positive sign is omitted or forced. `SkillCatalog` joins that hint at read time;
+it is not copied into the Army database.
+
 ### Design direction
 
 When the wiki downloader/packager and curated provenance contract are rewritten,

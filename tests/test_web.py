@@ -1224,6 +1224,19 @@ def test_developer_cache_toggle_is_served(app: Callable) -> None:
     assert b"developer-toggle developer-only" in body
 
 
+def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> None:
+    status, _, preferences = request(app, "/static/preferences.js")
+    assert status == 200
+    assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in preferences
+    assert b"parameterSemantics?.positive_sign" in preferences
+
+    for asset in ("skill.js", "skill-extras.js", "unit.js"):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"parameter_semantics" in body
+        assert b"Super-Jump" not in body
+        assert b"Forward Deployment" not in body
+
 def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/skill-extras")
     assert status == 200
@@ -1569,7 +1582,6 @@ def test_missing_database_fails_before_app_starts(tmp_path: Path) -> None:
     with pytest.raises((OSError, ValueError)):
         create_app(database_path)
     assert not database_path.exists()
-
 
 
 def test_weapon_api_adds_curated_special_profile_when_rules_database_is_available(

@@ -231,6 +231,26 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             facts = record.get("facts")
             if not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids:
                 raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
+            parameter_semantics = facts.get("parameterSemantics")
+            if parameter_semantics is not None:
+                if not isinstance(parameter_semantics, dict):
+                    raise ValueError(
+                        f"{context}: skill 'facts.parameterSemantics' must be an object"
+                    )
+                if set(parameter_semantics) != {"kind", "positiveSign"}:
+                    raise ValueError(
+                        f"{context}: skill 'facts.parameterSemantics' must contain only "
+                        "'kind' and 'positiveSign'"
+                    )
+                if parameter_semantics["kind"] != "distance":
+                    raise ValueError(
+                        f"{context}: skill parameter semantics 'kind' must be 'distance'"
+                    )
+                if parameter_semantics["positiveSign"] not in {"preserve", "omit", "force"}:
+                    raise ValueError(
+                        f"{context}: skill parameter semantics 'positiveSign' must be one of "
+                        "'preserve', 'omit', or 'force'"
+                    )
         if record["kind"] == "trait":
             facts = record.get("facts")
             if facts is not None:

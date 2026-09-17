@@ -44,6 +44,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Make skill-extra distance detection authoritative to imported Army
+  `extras.type` metadata instead of numeric-text heuristics. Numeric text such as
+  `+5 CC` no longer needs an application exception. Move the remaining
+  Super-Jump and Forward Deployment sign-display conventions into cited curated
+  skill parameter semantics consumed through `SkillCatalog`, removing duplicate
+  skill-name branches from backend and browser code.
 - Derive weapon range-table columns from imported profile distance endpoints
   instead of maintaining a fixed global range-band list. Inch labels use the
   existing 2.5 cm conversion and remain aligned across all profiles for a weapon.

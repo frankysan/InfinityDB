@@ -369,9 +369,12 @@ changes.
 - 2026-09-17: The remaining hard-coded-domain audit classified weapon range bands
   as derivable presentation data, not configuration. Weapon detail rendering now
   derives ordered range endpoints from imported profile `distance[].max` values.
-  Remaining audit targets are distance-skill parameter semantics, reinforcement
-  prefix normalization, the direct 901 grouping special case, and symbol-semantic
-  name tables reserved for the symbol-pipeline refactor.
+  Distance-skill handling is now source-driven: Army `extras.type` determines
+  `DISTANCE` versus text, while curated skill `parameterSemantics` supplies only
+  rule-derived sign-display behavior for Super-Jump and Forward Deployment.
+  Remaining audit targets are reinforcement prefix normalization, the direct 901
+  grouping special case, and symbol-semantic name tables reserved for the
+  symbol-pipeline refactor.
 - 2026-09-17: Special weapon game-rule facts moved out of
   `infinity_army_data.weapon_profiles`. The Armed Turret special profile is a
   cited curated `weapon` record linked to Army weapon ID 226; repository reads

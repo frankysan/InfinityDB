@@ -157,7 +157,12 @@ for catalog in (
     "ammunition",
     "extras",
 ):
-    fields = "name source_defined category" if catalog == "weapons" else "name source_defined"
+    if catalog == "weapons":
+        fields = "name source_defined category"
+    elif catalog == "extras":
+        fields = "name source_defined type"
+    else:
+        fields = "name source_defined"
     TABLES[catalog] = table("id", fields)
     TABLES[f"army_{catalog}"] = table(
         "army_id item_id",

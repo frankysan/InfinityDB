@@ -1,7 +1,7 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
 import { unitSymbol } from "./unit-symbols.js";
-import { distanceUnit, formatDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
+import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
@@ -434,10 +434,7 @@ function profileItems(items, catalog, fallbackLabel) {
       const extraName = extra.name || "Extra";
       if (!extra.name) hiddenIds.push(`Extra #${text(extra.id)}`);
       if (!extra.is_distance) return extraName;
-      return formatDistanceExtra(extraName, {
-        showPositiveSign: item.name !== "Super-Jump",
-        forcePositiveSign: item.name === "Forward Deployment",
-      });
+      return formatSkillDistanceExtra(extraName, item.parameter_semantics);
     });
     const decoratedName = extras.length ? `${name} (${extras.join(", ")})` : name;
     const label = item.quantity != null && Number(item.quantity) !== 1

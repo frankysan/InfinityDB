@@ -478,6 +478,36 @@ class RulesDatabase:
             ).fetchall()
             return self._records_from_rows(connection, rows)
 
+    def skill_parameter_semantics(self) -> dict[int, dict[str, str]]:
+        """Return curated skill parameter semantics keyed to Army skill ids."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT CAST(l.external_id AS INTEGER) AS skill_id, r.facts_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND c.status = 'current' "
+                "AND l.entity = 'skill' AND l.external_id IS NOT NULL "
+                "ORDER BY skill_id, r.collection_id, r.id"
+            ).fetchall()
+            result: dict[int, dict[str, str]] = {}
+            for row in rows:
+                facts = _decode_json(row["facts_json"], {})
+                semantics = facts.get("parameterSemantics") if isinstance(facts, dict) else None
+                if not isinstance(semantics, dict):
+                    continue
+                value = {
+                    "kind": semantics["kind"],
+                    "positive_sign": semantics["positiveSign"],
+                }
+                existing = result.get(row["skill_id"])
+                if existing is not None and existing != value:
+                    raise ValueError(
+                        f"Skill {row['skill_id']} has conflicting curated parameter semantics"
+                    )
+                result[row["skill_id"]] = value
+            return result
+
     def skill_declaration_categories(self) -> list[dict[str, Any]]:
         """Return curated skill declaration categories keyed to Army skill ids."""
         with self._connect() as connection:

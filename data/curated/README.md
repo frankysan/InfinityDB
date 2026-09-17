@@ -163,6 +163,12 @@ positive printed page. The application treats the absence of such a record as
 `Unclassified`; do not create uncited category records to represent missing rules
 classification.
 
+Skill records may use `facts.parameterSemantics` when a rule-derived parameter
+needs display behavior that Army source data does not encode. The current schema
+supports `{"kind": "distance", "positiveSign": "preserve|omit|force"}`. This
+field does not decide whether an Army extra is a distance: imported
+`extras.type == "DISTANCE"` remains authoritative for that source semantic.
+
 Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
 parameter value is part of the Army text, for example `Disposable (2)` mapping
 to the canonical `Disposable (X)` record. Exact alternate spellings and
