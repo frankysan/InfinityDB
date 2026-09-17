@@ -91,20 +91,31 @@ army-specific occurrences that supply optional mercenary availability. Many of
 those records also use a 10,000-offset-style source ID, but that numeric pattern
 is supporting evidence only and is not a semantic contract.
 
-Current repository queries reconstruct this distinction after database creation.
-They union declared `unit_factions` as the unit's normal army set, then mark an
-army occurrence as `mercs` when its source record has canonical faction `1` and
-the army is outside that normal set. Logical-unit grouping also combines common
-10,000-ID duplicate families and selected explicit aliases at query time. This
-produces the intended UI behavior today but leaves source-semantic
-classification and some deduplication later in the pipeline than necessary.
+Normalization now validates that observed source contract and records it
+explicitly. Source-defined units receive `units.source_role` with `standard` or
+`mercenary_variant`; their army occurrences receive
+`army_units.availability_kind` with `standard` or `mercenary`. A canonical-1
+unit that still has declared ordinary faction memberships remains `standard`.
+The classifier does not use the common 10,000-ID offset as its semantic rule,
+and contradictory mercenary markers fail normalization rather than being
+silently guessed.
+
+Current repository queries have not yet migrated to those explicit fields. They
+still union declared `unit_factions` as the logical unit's normal army set, then
+mark an army occurrence as `mercs` when its source record has canonical faction
+`1` and the army is outside that normal set. Logical-unit grouping also combines
+common 10,000-ID duplicate families and selected explicit aliases at query time.
+The new normalized/database classification therefore coexists intentionally
+with the legacy read path while the deduplication and repository migration are
+implemented incrementally.
 
 Canonical ownership, source identity, army grouping, army-list kind, optional
 availability category, and playability are separate semantics. The current
-normalized/database/API model does **not** yet expose a complete explicit
-role/playability model, nor does normalized data explicitly classify a source
-unit occurrence as normal versus optional mercenary availability. Clients must
-not infer these semantics from numeric ID patterns.
+normalized/database model now exposes mercenary source role and availability
+category explicitly, but the API/runtime model does **not** yet expose a
+complete explicit army role/playability model or an authoritative pre-runtime
+logical-unit identity for mercenary alternates. Clients must not infer those
+remaining semantics from numeric ID patterns.
 
 ### Design direction
 
@@ -114,28 +125,22 @@ grouping from the actual 901 metadata hierarchy. Remove the legacy `1` -> `901`
 override only as part of a coherent normalization/database/API migration so
 existing behavior is not silently broken midway through the refactor.
 
-Classify mercenary variants during normalization using source semantics rather
-than repository-time inference. The observed contract to validate is
-`canonical == 1`, empty declared `factions`, and a `merc-...` source slug.
-Validation should report any future source record that violates or extends that
-pattern. A 10,000-offset ID may help diagnose matching records but must not be
-the rule that determines mercenary semantics.
+Use the current source-semantic mercenary classification to improve logical-unit
+deduplication before runtime. When a mercenary alternate record can be matched
+unambiguously to its ordinary logical unit, normalization or database creation
+should combine their logical identity while preserving every source unit ID,
+army occurrence, and availability provenance needed for validation and the raw
+archive. The frontend repository should consume the resulting explicit logical
+identity and existing availability category instead of rediscovering them from
+canonical ID `1`, `factions`, and numeric duplicate patterns on every read.
 
-Use that classification to improve logical-unit deduplication before runtime.
-When a mercenary alternate record can be matched unambiguously to its ordinary
-logical unit, normalization or database creation should combine their logical
-identity while preserving every source unit ID, army occurrence, and
-availability provenance needed for validation and the raw archive. The frontend
-repository should consume the resulting explicit logical identity and
-availability category instead of rediscovering them from canonical ID `1`,
-`factions`, and numeric duplicate patterns on every read.
-
-The exact normalized schema for this provenance is not fixed yet. The important
-boundary is that deduplication may collapse several source records into one
-logical application unit without discarding the source records or the reason an
-army occurrence exists. Normal availability derived from declared `factions`
-and optional mercenary availability derived from mercenary source variants must
-remain distinguishable even when they occur for the same logical unit and army.
+The remaining provenance/logical-identity schema for deduplicated source records
+is not fixed yet. The important boundary is that deduplication may collapse
+several source records into one logical application unit without discarding the
+source records or the reason an army occurrence exists. Normal availability
+derived from declared `factions` and optional mercenary availability derived
+from mercenary source variants must remain distinguishable even when they occur
+for the same logical unit and army.
 
 Model army role/playability explicitly as a related but separate concern. Prefer
 metadata parent relationships for main-army/sectorial/Non-Aligned grouping and
@@ -165,9 +170,14 @@ the identity policy part of the immutable database snapshot and allowing
 tampering, incomplete provenance, or conflicting explicit export policy to fail
 validation.
 
+`units.source_role` and `army_units.availability_kind` are explicit frontend
+schema fields rather than incidental dynamic columns. This makes the
+normalization-time availability classification part of the generated database
+contract even though repository queries do not consume it yet.
+
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 8 and the application
-compatibility revision is 10. Imports build temporary sibling files, check
+records its schema version. The current schema version is 9 and the application
+compatibility revision is 11. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

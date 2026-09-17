@@ -244,7 +244,7 @@ prerequisites, updates, rollback behavior, and operational commands.
 ## Project layout
 
 ```text
-docs/                       # Architecture, data model, deployment, and project docs
+docs/                       # Architecture, data model, deployment, testing, and project docs
 src/
   infinity_army_data/       # Army JSON merge, normalization, metadata, and validation
   infinity_db/
@@ -258,7 +258,7 @@ src/
       wsgi.py               # WSGI entry point for deployment
       static/               # Browser pages, modules, styles, and symbols
 tests/                      # Pipeline, database, API, web, and tool-script tests
-tools/                      # Manual Army, wiki, and current unit-symbol download utilities
+tools/                      # Manual acquisition/processing utilities and check runner
 scripts/                    # Linux deployment, update, and image-maintenance scripts
 data/
   raw/                      # Ignored immutable Army/source snapshots
@@ -270,6 +270,7 @@ data/
     snapshot-notes/         # Planned human-reviewed snapshot annotations
   manifests/                # Planned generated provenance/build-state location
   generated/                # Ignored database, JSON, and validation artifacts
+reports/                    # Ignored timestamped local development-check reports
 .vscode/                    # Shared build, serve, test, lint, and debug tasks
 Dockerfile                  # Immutable application image for deployment
 compose.yaml                # Gunicorn, Caddy, and application Compose deployment
@@ -282,17 +283,47 @@ direction, and unimplemented work respectively.
 
 ## Development checks
 
+Use `tools/run_checks.py` as the standard development entry point. It
+orchestrates pytest, Ruff, and Army data-build validation while preserving the
+underlying tools as the authoritative checks.
+
 ```powershell
-python -m pytest -q
-python -m ruff check src/infinity_db src/infinity_army_data/cli.py tests
+# Full code checks: pytest, then Ruff
+python tools/run_checks.py --profile code
+
+# Data/build validation
+python tools/run_checks.py --profile data
+
+# All stages
+python tools/run_checks.py --all
+
+# Targeted checks
+python tools/run_checks.py --stage test tests/test_availability.py
+python tools/run_checks.py --stage lint src/infinity_army_data/availability.py tests/test_availability.py
 ```
 
-Tests cover the ingestion and import pipeline, preservation of normalized
-records, safe database replacement, army membership, pagination, search, API
-validation, reference catalogs, unit details, profile data, static-symbol
-delivery, and the standalone tool scripts used for local Army and wiki data
-fetches. VS Code includes build, serve, test, and lint tasks, plus build and
-web-server debug configurations.
+Requested stages continue after a failure by default so one run can report the
+complete state; add `--fail-fast` to stop at the first failure. Positional
+targets are forwarded to pytest/Ruff only. Use `--build-source PATH` to choose a
+specific Army source for the build stage.
+
+Add `--report` to tee the complete live console transcript to an ignored local
+report. Without an explicit path the runner writes
+`reports/CHECKS YYYYMMDD-HHMMSS.txt`, using the same run-start timestamp that is
+recorded in the report header. Supplying a path preserves it instead:
+
+```powershell
+python tools/run_checks.py --profile code --report
+python tools/run_checks.py --profile code --report reports/custom-check.txt
+```
+
+See [development checks](docs/testing.md) for stage/profile definitions,
+reporting behavior, and exit codes. Tests cover the ingestion and import
+pipeline, preservation of normalized records, safe database replacement, army
+membership, pagination, search, API validation, reference catalogs, unit
+details, profile data, static-symbol delivery, and the standalone tool scripts
+used for local Army and wiki data fetches. VS Code includes build, serve, test,
+and lint tasks, plus build and web-server debug configurations.
 
 ## LLM code disclosure
 
