@@ -111,6 +111,9 @@ normal local working tree:
 - Add identified future work to `docs/TODO.md`.
 - Record meaningful changes under `Unreleased` in `docs/CHANGELOG.md`.
 - Update `README.md` for user-visible behavior, setup, or major capabilities.
+- When changing the Army database schema or compatibility revision, update all
+  documented current schema/compatibility values and related rebuild guidance in
+  the same change.
 
 Do not duplicate canonical documentation unnecessarily; link to the
 authoritative document instead.

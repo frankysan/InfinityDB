@@ -162,7 +162,7 @@ queries consume the materialized identity and `army_units.availability_kind`;
 the old canonical/faction availability inference remains only as a legacy-row
 fallback.
 
-### Design direction
+### Design direction: manifests and snapshot notes
 
 Two additional data roles are accepted but are not yet implemented as produced
 artifacts:
@@ -190,6 +190,8 @@ define a schema or schema version, validate on load, serialize deterministically
 where generated, and have focused regression tests. Persistent project paths
 stored in future manifests should use portable project-relative
 representations rather than machine-specific absolute paths.
+
+### Current: army roles and logical-unit identity
 
 Army role/playability is derived in the backend from source relationships
 rather than numeric ID patterns. Metadata self-parent/child relationships

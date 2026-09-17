@@ -40,10 +40,14 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Reconcile reference documentation with the completed logical-unit and army-role
+  refactors: source-unit identity is now distinguished from materialized
+  application identity, repository-time identity discovery is no longer described
+  as current behavior, and completed refactor backlog history is removed.
 - Remove the obsolete repository-side logical-unit identity discovery path now
-  that frontend databases materialize complete identity. Legacy generic and
-  reinforcement compatibility behavior remains build-time only, with its
-  regression coverage moved to the logical-unit resolver/audit tests.
+  that frontend databases materialize complete identity. Legacy duplicate
+  compatibility behavior remains build-time only, with its regression coverage
+  moved to the logical-unit resolver/audit tests.
 - Materialize application logical-unit identity during frontend database
   creation. The exporter resolves configured aliases plus persisted generic,
   mercenary, and reinforcement evidence into frontend-only `logical_units` and
@@ -82,11 +86,6 @@ All notable changes to this project are documented in this file.
   longer use canonical faction `1` plus faction membership to decide whether an
   army occurrence requires the `mercs` filter; that inference remains only as a
   fallback for legacy rows without availability provenance.
-- Make repository logical-unit grouping consume persisted
-  `mercenaryUnitMatches` / `unmatchedMercenaryUnitIds` metadata when present,
-  so mercenary pairing no longer depends on the variant's 10,000-ID duplicate
-  key. Explicitly unmatched variants stay separate, while older databases
-  without this metadata retain the legacy grouping fallback.
 - Make `units.source_role` and `army_units.availability_kind` explicit frontend
   SQLite schema fields instead of incidental dynamic columns. Existing generated
   Army databases must be rebuilt when the cumulative schema/compatibility
@@ -116,10 +115,6 @@ All notable changes to this project are documented in this file.
 - Document the source-data finding that canonical-faction ID `1` represents a
   mercenary source/origin concept distinct from Non-Aligned Armies grouping ID
   `901`; the former ownership override has since been removed in Unreleased.
-- Document the accepted direction to classify optional mercenary source variants
-  during normalization, validate their source-semantic markers, and move
-  unambiguous logical-unit deduplication into normalization/database creation
-  while preserving every source ID, occurrence, and availability provenance.
 - Document the decision to keep PDF/wiki-derived rules references in a
   separately versioned SQLite database from Army JSON-derived data.
 - Harden the file-path sanitization and wiki mirror logic for cross-platform
@@ -145,10 +140,6 @@ All notable changes to this project are documented in this file.
 - Expose backend-derived trait references alongside raw metadata trait labels,
   including canonical trait names and catalog slugs, so catalog-detail browser
   code no longer duplicates trait aliases, misspellings, or slug generation.
-- Document the distinction between canonical source identity and army
-  playability. Source ID `1` and Non-Aligned Armies grouping ID `901` are
-  semantically distinct; 901's explicit non-playable role still needs complete
-  backend/API modeling.
 - Consolidate the standalone Army/symbol pipeline plan into the maintained
   backlog and durable AI context, preserving its pinned-snapshot, complete SVG
   discovery, reference/asset identity, override/cache/network resolution,

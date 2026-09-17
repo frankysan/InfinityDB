@@ -19,7 +19,9 @@ raw Army JSON
 
 ## Identities
 
-- `unit.id` is treated as the global unit identity.
+- `unit.id` is the stable source-unit identity. It is not necessarily the
+  application logical-unit identity: multiple source unit IDs can resolve to one
+  materialized logical unit while source rows retain their original IDs.
 - Unit `profileGroups` and unit-level `filters` are army-list-specific variants.
 - Profile group, profile and loadout option IDs are local to their army/unit
   hierarchy and use composite keys in normalized data.
@@ -130,19 +132,18 @@ previous canonical/faction inference only for database rows where
 `availability_kind` is absent.
 
 Canonical ownership, source identity, army grouping, army-list kind, optional
-availability category, and playability are separate semantics. The current
-normalized/database model exposes mercenary source role, availability category,
-and the audited mercenary-to-standard source relationship explicitly. The
-repository additionally derives army role/playability from imported metadata
-parent relationships and explicit reinforcement links, and `/api/armies`
-exposes that source-derived contract. It still does **not** expose one complete
-pre-runtime logical-unit identity that physically consolidates every configured
-alias and source variant. The generic, mercenary, and reinforcement match
-decisions are now persisted before repository queries, but source rows remain
-separate for provenance. Clients must not infer logical identity from numeric ID
-patterns.
+availability category, playability, and application logical identity are separate
+semantics. The current normalized/database model exposes mercenary source role,
+availability category, and audited identity evidence explicitly. Database
+creation resolves configured aliases plus generic, mercenary, and reinforcement
+evidence into one materialized logical-unit relation while retaining every source
+row for provenance. The repository derives army role/playability from imported
+metadata parent relationships and explicit reinforcement links, exposes that
+source-derived contract through `/api/armies`, and consumes the materialized
+logical-unit relation for unit reads. Clients must not infer logical identity from
+numeric ID patterns.
 
-### Design direction
+### Current logical-unit materialization
 
 Source ID `1` and grouping identity `901` are now kept distinct in current
 normalization. ID `1` remains source-side mercenary identity/provenance with no
@@ -198,9 +199,10 @@ logical-unit contract regardless of which compatibility path produced it.
 Normal availability derived from declared `factions` and optional mercenary
 availability derived from mercenary source variants remain distinguishable even
 when they occur for the same logical unit and army. The repository now consumes
-that explicit normalized availability category. The remaining migration work is
-to remove the legacy canonical/faction fallback once databases without explicit
-availability provenance no longer need to be supported.
+that explicit normalized availability category. The legacy canonical/faction
+inference remains only for compatibility with database rows that lack explicit
+availability provenance and can be removed when that compatibility is no longer
+required.
 
 Army role/playability is now explicit at the repository/API boundary. Metadata
 parent relationships provide main-army, sectorial, and Non-Aligned grouping;
