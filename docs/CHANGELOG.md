@@ -35,6 +35,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Make repository mercenary filtering consume explicit
+  `army_units.availability_kind` provenance. Current normalized snapshots no
+  longer use canonical faction `1` plus faction membership to decide whether an
+  army occurrence requires the `mercs` filter; that inference remains only as a
+  fallback for legacy rows without availability provenance.
 - Make repository logical-unit grouping consume persisted
   `mercenaryUnitMatches` / `unmatchedMercenaryUnitIds` metadata when present,
   so mercenary pairing no longer depends on the variant's 10,000-ID duplicate

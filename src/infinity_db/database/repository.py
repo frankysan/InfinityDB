@@ -18,9 +18,11 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from infinity_army_data.availability import (
+    MERCENARY_AVAILABILITY,
     MERCENARY_MATCH_METHOD,
     MERCENARY_SOURCE_ROLE,
     MERCENARY_UNIT_MATCHES_KEY,
+    STANDARD_AVAILABILITY,
     STANDARD_SOURCE_ROLE,
     UNMATCHED_MERCENARY_UNIT_IDS_KEY,
 )
@@ -559,12 +561,24 @@ def army_required_flags(
 ) -> set[str]:
     """Return the optional availability categories required by an occurrence."""
     required = unit_optional_modes(group)
-    faction_id = (
-        group["canonical_faction_id"] if canonical_faction_id is None else canonical_faction_id
-    )
-    normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
-    if faction_id == 1 and army["id"] not in normal_armies:
+    availability_kind = army.get("availability_kind")
+    if availability_kind == MERCENARY_AVAILABILITY:
         required.add("mercs")
+    elif availability_kind == STANDARD_AVAILABILITY:
+        pass
+    elif availability_kind is None:
+        # Legacy database rows created before normalized availability provenance
+        # was persisted still need the previous canonical/faction inference.
+        faction_id = (
+            group["canonical_faction_id"]
+            if canonical_faction_id is None
+            else canonical_faction_id
+        )
+        normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
+        if faction_id == 1 and army["id"] not in normal_armies:
+            required.add("mercs")
+    else:
+        raise ValueError(f"Unknown army availability kind: {availability_kind!r}")
     if army.get("kind") == "reinforcement":
         required.add("reinforcement")
     filters = army.get("filters")
@@ -724,7 +738,8 @@ class Database:
                 for row in connection.execute("SELECT id, name, slug FROM army_lists")
             }
             for army in connection.execute(
-                "SELECT au.unit_id, au.filters, a.id, a.name, a.slug, a.kind "
+                "SELECT au.unit_id, au.filters, au.availability_kind, "
+                "a.id, a.name, a.slug, a.kind "
                 "FROM army_units AS au "
                 "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
             ):
@@ -740,6 +755,7 @@ class Database:
                         "name": army_name(army),
                         "kind": army["kind"],
                         "filters": filters,
+                        "availability_kind": army["availability_kind"],
                     }
                 )
             normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in rows}
