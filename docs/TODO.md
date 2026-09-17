@@ -125,28 +125,6 @@ history retains implementation detail.
     records (for example the observed Miranda Ashcroft, Yuan Yuan, and Valerya
     patterns), including a case where normal and mercenary occurrences overlap
     the same army.
-- [ ] Model army/faction role and playability explicitly as a related but
-  separate part of the identity/list-semantics refactor.
-  - Derive standard main-army versus sectorial grouping from metadata parent
-    relationships where the main faction is self-parented and sectorials point
-    to it; do not use the first `xx01` ID as the role classifier.
-  - Represent 901 (Non-Aligned Armies) as a grouping identity for its child 9xx
-    army lists, not as an independently playable army and not as the meaning of
-    mercenary source identity `1`.
-  - Derive reinforcement relationships from the explicit top-level
-    `reinforcements` references in ordinary source lists; treat current
-    `army_lists.kind` as a merger-derived representation of that file shape,
-    not as a full source taxonomy.
-  - Prefer authoritative imported hierarchy/list relationships first and
-    validated project configuration only for semantics the source genuinely
-    cannot express.
-  - Expose role/playability explicitly from the backend so `/api/armies` and
-    browser selectors can distinguish grouping-only identities, independent
-    armies/sectorials/NA2 forces, and reinforcement lists without numeric-ID
-    heuristics.
-  - Add repository/API/UI regression coverage showing that 901 is grouping-only,
-    its child armies remain distinct/selectable, and optional mercenary units do
-    not imply NA2 ownership.
 - [ ] Add `config/catalogs/weapon-categories.json`.
   - Move the ordered weapon-family taxonomy and regex patterns out of
     `weapon_categories.py`.

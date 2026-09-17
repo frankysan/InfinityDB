@@ -93,9 +93,12 @@ and serves a read-only browser and same-origin HTTP API.
   main armies are self-parented, sectorials point to their main army, and NA2
   forces point to grouping identity 901. Ordinary list documents explicitly
   reference their reinforcement list through `reinforcements`.
-- The current backend/API does not yet expose complete explicit
-  role/playability semantics. **Design direction:** selectors should eventually
-  consume backend-provided role/playability rather than list presence or IDs.
+- The backend/API exposes explicit army role/playability semantics derived from
+  metadata parent relationships and ordinary-list `reinforcements` links.
+  `/api/armies` distinguishes main armies, sectorials, Non-Aligned forces,
+  reinforcement lists, and grouping-only identities; the browser selector
+  consumes that contract rather than Army-ID ranges. Grouping identity `901` is
+  non-playable.
 - Mercenary variants are classified during normalization, their source markers
   are validated, audited mercenary-to-standard mappings are persisted, and
   repository queries consume explicit availability provenance. **Design
@@ -334,6 +337,11 @@ changes.
 - 2026-09-16: Documentation distinguishes current implementation, accepted
   design direction, and planned/unimplemented backlog so future architecture is
   not presented as existing behavior.
+- 2026-09-17: Army role/playability moved to an explicit source-derived
+  backend/API contract. Metadata parents classify main, sectorial, and
+  Non-Aligned forces; explicit ordinary-list `reinforcements` links classify
+  reinforcement relationships. Grouping identity 901 is exposed as
+  non-playable and browser selectors no longer infer roles from Army-ID ranges.
 - 2026-09-17: Mercenary source identity and Non-Aligned Army grouping are
   separate. ID `1` is retained as mercenary source provenance; 901 groups NA2
   army lists. Dedicated mercenary variants are identified by source semantics,

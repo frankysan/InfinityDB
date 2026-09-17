@@ -120,11 +120,12 @@ previous canonical/faction inference only for database rows where
 Canonical ownership, source identity, army grouping, army-list kind, optional
 availability category, and playability are separate semantics. The current
 normalized/database model exposes mercenary source role, availability category,
-and the audited mercenary-to-standard source relationship explicitly. It still
-does **not** expose one complete pre-runtime logical-unit identity covering all
-duplicate and reinforcement cases, nor a complete explicit army
-role/playability model. Clients must not infer those remaining semantics from
-numeric ID patterns.
+and the audited mercenary-to-standard source relationship explicitly. The
+repository additionally derives army role/playability from imported metadata
+parent relationships and explicit reinforcement links, and `/api/armies`
+exposes that source-derived contract. It still does **not** expose one complete
+pre-runtime logical-unit identity covering all duplicate and reinforcement
+cases. Clients must not infer logical identity from numeric ID patterns.
 
 ### Design direction
 
@@ -149,12 +150,13 @@ that explicit normalized availability category. The remaining migration work is
 to remove the legacy canonical/faction fallback once databases without explicit
 availability provenance no longer need to be supported.
 
-Model army role/playability explicitly as a related but separate concern. Prefer
-metadata parent relationships for main-army/sectorial/Non-Aligned grouping and
-the explicit `reinforcements` links for reinforcement relationships. Expose the
-result from the backend so selectable armies are determined from modeled source
-semantics and reviewed project policy rather than hard-coded IDs or list
-presence.
+Army role/playability is now explicit at the repository/API boundary. Metadata
+parent relationships provide main-army, sectorial, and Non-Aligned grouping;
+explicit `reinforcements` links provide reinforcement parentage. Grouping
+identity `901` is surfaced as non-playable when its imported child lists are
+present, and the browser selector consumes `role`/`playable` instead of Army-ID
+ranges. The remaining identity work concerns generic/reinforcement logical-unit
+consolidation rather than army playability.
 
 ## Principle
 

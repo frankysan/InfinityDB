@@ -117,24 +117,28 @@ function showPanel(panel) {
 function populateArmies(armies) {
   // Keep source strings out of HTML so upstream data is always treated as text.
   elements.army.replaceChildren(new Option("All armies", ""));
-  const mainArmyIds = new Map();
-  for (const army of armies) {
-    const group = Math.floor(Number(army.id) / 100);
-    if (!mainArmyIds.has(group)) mainArmyIds.set(group, army.id);
-  }
-  for (const army of armies) {
-    const group = Math.floor(Number(army.id) / 100);
-    const isSectorial = army.kind === "army" && mainArmyIds.get(group) !== army.id;
-    const indentLevel = army.kind === "reinforcement" ? 2 : Number(isSectorial);
+  const playableArmies = armies.filter((army) => army.playable !== false);
+  const shownGroups = new Set();
+
+  for (const army of playableArmies) {
+    if (army.role === "non_aligned" && army.group_id && !shownGroups.has(army.group_id)) {
+      const label = new Option(army.group_name || `Group ${army.group_id}`, "");
+      label.disabled = true;
+      elements.army.add(label);
+      shownGroups.add(army.group_id);
+    }
+    const indentLevel = army.role === "reinforcement"
+      ? 2
+      : Number(army.role === "sectorial" || army.role === "non_aligned");
     const indent = "\u00a0\u00a0\u00a0\u00a0".repeat(indentLevel);
     elements.army.add(new Option(`${indent}${army.name} (${number.format(army.unit_count)})`, String(army.id)));
   }
-  if (state.armyId && !armies.some((army) => String(army.id) === state.armyId)) {
+  if (state.armyId && !playableArmies.some((army) => String(army.id) === state.armyId)) {
     state.armyId = "";
     state.offset = 0;
     writeLocation(true);
   }
-  elements.armyCount.textContent = number.format(armies.length);
+  elements.armyCount.textContent = number.format(playableArmies.length);
   elements.army.disabled = false;
   syncFilters();
 }

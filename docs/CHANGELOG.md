@@ -35,6 +35,13 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Derive army role/playability from authoritative imported relationships
+  instead of Army-ID ranges. `/api/armies` now exposes explicit roles,
+  playability, grouping metadata, and reinforcement parents for main armies,
+  sectorials, Non-Aligned forces, reinforcement lists, and grouping-only
+  identities. Non-Aligned grouping identity `901` is surfaced as non-playable,
+  direct unit filtering by it is rejected, and the browser army selector
+  consumes the backend role contract.
 - Remove the legacy canonical-faction `1` -> `901` identity override now that
   mercenary logical pairing and army-occurrence availability are explicit.
   Canonical source ID `1` remains mercenary source/origin provenance with no

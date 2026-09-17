@@ -183,14 +183,15 @@ where generated, and have focused regression tests. Persistent project paths
 stored in future manifests should use portable project-relative
 representations rather than machine-specific absolute paths.
 
-Army role/playability needs an explicit backend representation so API and
-browser selectors do not infer it from list presence or numeric ID patterns.
-Prefer source relationships over numeric conventions: standard metadata
-self-parent/child relationships provide main-army and sectorial grouping,
-metadata parent 901 groups the distinct Non-Aligned army lists, and ordinary
-source documents explicitly reference their reinforcement list through the
-`reinforcements` field. The known grouping-only status of 901 remains a domain
-invariant, but a complete API/UI playability model is not implemented yet.
+Army role/playability is derived in the backend from source relationships
+rather than numeric ID patterns. Metadata self-parent/child relationships
+identify main armies and sectorials, metadata parent `901` groups the distinct
+Non-Aligned army lists, and ordinary source documents identify their
+reinforcement list through the explicit `reinforcements` field. `/api/armies`
+exposes those roles, playability, grouping metadata, and reinforcement parents;
+the browser selector consumes that contract directly. Grouping-only identity
+`901` is exposed as non-playable and cannot be used as a selectable
+`army_id`.
 
 Mercenary source variants are classified during normalization from their
 source-semantic contract (`canonical == 1`, empty declared `factions`,
@@ -447,14 +448,16 @@ it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`
 
-Returns `{ "items": [...] }`. Each item currently has `id`, `name`, `slug`,
-`kind`, and `unit_count`. Only actual imported army-list identities appear;
-referenced faction placeholders do not create entries. Presence in this response
-does not by itself imply that an identity is independently playable: 901
-(Non-Aligned Armies) is a known grouping-only identity. Explicit role/playability
-semantics are not yet exposed, so clients must not treat this endpoint as a
-complete selectable-army contract. Unit counts use source-defined units in
-`army_units`.
+Returns `{ "items": [...] }`. Each item exposes `id`, `name`, `slug`,
+legacy source-shape `kind`, explicit `role`, `playable`, `group_id`,
+`group_name`, `group_slug`, `parent_army_ids`, and `unit_count`. Roles are
+derived from imported source relationships rather than Army-ID ranges:
+self-parented metadata factions are `main`, metadata children are `sectorial`,
+children of metadata identity `901` are `non_aligned`, and lists referenced by
+ordinary source `reinforcements` links are `reinforcement`. When imported
+Non-Aligned children exist, metadata identity `901` is also surfaced as a
+`grouping` item with `playable: false`; it is never a selectable army. Unit
+counts use source-defined units in `army_units`.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 

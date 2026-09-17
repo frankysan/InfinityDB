@@ -79,12 +79,11 @@ Current release: **0.5.1** (2026-09-14).
 ## Design direction
 
 Accepted architectural direction is documented separately from current
-features. Major unimplemented directions include explicit army
-role/playability semantics, generated snapshot provenance under
-`data/manifests/snapshots/` with separate human-authored snapshot notes, and a
-complete manifest-backed symbol pipeline. These are **not current features**;
-see [architecture](docs/architecture.md) for the intended boundaries and
-[the backlog](docs/TODO.md) for concrete implementation work.
+features. Major unimplemented directions include generated snapshot provenance
+under `data/manifests/snapshots/` with separate human-authored snapshot notes,
+and a complete manifest-backed symbol pipeline. These are **not current
+features**; see [architecture](docs/architecture.md) for the intended boundaries
+and [the backlog](docs/TODO.md) for concrete implementation work.
 
 The current curated rules schema records wiki pages by snapshot-local path and
 snapshot date, and the checked-in v5.3 collection still contains legacy
@@ -160,12 +159,13 @@ a rules-data import:
 infinity-db validate-curated data/curated/rules/example.json
 ```
 
-The current army selector includes imported main-army, sectorial, and
-reinforcement lists. Display names are derived from source slugs when a name is
-unavailable, and reinforcement lists that share the `reinf` slug include their
-list ID so they remain distinguishable. A complete explicit grouping-only versus
-selectable role is not yet exposed by the backend/API, so current selector
-behavior should not be read as the final playability model.
+The army selector consumes backend-derived role and playability semantics.
+Metadata parent relationships distinguish main armies, sectorials, and
+Non-Aligned forces; explicit source reinforcement links identify reinforcement
+lists. Non-Aligned grouping identity `901` is exposed by the API as grouping-only
+and is not selectable. Display names are derived from source slugs when a name
+is unavailable, and reinforcement lists that share the `reinf` slug include
+their list ID so they remain distinguishable.
 
 ## Commands
 
