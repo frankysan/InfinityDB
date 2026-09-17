@@ -145,9 +145,11 @@ history retains implementation detail.
     `Forward Deployment` records carry the remaining positive-sign display
     semantics, and browser code consumes the API contract without skill-name
     branches.
-  - [ ] Move reinforcement-prefix normalization (`REINF` / `REFUERZOS`) into the
-    maintained identity policy and remove the browser-side duplicate if backend
-    display/profile identity can make it unnecessary.
+  - [x] Move reinforcement-prefix normalization (`REINF` / `REFUERZOS`) into the
+    maintained identity policy. Backend unit-detail payloads now expose a
+    prefix-stripped profile `display_name` alongside the untouched source `name`
+    and normalized `profile_identity`, so browser code no longer carries a
+    duplicate reinforcement-prefix regex.
   - [ ] Remove the remaining direct `901` Non-Aligned grouping special case if
     grouping-only identities can be derived completely from metadata hierarchy
     plus playable source army lists.

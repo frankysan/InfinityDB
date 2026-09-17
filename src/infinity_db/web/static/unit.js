@@ -188,13 +188,6 @@ function identicalStatline(left, right) {
   return generalStatline(left).every((value, index) => value === rightStatline[index]);
 }
 
-function baseProfileName(profileName) {
-  return String(profileName || "")
-    .replace(/^(?:REINF|REFUERZOS)(?:\.|:)?\s*/i, "")
-    .trim();
-}
-
-
 const orderTypes = ["regular", "irregular"];
 const symbolLabels = {
   regular: "Regular Order",
@@ -316,7 +309,7 @@ function profileTitle(profile) {
 function generalProfiles(profiles, loadouts) {
   const byName = new Map();
   for (const profile of profiles) {
-    const profileName = baseProfileName(profile.name);
+    const profileName = String(profile.display_name || profile.name || "").trim();
     const profileKey = profile.profile_identity;
     if (!byName.has(profileKey)) byName.set(profileKey, {
       profileName, profiles: [],

@@ -11,6 +11,7 @@ from infinity_db.identities import (
     identity_metadata,
     load_identity_config,
     normalized_profile_identity,
+    normalized_unit_identity,
     parse_identity_config,
     parse_identity_metadata,
 )
@@ -24,6 +25,7 @@ def identity_document() -> dict:
 def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     config = load_identity_config()
 
+    assert config.document["schema_version"] == 2
     assert config.canonical_unit_id(1690) == 300
     assert config.canonical_unit_id(11345) == 1345
     assert config.canonical_army_id(998) == 999
@@ -35,12 +37,18 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     assert config.canonical_catalog_id("weapons", 228) == 226
     assert config.catalog_source_ids("skills", 20) == (19, 20, 21, 22, 23)
     assert config.word_aliases["reconaissance"] == "recon"
+    assert config.reinforcement_prefixes == ("reinf", "refuerzos")
     assert "intervention" in config.profile_identity_ignored_words
 
 
-def test_profile_identity_uses_manifest_backed_policy() -> None:
+def test_reinforcement_prefixes_are_manifest_backed_identity_policy() -> None:
     config = load_identity_config()
 
+    assert normalized_unit_identity("REINF: ARMBOTS BULLETEERS", config) == "armbot bulleteer"
+    assert (
+        normalized_unit_identity("REFUERZOS: ARMBOTS BULLETEERS", config)
+        == "armbot bulleteer"
+    )
     assert (
         normalized_profile_identity(
             "REFUERZOS: R\u00e9conaissance Intervention Troops",
@@ -118,6 +126,17 @@ def test_identity_config_rejects_duplicate_canonical_faction_overrides(
     )
 
     with pytest.raises(IdentityConfigError, match="duplicate source ID 1"):
+        parse_identity_config(identity_document)
+
+
+def test_identity_config_rejects_invalid_reinforcement_prefixes(identity_document: dict) -> None:
+    identity_document["name_normalization"]["reinforcement_prefixes"] = ["REINF"]
+
+    with pytest.raises(IdentityConfigError, match="trimmed and case-folded"):
+        parse_identity_config(identity_document)
+
+    identity_document["name_normalization"]["reinforcement_prefixes"] = ["reinf", "reinf"]
+    with pytest.raises(IdentityConfigError, match="contains duplicates"):
         parse_identity_config(identity_document)
 
 

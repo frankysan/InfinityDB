@@ -377,6 +377,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
         assert army["profiles"][0]["type"] == "Line Trooper"
         assert army["profiles"][0]["classification"] == "Light Infantry"
         assert army["profiles"][0]["profile_identity"] == "profile ranger"
+        assert army["profiles"][0]["display_name"] == army["profiles"][0]["name"]
         assert army["profiles"][0]["skills"] == [
             {
                 "id": 11,
@@ -946,7 +947,9 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b"function isStandardArmy(army)" in body
     assert b"section.open = expanded" in body
     assert b"const profileKey = profile.profile_identity;" in body
-    assert b"(?:REINF|REFUERZOS)" in body
+    assert b"profile.display_name || profile.name" in body
+    assert b"(?:REINF|REFUERZOS)" not in body
+    assert b"function baseProfileName(" not in body
     assert b"function profileIdentity(" not in body
     assert b"profileIdentityWordAliases" not in body
     assert b"profileIdentityIgnoredWords" not in body

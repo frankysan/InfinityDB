@@ -130,9 +130,10 @@ incomplete or conflicting identity metadata, and propagates the same policy to
 the frontend and raw database metadata. Repository queries revalidate and
 consume the policy pinned into that immutable database snapshot. Unit-detail
 queries also derive each profile's `profile_identity` from that pinned policy;
-browser grouping consumes the backend-derived identity and keeps only display
-formatting, so browser assets do not duplicate profile alias or ignored-word
-rules. This keeps deployments self-contained and prevents later working-tree
+browser grouping consumes the backend-derived identity and backend-derived
+`display_name`, so browser assets do not duplicate profile alias, reinforcement-
+prefix, or ignored-word rules. The maintained reinforcement prefixes themselves
+live in the pinned identity policy under `name_normalization`. This keeps deployments self-contained and prevents later working-tree
 configuration changes from silently changing the meaning of an existing
 normalized or SQLite snapshot.
 
@@ -491,7 +492,7 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 10 and database compatibility revision of 14; it
+schema has a schema version of 10 and database compatibility revision of 15; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

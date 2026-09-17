@@ -826,6 +826,24 @@ def test_catalog_details_omit_variants_without_visible_units(
     assert detail["variants"] == []
 
 
+def test_unit_details_expose_backend_profile_display_name(
+    tmp_path: Path, normalized: dict
+) -> None:
+    for profile in normalized["tables"]["profiles"]:
+        if profile["unit_id"] == 1:
+            profile["name"] = "REFUERZOS: Trooper"
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    for army in details["armies"]:
+        profile = army["profiles"][0]
+        assert profile["name"] == "REFUERZOS: Trooper"
+        assert profile["display_name"] == "Trooper"
+        assert profile["profile_identity"] == "trooper"
+
+
 def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:
     normalized["tables"]["extras"].append(
         {"id": 2, "name": "+5", "type": "DISTANCE", "source_defined": True}

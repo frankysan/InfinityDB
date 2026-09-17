@@ -44,6 +44,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Move reinforcement-label prefixes (`REINF` / `REFUERZOS`) into the validated
+  identity policy and derive profile `display_name` values in the backend. The
+  browser now consumes `display_name` and `profile_identity` instead of carrying
+  a duplicate reinforcement-prefix regex. Because existing generated databases
+  pin an older identity-config contract, bump the identity-config schema to 2
+  and Army database compatibility revision to 15 while keeping SQLite schema 10.
 - Make skill-extra distance detection authoritative to imported Army
   `extras.type` metadata instead of numeric-text heuristics. Numeric text such as
   `+5 CC` no longer needs an application exception. Move the remaining
@@ -82,7 +88,7 @@ All notable changes to this project are documented in this file.
   mercenary, and reinforcement evidence into frontend-only `logical_units` and
   `logical_unit_sources` tables while retaining all source rows and occurrence
   provenance. Repository reads now consume that materialized mapping; schema
-  version is 10 and database compatibility revision is 14.
+  version is 10.
 - Audit unambiguous reinforcement-only source-unit identity during database
   creation and persist `reinforcementUnitMatches` alongside the pinned identity
   policy. The audit now feeds materialized logical-unit identity instead of
