@@ -76,6 +76,15 @@ def _unit_symbol_mapping(source: bytes) -> dict[str, str]:
     return {json.loads(match.group(1)): json.loads(match.group(2)) for match in entries}
 
 
+def _army_symbol_mapping(source: bytes) -> dict[int, str]:
+    text = source.decode("utf-8")
+    entries = re.finditer(
+        r'\[\s*(\d+)\s*,\s*("(?:\\.|[^"\\])*")\s*\]',
+        text,
+    )
+    return {int(match.group(1)): json.loads(match.group(2)) for match in entries}
+
+
 def assert_css_rule(
     styles: bytes,
     selector: str,
@@ -843,18 +852,10 @@ def test_army_symbol_is_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
     assert b"armySymbolPath" in body
-    status, headers, body = request(app, "/static/armies/panoceania/101-panoceania.svg")
-    assert status == 200
-    assert headers["content-type"] == "image/svg+xml"
-    assert b"<svg" in body
-    status, _, body = request(app, "/static/units/panoceania/18-clipper-dronbot.svg")
-    assert status == 200
-    assert b"<svg" in body
-    for path in [
-        "/static/armies/combined-army/605-next-wave.svg",
-        "/static/armies/na2/998-contracted-back-up.svg",
-    ]:
-        status, headers, body = request(app, path)
+    mapping = _army_symbol_mapping(body)
+    for army_id in [101, 605, 998, 1199]:
+        published = mapping[army_id]
+        status, headers, body = request(app, f"/static/armies/{published}")
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
@@ -1581,6 +1582,7 @@ def test_unit_symbol_is_served(app: Callable) -> None:
     mapping = _unit_symbol_mapping(body)
     for slug in [
         "fusiliers",
+        "clipper-dronbot",
         "yojimbo-motorized-sword-for-hire",
         "blur-spec-ops",
         "next-wave-team-ops",
@@ -1592,10 +1594,6 @@ def test_unit_symbol_is_served(app: Callable) -> None:
         assert b"<svg" in body
     status, _, _ = request(app, "/static/units/unassigned/not-a-unit.svg")
     assert status == 404
-    status, headers, body = request(app, "/static/armies/jsa/1199-hayabusa.svg")
-    assert status == 200
-    assert headers["content-type"] == "image/svg+xml"
-    assert b"<svg" in body
 
 
 @pytest.mark.parametrize("path", ["/", "/api/armies", "/api/units", "/missing"])
