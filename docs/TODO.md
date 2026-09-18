@@ -76,14 +76,16 @@ history retains implementation detail.
   mismatch, and reports the accepted per-document source-revision topology
   diagnostically. Mixed top-level `version` values remain legitimate and are
   preserved independently from InfinityDB snapshot acquisition date/hash.
-- [ ] Establish a regression baseline for tolerated source-data anomalies. Keep
-  current source ambiguities non-fatal where the model intentionally preserves
-  them, but record warning categories/counts for a known snapshot and flag new
-  categories or unexpected growth on later snapshots. The 2026-09-10 merged
-  snapshot audit observed 95 anonymous references, 5 placeholder units, 1
-  placeholder catalog value, 14 unresolved Fireteam slugs, and 1 Fireteam member
-  outside its army roster; verify these counts from aligned generated artifacts
-  before making them an automated baseline.
+- [x] Establish a regression baseline for tolerated source-data anomalies.
+  `config/validation/source-anomalies.json` pins the exact 2026-09-18 raw
+  snapshot hash, observed source-revision topology, and its 116 normalization
+  warnings: 95 anonymous references, 5 placeholder units, 1 placeholder catalog
+  value, 14 unresolved Fireteam slugs, and 1 Fireteam member outside its army
+  roster. `infinity-db build`/`normalize` enforce that baseline for downloader-
+  dated snapshots at or after the baseline date: decreases remain non-fatal,
+  while new warning categories or growth above a recorded count fail before
+  database export. Ad-hoc/fixture inputs without downloader snapshot provenance
+  and the standalone `infinity-army` pipeline remain available for investigation.
 
 ## Configuration and domain knowledge
 

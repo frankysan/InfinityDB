@@ -105,6 +105,15 @@ define implementation behavior remain in code. Configuration is for maintained
 domain knowledge and policy; curated rules data is for human-reviewed
 source-derived facts.
 
+`config/validation/source-anomalies.json` records the reviewed normalization
+warning ceiling for one exact Army snapshot, including its acquisition date,
+archive SHA-256, source-revision counts, and per-warning counts. The comparison
+policy remains code: downloader-dated snapshots at or after the baseline may
+reduce known warning counts, but a new warning category or growth above a
+recorded count is a build regression. Inputs without downloader snapshot
+provenance are outside this production-source regression check so synthetic and
+investigative normalization remain usable.
+
 `config/identity/source-identities.json` is the first repository-wide example
 of the code/config split. It owns maintained logical-identity exceptions for
 source unit, army-list, skill, equipment, and weapon IDs plus identity-name

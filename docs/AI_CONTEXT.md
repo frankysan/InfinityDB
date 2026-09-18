@@ -391,6 +391,13 @@ changes.
   36 documents at `7.26246.158` / 22 at `7.26246.159`. Snapshot coherence will
   therefore be based on source stability across acquisition, while snapshot date
   and per-document data revision remain separate provenance concepts.
+- 2026-09-18: The exact 2026-09-18 Army snapshot is the reviewed
+  normalization-anomaly baseline: 116 warnings across five categories. The
+  tracked validation config treats those counts as ceilings for downloader-dated
+  snapshots at or after that date. Decreases are allowed; new categories or
+  count growth fail the InfinityDB application build before SQLite export.
+  Synthetic/ad-hoc inputs without downloader snapshot provenance and the
+  standalone `infinity-army` pipeline are deliberately outside this baseline.
 - 2026-09-17: Weapon catalog policy was split from implementation code.
   `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
   and explicit category decisions; `config/catalogs/weapon-overrides.json` owns

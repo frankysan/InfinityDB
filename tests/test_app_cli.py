@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+import infinity_db.cli as app_cli
 from infinity_army_data.merge import reconstruct_source
 from infinity_db.cli import build_parser, main
 from infinity_db.identities import (
@@ -148,6 +149,25 @@ def test_invalid_source_reports_error_without_database(
     output_dir = tmp_path / "generated"
     assert main(["build", str(tmp_path / "missing"), "--output-dir", str(output_dir)]) == 1
     assert "ERROR" in capsys.readouterr().err
+    assert not (output_dir / "infinity.db").exists()
+
+
+def test_source_anomaly_regression_blocks_database_export(
+    source_directory: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output_dir = tmp_path / "generated"
+
+    def reject(_source: Path) -> None:
+        raise ValueError("synthetic source anomaly regression")
+
+    monkeypatch.setattr(app_cli, "_validate_source_anomaly_baseline", reject)
+
+    assert main(["build", str(source_directory), "--output-dir", str(output_dir)]) == 1
+    assert "synthetic source anomaly regression" in capsys.readouterr().err
+    assert (output_dir / "normalized.json").is_file()
     assert not (output_dir / "infinity.db").exists()
 
 

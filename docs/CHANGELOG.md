@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add a validated source-anomaly regression baseline for the exact 2026-09-18
+  Army snapshot. InfinityDB application builds allow reviewed warning counts to
+  decrease but reject new warning categories or growth above the recorded
+  ceiling before database export.
 - Support an optional Git-ignored root `AGENTS.local.md` for user-specific agent
   workflow and communication preferences while keeping tracked project
   instructions authoritative.

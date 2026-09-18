@@ -17,10 +17,30 @@ from .curated import load_curated_directory, load_curated_document
 from .database import export_database, raw_database_path
 from .identities import identity_metadata, load_identity_config
 from .rules_database import export_rules_database
+from .source_anomalies import (
+    load_source_anomaly_baseline,
+    source_anomaly_baseline_applies,
+    validate_normalized_source_anomalies,
+)
 
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
+
+
+def _validate_source_anomaly_baseline(source: Path) -> None:
+    with source.open(encoding="utf-8") as handle:
+        normalized = json.load(handle)
+    baseline = load_source_anomaly_baseline()
+    if not source_anomaly_baseline_applies(normalized, baseline):
+        return
+    audit = validate_normalized_source_anomalies(normalized, baseline)
+    print(
+        "Source anomaly baseline: passed "
+        f"({audit.warning_count} warnings; "
+        f"baseline {audit.baseline_warning_count} from "
+        f"{audit.baseline_snapshot_downloaded_on})"
+    )
 
 
 def _export(source: Path, destination: Path) -> None:
@@ -33,11 +53,13 @@ def _export(source: Path, destination: Path) -> None:
 
 def cmd_normalize(args: argparse.Namespace) -> int:
     config = load_identity_config()
-    return normalize_dataset(
+    result = normalize_dataset(
         args,
         canonical_faction_overrides=config.canonical_faction_overrides,
         normalized_metadata=identity_metadata(config),
     )
+    _validate_source_anomaly_baseline(args.output)
+    return result
 
 
 def cmd_build(args: argparse.Namespace) -> int:
@@ -47,7 +69,9 @@ def cmd_build(args: argparse.Namespace) -> int:
         canonical_faction_overrides=config.canonical_faction_overrides,
         normalized_metadata=identity_metadata(config),
     )
-    _export(args.output_dir / "normalized.json", args.output_dir / "infinity.db")
+    normalized = args.output_dir / "normalized.json"
+    _validate_source_anomaly_baseline(normalized)
+    _export(normalized, args.output_dir / "infinity.db")
     return 0
 
 
