@@ -420,15 +420,15 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Package configuration intentionally required by supported installed CLI
     build/ingestion operations through an explicit resource contract, and verify
     that contract in the planned installed-wheel smoke job.
-  - [ ] Add explicit `--assets off|auto|required` handling to `run_checks.py`.
+  - [x] Add explicit `--assets off|auto|required` handling to `run_checks.py`.
     Required CI defaults to `off`; `auto` uses full-asset tests only when a
     validated complete set exists and fails on detected partial/corrupt state;
     `required` fails unless the complete set validates.
-  - [ ] Split asset-dependent pytest coverage into an explicit full-asset marker
+  - [x] Split asset-dependent pytest coverage into an explicit full-asset marker
     while making normal tests hermetic through project-owned fixtures or injected
     temporary static roots. Test absent/present asset behavior deliberately so a
     clean source archive passes without third-party graphical assets.
-  - [ ] Make version tests independent of incidental Git-checkout state. Test the
+  - [x] Make version tests independent of incidental Git-checkout state. Test the
     `+dev` display suffix with controlled repository/version inputs rather than
     requiring source archives or detached release trees to contain Git metadata
     and be ahead/dirty.

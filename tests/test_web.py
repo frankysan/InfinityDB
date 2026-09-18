@@ -16,6 +16,7 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_army_data.merge import make_source, merge_sources
+from infinity_db import __display_version__
 from infinity_army_data.normalize import normalize_master
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
@@ -596,7 +597,7 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert b'<header class="topbar page-header">' in body
     assert b'aria-label="Breadcrumb"' in body
     assert b'<footer class="page-footer">' in body
-    assert b"Version 0.5.1+dev" in body
+    assert f"Version {__display_version__}".encode() in body
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
@@ -785,7 +786,7 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
-    assert b"Version 0.5.1+dev" in body
+    assert f"Version {__display_version__}".encode() in body
     assert b"Support questions, suggestions, or" in body
     assert b"feedback can be submitted on the project's GitHub page." in body
     assert b"mailto:johannes@haglund.info" not in body
@@ -796,6 +797,38 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"about.js" in body
 
 
+def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
+    app: Callable,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    web_app = importlib.import_module("infinity_db.web.app")
+    package_root = tmp_path / "package"
+    fixture_paths = (
+        "static/armies/test/101-test.svg",
+        "static/orders/regular.svg",
+        "static/units/test/1-test.svg",
+    )
+    svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
+    for relative in fixture_paths:
+        path = package_root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(svg)
+
+    monkeypatch.setattr(web_app, "files", lambda _: package_root)
+
+    for url in (
+        "/static/armies/test/101-test.svg",
+        "/static/orders/regular.svg",
+        "/static/units/test/1-test.svg",
+    ):
+        status, headers, body = request(app, url)
+        assert status == 200
+        assert headers["content-type"] == "image/svg+xml"
+        assert body == svg
+
+
+@pytest.mark.full_assets
 def test_army_symbol_is_served(app: Callable) -> None:
     status, headers, body = request(app, "/static/army-symbols.js")
     assert status == 200
@@ -1170,6 +1203,7 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
     assert b"link.href = `/${catalog}/${encodeURIComponent(item.id)}`" in body
 
 
+@pytest.mark.full_assets
 @pytest.mark.parametrize(
     "symbol",
     [
@@ -1534,6 +1568,7 @@ def test_skill_details_frontend_renders_curated_rules_reference(app: Callable) -
     assert b"Rules reference" in body
 
 
+@pytest.mark.full_assets
 def test_unit_symbol_is_served(app: Callable) -> None:
     status, headers, body = request(app, "/static/unit-symbol-map.js")
     assert status == 200

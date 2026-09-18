@@ -1,9 +1,8 @@
 # Continuous integration strategy
 
-This document records the accepted design direction for InfinityDB continuous
-integration and automated validation. Unless a section is explicitly marked
-current, the workflows and command-line options described here are planned and
-must not be treated as implemented behavior.
+This document records the InfinityDB continuous-integration and automated
+validation contract. Sections explicitly marked design direction remain planned;
+the deployment smoke and local asset-test policy are current behavior.
 
 The goal is to make a clean checkout independently trustworthy while still
 supporting deeper validation against a complete local Corvus Belli graphical
@@ -107,9 +106,9 @@ separate planned contract for the installed-wheel smoke layer.
 This layer verifies deployment packaging; it is not a substitute for general
 source CI or installed-wheel validation.
 
-### Full-asset integration mode
+### Full-asset integration mode (current local behavior)
 
-`tools/run_checks.py` should gain an explicit asset policy with three modes:
+`tools/run_checks.py` has an explicit asset policy with three modes:
 
 ```text
 --assets off
@@ -117,7 +116,7 @@ source CI or installed-wheel validation.
 --assets required
 ```
 
-The intended semantics are:
+The implemented local semantics are:
 
 | Mode | Behavior |
 | --- | --- |
@@ -125,15 +124,18 @@ The intended semantics are:
 | `auto` | Use full-asset tests when a validated complete asset set is available. With no asset set, run hermetically. A detected partial/corrupt asset set is an error rather than a reason to silently downgrade. |
 | `required` | Require a validated complete asset set and run full-asset integration tests. Missing, partial, or invalid assets fail the check run. |
 
-A "complete asset set" must be established by the current symbol
+A "complete asset set" is established by the current tracked browser
 publication/mapping contract, not inferred from the presence of a few SVG files.
-The exact validator may evolve with the symbol pipeline, but the caller-visible
-semantics above should remain stable.
+The validator requires every mapped army/unit SVG plus every current
+order/characteristic symbol endpoint to exist and parse as SVG. The exact
+validator may evolve with the symbol publisher, but the caller-visible semantics
+above should remain stable.
 
-Asset-dependent pytest coverage should be explicitly marked (for example,
-`full_assets`) and separated from hermetic tests. Hermetic tests should use
-project-owned fixtures or injected temporary static roots to cover missing and
-present-asset behavior without requiring Corvus Belli artwork.
+Asset-dependent pytest coverage is marked `full_assets` and separated from the
+hermetic suite. Direct pytest excludes `full_assets` by default. Hermetic web
+coverage uses project-owned temporary SVG fixtures for dynamic static serving,
+and version-display assertions consume the controlled application display
+version rather than relying on incidental `.git` state.
 
 A GitHub Actions full-asset run should be optional/manual rather than a required
 public PR check. Acceptable execution models include a suitably configured
@@ -154,19 +156,17 @@ networked or long-running benchmark.
 
 ## Planned implementation order
 
-The deployment-smoke runtime import boundary is now separated from build-time
-normalization/configuration. Remaining CI work should proceed in this order:
+The deployment-smoke runtime import boundary and local hermetic/full-asset
+test split are implemented. Remaining CI work should proceed in this order:
 
-1. Make asset-dependent tests hermetic and introduce explicit `off` / `auto` /
-   `required` asset modes in `run_checks.py`.
-2. Add required Linux source CI around the normal check runner.
-3. Add installed-wheel/package smoke validation so source-checkout assumptions
+1. Add required Linux source CI around the normal check runner.
+2. Add installed-wheel/package smoke validation so source-checkout assumptions
    cannot hide missing packaged resources, including configuration intentionally
    required by supported installed build/ingestion CLI commands.
-4. Expand the hermetic source checks to Windows and macOS.
-5. Add optional/manual full-asset integration validation without redistributing
+3. Expand the hermetic source checks to Windows and macOS.
+4. Add optional/manual full-asset integration validation without redistributing
    third-party graphical assets.
-6. Add scheduled/manual acquisition, performance, or other extended workflows
+5. Add scheduled/manual acquisition, performance, or other extended workflows
    only where they provide useful independent signals.
 
 Symbol-pipeline feature work can then continue with these validation layers in

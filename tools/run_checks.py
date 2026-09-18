@@ -13,6 +13,19 @@ from datetime import datetime
 from pathlib import Path
 from typing import TextIO
 
+try:
+    from tools.asset_validation import (
+        ASSET_MODES,
+        AssetModeSelection,
+        select_asset_mode,
+    )
+except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
+    from asset_validation import (  # type: ignore[no-redef]
+        ASSET_MODES,
+        AssetModeSelection,
+        select_asset_mode,
+    )
+
 STAGE_ORDER = ("test", "lint", "build", "rules")
 PROFILES = {
     "code": ("test", "lint"),
@@ -24,12 +37,14 @@ DEFAULT_LINT_TARGETS = (
     "src/infinity_army_data",
     "tests",
     "tools/run_checks.py",
+    "tools/asset_validation.py",
 )
 EXIT_OK = 0
 EXIT_STAGE_FAILURE = 1
 EXIT_RUNNER_ERROR = 2
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIRECTORY = REPO_ROOT / "reports"
+STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
 
 
 @dataclass(frozen=True)
@@ -110,6 +125,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional Army source directory/ZIP passed only to the build stage.",
     )
     parser.add_argument(
+        "--assets",
+        choices=ASSET_MODES,
+        default="auto",
+        help=(
+            "Third-party graphical asset policy for the test stage: off runs hermetic "
+            "tests only; auto uses a complete validated local set when available; "
+            "required fails unless that complete set is available."
+        ),
+    )
+    parser.add_argument(
         "--report",
         nargs="?",
         const=True,
@@ -142,6 +167,7 @@ def stage_definitions(
     targets: list[str],
     *,
     build_source: Path | None,
+    include_full_assets: bool = False,
 ) -> list[Stage]:
     python = sys.executable
     stages: list[Stage] = []
@@ -150,7 +176,8 @@ def stage_definitions(
             command = [python, "-m", "pytest"]
             if targets:
                 command.extend(targets)
-            command.append("-q")
+            marker = "full_assets or not full_assets" if include_full_assets else "not full_assets"
+            command.extend(("-m", marker, "-q"))
         elif name == "lint":
             command = [python, "-m", "ruff", "check"]
             command.extend(targets or DEFAULT_LINT_TARGETS)
@@ -241,12 +268,15 @@ def write_header(
     stages: list[Stage],
     targets: list[str],
     started_at: datetime,
+    asset_selection: AssetModeSelection | None,
 ) -> None:
     reporter.write("InfinityDB check run")
     reporter.write(f"Started: {started_at.isoformat(timespec='seconds')}")
     reporter.write(f"Branch: {git_value('branch', '--show-current')}")
     reporter.write(f"Commit: {git_value('rev-parse', 'HEAD')}")
     reporter.write(f"Stages: {', '.join(stage.name for stage in stages)}")
+    if asset_selection is not None:
+        reporter.write(f"Assets: {asset_selection.description()}")
     if targets:
         reporter.write(f"Targets: {', '.join(targets)}")
 
@@ -265,13 +295,19 @@ def main(argv: list[str] | None = None) -> int:
     try:
         args = build_parser().parse_args(argv)
         stage_names = selected_stage_names(args)
+        if args.build_source is not None and "build" not in stage_names:
+            build_parser().error("--build-source requires the build stage")
+        asset_selection = (
+            select_asset_mode(args.assets, STATIC_ROOT) if "test" in stage_names else None
+        )
         stages = stage_definitions(
             stage_names,
             args.targets,
             build_source=args.build_source,
+            include_full_assets=bool(
+                asset_selection is not None and asset_selection.include_full_assets
+            ),
         )
-        if args.build_source is not None and "build" not in stage_names:
-            build_parser().error("--build-source requires the build stage")
     except SystemExit as exc:
         return int(exc.code)
     except (OSError, ValueError) as exc:
@@ -282,7 +318,7 @@ def main(argv: list[str] | None = None) -> int:
     report_path = resolve_report_path(args.report, started_at)
     try:
         with Reporter(report_path) as reporter:
-            write_header(reporter, stages, args.targets, started_at)
+            write_header(reporter, stages, args.targets, started_at, asset_selection)
             if args.targets and ({"build", "rules"} & set(stage_names)):
                 reporter.write(
                     "Note: positional targets apply to pytest/Ruff only; "

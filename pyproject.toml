@@ -42,7 +42,10 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = ["--basetemp=.pytest-tmp"]
+addopts = ["--basetemp=.pytest-tmp", "-m", "not full_assets"]
+markers = [
+  "full_assets: requires the complete validated local Corvus Belli graphical asset set",
+]
 cache_dir = ".cache/pytest"
 
 [tool.ruff]

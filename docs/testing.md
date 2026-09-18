@@ -24,6 +24,48 @@ stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
 `rules.db` from the tracked curated rules collections. The named profiles are
 `code` (`test` + `lint`), `data` (`build` + `rules`), and `all`.
 
+
+## Graphical asset test modes
+
+The test stage has an explicit policy for the ignored Corvus Belli graphical
+asset tree:
+
+```powershell
+# Hermetic tests only; suitable for clean/public CI
+python tools/run_checks.py --stage test --assets off
+
+# Local default: use full-asset tests when a complete valid set exists
+python tools/run_checks.py --stage test --assets auto
+
+# Require the complete valid published asset set
+python tools/run_checks.py --stage test --assets required
+```
+
+`run_checks.py` defaults to `--assets auto`. With no third-party SVG tree,
+`auto` falls back to the hermetic suite. If any published third-party SVGs are
+present, `auto` requires the set to be complete and valid rather than silently
+ignoring a partial/corrupt installation. `required` always requires the complete
+set. The report header records the requested/effective asset mode.
+
+Completeness is checked against the current tracked publication contract:
+every army SVG referenced by `army-symbols.js`, every unit SVG referenced by
+`unit-symbol-map.js`, and every current order/characteristic symbol endpoint must
+exist and parse as SVG. Extra local files do not make an otherwise valid set
+incomplete.
+
+Asset-dependent tests carry the `full_assets` pytest marker. Direct pytest runs
+exclude that marker by default, so a clean checkout is green:
+
+```powershell
+python -m pytest -q
+```
+
+Use `python -m pytest -m full_assets -q` only when debugging those integration
+tests directly. Normal development/handoff runs should prefer `run_checks.py`
+because it validates the asset set before enabling them. Hermetic web tests use
+project-owned temporary SVG fixtures to retain coverage of dynamic SVG serving
+without redistributing third-party artwork.
+
 ## Targeted checks
 
 Positional targets are forwarded to pytest and Ruff. They are deliberately not
@@ -65,10 +107,10 @@ the exact container contract and the equivalent manual command.
 ## Planned continuous integration
 
 The accepted CI/testing design direction is documented in
-[the continuous integration strategy](ci.md). It defines required hermetic
-source checks, cross-platform coverage, installed-wheel validation, the existing
-deployment-smoke layer, and optional full-asset integration testing. These are
-planned contracts until their corresponding backlog tasks are implemented.
+[the continuous integration strategy](ci.md). The local hermetic/full-asset test
+split described above is implemented; required source CI, cross-platform
+coverage, installed-wheel validation, and optional/manual GitHub full-asset
+execution remain planned until their corresponding backlog tasks are completed.
 
 ## Reports
 

@@ -26,6 +26,14 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add explicit hermetic/full-asset test modes. `run_checks.py --assets
+  off|auto|required` validates the complete current published symbol set before
+  enabling `full_assets` pytest coverage; direct pytest is hermetic by default,
+  partial/corrupt local asset trees fail strict modes, and project-owned SVG
+  fixtures retain dynamic static-serving coverage without third-party artwork.
+- Make web version-display assertions independent of incidental Git-checkout
+  state by testing against the application's controlled display version.
+
 - Add `tools/build_symbols.py` as the explicit symbol-refresh orchestration
   entrypoint. It pins one verified Army snapshot through raw symbol discovery
   and acquisition, supports offline `--snapshot` and explicit online

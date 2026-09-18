@@ -46,6 +46,8 @@ consistent across local development and agent handoffs. Examples:
 <venv-python> tools/run_checks.py --all
 <venv-python> tools/run_checks.py --stage test tests/test_availability.py
 <venv-python> tools/run_checks.py --profile code --report
+<venv-python> tools/run_checks.py --stage test --assets off
+<venv-python> tools/run_checks.py --stage test --assets required
 ```
 
 With `--report` and no path, the runner writes an ignored repository-local

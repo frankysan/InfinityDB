@@ -60,11 +60,14 @@ and serves a read-only browser and same-origin HTTP API.
   unexpectedly.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
-- **Design direction:** required CI is hermetic and clean-checkout capable.
-  Full-asset testing remains an explicit `off` / `auto` / `required` integration
-  mode against a validated complete asset set; public required CI neither depends
-  on live acquisition nor redistributes Corvus Belli graphical assets. See
-  `docs/ci.md` for the validation-layer contract.
+- Local tests separate hermetic and full-asset coverage explicitly.
+  `run_checks.py --assets off|auto|required` validates the complete current
+  published symbol contract before enabling `full_assets`; direct pytest is
+  hermetic by default. `auto` may fall back only when the asset tree is entirely
+  absent, never when it is partial/corrupt.
+- **Design direction:** required public CI uses hermetic mode, does not depend on
+  live acquisition, and does not redistribute Corvus Belli graphical assets.
+  Optional/manual full-asset GitHub validation remains separate. See `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 

@@ -501,15 +501,19 @@ separate, intentional operations.
 
 ## Validation and CI policy
 
-**Design direction:** required source CI is hermetic and must pass from a clean
-checkout without ignored Corvus Belli graphical assets or live acquisition.
-Full-asset validation remains an explicit supported integration mode against a
-validated complete local asset set, but is not a required public pull-request
-check and must not redistribute those assets as CI artifacts. Installed-wheel
-and container smoke tests validate packaging boundaries separately from
-source-checkout tests, while maintained Python tooling receives cross-platform
-Windows/Linux/macOS coverage where practical. The detailed planned validation
-layers and asset-mode semantics are defined in `docs/ci.md`.
+Local test execution now separates hermetic and full-asset coverage explicitly.
+`run_checks.py --assets off|auto|required` validates the current published
+army/unit/order symbol contract before enabling `full_assets` tests; direct
+pytest excludes those tests by default. A detected partial/corrupt local asset
+tree is an error in `auto`/`required`, while a completely absent tree is valid
+for hermetic testing.
+
+**Design direction:** required source CI uses the hermetic mode and must pass
+from a clean checkout without live acquisition. Full-asset GitHub validation
+remains optional/manual and must not redistribute those assets as CI artifacts.
+Installed-wheel and container smoke tests validate packaging boundaries
+separately from source-checkout tests, while maintained Python tooling receives
+cross-platform Windows/Linux/macOS coverage where practical. See `docs/ci.md`.
 
 ## Portability and filesystem policy
 

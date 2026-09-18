@@ -54,6 +54,8 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "-m",
         "pytest",
         "tests/test_cli.py",
+        "-m",
+        "not full_assets",
         "-q",
     )
     assert stages[1].command == (
@@ -77,6 +79,30 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "infinity_db",
         "build-rules",
     )
+
+
+def test_test_stage_can_include_full_asset_tests() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",),
+        [],
+        build_source=None,
+        include_full_assets=True,
+    )
+
+    assert stage.command == (
+        sys.executable,
+        "-m",
+        "pytest",
+        "-m",
+        "full_assets or not full_assets",
+        "-q",
+    )
+
+
+def test_asset_mode_defaults_to_auto() -> None:
+    args = run_checks.build_parser().parse_args(["--stage", "test"])
+
+    assert args.assets == "auto"
 
 
 def test_lint_stage_uses_project_defaults_without_targets() -> None:
