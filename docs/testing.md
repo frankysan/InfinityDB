@@ -43,6 +43,19 @@ By default, requested stages continue after a failed stage so one run can show
 the complete repository state. Use `--fail-fast` when stopping at the first
 failure is more useful.
 
+## Deployment smoke test
+
+Docker deployment validation is intentionally separate from `run_checks.py`
+because it requires a Docker daemon. The GitHub Actions `Deployment smoke test`
+workflow builds the real application databases from a small synthetic Army
+fixture plus the tracked curated rules collection, builds the Docker image, and
+uses `scripts/verify-container-image.sh` to validate image contents and healthy
+production startup. Redistributable-image validation also rejects locally
+acquired Corvus Belli graphical-asset trees.
+
+See [the Linux deployment guide](deployment.md#deployment-smoke-validation) for
+the exact container contract and the equivalent manual command.
+
 ## Reports
 
 Console output can also be written verbatim to a UTF-8 text report.

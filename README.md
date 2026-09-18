@@ -61,9 +61,11 @@ Current release: **0.5.1** (2026-09-14).
 - Includes an About page that explains the local reference, its validated data
   pipeline, its current capabilities and direction, plus maintainer contact
   details, the GitHub repository, and an LLM code-use disclosure.
-- Bundles army, unit, order, and characteristic SVG symbols for the browser.
-  Army and unit assets use stable ID-and-slug paths, so the browser can serve
-  an exact asset without scanning a symbol directory.
+- Supports locally published army, unit, order, and characteristic SVG symbols
+  for the browser. Corvus Belli graphical assets are acquired separately and are
+  not bundled with InfinityDB source code or redistributable releases by
+  default. Army and unit assets use stable ID-and-slug paths, so the browser can
+  serve an exact local asset without scanning a symbol directory.
 - Includes standalone scripts for downloading Army JSON snapshots, wiki mirror
   snapshots, and the current unit-symbol set. All three stage loose files
   temporarily and persist complete timestamped ZIP snapshots; normal build

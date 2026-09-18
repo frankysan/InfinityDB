@@ -59,6 +59,32 @@ For a local smoke test, use `DOMAIN=localhost` and open
 the real hostname before running Compose and configure the external TLS proxy
 to forward that host to Caddy.
 
+## Deployment smoke validation
+
+The `Deployment smoke test` GitHub Actions workflow exercises the distributable
+container path without committing or downloading real Army source data. It
+builds `infinity.db` from the synthetic source under
+`tests/fixtures/deployment-smoke/`, builds the tracked curated `rules.db`, then
+builds the Docker image and runs `scripts/verify-container-image.sh`.
+
+The verifier requires `/app/data/` to contain exactly `infinity.db` and
+`rules.db`, validates both database formats, checks the configured runtime paths
+and non-root image user, and starts Gunicorn with a read-only root filesystem,
+`/tmp` tmpfs, and `no-new-privileges`. It waits for the image health check and
+then exercises Army, rules-enriched Skill, and version API endpoints. In
+`--redistributable` mode it also rejects the ignored `armies/`, `orders/`, and
+`units/` Corvus Belli graphical-asset trees if they appear in either the copied
+source tree or the installed Python package. This keeps CI/release validation
+separate from local asset publication.
+
+The same image verifier can be run manually after preparing the two generated
+databases and building an image:
+
+```sh
+docker build -t infinity-db:smoke .
+sh ./scripts/verify-container-image.sh infinity-db:smoke --redistributable
+```
+
 ## Operations
 
 ```sh

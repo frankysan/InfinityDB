@@ -549,7 +549,7 @@ history retains implementation detail.
     runtime static tree, while source archives, wheels, GitHub releases, Docker
     images distributed by InfinityDB, and similar prebuilt artifacts must exclude
     those graphical assets under the current rights assumption.
-  - Correct current wording that implies bundled assets in `README.md`,
+  - [x] Correct current wording that implies bundled assets in `README.md`,
     `docs/architecture.md`, `docs/deployment.md`, and
     `THIRD_PARTY_NOTICES.md`; keep historical CHANGELOG entries intact when they
     accurately describe past behavior. Use `docs/AI_CONTEXT.md` and the existing
@@ -720,16 +720,20 @@ history retains implementation detail.
 - [ ] Add a benchmark/health-check command that validates the frontend database,
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
-- [ ] Test a full build and container startup in CI, including the requirement
-  that deployment images contain only intended runtime databases rather than the
-  development raw archive.
+- [ ] Complete deployment validation coverage.
   - [x] Build and package `rules.db` alongside `infinity.db` for the Docker
     deployment. The image explicitly configures the rules path, so a missing or
     invalid `rules.db` now fails worker startup instead of silently shipping a
     reduced feature set; local/development auto-discovery remains optional.
-  - Keep Corvus Belli graphical assets outside redistributable CI/release images
-    unless explicit redistribution permission is established; test local asset
-    publication separately from distributable-image construction.
+  - [x] Test a full synthetic Army/rules build and production container startup
+    in CI. The deployment smoke workflow validates both runtime databases,
+    requires `/app/data/` to contain only those intended database artifacts,
+    exercises the read-only/non-root Gunicorn startup and health check, and
+    rejects ignored Corvus Belli graphical-asset trees in redistributable
+    images.
+  - [ ] Test local asset publication separately from distributable-image
+    construction so a local installation can exercise acquired symbols without
+    weakening the release-image redistribution boundary.
 
 ## Potential product features
 

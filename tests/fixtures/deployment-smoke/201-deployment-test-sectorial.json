@@ -1,0 +1,47 @@
+{
+  "version": "ci",
+  "reinforcements": null,
+  "units": [
+    {
+      "id": 17,
+      "name": "Test Ranger",
+      "canonical": 101,
+      "factions": [
+        101,
+        201
+      ],
+      "profileGroups": [
+        {
+          "id": 1,
+          "profiles": [
+            {
+              "id": 1,
+              "name": "Ranger",
+              "move": [
+                10,
+                10
+              ],
+              "skills": [
+                {
+                  "id": 74
+                }
+              ]
+            }
+          ],
+          "options": []
+        }
+      ],
+      "filters": {
+        "army": 201
+      }
+    }
+  ],
+  "filters": {
+    "skills": [
+      {
+        "id": 74,
+        "name": "Super-Jump"
+      }
+    ]
+  }
+}

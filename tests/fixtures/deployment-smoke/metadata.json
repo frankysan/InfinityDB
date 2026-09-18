@@ -1,0 +1,19 @@
+{
+  "factions": [
+    {
+      "id": 101,
+      "name": "Deployment Test Army"
+    },
+    {
+      "id": 201,
+      "name": "Deployment Test Sectorial",
+      "parent": 101
+    }
+  ],
+  "skills": [
+    {
+      "id": 74,
+      "name": "Super-Jump"
+    }
+  ]
+}

@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add a Docker deployment smoke workflow that builds `infinity.db` from a
+  synthetic Army fixture plus the tracked `rules.db`, validates the image's
+  runtime-data contract, rejects third-party symbol trees in redistributable
+  builds, and exercises healthy non-root/read-only Gunicorn startup.
 - Add project-level markdownlint configuration that keeps `MD024` duplicate-heading checks within sibling headings, allowing standard changelog headings such as `Added`, `Changed`, and `Fixed` to repeat under different releases.
 - Add `tools/run_checks.py` as the standard development-check orchestrator for
   pytest, Ruff, and Army build validation, with selectable stages/profiles,
@@ -44,6 +48,9 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Clarify current asset-distribution language: Corvus Belli graphical symbols
+  may be published into a local installation but are not bundled with InfinityDB
+  source code or redistributable releases by default.
 - Replace first-logo-per-unit symbol acquisition with complete source-semantic
   Army discovery. `download_army_symbols.py` now preserves every profile/faction
   reference, includes maintained static symbols, audits `resume` and unknown SVG
