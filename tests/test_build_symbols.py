@@ -43,6 +43,31 @@ def army_snapshot(tmp_path: Path, *, language: str = "en") -> tuple[Path, Path]:
     return archive, manifest
 
 
+def stub_post_acquisition(module, monkeypatch, *, status: str = "passed") -> None:
+    materialized = SimpleNamespace(
+        raw_root=Path("work/raw"),
+        work_root=Path("work"),
+        asset_count=0,
+        build_manifest={},
+    )
+    preflight = SimpleNamespace(
+        report=Path("reports/svg-preflight.json"),
+        status=status,
+        summary={
+            "svgCount": 0,
+            "parseErrorCount": 0 if status == "passed" else 1,
+            "activeTextAssetCount": 0,
+            "noActiveTextAssetCount": 0,
+            "fontDeclaredAssetCount": 0,
+            "uniqueDeclaredFontCount": 0,
+        },
+    )
+    monkeypatch.setattr(
+        module, "materialize_symbol_archive", lambda *_args, **_kwargs: materialized
+    )
+    monkeypatch.setattr(module, "audit_symbol_work", lambda *_args, **_kwargs: preflight)
+
+
 def test_resolve_army_snapshot_verifies_provenance_and_revisions(tmp_path: Path) -> None:
     module = load_module()
     archive, manifest = army_snapshot(tmp_path)
@@ -108,6 +133,7 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
     expected_manifest.parent.mkdir(parents=True)
     expected_manifest.write_bytes(manifest.read_bytes())
     seen: dict[str, object] = {}
+    stub_post_acquisition(module, monkeypatch)
 
     discovery = SimpleNamespace(source_document_count=2)
 
@@ -170,6 +196,7 @@ def test_fetch_mode_pins_the_snapshot_returned_by_army_acquisition(
     data_root = tmp_path / "data"
     discovery = SimpleNamespace(source_document_count=2)
     seen: dict[str, object] = {}
+    stub_post_acquisition(module, monkeypatch)
 
     def fake_army(destination, manifest_directory, **kwargs):
         seen["army_destination"] = destination
@@ -229,3 +256,43 @@ def test_offline_mode_requires_snapshot_provenance(tmp_path: Path, capsys) -> No
         == 1
     )
     assert "Army snapshot provenance is required" in capsys.readouterr().err
+
+
+def test_orchestrator_fails_after_persisting_failed_svg_preflight(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = load_module()
+    archive, manifest = army_snapshot(tmp_path)
+    data_root = tmp_path / "data"
+    expected_manifest = data_root / "manifests" / "snapshots" / manifest.name
+    expected_manifest.parent.mkdir(parents=True)
+    expected_manifest.write_bytes(manifest.read_bytes())
+    stub_post_acquisition(module, monkeypatch, status="failed")
+    discovery = SimpleNamespace(source_document_count=2)
+    monkeypatch.setattr(module, "discover_symbol_source", lambda *_args, **_kwargs: discovery)
+    monkeypatch.setattr(module, "print_discovery_summary", lambda _discovery: None)
+    monkeypatch.setattr(
+        module,
+        "acquire_symbol_snapshot",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            asset_count=1,
+            archive=tmp_path / "symbols.zip",
+            snapshot_manifest=tmp_path / "symbols.json",
+            build_manifest=tmp_path / "build.json",
+        ),
+    )
+
+    assert (
+        module.main(
+            [
+                "--snapshot",
+                str(archive),
+                "--data-root",
+                str(data_root),
+                "--delay",
+                "0",
+            ]
+        )
+        == 1
+    )
+    assert "SVG preflight failed" in capsys.readouterr().err

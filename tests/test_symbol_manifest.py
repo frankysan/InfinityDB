@@ -5,6 +5,7 @@ import pytest
 
 from infinity_db.symbol_manifest import (
     SymbolManifestError,
+    add_svg_preflight,
     build_symbol_manifest,
     validate_symbol_manifest,
 )
@@ -207,3 +208,85 @@ def test_army_source_revisions_must_account_for_non_metadata_documents(
             project_root=tmp_path,
             **kwargs,
         )
+
+
+def test_acquisition_manifest_remains_version_2_until_preflight(tmp_path: Path) -> None:
+    army = artifact(tmp_path / "army.zip", b"army")
+    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
+    document = build_symbol_manifest(
+        army_artifact=army,
+        symbol_artifact=symbols,
+        acquired_at=datetime(2026, 9, 18, 9, 0, tzinfo=UTC),
+        **army_source_kwargs(1),
+        assets=[],
+        references=[],
+        audit={
+            "unitProfileReferenceCount": 0,
+            "uniqueUnitUrlCount": 0,
+            "factionReferenceCount": 0,
+            "uniqueFactionUrlCount": 0,
+            "semanticReferenceCount": 0,
+            "uniqueSemanticUrlCount": 0,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 0,
+            "uniqueRecursiveUrlCount": 0,
+            "uniqueDownloadedUrlCount": 0,
+            "unknownReferenceCount": 0,
+        },
+        project_root=tmp_path,
+    )
+
+    assert document["formatVersion"] == 2
+    validate_symbol_manifest(document)
+
+
+def test_svg_preflight_promotes_manifest_to_version_3(tmp_path: Path) -> None:
+    army = artifact(tmp_path / "army.zip", b"army")
+    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
+    report = artifact(tmp_path / "svg-preflight.json", b"{}")
+    document = build_symbol_manifest(
+        army_artifact=army,
+        symbol_artifact=symbols,
+        acquired_at=datetime(2026, 9, 18, 9, 0, tzinfo=UTC),
+        **army_source_kwargs(1),
+        assets=[],
+        references=[],
+        audit={
+            "unitProfileReferenceCount": 0,
+            "uniqueUnitUrlCount": 0,
+            "factionReferenceCount": 0,
+            "uniqueFactionUrlCount": 0,
+            "semanticReferenceCount": 0,
+            "uniqueSemanticUrlCount": 0,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 0,
+            "uniqueRecursiveUrlCount": 0,
+            "uniqueDownloadedUrlCount": 0,
+            "unknownReferenceCount": 0,
+        },
+        project_root=tmp_path,
+    )
+    summary = {
+        "svgCount": 0,
+        "parseErrorCount": 0,
+        "activeTextAssetCount": 0,
+        "noActiveTextAssetCount": 0,
+        "fontDeclaredAssetCount": 0,
+        "uniqueDeclaredFontCount": 0,
+    }
+
+    promoted = add_svg_preflight(
+        document,
+        status="passed",
+        summary=summary,
+        report=report,
+        project_root=tmp_path,
+    )
+
+    assert promoted["formatVersion"] == 3
+    assert promoted["processing"]["svgPreflight"]["report"]["path"] == "svg-preflight.json"
+    validate_symbol_manifest(promoted)

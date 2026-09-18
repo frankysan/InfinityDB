@@ -33,6 +33,7 @@ data/curated/*
 data/pdf/**/*
 data/wiki/**/*
 data/work/
+data/reports/
 src/infinity_db/web/static/armies/**/*
 src/infinity_db/web/static/orders/**/*
 src/infinity_db/web/static/units/**/*

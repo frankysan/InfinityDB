@@ -233,14 +233,19 @@ document count, and observed per-document Army source revisions, then passes
 that exact archive through current raw symbol discovery/resolution.
 
 The raw symbol resolution stage creates one immutable `SYMBOLS ...zip`,
-ordinary snapshot provenance, and the acquisition-only version-2
-`data/manifests/army-symbol-build.json`. That build manifest separates raw assets
-from consumers, records Army/SYMBOLS artifact hashes, and persists the verified
-Army source pin: API/source URL, language, acquisition timestamp, source-document
-count, and observed source revisions. It also records raw asset
-URL/filename/archive-path/hash/source-method, every source/static reference, and
-discovery audit counts. It deliberately has no font, duplicate, conversion,
-compression, or published-path state yet. The downloader does not generate
+ordinary snapshot provenance, and acquisition-only version-2
+`data/manifests/army-symbol-build.json`. That state separates raw assets from
+consumers, records Army/SYMBOLS artifact hashes, persists the verified Army
+source pin, and records raw asset URL/archive/hash/source-method plus all source
+references and discovery counts. The orchestrator then verifies the selected
+symbol archive/provenance and every member hash, replaces a derived work tree
+under `data/work/symbols/`, and writes a deterministic structural SVG preflight
+under `data/reports/symbols/`. The preflight records XML/SVG parse validity,
+active-text/text-object counts, and declared font families. It promotes the same
+build state to version 3 with the preflight status/summary/report identity.
+Version 2 remains accepted for acquisition-only state and existing caches. This
+preflight intentionally does not resolve installed fonts, aliases, duplicates,
+conversion, compression, or published paths. The downloader does not generate
 `army-symbols.js` or `unit-symbol-map.js`.
 
 Raw source resolution now follows this implemented order:
@@ -262,7 +267,8 @@ are reported.
 ### Design direction
 
 Later symbol processing must consume the same pinned Army/SYMBOLS identities
-rather than selecting newer snapshots independently. Exact or visual
+and the verified work/preflight state rather than selecting newer snapshots
+independently. Exact or visual
 deduplication may map several source assets to one canonical asset but must
 retain every original reference.
 

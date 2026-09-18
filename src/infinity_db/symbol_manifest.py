@@ -1,4 +1,4 @@
-"""Versioned acquisition state for Army symbol builds."""
+"""Versioned generated state for Army symbol builds."""
 
 from __future__ import annotations
 
@@ -11,7 +11,8 @@ from typing import Any
 from infinity_db.snapshot_provenance import portable_project_path, sha256_file
 
 SYMBOL_BUILD_FORMAT = "InfinityDB army symbol build"
-SYMBOL_BUILD_VERSION = 2
+SYMBOL_BUILD_ACQUISITION_VERSION = 2
+SYMBOL_BUILD_VERSION = 3
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
 SOURCE_METHODS = frozenset({"override", "cache", "network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -44,10 +45,10 @@ def build_symbol_manifest(
     audit: dict[str, int],
     project_root: Path,
 ) -> dict[str, Any]:
-    """Build and validate the acquisition-only version-2 symbol manifest."""
+    """Build and validate acquisition-only version-2 symbol state."""
     document = {
         "format": SYMBOL_BUILD_FORMAT,
-        "formatVersion": SYMBOL_BUILD_VERSION,
+        "formatVersion": SYMBOL_BUILD_ACQUISITION_VERSION,
         "snapshot": {
             "armyArtifact": artifact_record(army_artifact, project_root=project_root),
             "armySource": {
@@ -74,6 +75,31 @@ def build_symbol_manifest(
     }
     validate_symbol_manifest(document)
     return document
+
+
+def add_svg_preflight(
+    document: dict[str, Any],
+    *,
+    status: str,
+    summary: dict[str, int],
+    report: Path,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Promote acquisition state to version 3 with deterministic SVG preflight state."""
+    validate_symbol_manifest(document)
+    if status not in {"passed", "failed"}:
+        raise SymbolManifestError("SVG preflight status must be 'passed' or 'failed'")
+    promoted = json.loads(json.dumps(document))
+    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["processing"] = {
+        "svgPreflight": {
+            "status": status,
+            "summary": dict(sorted(summary.items())),
+            "report": artifact_record(report, project_root=project_root),
+        }
+    }
+    validate_symbol_manifest(promoted)
+    return promoted
 
 
 def write_symbol_manifest(document: dict[str, Any], path: Path) -> Path:
@@ -104,19 +130,20 @@ def load_symbol_manifest(path: Path) -> dict[str, Any]:
 
 
 def validate_symbol_manifest(document: Any) -> None:
-    """Validate the acquisition-only version-2 symbol-build contract."""
+    """Validate acquisition v2 or processed v3 symbol-build state."""
     root = _object(document, "symbol manifest")
-    _only_keys(
-        root,
-        {"format", "formatVersion", "snapshot", "assets", "references", "audit"},
-        "symbol manifest",
-    )
+    version = root.get("formatVersion")
+    if version not in {SYMBOL_BUILD_ACQUISITION_VERSION, SYMBOL_BUILD_VERSION}:
+        raise SymbolManifestError(
+            "symbol manifest.formatVersion must be "
+            f"{SYMBOL_BUILD_ACQUISITION_VERSION} or {SYMBOL_BUILD_VERSION}"
+        )
+    allowed = {"format", "formatVersion", "snapshot", "assets", "references", "audit"}
+    if version == SYMBOL_BUILD_VERSION:
+        allowed.add("processing")
+    _only_keys(root, allowed, "symbol manifest")
     if root.get("format") != SYMBOL_BUILD_FORMAT:
         raise SymbolManifestError(f"symbol manifest.format must be {SYMBOL_BUILD_FORMAT!r}")
-    if root.get("formatVersion") != SYMBOL_BUILD_VERSION:
-        raise SymbolManifestError(
-            f"symbol manifest.formatVersion must be {SYMBOL_BUILD_VERSION}"
-        )
 
     snapshot = _object(root.get("snapshot"), "symbol manifest.snapshot")
     _only_keys(
@@ -250,6 +277,66 @@ def validate_symbol_manifest(document: Any) -> None:
             "symbol manifest.audit.unknownReferenceCount must be zero for a published manifest"
         )
 
+    if version == SYMBOL_BUILD_VERSION:
+        _processing(root.get("processing"), len(asset_urls), "symbol manifest.processing")
+
+
+def _processing(value: Any, asset_count: int, context: str) -> None:
+    record = _object(value, context)
+    _only_keys(record, {"svgPreflight"}, context)
+    preflight = _object(record.get("svgPreflight"), f"{context}.svgPreflight")
+    _only_keys(preflight, {"status", "summary", "report"}, f"{context}.svgPreflight")
+    status = _string(preflight.get("status"), f"{context}.svgPreflight.status")
+    if status not in {"passed", "failed"}:
+        raise SymbolManifestError(
+            f"{context}.svgPreflight.status must be 'passed' or 'failed'"
+        )
+
+    summary = _object(preflight.get("summary"), f"{context}.svgPreflight.summary")
+    fields = {
+        "svgCount",
+        "parseErrorCount",
+        "activeTextAssetCount",
+        "noActiveTextAssetCount",
+        "fontDeclaredAssetCount",
+        "uniqueDeclaredFontCount",
+    }
+    _only_keys(summary, fields, f"{context}.svgPreflight.summary")
+    missing = fields - set(summary)
+    if missing:
+        raise SymbolManifestError(
+            f"{context}.svgPreflight.summary is missing field(s): "
+            + ", ".join(sorted(missing))
+        )
+    for field in sorted(fields):
+        count = summary[field]
+        if type(count) is not int or count < 0:
+            raise SymbolManifestError(
+                f"{context}.svgPreflight.summary.{field} must be a non-negative integer"
+            )
+    if summary["svgCount"] != asset_count:
+        raise SymbolManifestError(
+            f"{context}.svgPreflight.summary.svgCount must equal the asset count"
+        )
+    if summary["fontDeclaredAssetCount"] > asset_count:
+        raise SymbolManifestError(
+            f"{context}.svgPreflight.summary.fontDeclaredAssetCount cannot exceed asset count"
+        )
+    classified = (
+        summary["parseErrorCount"]
+        + summary["activeTextAssetCount"]
+        + summary["noActiveTextAssetCount"]
+    )
+    if classified != asset_count:
+        raise SymbolManifestError(
+            f"{context}.svgPreflight summary classifications must account for every asset"
+        )
+    expected_status = "passed" if summary["parseErrorCount"] == 0 else "failed"
+    if status != expected_status:
+        raise SymbolManifestError(
+            f"{context}.svgPreflight.status must be {expected_status!r} for this summary"
+        )
+    _artifact(preflight.get("report"), f"{context}.svgPreflight.report")
 
 
 def _army_source(value: Any, context: str) -> None:

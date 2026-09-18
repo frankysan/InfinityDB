@@ -4,8 +4,8 @@
 The orchestrator never selects the newest available snapshot implicitly. Use
 ``--snapshot`` for an existing immutable Army ZIP or ``--fetch-snapshot`` for an
 explicit network refresh. Later processing stages will be integrated here; the
-current orchestration boundary pins Army provenance and performs raw symbol
-discovery/resolution from that exact snapshot.
+current orchestration boundary pins Army provenance, resolves one immutable raw
+symbol snapshot, materializes verified work files, and runs structural SVG preflight.
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ try:
         discover_symbol_source,
         print_discovery_summary,
     )
+    from tools.symbol_work import audit_symbol_work, materialize_symbol_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
     from download_army_json import (
         API_BASE_URL,
@@ -42,6 +43,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
         discover_symbol_source,
         print_discovery_summary,
     )
+    from symbol_work import audit_symbol_work, materialize_symbol_archive
 
 
 def print_pinned_snapshot(snapshot: ArmySnapshotResult) -> None:
@@ -130,6 +132,8 @@ def main(argv: list[str] | None = None) -> int:
     army_destination = args.data_root / "raw"
     symbol_destination = args.data_root / "raw" / "symbols"
     build_manifest = args.data_root / "manifests" / "army-symbol-build.json"
+    symbol_work = args.data_root / "work" / "symbols"
+    symbol_reports = args.data_root / "reports" / "symbols"
 
     try:
         if args.fetch_snapshot:
@@ -183,6 +187,33 @@ def main(argv: list[str] | None = None) -> int:
             override_root=args.image_overrides,
             refresh_symbols=args.refresh_symbols,
         )
+
+        materialized = materialize_symbol_archive(
+            symbols.archive,
+            symbols.snapshot_manifest,
+            symbols.build_manifest,
+            symbol_work,
+        )
+        print(f"Materialized symbol work -> {materialized.raw_root}")
+        preflight = audit_symbol_work(
+            materialized,
+            archive=symbols.archive,
+            build_manifest_path=symbols.build_manifest,
+            reports_base=symbol_reports,
+            project_root=Path.cwd(),
+        )
+        print(
+            "SVG preflight -> "
+            f"{preflight.summary['svgCount']} SVGs | "
+            f"parse errors {preflight.summary['parseErrorCount']} | "
+            f"active text {preflight.summary['activeTextAssetCount']} | "
+            f"declared fonts {preflight.summary['uniqueDeclaredFontCount']}"
+        )
+        print(f"SVG preflight report -> {preflight.report}")
+        if preflight.status != "passed":
+            raise ValueError(
+                "SVG preflight failed; inspect the generated report before processing"
+            )
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

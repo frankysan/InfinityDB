@@ -172,6 +172,9 @@ consistency audit unless one becomes necessary to unblock that work.
         bypassing only the cache.
       - [ ] Integrate processing, compression, publication, mapping generation,
         validation, and final reporting.
+      - [x] Verify/extract the pinned raw symbol archive into a rebuildable work
+        tree and run an environment-independent SVG structural preflight bound
+        back into version-3 build state.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
     separate, intentional operations. The current orchestrator already supports
     `--snapshot-only`, `--language`, `--data-root`, and `--static-symbols`;
@@ -213,12 +216,12 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] The current symbol downloader stages a complete run temporarily and
     writes one `SYMBOLS YYYYMMDD-HHMMSS.zip` archive rather than leaving loose
     downloaded SVGs in the destination directory.
-  - [ ] Use roots equivalent to `data/raw/` for Army `JSON ...zip` snapshots,
+  - [x] Use roots equivalent to `data/raw/` for Army `JSON ...zip` snapshots,
     `data/raw/symbols/` for `SYMBOLS ...zip` snapshots, `data/work/symbols/` for
     transient extracted/processed files, generated `data/manifests/`,
     `data/reports/`, local `image_overrides/`, and the final
     `src/infinity_db/web/static/` publication tree.
-  - [ ] Never rename, rewrite, normalize, compress, or delete a timestamped raw
+  - [x] Never rename, rewrite, normalize, compress, or delete a timestamped raw
     archive during later processing. Extract selected archives into temporary or
     work locations when loose SVG files are needed.
   - [x] Reuse validated archived assets/cache before network access where practical;
@@ -234,6 +237,10 @@ consistency audit unless one becomes necessary to unblock that work.
     discovery, and matching algorithms in code.
   - [ ] Audit all resolved categories for SVG parse errors, active text, referenced
     fonts, available/missing fonts, alias normalization, and unused declarations.
+    - [x] Persist the environment-independent structural subset first: SVG parse
+      errors, active text/text objects, and declared font-family references.
+    - [ ] Extend that preflight with installed-font availability, alias
+      normalization, effective-font resolution, and unused declarations.
   - [ ] Deduplicate across the full resolved raw set before expensive text-to-path
     conversion: SHA-256 exact groups first, then visual duplicate detection with
     `resvg` using the established production default of 4 jobs.

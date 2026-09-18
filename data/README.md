@@ -17,6 +17,12 @@ provenance/state, and build outputs.
   work directory after publishing the immutable archive and provenance;
   incomplete/error runs preserve downloaded work here for inspection. Ignored
   by Git.
+- `work/symbols/` — rebuildable loose symbol work trees keyed to the immutable
+  `SYMBOLS ...zip` identity. The orchestrator verifies the raw archive and every
+  member hash before replacing this derived work tree. Ignored by Git.
+- `reports/symbols/` — generated symbol-processing reports. The current
+  `svg-preflight.json` records parse/text/font-declaration findings and is bound
+  back into `army-symbol-build.json` by SHA-256. Ignored by Git.
 - `manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, bound to its immutable SHA-256,
   and records the snapshot type, archive label/path when project-relative,
@@ -80,12 +86,13 @@ separate manifests with the same authoritative SHA-256.
 Symbol snapshot provenance also records the hash of the Army source artifact
 used by symbol acquisition. `tools/build_symbols.py` verifies the corresponding
 Army snapshot provenance before discovery and keeps that exact archive pinned
-through raw symbol acquisition. The generated version-2
-`army-symbol-build.json` is separate acquisition/build state: it persists the
-Army archive identity together with source URL, language, acquisition timestamp,
-source-document count, and observed source revisions so downstream symbol stages
-do not need to rediscover that provenance. It will be extended as later
-processing/publication stages are integrated.
+through raw symbol acquisition. Acquisition writes version-2
+`army-symbol-build.json`, persisting the Army archive identity together with
+source URL, language, acquisition timestamp, source-document count, and observed
+source revisions. After verified extraction and SVG structural preflight, the
+orchestrator promotes the same build state to version 3 and records the preflight
+status, summary, and exact generated report artifact. Version-2 state remains
+valid for standalone acquisition and prior symbol caches.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
@@ -99,10 +106,10 @@ documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-
 
 ## Remaining design direction
 
-The symbol orchestrator currently stops after raw acquisition. Later stages will
-consume the same pinned Army/SYMBOLS build state for override/cache resolution,
-font audit, deduplication, text conversion, compression, publication, generated
-browser mappings, and final validation/reporting.
+The symbol orchestrator currently stops after verified raw extraction and an
+SVG structural preflight. Later stages will consume the same pinned Army/SYMBOLS
+build state for installed-font/alias resolution, deduplication, text conversion,
+compression, publication, generated browser mappings, and final validation.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not automatically covered by InfinityDB's MIT

@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+- Add verified post-acquisition symbol materialization and structural SVG preflight.
+  `build_symbols.py` now revalidates the immutable symbol archive/provenance and
+  every member hash before replacing a derived `data/work/symbols/` tree, writes
+  a deterministic parse/text/font-declaration report under `data/reports/symbols/`,
+  and promotes acquisition-only symbol build state from version 2 to version 3.
+  Version-2 manifests remain valid cache inputs.
+
 ### Added
 
 - Add `tools/build_symbols.py` as the explicit symbol-refresh orchestration

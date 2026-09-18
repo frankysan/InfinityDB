@@ -145,12 +145,13 @@ records are ignored by Git.
 For normal symbol refreshes, `tools/build_symbols.py` is the orchestration
 entrypoint. It never selects an Army snapshot implicitly: use `--snapshot` to
 pin an existing immutable Army ZIP with matching generated provenance, or
-`--fetch-snapshot` for an explicit network refresh. The current orchestration
-stage performs source-semantic discovery and raw symbol resolution from that
-same pinned Army snapshot, writes the immutable `SYMBOLS ...zip`, and updates
-the version-2 `data/manifests/army-symbol-build.json` with the Army archive hash,
-source URL, language, acquisition timestamp/document count, observed source
-revisions, and each raw asset's resolution method.
+`--fetch-snapshot` for an explicit network refresh. The orchestrator performs
+source-semantic discovery and raw symbol resolution from that same pin, writes
+an immutable `SYMBOLS ...zip`, then verifies and extracts that archive under
+`data/work/symbols/` for an environment-independent SVG structural preflight.
+Raw acquisition writes version-2 `data/manifests/army-symbol-build.json`; a
+completed preflight promotes the same generated build state to version 3 and
+binds its summary/report to the exact symbol artifact hash.
 
 Raw symbol resolution is ordered and offline-friendly: a matching local SVG
 under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
@@ -160,10 +161,15 @@ manifest is the cache index and its referenced `SYMBOLS ...zip`, snapshot
 provenance, archive SHA-256, member SHA-256, and SVG content are checked before
 reuse. `--refresh-symbols` bypasses that archive cache but still keeps local
 overrides authoritative. Invalid matching overrides fail rather than falling
-back upstream; unused overrides and URL/filename collisions are reported. The
-standalone symbol downloader remains available for debugging and targeted
-maintenance; publishing a symbol snapshot through it requires matching Army
-snapshot provenance.
+back upstream; unused overrides and URL/filename collisions are reported. After
+acquisition, the orchestrator revalidates every archive member while creating a
+fresh work tree and writes `data/reports/symbols/.../svg-preflight.json` with XML
+parse status, active-text counts, and declared font families. Parse errors fail
+the orchestrated run after the report/build state has been preserved. Installed
+font availability, alias normalization, deduplication, conversion, compression,
+and publication remain later stages. The standalone symbol downloader remains
+available for debugging and targeted maintenance; publishing a symbol snapshot
+through it requires matching Army snapshot provenance.
 
 ```powershell
 python tools/download_wiki_snapshot.py

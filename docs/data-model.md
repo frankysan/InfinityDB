@@ -425,6 +425,14 @@ Snapshot notes are not rules-database inputs and do not become runtime
 application data. The current contract is a source-controlled annotation format
 and validation boundary only.
 
+`army-symbol-build.json` is separate generated build state. Standalone raw symbol
+acquisition writes version 2. The orchestrated structural SVG preflight promotes
+that state to version 3 after verifying the exact `SYMBOLS` archive, its snapshot
+provenance, and each member hash. Version 3 adds a preflight status/summary and a
+SHA-256-bound report artifact; the detailed report lives under
+`data/reports/symbols/`. Loaders continue to accept version 2 so prior immutable
+symbol snapshots remain valid cache inputs.
+
 ### Design direction
 
 Future snapshot-comparison tooling may emit generated diff/report data while

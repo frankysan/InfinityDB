@@ -441,12 +441,20 @@ Army-symbol acquisition is source-semantic and snapshot-pinned: every
 `units[].profileGroups[].profiles[].logo` and `metadata.json -> factions[].logo`
 reference is authoritative, maintained static declarations are included,
 `resume[].logo` is audit-only, and a recursive scan fails closed on unknown
-SVG-bearing source fields. URLs are downloaded once while every reference is
-preserved separately in `army-symbol-build.json`. The downloader does not
-generate browser mappings.
+SVG-bearing source fields. URLs are resolved once while every reference is
+preserved separately in `army-symbol-build.json`. Acquisition writes version-2
+build state. The orchestrator then verifies the immutable `SYMBOLS` archive and
+its snapshot provenance, re-hashes every listed member, and rebuilds a derived
+`data/work/symbols/<artifact>/raw/` tree rather than modifying the raw archive.
+It writes a deterministic structural SVG preflight under `data/reports/symbols/`
+and promotes build state to version 3 with the report identity and summary.
+Structural preflight covers parse validity, active text, empty text objects, and
+font-family declarations; installed-font resolution remains a later stage. The
+downloader does not generate browser mappings.
 
 **Design direction:** later processing will consume that exact acquisition state
-through deduplication, text conversion, compression, and publication. Canonical
+through full font resolution, deduplication, text conversion, compression, and
+publication. Canonical
 processing may collapse equivalent assets, but it must not discard their source
 references. Only the publisher will assign final application paths and generated
 browser mappings because only that stage knows the final canonical asset. Source
