@@ -150,8 +150,10 @@ source-semantic discovery and raw symbol resolution from that same pin, writes
 an immutable `SYMBOLS ...zip`, then verifies and extracts that archive under
 `data/work/symbols/` for an environment-independent SVG structural preflight.
 Raw acquisition writes version-2 `data/manifests/army-symbol-build.json`; a
-completed preflight promotes the same generated build state to version 3 and
-binds its summary/report to the exact symbol artifact hash.
+completed structural preflight promotes the same generated build state to
+version 3, and the installed-font audit promotes it to version 4 while binding
+both generated reports plus the tracked font-alias configuration to the exact
+symbol artifact.
 
 Raw symbol resolution is ordered and offline-friendly: a matching local SVG
 under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
@@ -165,9 +167,14 @@ back upstream; unused overrides and URL/filename collisions are reported. After
 acquisition, the orchestrator revalidates every archive member while creating a
 fresh work tree and writes `data/reports/symbols/.../svg-preflight.json` with XML
 parse status, active-text counts, and declared font families. Parse errors fail
-the orchestrated run after the report/build state has been preserved. Installed
-font availability, alias normalization, deduplication, conversion, compression,
-and publication remain later stages. The standalone symbol downloader remains
+the orchestrated run after the report/build state has been preserved. A second
+`font-audit.json` then resolves effective text fonts against the local installed
+font environment, applies maintained aliases from
+`config/symbols/font-aliases.json`, reports available/missing/ambiguous/generic
+references and unused declarations, and fails before later processing when an
+active-text asset has unresolved fonts. Install these Python dependencies with
+`pip install -e ".[symbols]"`. Deduplication, conversion, compression, and
+publication remain later stages. The standalone symbol downloader remains
 available for debugging and targeted maintenance; publishing a symbol snapshot
 through it requires matching Army snapshot provenance.
 

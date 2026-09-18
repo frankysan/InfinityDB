@@ -20,6 +20,11 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.12",
 ]
+symbols = [
+  "fonttools>=4.0",
+  "tinycss2>=1.4",
+  "cssselect2>=0.8",
+]
 
 [project.scripts]
 infinity-db = "infinity_db.cli:main"

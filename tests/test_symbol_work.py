@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import tools.symbol_work as symbol_work
 from infinity_db.snapshot_provenance import write_snapshot_manifest
 from infinity_db.symbol_manifest import (
     build_symbol_manifest,
@@ -188,3 +189,149 @@ def test_svg_preflight_persists_failed_parse_audit(tmp_path: Path) -> None:
     assert result.summary["parseErrorCount"] == 1
     updated = load_symbol_manifest(manifest)
     assert updated["processing"]["svgPreflight"]["status"] == "failed"
+
+def test_font_audit_classifies_effective_fonts_and_unused_declarations(
+    tmp_path: Path, monkeypatch
+) -> None:
+    members = {
+        "units/available.svg": (
+            b'<svg xmlns="http://www.w3.org/2000/svg">'
+            b'<text style="font-family: Legacy">OK</text></svg>'
+        ),
+        "units/missing.svg": (
+            b'<svg xmlns="http://www.w3.org/2000/svg">'
+            b'<text style="font-family: Missing">NO</text></svg>'
+        ),
+        "units/no-text.svg": b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
+    }
+    archive, snapshot_manifest, manifest = _fixture(tmp_path, members)
+    materialized = materialize_symbol_archive(
+        archive,
+        snapshot_manifest,
+        manifest,
+        tmp_path / "data" / "work" / "symbols",
+    )
+    preflight = audit_symbol_work(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+    )
+    assert preflight.status == "passed"
+
+    alias_config = tmp_path / "config" / "symbols" / "font-aliases.json"
+    alias_config.parent.mkdir(parents=True)
+    alias_config.write_text('{"schemaVersion":1,"overrides":[]}\n', encoding="utf-8")
+
+    def normal_key(value: str) -> str:
+        return " ".join(value.strip().casefold().split())
+
+    def fake_scan(path: Path):
+        if path.name == "available.svg":
+            return {
+                "used_fonts": {"Legacy": 2},
+                "declared_fonts": {"Legacy", "Unused"},
+                "text_runs": 2,
+                "found_active_text": True,
+                "empty_text_objects": 0,
+            }, None
+        if path.name == "missing.svg":
+            return {
+                "used_fonts": {"Missing": 1},
+                "declared_fonts": {"Missing"},
+                "text_runs": 1,
+                "found_active_text": True,
+                "empty_text_objects": 0,
+            }, None
+        return {
+            "used_fonts": {},
+            "declared_fonts": {"UnusedNoText"},
+            "text_runs": 0,
+            "found_active_text": False,
+            "empty_text_objects": 0,
+        }, None
+
+    def fake_find(reference, _exact, _compact, *, overrides=None):
+        assert overrides == {}
+        if reference == "Legacy":
+            return {
+                "status": "FOUND",
+                "match_type": "reference-override",
+                "matched_name": "Legacy Installed",
+                "family": "Installed",
+                "subfamily": "Regular",
+                "full_name": "Installed Regular",
+                "postscript": "Installed-Regular",
+                "font_file": str(tmp_path / "fonts" / "installed.ttf"),
+                "normalize": "YES",
+                "weight": "400",
+                "style": "normal",
+                "stretch": "normal",
+            }
+        return {
+            "status": "MISSING",
+            "match_type": "",
+            "matched_name": "",
+            "family": "",
+            "subfamily": "",
+            "full_name": "",
+            "postscript": "",
+            "font_file": "",
+            "normalize": "",
+            "weight": "",
+            "style": "",
+            "stretch": "",
+        }
+
+    fake_tools = type(
+        "FakeFontTools",
+        (),
+        {
+            "load_font_reference_overrides": staticmethod(lambda _path: {}),
+            "load_font_index": staticmethod(lambda: ({}, {}, 4, 7)),
+            "scan_svg": staticmethod(fake_scan),
+            "find_font": staticmethod(fake_find),
+            "normal_key": staticmethod(normal_key),
+        },
+    )
+    monkeypatch.setattr(symbol_work, "_font_tools", lambda: fake_tools)
+
+    result = symbol_work.audit_symbol_fonts(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+        alias_config=alias_config,
+    )
+
+    assert result.status == "failed"
+    assert result.summary == {
+        "svgCount": 3,
+        "fontAvailableAssetCount": 1,
+        "fontMissingAssetCount": 1,
+        "noActiveTextAssetCount": 1,
+        "implicitDefaultAssetCount": 0,
+        "effectiveFontReferenceCount": 2,
+        "availableFontReferenceCount": 1,
+        "missingFontReferenceCount": 1,
+        "ambiguousFontReferenceCount": 0,
+        "genericFontReferenceCount": 0,
+        "normalizedAliasReferenceCount": 1,
+        "unusedDeclarationCount": 2,
+    }
+    report = json.loads(result.report.read_text(encoding="utf-8"))
+    assert report["fontIndex"] == {"fontFaceCount": 7, "fontFileCount": 4}
+    assert report["fonts"][0]["fontFile"] == "installed.ttf"
+    categories = {row["archivePath"]: row["category"] for row in report["assets"]}
+    assert categories == {
+        "units/available.svg": "fonts_available",
+        "units/missing.svg": "fonts_missing",
+        "units/no-text.svg": "no_active_text",
+    }
+
+    updated = load_symbol_manifest(manifest)
+    assert updated["formatVersion"] == 4
+    assert updated["processing"]["fontAudit"]["status"] == "failed"
+    assert updated["processing"]["fontAudit"]["aliases"]["sha256"]

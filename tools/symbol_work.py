@@ -15,6 +15,7 @@ from typing import Any, NamedTuple
 
 from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
 from infinity_db.symbol_manifest import (
+    add_font_audit,
     add_svg_preflight,
     artifact_record,
     load_symbol_manifest,
@@ -23,6 +24,11 @@ from infinity_db.symbol_manifest import (
 
 SVG_PREFLIGHT_FORMAT = "InfinityDB SVG preflight audit"
 SVG_PREFLIGHT_VERSION = 1
+FONT_AUDIT_FORMAT = "InfinityDB SVG font audit"
+FONT_AUDIT_VERSION = 1
+DEFAULT_FONT_ALIAS_CONFIG = (
+    Path(__file__).resolve().parents[1] / "config" / "symbols" / "font-aliases.json"
+)
 _TEXT_ROOT_TAGS = {"text", "flowRoot"}
 _FONT_FAMILY_RE = re.compile(r"(?:^|[;{])\s*font-family\s*:\s*([^;}]+)", re.I)
 
@@ -35,6 +41,12 @@ class MaterializedSymbols(NamedTuple):
 
 
 class SvgPreflightResult(NamedTuple):
+    report: Path
+    summary: dict[str, int]
+    status: str
+
+
+class FontAuditResult(NamedTuple):
     report: Path
     summary: dict[str, int]
     status: str
@@ -348,3 +360,207 @@ def audit_symbol_work(
     )
     write_symbol_manifest(updated, build_manifest_path)
     return SvgPreflightResult(report=report, summary=summary, status=status)
+
+
+def _font_tools():
+    try:
+        from tools import svg_processor
+    except ImportError:  # pragma: no cover - direct script execution fallback
+        import svg_processor
+    return svg_processor
+
+
+def _font_result_record(result: dict[str, str]) -> dict[str, str]:
+    font_file = result.get("font_file", "")
+    return {
+        "status": result.get("status", ""),
+        "matchType": result.get("match_type", ""),
+        "matchedName": result.get("matched_name", ""),
+        "family": result.get("family", ""),
+        "subfamily": result.get("subfamily", ""),
+        "fullName": result.get("full_name", ""),
+        "postscript": result.get("postscript", ""),
+        "normalize": result.get("normalize", ""),
+        "weight": result.get("weight", ""),
+        "style": result.get("style", ""),
+        "stretch": result.get("stretch", ""),
+        "fontFile": Path(font_file).name if font_file else "",
+    }
+
+
+def audit_symbol_fonts(
+    materialized: MaterializedSymbols,
+    *,
+    archive: Path,
+    build_manifest_path: Path,
+    reports_base: Path,
+    project_root: Path,
+    alias_config: Path = DEFAULT_FONT_ALIAS_CONFIG,
+) -> FontAuditResult:
+    """Resolve effective SVG fonts against the installed font environment."""
+    manifest = load_symbol_manifest(build_manifest_path)
+    preflight = manifest.get("processing", {}).get("svgPreflight", {})
+    if manifest.get("formatVersion") != 3 or preflight.get("status") != "passed":
+        raise ValueError("Font audit requires passed version-3 SVG preflight state")
+
+    tools = _font_tools()
+    try:
+        overrides = tools.load_font_reference_overrides(alias_config)
+        exact_index, compact_index, font_file_count, face_count = tools.load_font_index()
+    except RuntimeError as exc:
+        raise ValueError(str(exc)) from exc
+
+    rows: list[dict[str, Any]] = []
+    references: dict[str, dict[str, Any]] = {}
+    available_assets = 0
+    missing_assets = 0
+    no_text_assets = 0
+    implicit_default_assets = 0
+    unused_declarations = 0
+
+    for asset in manifest["assets"]:
+        archive_path = asset["archivePath"]
+        path = materialized.raw_root.joinpath(*_portable_member(archive_path).parts)
+        scan, error = tools.scan_svg(path)
+        if scan is None:
+            raise ValueError(
+                f"Font audit could not parse {archive_path} after passed preflight: {error}"
+            )
+
+        used_fonts = scan["used_fonts"]
+        declared_fonts = scan["declared_fonts"]
+        active_text = scan["found_active_text"]
+        used_keys = {tools.normal_key(value) for value in used_fonts}
+        unused = sorted(
+            (value for value in declared_fonts if tools.normal_key(value) not in used_keys),
+            key=str.casefold,
+        )
+        unused_declarations += len(unused)
+        resolved: list[dict[str, Any]] = []
+        has_unresolved = False
+
+        for reference in sorted(used_fonts, key=str.casefold):
+            result = tools.find_font(
+                reference,
+                exact_index,
+                compact_index,
+                overrides=overrides,
+            )
+            if result["status"] in {"MISSING", "AMBIGUOUS"}:
+                has_unresolved = True
+            detail = {
+                "reference": reference,
+                "textRuns": used_fonts[reference],
+                **_font_result_record(result),
+            }
+            resolved.append(detail)
+
+            aggregate = references.setdefault(
+                reference,
+                {
+                    "reference": reference,
+                    "assetCount": 0,
+                    "textRuns": 0,
+                    **_font_result_record(result),
+                },
+            )
+            current = _font_result_record(result)
+            comparable = {
+                key: value
+                for key, value in aggregate.items()
+                if key not in {"reference", "assetCount", "textRuns"}
+            }
+            if comparable != current:
+                raise ValueError(
+                    f"Font reference {reference!r} resolved inconsistently within one audit"
+                )
+            aggregate["assetCount"] += 1
+            aggregate["textRuns"] += used_fonts[reference]
+
+        if not active_text:
+            category = "no_active_text"
+            no_text_assets += 1
+        elif not used_fonts:
+            category = "fonts_available"
+            available_assets += 1
+            implicit_default_assets += 1
+        elif has_unresolved:
+            category = "fonts_missing"
+            missing_assets += 1
+        else:
+            category = "fonts_available"
+            available_assets += 1
+
+        rows.append(
+            {
+                "archivePath": archive_path,
+                "category": category,
+                "activeText": active_text,
+                "textRunCount": scan["text_runs"],
+                "emptyTextObjectCount": scan["empty_text_objects"],
+                "effectiveFonts": resolved,
+                "unusedFontDeclarations": unused,
+            }
+        )
+
+    reference_rows = sorted(references.values(), key=lambda row: row["reference"].casefold())
+    summary = {
+        "svgCount": len(rows),
+        "fontAvailableAssetCount": available_assets,
+        "fontMissingAssetCount": missing_assets,
+        "noActiveTextAssetCount": no_text_assets,
+        "implicitDefaultAssetCount": implicit_default_assets,
+        "effectiveFontReferenceCount": len(reference_rows),
+        "availableFontReferenceCount": sum(
+            row["status"] == "FOUND" for row in reference_rows
+        ),
+        "missingFontReferenceCount": sum(
+            row["status"] == "MISSING" for row in reference_rows
+        ),
+        "ambiguousFontReferenceCount": sum(
+            row["status"] == "AMBIGUOUS" for row in reference_rows
+        ),
+        "genericFontReferenceCount": sum(
+            row["status"] == "GENERIC" for row in reference_rows
+        ),
+        "normalizedAliasReferenceCount": sum(
+            row["status"] == "FOUND" and row["normalize"] == "YES"
+            for row in reference_rows
+        ),
+        "unusedDeclarationCount": unused_declarations,
+    }
+    if summary["svgCount"] != materialized.asset_count:
+        raise ValueError(
+            "Font audit count does not match materialized symbols: "
+            f"{summary['svgCount']} != {materialized.asset_count}"
+        )
+
+    symbol_sha = manifest["snapshot"]["symbolArtifact"]["sha256"]
+    report_root = reports_base / _work_name(archive, symbol_sha)
+    report = report_root / "font-audit.json"
+    document = {
+        "format": FONT_AUDIT_FORMAT,
+        "formatVersion": FONT_AUDIT_VERSION,
+        "symbolArtifact": {"name": archive.name, "sha256": symbol_sha},
+        "fontAliases": artifact_record(alias_config, project_root=project_root),
+        "fontIndex": {
+            "fontFileCount": font_file_count,
+            "fontFaceCount": face_count,
+        },
+        "summary": dict(sorted(summary.items())),
+        "fonts": reference_rows,
+        "assets": sorted(rows, key=lambda row: row["archivePath"]),
+    }
+    _write_json(document, report)
+
+    status = "passed" if missing_assets == 0 else "failed"
+    updated = add_font_audit(
+        manifest,
+        status=status,
+        summary=summary,
+        report=report,
+        aliases=alias_config,
+        project_root=project_root,
+    )
+    write_symbol_manifest(updated, build_manifest_path)
+    return FontAuditResult(report=report, summary=summary, status=status)

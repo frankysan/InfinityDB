@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+- Add the installed-font stage of the symbol pipeline. Infinity-specific legacy
+  font aliases now live in validated `config/symbols/font-aliases.json`; the
+  orchestrator resolves effective fonts and unused declarations against the local
+  font environment, writes a SHA-bound `font-audit.json`, and promotes successful
+  structural-preflight state from symbol manifest version 3 to version 4.
+
 - Add verified post-acquisition symbol materialization and structural SVG preflight.
   `build_symbols.py` now revalidates the immutable symbol archive/provenance and
   every member hash before replacing a derived `data/work/symbols/` tree, writes

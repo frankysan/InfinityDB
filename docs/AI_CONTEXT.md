@@ -241,12 +241,15 @@ references and discovery counts. The orchestrator then verifies the selected
 symbol archive/provenance and every member hash, replaces a derived work tree
 under `data/work/symbols/`, and writes a deterministic structural SVG preflight
 under `data/reports/symbols/`. The preflight records XML/SVG parse validity,
-active-text/text-object counts, and declared font families. It promotes the same
-build state to version 3 with the preflight status/summary/report identity.
-Version 2 remains accepted for acquisition-only state and existing caches. This
-preflight intentionally does not resolve installed fonts, aliases, duplicates,
-conversion, compression, or published paths. The downloader does not generate
-`army-symbols.js` or `unit-symbol-map.js`.
+active-text/text-object counts, and declared font families, promoting build state
+to version 3. The next installed-font audit resolves effective text fonts using
+the existing CSS/font matcher plus validated tracked aliases from
+`config/symbols/font-aliases.json`; it reports available, missing, ambiguous, and
+generic references, alias normalization, and unused declarations, then promotes
+state to version 4 while binding the audit report and alias-config hashes. Missing
+or ambiguous fonts fail orchestration before deduplication/conversion. Versions 2
+and 3 remain accepted as valid earlier-stage state. The downloader does not
+generate `army-symbols.js` or `unit-symbol-map.js`.
 
 Raw source resolution now follows this implemented order:
 

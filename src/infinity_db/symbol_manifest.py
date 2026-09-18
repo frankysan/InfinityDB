@@ -12,7 +12,8 @@ from infinity_db.snapshot_provenance import portable_project_path, sha256_file
 
 SYMBOL_BUILD_FORMAT = "InfinityDB army symbol build"
 SYMBOL_BUILD_ACQUISITION_VERSION = 2
-SYMBOL_BUILD_VERSION = 3
+SYMBOL_BUILD_PREFLIGHT_VERSION = 3
+SYMBOL_BUILD_VERSION = 4
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
 SOURCE_METHODS = frozenset({"override", "cache", "network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -90,7 +91,7 @@ def add_svg_preflight(
     if status not in {"passed", "failed"}:
         raise SymbolManifestError("SVG preflight status must be 'passed' or 'failed'")
     promoted = json.loads(json.dumps(document))
-    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["formatVersion"] = SYMBOL_BUILD_PREFLIGHT_VERSION
     promoted["processing"] = {
         "svgPreflight": {
             "status": status,
@@ -101,6 +102,34 @@ def add_svg_preflight(
     validate_symbol_manifest(promoted)
     return promoted
 
+
+def add_font_audit(
+    document: dict[str, Any],
+    *,
+    status: str,
+    summary: dict[str, int],
+    report: Path,
+    aliases: Path,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Promote preflight state to version 4 with installed-font audit state."""
+    validate_symbol_manifest(document)
+    if document.get("formatVersion") != SYMBOL_BUILD_PREFLIGHT_VERSION:
+        raise SymbolManifestError(
+            f"Font audit requires version-{SYMBOL_BUILD_PREFLIGHT_VERSION} SVG preflight state"
+        )
+    if status not in {"passed", "failed"}:
+        raise SymbolManifestError("Font audit status must be 'passed' or 'failed'")
+    promoted = json.loads(json.dumps(document))
+    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["processing"]["fontAudit"] = {
+        "status": status,
+        "summary": dict(sorted(summary.items())),
+        "report": artifact_record(report, project_root=project_root),
+        "aliases": artifact_record(aliases, project_root=project_root),
+    }
+    validate_symbol_manifest(promoted)
+    return promoted
 
 def write_symbol_manifest(document: dict[str, Any], path: Path) -> Path:
     """Atomically replace the generated current symbol-build manifest."""
@@ -130,16 +159,21 @@ def load_symbol_manifest(path: Path) -> dict[str, Any]:
 
 
 def validate_symbol_manifest(document: Any) -> None:
-    """Validate acquisition v2 or processed v3 symbol-build state."""
+    """Validate acquisition v2, preflight v3, or font-audited v4 symbol state."""
     root = _object(document, "symbol manifest")
     version = root.get("formatVersion")
-    if version not in {SYMBOL_BUILD_ACQUISITION_VERSION, SYMBOL_BUILD_VERSION}:
+    supported_versions = {
+        SYMBOL_BUILD_ACQUISITION_VERSION,
+        SYMBOL_BUILD_PREFLIGHT_VERSION,
+        SYMBOL_BUILD_VERSION,
+    }
+    if version not in supported_versions:
         raise SymbolManifestError(
-            "symbol manifest.formatVersion must be "
-            f"{SYMBOL_BUILD_ACQUISITION_VERSION} or {SYMBOL_BUILD_VERSION}"
+            "symbol manifest.formatVersion must be one of: "
+            + ", ".join(str(item) for item in sorted(supported_versions))
         )
     allowed = {"format", "formatVersion", "snapshot", "assets", "references", "audit"}
-    if version == SYMBOL_BUILD_VERSION:
+    if version >= SYMBOL_BUILD_PREFLIGHT_VERSION:
         allowed.add("processing")
     _only_keys(root, allowed, "symbol manifest")
     if root.get("format") != SYMBOL_BUILD_FORMAT:
@@ -277,13 +311,21 @@ def validate_symbol_manifest(document: Any) -> None:
             "symbol manifest.audit.unknownReferenceCount must be zero for a published manifest"
         )
 
-    if version == SYMBOL_BUILD_VERSION:
-        _processing(root.get("processing"), len(asset_urls), "symbol manifest.processing")
+    if version >= SYMBOL_BUILD_PREFLIGHT_VERSION:
+        _processing(
+            root.get("processing"),
+            len(asset_urls),
+            version,
+            "symbol manifest.processing",
+        )
 
 
-def _processing(value: Any, asset_count: int, context: str) -> None:
+def _processing(value: Any, asset_count: int, version: int, context: str) -> None:
     record = _object(value, context)
-    _only_keys(record, {"svgPreflight"}, context)
+    allowed = {"svgPreflight"}
+    if version == SYMBOL_BUILD_VERSION:
+        allowed.add("fontAudit")
+    _only_keys(record, allowed, context)
     preflight = _object(record.get("svgPreflight"), f"{context}.svgPreflight")
     _only_keys(preflight, {"status", "summary", "report"}, f"{context}.svgPreflight")
     status = _string(preflight.get("status"), f"{context}.svgPreflight.status")
@@ -337,6 +379,102 @@ def _processing(value: Any, asset_count: int, context: str) -> None:
             f"{context}.svgPreflight.status must be {expected_status!r} for this summary"
         )
     _artifact(preflight.get("report"), f"{context}.svgPreflight.report")
+
+    if version == SYMBOL_BUILD_PREFLIGHT_VERSION:
+        return
+    if status != "passed":
+        raise SymbolManifestError(
+            f"{context}.svgPreflight.status must be 'passed' before font audit state"
+        )
+
+    font_audit = _object(record.get("fontAudit"), f"{context}.fontAudit")
+    _only_keys(
+        font_audit,
+        {"status", "summary", "report", "aliases"},
+        f"{context}.fontAudit",
+    )
+    font_status = _string(font_audit.get("status"), f"{context}.fontAudit.status")
+    if font_status not in {"passed", "failed"}:
+        raise SymbolManifestError(
+            f"{context}.fontAudit.status must be 'passed' or 'failed'"
+        )
+
+    font_summary = _object(
+        font_audit.get("summary"), f"{context}.fontAudit.summary"
+    )
+    font_fields = {
+        "svgCount",
+        "fontAvailableAssetCount",
+        "fontMissingAssetCount",
+        "noActiveTextAssetCount",
+        "implicitDefaultAssetCount",
+        "effectiveFontReferenceCount",
+        "availableFontReferenceCount",
+        "missingFontReferenceCount",
+        "ambiguousFontReferenceCount",
+        "genericFontReferenceCount",
+        "normalizedAliasReferenceCount",
+        "unusedDeclarationCount",
+    }
+    _only_keys(font_summary, font_fields, f"{context}.fontAudit.summary")
+    missing_font_fields = font_fields - set(font_summary)
+    if missing_font_fields:
+        raise SymbolManifestError(
+            f"{context}.fontAudit.summary is missing field(s): "
+            + ", ".join(sorted(missing_font_fields))
+        )
+    for field in sorted(font_fields):
+        count = font_summary[field]
+        if type(count) is not int or count < 0:
+            raise SymbolManifestError(
+                f"{context}.fontAudit.summary.{field} must be a non-negative integer"
+            )
+    if font_summary["svgCount"] != asset_count:
+        raise SymbolManifestError(
+            f"{context}.fontAudit.summary.svgCount must equal the asset count"
+        )
+    classified = (
+        font_summary["fontAvailableAssetCount"]
+        + font_summary["fontMissingAssetCount"]
+        + font_summary["noActiveTextAssetCount"]
+    )
+    if classified != asset_count:
+        raise SymbolManifestError(
+            f"{context}.fontAudit summary classifications must account for every asset"
+        )
+    if font_summary["implicitDefaultAssetCount"] > font_summary["fontAvailableAssetCount"]:
+        raise SymbolManifestError(
+            f"{context}.fontAudit.summary.implicitDefaultAssetCount cannot exceed "
+            "fontAvailableAssetCount"
+        )
+    reference_classified = (
+        font_summary["availableFontReferenceCount"]
+        + font_summary["missingFontReferenceCount"]
+        + font_summary["ambiguousFontReferenceCount"]
+        + font_summary["genericFontReferenceCount"]
+    )
+    if reference_classified != font_summary["effectiveFontReferenceCount"]:
+        raise SymbolManifestError(
+            f"{context}.fontAudit reference classifications must account for every "
+            "effective font reference"
+        )
+    if (
+        font_summary["normalizedAliasReferenceCount"]
+        > font_summary["availableFontReferenceCount"]
+    ):
+        raise SymbolManifestError(
+            f"{context}.fontAudit.summary.normalizedAliasReferenceCount cannot exceed "
+            "availableFontReferenceCount"
+        )
+    expected_font_status = (
+        "passed" if font_summary["fontMissingAssetCount"] == 0 else "failed"
+    )
+    if font_status != expected_font_status:
+        raise SymbolManifestError(
+            f"{context}.fontAudit.status must be {expected_font_status!r} for this summary"
+        )
+    _artifact(font_audit.get("report"), f"{context}.fontAudit.report")
+    _artifact(font_audit.get("aliases"), f"{context}.fontAudit.aliases")
 
 
 def _army_source(value: Any, context: str) -> None:

@@ -449,12 +449,17 @@ its snapshot provenance, re-hashes every listed member, and rebuilds a derived
 It writes a deterministic structural SVG preflight under `data/reports/symbols/`
 and promotes build state to version 3 with the report identity and summary.
 Structural preflight covers parse validity, active text, empty text objects, and
-font-family declarations; installed-font resolution remains a later stage. The
-downloader does not generate browser mappings.
+font-family declarations. A following installed-font audit reuses the established
+CSS/effective-font resolver, applies validated Infinity-specific aliases from
+`config/symbols/font-aliases.json`, classifies active-text assets as
+`fonts_available` or `fonts_missing`, reports alias normalization and unused
+declarations, and promotes the build state to version 4 with both its report and
+alias-config identities. Missing/ambiguous effective fonts stop orchestration
+before destructive/expensive processing. The downloader does not generate
+browser mappings.
 
 **Design direction:** later processing will consume that exact acquisition state
-through full font resolution, deduplication, text conversion, compression, and
-publication. Canonical
+through deduplication, text conversion, compression, and publication. Canonical
 processing may collapse equivalent assets, but it must not discard their source
 references. Only the publisher will assign final application paths and generated
 browser mappings because only that stage knows the final canonical asset. Source

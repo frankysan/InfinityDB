@@ -43,7 +43,13 @@ def army_snapshot(tmp_path: Path, *, language: str = "en") -> tuple[Path, Path]:
     return archive, manifest
 
 
-def stub_post_acquisition(module, monkeypatch, *, status: str = "passed") -> None:
+def stub_post_acquisition(
+    module,
+    monkeypatch,
+    *,
+    status: str = "passed",
+    font_status: str = "passed",
+) -> None:
     materialized = SimpleNamespace(
         raw_root=Path("work/raw"),
         work_root=Path("work"),
@@ -66,6 +72,19 @@ def stub_post_acquisition(module, monkeypatch, *, status: str = "passed") -> Non
         module, "materialize_symbol_archive", lambda *_args, **_kwargs: materialized
     )
     monkeypatch.setattr(module, "audit_symbol_work", lambda *_args, **_kwargs: preflight)
+    font_audit = SimpleNamespace(
+        report=Path("reports/font-audit.json"),
+        status=font_status,
+        summary={
+            "fontAvailableAssetCount": 0,
+            "fontMissingAssetCount": 0 if font_status == "passed" else 1,
+            "normalizedAliasReferenceCount": 0,
+            "unusedDeclarationCount": 0,
+        },
+    )
+    monkeypatch.setattr(
+        module, "audit_symbol_fonts", lambda *_args, **_kwargs: font_audit
+    )
 
 
 def test_resolve_army_snapshot_verifies_provenance_and_revisions(tmp_path: Path) -> None:
@@ -296,3 +315,42 @@ def test_orchestrator_fails_after_persisting_failed_svg_preflight(
         == 1
     )
     assert "SVG preflight failed" in capsys.readouterr().err
+
+def test_orchestrator_fails_after_persisting_failed_font_audit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = load_module()
+    archive, manifest = army_snapshot(tmp_path)
+    data_root = tmp_path / "data"
+    expected_manifest = data_root / "manifests" / "snapshots" / manifest.name
+    expected_manifest.parent.mkdir(parents=True)
+    expected_manifest.write_bytes(manifest.read_bytes())
+    stub_post_acquisition(module, monkeypatch, font_status="failed")
+    discovery = SimpleNamespace(source_document_count=2)
+    monkeypatch.setattr(module, "discover_symbol_source", lambda *_args, **_kwargs: discovery)
+    monkeypatch.setattr(module, "print_discovery_summary", lambda _discovery: None)
+    monkeypatch.setattr(
+        module,
+        "acquire_symbol_snapshot",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            asset_count=1,
+            archive=tmp_path / "symbols.zip",
+            snapshot_manifest=tmp_path / "symbols.json",
+            build_manifest=tmp_path / "build.json",
+        ),
+    )
+
+    assert (
+        module.main(
+            [
+                "--snapshot",
+                str(archive),
+                "--data-root",
+                str(data_root),
+                "--delay",
+                "0",
+            ]
+        )
+        == 1
+    )
+    assert "Font audit failed" in capsys.readouterr().err

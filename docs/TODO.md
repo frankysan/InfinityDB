@@ -231,7 +231,7 @@ consistency audit unless one becomes necessary to unblock that work.
 
 - [ ] Consolidate SVG audit, font handling, and complete-set duplicate detection
   around one structured manifest.
-  - [ ] Add `config/symbols/font-aliases.json` for Infinity-asset-specific
+  - [x] Add `config/symbols/font-aliases.json` for Infinity-asset-specific
     legacy/exported font-reference overrides. Keep generic CSS family handling,
     weight/stretch interpretation, cmap-suffix recognition, installed-font
     discovery, and matching algorithms in code.
@@ -239,7 +239,7 @@ consistency audit unless one becomes necessary to unblock that work.
     fonts, available/missing fonts, alias normalization, and unused declarations.
     - [x] Persist the environment-independent structural subset first: SVG parse
       errors, active text/text objects, and declared font-family references.
-    - [ ] Extend that preflight with installed-font availability, alias
+    - [x] Extend that preflight with installed-font availability, alias
       normalization, effective-font resolution, and unused declarations.
   - [ ] Deduplicate across the full resolved raw set before expensive text-to-path
     conversion: SHA-256 exact groups first, then visual duplicate detection with

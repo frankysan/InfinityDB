@@ -429,9 +429,12 @@ and validation boundary only.
 acquisition writes version 2. The orchestrated structural SVG preflight promotes
 that state to version 3 after verifying the exact `SYMBOLS` archive, its snapshot
 provenance, and each member hash. Version 3 adds a preflight status/summary and a
-SHA-256-bound report artifact; the detailed report lives under
-`data/reports/symbols/`. Loaders continue to accept version 2 so prior immutable
-symbol snapshots remain valid cache inputs.
+SHA-256-bound report artifact. Installed-font audit then promotes the same state
+to version 4 with available/missing/ambiguous/generic effective-font summaries,
+its generated report identity, and the exact tracked font-alias configuration
+identity. Detailed reports live under `data/reports/symbols/`. Loaders continue
+to accept versions 2 and 3 so prior immutable symbol caches and completed
+structural preflights remain valid inputs to their next stage.
 
 ### Design direction
 

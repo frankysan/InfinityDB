@@ -5,7 +5,8 @@ The orchestrator never selects the newest available snapshot implicitly. Use
 ``--snapshot`` for an existing immutable Army ZIP or ``--fetch-snapshot`` for an
 explicit network refresh. Later processing stages will be integrated here; the
 current orchestration boundary pins Army provenance, resolves one immutable raw
-symbol snapshot, materializes verified work files, and runs structural SVG preflight.
+symbol snapshot, materializes verified work files, runs structural SVG preflight,
+and audits effective fonts against the installed font environment.
 """
 
 from __future__ import annotations
@@ -28,7 +29,11 @@ try:
         discover_symbol_source,
         print_discovery_summary,
     )
-    from tools.symbol_work import audit_symbol_work, materialize_symbol_archive
+    from tools.symbol_work import (
+        audit_symbol_fonts,
+        audit_symbol_work,
+        materialize_symbol_archive,
+    )
 except ImportError:  # pragma: no cover - direct script execution fallback
     from download_army_json import (
         API_BASE_URL,
@@ -43,7 +48,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
         discover_symbol_source,
         print_discovery_summary,
     )
-    from symbol_work import audit_symbol_work, materialize_symbol_archive
+    from symbol_work import audit_symbol_fonts, audit_symbol_work, materialize_symbol_archive
 
 
 def print_pinned_snapshot(snapshot: ArmySnapshotResult) -> None:
@@ -213,6 +218,26 @@ def main(argv: list[str] | None = None) -> int:
         if preflight.status != "passed":
             raise ValueError(
                 "SVG preflight failed; inspect the generated report before processing"
+            )
+
+        font_audit = audit_symbol_fonts(
+            materialized,
+            archive=symbols.archive,
+            build_manifest_path=symbols.build_manifest,
+            reports_base=symbol_reports,
+            project_root=Path.cwd(),
+        )
+        print(
+            "Font audit -> "
+            f"available assets {font_audit.summary['fontAvailableAssetCount']} | "
+            f"missing assets {font_audit.summary['fontMissingAssetCount']} | "
+            f"aliases {font_audit.summary['normalizedAliasReferenceCount']} | "
+            f"unused declarations {font_audit.summary['unusedDeclarationCount']}"
+        )
+        print(f"Font audit report -> {font_audit.report}")
+        if font_audit.status != "passed":
+            raise ValueError(
+                "Font audit failed; install/resolve required fonts before processing"
             )
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

@@ -23,7 +23,7 @@ What it does
 
 Dependencies
 ------------
-pip install fonttools tinycss2 cssselect2
+pip install -e ".[symbols]"
 
 Optional tools:
     pip install pillow
@@ -44,6 +44,7 @@ from pathlib import Path
 import argparse
 import csv
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -55,17 +56,17 @@ import time
 import xml.etree.ElementTree as ET
 
 try:
-    from fontTools.ttLib import TTFont, TTCollection
-except ImportError:
-    print("Missing dependency: fonttools\nInstall with: pip install fonttools tinycss2 cssselect2", file=sys.stderr)
-    sys.exit(2)
+    from fontTools.ttLib import TTCollection, TTFont
+except ImportError:  # pragma: no cover - exercised on minimal installations
+    TTCollection = None
+    TTFont = None
 
 try:
-    import tinycss2
     import cssselect2
-except ImportError:
-    print("Missing dependencies: tinycss2 cssselect2\nInstall with: pip install fonttools tinycss2 cssselect2", file=sys.stderr)
-    sys.exit(2)
+    import tinycss2
+except ImportError:  # pragma: no cover - exercised on minimal installations
+    cssselect2 = None
+    tinycss2 = None
 
 try:
     import winreg
@@ -181,39 +182,71 @@ def compact_key(value: str) -> str:
     return re.sub(r"[\s_-]+", "", normal_key(value))
 
 
-# Known legacy/exported font references that cannot be derived reliably from
-# installed OpenType name records alone.  The lookup name must itself resolve
-# through the normal font index.  Optional CSS properties override the
-# installed face metadata; this is especially useful for variable fonts whose
-# default OS/2 weight does not describe the named instance encoded in the SVG.
-FONT_REFERENCE_OVERRIDES = {
-    "nasalizationrg-regular": {
-        "lookup": "Nasalization",
-        "subfamily": "Regular",
-        "weight": "400",
-    },
-    "jura-bold": {
-        "lookup": "Jura",
-        "subfamily": "Bold",
-        "weight": "700",
-    },
-    "microgrammadbolext": {
-        "lookup": "MicrogrammaD-BoldExte",
-    },
-    "bank gothic bt": {
-        "lookup": "BankGothicBT-Medium",
-    },
-    "adventpro-semibold": {
-        "lookup": "Advent Pro",
-        "subfamily": "SemiBold",
-        "weight": "600",
-    },
-    "octinstencilrg-regular": {
-        "lookup": "Octin Stencil",
-        "subfamily": "Regular",
-        "weight": "400",
-    },
-}
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_FONT_ALIAS_CONFIG = PROJECT_ROOT / "config" / "symbols" / "font-aliases.json"
+_FONT_OVERRIDE_FIELDS = {"reference", "lookup", "subfamily", "weight", "style", "stretch"}
+
+
+def require_font_dependencies() -> None:
+    missing = []
+    if TTFont is None or TTCollection is None:
+        missing.append("fonttools")
+    if tinycss2 is None:
+        missing.append("tinycss2")
+    if cssselect2 is None:
+        missing.append("cssselect2")
+    if missing:
+        joined = ", ".join(missing)
+        raise RuntimeError(
+            f"Missing symbol font dependency/dependencies: {joined}. "
+            "Install InfinityDB with the 'symbols' extra."
+        )
+
+
+def load_font_reference_overrides(
+    path: Path = DEFAULT_FONT_ALIAS_CONFIG,
+) -> dict[str, dict[str, str]]:
+    """Load validated Infinity-specific legacy/exported font aliases."""
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Could not load font alias config {path}: {exc}") from exc
+    if not isinstance(document, dict) or set(document) != {"schemaVersion", "overrides"}:
+        raise ValueError(
+            "Font alias config must contain exactly schemaVersion and overrides"
+        )
+    if document["schemaVersion"] != 1:
+        raise ValueError("Font alias config schemaVersion must be 1")
+    rows = document["overrides"]
+    if not isinstance(rows, list):
+        raise ValueError("Font alias config overrides must be an array")
+
+    result: dict[str, dict[str, str]] = {}
+    for index, row in enumerate(rows):
+        context = f"Font alias config overrides[{index}]"
+        if not isinstance(row, dict):
+            raise ValueError(f"{context} must be an object")
+        unknown = set(row) - _FONT_OVERRIDE_FIELDS
+        if unknown:
+            raise ValueError(
+                f"{context} has unknown field(s): {', '.join(sorted(unknown))}"
+            )
+        if "reference" not in row or "lookup" not in row:
+            raise ValueError(f"{context} must contain reference and lookup")
+        normalized: dict[str, str] = {}
+        for field, value in row.items():
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{context}.{field} must be a non-empty string")
+            normalized[field] = value.strip()
+        key = normal_key(normalized.pop("reference"))
+        if key in result:
+            raise ValueError(f"{context}.reference duplicates another alias: {key}")
+        result[key] = normalized
+    return result
+
+
+# Maintained project knowledge lives in config/symbols/font-aliases.json.
+FONT_REFERENCE_OVERRIDES = load_font_reference_overrides()
 
 
 def split_font_family_list(value: str) -> list[str]:
@@ -489,6 +522,7 @@ def discover_font_files() -> set[Path]:
 
 
 def load_font_index():
+    require_font_dependencies()
     exact = defaultdict(list)
     compact = defaultdict(list)
     font_files = discover_font_files()
@@ -570,8 +604,16 @@ def match_result(entry: AliasEntry, match_type: str):
     }
 
 
-def resolve_font_reference_override(reference: str, exact_index, compact_index):
-    override = FONT_REFERENCE_OVERRIDES.get(normal_key(reference))
+def resolve_font_reference_override(
+    reference: str,
+    exact_index,
+    compact_index,
+    *,
+    overrides=None,
+):
+    if overrides is None:
+        overrides = FONT_REFERENCE_OVERRIDES
+    override = overrides.get(normal_key(reference))
     if override is None:
         return None
 
@@ -604,7 +646,7 @@ def resolve_font_reference_override(reference: str, exact_index, compact_index):
     return result
 
 
-def find_font(reference: str, exact_index, compact_index):
+def find_font(reference: str, exact_index, compact_index, *, overrides=None):
     key = normal_key(reference)
     if key in GENERIC_FAMILIES:
         return {
@@ -622,7 +664,12 @@ def find_font(reference: str, exact_index, compact_index):
             "stretch": "",
         }
 
-    overridden = resolve_font_reference_override(reference, exact_index, compact_index)
+    overridden = resolve_font_reference_override(
+        reference,
+        exact_index,
+        compact_index,
+        overrides=overrides,
+    )
     if overridden is not None:
         return overridden
 
@@ -691,6 +738,7 @@ def parse_declarations(content) -> list[tuple[str, str, bool]]:
 
 
 def build_css_matcher(root):
+    require_font_dependencies()
     matcher = cssselect2.Matcher()
     declared_fonts = set()
 
