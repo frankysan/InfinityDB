@@ -224,8 +224,16 @@ or audit-only locations. A unit may reference several SVGs and several source
 references may share one URL; every reference is preserved while each
 authoritative URL is downloaded only once.
 
-The downloader creates one immutable `SYMBOLS ...zip`, ordinary snapshot
-provenance, and the acquisition-only version-1
+`tools/build_symbols.py` is the normal orchestration entrypoint for symbol
+refreshes. It requires either an explicit immutable Army ZIP (`--snapshot`) with
+matching generated snapshot provenance or an explicit network refresh
+(`--fetch-snapshot`); it never selects a newest snapshot implicitly. The
+orchestrator verifies archive hash, acquisition timestamp, source URL, language,
+document count, and observed per-document Army source revisions, then passes
+that exact archive through current raw symbol discovery/acquisition.
+
+The raw symbol acquisition stage creates one immutable `SYMBOLS ...zip`,
+ordinary snapshot provenance, and the acquisition-only version-1
 `data/manifests/army-symbol-build.json`. That build manifest separates raw assets
 from consumers, records Army/SYMBOLS artifact hashes, source-document count,
 raw asset URL/filename/archive-path/hash/source-method, every source/static

@@ -257,6 +257,13 @@ comparison snapshot SHA-256, and ordered notable-change notes. Snapshot notes
 are source-controlled human interpretation, not rules-database inputs or
 runtime application data.
 
+Symbol refresh orchestration is explicit and snapshot-pinned.
+`tools/build_symbols.py` requires either `--snapshot` for an existing immutable
+Army archive with generated provenance or `--fetch-snapshot` for an intentional
+network refresh. It verifies the selected Army archive/provenance and keeps that
+same artifact pinned through current raw symbol discovery and acquisition;
+normal application/database builds never invoke it or acquire network data.
+
 Army-symbol acquisition also writes the version-1
 `data/manifests/army-symbol-build.json`. This generated build-state document is
 separate from immutable snapshot provenance: it binds the selected Army and

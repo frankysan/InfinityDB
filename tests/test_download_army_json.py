@@ -28,7 +28,7 @@ def test_main_writes_snapshot_provenance_and_reports_revisions(
     destination = tmp_path / "raw"
     manifest_directory = tmp_path / "manifests"
 
-    def fake_download(staging, *, language):
+    def fake_download(staging, *, language, **_kwargs):
         metadata = staging / "metadata.json"
         army = staging / "101-panoceania.json"
         sectorial = staging / "102-sectorial.json"

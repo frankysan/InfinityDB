@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add `tools/build_symbols.py` as the explicit symbol-refresh orchestration
+  entrypoint. It pins one verified Army snapshot through raw symbol discovery
+  and acquisition, supports offline `--snapshot` and explicit online
+  `--fetch-snapshot` modes, and exposes reusable Army/symbol acquisition
+  results for later processing stages.
 - Add a validated source-anomaly regression baseline for the exact 2026-09-18
   Army snapshot. InfinityDB application builds allow reviewed warning counts to
   decrease but reject new warning categories or growth above the recorded

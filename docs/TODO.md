@@ -153,22 +153,26 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Let future snapshot-comparison tooling write structured generated diff
     data/reports under manifest/report paths while curated snapshot notes remain
     the human interpretation of those results.
-  - [ ] Add a thin `tools/build_symbols.py` orchestrator with mutually exclusive
-    offline `--snapshot PATH` and explicit online `--fetch-snapshot` modes.
-    Once selected or downloaded, pin archive path/name, SHA-256, language,
-    acquisition timestamp, API base URL, and source-document count; every
-    downstream symbol stage must consume that same snapshot rather than select
-    a newer one independently.
-    - [ ] Resolve the selected Army snapshot provenance and enrich the
-      `army-symbol-build.json` snapshot record with Army language, API base URL,
-      and source revision information rather than inferring those values from
-      filenames.
+  - [ ] Extend the thin `tools/build_symbols.py` orchestration spine through the
+    remaining processing/publication stages while keeping one pinned Army
+    snapshot authoritative for the whole run.
+    - [x] Add mutually exclusive offline `--snapshot PATH` and explicit online
+      `--fetch-snapshot` modes. Verify the selected Army archive against generated
+      provenance, pin archive identity/hash, language, acquisition timestamp,
+      API base URL, source-document count, and observed source revisions, and
+      pass that exact archive into raw symbol discovery/acquisition.
+    - [ ] Enrich the `army-symbol-build.json` snapshot record with Army language,
+      API base URL, acquisition provenance, and source revision information so
+      later stages consume the pin from generated build state rather than CLI
+      memory or filenames.
+    - [ ] Integrate override/cache resolution, processing, compression, publication,
+      mapping generation, validation, and final reporting behind the same pin.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
-    separate, intentional operations; `--snapshot-only`, `--language`,
-    `--data-root`, `--static-root`, `--jobs`, `--image-overrides`,
-    `--static-symbols`, `--refresh-symbols`, `--skip-symbol-download`,
-    `--skip-compression`, `--keep-work`, and `--dry-run` are candidate
-    orchestrator options as those stages are integrated.
+    separate, intentional operations. The current orchestrator already supports
+    `--snapshot-only`, `--language`, `--data-root`, and `--static-symbols`;
+    `--static-root`, `--jobs`, `--image-overrides`, `--refresh-symbols`,
+    `--skip-symbol-download`, `--skip-compression`, `--keep-work`, and
+    `--dry-run` remain candidate options as later stages are integrated.
 
 - [ ] Complete the static-symbol and local-override model as maintained project
   knowledge rather than downloader code.
@@ -283,11 +287,14 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] `snapshot_archive.py` centralizes the timestamped ZIP naming, collision
     handling, and deterministic archive member ordering shared by the Army,
     wiki, and symbol downloaders.
-  - [ ] `download_army_json.py`: expose snapshot identity/result to callers while
+  - [x] `download_army_json.py`: expose snapshot identity/result to callers while
     keeping its standalone CLI and explicit network behavior.
   - [ ] `download_army_symbols.py`: own complete discovery, static declarations,
     override/cache/network source resolution, recursive SVG audit, and manifest
     reference/asset updates while retaining complete timestamped archive output.
+    - [x] Expose current source-semantic discovery and raw network acquisition as
+      reusable functions so the standalone CLI and orchestrator share one
+      implementation.
   - [ ] Make the symbol-downloader input contract match its CLI and tests. Prefer
     the immutable raw Army ZIP as the authoritative input; either fully support
     directory/current merged-master inputs end to end or stop advertising them.

@@ -138,17 +138,29 @@ available explicitly with `--language es`. Symbol acquisition creates
 `SYMBOLS YYYYMMDD-HHMMSS.zip` archives under `data/raw/symbols/`. Successful
 wiki runs remove their local work directory; incomplete wiki runs publish no
 archive or provenance and preserve downloaded work under `data/work/wiki/` for
-inspection. All three downloaders also write deterministic snapshot provenance bound to each
-archive SHA-256 under `data/manifests/snapshots/`; these generated records are
-ignored by Git. Army-symbol acquisition additionally writes the current
-`data/manifests/army-symbol-build.json`, preserving raw asset identities and
-every Army/static reference for later processing stages.
+inspection. All three downloaders also write deterministic snapshot provenance
+bound to each archive SHA-256 under `data/manifests/snapshots/`; these generated
+records are ignored by Git.
+
+For normal symbol refreshes, `tools/build_symbols.py` is the orchestration
+entrypoint. It never selects an Army snapshot implicitly: use `--snapshot` to
+pin an existing immutable Army ZIP with matching generated provenance, or
+`--fetch-snapshot` for an explicit network refresh. The current orchestration
+stage performs source-semantic discovery and raw symbol acquisition from that
+same pinned Army snapshot, writes the immutable `SYMBOLS ...zip`, and updates
+`data/manifests/army-symbol-build.json`. The standalone symbol downloader remains
+available for debugging and targeted maintenance.
 
 ```powershell
 python tools/download_wiki_snapshot.py
 # Optional Spanish snapshot:
 python tools/download_wiki_snapshot.py --language es
-python tools/download_army_symbols.py "data/raw/JSON 20260910-204106.zip"
+
+# Offline/pinned symbol acquisition:
+python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip"
+
+# Explicit online Army refresh followed by symbol acquisition:
+python tools/build_symbols.py --fetch-snapshot
 ```
 
 The development server listens on all local network interfaces. Open

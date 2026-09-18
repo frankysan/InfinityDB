@@ -12,6 +12,7 @@ import time
 import zipfile
 from datetime import datetime
 from pathlib import Path
+from collections.abc import Callable
 from typing import Any, NamedTuple
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -46,6 +47,16 @@ class Discovery(NamedTuple):
     authoritative_urls: set[str]
     audit: dict[str, int]
     source_document_count: int
+
+
+class SymbolSnapshotResult(NamedTuple):
+    """Identity and discovery state for one published raw symbol snapshot."""
+
+    archive: Path
+    snapshot_manifest: Path
+    build_manifest: Path
+    asset_count: int
+    discovery: Discovery
 
 
 def destination_name(url: str) -> str:
@@ -395,6 +406,160 @@ def archive_symbols(
     )
 
 
+def discover_symbol_source(
+    source: Path,
+    *,
+    static_symbols_path: Path = DEFAULT_STATIC_CONFIG,
+    project_root: Path | None = None,
+) -> Discovery:
+    """Discover every authoritative symbol for one explicit Army source artifact."""
+    if not source.is_file():
+        raise ValueError("source must be an immutable Army ZIP or JSON file")
+    project_root = project_root or Path.cwd()
+    documents = load_source_documents(source)
+    static_symbols = load_static_symbols(static_symbols_path)
+    static_source = (
+        portable_project_path(static_symbols_path, project_root=project_root)
+        or static_symbols_path.name
+    )
+    return discover_symbols(
+        documents,
+        static_symbols=static_symbols,
+        static_source=static_source,
+    )
+
+
+def acquire_symbol_snapshot(
+    source: Path,
+    destination: Path,
+    manifest_directory: Path,
+    build_manifest_path: Path,
+    *,
+    static_symbols_path: Path = DEFAULT_STATIC_CONFIG,
+    delay: float = 0.2,
+    project_root: Path | None = None,
+    discovery: Discovery | None = None,
+    opener: Callable[..., Any] | None = None,
+    sleeper: Callable[[float], Any] | None = None,
+    acquired_at: datetime | None = None,
+    progress: Callable[[str], Any] | None = None,
+) -> SymbolSnapshotResult:
+    """Download and publish one complete raw symbol snapshot for a pinned Army source."""
+    if delay < 0:
+        raise ValueError("delay must not be negative")
+    project_root = project_root or Path.cwd()
+    discovery = discovery or discover_symbol_source(
+        source,
+        static_symbols_path=static_symbols_path,
+        project_root=project_root,
+    )
+    opener = opener or urlopen
+    sleeper = sleeper or time.sleep
+    progress = progress or (lambda _message: None)
+
+    destination.mkdir(parents=True, exist_ok=True)
+    archive: Path | None = None
+    snapshot_manifest: Path | None = None
+    try:
+        paths = archive_paths(discovery)
+        with tempfile.TemporaryDirectory(
+            prefix="infinity-symbols-", dir=destination
+        ) as staging:
+            staging_path = Path(staging)
+            files: list[Path] = []
+            assets: list[dict[str, str]] = []
+            urls = sorted(discovery.authoritative_urls)
+            for index, url in enumerate(urls, start=1):
+                relative = paths[url]
+                with opener(url, timeout=30) as response:
+                    body = response.read()
+                if b"<svg" not in body[:1024].lower():
+                    raise ValueError(f"Expected an SVG response: {url}")
+                path = staging_path / Path(relative)
+                _write_bytes(path, body)
+                files.append(path)
+                assets.append(
+                    {
+                        "url": url,
+                        "sourceFilename": Path(urlparse(url).path).name
+                        or destination_name(url),
+                        "archivePath": relative,
+                        "sha256": hashlib.sha256(body).hexdigest(),
+                        "sourceMethod": "network",
+                    }
+                )
+                progress(f"[{index}/{len(urls)}] {relative}")
+                if index < len(urls) and delay:
+                    sleeper(delay)
+
+            timestamp = acquired_at or datetime.now().astimezone()
+            archive = archive_symbols(
+                files, destination, root=staging_path, now=timestamp
+            )
+            snapshot_manifest = write_snapshot_manifest(
+                archive,
+                manifest_directory,
+                snapshot_type="symbols",
+                acquired_at=timestamp,
+                source_url=ASSET_ROOT_URL,
+                document_count=len(files),
+                project_root=project_root,
+                input_artifact=source,
+            )
+            build_manifest = build_symbol_manifest(
+                army_artifact=source,
+                symbol_artifact=archive,
+                acquired_at=timestamp,
+                source_document_count=discovery.source_document_count,
+                assets=assets,
+                references=discovery.references,
+                audit=discovery.audit,
+                project_root=project_root,
+            )
+            write_symbol_manifest(build_manifest, build_manifest_path)
+    except Exception:
+        if snapshot_manifest is not None:
+            snapshot_manifest.unlink(missing_ok=True)
+        if archive is not None:
+            archive.unlink(missing_ok=True)
+        raise
+
+    return SymbolSnapshotResult(
+        archive=archive,
+        snapshot_manifest=snapshot_manifest,
+        build_manifest=build_manifest_path,
+        asset_count=len(files),
+        discovery=discovery,
+    )
+
+
+def print_discovery_summary(discovery: Discovery) -> None:
+    """Print concise source-discovery counts for one symbol acquisition."""
+    print(
+        "Unit/profile logos: "
+        f"{discovery.audit['unitProfileReferenceCount']} references / "
+        f"{discovery.audit['uniqueUnitUrlCount']} unique URLs"
+    )
+    print(
+        "Faction logos: "
+        f"{discovery.audit['factionReferenceCount']} references / "
+        f"{discovery.audit['uniqueFactionUrlCount']} unique URLs"
+    )
+    print(
+        "Resume audit: "
+        f"{discovery.audit['resumeReferenceCount']} references / "
+        f"{discovery.audit['uniqueResumeUrlCount']} unique URLs"
+    )
+    print(
+        "Recursive SVG audit: "
+        f"{discovery.audit['recursiveReferenceCount']} references / "
+        f"{discovery.audit['uniqueRecursiveUrlCount']} unique URLs / "
+        f"{discovery.audit['unknownReferenceCount']} unknown locations"
+    )
+    print(f"Static declarations: {discovery.audit['staticReferenceCount']}")
+    print(f"Unique assets to download: {len(discovery.authoritative_urls)}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path, help="Raw Army ZIP/directory or legacy master JSON")
@@ -431,116 +596,32 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.delay < 0:
         raise ValueError("--delay must not be negative")
-    if not args.source.is_file():
-        raise ValueError("source must be an immutable Army ZIP or JSON file")
-    documents = load_source_documents(args.source)
-    static_symbols = load_static_symbols(args.static_symbols)
-    project_root = Path.cwd()
-    static_source = (
-        portable_project_path(args.static_symbols, project_root=project_root)
-        or args.static_symbols.name
-    )
-    discovery = discover_symbols(
-        documents,
-        static_symbols=static_symbols,
-        static_source=static_source,
-    )
-    print(
-        "Unit/profile logos: "
-        f"{discovery.audit['unitProfileReferenceCount']} references / "
-        f"{discovery.audit['uniqueUnitUrlCount']} unique URLs"
-    )
-    print(
-        "Faction logos: "
-        f"{discovery.audit['factionReferenceCount']} references / "
-        f"{discovery.audit['uniqueFactionUrlCount']} unique URLs"
-    )
-    print(
-        "Resume audit: "
-        f"{discovery.audit['resumeReferenceCount']} references / "
-        f"{discovery.audit['uniqueResumeUrlCount']} unique URLs"
-    )
-    print(
-        "Recursive SVG audit: "
-        f"{discovery.audit['recursiveReferenceCount']} references / "
-        f"{discovery.audit['uniqueRecursiveUrlCount']} unique URLs / "
-        f"{discovery.audit['unknownReferenceCount']} unknown locations"
-    )
-    print(f"Static declarations: {discovery.audit['staticReferenceCount']}")
-    print(f"Unique assets to download: {len(discovery.authoritative_urls)}")
-    if args.dry_run:
-        return 0
-
-    args.destination.mkdir(parents=True, exist_ok=True)
-    archive: Path | None = None
-    snapshot_manifest: Path | None = None
     try:
-        paths = archive_paths(discovery)
-        with tempfile.TemporaryDirectory(
-            prefix="infinity-symbols-", dir=args.destination
-        ) as staging:
-            staging_path = Path(staging)
-            files: list[Path] = []
-            assets: list[dict[str, str]] = []
-            urls = sorted(discovery.authoritative_urls)
-            for index, url in enumerate(urls, start=1):
-                relative = paths[url]
-                with urlopen(url, timeout=30) as response:
-                    body = response.read()
-                if b"<svg" not in body[:1024].lower():
-                    raise ValueError(f"Expected an SVG response: {url}")
-                path = staging_path / Path(relative)
-                _write_bytes(path, body)
-                files.append(path)
-                assets.append(
-                    {
-                        "url": url,
-                        "sourceFilename": Path(urlparse(url).path).name or destination_name(url),
-                        "archivePath": relative,
-                        "sha256": hashlib.sha256(body).hexdigest(),
-                        "sourceMethod": "network",
-                    }
-                )
-                print(f"[{index}/{len(urls)}] {relative}")
-                if index < len(urls) and args.delay:
-                    time.sleep(args.delay)
+        discovery = discover_symbol_source(
+            args.source,
+            static_symbols_path=args.static_symbols,
+        )
+        print_discovery_summary(discovery)
+        if args.dry_run:
+            return 0
 
-            acquired_at = datetime.now().astimezone()
-            archive = archive_symbols(
-                files, args.destination, root=staging_path, now=acquired_at
-            )
-            snapshot_manifest = write_snapshot_manifest(
-                archive,
-                args.manifest_dir,
-                snapshot_type="symbols",
-                acquired_at=acquired_at,
-                source_url=ASSET_ROOT_URL,
-                document_count=len(files),
-                project_root=project_root,
-                input_artifact=args.source,
-            )
-            build_manifest = build_symbol_manifest(
-                army_artifact=args.source,
-                symbol_artifact=archive,
-                acquired_at=acquired_at,
-                source_document_count=discovery.source_document_count,
-                assets=assets,
-                references=discovery.references,
-                audit=discovery.audit,
-                project_root=project_root,
-            )
-            write_symbol_manifest(build_manifest, args.build_manifest)
+        result = acquire_symbol_snapshot(
+            args.source,
+            args.destination,
+            args.manifest_dir,
+            args.build_manifest,
+            static_symbols_path=args.static_symbols,
+            delay=args.delay,
+            discovery=discovery,
+            progress=print,
+        )
     except (OSError, ValueError) as exc:
-        if snapshot_manifest is not None:
-            snapshot_manifest.unlink(missing_ok=True)
-        if archive is not None:
-            archive.unlink(missing_ok=True)
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    print(f"Downloaded {len(files)} symbols -> {archive}")
-    print(f"Snapshot provenance -> {snapshot_manifest}")
-    print(f"Symbol build manifest -> {args.build_manifest}")
+    print(f"Downloaded {result.asset_count} symbols -> {result.archive}")
+    print(f"Snapshot provenance -> {result.snapshot_manifest}")
+    print(f"Symbol build manifest -> {result.build_manifest}")
     return 0
 
 

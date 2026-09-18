@@ -78,8 +78,11 @@ the record. Byte-identical archives acquired under different labels may have
 separate manifests with the same authoritative SHA-256.
 
 Symbol snapshot provenance also records the hash of the Army source artifact
-used by the current symbol downloader. This is acquisition provenance only; it
-is not the later planned `army-symbol-build.json` processing manifest.
+used by symbol acquisition. `tools/build_symbols.py` verifies the corresponding
+Army snapshot provenance before discovery and keeps that exact archive pinned
+through raw symbol acquisition. The generated `army-symbol-build.json` is
+separate build state: its current contract is acquisition-only and will be
+extended as later processing/publication stages are integrated.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
@@ -93,11 +96,10 @@ documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-
 
 ## Remaining design direction
 
-Exact timestamped archive/hash provenance for legacy wiki-derived curated data
-will be addressed when the wiki downloader/packager and curated provenance
-contract are rewritten together. Other build-specific generated manifests, such
-as the planned Army-symbol build manifest, may live under `manifests/` as those
-pipelines are implemented.
+The symbol orchestrator currently stops after raw acquisition. Later stages will
+consume the same pinned Army/SYMBOLS build state for override/cache resolution,
+font audit, deduplication, text conversion, compression, publication, generated
+browser mappings, and final validation/reporting.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not automatically covered by InfinityDB's MIT

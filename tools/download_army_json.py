@@ -13,11 +13,12 @@ import hashlib
 import re
 import sys
 import tempfile
+import zipfile
 from collections import Counter
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import decode_document
@@ -41,6 +42,18 @@ _SLUG_PART = re.compile(r"[^a-z0-9]+")
 
 class ApiDownloadError(ValueError):
     """The Army API returned data that cannot be saved as an input snapshot."""
+
+
+class ArmySnapshotResult(NamedTuple):
+    """Identity and observed source revisions for one published Army snapshot."""
+
+    archive: Path
+    manifest: Path
+    acquired_at: datetime
+    language: str
+    source_url: str
+    document_count: int
+    source_revisions: dict[str, int]
 
 
 def _request(url: str) -> Request:
@@ -127,6 +140,30 @@ def _source_revision_counts(files: list[Path]) -> dict[str, int]:
     return dict(sorted(revisions.items()))
 
 
+def snapshot_source_revision_counts(archive: Path) -> dict[str, int]:
+    """Read per-document Army source revision counts from one immutable ZIP snapshot."""
+    if not archive.is_file() or not zipfile.is_zipfile(archive):
+        raise ApiDownloadError(f"Army snapshot must be a ZIP archive: {archive}")
+    revisions: Counter[str] = Counter()
+    with zipfile.ZipFile(archive) as source:
+        names = [
+            name
+            for name in source.namelist()
+            if not name.endswith("/") and name.lower().endswith(".json")
+        ]
+        if "metadata.json" not in names:
+            raise ApiDownloadError("Army snapshot is missing metadata.json")
+        for name in sorted(names):
+            if name == "metadata.json":
+                continue
+            try:
+                document = decode_document(source.read(name), name)
+            except ValueError as exc:
+                raise ApiDownloadError(f"Invalid Army source document {name}: {exc}") from exc
+            revisions[str(document.get("version"))] += 1
+    return dict(sorted(revisions.items()))
+
+
 def download_snapshot(
     destination: Path,
     *,
@@ -189,6 +226,63 @@ def archive_snapshot(
     return create_timestamped_archive(files, destination, prefix="JSON", now=now)
 
 
+def acquire_army_snapshot(
+    destination: Path,
+    manifest_directory: Path,
+    *,
+    language: str = "en",
+    api_base_url: str = API_BASE_URL,
+    project_root: Path | None = None,
+    opener: Callable[..., Any] | None = None,
+    timeout: int = DEFAULT_TIMEOUT,
+    acquired_at: datetime | None = None,
+) -> ArmySnapshotResult:
+    """Download, verify, archive, and describe one immutable Army snapshot."""
+    project_root = project_root or Path.cwd()
+    opener = opener or urlopen
+    destination.mkdir(parents=True, exist_ok=True)
+    archive: Path | None = None
+    manifest: Path | None = None
+    try:
+        with tempfile.TemporaryDirectory(prefix="infinity-army-", dir=destination) as staging:
+            files = download_snapshot(
+                Path(staging),
+                language=language,
+                api_base_url=api_base_url,
+                opener=opener,
+                timeout=timeout,
+            )
+            revisions = _source_revision_counts(files)
+            timestamp = acquired_at or datetime.now().astimezone()
+            archive = archive_snapshot(files, destination, now=timestamp)
+            manifest = write_snapshot_manifest(
+                archive,
+                manifest_directory,
+                snapshot_type="army",
+                acquired_at=timestamp,
+                source_url=api_base_url,
+                document_count=len(files),
+                project_root=project_root,
+                language=language,
+            )
+    except Exception:
+        if manifest is not None:
+            manifest.unlink(missing_ok=True)
+        if archive is not None:
+            archive.unlink(missing_ok=True)
+        raise
+
+    return ArmySnapshotResult(
+        archive=archive,
+        manifest=manifest,
+        acquired_at=timestamp,
+        language=language,
+        source_url=api_base_url,
+        document_count=len(files),
+        source_revisions=revisions,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("destination", nargs="?", type=Path, default=Path("data/raw"))
@@ -200,38 +294,26 @@ def main(argv: list[str] | None = None) -> int:
         help="Generated snapshot manifest directory (default: data/manifests/snapshots)",
     )
     args = parser.parse_args(argv)
-    archive: Path | None = None
-    manifest: Path | None = None
     try:
-        args.destination.mkdir(parents=True, exist_ok=True)
-        with tempfile.TemporaryDirectory(prefix="infinity-army-", dir=args.destination) as staging:
-            files = download_snapshot(Path(staging), language=args.language)
-            revisions = _source_revision_counts(files)
-            acquired_at = datetime.now().astimezone()
-            archive = archive_snapshot(files, args.destination, now=acquired_at)
-            manifest = write_snapshot_manifest(
-                archive,
-                args.manifest_dir,
-                snapshot_type="army",
-                acquired_at=acquired_at,
-                source_url=API_BASE_URL,
-                document_count=len(files),
-                project_root=Path.cwd(),
-                language=args.language,
-            )
+        result = acquire_army_snapshot(
+            args.destination,
+            args.manifest_dir,
+            language=args.language,
+        )
     except (OSError, ValueError) as exc:
-        if manifest is not None:
-            manifest.unlink(missing_ok=True)
-        if archive is not None:
-            archive.unlink(missing_ok=True)
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
-    print(f"Downloaded {len(files) - 1} army lists and metadata -> {archive}")
+    print(
+        f"Downloaded {result.document_count - 1} army lists and metadata -> "
+        f"{result.archive}"
+    )
     print(
         "Army source revisions -> "
-        + ", ".join(f"{version}: {count}" for version, count in revisions.items())
+        + ", ".join(
+            f"{version}: {count}" for version, count in result.source_revisions.items()
+        )
     )
-    print(f"Snapshot provenance -> {manifest}")
+    print(f"Snapshot provenance -> {result.manifest}")
     return 0
 
 
