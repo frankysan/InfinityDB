@@ -11,7 +11,6 @@ from tools.asset_validation import (
     validate_asset_set,
 )
 
-
 SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
 
 
