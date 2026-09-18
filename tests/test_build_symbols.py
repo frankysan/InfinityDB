@@ -93,6 +93,9 @@ def stub_post_acquisition(
         summary={
             "canonicalAssetCount": 0,
             "redundantAssetCount": 0,
+            "sourceAssetBytes": 0,
+            "canonicalAssetBytes": 0,
+            "reclaimedAssetBytes": 0,
             "exactGroupCount": 0,
             "visualGroupCount": 0,
             "renderErrorCount": 0,

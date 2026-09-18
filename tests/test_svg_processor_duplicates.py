@@ -53,6 +53,7 @@ def test_duplicate_detection_exact_first_visual_and_canonical_ranking(
     )
 
     assert result["source_svg_files"] == 4
+    assert result["canonical_svg_files"] == 2
     assert result["unique_byte_sets"] == 3
     assert result["renders_avoided_exact"] == 1
     assert result["exact_groups"] == 0
@@ -62,5 +63,31 @@ def test_duplicate_detection_exact_first_visual_and_canonical_ranking(
         "a.svg": "c.svg",
         "b.svg": "c.svg",
     }
+    source_size = sum(path.stat().st_size for path in input_root.glob("*.svg"))
+    canonical_size = (input_root / "c.svg").stat().st_size + (
+        input_root / "d.svg"
+    ).stat().st_size
+    assert result["source_size_bytes"] == source_size
+    assert result["canonical_size_bytes"] == canonical_size
+    assert result["reclaimed_size_bytes"] == source_size - canonical_size
+    assert result["reduction_percent"] == (
+        (source_size - canonical_size) * 100.0 / source_size
+    )
+    summary = result["summary_path"].read_text(encoding="utf-8-sig")
+    assert "source_size_bytes,canonical_size_bytes,reclaimed_size_bytes" in summary
+    assert f"{source_size},{canonical_size},{source_size - canonical_size}" in summary
     report = result["report_path"].read_text(encoding="utf-8-sig")
     assert "representative,c.svg,no_active_text,c.svg" in report
+
+
+def test_symbol_set_size_metrics_handles_empty_set(tmp_path: Path) -> None:
+    result = svg_processor.symbol_set_size_metrics([], tmp_path, {})
+
+    assert result == {
+        "source_svg_files": 0,
+        "canonical_svg_files": 0,
+        "source_size_bytes": 0,
+        "canonical_size_bytes": 0,
+        "reclaimed_size_bytes": 0,
+        "reduction_percent": 0.0,
+    }

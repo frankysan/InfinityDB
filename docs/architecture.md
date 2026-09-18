@@ -461,9 +461,11 @@ renders, remaining candidates are compared through decoded RGBA output from the
 selected renderer, and inconclusive render failures remain unique. Deterministic
 representative ranking prefers `no_active_text`, then `fonts_available`, then
 weaker classifications before filename/path tie-breakers. Version-5 build state
-records duplicate reports, renderer settings, counts, and a complete portable
+records duplicate reports, renderer settings, counts, total source/canonical
+loose-SVG byte sizes, reclaimed bytes, and a complete portable
 `archivePath -> canonical archivePath` mapping while retaining every acquisition
-asset and source reference. The downloader does not generate browser mappings.
+asset and source reference. The SHA-bound duplicate summary report also records
+the percentage size reduction. The downloader does not generate browser mappings.
 
 **Design direction:** later processing will consume that exact version-5 state
 through text conversion, compression, and publication. Canonical processing may

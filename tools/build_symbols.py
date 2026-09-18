@@ -288,6 +288,18 @@ def main(argv: list[str] | None = None) -> int:
             f"visual groups {duplicates.summary['visualGroupCount']} | "
             f"render errors {duplicates.summary['renderErrorCount']}"
         )
+        source_bytes = duplicates.summary["sourceAssetBytes"]
+        canonical_bytes = duplicates.summary["canonicalAssetBytes"]
+        reclaimed_bytes = duplicates.summary["reclaimedAssetBytes"]
+        reduction_percent = (
+            reclaimed_bytes * 100.0 / source_bytes if source_bytes else 0.0
+        )
+        print(
+            "Symbol set size -> "
+            f"{source_bytes:,} bytes before | "
+            f"{canonical_bytes:,} bytes after | "
+            f"{reclaimed_bytes:,} bytes saved ({reduction_percent:.2f}%)"
+        )
         print(f"Duplicate report -> {duplicates.groups_report}")
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

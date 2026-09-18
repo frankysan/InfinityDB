@@ -158,7 +158,7 @@ consistency audit unless one becomes necessary to unblock that work.
         bypassing only the cache.
       - [x] Integrate verified extraction, structural/font audit, and complete-set
         exact-first visual deduplication through version-5 build state with a
-        portable canonical raw-asset mapping.
+        portable canonical raw-asset mapping and before/after byte-size accounting.
       - [ ] Integrate text conversion, compression, publication, mapping generation,
         validation, and final reporting.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain

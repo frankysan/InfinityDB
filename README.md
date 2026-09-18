@@ -176,10 +176,12 @@ references and unused declarations, and fails before later processing when an
 active-text asset has unresolved fonts. The following duplicate stage hashes exact
 byte sets first, renders only unique byte sets for visual comparison, keeps
 inconclusive render failures unique, and records the selected canonical raw asset
-for every original archive path without deleting source references. Install the
-Python dependencies with `pip install -e ".[symbols]"`; the default visual
-duplicate renderer is the external `resvg` executable. Text conversion,
-compression, and publication remain later stages. The standalone symbol downloader
+for every original archive path without deleting source references. The bound
+`duplicate-summary.csv` also records total loose-SVG bytes before deduplication,
+total canonical bytes after deduplication, bytes reclaimed, and percentage
+reduction. Install the Python dependencies with `pip install -e ".[symbols]"`;
+the default visual duplicate renderer is the external `resvg` executable. Text
+conversion, compression, and publication remain later stages. The standalone symbol downloader
 remains available for debugging and targeted maintenance; publishing a symbol
 snapshot through it requires matching Army snapshot provenance.
 

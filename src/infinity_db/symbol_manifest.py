@@ -575,7 +575,12 @@ def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> N
         "canonicalAssetCount",
         "renderErrorCount",
     }
-    _only_keys(summary, fields, f"{context}.summary")
+    size_fields = {
+        "sourceAssetBytes",
+        "canonicalAssetBytes",
+        "reclaimedAssetBytes",
+    }
+    _only_keys(summary, fields | size_fields, f"{context}.summary")
     missing = fields - set(summary)
     if missing:
         raise SymbolManifestError(
@@ -586,6 +591,30 @@ def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> N
         if type(count) is not int or count < 0:
             raise SymbolManifestError(
                 f"{context}.summary.{field} must be a non-negative integer"
+            )
+    present_size_fields = size_fields & set(summary)
+    if present_size_fields and present_size_fields != size_fields:
+        raise SymbolManifestError(
+            f"{context}.summary size fields must be present as a complete set"
+        )
+    for field in sorted(present_size_fields):
+        count = summary[field]
+        if type(count) is not int or count < 0:
+            raise SymbolManifestError(
+                f"{context}.summary.{field} must be a non-negative integer"
+            )
+    if present_size_fields:
+        if summary["canonicalAssetBytes"] > summary["sourceAssetBytes"]:
+            raise SymbolManifestError(
+                f"{context}.summary.canonicalAssetBytes cannot exceed sourceAssetBytes"
+            )
+        if (
+            summary["sourceAssetBytes"] - summary["canonicalAssetBytes"]
+            != summary["reclaimedAssetBytes"]
+        ):
+            raise SymbolManifestError(
+                f"{context}.summary.reclaimedAssetBytes must equal "
+                "sourceAssetBytes - canonicalAssetBytes"
             )
     asset_count = len(archive_paths)
     if summary["sourceAssetCount"] != asset_count:

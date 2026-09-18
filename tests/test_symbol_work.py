@@ -13,6 +13,7 @@ from infinity_db.symbol_manifest import (
     add_svg_preflight,
     build_symbol_manifest,
     load_symbol_manifest,
+    validate_symbol_manifest,
     write_symbol_manifest,
 )
 from tools.symbol_work import (
@@ -438,12 +439,17 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
             path.write_text("header\n", encoding="utf-8")
         return {
             "source_svg_files": 3,
+            "canonical_svg_files": 2,
             "unique_byte_sets": 2,
             "renders_avoided_exact": 1,
             "exact_groups": 1,
             "visual_groups": 0,
             "redundant_files": 1,
             "render_errors": 0,
+            "source_size_bytes": 180,
+            "canonical_size_bytes": 120,
+            "reclaimed_size_bytes": 60,
+            "reduction_percent": 33.333333,
             "render_size": 512,
             "jobs": 4,
             "renderer": "resvg",
@@ -471,6 +477,9 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
     )
 
     assert result.summary["canonicalAssetCount"] == 2
+    assert result.summary["sourceAssetBytes"] == 180
+    assert result.summary["canonicalAssetBytes"] == 120
+    assert result.summary["reclaimedAssetBytes"] == 60
     assert result.canonical_by_archive_path == {
         "units/a.svg": "units/a.svg",
         "units/b.svg": "units/a.svg",
@@ -480,9 +489,17 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
     assert updated["formatVersion"] == 5
     duplicate = updated["processing"]["duplicateDetection"]
     assert duplicate["canonicalByArchivePath"] == result.canonical_by_archive_path
+    assert duplicate["summary"]["sourceAssetBytes"] == 180
+    assert duplicate["summary"]["canonicalAssetBytes"] == 120
+    assert duplicate["summary"]["reclaimedAssetBytes"] == 60
     assert duplicate["renderer"] == {
         "name": "resvg",
         "version": "0.45.1",
         "renderSize": 512,
         "jobs": 4,
     }
+
+    legacy_v5 = json.loads(json.dumps(updated))
+    for field in ("sourceAssetBytes", "canonicalAssetBytes", "reclaimedAssetBytes"):
+        legacy_v5["processing"]["duplicateDetection"]["summary"].pop(field)
+    validate_symbol_manifest(legacy_v5)

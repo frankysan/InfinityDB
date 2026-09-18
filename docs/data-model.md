@@ -433,12 +433,15 @@ SHA-256-bound report artifact. Installed-font audit then promotes the same state
 to version 4 with available/missing/ambiguous/generic effective-font summaries,
 its generated report identity, and the exact tracked font-alias configuration
 identity. Exact-first visual duplicate detection then promotes the same state to
-version 5. Version 5 records renderer settings, duplicate-report identities,
-summary counts, and a complete portable `archivePath -> canonical archivePath`
-mapping while retaining the original `assets` and `references` arrays unchanged.
-Detailed reports live under `data/reports/symbols/`. Loaders continue to accept
-versions 2, 3, and 4 so prior immutable symbol caches and completed intermediate
-processing states remain valid inputs to their next stage.
+version 5. Version 5 records renderer settings, duplicate-report identities, summary
+counts, total source/canonical loose-SVG byte sizes, reclaimed bytes, and a
+complete portable `archivePath -> canonical archivePath` mapping while retaining
+the original `assets` and `references` arrays unchanged. The SHA-bound duplicate
+summary report additionally records percentage reduction. Detailed reports live
+under `data/reports/symbols/`. Loaders continue to accept versions 2, 3, and 4 so
+prior immutable symbol caches and completed intermediate processing states remain
+valid inputs to their next stage; version-5 manifests produced before size
+accounting remain valid for compatibility.
 
 ### Design direction
 

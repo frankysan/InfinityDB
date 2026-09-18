@@ -2433,6 +2433,44 @@ def duplicate_representative_sort_key(relative: Path, file_categories: dict[str,
     )
 
 
+class SymbolSetSizeMetrics(TypedDict):
+    source_svg_files: int
+    canonical_svg_files: int
+    source_size_bytes: int
+    canonical_size_bytes: int
+    reclaimed_size_bytes: int
+    reduction_percent: float
+
+
+def symbol_set_size_metrics(
+    svg_files: list[Path],
+    input_root: Path,
+    duplicate_representatives: dict[str, str],
+) -> SymbolSetSizeMetrics:
+    """Summarize source and canonical SVG-set sizes after deduplication."""
+    source_size_bytes = sum(path.stat().st_size for path in svg_files)
+    canonical_files = [
+        path
+        for path in svg_files
+        if duplicate_relative_key(path, input_root) not in duplicate_representatives
+    ]
+    canonical_size_bytes = sum(path.stat().st_size for path in canonical_files)
+    reclaimed_size_bytes = source_size_bytes - canonical_size_bytes
+    reduction_percent = (
+        reclaimed_size_bytes * 100.0 / source_size_bytes
+        if source_size_bytes
+        else 0.0
+    )
+    return {
+        "source_svg_files": len(svg_files),
+        "canonical_svg_files": len(canonical_files),
+        "source_size_bytes": source_size_bytes,
+        "canonical_size_bytes": canonical_size_bytes,
+        "reclaimed_size_bytes": reclaimed_size_bytes,
+        "reduction_percent": reduction_percent,
+    }
+
+
 def find_duplicate_svgs(
     input_root: Path,
     output_root: Path,
@@ -2696,6 +2734,12 @@ def find_duplicate_svgs(
         writer.writeheader()
         writer.writerows(render_errors)
 
+    size_metrics = symbol_set_size_metrics(
+        svg_files,
+        input_root,
+        duplicate_representatives,
+    )
+
     duplicate_elapsed = time.perf_counter() - duplicate_started
     summary_path = reports_root / "duplicate-summary.csv"
     with summary_path.open("w", newline="", encoding="utf-8-sig") as f:
@@ -2705,12 +2749,17 @@ def find_duplicate_svgs(
             "jobs",
             "render_size",
             "source_svg_files",
+            "canonical_svg_files",
             "unique_byte_sets",
             "renders_avoided_exact",
             "exact_groups",
             "visual_groups",
             "redundant_files",
             "render_errors",
+            "source_size_bytes",
+            "canonical_size_bytes",
+            "reclaimed_size_bytes",
+            "reduction_percent",
             "elapsed_seconds",
         ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -2721,12 +2770,17 @@ def find_duplicate_svgs(
             "jobs": jobs,
             "render_size": render_size,
             "source_svg_files": len(svg_files),
+            "canonical_svg_files": size_metrics["canonical_svg_files"],
             "unique_byte_sets": len(unique_byte_groups),
             "renders_avoided_exact": saved_renders,
             "exact_groups": exact_groups,
             "visual_groups": visual_groups_count,
             "redundant_files": len(duplicate_representatives),
             "render_errors": len(render_errors),
+            "source_size_bytes": size_metrics["source_size_bytes"],
+            "canonical_size_bytes": size_metrics["canonical_size_bytes"],
+            "reclaimed_size_bytes": size_metrics["reclaimed_size_bytes"],
+            "reduction_percent": f"{size_metrics['reduction_percent']:.6f}",
             "elapsed_seconds": duplicate_elapsed,
         })
 
@@ -2734,18 +2788,30 @@ def find_duplicate_svgs(
     print(f"Visual groups:      {visual_groups_count}")
     print(f"Redundant files:    {len(duplicate_representatives)}")
     print(f"Render errors:      {len(render_errors)}")
+    print(f"Source size:        {size_metrics['source_size_bytes']:,} bytes")
+    print(f"Canonical size:     {size_metrics['canonical_size_bytes']:,} bytes")
+    print(
+        "Dedup reduction:    "
+        f"{size_metrics['reclaimed_size_bytes']:,} bytes "
+        f"({size_metrics['reduction_percent']:.2f}%)"
+    )
     print(f"Elapsed:            {duplicate_elapsed:.3f}s")
     print(f"Report:             {report_path}")
     print(f"Summary:            {summary_path}")
 
     return {
         "source_svg_files": len(svg_files),
+        "canonical_svg_files": size_metrics["canonical_svg_files"],
         "unique_byte_sets": len(unique_byte_groups),
         "renders_avoided_exact": saved_renders,
         "exact_groups": exact_groups,
         "visual_groups": visual_groups_count,
         "redundant_files": len(duplicate_representatives),
         "render_errors": len(render_errors),
+        "source_size_bytes": size_metrics["source_size_bytes"],
+        "canonical_size_bytes": size_metrics["canonical_size_bytes"],
+        "reclaimed_size_bytes": size_metrics["reclaimed_size_bytes"],
+        "reduction_percent": size_metrics["reduction_percent"],
         "render_size": render_size,
         "jobs": jobs,
         "renderer": renderer_name,

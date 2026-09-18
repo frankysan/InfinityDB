@@ -44,9 +44,9 @@ All notable changes to this project are documented in this file.
 
 - Integrate exact-first visual symbol deduplication into `build_symbols.py`.
   Successful font-audited builds now produce version-5 symbol state with
-  duplicate reports, renderer settings, conservative render-error handling, and
-  a complete portable raw-asset-to-canonical mapping while retaining every
-  original source reference.
+  duplicate reports, renderer settings, conservative render-error handling, a
+  complete portable raw-asset-to-canonical mapping, and total source/canonical
+  loose-SVG size accounting while retaining every original source reference.
 
 - Add a dispatch-only `Full-asset checks` GitHub Actions workflow. The job is
   restricted to `main`, stages a checksum-pinned private SVG bundle supplied

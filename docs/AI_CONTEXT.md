@@ -281,9 +281,12 @@ or ambiguous fonts fail orchestration before deduplication/conversion. The
 orchestrator then runs exact-first visual duplicate detection with the established
 renderer/ranking policy and promotes passed state to version 5. Version-5 state
 retains every original asset/reference and adds a complete portable
-`archivePath -> canonical archivePath` map plus duplicate report identities and
-renderer settings. Individual render failures remain unique and are reported.
-Versions 2, 3, and 4 remain accepted as valid earlier-stage state. The downloader
+`archivePath -> canonical archivePath` map plus duplicate report identities,
+renderer settings, and total source/canonical loose-SVG byte sizes with reclaimed
+bytes. The bound duplicate summary also reports percentage reduction. Individual
+render failures remain unique and are reported. Versions 2, 3, and 4 remain
+accepted as valid earlier-stage state, and earlier version-5 state without size
+metrics remains compatible. The downloader
 does not generate `army-symbols.js` or `unit-symbol-map.js`.
 
 Raw source resolution now follows this implemented order:

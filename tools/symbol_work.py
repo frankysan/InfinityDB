@@ -673,11 +673,19 @@ def detect_symbol_duplicates(
         "redundantAssetCount": result["redundant_files"],
         "canonicalAssetCount": len(set(canonical.values())),
         "renderErrorCount": result["render_errors"],
+        "sourceAssetBytes": result["source_size_bytes"],
+        "canonicalAssetBytes": result["canonical_size_bytes"],
+        "reclaimedAssetBytes": result["reclaimed_size_bytes"],
     }
     if summary["sourceAssetCount"] != materialized.asset_count:
         raise ValueError(
             "Duplicate detector source count does not match materialized symbols: "
             f"{summary['sourceAssetCount']} != {materialized.asset_count}"
+        )
+    if result["canonical_svg_files"] != summary["canonicalAssetCount"]:
+        raise ValueError(
+            "Duplicate detector canonical count does not match canonical mapping: "
+            f"{result['canonical_svg_files']} != {summary['canonicalAssetCount']}"
         )
 
     updated = add_duplicate_detection(
