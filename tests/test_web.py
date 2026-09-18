@@ -67,6 +67,15 @@ def _normalized_css_selector(selector: str) -> str:
     return re.sub(r"\s*([>,+~])\s*", r"\1", selector)
 
 
+def _unit_symbol_mapping(source: bytes) -> dict[str, str]:
+    text = source.decode("utf-8")
+    entries = re.finditer(
+        r'\[\s*("(?:\\.|[^"\\])*")\s*,\s*("(?:\\.|[^"\\])*")\s*\]',
+        text,
+    )
+    return {json.loads(match.group(1)): json.loads(match.group(2)) for match in entries}
+
+
 def assert_css_rule(
     styles: bytes,
     selector: str,
@@ -838,11 +847,6 @@ def test_army_symbol_is_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body
-    status, _, body = request(
-        app, "/static/units/unassigned/224-yojimbo-motorized-sword-for-hire.svg"
-    )
-    assert status == 200
-    assert b"<svg" in body
     status, _, body = request(app, "/static/units/panoceania/18-clipper-dronbot.svg")
     assert status == 200
     assert b"<svg" in body
@@ -1574,15 +1578,15 @@ def test_unit_symbol_is_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
     assert b"unitSymbolSlug" in body
-    status, headers, body = request(app, "/static/units/panoceania/1-fusiliers.svg")
-    assert status == 200
-    assert headers["content-type"] == "image/svg+xml"
-    assert b"<svg" in body
-    for path in [
-        "/static/units/next-wave/1921-blur-spec-ops.svg",
-        "/static/units/next-wave/1935-next-wave-team-ops.svg",
+    mapping = _unit_symbol_mapping(body)
+    for slug in [
+        "fusiliers",
+        "yojimbo-motorized-sword-for-hire",
+        "blur-spec-ops",
+        "next-wave-team-ops",
     ]:
-        status, headers, body = request(app, path)
+        published = mapping[slug]
+        status, headers, body = request(app, f"/static/units/{published}.svg")
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
