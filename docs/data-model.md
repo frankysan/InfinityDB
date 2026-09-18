@@ -448,8 +448,12 @@ Version 7 records canonical/compressed counts and byte totals, production
 compression settings, and SHA-bound `compression-report.csv`,
 `compression-candidates.csv`, and `compression-run.json` identities. The derived
 compressed work tree contains exactly the canonical asset set and is replaced only
-after validation succeeds. Detailed reports live under `data/reports/symbols/`.
-Loaders continue to accept versions 2 through 7 so prior immutable symbol caches
+after validation succeeds. Final publication promotes passed version-7 state to
+version 8. Version 8 records published/mapping counts and byte totals and binds
+`publication-map.json`, `army-symbols.js`, and `unit-symbol-map.js`; the report
+contains complete source-archive and canonical-archive mappings to published paths
+plus published SVG hashes. Detailed reports live under `data/reports/symbols/`.
+Loaders continue to accept versions 2 through 8 so prior immutable symbol caches
 and completed intermediate processing states remain valid inputs; version-5
 manifests produced before size accounting remain valid for compatibility.
 

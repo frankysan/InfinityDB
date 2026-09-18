@@ -8,8 +8,9 @@ current orchestration boundary pins Army provenance, resolves one immutable raw
 symbol snapshot, materializes verified work files, runs structural SVG preflight,
 audits effective fonts against the installed font environment, performs
 exact-first visual duplicate detection with a persisted canonical mapping, and
-converts active text on canonical assets into paths, and compresses the complete
-canonical set through display-aware validation.
+converts active text on canonical assets into paths, compresses the complete
+canonical set through display-aware validation, and transactionally publishes the final
+asset tree and browser mappings.
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ try:
         discover_symbol_source,
         print_discovery_summary,
     )
+    from tools.reorganize_symbols import publish_symbols
     from tools.symbol_work import (
         audit_symbol_fonts,
         audit_symbol_work,
@@ -54,6 +56,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
         discover_symbol_source,
         print_discovery_summary,
     )
+    from reorganize_symbols import publish_symbols
     from symbol_work import (
         audit_symbol_fonts,
         audit_symbol_work,
@@ -171,6 +174,12 @@ def main(argv: list[str] | None = None) -> int:
         choices=("resvg", "inkscape", "auto"),
         default="resvg",
         help="Renderer for compression validation (default: resvg)",
+    )
+    parser.add_argument(
+        "--static-root",
+        type=Path,
+        default=Path("src/infinity_db/web/static"),
+        help="Application static root for final symbol publication",
     )
     args = parser.parse_args(argv)
 
@@ -385,6 +394,24 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Compression renderer -> {compression.renderer}{renderer_suffix}")
         print(f"Compression report -> {compression.report}")
         print(f"Compressed symbol work -> {compression.compressed_root}")
+
+        publication = publish_symbols(
+            army_snapshot=pinned.archive,
+            build_manifest_path=symbols.build_manifest,
+            work_root=materialized.work_root,
+            reports_base=symbol_reports,
+            static_root=args.static_root,
+            project_root=Path.cwd(),
+        )
+        print(
+            "Publication -> "
+            f"{publication.summary['publishedAssetCount']} canonical SVGs | "
+            f"{publication.summary['unitMappingCount']} unit mappings | "
+            f"{publication.summary['factionMappingCount']} faction mappings | "
+            f"{publication.summary['staticMappingCount']} static mappings"
+        )
+        print(f"Published symbol root -> {publication.static_root}")
+        print(f"Publication mapping -> {publication.mapping_report}")
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

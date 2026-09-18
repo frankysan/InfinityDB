@@ -182,12 +182,14 @@ python tools/run_checks.py --all --assets required \
   --build-source tests/fixtures/deployment-smoke
 ```
 
-The bundle is deliberately supplied privately rather than reconstructed by CI:
-InfinityDB does not yet have an authoritative symbol publisher, and the CI layer
-must not duplicate that future publication logic. The workflow has no push or
-pull-request trigger and does not upload the bundle or staged graphical tree as a
-GitHub Actions artifact. The environment secrets therefore remain an explicit
-repository-administration prerequisite before a manual run can succeed.
+The bundle is deliberately supplied privately rather than reconstructed by CI.
+InfinityDB now has an authoritative publisher, but required/manual full-asset CI
+still avoids rerunning the network/external-tool-sensitive symbol acquisition and
+processing pipeline; it validates the already-published contract instead. The
+workflow has no push or pull-request trigger and does not upload the bundle or
+staged graphical tree as a GitHub Actions artifact. The environment secrets
+therefore remain an explicit repository-administration prerequisite before a
+manual run can succeed.
 
 ## Network and scheduled workflows
 

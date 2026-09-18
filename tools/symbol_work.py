@@ -16,6 +16,7 @@ from typing import Any, NamedTuple
 
 from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
 from infinity_db.symbol_manifest import (
+    SYMBOL_BUILD_COMPRESSION_VERSION,
     SYMBOL_BUILD_DUPLICATE_VERSION,
     SYMBOL_BUILD_FONT_AUDIT_VERSION,
     SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
@@ -770,6 +771,7 @@ def convert_symbol_text(
         manifest.get("formatVersion") not in {
             SYMBOL_BUILD_DUPLICATE_VERSION,
             SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
+            SYMBOL_BUILD_COMPRESSION_VERSION,
             SYMBOL_BUILD_VERSION,
         }
         or duplicate.get("status") != "passed"
@@ -953,6 +955,7 @@ def compress_symbol_work(
     if (
         manifest.get("formatVersion") not in {
             SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
+            SYMBOL_BUILD_COMPRESSION_VERSION,
             SYMBOL_BUILD_VERSION,
         }
         or conversion.get("status") != "passed"

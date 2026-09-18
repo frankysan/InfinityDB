@@ -142,6 +142,25 @@ def stub_post_acquisition(
     monkeypatch.setattr(
         module, "compress_symbol_work", lambda *_args, **_kwargs: compression
     )
+    publication = SimpleNamespace(
+        static_root=Path("static"),
+        mapping_report=Path("reports/publication-map.json"),
+        army_map=Path("static/army-symbols.js"),
+        unit_map=Path("static/unit-symbol-map.js"),
+        status="passed",
+        summary={
+            "sourceAssetCount": 0,
+            "canonicalAssetCount": 0,
+            "publishedAssetCount": 0,
+            "factionMappingCount": 0,
+            "unitMappingCount": 0,
+            "staticMappingCount": 0,
+            "publishedBytes": 0,
+        },
+    )
+    monkeypatch.setattr(
+        module, "publish_symbols", lambda *_args, **_kwargs: publication
+    )
 
 
 def test_resolve_army_snapshot_verifies_provenance_and_revisions(tmp_path: Path) -> None:

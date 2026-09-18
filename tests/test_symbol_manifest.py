@@ -5,8 +5,12 @@ import pytest
 
 from infinity_db.symbol_manifest import (
     SymbolManifestError,
+    add_compression,
+    add_duplicate_detection,
     add_font_audit,
+    add_publication,
     add_svg_preflight,
+    add_text_conversion,
     build_symbol_manifest,
     validate_symbol_manifest,
 )
@@ -365,3 +369,171 @@ def test_font_audit_promotes_preflight_manifest_to_version_4(tmp_path: Path) -> 
     assert font_audit["aliases"]["path"] == "font-aliases.json"
     assert font_audit["report"]["path"] == "font-audit.json"
     validate_symbol_manifest(promoted)
+
+
+def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -> None:
+    army = artifact(tmp_path / "army.zip", b"army")
+    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
+    preflight_report = artifact(tmp_path / "svg-preflight.json", b"{}")
+    font_report = artifact(tmp_path / "font-audit.json", b"{}")
+    aliases = artifact(tmp_path / "font-aliases.json", b"{}")
+    duplicate_groups = artifact(tmp_path / "duplicate-groups.csv", b"x")
+    duplicate_errors = artifact(tmp_path / "duplicate-errors.csv", b"x")
+    duplicate_summary = artifact(tmp_path / "duplicate-summary.csv", b"x")
+    conversion_report = artifact(tmp_path / "conversion.csv", b"x")
+    conversion_summary = artifact(tmp_path / "conversion-summary.csv", b"x")
+    compression_report = artifact(tmp_path / "compression.csv", b"x")
+    compression_candidates = artifact(tmp_path / "compression-candidates.csv", b"x")
+    compression_run = artifact(tmp_path / "compression-run.json", b"{}")
+    publication_report = artifact(tmp_path / "publication-map.json", b"{}")
+    army_map = artifact(tmp_path / "army-symbols.js", b"map")
+    unit_map = artifact(tmp_path / "unit-symbol-map.js", b"map")
+
+    document = build_symbol_manifest(
+        army_artifact=army,
+        symbol_artifact=symbols,
+        acquired_at=datetime(2026, 9, 18, 9, 0, tzinfo=UTC),
+        **army_source_kwargs(1),
+        assets=[],
+        references=[],
+        audit={
+            "unitProfileReferenceCount": 0,
+            "uniqueUnitUrlCount": 0,
+            "factionReferenceCount": 0,
+            "uniqueFactionUrlCount": 0,
+            "semanticReferenceCount": 0,
+            "uniqueSemanticUrlCount": 0,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 0,
+            "uniqueRecursiveUrlCount": 0,
+            "uniqueDownloadedUrlCount": 0,
+            "unknownReferenceCount": 0,
+        },
+        project_root=tmp_path,
+    )
+    document = add_svg_preflight(
+        document,
+        status="passed",
+        summary={
+            "svgCount": 0,
+            "parseErrorCount": 0,
+            "activeTextAssetCount": 0,
+            "noActiveTextAssetCount": 0,
+            "fontDeclaredAssetCount": 0,
+            "uniqueDeclaredFontCount": 0,
+        },
+        report=preflight_report,
+        project_root=tmp_path,
+    )
+    document = add_font_audit(
+        document,
+        status="passed",
+        summary={
+            "svgCount": 0,
+            "fontAvailableAssetCount": 0,
+            "fontMissingAssetCount": 0,
+            "noActiveTextAssetCount": 0,
+            "implicitDefaultAssetCount": 0,
+            "effectiveFontReferenceCount": 0,
+            "availableFontReferenceCount": 0,
+            "missingFontReferenceCount": 0,
+            "ambiguousFontReferenceCount": 0,
+            "genericFontReferenceCount": 0,
+            "normalizedAliasReferenceCount": 0,
+            "unusedDeclarationCount": 0,
+        },
+        report=font_report,
+        aliases=aliases,
+        project_root=tmp_path,
+    )
+    document = add_duplicate_detection(
+        document,
+        summary={
+            "sourceAssetCount": 0,
+            "canonicalAssetCount": 0,
+            "redundantAssetCount": 0,
+            "sourceAssetBytes": 0,
+            "canonicalAssetBytes": 0,
+            "reclaimedAssetBytes": 0,
+            "uniqueByteSetCount": 0,
+            "rendersAvoidedExactCount": 0,
+            "exactGroupCount": 0,
+            "visualGroupCount": 0,
+            "renderErrorCount": 0,
+        },
+        canonical_by_archive_path={},
+        groups_report=duplicate_groups,
+        errors_report=duplicate_errors,
+        summary_report=duplicate_summary,
+        renderer="resvg",
+        renderer_version="test",
+        render_size=512,
+        jobs=4,
+        project_root=tmp_path,
+    )
+    document = add_text_conversion(
+        document,
+        status="passed",
+        summary={
+            "canonicalAssetCount": 0,
+            "conversionCandidateCount": 0,
+            "convertedAssetCount": 0,
+            "carriedForwardAssetCount": 0,
+            "failedAssetCount": 0,
+        },
+        report=conversion_report,
+        summary_report=conversion_summary,
+        converter="inkscape-shell",
+        converter_version="test",
+        jobs=4,
+        project_root=tmp_path,
+    )
+    document = add_compression(
+        document,
+        status="passed",
+        summary={
+            "assetCount": 0,
+            "compressedAssetCount": 0,
+            "retainedAssetCount": 0,
+            "sourceBytes": 0,
+            "outputBytes": 0,
+            "reclaimedBytes": 0,
+        },
+        report=compression_report,
+        candidates_report=compression_candidates,
+        run_report=compression_run,
+        profile="balanced",
+        renderer="resvg",
+        target_sizes=[32, 64],
+        dprs=[1.0, 2.0],
+        balanced_precisions=[2, 3],
+        max_rms=0.01,
+        max_changed_fraction=0.01,
+        pixel_diff_threshold=8,
+        jobs=4,
+        project_root=tmp_path,
+    )
+    assert document["formatVersion"] == 7
+
+    published = add_publication(
+        document,
+        summary={
+            "sourceAssetCount": 0,
+            "canonicalAssetCount": 0,
+            "publishedAssetCount": 0,
+            "factionMappingCount": 0,
+            "unitMappingCount": 0,
+            "staticMappingCount": 0,
+            "publishedBytes": 0,
+        },
+        mapping_report=publication_report,
+        army_map=army_map,
+        unit_map=unit_map,
+        project_root=tmp_path,
+    )
+
+    assert published["formatVersion"] == 8
+    assert published["processing"]["publication"]["status"] == "passed"
+    validate_symbol_manifest(published)

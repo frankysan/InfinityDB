@@ -480,16 +480,17 @@ RMS/changed-fraction limits of 0.01, and pixel-difference threshold 8. The
 complete balanced output is revalidated and atomically promoted to the derived
 `compressed/` work tree; successful state advances to manifest version 7 with
 SHA-bound compression reports and settings. Compression failure leaves prior
-compressed output and version-6 state intact. The downloader does not generate
-browser mappings.
-
-**Design direction:** publication will consume that exact version-7 compressed
-work tree. Canonical processing may collapse equivalent assets, but it must not
-discard their source references. Only the publisher will assign final application
-paths and generated browser mappings because only that stage knows the final
-canonical asset after processing. Source resolution, validation, deduplication,
-conversion, compression, and publishing remain distinct stages with provenance
-recorded rather than inferred from final filenames.
+compressed output and version-6 state intact. Final publication consumes that exact
+version-7 compressed work tree, the pinned Army snapshot, and the authoritative
+build manifest. It materializes a temporary application asset tree, generates the
+browser maps from authoritative references plus the canonical mapping, validates
+the complete result, transactionally replaces only the generated static symbol
+outputs, and advances successful state to version 8 with a SHA-bound complete
+publication mapping. Canonical processing may collapse equivalent assets without
+discarding their source references; conflicting browser lookup keys fail rather
+than using legacy first-symbol-wins behavior. Source resolution, validation,
+deduplication, conversion, compression, and publishing remain distinct stages with
+provenance recorded rather than inferred from final filenames.
 
 ## Module boundaries
 
@@ -543,8 +544,8 @@ and consumes maintained build configuration from
 `Full-asset checks` provides a dispatch-only GitHub layer restricted to `main`.
 It stages a private checksum-pinned published-asset bundle through the
 `full-assets` environment and validates it before running the normal checks with
-`--assets required`; CI deliberately does not reconstruct publication paths from
-raw symbols while the authoritative publisher remains unfinished. The graphical
+`--assets required`; CI deliberately validates a private published bundle rather
+than rerunning the network/external-tool-sensitive symbol pipeline. The graphical
 asset tree is never uploaded as a workflow artifact. The existing container smoke
 test continues to validate deployment packaging separately. See `docs/ci.md`.
 

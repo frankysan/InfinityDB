@@ -16,7 +16,8 @@ SYMBOL_BUILD_PREFLIGHT_VERSION = 3
 SYMBOL_BUILD_FONT_AUDIT_VERSION = 4
 SYMBOL_BUILD_DUPLICATE_VERSION = 5
 SYMBOL_BUILD_TEXT_CONVERSION_VERSION = 6
-SYMBOL_BUILD_VERSION = 7
+SYMBOL_BUILD_COMPRESSION_VERSION = 7
+SYMBOL_BUILD_VERSION = 8
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
 SOURCE_METHODS = frozenset({"override", "cache", "network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -203,6 +204,7 @@ def add_text_conversion(
     if document.get("formatVersion") not in {
         SYMBOL_BUILD_DUPLICATE_VERSION,
         SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
+        SYMBOL_BUILD_COMPRESSION_VERSION,
         SYMBOL_BUILD_VERSION,
     }:
         raise SymbolManifestError(
@@ -225,6 +227,7 @@ def add_text_conversion(
     promoted = json.loads(json.dumps(document))
     promoted["formatVersion"] = SYMBOL_BUILD_TEXT_CONVERSION_VERSION
     promoted["processing"].pop("compression", None)
+    promoted["processing"].pop("publication", None)
     promoted["processing"]["textConversion"] = {
         "status": status,
         "summary": dict(sorted(summary.items())),
@@ -259,11 +262,13 @@ def add_compression(
     validate_symbol_manifest(document)
     if document.get("formatVersion") not in {
         SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
+        SYMBOL_BUILD_COMPRESSION_VERSION,
         SYMBOL_BUILD_VERSION,
     }:
         raise SymbolManifestError(
             "Compression requires version-"
-            f"{SYMBOL_BUILD_TEXT_CONVERSION_VERSION} or version-{SYMBOL_BUILD_VERSION} "
+            f"{SYMBOL_BUILD_TEXT_CONVERSION_VERSION}, version-"
+            f"{SYMBOL_BUILD_COMPRESSION_VERSION}, or version-{SYMBOL_BUILD_VERSION} "
             "text-converted state"
         )
     if document["processing"]["textConversion"]["status"] != "passed":
@@ -274,7 +279,8 @@ def add_compression(
         raise SymbolManifestError("Compression jobs must be at least 1")
 
     promoted = json.loads(json.dumps(document))
-    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["formatVersion"] = SYMBOL_BUILD_COMPRESSION_VERSION
+    promoted["processing"].pop("publication", None)
     promoted["processing"]["compression"] = {
         "status": status,
         "summary": dict(sorted(summary.items())),
@@ -298,6 +304,40 @@ def add_compression(
     validate_symbol_manifest(promoted)
     return promoted
 
+
+def add_publication(
+    document: dict[str, Any],
+    *,
+    summary: dict[str, int],
+    mapping_report: Path,
+    army_map: Path,
+    unit_map: Path,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Promote compressed version-7 state to version 8 publication state."""
+    validate_symbol_manifest(document)
+    if document.get("formatVersion") not in {
+        SYMBOL_BUILD_COMPRESSION_VERSION,
+        SYMBOL_BUILD_VERSION,
+    }:
+        raise SymbolManifestError(
+            "Publication requires version-"
+            f"{SYMBOL_BUILD_COMPRESSION_VERSION} compressed state"
+        )
+    if document["processing"]["compression"]["status"] != "passed":
+        raise SymbolManifestError("Publication requires passed compression")
+
+    promoted = json.loads(json.dumps(document))
+    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["processing"]["publication"] = {
+        "status": "passed",
+        "summary": dict(sorted(summary.items())),
+        "mappingReport": artifact_record(mapping_report, project_root=project_root),
+        "armyMap": artifact_record(army_map, project_root=project_root),
+        "unitMap": artifact_record(unit_map, project_root=project_root),
+    }
+    validate_symbol_manifest(promoted)
+    return promoted
 
 def write_symbol_manifest(document: dict[str, Any], path: Path) -> Path:
     """Atomically replace the generated current symbol-build manifest."""
@@ -327,7 +367,7 @@ def load_symbol_manifest(path: Path) -> dict[str, Any]:
 
 
 def validate_symbol_manifest(document: Any) -> None:
-    """Validate acquisition v2 through compressed v7 symbol state."""
+    """Validate acquisition v2 through published v8 symbol state."""
     root = _object(document, "symbol manifest")
     version = root.get("formatVersion")
     supported_versions = {
@@ -336,6 +376,7 @@ def validate_symbol_manifest(document: Any) -> None:
         SYMBOL_BUILD_FONT_AUDIT_VERSION,
         SYMBOL_BUILD_DUPLICATE_VERSION,
         SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
+        SYMBOL_BUILD_COMPRESSION_VERSION,
         SYMBOL_BUILD_VERSION,
     }
     if version not in supported_versions:
@@ -501,8 +542,10 @@ def _processing(value: Any, archive_paths: set[str], version: int, context: str)
         allowed.add("duplicateDetection")
     if version >= SYMBOL_BUILD_TEXT_CONVERSION_VERSION:
         allowed.add("textConversion")
-    if version == SYMBOL_BUILD_VERSION:
+    if version >= SYMBOL_BUILD_COMPRESSION_VERSION:
         allowed.add("compression")
+    if version == SYMBOL_BUILD_VERSION:
+        allowed.add("publication")
     _only_keys(record, allowed, context)
     preflight = _object(record.get("svgPreflight"), f"{context}.svgPreflight")
     _only_keys(preflight, {"status", "summary", "report"}, f"{context}.svgPreflight")
@@ -678,6 +721,14 @@ def _processing(value: Any, archive_paths: set[str], version: int, context: str)
         record.get("compression"),
         record["duplicateDetection"]["summary"]["canonicalAssetCount"],
         f"{context}.compression",
+    )
+    if version == SYMBOL_BUILD_COMPRESSION_VERSION:
+        return
+    _publication(
+        record.get("publication"),
+        asset_count,
+        record["duplicateDetection"]["summary"]["canonicalAssetCount"],
+        f"{context}.publication",
     )
 
 
@@ -865,6 +916,60 @@ def _compression(value: Any, canonical_asset_count: int, context: str) -> None:
     _artifact(record.get("candidatesReport"), f"{context}.candidatesReport")
     _artifact(record.get("runReport"), f"{context}.runReport")
 
+
+def _publication(
+    value: Any,
+    source_asset_count: int,
+    canonical_asset_count: int,
+    context: str,
+) -> None:
+    record = _object(value, context)
+    _only_keys(
+        record,
+        {"status", "summary", "mappingReport", "armyMap", "unitMap"},
+        context,
+    )
+    status = _string(record.get("status"), f"{context}.status")
+    if status != "passed":
+        raise SymbolManifestError(f"{context}.status must be 'passed'")
+
+    summary = _object(record.get("summary"), f"{context}.summary")
+    fields = {
+        "sourceAssetCount",
+        "canonicalAssetCount",
+        "publishedAssetCount",
+        "factionMappingCount",
+        "unitMappingCount",
+        "staticMappingCount",
+        "publishedBytes",
+    }
+    _only_keys(summary, fields, f"{context}.summary")
+    missing = fields - set(summary)
+    if missing:
+        raise SymbolManifestError(
+            f"{context}.summary is missing field(s): " + ", ".join(sorted(missing))
+        )
+    for field in sorted(fields):
+        count = summary[field]
+        if type(count) is not int or count < 0:
+            raise SymbolManifestError(
+                f"{context}.summary.{field} must be a non-negative integer"
+            )
+    if summary["sourceAssetCount"] != source_asset_count:
+        raise SymbolManifestError(
+            f"{context}.summary.sourceAssetCount must equal the source asset count"
+        )
+    if summary["canonicalAssetCount"] != canonical_asset_count:
+        raise SymbolManifestError(
+            f"{context}.summary.canonicalAssetCount must equal duplicate canonical count"
+        )
+    if summary["publishedAssetCount"] != canonical_asset_count:
+        raise SymbolManifestError(
+            f"{context}.summary.publishedAssetCount must equal canonical asset count"
+        )
+    _artifact(record.get("mappingReport"), f"{context}.mappingReport")
+    _artifact(record.get("armyMap"), f"{context}.armyMap")
+    _artifact(record.get("unitMap"), f"{context}.unitMap")
 
 def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> None:
     record = _object(value, context)

@@ -153,12 +153,13 @@ Raw acquisition writes version-2 `data/manifests/army-symbol-build.json`; a
 completed structural preflight promotes the same generated build state to
 version 3, the installed-font audit promotes it to version 4, complete-set
 exact-first visual deduplication promotes it to version 5, canonical
-text-to-path conversion promotes it to version 6, and display-aware canonical
-compression promotes it to version 7. The generated state binds reports, tracked
-font-alias configuration, renderer/converter settings, and a portable
-raw-asset-to-canonical mapping to the exact symbol artifact. Version 7 records the
-production compression settings and SHA-bound compression reports while the
-verified compressed work tree carries the complete canonical asset set forward.
+text-to-path conversion promotes it to version 6, display-aware canonical
+compression promotes it to version 7, and final publication promotes it to version
+8. The generated state binds reports, tracked font-alias configuration,
+renderer/converter settings, a portable raw-asset-to-canonical mapping, the final
+source-to-published mapping, and generated browser-map identities to the exact
+symbol artifact. Version 8 is the complete published state; version 7 remains the
+validated compressed intermediate state.
 
 Raw symbol resolution is ordered and offline-friendly: a matching local SVG
 under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
@@ -192,12 +193,17 @@ with the `balanced` profile, `resvg` validation, p2-first/p3-rescue precision,
 32/64 CSS-pixel targets at DPR 1/2, RMS/changed-fraction limits of 0.01, and
 pixel-difference threshold 8. It atomically replaces
 `data/work/symbols/.../compressed/` only after the complete output set validates.
-Install the Python dependencies with `pip install -e ".[symbols]"`; compression
-also requires SVGO v4+ (`npm install -g svgo`) and, by default, the external
-`resvg` executable. Text conversion requires Inkscape unless another backend is
-selected. Publication remains a later stage. The standalone symbol downloader remains
-available for debugging and targeted maintenance; publishing a symbol snapshot
-through it requires matching Army snapshot provenance.
+The final publisher consumes that verified compressed tree plus the same pinned Army
+snapshot and authoritative build manifest, materializes the ignored
+`armies/`, `orders/`, and `units/` trees under `src/infinity_db/web/static/`,
+generates `army-symbols.js` and `unit-symbol-map.js`, writes a complete SHA-bound
+source-to-published mapping report, and promotes the manifest to version 8 only
+after the new publication validates. Install the Python dependencies with
+`pip install -e ".[symbols]"`; compression also requires SVGO v4+
+(`npm install -g svgo`) and, by default, the external `resvg` executable. Text
+conversion requires Inkscape unless another backend is selected. The standalone
+symbol downloader and publisher remain available for debugging and targeted
+maintenance; both require matching pinned snapshot/build provenance.
 
 ```powershell
 python tools/download_wiki_snapshot.py

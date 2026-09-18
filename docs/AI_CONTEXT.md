@@ -81,8 +81,8 @@ and serves a read-only browser and same-origin HTTP API.
 - `Full-asset checks` is dispatch-only, restricted to `main`, and stages a private
   checksum-pinned published-asset ZIP from the `full-assets` GitHub environment
   before running `run_checks.py --assets required`. It does not upload the
-  graphical tree as an artifact, and it intentionally does not duplicate the
-  unfinished symbol publisher by reconstructing runtime paths from raw symbols.
+  graphical tree as an artifact, and it intentionally does not rerun the
+  network/external-tool-sensitive symbol pipeline from raw inputs.
   Repository environment secrets must be configured before the manual job can
   succeed. See `docs/ci.md`.
 
@@ -295,10 +295,13 @@ then promotes passed version-6 state to version 7 using the reusable standalone
 compressor: balanced profile, resvg validation, p2-first/p3-rescue precision,
 32/64 CSS-pixel targets, DPR 1/2, RMS and changed-fraction limits 0.01, and
 pixel-difference threshold 8. The complete compressed tree and three compression
-reports are validated before atomic promotion. Versions 2 through 7 remain
-accepted as valid stage state, and earlier version-5 state without size metrics
-remains compatible. The downloader does not generate `army-symbols.js` or
-`unit-symbol-map.js`.
+reports are validated before atomic promotion. Final publication then consumes the
+same pinned Army snapshot, version-7 compressed tree, and authoritative build
+manifest; it generates the application asset tree plus `army-symbols.js` and
+`unit-symbol-map.js`, writes a complete source/canonical-to-published mapping, and
+promotes passed state to version 8. Versions 2 through 8 remain accepted as valid
+stage state, and earlier version-5 state without size metrics remains compatible.
+The downloader still does not generate browser mappings; only the publisher does.
 
 Raw source resolution now follows this implemented order:
 
@@ -316,15 +319,15 @@ does not bypass a matching override. An invalid matching override is an error,
 not a reason to fall back upstream. Unused overrides and URL/filename collisions
 are reported.
 
-### Design direction
+### Publication boundary
 
-Later symbol publication must consume the same pinned Army/SYMBOLS identities
-and the verified version-7 compressed work tree rather than selecting newer
-snapshots independently.
-
-Only the publisher assigns final application paths and generated
+Symbol publication consumes the same pinned Army/SYMBOLS identities and the
+verified version-7 compressed work tree rather than selecting newer snapshots
+independently. The publisher alone assigns final application paths and generated
 `army-symbols.js` / `unit-symbol-map.js` mappings because only publication knows
-the final canonical asset after deduplication/conversion/compression.
+the final canonical asset after deduplication/conversion/compression. Successful
+publication is version 8 and binds the complete source-to-published mapping plus
+the generated browser maps into build state.
 
 The established processing direction is `resvg` for visual duplicate and
 compression validation, persistent `inkscape --shell` workers for text-to-path

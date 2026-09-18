@@ -151,7 +151,7 @@ consistency audit unless one becomes necessary to unblock that work.
       language, API base URL, acquisition timestamp/document count, and source
       revision information so later stages consume the pin from generated build
       state rather than CLI memory or filenames.
-    - [ ] Integrate override/cache resolution, processing, compression, publication,
+    - [x] Integrate override/cache resolution, processing, compression, publication,
       mapping generation, validation, and final reporting behind the same pin.
       - [x] Route raw acquisition through local override, validated prior immutable
         symbol snapshot/cache, then network resolution, with explicit refresh
@@ -160,13 +160,13 @@ consistency audit unless one becomes necessary to unblock that work.
         exact-first visual deduplication through version-5 build state, canonical
         text conversion through version-6 build state, and balanced compression
         through version-7 build state.
-      - [ ] Integrate publication, mapping generation, final validation, and final
-        reporting.
+      - [x] Integrate publication, mapping generation, final validation, and final
+        reporting through version-8 published state.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
     separate, intentional operations. The current orchestrator already supports
     `--snapshot-only`, `--language`, `--data-root`, `--static-symbols`, `--jobs`,
-    `--duplicate-render-size`, `--duplicate-renderer`, `--text-converter`, and
-    `--compression-renderer`; `--static-root`,
+    `--duplicate-render-size`, `--duplicate-renderer`, `--text-converter`,
+    `--compression-renderer`, and `--static-root`;
     `--skip-symbol-download`, `--skip-compression`, `--keep-work`, and `--dry-run`
     remain candidate options as later stages are integrated.
 
@@ -240,24 +240,24 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] Compress canonical assets only. If no lossy candidate passes visual
     validation, retain the validated lossless/path-only output.
 
-- [ ] Refactor `reorganize_symbols.py` from destructive migration tooling into
+- [x] Refactor `reorganize_symbols.py` from destructive migration tooling into
   a non-destructive publisher.
-  - [ ] Consume the pinned snapshot, authoritative build manifest, and final
-    canonical/compressed asset directory; copy/materialize outputs rather than
+  - [x] Consume the pinned snapshot, authoritative build manifest, and final
+    compressed canonical asset directory; copy/materialize outputs rather than
     move or delete source/work files.
-  - [ ] Build a temporary publication tree, validate it, and atomically replace the
-    generated published tree only after success so a failed run leaves the prior
-    assets intact.
-  - [ ] The publisher alone defines final application paths after deduplication,
+  - [x] Build a temporary publication tree, validate it, and transactionally replace
+    the generated published tree/maps only after success so a failed run restores
+    the prior assets and report.
+  - [x] The publisher alone defines final application paths after deduplication,
     conversion, compression, and organization. Generate `army-symbols.js` and
-    `unit-symbol-map.js` here, not in a downloader, and remove legacy
-    first-symbol-wins assumptions once this publisher is authoritative.
-  - [ ] Preserve stable ID/slug application conventions where practical. The useful
-    unit convention is `units/<army-slug>/<unit-id>-<unit-slug>.svg`; faction
-    assets should use an ID/slug form such as
-    `armies/<faction-id>-<faction-slug>.svg` or the existing compatible format.
-    Decide the exact canonical physical naming before changing browser mappings.
-  - [ ] Permit several source/unit references to map to one canonical physical SVG.
+    `unit-symbol-map.js` here, not in a downloader, and reject conflicting unit
+    lookup keys instead of retaining legacy first-symbol-wins behavior.
+  - [x] Preserve stable ID/slug application conventions. Units publish as
+    `units/<canonical-army-slug>/<unit-id>-<unit-slug>.svg`; faction assets use
+    the parent-faction folder with `<faction-id>-<faction-slug>.svg`; established
+    `/static/orders/` names remain browser-compatible for static symbols.
+  - [x] Permit several source/unit or faction references to map to one canonical
+    physical SVG and persist a complete source/canonical-to-published mapping.
 
 - [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
   small shared symbol-pipeline utility layer.
@@ -288,7 +288,7 @@ consistency audit unless one becomes necessary to unblock that work.
     beyond the current canonical flow remains.
   - [x] `svg_compress.py`: keep the standalone CLI and production validation
     behavior; expose an importable result/update path for orchestration.
-  - [ ] `reorganize_symbols.py`: become the publisher and final mapping generator.
+  - [x] `reorganize_symbols.py`: become the publisher and final mapping generator.
   - [ ] `path_sanitization.py`: remain shared infrastructure for external/mirror
     naming; pipeline-generated asset names should use one host-independent
     policy.

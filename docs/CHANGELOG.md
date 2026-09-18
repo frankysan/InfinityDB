@@ -37,6 +37,14 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Integrate final non-destructive symbol publication into `build_symbols.py`.
+  Passed version-7 compression state now advances to version 8 after a temporary
+  publication tree, generated browser mappings, and the complete
+  source/canonical-to-published mapping validate. The publisher transactionally
+  replaces only generated `armies/`, `orders/`, `units/`, `army-symbols.js`, and
+  `unit-symbol-map.js` outputs, restores prior publication on failure, and removes
+  the legacy first-symbol-wins mapping behavior.
+
 - Integrate display-aware canonical symbol compression into `build_symbols.py`.
   Passed version-6 text-conversion state now advances to version 7 using the
   reusable `svg_compress.py` engine with the balanced production profile and
