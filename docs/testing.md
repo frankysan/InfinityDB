@@ -24,7 +24,6 @@ stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
 `rules.db` from the tracked curated rules collections. The named profiles are
 `code` (`test` + `lint`), `data` (`build` + `rules`), and `all`.
 
-
 ## Graphical asset test modes
 
 The test stage has an explicit policy for the ignored Corvus Belli graphical
@@ -107,8 +106,9 @@ the exact container contract and the equivalent manual command.
 ## Continuous integration
 
 The `Source checks` GitHub Actions workflow runs the normal check runner on
-clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests and
-pushes to `main`, plus a Linux Python 3.14 compatibility leg:
+clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests,
+pushes to `main`, and manual dispatch, plus a Linux Python 3.14 compatibility
+leg:
 
 ```text
 python tools/run_checks.py --all --assets off \

@@ -70,9 +70,9 @@ Current release: **0.5.1** (2026-09-14).
   snapshots, and the current unit-symbol set. All three stage loose files
   temporarily and persist complete timestamped ZIP snapshots; normal build
   commands do not make network requests.
-- Includes dedicated regression tests for each standalone tool script so the
-  wiki mirror, symbol download, symbol reorganizer, Army JSON downloader, and
-  shared sanitization logic stay cross-platform and safe to run.
+- Includes dedicated regression coverage for the acquisition, symbol
+  orchestration/reorganization, private asset staging, and shared path-safety
+  utilities; broader maintained-tool coverage remains tracked in the backlog.
 - Uses snapshot-aware API validators and release-fingerprinted static modules,
   so browsers refresh safely when either deployed application or data changes.
 - Includes server deployment, update, and image-pruning scripts; see the

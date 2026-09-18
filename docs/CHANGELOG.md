@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Bring reference documentation and backlog status in line with the implemented
+  CI, snapshot-provenance, and asset-redistribution contracts. Remove stale
+  future-only wording for acquisition/provenance and clarify that remaining CI
+  hardening no longer blocks symbol-pipeline work.
+
 - Decouple read-only database/web runtime imports from the database exporter and
   Army normalization policy. Installed runtime validation can now open generated
   `infinity.db` and `rules.db` without repository-relative weapon configuration,

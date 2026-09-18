@@ -136,20 +136,6 @@ consistency audit unless one becomes necessary to unblock that work.
     output lifecycle as Army acquisition. The wiki downloader no longer keeps
     a dated unpacked mirror as its primary output, and the symbol downloader no
     longer incrementally fills a long-lived loose destination directory.
-  - [x] Add shared, versioned snapshot-provenance and annotation contracts using
-    the existing data-path design rather than adjacent sidecars.
-    - [ ] Army, wiki, and symbol acquisition now write deterministic SHA-256-bound
-      provenance under `data/manifests/snapshots/`, with archive-hash
-      verification and portable project-relative paths where applicable.
-    - [ ] Human-authored descriptions, comparison targets, and ordered notable
-      changes use the separate versioned contract under
-      `data/curated/snapshot-notes/`; acquisition tooling never mutates them.
-    - [ ] Generated manifests are ignored by Git, excluded from Docker build
-      context, retained until explicitly removed, and never replace Corvus
-      Belli's source `metadata.json`.
-    - [ ] Regression coverage validates all three snapshot types, symbol input
-      provenance, deterministic serialization, immutable archive-labeled
-      records bound to SHA-256, archive verification, and annotation references.
   - [ ] Let future snapshot-comparison tooling write structured generated diff
     data/reports under manifest/report paths while curated snapshot notes remain
     the human interpretation of those results.
@@ -412,8 +398,9 @@ consistency audit unless one becomes necessary to unblock that work.
 
 ## Continuous integration and validation
 
-- [ ] Implement the accepted CI strategy documented in `docs/ci.md` before
-  resuming later symbol-processing stages.
+- [ ] Finish non-blocking CI hardening documented in `docs/ci.md`. The core
+  validation layers are implemented, so later symbol-processing stages may
+  proceed while these follow-up items remain open.
   - [x] Repair the deployment-smoke runtime import boundary. Read-only runtime
     database/web imports no longer pull the database exporter, Army normalizer,
     or weapon-policy configuration from source-checkout-relative paths.
@@ -471,16 +458,16 @@ consistency audit unless one becomes necessary to unblock that work.
 
 - [ ] Align all documentation and packaging language with the current
   third-party graphical-asset redistribution policy.
-  - [ ] State explicitly that Corvus Belli graphical assets are **not bundled with
+  - [x] State explicitly that Corvus Belli graphical assets are **not bundled with
     InfinityDB source code or redistributable releases by default**. Public
     availability from Corvus Belli asset hosts is not treated as permission to
     redistribute the files, and InfinityDB's MIT License does not relicense
     them.
-  - [ ] Keep raw symbol snapshots, processed symbols, locally corrected derivatives,
+  - [x] Keep raw symbol snapshots, processed symbols, locally corrected derivatives,
     and locally published runtime copies ignored/uncommitted unless explicit
     redistribution permission covering the intended distribution form has been
     established.
-  - [ ] Distinguish local application publication from redistribution: the symbol
+  - [x] Distinguish local application publication from redistribution: the symbol
     pipeline may acquire/process/publish assets into a local installation's
     runtime static tree, while source archives, wheels, GitHub releases, Docker
     images distributed by InfinityDB, and similar prebuilt artifacts must exclude

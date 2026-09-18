@@ -111,9 +111,9 @@ documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-
 
 The symbol orchestrator currently stops after verified raw extraction, structural
 SVG preflight, and installed-font audit. Later stages will consume the same
-pinned Army/SYMBOLS
-build state for installed-font/alias resolution, deduplication, text conversion,
-compression, publication, generated browser mappings, and final validation.
+pinned Army/SYMBOLS build state for canonical selection/deduplication, text
+conversion, compression, publication, generated browser mappings, and final
+validation.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not automatically covered by InfinityDB's MIT

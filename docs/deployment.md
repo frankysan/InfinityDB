@@ -12,9 +12,10 @@ those assets separately for local browser use, but that does not grant
 redistribution rights. Review [third-party notices](../THIRD_PARTY_NOTICES.md)
 before distributing any image or database that contains external data or assets.
 
-This guide documents the **current deployment workflow**. Future acquisition,
-snapshot-manifest, and symbol-pipeline design described elsewhere is not part of
-the deployment contract until it is implemented and explicitly added here.
+This guide documents the **current deployment workflow**. Acquisition and
+snapshot-provenance tooling are separate from deployment, and unfinished later
+symbol-processing/publication stages described elsewhere are not part of the
+deployment contract until they are implemented and explicitly added here.
 
 ## Prerequisites
 

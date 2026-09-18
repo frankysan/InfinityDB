@@ -67,11 +67,11 @@ and serves a read-only browser and same-origin HTTP API.
   hermetic by default. `auto` may fall back only when the asset tree is entirely
   absent, never when it is partial/corrupt.
 - GitHub `Source checks` runs the hermetic project checks on clean Windows,
-  Ubuntu/Linux, and macOS Python 3.11 runners for pull requests and pushes to
-  `main`, plus a Linux Python 3.14 compatibility leg. It uses the tracked
-  synthetic Army fixture rather than live acquisition or ignored graphical
-  assets. Repository rules/branch protection, not workflow YAML, determines
-  whether GitHub blocks a merge on those checks.
+  Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
+  `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
+  uses the tracked synthetic Army fixture rather than live acquisition or ignored
+  graphical assets. Repository rules/branch-protection settings, not workflow
+  YAML, determine whether GitHub blocks a merge on those checks.
 - `Installed wheel smoke` builds and installs the wheel in a fresh virtual
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases

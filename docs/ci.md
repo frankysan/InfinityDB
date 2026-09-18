@@ -3,7 +3,8 @@
 This document records the InfinityDB continuous-integration and automated
 validation contract. Sections explicitly marked design direction remain planned;
 the deployment smoke, required cross-platform source workflow, installed-wheel
-smoke, and local asset-test policy are current behavior.
+smoke, local asset-test policy, and dispatch-only full-asset workflow are current
+behavior.
 
 The goal is to make a clean checkout independently trustworthy while still
 supporting deeper validation against a complete local Corvus Belli graphical
@@ -196,16 +197,17 @@ The same principle applies to expensive performance/capacity work: scheduled or
 manual workflows may establish baselines without turning every commit into a
 networked or long-running benchmark.
 
-## Planned implementation order
+## Remaining follow-up work
 
 The deployment-smoke runtime import boundary, local hermetic/full-asset test
 split, cross-platform source workflow, installed-wheel smoke, and dispatch-only
-full-asset workflow are implemented. Repository administration still needs to
-configure the `full-assets` environment with an authorized checksum-pinned
-bundle before that manual job can run successfully. After that, remaining CI
-work should add scheduled/manual acquisition, performance, or other extended
-workflows only where they provide useful independent signals.
+full-asset workflow are implemented. These core validation layers are sufficient
+for symbol-pipeline feature work to continue with automatic clean-environment and
+cross-platform coverage.
 
-Symbol-pipeline feature work can then continue with these validation layers in
-place, so later deduplication/conversion/publication changes receive automatic
-clean-environment and cross-platform coverage.
+Non-blocking CI follow-up remains in the backlog: broaden the normal runner's
+maintained-tool coverage, validate checked-in snapshot notes routinely, configure
+repository rules/branch protection if required, and configure the `full-assets`
+environment with an authorized checksum-pinned bundle plus one successful manual
+run. Scheduled/manual acquisition, performance, or other extended workflows
+should be added only where they provide a useful independent signal.
