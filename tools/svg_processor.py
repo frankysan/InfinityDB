@@ -25,8 +25,7 @@ Dependencies
 ------------
 pip install -e ".[symbols]"
 
-Optional tools:
-    pip install pillow
+External tools:
     cargo install resvg   # default duplicate renderer
     cargo install usvg    # experimental text-to-path backend
     Inkscape              # text-to-path backend; persistent shell mode available
@@ -37,10 +36,6 @@ modify the input tree. All generated files go under the separate output root.
 
 from __future__ import annotations
 
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass
-from pathlib import Path
 import argparse
 import csv
 import hashlib
@@ -54,24 +49,28 @@ import tempfile
 import threading
 import time
 import xml.etree.ElementTree as ET
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
+from importlib import import_module
+from pathlib import Path
+from typing import Any, TypedDict
 
-try:
-    from fontTools.ttLib import TTCollection, TTFont
-except ImportError:  # pragma: no cover - exercised on minimal installations
-    TTCollection = None
-    TTFont = None
 
-try:
-    import cssselect2
-    import tinycss2
-except ImportError:  # pragma: no cover - exercised on minimal installations
-    cssselect2 = None
-    tinycss2 = None
+def optional_import(module_name: str) -> Any:
+    """Import an optional dependency without creating static import errors."""
+    try:
+        return import_module(module_name)
+    except ImportError:  # pragma: no cover - exercised on minimal installations
+        return None
 
-try:
-    import winreg
-except ImportError:
-    winreg = None
+
+_fonttools_ttlib = optional_import("fontTools.ttLib")
+TTCollection: Any = getattr(_fonttools_ttlib, "TTCollection", None)
+TTFont: Any = getattr(_fonttools_ttlib, "TTFont", None)
+cssselect2: Any = optional_import("cssselect2")
+tinycss2: Any = optional_import("tinycss2")
+winreg: Any = optional_import("winreg")
 
 
 # Keep ElementTree serialization compatible with ordinary SVG consumers.
@@ -336,7 +335,7 @@ class AliasEntry:
     face: FontFace
 
 
-def name_values(font: TTFont, name_id: int) -> set[str]:
+def name_values(font: Any, name_id: int) -> set[str]:
     values = set()
     if "name" not in font:
         return values
@@ -352,7 +351,7 @@ def name_values(font: TTFont, name_id: int) -> set[str]:
     return values
 
 
-def first_name(font: TTFont, *ids: int) -> str:
+def first_name(font: Any, *ids: int) -> str:
     if "name" not in font:
         return ""
     table = font["name"]
@@ -383,7 +382,7 @@ def stretch_from_subfamily(subfamily: str) -> str:
     return "normal"
 
 
-def weight_from_font(font: TTFont, subfamily: str) -> str:
+def weight_from_font(font: Any, subfamily: str) -> str:
     try:
         if "OS/2" in font:
             value = int(font["OS/2"].usWeightClass)
@@ -404,7 +403,7 @@ def weight_from_font(font: TTFont, subfamily: str) -> str:
     return "400"
 
 
-def get_face(font: TTFont, path: Path) -> FontFace | None:
+def get_face(font: Any, path: Path) -> FontFace | None:
     if "name" not in font:
         return None
 
@@ -444,7 +443,7 @@ def get_face(font: TTFont, path: Path) -> FontFace | None:
     )
 
 
-def aliases_for_font(font: TTFont, face: FontFace) -> list[AliasEntry]:
+def aliases_for_font(font: Any, face: FontFace) -> list[AliasEntry]:
     aliases = {}
 
     for name_id in (1, 16, 21):
@@ -457,7 +456,11 @@ def aliases_for_font(font: TTFont, face: FontFace) -> list[AliasEntry]:
     for value in name_values(font, 6):
         aliases[(value, "postscript")] = AliasEntry(value, "postscript", face)
 
-    if face.family and face.subfamily and normal_key(face.subfamily) not in {"regular", "normal", "roman"}:
+    if (
+        face.family
+        and face.subfamily
+        and normal_key(face.subfamily) not in {"regular", "normal", "roman"}
+    ):
         value = f"{face.family} {face.subfamily}"
         aliases[(value, "family+style")] = AliasEntry(value, "family+style", face)
 
@@ -567,7 +570,14 @@ def choose_face(entries: list[AliasEntry]) -> AliasEntry:
     def score(entry):
         sub = normal_key(entry.face.subfamily)
         return 0 if sub in {"regular", "normal", "roman", "book"} else 1
-    return sorted(entries, key=lambda e: (score(e), e.face.subfamily.casefold(), e.face.full_name.casefold()))[0]
+    return sorted(
+        entries,
+        key=lambda e: (
+            score(e),
+            e.face.subfamily.casefold(),
+            e.face.full_name.casefold(),
+        ),
+    )[0]
 
 
 def ambiguous_result():
@@ -756,7 +766,11 @@ def build_css_matcher(root):
             selector_text = tinycss2.serialize(rule.prelude).strip()
             declarations = parse_declarations(rule.content)
 
-            family_decls = [(value, important) for name, value, important in declarations if name == "font-family"]
+            family_decls = [
+                (value, important)
+                for name, value, important in declarations
+                if name == "font-family"
+            ]
             for value, _ in family_decls:
                 declared_fonts.update(split_font_family_list(value))
 
@@ -819,7 +833,10 @@ def resolve_effective_font_families(root):
             if inline:
                 declared_fonts.update(split_font_family_list(inline[0]))
                 value, important = inline
-                candidate = better_candidate(candidate, (important, (1_000_000, 0, 0), 1_000_000, value))
+                candidate = better_candidate(
+                    candidate,
+                    (important, (1_000_000, 0, 0), 1_000_000, value),
+                )
 
         if candidate is None:
             current_value = inherited_value
@@ -910,7 +927,25 @@ def scan_svg(path: Path):
 
 # ---------- classification ----------
 
-def classify_svgs(input_root: Path, output_root: Path, exact_index, compact_index):
+
+class ClassificationResult(TypedDict):
+    available: int
+    missing: int
+    no_active_text: int
+    aliases: int
+    implicit_default: int
+    empty_placeholder_files: int
+    unused_decl_count: int
+    parse_errors: int
+    file_categories: dict[str, str]
+
+
+def classify_svgs(
+    input_root: Path,
+    output_root: Path,
+    exact_index: Any,
+    compact_index: Any,
+) -> ClassificationResult:
     available_root = output_root / "fonts_available"
     missing_root = output_root / "fonts_missing"
     no_active_root = output_root / "no_active_text"
@@ -927,9 +962,7 @@ def classify_svgs(input_root: Path, output_root: Path, exact_index, compact_inde
     rows = []
     unused_rows = []
     parse_errors = []
-    file_categories = {}
-
-    counts = {
+    counts: ClassificationResult = {
         "available": 0,
         "missing": 0,
         "no_active_text": 0,
@@ -938,7 +971,9 @@ def classify_svgs(input_root: Path, output_root: Path, exact_index, compact_inde
         "empty_placeholder_files": 0,
         "unused_decl_count": 0,
         "parse_errors": 0,
+        "file_categories": {},
     }
+    file_categories = counts["file_categories"]
 
     print(f"Scanning SVGs under: {input_root}")
     print(f"SVG files found: {len(svg_files)}")
@@ -1072,7 +1107,6 @@ def classify_svgs(input_root: Path, output_root: Path, exact_index, compact_inde
         writer.writeheader()
         writer.writerows(parse_errors)
 
-    counts["file_categories"] = file_categories
     return counts
 
 
@@ -1152,7 +1186,9 @@ def normalize_svg_for_conversion(source_svg: Path, target_svg: Path, exact_index
                 changed += 1
 
                 alias_descriptions.append(
-                    f"{family_ref} -> {target_family} [{info['subfamily']}; weight={info['weight']}; style={info['style']}; stretch={info['stretch']}]"
+                    f"{family_ref} -> {target_family} "
+                    f"[{info['subfamily']}; weight={info['weight']}; "
+                    f"style={info['style']}; stretch={info['stretch']}]"
                 )
             else:
                 target_family = family_ref
@@ -1324,9 +1360,17 @@ def normalize_svg_for_conversion(source_svg: Path, target_svg: Path, exact_index
                 if info is not None:
                     if not get_property_from_elem(elem, "font-weight") and info["weight"]:
                         set_property_on_elem(elem, "font-weight", info["weight"])
-                    if not get_property_from_elem(elem, "font-style") and info["style"] and info["style"] != "normal":
+                    if (
+                        not get_property_from_elem(elem, "font-style")
+                        and info["style"]
+                        and info["style"] != "normal"
+                    ):
                         set_property_on_elem(elem, "font-style", info["style"])
-                    if not get_property_from_elem(elem, "font-stretch") and info["stretch"] and info["stretch"] != "normal":
+                    if (
+                        not get_property_from_elem(elem, "font-stretch")
+                        and info["stretch"]
+                        and info["stretch"] != "normal"
+                    ):
                         set_property_on_elem(elem, "font-stretch", info["stretch"])
 
         # inline style font-family
@@ -1343,9 +1387,17 @@ def normalize_svg_for_conversion(source_svg: Path, target_svg: Path, exact_index
                     if info is not None:
                         if "font-weight" not in mapping and info["weight"]:
                             mapping["font-weight"] = info["weight"]
-                        if "font-style" not in mapping and info["style"] and info["style"] != "normal":
+                        if (
+                            "font-style" not in mapping
+                            and info["style"]
+                            and info["style"] != "normal"
+                        ):
                             mapping["font-style"] = info["style"]
-                        if "font-stretch" not in mapping and info["stretch"] and info["stretch"] != "normal":
+                        if (
+                            "font-stretch" not in mapping
+                            and info["stretch"]
+                            and info["stretch"] != "normal"
+                        ):
                             mapping["font-stretch"] = info["stretch"]
 
                     elem.set("style", serialize_style_attribute(mapping))
@@ -1526,7 +1578,7 @@ def executable_version(executable: str) -> str:
 
 
 def run_subprocess(command):
-    return subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return subprocess.run(command, capture_output=True, text=True)
 
 
 def inkscape_export_text_to_path(inkscape, source: Path, destination: Path):
@@ -1621,7 +1673,10 @@ class InkscapeShellWorker:
             except OSError:
                 pass
             time.sleep(0.025)
-        return False, f"Timed out after {self.output_timeout:.0f}s waiting for Inkscape shell output."
+        return (
+            False,
+            f"Timed out after {self.output_timeout:.0f}s waiting for Inkscape shell output.",
+        )
 
     def convert_text_to_path(self, source: Path, destination: Path):
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -1653,7 +1708,12 @@ class InkscapeShellWorker:
             self.process.stdin.flush()
         except Exception as e:
             self.close()
-            return subprocess.CompletedProcess([], 1, "", f"Could not submit command to Inkscape shell: {e}")
+            return subprocess.CompletedProcess(
+                [],
+                1,
+                "",
+                f"Could not submit command to Inkscape shell: {e}",
+            )
 
         ok, error = self._wait_for_output(destination)
         if ok:
@@ -1743,7 +1803,10 @@ def convert_available_svgs(
     def get_inkscape_shell_worker():
         worker = getattr(shell_local, "worker", None)
         if worker is None:
-            worker = InkscapeShellWorker(converter_executable)
+            executable = converter_executable
+            if executable is None:
+                raise RuntimeError("Inkscape executable was not resolved.")
+            worker = InkscapeShellWorker(executable)
             shell_local.worker = worker
             with shell_workers_lock:
                 shell_workers.append(worker)
@@ -2086,8 +2149,13 @@ def convert_available_svgs(
 
             results_by_index[result_index] = row
             completed += 1
-            if row.get("error") and row["status"] in {"FAILED_INKSCAPE", "FAILED_USVG", "FAILED_FALLBACK"}:
-                first_line = row["error"].splitlines()[0] if row["error"].splitlines() else row["error"]
+            if row.get("error") and row["status"] in {
+                "FAILED_INKSCAPE",
+                "FAILED_USVG",
+                "FAILED_FALLBACK",
+            }:
+                error_lines = row["error"].splitlines()
+                first_line = error_lines[0] if error_lines else row["error"]
                 print(f"[{completed}/{total}] {result_relative} {display_status}: {first_line}")
             else:
                 print(f"[{completed}/{total}] {result_relative} {display_status}")
@@ -2102,7 +2170,8 @@ def convert_available_svgs(
     # serially is also useful for diagnosing any usvg subprocess failures.
     retry_indexes = [
         i for i in range(1, total + 1)
-        if results_by_index.get(i, {}).get("status") in {"FAILED_INKSCAPE", "FAILED_USVG", "FAILED_FALLBACK"}
+        if results_by_index.get(i, {}).get("status")
+        in {"FAILED_INKSCAPE", "FAILED_USVG", "FAILED_FALLBACK"}
     ]
 
     if retry_indexes and jobs > 1 and not dry_run:
@@ -2111,12 +2180,16 @@ def convert_available_svgs(
         for retry_number, index in enumerate(retry_indexes, 1):
             source = svg_files[index - 1]
             relative = source.relative_to(available_root)
-            prior_runtime = float(results_by_index.get(index, {}).get("runtime_seconds", 0.0) or 0.0)
+            prior_runtime = float(
+                results_by_index.get(index, {}).get("runtime_seconds", 0.0) or 0.0
+            )
             try:
                 result_index, result_relative, row, display_status = process_one(
                     index, source, force=True
                 )
-                row["runtime_seconds"] = prior_runtime + float(row.get("runtime_seconds", 0.0) or 0.0)
+                row["runtime_seconds"] = prior_runtime + float(
+                    row.get("runtime_seconds", 0.0) or 0.0
+                )
             except Exception as e:
                 result_index = index
                 result_relative = relative
@@ -2132,8 +2205,14 @@ def convert_available_svgs(
                 display_status = "FAILED (internal)"
 
             results_by_index[result_index] = row
-            if row.get("error") and row["status"] in {"FAILED_INKSCAPE", "FAILED_USVG", "FAILED_FALLBACK", "FAILED_INTERNAL"}:
-                first_line = row["error"].splitlines()[0] if row["error"].splitlines() else row["error"]
+            if row.get("error") and row["status"] in {
+                "FAILED_INKSCAPE",
+                "FAILED_USVG",
+                "FAILED_FALLBACK",
+                "FAILED_INTERNAL",
+            }:
+                error_lines = row["error"].splitlines()
+                first_line = error_lines[0] if error_lines else row["error"]
                 print(
                     f"[retry {retry_number}/{len(retry_indexes)}] "
                     f"{result_relative} {display_status}: {first_line}"
@@ -2175,7 +2254,15 @@ def convert_available_svgs(
     with report_path.open("w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(
             f,
-            fieldnames=["file", "status", "aliases_normalized", "warnings", "converter", "runtime_seconds", "error"],
+            fieldnames=[
+                "file",
+                "status",
+                "aliases_normalized",
+                "warnings",
+                "converter",
+                "runtime_seconds",
+                "error",
+            ],
         )
         writer.writeheader()
         writer.writerows(results)
@@ -2300,15 +2387,19 @@ def resolve_duplicate_renderer(requested: str):
     raise ValueError(f"Unsupported duplicate renderer: {requested}")
 
 
-def rgba_pixel_hash(png_path: Path) -> str:
-    try:
-        from PIL import Image
-    except ImportError as e:
+def pillow_image_module() -> Any:
+    image_module = optional_import("PIL.Image")
+    if image_module is None:
         raise RuntimeError(
-            "Visual duplicate detection requires Pillow. Install it with: pip install pillow"
-        ) from e
+            "Visual duplicate detection requires Pillow. "
+            "Install InfinityDB with the 'symbols' extra."
+        )
+    return image_module
 
-    with Image.open(png_path) as image:
+
+def rgba_pixel_hash(png_path: Path) -> str:
+    image_module = pillow_image_module()
+    with image_module.open(png_path) as image:
         rgba = image.convert("RGBA")
         digest = hashlib.sha256()
         digest.update(f"{rgba.width}x{rgba.height}:RGBA\0".encode("ascii"))
@@ -2316,12 +2407,17 @@ def rgba_pixel_hash(png_path: Path) -> str:
         return digest.hexdigest()
 
 
+def duplicate_relative_key(path: Path, input_root: Path) -> str:
+    """Return one host-independent source-relative SVG path."""
+    return path.relative_to(input_root).as_posix()
+
+
 def duplicate_representative_sort_key(relative: Path, file_categories: dict[str, str]):
     # Prefer a source that already needs no text conversion.  If there is no
     # such member, prefer a font-safe convertible source over a missing-font
     # source.  Within the same classification, prefer the shorter filename;
     # lexical filename/path order keeps ties deterministic.
-    category = file_categories.get(str(relative), "unknown")
+    category = file_categories.get(relative.as_posix(), "unknown")
     priority = {
         "no_active_text": 0,
         "fonts_available": 1,
@@ -2344,6 +2440,8 @@ def find_duplicate_svgs(
     render_size: int = 512,
     jobs: int = 2,
     renderer: str = "resvg",
+    *,
+    reports_root: Path | None = None,
 ):
     """Find duplicates across the ENTIRE original input SVG set.
 
@@ -2356,7 +2454,7 @@ def find_duplicate_svgs(
     members: relative source path -> chosen representative relative source path.
     The input tree is never modified.
     """
-    reports_root = output_root / "reports"
+    reports_root = reports_root or output_root / "reports"
     reports_root.mkdir(parents=True, exist_ok=True)
 
     if render_size < 1:
@@ -2368,12 +2466,7 @@ def find_duplicate_svgs(
     renderer_version = executable_version(renderer_executable)
     duplicate_started = time.perf_counter()
 
-    try:
-        from PIL import Image as _PillowImage  # noqa: F401
-    except ImportError as e:
-        raise RuntimeError(
-            "Visual duplicate detection requires Pillow. Install it with: pip install pillow"
-        ) from e
+    pillow_image_module()
 
     svg_files = sorted(
         path for path in input_root.rglob("*.svg")
@@ -2384,7 +2477,8 @@ def find_duplicate_svgs(
     print("Duplicate detection (entire source set)")
     print("---------------------------------------")
     print(f"Source SVG files:   {len(svg_files)}")
-    print(f"Renderer:           {renderer_name}" + (f" ({renderer_version})" if renderer_version else ""))
+    renderer_label = renderer_name + (f" ({renderer_version})" if renderer_version else "")
+    print(f"Renderer:           {renderer_label}")
     print(f"Render width:       {render_size}px")
     print(f"Parallel jobs:      {jobs}")
 
@@ -2397,7 +2491,7 @@ def find_duplicate_svgs(
 
     unique_byte_groups = sorted(
         byte_groups.items(),
-        key=lambda item: str(item[1][0].relative_to(input_root)).casefold(),
+        key=lambda item: duplicate_relative_key(item[1][0], input_root).casefold(),
     )
     saved_renders = len(svg_files) - len(unique_byte_groups)
     print(f"Unique byte sets:   {len(unique_byte_groups)}")
@@ -2453,7 +2547,11 @@ def find_duplicate_svgs(
                     visual_hash_for_byte_hash[result_hash] = visual_hash
                     print(f"[{completed}/{len(tasks)}] {relative} OK")
                 else:
-                    first_line = error.splitlines()[0] if error else f"{renderer_name} render failed"
+                    first_line = (
+                        error.splitlines()[0]
+                        if error
+                        else f"{renderer_name} render failed"
+                    )
                     print(f"[{completed}/{len(tasks)}] {relative} FAILED: {first_line}")
                     failed_tasks.append((index, result_hash, result_paths))
 
@@ -2477,7 +2575,7 @@ def find_duplicate_svgs(
                 )
                 for path in result_paths:
                     render_errors.append({
-                        "file": str(path.relative_to(input_root)),
+                        "file": duplicate_relative_key(path, input_root),
                         "byte_sha256": result_hash,
                         "renderer": renderer_name,
                         "error": error,
@@ -2499,7 +2597,7 @@ def find_duplicate_svgs(
                         error = str(e)
                 for path in paths:
                     render_errors.append({
-                        "file": str(path.relative_to(input_root)),
+                        "file": duplicate_relative_key(path, input_root),
                         "byte_sha256": byte_hash,
                         "renderer": renderer_name,
                         "error": error,
@@ -2527,7 +2625,7 @@ def find_duplicate_svgs(
         duplicate_sets.append((group_type, visual_hash, paths))
         grouped_paths.update(paths)
 
-    for byte_hash, paths in byte_groups.items():
+    for _byte_hash, paths in byte_groups.items():
         if len(paths) < 2:
             continue
         remaining = [p for p in paths if p not in grouped_paths]
@@ -2536,7 +2634,7 @@ def find_duplicate_svgs(
             grouped_paths.update(remaining)
 
     duplicate_sets.sort(
-        key=lambda item: str(item[2][0].relative_to(input_root)).casefold()
+        key=lambda item: duplicate_relative_key(item[2][0], input_root).casefold()
     )
 
     rows = []
@@ -2557,17 +2655,17 @@ def find_duplicate_svgs(
         )
         group_id = f"D{group_number:04d}"
 
-        for path, relative in zip(paths, relatives):
+        for path, relative in zip(paths, relatives, strict=True):
             is_representative = relative == representative
             if not is_representative:
-                duplicate_representatives[str(relative)] = str(representative)
+                duplicate_representatives[relative.as_posix()] = representative.as_posix()
             rows.append({
                 "group": group_id,
                 "type": group_type,
                 "role": "representative" if is_representative else "duplicate",
-                "representative": str(representative),
-                "classification": file_categories.get(str(relative), "unknown"),
-                "file": str(relative),
+                "representative": representative.as_posix(),
+                "classification": file_categories.get(relative.as_posix(), "unknown"),
+                "file": relative.as_posix(),
                 "size_bytes": path.stat().st_size,
                 "byte_sha256": byte_hash_for_path[path],
                 "visual_sha256": visual_hash,
@@ -2641,10 +2739,15 @@ def find_duplicate_svgs(
     print(f"Summary:            {summary_path}")
 
     return {
+        "source_svg_files": len(svg_files),
+        "unique_byte_sets": len(unique_byte_groups),
+        "renders_avoided_exact": saved_renders,
         "exact_groups": exact_groups,
         "visual_groups": visual_groups_count,
         "redundant_files": len(duplicate_representatives),
         "render_errors": len(render_errors),
+        "render_size": render_size,
+        "jobs": jobs,
         "renderer": renderer_name,
         "renderer_version": renderer_version,
         "elapsed_seconds": duplicate_elapsed,
@@ -2684,7 +2787,10 @@ def separate_duplicate_outputs(
         destination.parent.mkdir(parents=True, exist_ok=True)
 
         source_copy = output_root / category / relative
-        if category in {"fonts_available", "fonts_missing", "no_active_text"} and source_copy.exists():
+        if (
+            category in {"fonts_available", "fonts_missing", "no_active_text"}
+            and source_copy.exists()
+        ):
             shutil.move(str(source_copy), str(destination))
             action = "moved"
             moved += 1
@@ -2724,24 +2830,54 @@ def separate_duplicate_outputs(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Unified SVG font audit, source-level duplicate detection, and text-to-path pipeline."
+        description=(
+            "Unified SVG font audit, source-level duplicate detection, "
+            "and text-to-path pipeline."
+        )
     )
     parser.add_argument("input_root", help="Directory containing source SVG files")
     parser.add_argument("output_root", help="Separate directory for all generated outputs")
-    parser.add_argument("--dry-run", action="store_true", help="Classify normally, but only dry-run the conversion stage")
-    parser.add_argument("--overwrite", action="store_true", help="Overwrite existing converted outputs")
-    parser.add_argument("--keep-failed", action="store_true", help="Keep normalized and failed converter diagnostic files")
-    parser.add_argument("--classify-only", action="store_true", help="Stop after classification and optional duplicate analysis")
-    parser.add_argument("--jobs", type=int, default=4, help="Number of parallel conversion/render jobs (default: 4)")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Classify normally, but only dry-run the conversion stage",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing converted outputs",
+    )
+    parser.add_argument(
+        "--keep-failed",
+        action="store_true",
+        help="Keep normalized and failed converter diagnostic files",
+    )
+    parser.add_argument(
+        "--classify-only",
+        action="store_true",
+        help="Stop after classification and optional duplicate analysis",
+    )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=4,
+        help="Number of parallel conversion/render jobs (default: 4)",
+    )
     parser.add_argument(
         "--find-duplicates",
         action="store_true",
-        help="Detect exact and visually identical SVGs across the entire original input set before conversion",
+        help=(
+            "Detect exact and visually identical SVGs across the entire original "
+            "input set before conversion"
+        ),
     )
     parser.add_argument(
         "--separate-duplicates",
         action="store_true",
-        help="Move redundant classified output copies under output_root/duplicates; implies --find-duplicates",
+        help=(
+            "Move redundant classified output copies under output_root/duplicates; "
+            "implies --find-duplicates"
+        ),
     )
     parser.add_argument(
         "--duplicate-render-size",
@@ -2763,7 +2899,10 @@ def main():
         "--duplicate-renderer",
         choices=("resvg", "inkscape", "auto"),
         default="resvg",
-        help="Renderer for visual duplicate detection (default: resvg; auto prefers resvg then Inkscape)",
+        help=(
+            "Renderer for visual duplicate detection "
+            "(default: resvg; auto prefers resvg then Inkscape)"
+        ),
     )
     args = parser.parse_args()
 
@@ -2783,14 +2922,21 @@ def main():
 
     try:
         input_root.relative_to(output_root)
-        print("Refusing to use an output directory that is an ancestor of the input directory.", file=sys.stderr)
+        print(
+            "Refusing to use an output directory that is an ancestor of the input directory.",
+            file=sys.stderr,
+        )
         return 1
     except ValueError:
         pass
 
     try:
         output_root.relative_to(input_root)
-        print("Refusing to write output inside the input directory. Please choose a separate output directory.", file=sys.stderr)
+        print(
+            "Refusing to write output inside the input directory. "
+            "Please choose a separate output directory.",
+            file=sys.stderr,
+        )
         return 1
     except ValueError:
         pass

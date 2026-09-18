@@ -24,6 +24,7 @@ symbols = [
   "fonttools>=4.0",
   "tinycss2>=1.4",
   "cssselect2>=0.8",
+  "pillow>=10.0",
 ]
 
 [project.scripts]

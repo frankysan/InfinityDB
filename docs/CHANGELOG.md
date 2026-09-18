@@ -6,6 +6,12 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Make `tools/svg_processor.py` clean under the project Ruff/Pylance expectations:
+  optional symbol dependencies are loaded without static unresolved-import noise,
+  classification results have explicit types, and remaining lint diagnostics are
+  corrected. Extend the default Ruff target set to the maintained symbol
+  toolchain so future symbol-processor regressions fail local/CI code checks.
+
 - Bring reference documentation and backlog status in line with the implemented
   CI, snapshot-provenance, and asset-redistribution contracts. Remove stale
   future-only wording for acquisition/provenance and clarify that remaining CI
@@ -30,6 +36,12 @@ All notable changes to this project are documented in this file.
   Version-2 manifests remain valid cache inputs.
 
 ### Added
+
+- Integrate exact-first visual symbol deduplication into `build_symbols.py`.
+  Successful font-audited builds now produce version-5 symbol state with
+  duplicate reports, renderer settings, conservative render-error handling, and
+  a complete portable raw-asset-to-canonical mapping while retaining every
+  original source reference.
 
 - Add a dispatch-only `Full-asset checks` GitHub Actions workflow. The job is
   restricted to `main`, stages a checksum-pinned private SVG bundle supplied

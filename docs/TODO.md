@@ -156,17 +156,17 @@ consistency audit unless one becomes necessary to unblock that work.
       - [x] Route raw acquisition through local override, validated prior immutable
         symbol snapshot/cache, then network resolution, with explicit refresh
         bypassing only the cache.
-      - [ ] Integrate processing, compression, publication, mapping generation,
+      - [x] Integrate verified extraction, structural/font audit, and complete-set
+        exact-first visual deduplication through version-5 build state with a
+        portable canonical raw-asset mapping.
+      - [ ] Integrate text conversion, compression, publication, mapping generation,
         validation, and final reporting.
-      - [x] Verify/extract the pinned raw symbol archive into a rebuildable work
-        tree and run an environment-independent SVG structural preflight bound
-        back into version-3 build state.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
     separate, intentional operations. The current orchestrator already supports
-    `--snapshot-only`, `--language`, `--data-root`, and `--static-symbols`;
-    `--static-root`, `--jobs`, `--skip-symbol-download`, `--skip-compression`,
-    `--keep-work`, and
-    `--dry-run` remain candidate options as later stages are integrated.
+    `--snapshot-only`, `--language`, `--data-root`, `--static-symbols`, `--jobs`,
+    `--duplicate-render-size`, and `--duplicate-renderer`; `--static-root`,
+    `--skip-symbol-download`, `--skip-compression`, `--keep-work`, and `--dry-run`
+    remain candidate options as later stages are integrated.
 
 - [ ] Complete the static-symbol and local-override model as maintained project
   knowledge rather than downloader code.
@@ -214,29 +214,6 @@ consistency audit unless one becomes necessary to unblock that work.
     explicit refresh creates a new timestamped archive rather than mutating an
     old one. Detect URL-to-filename collisions and deterministically disambiguate
     their stable source-derived override/archive names.
-
-- [ ] Consolidate SVG audit, font handling, and complete-set duplicate detection
-  around one structured manifest.
-  - [x] Add `config/symbols/font-aliases.json` for Infinity-asset-specific
-    legacy/exported font-reference overrides. Keep generic CSS family handling,
-    weight/stretch interpretation, cmap-suffix recognition, installed-font
-    discovery, and matching algorithms in code.
-  - [ ] Audit all resolved categories for SVG parse errors, active text, referenced
-    fonts, available/missing fonts, alias normalization, and unused declarations.
-    - [x] Persist the environment-independent structural subset first: SVG parse
-      errors, active text/text objects, and declared font-family references.
-    - [x] Extend that preflight with installed-font availability, alias
-      normalization, effective-font resolution, and unused declarations.
-  - [ ] Deduplicate across the full resolved raw set before expensive text-to-path
-    conversion: SHA-256 exact groups first, then visual duplicate detection with
-    `resvg` using the established production default of 4 jobs.
-  - [ ] Use deterministic canonical ranking: `no_active_text`, then
-    `fonts_available`, then `fonts_missing`, then parse/unknown errors, followed
-    by shorter filename and alphabetical source path/name. A failed or
-    inconclusive visual comparison keeps an asset unique rather than removing it.
-  - [ ] Removing a duplicate from active processing must never remove its source
-    references; each original URL continues to point at the selected canonical
-    asset in the manifest.
 
 - [ ] Keep text-to-path conversion limited to canonical assets that still have
   active text and resolvable fonts.
@@ -304,8 +281,8 @@ consistency audit unless one becomes necessary to unblock that work.
     references as unknown fields.
   - [ ] `svg_processor.py`: keep font audit, alias normalization, complete-set
     duplicate detection, deterministic representative ranking, persistent
-    Inkscape conversion, and reports; add structured manifest updates and
-    multi-category processing.
+    Inkscape conversion, and reports. Duplicate/canonical state is now integrated
+    into the build manifest; conversion state and multi-category processing remain.
   - [ ] `svg_compress.py`: keep the standalone CLI and production validation
     behavior; expose an importable result/update path for orchestration.
   - [ ] `reorganize_symbols.py`: become the publisher and final mapping generator.
@@ -337,8 +314,8 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] Invalid matching overrides fail; failed network downloads leave existing
     archives untouched and prevent creation/publication of an incomplete
     replacement snapshot.
-  - [ ] SVG parse/font errors are retained and reported rather than discarded.
-  - [ ] Duplicate-render uncertainty keeps assets unique.
+  - [x] SVG parse/font errors are retained and reported rather than discarded.
+  - [x] Duplicate-render uncertainty keeps assets unique.
   - [ ] Text conversion failure retains the verified source rather than claiming a
     successful replacement.
   - [ ] Compression falls back to a validated lossless/path-only asset.

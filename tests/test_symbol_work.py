@@ -9,11 +9,17 @@ import pytest
 import tools.symbol_work as symbol_work
 from infinity_db.snapshot_provenance import write_snapshot_manifest
 from infinity_db.symbol_manifest import (
+    add_font_audit,
+    add_svg_preflight,
     build_symbol_manifest,
     load_symbol_manifest,
     write_symbol_manifest,
 )
-from tools.symbol_work import audit_symbol_work, materialize_symbol_archive
+from tools.symbol_work import (
+    audit_symbol_work,
+    detect_symbol_duplicates,
+    materialize_symbol_archive,
+)
 
 
 def _discovery_audit(asset_count: int) -> dict[str, int]:
@@ -335,3 +341,148 @@ def test_font_audit_classifies_effective_fonts_and_unused_declarations(
     assert updated["formatVersion"] == 4
     assert updated["processing"]["fontAudit"]["status"] == "failed"
     assert updated["processing"]["fontAudit"]["aliases"]["sha256"]
+
+
+def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypatch) -> None:
+    body = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
+    unique = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M1 1"/></svg>'
+    archive, snapshot_manifest, manifest_path = _fixture(
+        tmp_path,
+        {
+            "units/a.svg": body,
+            "units/b.svg": body,
+            "units/c.svg": unique,
+        },
+    )
+    materialized = materialize_symbol_archive(
+        archive,
+        snapshot_manifest,
+        manifest_path,
+        tmp_path / "data" / "work" / "symbols",
+    )
+
+    preflight_report = tmp_path / "preflight.json"
+    preflight_report.write_text("{}\n", encoding="utf-8")
+    document = add_svg_preflight(
+        load_symbol_manifest(manifest_path),
+        status="passed",
+        summary={
+            "svgCount": 3,
+            "parseErrorCount": 0,
+            "activeTextAssetCount": 0,
+            "noActiveTextAssetCount": 3,
+            "fontDeclaredAssetCount": 0,
+            "uniqueDeclaredFontCount": 0,
+        },
+        report=preflight_report,
+        project_root=tmp_path,
+    )
+    alias_config = tmp_path / "font-aliases.json"
+    alias_config.write_text("{}\n", encoding="utf-8")
+    font_report = tmp_path / "font-audit.json"
+    font_report.write_text(
+        json.dumps(
+            {
+                "symbolArtifact": {
+                    "name": archive.name,
+                    "sha256": document["snapshot"]["symbolArtifact"]["sha256"],
+                },
+                "assets": [
+                    {"archivePath": name, "category": "no_active_text"}
+                    for name in ("units/a.svg", "units/b.svg", "units/c.svg")
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    document = add_font_audit(
+        document,
+        status="passed",
+        summary={
+            "svgCount": 3,
+            "fontAvailableAssetCount": 0,
+            "fontMissingAssetCount": 0,
+            "noActiveTextAssetCount": 3,
+            "implicitDefaultAssetCount": 0,
+            "effectiveFontReferenceCount": 0,
+            "availableFontReferenceCount": 0,
+            "missingFontReferenceCount": 0,
+            "ambiguousFontReferenceCount": 0,
+            "genericFontReferenceCount": 0,
+            "normalizedAliasReferenceCount": 0,
+            "unusedDeclarationCount": 0,
+        },
+        report=font_report,
+        aliases=alias_config,
+        project_root=tmp_path,
+    )
+    write_symbol_manifest(document, manifest_path)
+
+    def fake_duplicates(input_root, output_root, categories, **kwargs):
+        assert input_root == materialized.raw_root
+        assert output_root == materialized.work_root
+        assert categories == {
+            "units/a.svg": "no_active_text",
+            "units/b.svg": "no_active_text",
+            "units/c.svg": "no_active_text",
+        }
+        assert kwargs["render_size"] == 512
+        assert kwargs["jobs"] == 4
+        assert kwargs["renderer"] == "resvg"
+        report_root = kwargs["reports_root"]
+        report_root.mkdir(parents=True, exist_ok=True)
+        group_report = report_root / "duplicate-groups.csv"
+        error_report = report_root / "duplicate-render-errors.csv"
+        summary_report = report_root / "duplicate-summary.csv"
+        for path in (group_report, error_report, summary_report):
+            path.write_text("header\n", encoding="utf-8")
+        return {
+            "source_svg_files": 3,
+            "unique_byte_sets": 2,
+            "renders_avoided_exact": 1,
+            "exact_groups": 1,
+            "visual_groups": 0,
+            "redundant_files": 1,
+            "render_errors": 0,
+            "render_size": 512,
+            "jobs": 4,
+            "renderer": "resvg",
+            "renderer_version": "0.45.1",
+            "duplicate_representatives": {"units/b.svg": "units/a.svg"},
+            "report_path": group_report,
+            "error_path": error_report,
+            "summary_path": summary_report,
+        }
+
+    fake_tools = type(
+        "FakeDuplicateTools",
+        (),
+        {"find_duplicate_svgs": staticmethod(fake_duplicates)},
+    )
+    monkeypatch.setattr(symbol_work, "_font_tools", lambda: fake_tools)
+
+    result = detect_symbol_duplicates(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest_path,
+        font_report=font_report,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+    )
+
+    assert result.summary["canonicalAssetCount"] == 2
+    assert result.canonical_by_archive_path == {
+        "units/a.svg": "units/a.svg",
+        "units/b.svg": "units/a.svg",
+        "units/c.svg": "units/c.svg",
+    }
+    updated = load_symbol_manifest(manifest_path)
+    assert updated["formatVersion"] == 5
+    duplicate = updated["processing"]["duplicateDetection"]
+    assert duplicate["canonicalByArchivePath"] == result.canonical_by_archive_path
+    assert duplicate["renderer"] == {
+        "name": "resvg",
+        "version": "0.45.1",
+        "renderSize": 512,
+        "jobs": 4,
+    }

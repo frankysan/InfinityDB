@@ -93,9 +93,12 @@ source revisions. After verified extraction and SVG structural preflight, the
 orchestrator promotes the same build state to version 3 and records the preflight
 status, summary, and exact generated report artifact. Installed-font audit then
 promotes the state to version 4 and records its environment-specific report plus
-the exact tracked `config/symbols/font-aliases.json` artifact. Version-2 state
-remains valid for standalone acquisition/prior symbol caches, and version-3 state
-remains valid as completed structural preflight awaiting font audit.
+the exact tracked `config/symbols/font-aliases.json` artifact. Integrated
+exact-first visual duplicate detection then promotes state to version 5 with
+duplicate report identities, renderer settings, and a complete portable mapping
+from every raw archive path to its selected canonical archive path. Version-2
+state remains valid for standalone acquisition/prior symbol caches; versions 3
+and 4 remain valid earlier processing states awaiting their next stage.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
@@ -110,10 +113,9 @@ documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-
 ## Remaining design direction
 
 The symbol orchestrator currently stops after verified raw extraction, structural
-SVG preflight, and installed-font audit. Later stages will consume the same
-pinned Army/SYMBOLS build state for canonical selection/deduplication, text
-conversion, compression, publication, generated browser mappings, and final
-validation.
+SVG preflight, installed-font audit, and canonical selection/deduplication. Later
+stages will consume the same pinned Army/SYMBOLS build state for text conversion,
+compression, publication, generated browser mappings, and final validation.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not automatically covered by InfinityDB's MIT

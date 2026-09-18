@@ -117,6 +117,12 @@ def test_lint_stage_uses_project_defaults_without_targets() -> None:
     )
 
 
+def test_default_lint_targets_include_symbol_toolchain() -> None:
+    assert "tools/build_symbols.py" in run_checks.DEFAULT_LINT_TARGETS
+    assert "tools/svg_processor.py" in run_checks.DEFAULT_LINT_TARGETS
+    assert "tools/symbol_work.py" in run_checks.DEFAULT_LINT_TARGETS
+
+
 def test_report_without_path_uses_timestamped_repository_filename() -> None:
     args = run_checks.build_parser().parse_args(["--profile", "code", "--report"])
     started_at = datetime.fromisoformat("2026-09-17T14:05:06+02:00")

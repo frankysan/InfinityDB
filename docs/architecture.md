@@ -455,17 +455,24 @@ CSS/effective-font resolver, applies validated Infinity-specific aliases from
 `fonts_available` or `fonts_missing`, reports alias normalization and unused
 declarations, and promotes the build state to version 4 with both its report and
 alias-config identities. Missing/ambiguous effective fonts stop orchestration
-before destructive/expensive processing. The downloader does not generate
-browser mappings.
+before expensive processing. The next integrated stage reuses the established
+exact-first visual duplicate detector: byte-identical sets avoid redundant
+renders, remaining candidates are compared through decoded RGBA output from the
+selected renderer, and inconclusive render failures remain unique. Deterministic
+representative ranking prefers `no_active_text`, then `fonts_available`, then
+weaker classifications before filename/path tie-breakers. Version-5 build state
+records duplicate reports, renderer settings, counts, and a complete portable
+`archivePath -> canonical archivePath` mapping while retaining every acquisition
+asset and source reference. The downloader does not generate browser mappings.
 
-**Design direction:** later processing will consume that exact acquisition state
-through deduplication, text conversion, compression, and publication. Canonical
-processing may collapse equivalent assets, but it must not discard their source
-references. Only the publisher will assign final application paths and generated
-browser mappings because only that stage knows the final canonical asset. Source
-resolution, validation, deduplication, conversion, compression, and publishing
-remain distinct intended stages with provenance recorded rather than inferred
-from final filenames.
+**Design direction:** later processing will consume that exact version-5 state
+through text conversion, compression, and publication. Canonical processing may
+collapse equivalent assets, but it must not discard their source references.
+Only the publisher will assign final application paths and generated browser
+mappings because only that stage knows the final canonical asset after subsequent
+processing. Source resolution, validation, deduplication, conversion, compression,
+and publishing remain distinct stages with provenance recorded rather than
+inferred from final filenames.
 
 ## Module boundaries
 

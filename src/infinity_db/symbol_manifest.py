@@ -13,7 +13,8 @@ from infinity_db.snapshot_provenance import portable_project_path, sha256_file
 SYMBOL_BUILD_FORMAT = "InfinityDB army symbol build"
 SYMBOL_BUILD_ACQUISITION_VERSION = 2
 SYMBOL_BUILD_PREFLIGHT_VERSION = 3
-SYMBOL_BUILD_VERSION = 4
+SYMBOL_BUILD_FONT_AUDIT_VERSION = 4
+SYMBOL_BUILD_VERSION = 5
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
 SOURCE_METHODS = frozenset({"override", "cache", "network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -121,7 +122,7 @@ def add_font_audit(
     if status not in {"passed", "failed"}:
         raise SymbolManifestError("Font audit status must be 'passed' or 'failed'")
     promoted = json.loads(json.dumps(document))
-    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["formatVersion"] = SYMBOL_BUILD_FONT_AUDIT_VERSION
     promoted["processing"]["fontAudit"] = {
         "status": status,
         "summary": dict(sorted(summary.items())),
@@ -130,6 +131,58 @@ def add_font_audit(
     }
     validate_symbol_manifest(promoted)
     return promoted
+
+
+def add_duplicate_detection(
+    document: dict[str, Any],
+    *,
+    summary: dict[str, int],
+    canonical_by_archive_path: dict[str, str],
+    groups_report: Path,
+    errors_report: Path,
+    summary_report: Path,
+    renderer: str,
+    renderer_version: str,
+    render_size: int,
+    jobs: int,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Promote font-audited state to version 5 with duplicate/canonical state."""
+    validate_symbol_manifest(document)
+    if document.get("formatVersion") != SYMBOL_BUILD_FONT_AUDIT_VERSION:
+        raise SymbolManifestError(
+            "Duplicate detection requires version-"
+            f"{SYMBOL_BUILD_FONT_AUDIT_VERSION} font-audited state"
+        )
+    if document["processing"]["fontAudit"]["status"] != "passed":
+        raise SymbolManifestError("Duplicate detection requires a passed font audit")
+    if render_size < 1:
+        raise SymbolManifestError("Duplicate render size must be at least 1")
+    if jobs < 1:
+        raise SymbolManifestError("Duplicate render jobs must be at least 1")
+
+    renderer_record: dict[str, Any] = {
+        "name": renderer,
+        "renderSize": render_size,
+        "jobs": jobs,
+    }
+    if renderer_version:
+        renderer_record["version"] = renderer_version
+
+    promoted = json.loads(json.dumps(document))
+    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["processing"]["duplicateDetection"] = {
+        "status": "passed",
+        "summary": dict(sorted(summary.items())),
+        "renderer": renderer_record,
+        "canonicalByArchivePath": dict(sorted(canonical_by_archive_path.items())),
+        "groupsReport": artifact_record(groups_report, project_root=project_root),
+        "errorsReport": artifact_record(errors_report, project_root=project_root),
+        "summaryReport": artifact_record(summary_report, project_root=project_root),
+    }
+    validate_symbol_manifest(promoted)
+    return promoted
+
 
 def write_symbol_manifest(document: dict[str, Any], path: Path) -> Path:
     """Atomically replace the generated current symbol-build manifest."""
@@ -159,12 +212,13 @@ def load_symbol_manifest(path: Path) -> dict[str, Any]:
 
 
 def validate_symbol_manifest(document: Any) -> None:
-    """Validate acquisition v2, preflight v3, or font-audited v4 symbol state."""
+    """Validate acquisition v2 through duplicate-detected v5 symbol state."""
     root = _object(document, "symbol manifest")
     version = root.get("formatVersion")
     supported_versions = {
         SYMBOL_BUILD_ACQUISITION_VERSION,
         SYMBOL_BUILD_PREFLIGHT_VERSION,
+        SYMBOL_BUILD_FONT_AUDIT_VERSION,
         SYMBOL_BUILD_VERSION,
     }
     if version not in supported_versions:
@@ -314,17 +368,20 @@ def validate_symbol_manifest(document: Any) -> None:
     if version >= SYMBOL_BUILD_PREFLIGHT_VERSION:
         _processing(
             root.get("processing"),
-            len(asset_urls),
+            archive_paths,
             version,
             "symbol manifest.processing",
         )
 
 
-def _processing(value: Any, asset_count: int, version: int, context: str) -> None:
+def _processing(value: Any, archive_paths: set[str], version: int, context: str) -> None:
     record = _object(value, context)
+    asset_count = len(archive_paths)
     allowed = {"svgPreflight"}
-    if version == SYMBOL_BUILD_VERSION:
+    if version >= SYMBOL_BUILD_FONT_AUDIT_VERSION:
         allowed.add("fontAudit")
+    if version == SYMBOL_BUILD_VERSION:
+        allowed.add("duplicateDetection")
     _only_keys(record, allowed, context)
     preflight = _object(record.get("svgPreflight"), f"{context}.svgPreflight")
     _only_keys(preflight, {"status", "summary", "report"}, f"{context}.svgPreflight")
@@ -475,6 +532,111 @@ def _processing(value: Any, asset_count: int, version: int, context: str) -> Non
         )
     _artifact(font_audit.get("report"), f"{context}.fontAudit.report")
     _artifact(font_audit.get("aliases"), f"{context}.fontAudit.aliases")
+
+    if version == SYMBOL_BUILD_FONT_AUDIT_VERSION:
+        return
+    if font_status != "passed":
+        raise SymbolManifestError(
+            f"{context}.fontAudit.status must be 'passed' before duplicate detection state"
+        )
+    _duplicate_detection(
+        record.get("duplicateDetection"),
+        archive_paths,
+        f"{context}.duplicateDetection",
+    )
+
+
+def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> None:
+    record = _object(value, context)
+    _only_keys(
+        record,
+        {
+            "status",
+            "summary",
+            "renderer",
+            "canonicalByArchivePath",
+            "groupsReport",
+            "errorsReport",
+            "summaryReport",
+        },
+        context,
+    )
+    if _string(record.get("status"), f"{context}.status") != "passed":
+        raise SymbolManifestError(f"{context}.status must be 'passed'")
+
+    summary = _object(record.get("summary"), f"{context}.summary")
+    fields = {
+        "sourceAssetCount",
+        "uniqueByteSetCount",
+        "rendersAvoidedExactCount",
+        "exactGroupCount",
+        "visualGroupCount",
+        "redundantAssetCount",
+        "canonicalAssetCount",
+        "renderErrorCount",
+    }
+    _only_keys(summary, fields, f"{context}.summary")
+    missing = fields - set(summary)
+    if missing:
+        raise SymbolManifestError(
+            f"{context}.summary is missing field(s): " + ", ".join(sorted(missing))
+        )
+    for field in sorted(fields):
+        count = summary[field]
+        if type(count) is not int or count < 0:
+            raise SymbolManifestError(
+                f"{context}.summary.{field} must be a non-negative integer"
+            )
+    asset_count = len(archive_paths)
+    if summary["sourceAssetCount"] != asset_count:
+        raise SymbolManifestError(f"{context}.summary.sourceAssetCount must equal asset count")
+    if summary["canonicalAssetCount"] + summary["redundantAssetCount"] != asset_count:
+        raise SymbolManifestError(
+            f"{context} canonical/redundant counts must account for every asset"
+        )
+    if summary["uniqueByteSetCount"] > asset_count:
+        raise SymbolManifestError(f"{context}.summary.uniqueByteSetCount cannot exceed asset count")
+    if summary["rendersAvoidedExactCount"] != asset_count - summary["uniqueByteSetCount"]:
+        raise SymbolManifestError(
+            f"{context}.summary.rendersAvoidedExactCount must equal "
+            "sourceAssetCount - uniqueByteSetCount"
+        )
+
+    renderer = _object(record.get("renderer"), f"{context}.renderer")
+    _only_keys(renderer, {"name", "version", "renderSize", "jobs"}, f"{context}.renderer")
+    _string(renderer.get("name"), f"{context}.renderer.name")
+    if "version" in renderer:
+        _string(renderer["version"], f"{context}.renderer.version")
+    for field in ("renderSize", "jobs"):
+        count = renderer.get(field)
+        if type(count) is not int or count < 1:
+            raise SymbolManifestError(f"{context}.renderer.{field} must be a positive integer")
+
+    canonical = _object(record.get("canonicalByArchivePath"), f"{context}.canonicalByArchivePath")
+    if set(canonical) != archive_paths:
+        raise SymbolManifestError(f"{context}.canonicalByArchivePath must cover every asset")
+    canonical_values: set[str] = set()
+    redundant_count = 0
+    for source, target in canonical.items():
+        _portable_path(source, f"{context}.canonicalByArchivePath key")
+        canonical_target = _portable_path(target, f"{context}.canonicalByArchivePath[{source!r}]")
+        if canonical_target not in archive_paths:
+            raise SymbolManifestError(
+                f"{context} canonical target is not an asset: {canonical_target}"
+            )
+        canonical_values.add(canonical_target)
+        redundant_count += source != canonical_target
+    for target in canonical_values:
+        if canonical.get(target) != target:
+            raise SymbolManifestError(f"{context} canonical target must map to itself: {target}")
+    if redundant_count != summary["redundantAssetCount"]:
+        raise SymbolManifestError(f"{context} redundant mapping count does not match summary")
+    if len(canonical_values) != summary["canonicalAssetCount"]:
+        raise SymbolManifestError(f"{context} canonical mapping count does not match summary")
+
+    _artifact(record.get("groupsReport"), f"{context}.groupsReport")
+    _artifact(record.get("errorsReport"), f"{context}.errorsReport")
+    _artifact(record.get("summaryReport"), f"{context}.summaryReport")
 
 
 def _army_source(value: Any, context: str) -> None:

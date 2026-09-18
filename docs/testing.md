@@ -76,8 +76,10 @@ python tools/run_checks.py --stage lint src/infinity_army_data/availability.py t
 ```
 
 When no target is supplied, pytest runs the full suite and Ruff uses the
-repository defaults defined by the runner. The build and rules stages ignore
-positional targets; use `--build-source PATH` to select an Army source directory
+repository defaults defined by the runner, including the maintained symbol
+toolchain (`build_symbols.py`, `svg_processor.py`, and `symbol_work.py`). The
+build and rules stages ignore positional targets; use `--build-source PATH` to
+select an Army source directory
 or ZIP for the Army build. The rules stage
 always uses the normal curated-rules defaults.
 

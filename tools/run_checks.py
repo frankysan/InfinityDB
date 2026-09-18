@@ -39,6 +39,9 @@ DEFAULT_LINT_TARGETS = (
     "tools/run_checks.py",
     "tools/asset_validation.py",
     "tools/stage_full_asset_bundle.py",
+    "tools/build_symbols.py",
+    "tools/svg_processor.py",
+    "tools/symbol_work.py",
 )
 EXIT_OK = 0
 EXIT_STAGE_FAILURE = 1
@@ -310,7 +313,8 @@ def main(argv: list[str] | None = None) -> int:
             ),
         )
     except SystemExit as exc:
-        return int(exc.code)
+        exit_code = exc.code
+        return exit_code if isinstance(exit_code, int) else EXIT_RUNNER_ERROR
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return EXIT_RUNNER_ERROR

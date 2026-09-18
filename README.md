@@ -151,9 +151,10 @@ an immutable `SYMBOLS ...zip`, then verifies and extracts that archive under
 `data/work/symbols/` for an environment-independent SVG structural preflight.
 Raw acquisition writes version-2 `data/manifests/army-symbol-build.json`; a
 completed structural preflight promotes the same generated build state to
-version 3, and the installed-font audit promotes it to version 4 while binding
-both generated reports plus the tracked font-alias configuration to the exact
-symbol artifact.
+version 3, the installed-font audit promotes it to version 4, and complete-set
+exact-first visual deduplication promotes it to version 5 while binding generated
+reports, tracked font-alias configuration, renderer settings, and a portable
+raw-asset-to-canonical mapping to the exact symbol artifact.
 
 Raw symbol resolution is ordered and offline-friendly: a matching local SVG
 under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
@@ -172,11 +173,15 @@ the orchestrated run after the report/build state has been preserved. A second
 font environment, applies maintained aliases from
 `config/symbols/font-aliases.json`, reports available/missing/ambiguous/generic
 references and unused declarations, and fails before later processing when an
-active-text asset has unresolved fonts. Install these Python dependencies with
-`pip install -e ".[symbols]"`. Deduplication, conversion, compression, and
-publication remain later stages. The standalone symbol downloader remains
-available for debugging and targeted maintenance; publishing a symbol snapshot
-through it requires matching Army snapshot provenance.
+active-text asset has unresolved fonts. The following duplicate stage hashes exact
+byte sets first, renders only unique byte sets for visual comparison, keeps
+inconclusive render failures unique, and records the selected canonical raw asset
+for every original archive path without deleting source references. Install the
+Python dependencies with `pip install -e ".[symbols]"`; the default visual
+duplicate renderer is the external `resvg` executable. Text conversion,
+compression, and publication remain later stages. The standalone symbol downloader
+remains available for debugging and targeted maintenance; publishing a symbol
+snapshot through it requires matching Army snapshot provenance.
 
 ```powershell
 python tools/download_wiki_snapshot.py

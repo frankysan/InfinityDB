@@ -85,6 +85,22 @@ def stub_post_acquisition(
     monkeypatch.setattr(
         module, "audit_symbol_fonts", lambda *_args, **_kwargs: font_audit
     )
+    duplicates = SimpleNamespace(
+        groups_report=Path("reports/duplicate-groups.csv"),
+        errors_report=Path("reports/duplicate-render-errors.csv"),
+        summary_report=Path("reports/duplicate-summary.csv"),
+        status="passed",
+        summary={
+            "canonicalAssetCount": 0,
+            "redundantAssetCount": 0,
+            "exactGroupCount": 0,
+            "visualGroupCount": 0,
+            "renderErrorCount": 0,
+        },
+    )
+    monkeypatch.setattr(
+        module, "detect_symbol_duplicates", lambda *_args, **_kwargs: duplicates
+    )
 
 
 def test_resolve_army_snapshot_verifies_provenance_and_revisions(tmp_path: Path) -> None:

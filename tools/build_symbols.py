@@ -6,7 +6,8 @@ The orchestrator never selects the newest available snapshot implicitly. Use
 explicit network refresh. Later processing stages will be integrated here; the
 current orchestration boundary pins Army provenance, resolves one immutable raw
 symbol snapshot, materializes verified work files, runs structural SVG preflight,
-and audits effective fonts against the installed font environment.
+audits effective fonts against the installed font environment, and performs
+exact-first visual duplicate detection with a persisted canonical mapping.
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ try:
     from tools.symbol_work import (
         audit_symbol_fonts,
         audit_symbol_work,
+        detect_symbol_duplicates,
         materialize_symbol_archive,
     )
 except ImportError:  # pragma: no cover - direct script execution fallback
@@ -48,7 +50,12 @@ except ImportError:  # pragma: no cover - direct script execution fallback
         discover_symbol_source,
         print_discovery_summary,
     )
-    from symbol_work import audit_symbol_fonts, audit_symbol_work, materialize_symbol_archive
+    from symbol_work import (
+        audit_symbol_fonts,
+        audit_symbol_work,
+        detect_symbol_duplicates,
+        materialize_symbol_archive,
+    )
 
 
 def print_pinned_snapshot(snapshot: ArmySnapshotResult) -> None:
@@ -126,10 +133,32 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Resolve/fetch and report the pinned Army snapshot without acquiring symbols",
     )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=4,
+        help="Parallel jobs for duplicate rendering and later processing stages (default: 4)",
+    )
+    parser.add_argument(
+        "--duplicate-render-size",
+        type=int,
+        default=512,
+        help="Raster width for visual duplicate detection (default: 512)",
+    )
+    parser.add_argument(
+        "--duplicate-renderer",
+        choices=("resvg", "inkscape", "auto"),
+        default="resvg",
+        help="Renderer for visual duplicate detection (default: resvg)",
+    )
     args = parser.parse_args(argv)
 
     if args.delay < 0:
         parser.error("--delay must not be negative")
+    if args.jobs < 1:
+        parser.error("--jobs must be at least 1")
+    if args.duplicate_render_size < 1:
+        parser.error("--duplicate-render-size must be at least 1")
     if args.fetch_snapshot and args.snapshot_manifest is not None:
         parser.error("--snapshot-manifest is only valid with --snapshot")
 
@@ -239,6 +268,27 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError(
                 "Font audit failed; install/resolve required fonts before processing"
             )
+
+        duplicates = detect_symbol_duplicates(
+            materialized,
+            archive=symbols.archive,
+            build_manifest_path=symbols.build_manifest,
+            font_report=font_audit.report,
+            reports_base=symbol_reports,
+            project_root=Path.cwd(),
+            render_size=args.duplicate_render_size,
+            jobs=args.jobs,
+            renderer=args.duplicate_renderer,
+        )
+        print(
+            "Duplicate detection -> "
+            f"canonical {duplicates.summary['canonicalAssetCount']} | "
+            f"redundant {duplicates.summary['redundantAssetCount']} | "
+            f"exact groups {duplicates.summary['exactGroupCount']} | "
+            f"visual groups {duplicates.summary['visualGroupCount']} | "
+            f"render errors {duplicates.summary['renderErrorCount']}"
+        )
+        print(f"Duplicate report -> {duplicates.groups_report}")
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

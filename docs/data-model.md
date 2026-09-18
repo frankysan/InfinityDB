@@ -432,9 +432,13 @@ provenance, and each member hash. Version 3 adds a preflight status/summary and 
 SHA-256-bound report artifact. Installed-font audit then promotes the same state
 to version 4 with available/missing/ambiguous/generic effective-font summaries,
 its generated report identity, and the exact tracked font-alias configuration
-identity. Detailed reports live under `data/reports/symbols/`. Loaders continue
-to accept versions 2 and 3 so prior immutable symbol caches and completed
-structural preflights remain valid inputs to their next stage.
+identity. Exact-first visual duplicate detection then promotes the same state to
+version 5. Version 5 records renderer settings, duplicate-report identities,
+summary counts, and a complete portable `archivePath -> canonical archivePath`
+mapping while retaining the original `assets` and `references` arrays unchanged.
+Detailed reports live under `data/reports/symbols/`. Loaders continue to accept
+versions 2, 3, and 4 so prior immutable symbol caches and completed intermediate
+processing states remain valid inputs to their next stage.
 
 ### Design direction
 

@@ -15,6 +15,8 @@ from typing import Any, NamedTuple
 
 from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
 from infinity_db.symbol_manifest import (
+    SYMBOL_BUILD_FONT_AUDIT_VERSION,
+    add_duplicate_detection,
     add_font_audit,
     add_svg_preflight,
     artifact_record,
@@ -49,6 +51,17 @@ class SvgPreflightResult(NamedTuple):
 class FontAuditResult(NamedTuple):
     report: Path
     summary: dict[str, int]
+    status: str
+
+
+class DuplicateDetectionResult(NamedTuple):
+    groups_report: Path
+    errors_report: Path
+    summary_report: Path
+    summary: dict[str, int]
+    canonical_by_archive_path: dict[str, str]
+    renderer: str
+    renderer_version: str
     status: str
 
 
@@ -564,3 +577,130 @@ def audit_symbol_fonts(
     )
     write_symbol_manifest(updated, build_manifest_path)
     return FontAuditResult(report=report, summary=summary, status=status)
+
+
+def detect_symbol_duplicates(
+    materialized: MaterializedSymbols,
+    *,
+    archive: Path,
+    build_manifest_path: Path,
+    font_report: Path,
+    reports_base: Path,
+    project_root: Path,
+    render_size: int = 512,
+    jobs: int = 4,
+    renderer: str = "resvg",
+) -> DuplicateDetectionResult:
+    """Detect exact/visual duplicates and persist canonical raw-asset mapping."""
+    manifest = load_symbol_manifest(build_manifest_path)
+    font_audit = manifest.get("processing", {}).get("fontAudit", {})
+    if (
+        manifest.get("formatVersion") != SYMBOL_BUILD_FONT_AUDIT_VERSION
+        or font_audit.get("status") != "passed"
+    ):
+        raise ValueError(
+            "Duplicate detection requires passed "
+            f"version-{SYMBOL_BUILD_FONT_AUDIT_VERSION} font audit state"
+        )
+    if sha256_file(font_report) != font_audit["report"]["sha256"]:
+        raise ValueError("Font audit report SHA-256 does not match army-symbol-build.json")
+
+    try:
+        font_document = json.loads(font_report.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Could not load font audit report {font_report}: {exc}") from exc
+    if font_document.get("symbolArtifact") != {
+        "name": archive.name,
+        "sha256": manifest["snapshot"]["symbolArtifact"]["sha256"],
+    }:
+        raise ValueError("Font audit report is bound to a different symbol artifact")
+
+    rows = font_document.get("assets")
+    if not isinstance(rows, list):
+        raise ValueError("Font audit report assets must be an array")
+    file_categories: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError("Font audit report asset rows must be objects")
+        archive_path = row.get("archivePath")
+        category = row.get("category")
+        if not isinstance(archive_path, str) or not isinstance(category, str):
+            raise ValueError("Font audit report asset rows require archivePath/category")
+        if archive_path in file_categories:
+            raise ValueError(f"Font audit report repeats asset {archive_path}")
+        file_categories[archive_path] = category
+
+    asset_paths = {asset["archivePath"] for asset in manifest["assets"]}
+    if set(file_categories) != asset_paths:
+        raise ValueError("Font audit report asset set does not match army-symbol-build.json")
+
+    symbol_sha = manifest["snapshot"]["symbolArtifact"]["sha256"]
+    report_root = reports_base / _work_name(archive, symbol_sha)
+    tools = _font_tools()
+    try:
+        result = tools.find_duplicate_svgs(
+            materialized.raw_root,
+            materialized.work_root,
+            file_categories,
+            render_size=render_size,
+            jobs=jobs,
+            renderer=renderer,
+            reports_root=report_root,
+        )
+    except RuntimeError as exc:
+        raise ValueError(str(exc)) from exc
+
+    redundant = result["duplicate_representatives"]
+    if not isinstance(redundant, dict):
+        raise ValueError("Duplicate detector returned an invalid representative mapping")
+    canonical = {path: redundant.get(path, path) for path in sorted(asset_paths)}
+    for source, target in canonical.items():
+        if target not in asset_paths:
+            raise ValueError(
+                f"Duplicate detector selected unknown representative {target} for {source}"
+            )
+        if canonical.get(target) != target:
+            raise ValueError(
+                f"Duplicate detector returned chained representative {source} -> {target}"
+            )
+
+    summary = {
+        "sourceAssetCount": result["source_svg_files"],
+        "uniqueByteSetCount": result["unique_byte_sets"],
+        "rendersAvoidedExactCount": result["renders_avoided_exact"],
+        "exactGroupCount": result["exact_groups"],
+        "visualGroupCount": result["visual_groups"],
+        "redundantAssetCount": result["redundant_files"],
+        "canonicalAssetCount": len(set(canonical.values())),
+        "renderErrorCount": result["render_errors"],
+    }
+    if summary["sourceAssetCount"] != materialized.asset_count:
+        raise ValueError(
+            "Duplicate detector source count does not match materialized symbols: "
+            f"{summary['sourceAssetCount']} != {materialized.asset_count}"
+        )
+
+    updated = add_duplicate_detection(
+        manifest,
+        summary=summary,
+        canonical_by_archive_path=canonical,
+        groups_report=result["report_path"],
+        errors_report=result["error_path"],
+        summary_report=result["summary_path"],
+        renderer=result["renderer"],
+        renderer_version=result["renderer_version"],
+        render_size=result["render_size"],
+        jobs=result["jobs"],
+        project_root=project_root,
+    )
+    write_symbol_manifest(updated, build_manifest_path)
+    return DuplicateDetectionResult(
+        groups_report=result["report_path"],
+        errors_report=result["error_path"],
+        summary_report=result["summary_path"],
+        summary=summary,
+        canonical_by_archive_path=canonical,
+        renderer=result["renderer"],
+        renderer_version=result["renderer_version"],
+        status="passed",
+    )

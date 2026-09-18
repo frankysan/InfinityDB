@@ -275,9 +275,14 @@ the existing CSS/font matcher plus validated tracked aliases from
 `config/symbols/font-aliases.json`; it reports available, missing, ambiguous, and
 generic references, alias normalization, and unused declarations, then promotes
 state to version 4 while binding the audit report and alias-config hashes. Missing
-or ambiguous fonts fail orchestration before deduplication/conversion. Versions 2
-and 3 remain accepted as valid earlier-stage state. The downloader does not
-generate `army-symbols.js` or `unit-symbol-map.js`.
+or ambiguous fonts fail orchestration before deduplication/conversion. The
+orchestrator then runs exact-first visual duplicate detection with the established
+renderer/ranking policy and promotes passed state to version 5. Version-5 state
+retains every original asset/reference and adds a complete portable
+`archivePath -> canonical archivePath` map plus duplicate report identities and
+renderer settings. Individual render failures remain unique and are reported.
+Versions 2, 3, and 4 remain accepted as valid earlier-stage state. The downloader
+does not generate `army-symbols.js` or `unit-symbol-map.js`.
 
 Raw source resolution now follows this implemented order:
 
@@ -298,10 +303,8 @@ are reported.
 ### Design direction
 
 Later symbol processing must consume the same pinned Army/SYMBOLS identities
-and the verified work/preflight state rather than selecting newer snapshots
-independently. Exact or visual
-deduplication may map several source assets to one canonical asset but must
-retain every original reference.
+and the verified version-5 canonical state rather than selecting newer snapshots
+independently.
 
 Only the publisher assigns final application paths and generated
 `army-symbols.js` / `unit-symbol-map.js` mappings because only publication knows
@@ -384,8 +387,9 @@ application-level identities.
 - Update focused tests with behavior changes. Standalone scripts in `tools/`
   require dedicated regression coverage for filesystem/URL/portability logic.
 - Run substantive Python tests/lint through the project virtual environment,
-  for example `<venv-python> -m pytest -q` and
-  `<venv-python> -m ruff check src/infinity_db src/infinity_army_data/cli.py tests`.
+  preferably via `<venv-python> tools/run_checks.py --profile code`; the default
+  Ruff target set includes the maintained symbol toolchain as well as application
+  code and tests.
 - Update `README.md` for user-visible behavior/setup/capabilities, canonical
   architecture/data-model docs for their respective decisions, `TODO.md` for
   concrete future work, and `CHANGELOG.md` under `Unreleased` for meaningful
