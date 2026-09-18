@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import tempfile
 import xml.etree.ElementTree as ET
@@ -41,6 +42,9 @@ PUBLICATION_MAPPING_VERSION = 1
 GENERATED_CATEGORIES = ("armies", "orders", "units")
 _TEXT_ROOT_TAGS = {"text", "flowRoot"}
 _STATIC_PUBLIC_STEMS = {"cube2": "cube-2"}
+_UNIT_PROFILE_JSON_PATH = re.compile(
+    r"\.profileGroups\[(\d+)\]\.profiles\[(\d+)\]\.logo$"
+)
 
 
 class FactionInfo(NamedTuple):
@@ -148,19 +152,57 @@ def _faction_public_path(reference: dict[str, Any], index: SnapshotIndex) -> str
     return f"armies/{folder}/{faction_id}-{faction_slug}.svg"
 
 
+def _unit_profile_slot(reference: dict[str, Any]) -> tuple[int, int] | None:
+    json_path = reference.get("jsonPath")
+    if not isinstance(json_path, str):
+        return None
+    match = _UNIT_PROFILE_JSON_PATH.search(json_path)
+    if match is None:
+        return None
+    return int(match.group(1)), int(match.group(2))
+
+
+def _unit_reference_owner(
+    reference: dict[str, Any], index: SnapshotIndex
+) -> int | None:
+    unit_id = reference.get("unitId")
+    raw_slug = reference.get("unitSlug")
+    source_document = reference.get("sourceDocument")
+    if (
+        type(unit_id) is not int
+        or not isinstance(raw_slug, str)
+        or not raw_slug.strip()
+        or not isinstance(source_document, str)
+    ):
+        return None
+    return index.unit_owner_by_reference.get(
+        (source_document, unit_id, slugify(raw_slug))
+    )
+
+
 def _unit_public_path(reference: dict[str, Any], index: SnapshotIndex) -> str:
     unit_id = reference.get("unitId")
     raw_slug = reference.get("unitSlug")
     if type(unit_id) is not int or not isinstance(raw_slug, str) or not raw_slug.strip():
         raise ValueError("Authoritative unit reference requires unitId and unitSlug")
     unit_slug = slugify(raw_slug)
-    source_document = reference.get("sourceDocument")
-    owner = None
-    if isinstance(source_document, str):
-        owner = index.unit_owner_by_reference.get((source_document, unit_id, unit_slug))
+    owner = _unit_reference_owner(reference, index)
     owner_info = index.factions.get(owner) if owner is not None else None
     folder = owner_info.slug if owner_info is not None else "unassigned"
-    return f"units/{folder}/{unit_id}-{unit_slug}.svg"
+    stem = f"units/{folder}/{unit_id}-{unit_slug}"
+
+    suffix_parts: list[str] = []
+    army_id = reference.get("armyId")
+    if type(owner) is int and type(army_id) is int and army_id != owner:
+        suffix_parts.extend(("army", str(army_id)))
+
+    slot = _unit_profile_slot(reference)
+    if slot is not None and slot != (0, 0):
+        group_index, profile_index = slot
+        suffix_parts.extend((str(group_index + 1), str(profile_index + 1)))
+
+    suffix = f"--{'-'.join(suffix_parts)}" if suffix_parts else ""
+    return f"{stem}{suffix}.svg"
 
 
 def _static_public_path(reference: dict[str, Any]) -> str:
@@ -189,18 +231,48 @@ def _namespace(path: str) -> str:
     return _portable_member(path).parts[0]
 
 
-def _reference_rank(reference: dict[str, Any]) -> tuple[int, int, str]:
+def _reference_rank(
+    reference: dict[str, Any], index: SnapshotIndex
+) -> tuple[int, int, int, int, int, int, int, str]:
     kind = reference.get("kind")
     if kind == "faction":
         identifier = reference.get("factionId")
         slug = reference.get("factionSlug")
-        return (0, identifier if type(identifier) is int else 2**31, str(slug or ""))
+        return (
+            0,
+            0,
+            0,
+            identifier if type(identifier) is int else 2**31,
+            0,
+            0,
+            0,
+            str(slug or ""),
+        )
     if kind == "unit-profile":
         identifier = reference.get("unitId")
         slug = reference.get("unitSlug")
-        return (1, identifier if type(identifier) is int else 2**31, str(slug or ""))
+        owner = _unit_reference_owner(reference, index)
+        army_id = reference.get("armyId")
+        owner_rank = (
+            0
+            if type(owner) is not int or type(army_id) is not int or army_id == owner
+            else 1
+        )
+        slot = _unit_profile_slot(reference)
+        group_index, profile_index = slot if slot is not None else (0, 0)
+        primary_rank = 0 if slot is None or slot == (0, 0) else 1
+        return (
+            1,
+            owner_rank,
+            primary_rank,
+            identifier if type(identifier) is int else 2**31,
+            group_index,
+            profile_index,
+            army_id if type(army_id) is int else 2**31,
+            str(slug or ""),
+        )
     key = reference.get("staticKey")
-    return (2, 0, str(key or ""))
+    return (2, 0, 0, 0, 0, 0, 0, str(key or ""))
 
 
 def _render_army_map(mapping: dict[int, str]) -> str:
@@ -299,7 +371,7 @@ def _build_publication(
         if not references:
             raise ValueError(f"Canonical asset has no authoritative references: {canonical}")
         ranked_candidates = sorted(
-            (_reference_rank(row), _publication_candidate(row, snapshot_index))
+            (_reference_rank(row, snapshot_index), _publication_candidate(row, snapshot_index))
             for row in references
         )
         candidates = sorted({candidate for _, candidate in ranked_candidates})
@@ -333,6 +405,10 @@ def _build_publication(
 
     army_mapping: dict[int, str] = {}
     unit_mapping: dict[str, str] = {}
+    unit_mapping_candidates: dict[
+        tuple[int, str],
+        list[tuple[tuple[int, int, int, int, int, int, int, str], str]],
+    ] = defaultdict(list)
     static_mapping: dict[str, str] = {}
     for reference in manifest["references"]:
         if not reference.get("authoritative"):
@@ -361,19 +437,21 @@ def _build_publication(
                     f"{previous} vs {browser_path}"
                 )
         elif kind == "unit-profile":
+            unit_id = reference.get("unitId")
             raw_slug = reference.get("unitSlug")
-            if not isinstance(raw_slug, str) or not raw_slug.strip():
-                raise ValueError("Authoritative unit reference is missing unitSlug")
+            if (
+                type(unit_id) is not int
+                or not isinstance(raw_slug, str)
+                or not raw_slug.strip()
+            ):
+                raise ValueError("Authoritative unit reference requires unitId and unitSlug")
             key = slugify(raw_slug)
             if not published.startswith("units/") or not published.endswith(".svg"):
                 raise ValueError(f"Unit {key!r} resolved outside units/: {published}")
             browser_path = published.removeprefix("units/").removesuffix(".svg")
-            previous = unit_mapping.setdefault(key, browser_path)
-            if previous != browser_path:
-                raise ValueError(
-                    f"Unit slug {key!r} resolves to conflicting symbols: "
-                    f"{previous} vs {browser_path}"
-                )
+            unit_mapping_candidates[(unit_id, key)].append(
+                (_reference_rank(reference, snapshot_index), browser_path)
+            )
         elif kind == "static":
             key = reference.get("staticKey")
             if not isinstance(key, str) or not key.strip():
@@ -386,6 +464,15 @@ def _build_publication(
             previous = static_mapping.setdefault(key, published)
             if previous != published:
                 raise ValueError(f"Static symbol {key!r} resolves to conflicting paths")
+
+    for (_unit_id, key), candidates in sorted(unit_mapping_candidates.items()):
+        browser_path = min(candidates)[1]
+        previous = unit_mapping.setdefault(key, browser_path)
+        if previous != browser_path:
+            raise ValueError(
+                f"Unit slug {key!r} resolves to conflicting symbols: "
+                f"{previous} vs {browser_path}"
+            )
 
     staging_static.mkdir(parents=True, exist_ok=True)
     for category in GENERATED_CATEGORIES:

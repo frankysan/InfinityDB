@@ -264,10 +264,15 @@ consistency audit unless one becomes necessary to unblock that work.
     conversion, compression, and organization. Generate `army-symbols.js` and
     `unit-symbol-map.js` here, not in a downloader, and reject conflicting unit
     lookup keys instead of retaining legacy first-symbol-wins behavior.
-  - [x] Preserve stable ID/slug application conventions. Units publish as
-    `units/<canonical-army-slug>/<unit-id>-<unit-slug>.svg`; faction assets use
-    the parent-faction folder with `<faction-id>-<faction-slug>.svg`; established
-    `/static/orders/` names remain browser-compatible for static symbols.
+  - [x] Preserve stable ID/slug application conventions. A unit's first source
+    profile slot publishes as
+    `units/<canonical-army-slug>/<unit-id>-<unit-slug>.svg`; distinct later
+    profile-slot artwork uses deterministic one-based `--<group>-<profile>`
+    suffixes; distinct non-owner-army variants add `--army-<army-id>` before any
+    profile suffix, while exact duplicate references share their canonical file. Faction
+    assets use the parent-faction folder with `<faction-id>-<faction-slug>.svg`;
+    established `/static/orders/` names remain browser-compatible for static
+    symbols.
   - [x] Permit several source/unit or faction references to map to one canonical
     physical SVG and persist a complete source/canonical-to-published mapping.
 

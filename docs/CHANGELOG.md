@@ -6,6 +6,12 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Preserve distinct unit profile-slot symbol artwork during publication by keeping
+  the first profile at the stable unit path and assigning deterministic
+  `--<group>-<profile>` suffixes to later distinct profile symbols and
+  `--army-<army-id>` namespacing to distinct non-owner-army variants, while
+  exact duplicates continue to share one canonical file.
+
 - Treat source-declared symbol URLs that return HTTP 404 as explicit unavailable
   upstream assets instead of aborting the complete symbol acquisition. The
   versioned build manifest retains their URL/reference provenance, downstream

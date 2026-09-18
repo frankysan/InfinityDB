@@ -331,7 +331,12 @@ independently. The publisher alone assigns final application paths and generated
 `army-symbols.js` / `unit-symbol-map.js` mappings because only publication knows
 the final canonical asset after deduplication/conversion/compression. Successful
 publication is version 8 and binds the complete source-to-published mapping plus
-the generated browser maps into build state.
+the generated browser maps into build state. Unit source profile slot
+`profileGroups[0].profiles[0]` retains the stable unsuffixed unit path used by
+`unit-symbol-map.js`; distinct later profile slots use deterministic one-based
+`--<group>-<profile>` suffixes. Distinct non-owner-army artwork is namespaced
+with `--army-<army-id>` before any profile suffix, while exact duplicates continue
+to share one canonical published file.
 
 The established processing direction is `resvg` for visual duplicate and
 compression validation, persistent `inkscape --shell` workers for text-to-path

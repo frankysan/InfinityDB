@@ -496,10 +496,18 @@ browser maps from authoritative references plus the canonical mapping, validates
 the complete result, transactionally replaces only the generated static symbol
 outputs, and advances successful state to version 8 with a SHA-bound complete
 publication mapping. Canonical processing may collapse equivalent assets without
-discarding their source references; conflicting browser lookup keys fail rather
-than using legacy first-symbol-wins behavior. Source resolution, validation,
-deduplication, conversion, compression, and publishing remain distinct stages with
-provenance recorded rather than inferred from final filenames.
+discarding their source references. For unit artwork, source profile slot
+`profileGroups[0].profiles[0]` retains the stable
+`units/<canonical-army-slug>/<unit-id>-<unit-slug>.svg` browser path. Distinct
+later profile-slot artwork is preserved with deterministic one-based
+`--<group>-<profile>` suffixes (for example `--2-1.svg`). Distinct artwork for
+the same logical unit in a non-owner source army is namespaced with
+`--army-<army-id>` before any profile-slot suffix. Exact duplicate slots and
+army references continue to share one canonical published file. Conflicting browser lookup
+keys still fail rather than using legacy first-symbol-wins behavior. Source
+resolution, validation, deduplication, conversion, compression, and publishing
+remain distinct stages with provenance recorded rather than inferred from final
+filenames.
 
 ## Module boundaries
 

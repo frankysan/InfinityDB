@@ -54,6 +54,7 @@ def _manifest(snapshot: Path) -> dict[str, Any]:
             "authoritative": True,
             "sourceDocument": "101-panoceania.json",
             "assetUrl": urls["u1"],
+            "armyId": 101,
             "unitId": 1,
             "unitSlug": "mech-engineer",
         },
@@ -62,6 +63,7 @@ def _manifest(snapshot: Path) -> dict[str, Any]:
             "authoritative": True,
             "sourceDocument": "101-panoceania.json",
             "assetUrl": urls["u2"],
+            "armyId": 101,
             "unitId": 2,
             "unitSlug": "chung-hee-jeong",
         },
@@ -179,6 +181,170 @@ def test_build_publication_maps_many_references_to_canonical_assets(tmp_path: Pa
     assert '["mech-engineer", "panoceania/1-mech-engineer"]' in unit_map
     assert '["chung-hee-jeong", "panoceania/1-mech-engineer"]' in unit_map
 
+
+
+def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+
+    duplicate_url = "https://example.invalid/u1-duplicate.svg"
+    alternate_url = "https://example.invalid/u1-alternate.svg"
+    manifest["references"][0]["jsonPath"] = (
+        "$.units[0].profileGroups[0].profiles[0].logo"
+    )
+    manifest["assets"].extend(
+        [
+            {"url": duplicate_url, "archivePath": "units/u1-duplicate.svg"},
+            {"url": alternate_url, "archivePath": "units/u1-alternate.svg"},
+        ]
+    )
+    manifest["references"].extend(
+        [
+            {
+                "kind": "unit-profile",
+                "authoritative": True,
+                "sourceDocument": "101-panoceania.json",
+                "jsonPath": "$.units[0].profileGroups[0].profiles[1].logo",
+                "assetUrl": duplicate_url,
+                "armyId": 101,
+                "unitId": 1,
+                "unitSlug": "mech-engineer",
+            },
+            {
+                "kind": "unit-profile",
+                "authoritative": True,
+                "sourceDocument": "101-panoceania.json",
+                "jsonPath": "$.units[0].profileGroups[1].profiles[0].logo",
+                "assetUrl": alternate_url,
+                "armyId": 101,
+                "unitId": 1,
+                "unitSlug": "mech-engineer",
+            },
+        ]
+    )
+    canonical = manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"]
+    canonical["units/u1-duplicate.svg"] = "units/u1.svg"
+    canonical["units/u1-alternate.svg"] = "units/u1-alternate.svg"
+
+    compressed = tmp_path / "compressed"
+    _write_compressed(compressed)
+    (compressed / "units" / "u1-alternate.svg").write_bytes(SVG)
+    staging = tmp_path / "staging"
+
+    report, summary = reorganize_symbols._build_publication(
+        manifest=manifest,
+        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+        compressed_root=compressed,
+        staging_static=staging,
+    )
+
+    primary_path = "units/panoceania/1-mech-engineer.svg"
+    alternate_path = "units/panoceania/1-mech-engineer--2-1.svg"
+    source_map = report["sourceArchivePathToPublishedPath"]
+    assert source_map["units/u1.svg"] == primary_path
+    assert source_map["units/u1-duplicate.svg"] == primary_path
+    assert source_map["units/u1-alternate.svg"] == alternate_path
+    assert report["unitSlugToPublishedPath"]["mech-engineer"] == primary_path
+    assert summary["publishedAssetCount"] == 5
+    assert (staging / primary_path).is_file()
+    assert (staging / alternate_path).is_file()
+
+    unit_map = (staging / "unit-symbol-map.js").read_text(encoding="utf-8")
+    assert '["mech-engineer", "panoceania/1-mech-engineer"]' in unit_map
+    assert "mech-engineer--2-1" not in unit_map
+
+
+def test_publication_preserves_army_specific_primary_variant(tmp_path: Path) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+
+    primary = manifest["references"][0]
+    primary["jsonPath"] = "$.units[0].profileGroups[0].profiles[0].logo"
+    variant_url = "https://example.invalid/u1-sectorial.svg"
+    manifest["assets"].append(
+        {"url": variant_url, "archivePath": "units/u1-sectorial.svg"}
+    )
+    manifest["references"].append(
+        {
+            "kind": "unit-profile",
+            "authoritative": True,
+            "sourceDocument": "101-panoceania.json",
+            "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
+            "assetUrl": variant_url,
+            "armyId": 102,
+            "unitId": 1,
+            "unitSlug": "mech-engineer",
+        }
+    )
+    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+        "units/u1-sectorial.svg"
+    ] = "units/u1-sectorial.svg"
+
+    compressed = tmp_path / "compressed"
+    _write_compressed(compressed)
+    (compressed / "units" / "u1-sectorial.svg").write_bytes(SVG)
+    staging = tmp_path / "staging"
+
+    report, _summary = reorganize_symbols._build_publication(
+        manifest=manifest,
+        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+        compressed_root=compressed,
+        staging_static=staging,
+    )
+
+    primary_path = "units/panoceania/1-mech-engineer.svg"
+    variant_path = "units/panoceania/1-mech-engineer--army-102.svg"
+    source_map = report["sourceArchivePathToPublishedPath"]
+    assert source_map["units/u1.svg"] == primary_path
+    assert source_map["units/u1-sectorial.svg"] == variant_path
+    assert report["unitSlugToPublishedPath"]["mech-engineer"] == primary_path
+    assert (staging / primary_path).is_file()
+    assert (staging / variant_path).is_file()
+
+
+def test_publication_still_rejects_same_profile_slot_collision(tmp_path: Path) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+
+    conflict_url = "https://example.invalid/u1-conflict.svg"
+    manifest["references"][0]["jsonPath"] = (
+        "$.units[0].profileGroups[0].profiles[0].logo"
+    )
+    manifest["assets"].append(
+        {"url": conflict_url, "archivePath": "units/u1-conflict.svg"}
+    )
+    manifest["references"].append(
+        {
+            "kind": "unit-profile",
+            "authoritative": True,
+            "sourceDocument": "101-panoceania.json",
+            "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
+            "assetUrl": conflict_url,
+            "armyId": 101,
+            "unitId": 1,
+            "unitSlug": "mech-engineer",
+        }
+    )
+    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+        "units/u1-conflict.svg"
+    ] = "units/u1-conflict.svg"
+
+    compressed = tmp_path / "compressed"
+    _write_compressed(compressed)
+    (compressed / "units" / "u1-conflict.svg").write_bytes(SVG)
+
+    with pytest.raises(
+        ValueError, match=r"Published symbol path collision: units/panoceania/1-mech-engineer\.svg"
+    ):
+        reorganize_symbols._build_publication(
+            manifest=manifest,
+            snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+            compressed_root=compressed,
+            staging_static=tmp_path / "staging",
+        )
 
 
 def test_publication_skips_recorded_unavailable_authoritative_reference(tmp_path: Path) -> None:
