@@ -51,6 +51,10 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Make Army JSON acquisition coherence explicit: the downloader now verifies a
+  second complete metadata/list pass byte-for-byte before publishing a snapshot,
+  reports changed endpoints on instability, and prints accepted source-revision
+  counts without requiring one global Corvus Belli revision.
 - Clarify current asset-distribution language: Corvus Belli graphical symbols
   may be published into a local installation but are not bundled with InfinityDB
   source code or redistributable releases by default.

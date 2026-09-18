@@ -116,11 +116,14 @@ infinity-db build --compact
 infinity-db serve
 ```
 
-Alternatively, download a fresh raw snapshot first. The downloader saves Army
-API metadata and each faction listed in it, writes a timestamped
-`JSON YYYYMMDD-HHMMSS.zip` archive, and removes its temporary loose files.
-When that archive is built, InfinityDB records its download date and shows it
-in the browser sidebar.
+Alternatively, download a fresh raw snapshot first. The downloader fetches Army
+API metadata and each faction listed in it, then repeats the complete endpoint
+set and requires byte-identical responses before writing the timestamped
+`JSON YYYYMMDD-HHMMSS.zip` archive. If any endpoint changes between passes, the
+run aborts without publishing a snapshot and reports the changed endpoint(s).
+Successful runs also report the observed per-document Army source revisions.
+When the archive is built, InfinityDB records its download date and shows it in
+the browser sidebar.
 
 ```powershell
 python tools/download_army_json.py data/raw

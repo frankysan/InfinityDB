@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,7 +21,9 @@ def test_filename_slugifies_bad_faction_names() -> None:
     assert name == "42-special-recent-changes.json"
 
 
-def test_main_writes_snapshot_provenance(tmp_path, monkeypatch) -> None:
+def test_main_writes_snapshot_provenance_and_reports_revisions(
+    tmp_path, monkeypatch, capsys
+) -> None:
     module = load_module()
     destination = tmp_path / "raw"
     manifest_directory = tmp_path / "manifests"
@@ -28,9 +31,17 @@ def test_main_writes_snapshot_provenance(tmp_path, monkeypatch) -> None:
     def fake_download(staging, *, language):
         metadata = staging / "metadata.json"
         army = staging / "101-panoceania.json"
+        sectorial = staging / "102-sectorial.json"
         metadata.write_text("{}", encoding="utf-8")
-        army.write_text("{}", encoding="utf-8")
-        return [metadata, army]
+        army.write_text(
+            json.dumps({"version": "7.26246.158", "units": []}),
+            encoding="utf-8",
+        )
+        sectorial.write_text(
+            json.dumps({"version": "7.26246.159", "units": []}),
+            encoding="utf-8",
+        )
+        return [metadata, army, sectorial]
 
     monkeypatch.setattr(module, "download_snapshot", fake_download)
 
@@ -54,5 +65,9 @@ def test_main_writes_snapshot_provenance(tmp_path, monkeypatch) -> None:
 
     document = load_snapshot_manifest(manifests[0], archive=archives[0])
     assert document["snapshot"]["type"] == "army"
-    assert document["snapshot"]["documentCount"] == 2
+    assert document["snapshot"]["documentCount"] == 3
     assert document["source"] == {"language": "en", "url": module.API_BASE_URL}
+
+    output = capsys.readouterr().out
+    assert "Downloaded 2 army lists and metadata" in output
+    assert "Army source revisions -> 7.26246.158: 1, 7.26246.159: 1" in output

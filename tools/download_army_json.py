@@ -9,9 +9,11 @@ only when this script is explicitly run.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 import tempfile
+from collections import Counter
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -91,6 +93,40 @@ def _filename(faction: dict[str, Any]) -> str:
     return f"{faction_id}-{normalized_slug}.json"
 
 
+def _sha256(body: bytes) -> str:
+    return hashlib.sha256(body).hexdigest()
+
+
+def _verify_stable_downloads(
+    downloads: list[tuple[Path, str, bytes]],
+    *,
+    opener: Callable[..., Any],
+    timeout: int,
+) -> None:
+    changed: list[str] = []
+    for path, url, first_body in downloads:
+        second_body = _get_bytes(url, opener=opener, timeout=timeout)
+        if second_body == first_body:
+            continue
+        changed.append(f"{path.name} ({_sha256(first_body)} -> {_sha256(second_body)})")
+
+    if changed:
+        raise ApiDownloadError(
+            "Army API responses changed during acquisition; refusing to create a torn "
+            "snapshot. Changed endpoint(s): " + "; ".join(changed)
+        )
+
+
+def _source_revision_counts(files: list[Path]) -> dict[str, int]:
+    revisions: Counter[str] = Counter()
+    for path in files:
+        if path.name == "metadata.json":
+            continue
+        document = decode_document(path.read_bytes(), path.name)
+        revisions[str(document.get("version"))] += 1
+    return dict(sorted(revisions.items()))
+
+
 def download_snapshot(
     destination: Path,
     *,
@@ -99,7 +135,7 @@ def download_snapshot(
     opener: Callable[..., Any] = urlopen,
     timeout: int = DEFAULT_TIMEOUT,
 ) -> list[Path]:
-    """Save metadata, then one raw unit-list JSON file for every metadata faction."""
+    """Download one stable metadata + Army-list snapshot using two API passes."""
     if not re.fullmatch(r"[a-z]{2}(?:-[A-Z]{2})?", language):
         raise ApiDownloadError("language must be an API language code such as 'en'")
 
@@ -110,9 +146,10 @@ def download_snapshot(
         metadata = decode_metadata(metadata_bytes, "metadata.json")["data"]
     except ValueError as exc:
         raise ApiDownloadError(f"Invalid metadata response: {exc}") from exc
-    _write_bytes(destination / "metadata.json", metadata_bytes)
 
-    files = [destination / "metadata.json"]
+    downloads: list[tuple[Path, str, bytes]] = [
+        (destination / "metadata.json", metadata_url, metadata_bytes)
+    ]
     seen_ids: set[int] = set()
     for faction in metadata["factions"]:
         if not isinstance(faction, dict):
@@ -133,10 +170,13 @@ def download_snapshot(
             raise ApiDownloadError(
                 f"Invalid unit-list response for faction {faction_id}: {exc}"
             ) from exc
-        path = destination / filename
-        _write_bytes(path, units_bytes)
-        files.append(path)
-    return files
+        downloads.append((destination / filename, units_url, units_bytes))
+
+    _verify_stable_downloads(downloads, opener=opener, timeout=timeout)
+
+    for path, _, body in downloads:
+        _write_bytes(path, body)
+    return [path for path, _, _ in downloads]
 
 
 def archive_snapshot(
@@ -166,6 +206,7 @@ def main(argv: list[str] | None = None) -> int:
         args.destination.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="infinity-army-", dir=args.destination) as staging:
             files = download_snapshot(Path(staging), language=args.language)
+            revisions = _source_revision_counts(files)
             acquired_at = datetime.now().astimezone()
             archive = archive_snapshot(files, args.destination, now=acquired_at)
             manifest = write_snapshot_manifest(
@@ -186,6 +227,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     print(f"Downloaded {len(files) - 1} army lists and metadata -> {archive}")
+    print(
+        "Army source revisions -> "
+        + ", ".join(f"{version}: {count}" for version, count in revisions.items())
+    )
     print(f"Snapshot provenance -> {manifest}")
     return 0
 

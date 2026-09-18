@@ -178,6 +178,11 @@ and serves a read-only browser and same-origin HTTP API.
   revision/build, but that interpretation is not a documented upstream
   contract. Preserve the raw value. Legitimate snapshots may contain multiple
   source revisions; distinguish those from InfinityDB `acquiredAt` provenance.
+- Army snapshot coherence is verified independently of those revision strings.
+  `download_army_json.py` performs two complete passes over metadata and every
+  Army/reinforcement endpoint, requires byte-identical responses between passes,
+  and writes snapshot files only after verification succeeds. A changed endpoint
+  aborts the acquisition rather than publishing a potentially torn snapshot.
 
 ### Design direction
 

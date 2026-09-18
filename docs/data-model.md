@@ -382,9 +382,19 @@ A coherent Army snapshot may legitimately contain more than one source data
 revision. The 2026-09-10 and 2026-09-18 acquisitions both contained 36 documents
 at `7.26246.158` and 22 at `7.26246.159`; all 58 Army/reinforcement documents and
 `metadata.json` were byte-identical between those acquisitions. The split is
-stable by faction family rather than by sequential download position. Therefore
-snapshot coherence must be established by source stability during acquisition,
-not by requiring one `version` value across every document.
+stable by faction family rather than by sequential download position. Snapshot
+coherence therefore cannot be established by requiring one `version` value
+across every document.
+
+The Army JSON downloader establishes acquisition coherence with two complete API
+passes. The first pass validates metadata and every Army/reinforcement response
+without publishing loose files. The second pass re-fetches the same metadata and
+source endpoints and requires each response to be byte-identical to its first-pass
+response. Any mismatch aborts the acquisition before the immutable archive or
+provenance manifest is created and reports the changed filename together with the
+first- and second-pass SHA-256 values. Successful runs report the observed raw
+source-revision counts diagnostically; mixed revisions are not themselves an
+error.
 
 When dates or versions are reported, keep these concepts distinct:
 
