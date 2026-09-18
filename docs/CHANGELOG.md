@@ -61,6 +61,11 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Resolve raw Army symbols through Git-ignored local overrides, a validated
+  prior immutable symbol snapshot/cache, then upstream network access. Add
+  `--image-overrides` and `--refresh-symbols`, report unused overrides and
+  filename collisions, validate cached archive/member hashes before reuse, and
+  record `override`, `cache`, or `network` as each asset's source method.
 - Migrate curated rules provenance to format v3. PDF sources now retain both the
   reviewed local file and official Corvus Belli Resources URL; archived wiki
   sources bind to exact timestamped ZIP/hash/acquisition provenance and use

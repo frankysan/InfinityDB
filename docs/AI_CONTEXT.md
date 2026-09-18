@@ -230,9 +230,9 @@ matching generated snapshot provenance or an explicit network refresh
 (`--fetch-snapshot`); it never selects a newest snapshot implicitly. The
 orchestrator verifies archive hash, acquisition timestamp, source URL, language,
 document count, and observed per-document Army source revisions, then passes
-that exact archive through current raw symbol discovery/acquisition.
+that exact archive through current raw symbol discovery/resolution.
 
-The raw symbol acquisition stage creates one immutable `SYMBOLS ...zip`,
+The raw symbol resolution stage creates one immutable `SYMBOLS ...zip`,
 ordinary snapshot provenance, and the acquisition-only version-2
 `data/manifests/army-symbol-build.json`. That build manifest separates raw assets
 from consumers, records Army/SYMBOLS artifact hashes, and persists the verified
@@ -243,23 +243,28 @@ discovery audit counts. It deliberately has no font, duplicate, conversion,
 compression, or published-path state yet. The downloader does not generate
 `army-symbols.js` or `unit-symbol-map.js`.
 
+Raw source resolution now follows this implemented order:
+
+```text
+matching local override
+    -> exact-URL entry from the prior validated immutable symbol snapshot/cache
+    -> upstream network
+```
+
+Local overrides live under ignored `image_overrides/<category>/` paths using
+stable source-derived names. The prior current build manifest indexes the cache;
+its referenced symbol archive/provenance and selected member hash are validated
+before reuse. `--refresh-symbols` bypasses the prior symbol archive cache but
+does not bypass a matching override. An invalid matching override is an error,
+not a reason to fall back upstream. Unused overrides and URL/filename collisions
+are reported.
+
 ### Design direction
 
 Later symbol processing must consume the same pinned Army/SYMBOLS identities
 rather than selecting newer snapshots independently. Exact or visual
 deduplication may map several source assets to one canonical asset but must
 retain every original reference.
-
-Source resolution follows the accepted policy:
-
-```text
-local override
-    -> validated selected symbol snapshot/cache
-    -> upstream network when explicit acquisition permits it
-```
-
-An invalid matching override is an error; it must not silently fall back to a
-different source.
 
 Only the publisher assigns final application paths and generated
 `army-symbols.js` / `unit-symbol-map.js` mappings because only publication knows

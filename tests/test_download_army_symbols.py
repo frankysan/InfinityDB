@@ -408,3 +408,365 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
         "faction",
         "resume-audit",
     }
+
+
+def _single_asset_army_snapshot(tmp_path: Path, module, *, url: str) -> tuple[Path, Path]:
+    source = tmp_path / "army.zip"
+    with zipfile.ZipFile(source, "w") as archive:
+        archive.writestr("metadata.json", json.dumps({"factions": []}))
+        archive.writestr(
+            "101-test.json",
+            json.dumps(
+                {
+                    "version": "7.26246.158",
+                    "units": [
+                        {
+                            "id": 1,
+                            "slug": "test-unit",
+                            "profileGroups": [{"profiles": [{"logo": url}]}],
+                        }
+                    ],
+                    "resume": [],
+                }
+            ),
+        )
+
+    from infinity_db.snapshot_provenance import write_snapshot_manifest
+
+    manifest_directory = tmp_path / "manifests"
+    manifest = write_snapshot_manifest(
+        source,
+        manifest_directory,
+        snapshot_type="army",
+        acquired_at=datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),
+        source_url="https://api.corvusbelli.com/army",
+        document_count=2,
+        project_root=tmp_path,
+        language="en",
+    )
+    return source, manifest
+
+
+def test_override_resolution_uses_stable_category_and_disambiguates_collisions() -> None:
+    module = load_module()
+    first = unit_url("shared")
+    second = first + "?variant=2"
+    discovery = module.Discovery(
+        references=[
+            {
+                "kind": "unit-profile",
+                "authoritative": True,
+                "sourceDocument": "101-test.json",
+                "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
+                "assetUrl": first,
+            },
+            {
+                "kind": "unit-profile",
+                "authoritative": True,
+                "sourceDocument": "101-test.json",
+                "jsonPath": "$.units[0].profileGroups[0].profiles[1].logo",
+                "assetUrl": second,
+            },
+        ],
+        authoritative_urls={first, second},
+        audit={},
+        source_document_count=1,
+    )
+
+    plan = module.override_resolution_plan(discovery)
+
+    assert len(plan.collisions) == 1
+    assert plan.override_paths[first].startswith("units/shared--")
+    assert plan.override_paths[second].startswith("units/shared--")
+    assert plan.override_paths[first] != plan.override_paths[second]
+
+
+def test_matching_override_suppresses_cache_and_network(tmp_path: Path) -> None:
+    module = load_module()
+    url = unit_url("test-unit")
+    source, manifest = _single_asset_army_snapshot(tmp_path, module, url=url)
+    destination = tmp_path / "symbols"
+    build_manifest = tmp_path / "army-symbol-build.json"
+    override_root = tmp_path / "image_overrides"
+    override = override_root / "units" / "test-unit.svg"
+    override.parent.mkdir(parents=True)
+    override.write_bytes(b"<svg id='override'/>")
+    unused = override_root / "units" / "unused.svg"
+    unused.write_bytes(b"<svg id='unused'/>")
+    static = static_config(tmp_path / "static.json")
+    progress: list[str] = []
+
+    def fail_network(*_args, **_kwargs):
+        raise AssertionError("network must not be used for a matching override")
+
+    result = module.acquire_symbol_snapshot(
+        source,
+        destination,
+        manifest.parent,
+        build_manifest,
+        static_symbols_path=static,
+        delay=0,
+        project_root=tmp_path,
+        opener=fail_network,
+        progress=progress.append,
+        army_snapshot_manifest=manifest,
+        override_root=override_root,
+        refresh_symbols=True,
+        acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+    )
+
+    from infinity_db.symbol_manifest import load_symbol_manifest
+
+    build = load_symbol_manifest(result.build_manifest)
+    assert build["assets"][0]["sourceMethod"] == "override"
+    assert any("Symbol sources: override 1 | cache 0 | network 0" in row for row in progress)
+    assert any("units/unused.svg" in row for row in progress)
+    with zipfile.ZipFile(result.archive) as archive:
+        assert archive.read(build["assets"][0]["archivePath"]) == b"<svg id='override'/>"
+
+
+def test_invalid_matching_override_fails_without_network(tmp_path: Path) -> None:
+    module = load_module()
+    url = unit_url("test-unit")
+    source, manifest = _single_asset_army_snapshot(tmp_path, module, url=url)
+    override_root = tmp_path / "image_overrides"
+    override = override_root / "units" / "test-unit.svg"
+    override.parent.mkdir(parents=True)
+    override.write_text("not svg", encoding="utf-8")
+    static = static_config(tmp_path / "static.json")
+
+    def fail_network(*_args, **_kwargs):
+        raise AssertionError("invalid matching override must not fall through")
+
+    with pytest.raises(ValueError, match="Invalid SVG from override"):
+        module.acquire_symbol_snapshot(
+            source,
+            tmp_path / "symbols",
+            manifest.parent,
+            tmp_path / "army-symbol-build.json",
+            static_symbols_path=static,
+            delay=0,
+            project_root=tmp_path,
+            opener=fail_network,
+            army_snapshot_manifest=manifest,
+            override_root=override_root,
+        )
+
+
+def test_validated_prior_symbol_snapshot_is_used_as_cache(tmp_path: Path) -> None:
+    module = load_module()
+    url = unit_url("test-unit")
+    source, manifest = _single_asset_army_snapshot(tmp_path, module, url=url)
+    destination = tmp_path / "symbols"
+    destination.mkdir()
+    cached_archive = destination / "SYMBOLS 20260918-120000.zip"
+    cached_body = b"<svg id='cached'/>"
+    with zipfile.ZipFile(cached_archive, "w") as archive:
+        archive.writestr("units/test-unit.svg", cached_body)
+
+    from infinity_db.snapshot_provenance import write_snapshot_manifest
+    from infinity_db.symbol_manifest import (
+        build_symbol_manifest,
+        load_symbol_manifest,
+        write_symbol_manifest,
+    )
+
+    write_snapshot_manifest(
+        cached_archive,
+        manifest.parent,
+        snapshot_type="symbols",
+        acquired_at=datetime(2026, 9, 18, 12, 0, tzinfo=UTC),
+        source_url=module.ASSET_ROOT_URL,
+        document_count=1,
+        project_root=tmp_path,
+        input_artifact=source,
+    )
+    build_manifest = tmp_path / "army-symbol-build.json"
+    previous = build_symbol_manifest(
+        army_artifact=source,
+        symbol_artifact=cached_archive,
+        acquired_at=datetime(2026, 9, 18, 12, 0, tzinfo=UTC),
+        army_acquired_at=datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),
+        army_language="en",
+        army_source_url="https://api.corvusbelli.com/army",
+        source_document_count=2,
+        source_revisions={"7.26246.158": 1},
+        assets=[
+            {
+                "url": url,
+                "sourceFilename": "test-unit.svg",
+                "archivePath": "units/test-unit.svg",
+                "sha256": __import__("hashlib").sha256(cached_body).hexdigest(),
+                "sourceMethod": "network",
+            }
+        ],
+        references=[
+            {
+                "kind": "unit-profile",
+                "authoritative": True,
+                "sourceDocument": "101-test.json",
+                "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
+                "assetUrl": url,
+                "unitId": 1,
+                "unitSlug": "test-unit",
+            }
+        ],
+        audit={
+            "unitProfileReferenceCount": 1,
+            "uniqueUnitUrlCount": 1,
+            "factionReferenceCount": 0,
+            "uniqueFactionUrlCount": 0,
+            "semanticReferenceCount": 1,
+            "uniqueSemanticUrlCount": 1,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 1,
+            "uniqueRecursiveUrlCount": 1,
+            "uniqueDownloadedUrlCount": 1,
+            "unknownReferenceCount": 0,
+        },
+        project_root=tmp_path,
+    )
+    write_symbol_manifest(previous, build_manifest)
+    static = static_config(tmp_path / "static.json")
+
+    def fail_network(*_args, **_kwargs):
+        raise AssertionError("validated cache hit must suppress network")
+
+    result = module.acquire_symbol_snapshot(
+        source,
+        destination,
+        manifest.parent,
+        build_manifest,
+        static_symbols_path=static,
+        delay=0,
+        project_root=tmp_path,
+        opener=fail_network,
+        army_snapshot_manifest=manifest,
+        override_root=tmp_path / "image_overrides",
+        acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+    )
+
+    current = load_symbol_manifest(result.build_manifest)
+    assert current["assets"][0]["sourceMethod"] == "cache"
+    with zipfile.ZipFile(result.archive) as archive:
+        assert archive.read(current["assets"][0]["archivePath"]) == cached_body
+
+
+def test_refresh_symbols_bypasses_cache(tmp_path: Path, monkeypatch) -> None:
+    module = load_module()
+    url = unit_url("test-unit")
+    source, manifest = _single_asset_army_snapshot(tmp_path, module, url=url)
+    static = static_config(tmp_path / "static.json")
+    body = b"<svg id='network'/>"
+
+    def fail_cache(*_args, **_kwargs):
+        raise AssertionError("refresh mode must not inspect the prior symbol cache")
+
+    monkeypatch.setattr(module, "load_symbol_cache", fail_cache)
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return body
+
+    result = module.acquire_symbol_snapshot(
+        source,
+        tmp_path / "symbols",
+        manifest.parent,
+        tmp_path / "army-symbol-build.json",
+        static_symbols_path=static,
+        delay=0,
+        project_root=tmp_path,
+        opener=lambda *_args, **_kwargs: Response(),
+        army_snapshot_manifest=manifest,
+        override_root=tmp_path / "image_overrides",
+        refresh_symbols=True,
+        acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+    )
+
+    from infinity_db.symbol_manifest import load_symbol_manifest
+
+    build = load_symbol_manifest(result.build_manifest)
+    assert build["assets"][0]["sourceMethod"] == "network"
+
+
+def test_symbol_cache_rejects_mutated_archive(tmp_path: Path) -> None:
+    module = load_module()
+    army = tmp_path / "army.zip"
+    army.write_bytes(b"army")
+    destination = tmp_path / "symbols"
+    destination.mkdir()
+    symbols = destination / "SYMBOLS 20260918-120000.zip"
+    url = unit_url("cached")
+    body = b"<svg id='cached'/>"
+    with zipfile.ZipFile(symbols, "w") as archive:
+        archive.writestr("units/cached.svg", body)
+
+    from infinity_db.snapshot_provenance import write_snapshot_manifest
+    from infinity_db.symbol_manifest import build_symbol_manifest, write_symbol_manifest
+
+    manifest_directory = tmp_path / "manifests"
+    write_snapshot_manifest(
+        symbols,
+        manifest_directory,
+        snapshot_type="symbols",
+        acquired_at=datetime(2026, 9, 18, 12, 0, tzinfo=UTC),
+        source_url=module.ASSET_ROOT_URL,
+        document_count=1,
+        project_root=tmp_path,
+        input_artifact=army,
+    )
+    build_manifest = tmp_path / "army-symbol-build.json"
+    document = build_symbol_manifest(
+        army_artifact=army,
+        symbol_artifact=symbols,
+        acquired_at=datetime(2026, 9, 18, 12, 0, tzinfo=UTC),
+        army_acquired_at=datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),
+        army_language="en",
+        army_source_url="https://api.corvusbelli.com/army",
+        source_document_count=1,
+        source_revisions={},
+        assets=[
+            {
+                "url": url,
+                "sourceFilename": "cached.svg",
+                "archivePath": "units/cached.svg",
+                "sha256": module.hashlib.sha256(body).hexdigest(),
+                "sourceMethod": "network",
+            }
+        ],
+        references=[],
+        audit={
+            "unitProfileReferenceCount": 0,
+            "uniqueUnitUrlCount": 0,
+            "factionReferenceCount": 0,
+            "uniqueFactionUrlCount": 0,
+            "semanticReferenceCount": 0,
+            "uniqueSemanticUrlCount": 0,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 0,
+            "uniqueRecursiveUrlCount": 0,
+            "uniqueDownloadedUrlCount": 1,
+            "unknownReferenceCount": 0,
+        },
+        project_root=tmp_path,
+    )
+    write_symbol_manifest(document, build_manifest)
+    symbols.write_bytes(b"mutated")
+
+    with pytest.raises(ValueError, match="Cached symbol archive SHA-256 mismatch"):
+        module.load_symbol_cache(
+            build_manifest,
+            destination=destination,
+            manifest_directory=manifest_directory,
+            project_root=tmp_path,
+        )

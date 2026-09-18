@@ -1,4 +1,4 @@
-"""Discover and download every authoritative symbol referenced by one Army snapshot."""
+"""Discover and resolve every authoritative symbol referenced by one Army snapshot."""
 
 from __future__ import annotations
 
@@ -10,15 +10,26 @@ import sys
 import tempfile
 import time
 import zipfile
+from collections.abc import Callable
+from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
-from collections.abc import Callable
 from typing import Any, NamedTuple
 from urllib.parse import urlparse
 from urllib.request import urlopen
+from xml.etree import ElementTree
 
-from infinity_db.snapshot_provenance import portable_project_path, write_snapshot_manifest
-from infinity_db.symbol_manifest import build_symbol_manifest, write_symbol_manifest
+from infinity_db.snapshot_provenance import (
+    load_snapshot_manifest,
+    portable_project_path,
+    sha256_file,
+    write_snapshot_manifest,
+)
+from infinity_db.symbol_manifest import (
+    build_symbol_manifest,
+    load_symbol_manifest,
+    write_symbol_manifest,
+)
 
 try:
     from tools.download_army_json import ArmySnapshotResult, resolve_army_snapshot
@@ -34,6 +45,7 @@ ASSET_ROOT_PATH = "/army/img/"
 ASSET_ROOT_URL = f"https://{ASSET_HOST}{ASSET_ROOT_PATH}"
 DEFAULT_STATIC_CONFIG = Path("config/symbols/static-symbols.json")
 DEFAULT_BUILD_MANIFEST = Path("data/manifests/army-symbol-build.json")
+DEFAULT_OVERRIDE_ROOT = Path("image_overrides")
 SVG_NAME = re.compile(r"[a-z0-9-]+\.svg$")
 ARMY_FILE = re.compile(r"^(?P<id>\d+)-(?P<slug>.+)\.json$", re.IGNORECASE)
 STATIC_IDENTIFIER = re.compile(r"[a-z0-9-]+")
@@ -59,6 +71,20 @@ class SymbolSnapshotResult(NamedTuple):
     build_manifest: Path
     asset_count: int
     discovery: Discovery
+
+
+class SymbolCache(NamedTuple):
+    """Validated prior immutable symbol snapshot used as an acquisition cache."""
+
+    archive: Path
+    assets: dict[str, dict[str, Any]]
+
+
+class ResolutionPlan(NamedTuple):
+    """Stable local override keys plus diagnostics for one discovery set."""
+
+    override_paths: dict[str, str]
+    collisions: dict[str, list[str]]
 
 
 def destination_name(url: str) -> str:
@@ -384,6 +410,167 @@ def archive_paths(discovery: Discovery) -> dict[str, str]:
     return candidates
 
 
+def override_resolution_plan(discovery: Discovery) -> ResolutionPlan:
+    """Return stable URL-derived override paths and any filename collisions."""
+    categories: dict[str, set[str]] = {url: set() for url in discovery.authoritative_urls}
+    for reference in discovery.references:
+        url = reference["assetUrl"]
+        if url not in categories or not reference["authoritative"]:
+            continue
+        kind = reference["kind"]
+        if kind == "unit-profile":
+            categories[url].add("units")
+        elif kind == "faction":
+            categories[url].add("factions")
+        elif kind == "static":
+            categories[url].add(reference["staticCategory"])
+
+    candidates: dict[str, str] = {}
+    for url in sorted(discovery.authoritative_urls):
+        category = sorted(categories[url])[0] if categories[url] else "unclassified"
+        candidates[url] = f"{category}/{destination_name(url)}"
+
+    collisions: dict[str, list[str]] = {}
+    by_candidate: dict[str, list[str]] = {}
+    for url, candidate in candidates.items():
+        by_candidate.setdefault(candidate.casefold(), []).append(url)
+    for key, urls in sorted(by_candidate.items()):
+        if len(urls) < 2:
+            continue
+        collisions[key] = sorted(urls)
+        for url in urls:
+            path = Path(candidates[url])
+            suffix = hashlib.sha256(url.encode("utf-8")).hexdigest()[:12]
+            candidates[url] = (path.parent / f"{path.stem}--{suffix}{path.suffix}").as_posix()
+    return ResolutionPlan(candidates, collisions)
+
+
+def _svg_bytes(body: bytes, *, context: str) -> bytes:
+    """Validate raw bytes as one SVG document and return them unchanged."""
+    try:
+        root = ElementTree.fromstring(body)
+    except ElementTree.ParseError as exc:
+        raise ValueError(f"Invalid SVG from {context}: {exc}") from exc
+    if root.tag.rsplit("}", 1)[-1].casefold() != "svg":
+        raise ValueError(f"Invalid SVG from {context}: root element is not <svg>")
+    return body
+
+
+def _override_files(root: Path) -> dict[str, Path]:
+    """Index local SVG overrides by case-insensitive portable relative path."""
+    if not root.exists():
+        return {}
+    if not root.is_dir():
+        raise ValueError(f"Image override root is not a directory: {root}")
+
+    result: dict[str, Path] = {}
+    for path in sorted(
+        (candidate for candidate in root.rglob("*") if candidate.is_file()),
+        key=lambda candidate: candidate.relative_to(root).as_posix().casefold(),
+    ):
+        if path.suffix.casefold() != ".svg":
+            continue
+        relative = path.relative_to(root).as_posix()
+        key = relative.casefold()
+        if key in result:
+            first = result[key].relative_to(root).as_posix()
+            raise ValueError(
+                "Case-insensitive image override collision: "
+                f"{first} and {relative}"
+            )
+        result[key] = path
+    return result
+
+
+def _cache_archive_path(
+    artifact: dict[str, Any],
+    *,
+    destination: Path,
+    project_root: Path,
+) -> Path | None:
+    if isinstance(artifact.get("path"), str):
+        candidate = project_root / Path(artifact["path"])
+        if candidate.is_file():
+            return candidate
+    candidate = destination / artifact["name"]
+    if candidate.is_file():
+        return candidate
+    return None
+
+
+def load_symbol_cache(
+    build_manifest_path: Path,
+    *,
+    destination: Path,
+    manifest_directory: Path,
+    project_root: Path,
+) -> SymbolCache | None:
+    """Load the prior symbol snapshot as a validated exact-URL cache when available."""
+    if not build_manifest_path.is_file():
+        return None
+
+    manifest = load_symbol_manifest(build_manifest_path)
+    artifact = manifest["snapshot"]["symbolArtifact"]
+    archive = _cache_archive_path(
+        artifact,
+        destination=destination,
+        project_root=project_root,
+    )
+    if archive is None:
+        return None
+    if archive.name != artifact["name"]:
+        raise ValueError(
+            "Cached symbol artifact name does not match its resolved archive: "
+            f"{artifact['name']} != {archive.name}"
+        )
+    actual = sha256_file(archive)
+    if actual != artifact["sha256"]:
+        raise ValueError(
+            "Cached symbol archive SHA-256 mismatch: "
+            f"expected {artifact['sha256']}, got {actual}"
+        )
+
+    provenance_path = manifest_directory / f"{archive.stem}.json"
+    if not provenance_path.is_file():
+        raise ValueError(f"Cached symbol snapshot provenance is missing: {provenance_path}")
+    provenance = load_snapshot_manifest(provenance_path, archive=archive)
+    if provenance["snapshot"]["type"] != "symbols":
+        raise ValueError(f"Cached snapshot provenance is not a symbol snapshot: {provenance_path}")
+
+    assets = {row["url"]: row for row in manifest["assets"]}
+    if provenance["snapshot"]["archive"]["name"] != archive.name:
+        raise ValueError(
+            "Cached symbol snapshot provenance names a different archive: "
+            f"{provenance['snapshot']['archive']['name']} != {archive.name}"
+        )
+    if provenance["snapshot"]["documentCount"] != len(assets):
+        raise ValueError(
+            "Cached symbol snapshot document count does not match its build manifest: "
+            f"{provenance['snapshot']['documentCount']} != {len(assets)}"
+        )
+    return SymbolCache(archive=archive, assets=assets)
+
+
+def _cached_svg(cache: SymbolCache, archive: zipfile.ZipFile, url: str) -> bytes | None:
+    asset = cache.assets.get(url)
+    if asset is None:
+        return None
+    archive_path = asset["archivePath"]
+    try:
+        body = archive.read(archive_path)
+    except KeyError as exc:
+        raise ValueError(
+            f"Cached symbol archive is missing manifest member {archive_path!r}: {cache.archive}"
+        ) from exc
+    actual = hashlib.sha256(body).hexdigest()
+    if actual != asset["sha256"]:
+        raise ValueError(
+            "Cached symbol member SHA-256 mismatch for "
+            f"{url}: expected {asset['sha256']}, got {actual}"
+        )
+    return _svg_bytes(body, context=f"cache {cache.archive.name}#{archive_path}")
+
+
 def _write_bytes(path: Path, body: bytes) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.parent.mkdir(parents=True, exist_ok=True)
@@ -447,8 +634,10 @@ def acquire_symbol_snapshot(
     progress: Callable[[str], Any] | None = None,
     army_snapshot: ArmySnapshotResult | None = None,
     army_snapshot_manifest: Path | None = None,
+    override_root: Path = DEFAULT_OVERRIDE_ROOT,
+    refresh_symbols: bool = False,
 ) -> SymbolSnapshotResult:
-    """Download and publish one complete raw symbol snapshot for a pinned Army source."""
+    """Resolve and publish one complete raw symbol snapshot for a pinned Army source."""
     if delay < 0:
         raise ValueError("delay must not be negative")
     project_root = project_root or Path.cwd()
@@ -476,27 +665,72 @@ def acquire_symbol_snapshot(
             f"{discovery.source_document_count} != {army_snapshot.document_count}"
         )
 
+    resolution_plan = override_resolution_plan(discovery)
+    overrides = _override_files(override_root)
+    for candidate, urls in resolution_plan.collisions.items():
+        progress(
+            "Override filename collision: "
+            f"{candidate} represents {len(urls)} URLs; use URL-specific names:"
+        )
+        for url in urls:
+            progress(f"  {url} -> {resolution_plan.override_paths[url]}")
+
+    cache = None
+    if not refresh_symbols:
+        cache = load_symbol_cache(
+            build_manifest_path,
+            destination=destination,
+            manifest_directory=manifest_directory,
+            project_root=project_root,
+        )
+
     destination.mkdir(parents=True, exist_ok=True)
     archive: Path | None = None
     snapshot_manifest: Path | None = None
     try:
         paths = archive_paths(discovery)
-        with tempfile.TemporaryDirectory(
+        cache_context = zipfile.ZipFile(cache.archive) if cache is not None else nullcontext(None)
+        with cache_context as cache_archive, tempfile.TemporaryDirectory(
             prefix="infinity-symbols-", dir=destination
         ) as staging:
             staging_path = Path(staging)
             files: list[Path] = []
             assets: list[dict[str, str]] = []
+            used_overrides: set[str] = set()
+            source_counts = {"override": 0, "cache": 0, "network": 0}
             urls = sorted(discovery.authoritative_urls)
             for index, url in enumerate(urls, start=1):
                 relative = paths[url]
-                with opener(url, timeout=30) as response:
-                    body = response.read()
-                if b"<svg" not in body[:1024].lower():
-                    raise ValueError(f"Expected an SVG response: {url}")
+                override_relative = resolution_plan.override_paths[url]
+                override_key = override_relative.casefold()
+                override = overrides.get(override_key)
+                if override is not None:
+                    body = _svg_bytes(
+                        override.read_bytes(),
+                        context=f"override {override}",
+                    )
+                    source_method = "override"
+                    used_overrides.add(override_key)
+                else:
+                    cached = None
+                    if cache is not None:
+                        assert isinstance(cache_archive, zipfile.ZipFile)
+                        cached = _cached_svg(cache, cache_archive, url)
+                    if cached is not None:
+                        body = cached
+                        source_method = "cache"
+                    else:
+                        with opener(url, timeout=30) as response:
+                            body = response.read()
+                        body = _svg_bytes(body, context=f"network {url}")
+                        source_method = "network"
+                        if index < len(urls) and delay:
+                            sleeper(delay)
+
                 path = staging_path / Path(relative)
                 _write_bytes(path, body)
                 files.append(path)
+                source_counts[source_method] += 1
                 assets.append(
                     {
                         "url": url,
@@ -504,12 +738,26 @@ def acquire_symbol_snapshot(
                         or destination_name(url),
                         "archivePath": relative,
                         "sha256": hashlib.sha256(body).hexdigest(),
-                        "sourceMethod": "network",
+                        "sourceMethod": source_method,
                     }
                 )
-                progress(f"[{index}/{len(urls)}] {relative}")
-                if index < len(urls) and delay:
-                    sleeper(delay)
+                progress(f"[{index}/{len(urls)}] {relative} [{source_method}]")
+
+            unused_overrides = sorted(
+                path.relative_to(override_root).as_posix()
+                for key, path in overrides.items()
+                if key not in used_overrides
+            )
+            progress(
+                "Symbol sources: "
+                f"override {source_counts['override']} | "
+                f"cache {source_counts['cache']} | "
+                f"network {source_counts['network']}"
+            )
+            if unused_overrides:
+                progress(f"Unused image overrides ({len(unused_overrides)}):")
+                for relative in unused_overrides:
+                    progress(f"  {relative}")
 
             timestamp = acquired_at or datetime.now().astimezone()
             archive = archive_symbols(
@@ -610,6 +858,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Generated acquisition/build manifest",
     )
     parser.add_argument(
+        "--image-overrides",
+        type=Path,
+        default=DEFAULT_OVERRIDE_ROOT,
+        help="Local SVG override root (default: image_overrides)",
+    )
+    parser.add_argument(
+        "--refresh-symbols",
+        action="store_true",
+        help="Bypass the prior immutable symbol cache; local overrides still take precedence",
+    )
+    parser.add_argument(
         "--manifest-dir",
         type=Path,
         default=Path("data/manifests/snapshots"),
@@ -647,12 +906,14 @@ def main(argv: list[str] | None = None) -> int:
             discovery=discovery,
             progress=print,
             army_snapshot_manifest=args.snapshot_manifest,
+            override_root=args.image_overrides,
+            refresh_symbols=args.refresh_symbols,
         )
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    print(f"Downloaded {result.asset_count} symbols -> {result.archive}")
+    print(f"Resolved {result.asset_count} symbols -> {result.archive}")
     print(f"Snapshot provenance -> {result.snapshot_manifest}")
     print(f"Symbol build manifest -> {result.build_manifest}")
     return 0

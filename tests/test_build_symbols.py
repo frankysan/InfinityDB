@@ -124,6 +124,8 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
     ):
         seen["acquisition"] = source
         seen["army_snapshot"] = kwargs["army_snapshot"]
+        seen["override_root"] = kwargs["override_root"]
+        seen["refresh_symbols"] = kwargs["refresh_symbols"]
         return SimpleNamespace(
             asset_count=3,
             archive=destination / "SYMBOLS 20260918-120100.zip",
@@ -142,6 +144,9 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
                 str(archive),
                 "--data-root",
                 str(data_root),
+                "--image-overrides",
+                str(tmp_path / "overrides"),
+                "--refresh-symbols",
                 "--delay",
                 "0",
             ]
@@ -153,6 +158,8 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
     assert seen["acquisition"] == archive
     assert seen["army_snapshot"].archive == archive
     assert seen["army_snapshot"].source_revisions == {"7.26246.158": 1}
+    assert seen["override_root"] == tmp_path / "overrides"
+    assert seen["refresh_symbols"] is True
 
 
 def test_fetch_mode_pins_the_snapshot_returned_by_army_acquisition(

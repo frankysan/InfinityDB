@@ -167,11 +167,16 @@ consistency audit unless one becomes necessary to unblock that work.
       state rather than CLI memory or filenames.
     - [ ] Integrate override/cache resolution, processing, compression, publication,
       mapping generation, validation, and final reporting behind the same pin.
+      - [x] Route raw acquisition through local override, validated prior immutable
+        symbol snapshot/cache, then network resolution, with explicit refresh
+        bypassing only the cache.
+      - [ ] Integrate processing, compression, publication, mapping generation,
+        validation, and final reporting.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
     separate, intentional operations. The current orchestrator already supports
     `--snapshot-only`, `--language`, `--data-root`, and `--static-symbols`;
-    `--static-root`, `--jobs`, `--image-overrides`, `--refresh-symbols`,
-    `--skip-symbol-download`, `--skip-compression`, `--keep-work`, and
+    `--static-root`, `--jobs`, `--skip-symbol-download`, `--skip-compression`,
+    `--keep-work`, and
     `--dry-run` remain candidate options as later stages are integrated.
 
 - [ ] Complete the static-symbol and local-override model as maintained project
@@ -183,11 +188,11 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] Extend current static declarations with stable key, category, source
     filename, and user-facing label. Add further known source-name metadata only
     when a concrete processing/publishing need appears.
-  - [ ] Keep local `image_overrides/` outside version control, organized by
+  - [x] Keep local `image_overrides/` outside version control, organized by
     explicit categories such as `units/`, `factions/`, `characteristics/`, and
     `orders/`. Use stable URL-derived logical names/categories as lookup keys,
     not generated publication filenames.
-  - [ ] Resolve each asset strictly in this order: matching local override,
+  - [x] Resolve each asset strictly in this order: matching local override,
     existing validated immutable symbol snapshot/cache, then upstream network
     download. A valid override suppresses all network access for that asset; an
     invalid matching override is an error and must not silently fall back
@@ -216,10 +221,10 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Never rename, rewrite, normalize, compress, or delete a timestamped raw
     archive during later processing. Extract selected archives into temporary or
     work locations when loose SVG files are needed.
-  - [ ] Reuse validated archived assets/cache before network access where practical;
+  - [x] Reuse validated archived assets/cache before network access where practical;
     explicit refresh creates a new timestamped archive rather than mutating an
-    old one. Treat URL-to-filename collisions as errors requiring deterministic
-    disambiguation.
+    old one. Detect URL-to-filename collisions and deterministically disambiguate
+    their stable source-derived override/archive names.
 
 - [ ] Consolidate SVG audit, font handling, and complete-set duplicate detection
   around one structured manifest.
@@ -295,6 +300,9 @@ consistency audit unless one becomes necessary to unblock that work.
     - [x] Expose current source-semantic discovery and raw network acquisition as
       reusable functions so the standalone CLI and orchestrator share one
       implementation.
+    - [x] Resolve raw assets through Git-ignored local overrides, the prior
+      validated immutable symbol snapshot/cache, then network, and record the
+      chosen source method for every resolved asset.
   - [ ] Make the symbol-downloader input contract match its CLI and tests. Prefer
     the immutable raw Army ZIP as the authoritative input; either fully support
     directory/current merged-master inputs end to end or stop advertising them.
@@ -333,7 +341,7 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Partial/invalid snapshot acquisition must not continue or replace prior
     snapshots/publication.
   - [ ] Unknown SVG source locations require explicit review.
-  - [ ] Invalid matching overrides fail; failed network downloads leave existing
+  - [x] Invalid matching overrides fail; failed network downloads leave existing
     archives untouched and prevent creation/publication of an incomplete
     replacement snapshot.
   - [ ] SVG parse/font errors are retained and reported rather than discarded.

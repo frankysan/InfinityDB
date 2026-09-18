@@ -5,7 +5,7 @@ The orchestrator never selects the newest available snapshot implicitly. Use
 ``--snapshot`` for an existing immutable Army ZIP or ``--fetch-snapshot`` for an
 explicit network refresh. Later processing stages will be integrated here; the
 current orchestration boundary pins Army provenance and performs raw symbol
-discovery/acquisition from that exact snapshot.
+discovery/resolution from that exact snapshot.
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ try:
         resolve_army_snapshot,
     )
     from tools.download_army_symbols import (
+        DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,
         acquire_symbol_snapshot,
         discover_symbol_source,
@@ -35,6 +36,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
         resolve_army_snapshot,
     )
     from download_army_symbols import (
+        DEFAULT_OVERRIDE_ROOT,
         DEFAULT_STATIC_CONFIG,
         acquire_symbol_snapshot,
         discover_symbol_source,
@@ -94,6 +96,17 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=DEFAULT_STATIC_CONFIG,
         help="Maintained static-symbol declarations",
+    )
+    parser.add_argument(
+        "--image-overrides",
+        type=Path,
+        default=DEFAULT_OVERRIDE_ROOT,
+        help="Local SVG override root (default: image_overrides)",
+    )
+    parser.add_argument(
+        "--refresh-symbols",
+        action="store_true",
+        help="Bypass the prior immutable symbol cache; local overrides still take precedence",
     )
     parser.add_argument(
         "--delay",
@@ -167,12 +180,14 @@ def main(argv: list[str] | None = None) -> int:
             discovery=discovery,
             progress=print,
             army_snapshot=pinned,
+            override_root=args.image_overrides,
+            refresh_symbols=args.refresh_symbols,
         )
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    print(f"Downloaded {symbols.asset_count} symbols -> {symbols.archive}")
+    print(f"Resolved {symbols.asset_count} symbols -> {symbols.archive}")
     print(f"Symbol snapshot provenance -> {symbols.snapshot_manifest}")
     print(f"Symbol build manifest -> {symbols.build_manifest}")
     return 0

@@ -146,13 +146,24 @@ For normal symbol refreshes, `tools/build_symbols.py` is the orchestration
 entrypoint. It never selects an Army snapshot implicitly: use `--snapshot` to
 pin an existing immutable Army ZIP with matching generated provenance, or
 `--fetch-snapshot` for an explicit network refresh. The current orchestration
-stage performs source-semantic discovery and raw symbol acquisition from that
+stage performs source-semantic discovery and raw symbol resolution from that
 same pinned Army snapshot, writes the immutable `SYMBOLS ...zip`, and updates
 the version-2 `data/manifests/army-symbol-build.json` with the Army archive hash,
-source URL, language, acquisition timestamp/document count, and observed source
-revisions. The standalone symbol downloader remains available for debugging and
-targeted maintenance; publishing a symbol snapshot through it requires matching
-Army snapshot provenance.
+source URL, language, acquisition timestamp/document count, observed source
+revisions, and each raw asset's resolution method.
+
+Raw symbol resolution is ordered and offline-friendly: a matching local SVG
+under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
+entry from the previously validated immutable symbol snapshot is reused as a
+cache, and only a miss reaches Corvus Belli's asset host. The current build
+manifest is the cache index and its referenced `SYMBOLS ...zip`, snapshot
+provenance, archive SHA-256, member SHA-256, and SVG content are checked before
+reuse. `--refresh-symbols` bypasses that archive cache but still keeps local
+overrides authoritative. Invalid matching overrides fail rather than falling
+back upstream; unused overrides and URL/filename collisions are reported. The
+standalone symbol downloader remains available for debugging and targeted
+maintenance; publishing a symbol snapshot through it requires matching Army
+snapshot provenance.
 
 ```powershell
 python tools/download_wiki_snapshot.py
@@ -164,6 +175,9 @@ python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip"
 
 # Explicit online Army refresh followed by symbol acquisition:
 python tools/build_symbols.py --fetch-snapshot
+
+# Force upstream refresh for non-overridden symbols while preserving local overrides:
+python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip" --refresh-symbols
 ```
 
 The development server listens on all local network interfaces. Open

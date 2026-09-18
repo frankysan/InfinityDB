@@ -261,7 +261,7 @@ Symbol refresh orchestration is explicit and snapshot-pinned.
 `tools/build_symbols.py` requires either `--snapshot` for an existing immutable
 Army archive with generated provenance or `--fetch-snapshot` for an intentional
 network refresh. It verifies the selected Army archive/provenance and keeps that
-same artifact pinned through current raw symbol discovery and acquisition;
+same artifact pinned through current raw symbol discovery and resolution;
 normal application/database builds never invoke it or acquire network data.
 
 Army-symbol acquisition also writes the version-2
@@ -271,9 +271,16 @@ SYMBOLS artifacts and carries the verified Army acquisition pin (source URL,
 language, acquisition timestamp, source-document count, and observed source
 revisions). It also records every downloaded raw asset by URL/hash/archive path,
 preserves every authoritative and audit-only source reference, and stores the
-discovery audit counts. Its current contract is acquisition-only; later symbol
-processing stages will extend the build state with their own validated fields
-rather than making the downloader assign final application paths.
+discovery audit counts. Raw assets are resolved in strict order: a matching
+Git-ignored local override, an exact-URL entry from the prior validated immutable
+symbol snapshot/cache, then upstream network access. The prior build manifest is
+the cache index; its referenced symbol archive/provenance and the selected member
+hash are validated before reuse. `--refresh-symbols` bypasses the archive cache
+without bypassing local overrides. Invalid matching overrides fail rather than
+falling through, and unused overrides plus URL/filename collisions are reported.
+Its current contract is still raw-resolution only; later symbol processing
+stages will extend the build state with their own validated fields rather than
+making the downloader assign final application paths.
 
 ### Current: army roles and logical-unit identity
 

@@ -13,7 +13,7 @@ from infinity_db.snapshot_provenance import portable_project_path, sha256_file
 SYMBOL_BUILD_FORMAT = "InfinityDB army symbol build"
 SYMBOL_BUILD_VERSION = 2
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
-SOURCE_METHODS = frozenset({"network"})
+SOURCE_METHODS = frozenset({"override", "cache", "network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
 
