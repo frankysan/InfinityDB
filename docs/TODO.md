@@ -156,15 +156,16 @@ consistency audit unless one becomes necessary to unblock that work.
       - [x] Route raw acquisition through local override, validated prior immutable
         symbol snapshot/cache, then network resolution, with explicit refresh
         bypassing only the cache.
-      - [x] Integrate verified extraction, structural/font audit, and complete-set
-        exact-first visual deduplication through version-5 build state with a
-        portable canonical raw-asset mapping and before/after byte-size accounting.
-      - [ ] Integrate text conversion, compression, publication, mapping generation,
-        validation, and final reporting.
+      - [x] Integrate verified extraction, structural/font audit, complete-set
+        exact-first visual deduplication through version-5 build state, and
+        canonical text conversion through version-6 build state.
+      - [ ] Integrate compression, publication, mapping generation, validation, and
+        final reporting.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
     separate, intentional operations. The current orchestrator already supports
     `--snapshot-only`, `--language`, `--data-root`, `--static-symbols`, `--jobs`,
-    `--duplicate-render-size`, and `--duplicate-renderer`; `--static-root`,
+    `--duplicate-render-size`, `--duplicate-renderer`, and `--text-converter`;
+    `--static-root`,
     `--skip-symbol-download`, `--skip-compression`, `--keep-work`, and `--dry-run`
     remain candidate options as later stages are integrated.
 
@@ -215,18 +216,18 @@ consistency audit unless one becomes necessary to unblock that work.
     old one. Detect URL-to-filename collisions and deterministically disambiguate
     their stable source-derived override/archive names.
 
-- [ ] Keep text-to-path conversion limited to canonical assets that still have
+- [x] Keep text-to-path conversion limited to canonical assets that still have
   active text and resolvable fonts.
-  - [ ] Use persistent `inkscape --shell` workers as the production backend with 4
+  - [x] Use persistent `inkscape --shell` workers as the production backend with 4
     jobs, launched directly with `subprocess.Popen()` pipes rather than through
     a shell. Keep one-shot Inkscape as fallback/debugging.
-  - [ ] Keep `usvg` experimental only; real font-heavy symbol tests produced visible
+  - [x] Keep `usvg` experimental only; real font-heavy symbol tests produced visible
     differences from the intended rendering.
-  - [ ] Validate that converted SVGs parse, meaningful active `<text>` is gone,
+  - [x] Validate that converted SVGs parse, meaningful active `<text>` is gone,
     empty text placeholders are removed when safe, and namespaces remain valid.
-    Failed conversion must not replace or masquerade as a verified canonical
-    source.
-  - [ ] Treat the roughly 8-9 second Windows Inkscape startup cost as an accepted
+    Failed conversion records failed state and reports without replacing the
+    existing canonical work tree or masquerading as verified output.
+  - [x] Treat the roughly 8-9 second Windows Inkscape startup cost as an accepted
     external-tool limitation for now. Clean-profile testing did not remove it;
     persistent workers are the mitigation rather than continued startup chasing.
 
@@ -281,8 +282,9 @@ consistency audit unless one becomes necessary to unblock that work.
     references as unknown fields.
   - [ ] `svg_processor.py`: keep font audit, alias normalization, complete-set
     duplicate detection, deterministic representative ranking, persistent
-    Inkscape conversion, and reports. Duplicate/canonical state is now integrated
-    into the build manifest; conversion state and multi-category processing remain.
+    Inkscape conversion, and reports. Duplicate/canonical and text-conversion
+    state are integrated into the build manifest; multi-category processing
+    beyond the current canonical flow remains.
   - [ ] `svg_compress.py`: keep the standalone CLI and production validation
     behavior; expose an importable result/update path for orchestration.
   - [ ] `reorganize_symbols.py`: become the publisher and final mapping generator.
@@ -316,8 +318,8 @@ consistency audit unless one becomes necessary to unblock that work.
     replacement snapshot.
   - [x] SVG parse/font errors are retained and reported rather than discarded.
   - [x] Duplicate-render uncertainty keeps assets unique.
-  - [ ] Text conversion failure retains the verified source rather than claiming a
-    successful replacement.
+  - [x] Text conversion failure retains the verified source/canonical tree and
+    records failed conversion state rather than claiming a successful replacement.
   - [ ] Compression falls back to a validated lossless/path-only asset.
   - [ ] Publication failure leaves the previous published tree intact.
 

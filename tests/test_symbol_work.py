@@ -9,6 +9,7 @@ import pytest
 import tools.symbol_work as symbol_work
 from infinity_db.snapshot_provenance import write_snapshot_manifest
 from infinity_db.symbol_manifest import (
+    add_duplicate_detection,
     add_font_audit,
     add_svg_preflight,
     build_symbol_manifest,
@@ -18,6 +19,7 @@ from infinity_db.symbol_manifest import (
 )
 from tools.symbol_work import (
     audit_symbol_work,
+    convert_symbol_text,
     detect_symbol_duplicates,
     materialize_symbol_archive,
 )
@@ -370,9 +372,9 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         summary={
             "svgCount": 3,
             "parseErrorCount": 0,
-            "activeTextAssetCount": 0,
-            "noActiveTextAssetCount": 3,
-            "fontDeclaredAssetCount": 0,
+            "activeTextAssetCount": 2,
+            "noActiveTextAssetCount": 1,
+            "fontDeclaredAssetCount": 2,
             "uniqueDeclaredFontCount": 0,
         },
         report=preflight_report,
@@ -389,8 +391,9 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
                     "sha256": document["snapshot"]["symbolArtifact"]["sha256"],
                 },
                 "assets": [
-                    {"archivePath": name, "category": "no_active_text"}
-                    for name in ("units/a.svg", "units/b.svg", "units/c.svg")
+                    {"archivePath": "units/a.svg", "category": "fonts_available"},
+                    {"archivePath": "units/b.svg", "category": "fonts_available"},
+                    {"archivePath": "units/c.svg", "category": "no_active_text"},
                 ],
             }
         ),
@@ -401,9 +404,9 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         status="passed",
         summary={
             "svgCount": 3,
-            "fontAvailableAssetCount": 0,
+            "fontAvailableAssetCount": 2,
             "fontMissingAssetCount": 0,
-            "noActiveTextAssetCount": 3,
+            "noActiveTextAssetCount": 1,
             "implicitDefaultAssetCount": 0,
             "effectiveFontReferenceCount": 0,
             "availableFontReferenceCount": 0,
@@ -423,8 +426,8 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         assert input_root == materialized.raw_root
         assert output_root == materialized.work_root
         assert categories == {
-            "units/a.svg": "no_active_text",
-            "units/b.svg": "no_active_text",
+            "units/a.svg": "fonts_available",
+            "units/b.svg": "fonts_available",
             "units/c.svg": "no_active_text",
         }
         assert kwargs["render_size"] == 512
@@ -503,3 +506,240 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
     for field in ("sourceAssetBytes", "canonicalAssetBytes", "reclaimedAssetBytes"):
         legacy_v5["processing"]["duplicateDetection"]["summary"].pop(field)
     validate_symbol_manifest(legacy_v5)
+
+    def fake_convert(output_root, _exact, _compact, **kwargs):
+        assert kwargs["overwrite"] is True
+        assert kwargs["keep_failed"] is True
+        assert kwargs["jobs"] == 4
+        assert kwargs["text_converter"] == "inkscape-shell"
+        available = output_root / "fonts_available"
+        assert (available / "units" / "a.svg").is_file()
+        assert not (available / "units" / "b.svg").exists()
+        converted = output_root / "text_as_paths" / "units" / "a.svg"
+        converted.parent.mkdir(parents=True, exist_ok=True)
+        converted.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
+            encoding="utf-8",
+        )
+        reports = output_root / "reports"
+        reports.mkdir(parents=True, exist_ok=True)
+        report = reports / "svg-text-to-path-report.csv"
+        summary_report = reports / "text-conversion-summary.csv"
+        report.write_text("file,status\nunits/a.svg,CONVERTED\n", encoding="utf-8")
+        summary_report.write_text("converted,failed\n1,0\n", encoding="utf-8")
+        return {
+            "converted": 1,
+            "skipped": 0,
+            "skipped_duplicates": 0,
+            "failed": 0,
+            "report_path": report,
+            "summary_path": summary_report,
+            "elapsed_seconds": 0.1,
+            "converter": "inkscape-shell",
+            "converter_version": "Inkscape test",
+        }
+
+    fake_conversion_tools = type(
+        "FakeConversionTools",
+        (),
+        {
+            "load_font_index": staticmethod(lambda: ({}, {}, 0, 0)),
+            "convert_available_svgs": staticmethod(fake_convert),
+        },
+    )
+    monkeypatch.setattr(symbol_work, "_font_tools", lambda: fake_conversion_tools)
+
+    conversion = convert_symbol_text(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest_path,
+        font_report=font_report,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+    )
+
+    assert conversion.status == "passed"
+    assert conversion.summary == {
+        "canonicalAssetCount": 2,
+        "conversionCandidateCount": 1,
+        "convertedAssetCount": 1,
+        "carriedForwardAssetCount": 1,
+        "failedAssetCount": 0,
+    }
+    assert (conversion.canonical_root / "units" / "a.svg").is_file()
+    assert (conversion.canonical_root / "units" / "c.svg").is_file()
+    assert not (conversion.canonical_root / "units" / "b.svg").exists()
+    converted_manifest = load_symbol_manifest(manifest_path)
+    assert converted_manifest["formatVersion"] == 6
+    text_conversion = converted_manifest["processing"]["textConversion"]
+    assert text_conversion["status"] == "passed"
+    assert text_conversion["converter"] == {
+        "name": "inkscape-shell",
+        "version": "Inkscape test",
+        "jobs": 4,
+    }
+
+def test_text_conversion_failure_preserves_existing_canonical_tree(
+    tmp_path: Path, monkeypatch
+) -> None:
+    members = {
+        "units/text.svg": (
+            b'<svg xmlns="http://www.w3.org/2000/svg">'
+            b'<text style="font-family: Test">X</text></svg>'
+        ),
+        "units/plain.svg": b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
+    }
+    archive, snapshot_manifest, manifest_path = _fixture(tmp_path, members)
+    materialized = materialize_symbol_archive(
+        archive,
+        snapshot_manifest,
+        manifest_path,
+        tmp_path / "data" / "work" / "symbols",
+    )
+
+    preflight_report = tmp_path / "preflight.json"
+    preflight_report.write_text("{}\n", encoding="utf-8")
+    document = add_svg_preflight(
+        load_symbol_manifest(manifest_path),
+        status="passed",
+        summary={
+            "svgCount": 2,
+            "parseErrorCount": 0,
+            "activeTextAssetCount": 1,
+            "noActiveTextAssetCount": 1,
+            "fontDeclaredAssetCount": 1,
+            "uniqueDeclaredFontCount": 1,
+        },
+        report=preflight_report,
+        project_root=tmp_path,
+    )
+    alias_config = tmp_path / "font-aliases.json"
+    alias_config.write_text("{}\n", encoding="utf-8")
+    font_report = tmp_path / "font-audit.json"
+    font_report.write_text(
+        json.dumps(
+            {
+                "symbolArtifact": {
+                    "name": archive.name,
+                    "sha256": document["snapshot"]["symbolArtifact"]["sha256"],
+                },
+                "assets": [
+                    {"archivePath": "units/plain.svg", "category": "no_active_text"},
+                    {"archivePath": "units/text.svg", "category": "fonts_available"},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    document = add_font_audit(
+        document,
+        status="passed",
+        summary={
+            "svgCount": 2,
+            "fontAvailableAssetCount": 1,
+            "fontMissingAssetCount": 0,
+            "noActiveTextAssetCount": 1,
+            "implicitDefaultAssetCount": 0,
+            "effectiveFontReferenceCount": 1,
+            "availableFontReferenceCount": 1,
+            "missingFontReferenceCount": 0,
+            "ambiguousFontReferenceCount": 0,
+            "genericFontReferenceCount": 0,
+            "normalizedAliasReferenceCount": 0,
+            "unusedDeclarationCount": 0,
+        },
+        report=font_report,
+        aliases=alias_config,
+        project_root=tmp_path,
+    )
+    duplicate_reports = []
+    for name in (
+        "duplicate-groups.csv",
+        "duplicate-render-errors.csv",
+        "duplicate-summary.csv",
+    ):
+        path = tmp_path / name
+        path.write_text("header\n", encoding="utf-8")
+        duplicate_reports.append(path)
+    document = add_duplicate_detection(
+        document,
+        summary={
+            "sourceAssetCount": 2,
+            "uniqueByteSetCount": 2,
+            "rendersAvoidedExactCount": 0,
+            "exactGroupCount": 0,
+            "visualGroupCount": 0,
+            "redundantAssetCount": 0,
+            "canonicalAssetCount": 2,
+            "renderErrorCount": 0,
+            "sourceAssetBytes": sum(len(body) for body in members.values()),
+            "canonicalAssetBytes": sum(len(body) for body in members.values()),
+            "reclaimedAssetBytes": 0,
+        },
+        canonical_by_archive_path={
+            "units/plain.svg": "units/plain.svg",
+            "units/text.svg": "units/text.svg",
+        },
+        groups_report=duplicate_reports[0],
+        errors_report=duplicate_reports[1],
+        summary_report=duplicate_reports[2],
+        renderer="resvg",
+        renderer_version="test",
+        render_size=512,
+        jobs=4,
+        project_root=tmp_path,
+    )
+    write_symbol_manifest(document, manifest_path)
+
+    canonical_root = materialized.work_root / "canonical"
+    canonical_root.mkdir()
+    marker = canonical_root / "previous.svg"
+    marker.write_text("previous", encoding="utf-8")
+
+    def fake_convert(output_root, _exact, _compact, **_kwargs):
+        reports = output_root / "reports"
+        reports.mkdir(parents=True, exist_ok=True)
+        report = reports / "svg-text-to-path-report.csv"
+        summary_report = reports / "text-conversion-summary.csv"
+        report.write_text(
+            "file,status,error\nunits/text.svg,FAILED_INKSCAPE,error\n",
+            encoding="utf-8",
+        )
+        summary_report.write_text("converted,failed\n0,1\n", encoding="utf-8")
+        return {
+            "converted": 0,
+            "skipped": 0,
+            "skipped_duplicates": 0,
+            "failed": 1,
+            "report_path": report,
+            "summary_path": summary_report,
+            "elapsed_seconds": 0.1,
+            "converter": "inkscape-shell",
+            "converter_version": "Inkscape test",
+        }
+
+    fake_tools = type(
+        "FakeConversionFailureTools",
+        (),
+        {
+            "load_font_index": staticmethod(lambda: ({}, {}, 0, 0)),
+            "convert_available_svgs": staticmethod(fake_convert),
+        },
+    )
+    monkeypatch.setattr(symbol_work, "_font_tools", lambda: fake_tools)
+
+    result = convert_symbol_text(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest_path,
+        font_report=font_report,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+    )
+
+    assert result.status == "failed"
+    assert marker.read_text(encoding="utf-8") == "previous"
+    updated = load_symbol_manifest(manifest_path)
+    assert updated["formatVersion"] == 6
+    assert updated["processing"]["textConversion"]["status"] == "failed"
+    assert updated["processing"]["textConversion"]["summary"]["failedAssetCount"] == 1

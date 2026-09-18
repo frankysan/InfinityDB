@@ -37,6 +37,14 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Integrate canonical text-to-path conversion into `build_symbols.py`. Version-5
+  duplicate state now advances to version 6 with SHA-bound conversion reports,
+  converter identity/settings, and a canonical work tree that converts only
+  active-text representatives while carrying no-text representatives forward
+  unchanged. Persistent `inkscape --shell` workers are the production default;
+  conversion failure records failed state without replacing existing canonical
+  output.
+
 - Expand the normal code-check contract with Pyright type checking, full `tools/`
   Ruff coverage, and synthetic integration tests against the real symbol Python
   dependency stack. Required source CI now installs `.[dev,symbols]` on every

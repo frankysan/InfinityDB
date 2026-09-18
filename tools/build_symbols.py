@@ -6,8 +6,9 @@ The orchestrator never selects the newest available snapshot implicitly. Use
 explicit network refresh. Later processing stages will be integrated here; the
 current orchestration boundary pins Army provenance, resolves one immutable raw
 symbol snapshot, materializes verified work files, runs structural SVG preflight,
-audits effective fonts against the installed font environment, and performs
-exact-first visual duplicate detection with a persisted canonical mapping.
+audits effective fonts against the installed font environment, performs
+exact-first visual duplicate detection with a persisted canonical mapping, and
+converts active text on canonical assets into paths.
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ try:
     from tools.symbol_work import (
         audit_symbol_fonts,
         audit_symbol_work,
+        convert_symbol_text,
         detect_symbol_duplicates,
         materialize_symbol_archive,
     )
@@ -53,6 +55,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
     from symbol_work import (
         audit_symbol_fonts,
         audit_symbol_work,
+        convert_symbol_text,
         detect_symbol_duplicates,
         materialize_symbol_archive,
     )
@@ -138,6 +141,15 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=4,
         help="Parallel jobs for duplicate rendering and later processing stages (default: 4)",
+    )
+    parser.add_argument(
+        "--text-converter",
+        choices=("inkscape", "inkscape-shell", "usvg", "auto"),
+        default="inkscape-shell",
+        help=(
+            "Text-to-path backend for canonical active-text assets "
+            "(default: inkscape-shell)"
+        ),
     )
     parser.add_argument(
         "--duplicate-render-size",
@@ -301,6 +313,36 @@ def main(argv: list[str] | None = None) -> int:
             f"{reclaimed_bytes:,} bytes saved ({reduction_percent:.2f}%)"
         )
         print(f"Duplicate report -> {duplicates.groups_report}")
+
+        conversion = convert_symbol_text(
+            materialized,
+            archive=symbols.archive,
+            build_manifest_path=symbols.build_manifest,
+            font_report=font_audit.report,
+            reports_base=symbol_reports,
+            project_root=Path.cwd(),
+            jobs=args.jobs,
+            text_converter=args.text_converter,
+        )
+        version_suffix = (
+            f" ({conversion.converter_version})"
+            if conversion.converter_version
+            else ""
+        )
+        print(
+            "Text conversion -> "
+            f"{conversion.summary['convertedAssetCount']} converted | "
+            f"{conversion.summary['carriedForwardAssetCount']} unchanged | "
+            f"{conversion.summary['failedAssetCount']} failed"
+        )
+        print(f"Text converter -> {conversion.converter}{version_suffix}")
+        print(f"Text conversion report -> {conversion.report}")
+        if conversion.status != "passed":
+            raise ValueError(
+                "Text conversion failed; verified source assets remain available "
+                "and canonical output was not replaced"
+            )
+        print(f"Canonical symbol work -> {conversion.canonical_root}")
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

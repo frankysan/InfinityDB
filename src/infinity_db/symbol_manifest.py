@@ -14,7 +14,8 @@ SYMBOL_BUILD_FORMAT = "InfinityDB army symbol build"
 SYMBOL_BUILD_ACQUISITION_VERSION = 2
 SYMBOL_BUILD_PREFLIGHT_VERSION = 3
 SYMBOL_BUILD_FONT_AUDIT_VERSION = 4
-SYMBOL_BUILD_VERSION = 5
+SYMBOL_BUILD_DUPLICATE_VERSION = 5
+SYMBOL_BUILD_VERSION = 6
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
 SOURCE_METHODS = frozenset({"override", "cache", "network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -170,7 +171,7 @@ def add_duplicate_detection(
         renderer_record["version"] = renderer_version
 
     promoted = json.loads(json.dumps(document))
-    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["formatVersion"] = SYMBOL_BUILD_DUPLICATE_VERSION
     promoted["processing"]["duplicateDetection"] = {
         "status": "passed",
         "summary": dict(sorted(summary.items())),
@@ -178,6 +179,53 @@ def add_duplicate_detection(
         "canonicalByArchivePath": dict(sorted(canonical_by_archive_path.items())),
         "groupsReport": artifact_record(groups_report, project_root=project_root),
         "errorsReport": artifact_record(errors_report, project_root=project_root),
+        "summaryReport": artifact_record(summary_report, project_root=project_root),
+    }
+    validate_symbol_manifest(promoted)
+    return promoted
+
+
+def add_text_conversion(
+    document: dict[str, Any],
+    *,
+    status: str,
+    summary: dict[str, int],
+    report: Path,
+    summary_report: Path,
+    converter: str,
+    converter_version: str,
+    jobs: int,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Promote duplicate-detected state to version 6 with text conversion state."""
+    validate_symbol_manifest(document)
+    if document.get("formatVersion") not in {
+        SYMBOL_BUILD_DUPLICATE_VERSION,
+        SYMBOL_BUILD_VERSION,
+    }:
+        raise SymbolManifestError(
+            "Text conversion requires version-"
+            f"{SYMBOL_BUILD_DUPLICATE_VERSION} or version-{SYMBOL_BUILD_VERSION} "
+            "duplicate-detected state"
+        )
+    if document["processing"]["duplicateDetection"]["status"] != "passed":
+        raise SymbolManifestError("Text conversion requires passed duplicate detection")
+    if status not in {"passed", "failed"}:
+        raise SymbolManifestError("Text conversion status must be 'passed' or 'failed'")
+    if jobs < 1:
+        raise SymbolManifestError("Text conversion jobs must be at least 1")
+
+    converter_record: dict[str, Any] = {"name": converter, "jobs": jobs}
+    if converter_version:
+        converter_record["version"] = converter_version
+
+    promoted = json.loads(json.dumps(document))
+    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["processing"]["textConversion"] = {
+        "status": status,
+        "summary": dict(sorted(summary.items())),
+        "converter": converter_record,
+        "report": artifact_record(report, project_root=project_root),
         "summaryReport": artifact_record(summary_report, project_root=project_root),
     }
     validate_symbol_manifest(promoted)
@@ -219,6 +267,7 @@ def validate_symbol_manifest(document: Any) -> None:
         SYMBOL_BUILD_ACQUISITION_VERSION,
         SYMBOL_BUILD_PREFLIGHT_VERSION,
         SYMBOL_BUILD_FONT_AUDIT_VERSION,
+        SYMBOL_BUILD_DUPLICATE_VERSION,
         SYMBOL_BUILD_VERSION,
     }
     if version not in supported_versions:
@@ -380,8 +429,10 @@ def _processing(value: Any, archive_paths: set[str], version: int, context: str)
     allowed = {"svgPreflight"}
     if version >= SYMBOL_BUILD_FONT_AUDIT_VERSION:
         allowed.add("fontAudit")
-    if version == SYMBOL_BUILD_VERSION:
+    if version >= SYMBOL_BUILD_DUPLICATE_VERSION:
         allowed.add("duplicateDetection")
+    if version == SYMBOL_BUILD_VERSION:
+        allowed.add("textConversion")
     _only_keys(record, allowed, context)
     preflight = _object(record.get("svgPreflight"), f"{context}.svgPreflight")
     _only_keys(preflight, {"status", "summary", "report"}, f"{context}.svgPreflight")
@@ -544,6 +595,85 @@ def _processing(value: Any, archive_paths: set[str], version: int, context: str)
         archive_paths,
         f"{context}.duplicateDetection",
     )
+    if version == SYMBOL_BUILD_DUPLICATE_VERSION:
+        return
+    _text_conversion(
+        record.get("textConversion"),
+        record["duplicateDetection"]["summary"]["canonicalAssetCount"],
+        f"{context}.textConversion",
+    )
+
+
+def _text_conversion(
+    value: Any,
+    canonical_asset_count: int,
+    context: str,
+) -> None:
+    record = _object(value, context)
+    _only_keys(
+        record,
+        {"status", "summary", "converter", "report", "summaryReport"},
+        context,
+    )
+    status = _string(record.get("status"), f"{context}.status")
+    if status not in {"passed", "failed"}:
+        raise SymbolManifestError(f"{context}.status must be 'passed' or 'failed'")
+
+    summary = _object(record.get("summary"), f"{context}.summary")
+    fields = {
+        "canonicalAssetCount",
+        "conversionCandidateCount",
+        "convertedAssetCount",
+        "carriedForwardAssetCount",
+        "failedAssetCount",
+    }
+    _only_keys(summary, fields, f"{context}.summary")
+    missing = fields - set(summary)
+    if missing:
+        raise SymbolManifestError(
+            f"{context}.summary is missing field(s): " + ", ".join(sorted(missing))
+        )
+    for field in sorted(fields):
+        count = summary[field]
+        if type(count) is not int or count < 0:
+            raise SymbolManifestError(
+                f"{context}.summary.{field} must be a non-negative integer"
+            )
+    if summary["canonicalAssetCount"] != canonical_asset_count:
+        raise SymbolManifestError(
+            f"{context}.summary.canonicalAssetCount must equal duplicate canonical count"
+        )
+    if (
+        summary["conversionCandidateCount"] + summary["carriedForwardAssetCount"]
+        != canonical_asset_count
+    ):
+        raise SymbolManifestError(
+            f"{context} candidate/carried-forward counts must account for every canonical asset"
+        )
+    if (
+        summary["convertedAssetCount"] + summary["failedAssetCount"]
+        != summary["conversionCandidateCount"]
+    ):
+        raise SymbolManifestError(
+            f"{context} converted/failed counts must account for every conversion candidate"
+        )
+    expected_status = "passed" if summary["failedAssetCount"] == 0 else "failed"
+    if status != expected_status:
+        raise SymbolManifestError(
+            f"{context}.status must be {expected_status!r} for this summary"
+        )
+
+    converter = _object(record.get("converter"), f"{context}.converter")
+    _only_keys(converter, {"name", "version", "jobs"}, f"{context}.converter")
+    _string(converter.get("name"), f"{context}.converter.name")
+    if "version" in converter:
+        _string(converter["version"], f"{context}.converter.version")
+    jobs = converter.get("jobs")
+    if type(jobs) is not int or jobs < 1:
+        raise SymbolManifestError(f"{context}.converter.jobs must be a positive integer")
+
+    _artifact(record.get("report"), f"{context}.report")
+    _artifact(record.get("summaryReport"), f"{context}.summaryReport")
 
 
 def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> None:

@@ -151,10 +151,13 @@ an immutable `SYMBOLS ...zip`, then verifies and extracts that archive under
 `data/work/symbols/` for an environment-independent SVG structural preflight.
 Raw acquisition writes version-2 `data/manifests/army-symbol-build.json`; a
 completed structural preflight promotes the same generated build state to
-version 3, the installed-font audit promotes it to version 4, and complete-set
-exact-first visual deduplication promotes it to version 5 while binding generated
-reports, tracked font-alias configuration, renderer settings, and a portable
-raw-asset-to-canonical mapping to the exact symbol artifact.
+version 3, the installed-font audit promotes it to version 4, complete-set
+exact-first visual deduplication promotes it to version 5, and canonical
+text-to-path conversion promotes it to version 6. The generated state binds
+reports, tracked font-alias configuration, renderer/converter settings, and a
+portable raw-asset-to-canonical mapping to the exact symbol artifact. Version 6
+also records text-conversion counts and report identities while the verified
+canonical work tree carries unchanged no-text SVGs alongside converted assets.
 
 Raw symbol resolution is ordered and offline-friendly: a matching local SVG
 under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
@@ -179,11 +182,16 @@ inconclusive render failures unique, and records the selected canonical raw asse
 for every original archive path without deleting source references. The bound
 `duplicate-summary.csv` also records total loose-SVG bytes before deduplication,
 total canonical bytes after deduplication, bytes reclaimed, and percentage
-reduction. Install the Python dependencies with `pip install -e ".[symbols]"`;
-the default visual duplicate renderer is the external `resvg` executable. Text
-conversion, compression, and publication remain later stages. The standalone symbol downloader
-remains available for debugging and targeted maintenance; publishing a symbol
-snapshot through it requires matching Army snapshot provenance.
+reduction. The following text-conversion stage processes only canonical
+active-text assets and carries canonical no-text assets forward unchanged into
+`data/work/symbols/.../canonical/`; persistent `inkscape --shell` is the default
+backend, with one-shot Inkscape available explicitly and `usvg` remaining
+experimental. Install the Python dependencies with `pip install -e ".[symbols]"`;
+the default visual duplicate renderer is the external `resvg` executable and
+text conversion requires Inkscape unless another backend is selected. Compression
+and publication remain later stages. The standalone symbol downloader remains
+available for debugging and targeted maintenance; publishing a symbol snapshot
+through it requires matching Army snapshot provenance.
 
 ```powershell
 python tools/download_wiki_snapshot.py

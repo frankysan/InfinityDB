@@ -104,6 +104,24 @@ def stub_post_acquisition(
     monkeypatch.setattr(
         module, "detect_symbol_duplicates", lambda *_args, **_kwargs: duplicates
     )
+    conversion = SimpleNamespace(
+        canonical_root=Path("work/canonical"),
+        report=Path("reports/svg-text-to-path-report.csv"),
+        summary_report=Path("reports/text-conversion-summary.csv"),
+        status="passed",
+        converter="inkscape-shell",
+        converter_version="Inkscape test",
+        summary={
+            "canonicalAssetCount": 0,
+            "conversionCandidateCount": 0,
+            "convertedAssetCount": 0,
+            "carriedForwardAssetCount": 0,
+            "failedAssetCount": 0,
+        },
+    )
+    monkeypatch.setattr(
+        module, "convert_symbol_text", lambda *_args, **_kwargs: conversion
+    )
 
 
 def test_resolve_army_snapshot_verifies_provenance_and_revisions(tmp_path: Path) -> None:

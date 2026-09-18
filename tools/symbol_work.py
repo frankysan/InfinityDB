@@ -15,10 +15,13 @@ from typing import Any, NamedTuple
 
 from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
 from infinity_db.symbol_manifest import (
+    SYMBOL_BUILD_DUPLICATE_VERSION,
     SYMBOL_BUILD_FONT_AUDIT_VERSION,
+    SYMBOL_BUILD_VERSION,
     add_duplicate_detection,
     add_font_audit,
     add_svg_preflight,
+    add_text_conversion,
     artifact_record,
     load_symbol_manifest,
     write_symbol_manifest,
@@ -62,6 +65,16 @@ class DuplicateDetectionResult(NamedTuple):
     canonical_by_archive_path: dict[str, str]
     renderer: str
     renderer_version: str
+    status: str
+
+
+class TextConversionResult(NamedTuple):
+    canonical_root: Path
+    report: Path
+    summary_report: Path
+    summary: dict[str, int]
+    converter: str
+    converter_version: str
     status: str
 
 
@@ -711,4 +724,188 @@ def detect_symbol_duplicates(
         renderer=result["renderer"],
         renderer_version=result["renderer_version"],
         status="passed",
+    )
+
+
+def convert_symbol_text(
+    materialized: MaterializedSymbols,
+    *,
+    archive: Path,
+    build_manifest_path: Path,
+    font_report: Path,
+    reports_base: Path,
+    project_root: Path,
+    jobs: int = 4,
+    text_converter: str = "inkscape-shell",
+) -> TextConversionResult:
+    """Convert active text on canonical assets and build the canonical work tree."""
+    manifest = load_symbol_manifest(build_manifest_path)
+    processing = manifest.get("processing", {})
+    duplicate = processing.get("duplicateDetection", {})
+    if (
+        manifest.get("formatVersion") not in {
+            SYMBOL_BUILD_DUPLICATE_VERSION,
+            SYMBOL_BUILD_VERSION,
+        }
+        or duplicate.get("status") != "passed"
+    ):
+        raise ValueError(
+            "Text conversion requires passed "
+            f"version-{SYMBOL_BUILD_DUPLICATE_VERSION} duplicate-detection state"
+        )
+
+    font_audit = processing.get("fontAudit", {})
+    if sha256_file(font_report) != font_audit["report"]["sha256"]:
+        raise ValueError("Font audit report SHA-256 does not match army-symbol-build.json")
+    try:
+        font_document = json.loads(font_report.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Could not load font audit report {font_report}: {exc}") from exc
+
+    if font_document.get("symbolArtifact") != {
+        "name": archive.name,
+        "sha256": manifest["snapshot"]["symbolArtifact"]["sha256"],
+    }:
+        raise ValueError("Font audit report is bound to a different symbol artifact")
+
+    rows = font_document.get("assets")
+    if not isinstance(rows, list):
+        raise ValueError("Font audit report assets must be an array")
+    categories: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError("Font audit report asset rows must be objects")
+        archive_path = row.get("archivePath")
+        category = row.get("category")
+        if not isinstance(archive_path, str) or not isinstance(category, str):
+            raise ValueError("Font audit report asset rows require archivePath/category")
+        if archive_path in categories:
+            raise ValueError(f"Font audit report repeats asset {archive_path}")
+        categories[archive_path] = category
+
+    canonical_map = duplicate.get("canonicalByArchivePath")
+    if not isinstance(canonical_map, dict):
+        raise ValueError("Duplicate-detection canonical mapping is invalid")
+    canonical_paths = sorted({str(value) for value in canonical_map.values()})
+    if set(categories) != {asset["archivePath"] for asset in manifest["assets"]}:
+        raise ValueError("Font audit report asset set does not match army-symbol-build.json")
+
+    conversion_root = materialized.work_root / "text-conversion"
+    if conversion_root.exists():
+        shutil.rmtree(conversion_root)
+    available_root = conversion_root / "fonts_available"
+    available_root.mkdir(parents=True)
+
+    carried_forward: list[str] = []
+    candidates: list[str] = []
+    for archive_path in canonical_paths:
+        category = categories.get(archive_path)
+        source = materialized.raw_root.joinpath(*_portable_member(archive_path).parts)
+        if category == "fonts_available":
+            destination = available_root.joinpath(*_portable_member(archive_path).parts)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+            candidates.append(archive_path)
+        elif category == "no_active_text":
+            carried_forward.append(archive_path)
+        else:
+            raise ValueError(
+                f"Canonical asset {archive_path} has unsupported conversion category {category!r}"
+            )
+
+    tools = _font_tools()
+    try:
+        exact_index, compact_index, _, _ = tools.load_font_index()
+        result = tools.convert_available_svgs(
+            conversion_root,
+            exact_index,
+            compact_index,
+            overwrite=True,
+            keep_failed=True,
+            jobs=jobs,
+            text_converter=text_converter,
+        )
+    except RuntimeError as exc:
+        raise ValueError(str(exc)) from exc
+
+    symbol_sha = manifest["snapshot"]["symbolArtifact"]["sha256"]
+    report_root = reports_base / _work_name(archive, symbol_sha)
+    report_root.mkdir(parents=True, exist_ok=True)
+    report = report_root / "svg-text-to-path-report.csv"
+    summary_report = report_root / "text-conversion-summary.csv"
+    shutil.copy2(result["report_path"], report)
+    shutil.copy2(result["summary_path"], summary_report)
+
+    converted = int(result["converted"])
+    failed = int(result["failed"])
+    summary = {
+        "canonicalAssetCount": len(canonical_paths),
+        "conversionCandidateCount": len(candidates),
+        "convertedAssetCount": converted,
+        "carriedForwardAssetCount": len(carried_forward),
+        "failedAssetCount": failed,
+    }
+    if converted + failed != len(candidates):
+        raise ValueError(
+            "Text converter result count does not match canonical conversion candidates"
+        )
+
+    status = "passed" if failed == 0 else "failed"
+    canonical_root = materialized.work_root / "canonical"
+    if status == "passed":
+        staging = Path(
+            tempfile.mkdtemp(prefix=".canonical-", dir=materialized.work_root)
+        )
+        try:
+            for archive_path in carried_forward:
+                source = materialized.raw_root.joinpath(*_portable_member(archive_path).parts)
+                destination = staging.joinpath(*_portable_member(archive_path).parts)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, destination)
+            converted_root = conversion_root / "text_as_paths"
+            for archive_path in candidates:
+                source = converted_root.joinpath(*_portable_member(archive_path).parts)
+                if not source.is_file():
+                    raise ValueError(
+                        f"Verified text conversion did not produce {archive_path}"
+                    )
+                destination = staging.joinpath(*_portable_member(archive_path).parts)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, destination)
+            actual = {
+                path.relative_to(staging).as_posix()
+                for path in staging.rglob("*.svg")
+                if path.is_file()
+            }
+            if actual != set(canonical_paths):
+                raise ValueError(
+                    "Canonical conversion output does not contain exactly the canonical asset set"
+                )
+            if canonical_root.exists():
+                shutil.rmtree(canonical_root)
+            staging.replace(canonical_root)
+        except Exception:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
+
+    updated = add_text_conversion(
+        manifest,
+        status=status,
+        summary=summary,
+        report=report,
+        summary_report=summary_report,
+        converter=str(result["converter"]),
+        converter_version=str(result.get("converter_version", "")),
+        jobs=jobs,
+        project_root=project_root,
+    )
+    write_symbol_manifest(updated, build_manifest_path)
+    return TextConversionResult(
+        canonical_root=canonical_root,
+        report=report,
+        summary_report=summary_report,
+        summary=summary,
+        converter=str(result["converter"]),
+        converter_version=str(result.get("converter_version", "")),
+        status=status,
     )

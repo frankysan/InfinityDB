@@ -465,10 +465,18 @@ records duplicate reports, renderer settings, counts, total source/canonical
 loose-SVG byte sizes, reclaimed bytes, and a complete portable
 `archivePath -> canonical archivePath` mapping while retaining every acquisition
 asset and source reference. The SHA-bound duplicate summary report also records
-the percentage size reduction. The downloader does not generate browser mappings.
+the percentage size reduction. Canonical text conversion then consumes exactly
+that version-5 mapping: only canonical `fonts_available` assets are converted,
+canonical `no_active_text` assets are copied forward unchanged, and persistent
+`inkscape --shell` workers are the production default. One-shot Inkscape remains
+an explicit fallback/debug backend and `usvg` remains experimental. Converted
+outputs are revalidated for parseability and remaining active text before a
+version-6 manifest is written. A failed conversion records failed state and
+reports but does not replace the prior canonical work tree. The downloader does
+not generate browser mappings.
 
-**Design direction:** later processing will consume that exact version-5 state
-through text conversion, compression, and publication. Canonical processing may
+**Design direction:** later processing will consume that exact version-6
+canonical work tree through compression and publication. Canonical processing may
 collapse equivalent assets, but it must not discard their source references.
 Only the publisher will assign final application paths and generated browser
 mappings because only that stage knows the final canonical asset after subsequent

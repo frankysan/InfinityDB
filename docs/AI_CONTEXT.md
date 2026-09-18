@@ -284,10 +284,16 @@ retains every original asset/reference and adds a complete portable
 `archivePath -> canonical archivePath` map plus duplicate report identities,
 renderer settings, and total source/canonical loose-SVG byte sizes with reclaimed
 bytes. The bound duplicate summary also reports percentage reduction. Individual
-render failures remain unique and are reported. Versions 2, 3, and 4 remain
-accepted as valid earlier-stage state, and earlier version-5 state without size
-metrics remains compatible. The downloader
-does not generate `army-symbols.js` or `unit-symbol-map.js`.
+render failures remain unique and are reported. Canonical text conversion then
+promotes state to version 6: only canonical `fonts_available` SVGs are converted,
+canonical no-text SVGs are carried forward unchanged, persistent
+`inkscape --shell` is the production default, one-shot Inkscape remains an
+explicit fallback/debug backend, and `usvg` remains experimental. Conversion
+reports and converter identity are SHA-bound into build state. Failed conversion
+state is recorded without replacing the prior canonical work tree. Versions 2
+through 5 remain accepted as valid earlier-stage state, and earlier version-5
+state without size metrics remains compatible. The downloader does not generate
+`army-symbols.js` or `unit-symbol-map.js`.
 
 Raw source resolution now follows this implemented order:
 
@@ -308,8 +314,8 @@ are reported.
 ### Design direction
 
 Later symbol processing must consume the same pinned Army/SYMBOLS identities
-and the verified version-5 canonical state rather than selecting newer snapshots
-independently.
+and the verified version-6 canonical work tree rather than selecting newer
+snapshots independently.
 
 Only the publisher assigns final application paths and generated
 `army-symbols.js` / `unit-symbol-map.js` mappings because only publication knows

@@ -1789,10 +1789,13 @@ def convert_available_svgs(
         failed_inkscape_fallback_root.mkdir(parents=True, exist_ok=True)
         failed_usvg_root.mkdir(parents=True, exist_ok=True)
 
+    svg_files = sorted(available_root.rglob("*.svg"))
+    total = len(svg_files)
+
     converter_name = text_converter
     converter_executable = None
     converter_version = ""
-    if not dry_run:
+    if not dry_run and total:
         converter_name, converter_executable = resolve_text_converter(text_converter)
         converter_version = executable_version(converter_executable)
 
@@ -1826,9 +1829,6 @@ def convert_available_svgs(
         except Exception:
             pass
 
-    svg_files = sorted(available_root.rglob("*.svg"))
-    total = len(svg_files)
-
     print()
     print(f"Converting SVGs from: {available_root}")
     print(f"SVG files found: {total}")
@@ -1845,11 +1845,12 @@ def convert_available_svgs(
     def process_one(index: int, source: Path, force=False):
         attempt_started = time.perf_counter()
         relative = source.relative_to(available_root)
+        relative_key = relative.as_posix()
         destination = converted_root / relative
 
         def make_row(status, aliases="", warnings="", error=""):
             return {
-                "file": str(relative),
+                "file": relative_key,
                 "status": status,
                 "aliases_normalized": aliases,
                 "warnings": warnings,
@@ -1858,7 +1859,7 @@ def convert_available_svgs(
                 "error": error,
             }
 
-        representative = duplicate_representatives.get(str(relative))
+        representative = duplicate_representatives.get(relative_key)
         if representative:
             return (
                 index,
@@ -2137,7 +2138,7 @@ def convert_available_svgs(
                 result_index = index
                 result_relative = relative
                 row = {
-                    "file": str(relative),
+                    "file": relative.as_posix(),
                     "status": "FAILED_INTERNAL",
                     "aliases_normalized": "",
                     "warnings": "",
@@ -2194,7 +2195,7 @@ def convert_available_svgs(
                 result_index = index
                 result_relative = relative
                 row = {
-                    "file": str(relative),
+                    "file": relative.as_posix(),
                     "status": "FAILED_INTERNAL",
                     "aliases_normalized": "",
                     "warnings": "",
