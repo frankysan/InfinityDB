@@ -152,12 +152,13 @@ an immutable `SYMBOLS ...zip`, then verifies and extracts that archive under
 Raw acquisition writes version-2 `data/manifests/army-symbol-build.json`; a
 completed structural preflight promotes the same generated build state to
 version 3, the installed-font audit promotes it to version 4, complete-set
-exact-first visual deduplication promotes it to version 5, and canonical
-text-to-path conversion promotes it to version 6. The generated state binds
-reports, tracked font-alias configuration, renderer/converter settings, and a
-portable raw-asset-to-canonical mapping to the exact symbol artifact. Version 6
-also records text-conversion counts and report identities while the verified
-canonical work tree carries unchanged no-text SVGs alongside converted assets.
+exact-first visual deduplication promotes it to version 5, canonical
+text-to-path conversion promotes it to version 6, and display-aware canonical
+compression promotes it to version 7. The generated state binds reports, tracked
+font-alias configuration, renderer/converter settings, and a portable
+raw-asset-to-canonical mapping to the exact symbol artifact. Version 7 records the
+production compression settings and SHA-bound compression reports while the
+verified compressed work tree carries the complete canonical asset set forward.
 
 Raw symbol resolution is ordered and offline-friendly: a matching local SVG
 under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
@@ -186,10 +187,15 @@ reduction. The following text-conversion stage processes only canonical
 active-text assets and carries canonical no-text assets forward unchanged into
 `data/work/symbols/.../canonical/`; persistent `inkscape --shell` is the default
 backend, with one-shot Inkscape available explicitly and `usvg` remaining
-experimental. Install the Python dependencies with `pip install -e ".[symbols]"`;
-the default visual duplicate renderer is the external `resvg` executable and
-text conversion requires Inkscape unless another backend is selected. Compression
-and publication remain later stages. The standalone symbol downloader remains
+experimental. The compression stage then processes only that canonical tree
+with the `balanced` profile, `resvg` validation, p2-first/p3-rescue precision,
+32/64 CSS-pixel targets at DPR 1/2, RMS/changed-fraction limits of 0.01, and
+pixel-difference threshold 8. It atomically replaces
+`data/work/symbols/.../compressed/` only after the complete output set validates.
+Install the Python dependencies with `pip install -e ".[symbols]"`; compression
+also requires SVGO v4+ (`npm install -g svgo`) and, by default, the external
+`resvg` executable. Text conversion requires Inkscape unless another backend is
+selected. Publication remains a later stage. The standalone symbol downloader remains
 available for debugging and targeted maintenance; publishing a symbol snapshot
 through it requires matching Army snapshot provenance.
 

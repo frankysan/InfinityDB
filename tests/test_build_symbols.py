@@ -122,6 +122,26 @@ def stub_post_acquisition(
     monkeypatch.setattr(
         module, "convert_symbol_text", lambda *_args, **_kwargs: conversion
     )
+    compression = SimpleNamespace(
+        compressed_root=Path("work/compressed"),
+        report=Path("reports/compression-report.csv"),
+        candidates_report=Path("reports/compression-candidates.csv"),
+        run_report=Path("reports/compression-run.json"),
+        status="passed",
+        renderer="resvg",
+        renderer_version="resvg test",
+        summary={
+            "assetCount": 0,
+            "compressedAssetCount": 0,
+            "retainedAssetCount": 0,
+            "sourceBytes": 0,
+            "outputBytes": 0,
+            "reclaimedBytes": 0,
+        },
+    )
+    monkeypatch.setattr(
+        module, "compress_symbol_work", lambda *_args, **_kwargs: compression
+    )
 
 
 def test_resolve_army_snapshot_verifies_provenance_and_revisions(tmp_path: Path) -> None:

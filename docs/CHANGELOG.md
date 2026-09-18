@@ -37,6 +37,12 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Integrate display-aware canonical symbol compression into `build_symbols.py`.
+  Passed version-6 text-conversion state now advances to version 7 using the
+  reusable `svg_compress.py` engine with the balanced production profile and
+  SHA-bound compression reports; validated output atomically replaces the derived
+  compressed work tree while failures preserve the prior state/tree.
+
 - Integrate canonical text-to-path conversion into `build_symbols.py`. Version-5
   duplicate state now advances to version 6 with SHA-bound conversion reports,
   converter identity/settings, and a canonical work tree that converts only

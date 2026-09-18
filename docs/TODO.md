@@ -157,15 +157,16 @@ consistency audit unless one becomes necessary to unblock that work.
         symbol snapshot/cache, then network resolution, with explicit refresh
         bypassing only the cache.
       - [x] Integrate verified extraction, structural/font audit, complete-set
-        exact-first visual deduplication through version-5 build state, and
-        canonical text conversion through version-6 build state.
-      - [ ] Integrate compression, publication, mapping generation, validation, and
-        final reporting.
+        exact-first visual deduplication through version-5 build state, canonical
+        text conversion through version-6 build state, and balanced compression
+        through version-7 build state.
+      - [ ] Integrate publication, mapping generation, final validation, and final
+        reporting.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
     separate, intentional operations. The current orchestrator already supports
     `--snapshot-only`, `--language`, `--data-root`, `--static-symbols`, `--jobs`,
-    `--duplicate-render-size`, `--duplicate-renderer`, and `--text-converter`;
-    `--static-root`,
+    `--duplicate-render-size`, `--duplicate-renderer`, `--text-converter`, and
+    `--compression-renderer`; `--static-root`,
     `--skip-symbol-download`, `--skip-compression`, `--keep-work`, and `--dry-run`
     remain candidate options as later stages are integrated.
 
@@ -231,12 +232,12 @@ consistency audit unless one becomes necessary to unblock that work.
     external-tool limitation for now. Clean-profile testing did not remove it;
     persistent workers are the mitigation rather than continued startup chasing.
 
-- [ ] Keep `svg_compress.py` reusable while integrating compression into the
+- [x] Keep `svg_compress.py` reusable while integrating compression into the
   manifest-backed build.
-  - [ ] Preserve production defaults: `balanced` profile, `resvg` validation,
+  - [x] Preserve production defaults: `balanced` profile, `resvg` validation,
     precision `p2` first and `p3` rescue, target sizes 32/64, DPR 1/2, maximum
     RMS 0.01, maximum changed fraction 0.01, and pixel-difference threshold 8.
-  - [ ] Compress canonical assets only. If no lossy candidate passes visual
+  - [x] Compress canonical assets only. If no lossy candidate passes visual
     validation, retain the validated lossless/path-only output.
 
 - [ ] Refactor `reorganize_symbols.py` from destructive migration tooling into
@@ -285,7 +286,7 @@ consistency audit unless one becomes necessary to unblock that work.
     Inkscape conversion, and reports. Duplicate/canonical and text-conversion
     state are integrated into the build manifest; multi-category processing
     beyond the current canonical flow remains.
-  - [ ] `svg_compress.py`: keep the standalone CLI and production validation
+  - [x] `svg_compress.py`: keep the standalone CLI and production validation
     behavior; expose an importable result/update path for orchestration.
   - [ ] `reorganize_symbols.py`: become the publisher and final mapping generator.
   - [ ] `path_sanitization.py`: remain shared infrastructure for external/mirror

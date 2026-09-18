@@ -472,17 +472,24 @@ canonical `no_active_text` assets are copied forward unchanged, and persistent
 an explicit fallback/debug backend and `usvg` remains experimental. Converted
 outputs are revalidated for parseability and remaining active text before a
 version-6 manifest is written. A failed conversion records failed state and
-reports but does not replace the prior canonical work tree. The downloader does
-not generate browser mappings.
+reports but does not replace the prior canonical work tree. Compression then
+consumes exactly that version-6 canonical tree through the reusable
+`svg_compress.py` engine. Production uses the balanced profile with resvg visual
+validation, p2-first/p3-rescue precision, 32/64 CSS-pixel targets at DPR 1/2,
+RMS/changed-fraction limits of 0.01, and pixel-difference threshold 8. The
+complete balanced output is revalidated and atomically promoted to the derived
+`compressed/` work tree; successful state advances to manifest version 7 with
+SHA-bound compression reports and settings. Compression failure leaves prior
+compressed output and version-6 state intact. The downloader does not generate
+browser mappings.
 
-**Design direction:** later processing will consume that exact version-6
-canonical work tree through compression and publication. Canonical processing may
-collapse equivalent assets, but it must not discard their source references.
-Only the publisher will assign final application paths and generated browser
-mappings because only that stage knows the final canonical asset after subsequent
-processing. Source resolution, validation, deduplication, conversion, compression,
-and publishing remain distinct stages with provenance recorded rather than
-inferred from final filenames.
+**Design direction:** publication will consume that exact version-7 compressed
+work tree. Canonical processing may collapse equivalent assets, but it must not
+discard their source references. Only the publisher will assign final application
+paths and generated browser mappings because only that stage knows the final
+canonical asset after processing. Source resolution, validation, deduplication,
+conversion, compression, and publishing remain distinct stages with provenance
+recorded rather than inferred from final filenames.
 
 ## Module boundaries
 

@@ -442,11 +442,16 @@ conversion promotes passed or failed conversion state to version 6 with
 converter identity/jobs, conversion counts, and SHA-bound detailed/summary
 reports. A passed conversion materializes one canonical work tree containing
 converted active-text representatives plus unchanged no-text representatives;
-failed conversion does not replace an existing canonical tree. Detailed reports
-live under `data/reports/symbols/`. Loaders continue to accept versions 2 through
-5 so prior immutable symbol caches and completed intermediate processing states
-remain valid inputs to their next stage; version-5 manifests produced before
-size accounting remain valid for compatibility.
+failed conversion does not replace an existing canonical tree. Balanced
+display-aware compression then promotes passed version-6 state to version 7.
+Version 7 records canonical/compressed counts and byte totals, production
+compression settings, and SHA-bound `compression-report.csv`,
+`compression-candidates.csv`, and `compression-run.json` identities. The derived
+compressed work tree contains exactly the canonical asset set and is replaced only
+after validation succeeds. Detailed reports live under `data/reports/symbols/`.
+Loaders continue to accept versions 2 through 7 so prior immutable symbol caches
+and completed intermediate processing states remain valid inputs; version-5
+manifests produced before size accounting remain valid for compatibility.
 
 ### Design direction
 

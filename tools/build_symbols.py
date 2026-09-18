@@ -8,7 +8,8 @@ current orchestration boundary pins Army provenance, resolves one immutable raw
 symbol snapshot, materializes verified work files, runs structural SVG preflight,
 audits effective fonts against the installed font environment, performs
 exact-first visual duplicate detection with a persisted canonical mapping, and
-converts active text on canonical assets into paths.
+converts active text on canonical assets into paths, and compresses the complete
+canonical set through display-aware validation.
 """
 
 from __future__ import annotations
@@ -34,6 +35,7 @@ try:
     from tools.symbol_work import (
         audit_symbol_fonts,
         audit_symbol_work,
+        compress_symbol_work,
         convert_symbol_text,
         detect_symbol_duplicates,
         materialize_symbol_archive,
@@ -55,6 +57,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
     from symbol_work import (
         audit_symbol_fonts,
         audit_symbol_work,
+        compress_symbol_work,
         convert_symbol_text,
         detect_symbol_duplicates,
         materialize_symbol_archive,
@@ -162,6 +165,12 @@ def main(argv: list[str] | None = None) -> int:
         choices=("resvg", "inkscape", "auto"),
         default="resvg",
         help="Renderer for visual duplicate detection (default: resvg)",
+    )
+    parser.add_argument(
+        "--compression-renderer",
+        choices=("resvg", "inkscape", "auto"),
+        default="resvg",
+        help="Renderer for compression validation (default: resvg)",
     )
     args = parser.parse_args(argv)
 
@@ -343,6 +352,39 @@ def main(argv: list[str] | None = None) -> int:
                 "and canonical output was not replaced"
             )
         print(f"Canonical symbol work -> {conversion.canonical_root}")
+
+        compression = compress_symbol_work(
+            materialized,
+            archive=symbols.archive,
+            build_manifest_path=symbols.build_manifest,
+            reports_base=symbol_reports,
+            project_root=Path.cwd(),
+            jobs=args.jobs,
+            renderer=args.compression_renderer,
+        )
+        compression_source = compression.summary["sourceBytes"]
+        compression_output = compression.summary["outputBytes"]
+        compression_saved = compression.summary["reclaimedBytes"]
+        compression_percent = (
+            compression_saved * 100.0 / compression_source
+            if compression_source
+            else 0.0
+        )
+        renderer_suffix = (
+            f" ({compression.renderer_version})"
+            if compression.renderer_version
+            else ""
+        )
+        print(
+            "Compression -> "
+            f"{compression.summary['compressedAssetCount']} smaller | "
+            f"{compression.summary['retainedAssetCount']} retained | "
+            f"{compression_source:,} -> {compression_output:,} bytes "
+            f"({compression_percent:.2f}% saved)"
+        )
+        print(f"Compression renderer -> {compression.renderer}{renderer_suffix}")
+        print(f"Compression report -> {compression.report}")
+        print(f"Compressed symbol work -> {compression.compressed_root}")
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

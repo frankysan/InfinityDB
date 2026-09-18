@@ -290,10 +290,15 @@ canonical no-text SVGs are carried forward unchanged, persistent
 `inkscape --shell` is the production default, one-shot Inkscape remains an
 explicit fallback/debug backend, and `usvg` remains experimental. Conversion
 reports and converter identity are SHA-bound into build state. Failed conversion
-state is recorded without replacing the prior canonical work tree. Versions 2
-through 5 remain accepted as valid earlier-stage state, and earlier version-5
-state without size metrics remains compatible. The downloader does not generate
-`army-symbols.js` or `unit-symbol-map.js`.
+state is recorded without replacing the prior canonical work tree. Compression
+then promotes passed version-6 state to version 7 using the reusable standalone
+compressor: balanced profile, resvg validation, p2-first/p3-rescue precision,
+32/64 CSS-pixel targets, DPR 1/2, RMS and changed-fraction limits 0.01, and
+pixel-difference threshold 8. The complete compressed tree and three compression
+reports are validated before atomic promotion. Versions 2 through 7 remain
+accepted as valid stage state, and earlier version-5 state without size metrics
+remains compatible. The downloader does not generate `army-symbols.js` or
+`unit-symbol-map.js`.
 
 Raw source resolution now follows this implemented order:
 
@@ -313,8 +318,8 @@ are reported.
 
 ### Design direction
 
-Later symbol processing must consume the same pinned Army/SYMBOLS identities
-and the verified version-6 canonical work tree rather than selecting newer
+Later symbol publication must consume the same pinned Army/SYMBOLS identities
+and the verified version-7 compressed work tree rather than selecting newer
 snapshots independently.
 
 Only the publisher assigns final application paths and generated

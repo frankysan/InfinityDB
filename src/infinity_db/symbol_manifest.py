@@ -15,7 +15,8 @@ SYMBOL_BUILD_ACQUISITION_VERSION = 2
 SYMBOL_BUILD_PREFLIGHT_VERSION = 3
 SYMBOL_BUILD_FONT_AUDIT_VERSION = 4
 SYMBOL_BUILD_DUPLICATE_VERSION = 5
-SYMBOL_BUILD_VERSION = 6
+SYMBOL_BUILD_TEXT_CONVERSION_VERSION = 6
+SYMBOL_BUILD_VERSION = 7
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
 SOURCE_METHODS = frozenset({"override", "cache", "network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -201,11 +202,13 @@ def add_text_conversion(
     validate_symbol_manifest(document)
     if document.get("formatVersion") not in {
         SYMBOL_BUILD_DUPLICATE_VERSION,
+        SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
         SYMBOL_BUILD_VERSION,
     }:
         raise SymbolManifestError(
             "Text conversion requires version-"
-            f"{SYMBOL_BUILD_DUPLICATE_VERSION} or version-{SYMBOL_BUILD_VERSION} "
+            f"{SYMBOL_BUILD_DUPLICATE_VERSION}, version-"
+            f"{SYMBOL_BUILD_TEXT_CONVERSION_VERSION}, or version-{SYMBOL_BUILD_VERSION} "
             "duplicate-detected state"
         )
     if document["processing"]["duplicateDetection"]["status"] != "passed":
@@ -220,13 +223,77 @@ def add_text_conversion(
         converter_record["version"] = converter_version
 
     promoted = json.loads(json.dumps(document))
-    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["formatVersion"] = SYMBOL_BUILD_TEXT_CONVERSION_VERSION
+    promoted["processing"].pop("compression", None)
     promoted["processing"]["textConversion"] = {
         "status": status,
         "summary": dict(sorted(summary.items())),
         "converter": converter_record,
         "report": artifact_record(report, project_root=project_root),
         "summaryReport": artifact_record(summary_report, project_root=project_root),
+    }
+    validate_symbol_manifest(promoted)
+    return promoted
+
+
+def add_compression(
+    document: dict[str, Any],
+    *,
+    status: str,
+    summary: dict[str, int],
+    report: Path,
+    candidates_report: Path,
+    run_report: Path,
+    profile: str,
+    renderer: str,
+    target_sizes: list[int],
+    dprs: list[float],
+    balanced_precisions: list[int],
+    max_rms: float,
+    max_changed_fraction: float,
+    pixel_diff_threshold: int,
+    jobs: int,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Promote text-converted state to version 7 with compression state."""
+    validate_symbol_manifest(document)
+    if document.get("formatVersion") not in {
+        SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
+        SYMBOL_BUILD_VERSION,
+    }:
+        raise SymbolManifestError(
+            "Compression requires version-"
+            f"{SYMBOL_BUILD_TEXT_CONVERSION_VERSION} or version-{SYMBOL_BUILD_VERSION} "
+            "text-converted state"
+        )
+    if document["processing"]["textConversion"]["status"] != "passed":
+        raise SymbolManifestError("Compression requires passed text conversion")
+    if status != "passed":
+        raise SymbolManifestError("Compression status must be 'passed'")
+    if jobs < 1:
+        raise SymbolManifestError("Compression jobs must be at least 1")
+
+    promoted = json.loads(json.dumps(document))
+    promoted["formatVersion"] = SYMBOL_BUILD_VERSION
+    promoted["processing"]["compression"] = {
+        "status": status,
+        "summary": dict(sorted(summary.items())),
+        "profile": profile,
+        "settings": {
+            "renderer": renderer,
+            "targetSizesCssPx": list(target_sizes),
+            "dprs": list(dprs),
+            "balancedPrecisions": list(balanced_precisions),
+            "maxRms": max_rms,
+            "maxChangedFraction": max_changed_fraction,
+            "pixelDiffThreshold": pixel_diff_threshold,
+            "jobs": jobs,
+        },
+        "report": artifact_record(report, project_root=project_root),
+        "candidatesReport": artifact_record(
+            candidates_report, project_root=project_root
+        ),
+        "runReport": artifact_record(run_report, project_root=project_root),
     }
     validate_symbol_manifest(promoted)
     return promoted
@@ -260,7 +327,7 @@ def load_symbol_manifest(path: Path) -> dict[str, Any]:
 
 
 def validate_symbol_manifest(document: Any) -> None:
-    """Validate acquisition v2 through duplicate-detected v5 symbol state."""
+    """Validate acquisition v2 through compressed v7 symbol state."""
     root = _object(document, "symbol manifest")
     version = root.get("formatVersion")
     supported_versions = {
@@ -268,6 +335,7 @@ def validate_symbol_manifest(document: Any) -> None:
         SYMBOL_BUILD_PREFLIGHT_VERSION,
         SYMBOL_BUILD_FONT_AUDIT_VERSION,
         SYMBOL_BUILD_DUPLICATE_VERSION,
+        SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
         SYMBOL_BUILD_VERSION,
     }
     if version not in supported_versions:
@@ -431,8 +499,10 @@ def _processing(value: Any, archive_paths: set[str], version: int, context: str)
         allowed.add("fontAudit")
     if version >= SYMBOL_BUILD_DUPLICATE_VERSION:
         allowed.add("duplicateDetection")
-    if version == SYMBOL_BUILD_VERSION:
+    if version >= SYMBOL_BUILD_TEXT_CONVERSION_VERSION:
         allowed.add("textConversion")
+    if version == SYMBOL_BUILD_VERSION:
+        allowed.add("compression")
     _only_keys(record, allowed, context)
     preflight = _object(record.get("svgPreflight"), f"{context}.svgPreflight")
     _only_keys(preflight, {"status", "summary", "report"}, f"{context}.svgPreflight")
@@ -602,6 +672,13 @@ def _processing(value: Any, archive_paths: set[str], version: int, context: str)
         record["duplicateDetection"]["summary"]["canonicalAssetCount"],
         f"{context}.textConversion",
     )
+    if version == SYMBOL_BUILD_TEXT_CONVERSION_VERSION:
+        return
+    _compression(
+        record.get("compression"),
+        record["duplicateDetection"]["summary"]["canonicalAssetCount"],
+        f"{context}.compression",
+    )
 
 
 def _text_conversion(
@@ -674,6 +751,119 @@ def _text_conversion(
 
     _artifact(record.get("report"), f"{context}.report")
     _artifact(record.get("summaryReport"), f"{context}.summaryReport")
+
+
+def _compression(value: Any, canonical_asset_count: int, context: str) -> None:
+    record = _object(value, context)
+    _only_keys(
+        record,
+        {
+            "status",
+            "summary",
+            "profile",
+            "settings",
+            "report",
+            "candidatesReport",
+            "runReport",
+        },
+        context,
+    )
+    status = _string(record.get("status"), f"{context}.status")
+    if status != "passed":
+        raise SymbolManifestError(f"{context}.status must be 'passed'")
+
+    summary = _object(record.get("summary"), f"{context}.summary")
+    fields = {
+        "assetCount",
+        "compressedAssetCount",
+        "retainedAssetCount",
+        "sourceBytes",
+        "outputBytes",
+        "reclaimedBytes",
+    }
+    _only_keys(summary, fields, f"{context}.summary")
+    missing = fields - set(summary)
+    if missing:
+        raise SymbolManifestError(
+            f"{context}.summary is missing field(s): " + ", ".join(sorted(missing))
+        )
+    for field in sorted(fields):
+        count = summary[field]
+        if type(count) is not int or count < 0:
+            raise SymbolManifestError(
+                f"{context}.summary.{field} must be a non-negative integer"
+            )
+    if summary["assetCount"] != canonical_asset_count:
+        raise SymbolManifestError(
+            f"{context}.summary.assetCount must equal duplicate canonical count"
+        )
+    if summary["compressedAssetCount"] + summary["retainedAssetCount"] != canonical_asset_count:
+        raise SymbolManifestError(
+            f"{context} compressed/retained counts must account for every canonical asset"
+        )
+    if summary["outputBytes"] > summary["sourceBytes"]:
+        raise SymbolManifestError(f"{context}.summary.outputBytes cannot exceed sourceBytes")
+    if summary["reclaimedBytes"] != summary["sourceBytes"] - summary["outputBytes"]:
+        raise SymbolManifestError(
+            f"{context}.summary.reclaimedBytes must equal sourceBytes - outputBytes"
+        )
+    expected_status = "passed"
+    if status != expected_status:
+        raise SymbolManifestError(
+            f"{context}.status must be {expected_status!r} for a complete compression state"
+        )
+
+    profile = _string(record.get("profile"), f"{context}.profile")
+    if profile != "balanced":
+        raise SymbolManifestError(f"{context}.profile must be 'balanced'")
+
+    settings = _object(record.get("settings"), f"{context}.settings")
+    _only_keys(
+        settings,
+        {
+            "renderer",
+            "targetSizesCssPx",
+            "dprs",
+            "balancedPrecisions",
+            "maxRms",
+            "maxChangedFraction",
+            "pixelDiffThreshold",
+            "jobs",
+        },
+        f"{context}.settings",
+    )
+    _string(settings.get("renderer"), f"{context}.settings.renderer")
+    for field in ("targetSizesCssPx", "balancedPrecisions"):
+        values = settings.get(field)
+        if not isinstance(values, list) or not values:
+            raise SymbolManifestError(f"{context}.settings.{field} must be a non-empty array")
+        if any(type(item) is not int or item < 1 for item in values):
+            raise SymbolManifestError(
+                f"{context}.settings.{field} values must be positive integers"
+            )
+    dprs = settings.get("dprs")
+    if not isinstance(dprs, list) or not dprs or any(
+        type(item) not in {int, float} or item <= 0 for item in dprs
+    ):
+        raise SymbolManifestError(
+            f"{context}.settings.dprs must contain positive numbers"
+        )
+    for field in ("maxRms", "maxChangedFraction"):
+        number = settings.get(field)
+        if not isinstance(number, (int, float)) or isinstance(number, bool) or number < 0:
+            raise SymbolManifestError(f"{context}.settings.{field} must be non-negative")
+    threshold = settings.get("pixelDiffThreshold")
+    if type(threshold) is not int or not 0 <= threshold <= 255:
+        raise SymbolManifestError(
+            f"{context}.settings.pixelDiffThreshold must be an integer from 0 to 255"
+        )
+    jobs = settings.get("jobs")
+    if type(jobs) is not int or jobs < 1:
+        raise SymbolManifestError(f"{context}.settings.jobs must be a positive integer")
+
+    _artifact(record.get("report"), f"{context}.report")
+    _artifact(record.get("candidatesReport"), f"{context}.candidatesReport")
+    _artifact(record.get("runReport"), f"{context}.runReport")
 
 
 def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> None:

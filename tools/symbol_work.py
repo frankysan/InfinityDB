@@ -10,6 +10,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import Counter
+from importlib import import_module
 from pathlib import Path, PurePosixPath
 from typing import Any, NamedTuple
 
@@ -17,7 +18,9 @@ from infinity_db.snapshot_provenance import load_snapshot_manifest, sha256_file
 from infinity_db.symbol_manifest import (
     SYMBOL_BUILD_DUPLICATE_VERSION,
     SYMBOL_BUILD_FONT_AUDIT_VERSION,
+    SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
     SYMBOL_BUILD_VERSION,
+    add_compression,
     add_duplicate_detection,
     add_font_audit,
     add_svg_preflight,
@@ -75,6 +78,17 @@ class TextConversionResult(NamedTuple):
     summary: dict[str, int]
     converter: str
     converter_version: str
+    status: str
+
+
+class CompressionResult(NamedTuple):
+    compressed_root: Path
+    report: Path
+    candidates_report: Path
+    run_report: Path
+    summary: dict[str, int]
+    renderer: str
+    renderer_version: str
     status: str
 
 
@@ -394,6 +408,16 @@ def _font_tools():
     except ImportError:  # pragma: no cover - direct script execution fallback
         import svg_processor
     return svg_processor
+
+
+def _compression_tools() -> Any:
+    try:
+        return import_module("tools.svg_compress")
+    except ModuleNotFoundError:
+        try:
+            return import_module("svg_compress")
+        except ModuleNotFoundError as exc:  # pragma: no cover - packaging failure
+            raise RuntimeError("Could not import svg_compress") from exc
 
 
 def _font_result_record(result: dict[str, str]) -> dict[str, str]:
@@ -745,6 +769,7 @@ def convert_symbol_text(
     if (
         manifest.get("formatVersion") not in {
             SYMBOL_BUILD_DUPLICATE_VERSION,
+            SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
             SYMBOL_BUILD_VERSION,
         }
         or duplicate.get("status") != "passed"
@@ -909,3 +934,210 @@ def convert_symbol_text(
         converter_version=str(result.get("converter_version", "")),
         status=status,
     )
+
+
+def compress_symbol_work(
+    materialized: MaterializedSymbols,
+    *,
+    archive: Path,
+    build_manifest_path: Path,
+    reports_base: Path,
+    project_root: Path,
+    jobs: int = 4,
+    renderer: str = "resvg",
+) -> CompressionResult:
+    """Compress the complete version-6 canonical tree with production settings."""
+    manifest = load_symbol_manifest(build_manifest_path)
+    processing = manifest.get("processing", {})
+    conversion = processing.get("textConversion", {})
+    if (
+        manifest.get("formatVersion") not in {
+            SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
+            SYMBOL_BUILD_VERSION,
+        }
+        or conversion.get("status") != "passed"
+    ):
+        raise ValueError(
+            "Compression requires passed "
+            f"version-{SYMBOL_BUILD_TEXT_CONVERSION_VERSION} text-conversion state"
+        )
+
+    duplicate = processing.get("duplicateDetection", {})
+    canonical_map = duplicate.get("canonicalByArchivePath")
+    if not isinstance(canonical_map, dict):
+        raise ValueError("Duplicate-detection canonical mapping is invalid")
+    canonical_paths = sorted({str(value) for value in canonical_map.values()})
+    canonical_root = materialized.work_root / "canonical"
+    if not canonical_root.is_dir():
+        raise ValueError(f"Canonical symbol work tree is missing: {canonical_root}")
+    actual_input = {
+        path.relative_to(canonical_root).as_posix()
+        for path in canonical_root.rglob("*.svg")
+        if path.is_file()
+    }
+    if actual_input != set(canonical_paths):
+        raise ValueError(
+            "Canonical symbol work tree does not contain exactly the manifest canonical set"
+        )
+
+    target_sizes = [32, 64]
+    dprs = [1.0, 2.0]
+    balanced_precisions = [2, 3]
+    max_rms = 0.01
+    max_changed_fraction = 0.01
+    pixel_diff_threshold = 8
+
+    staging = Path(
+        tempfile.mkdtemp(prefix=".compression-", dir=materialized.work_root)
+    )
+    try:
+        tools = _compression_tools()
+        try:
+            result = tools.compress_svg_tree(
+                canonical_root,
+                staging / "run",
+                profile="balanced",
+                target_sizes=tuple(target_sizes),
+                dprs=tuple(dprs),
+                balanced_precisions=tuple(balanced_precisions),
+                max_rms=max_rms,
+                max_changed_fraction=max_changed_fraction,
+                pixel_diff_threshold=pixel_diff_threshold,
+                jobs=jobs,
+                renderer=renderer,
+            )
+        except RuntimeError as exc:
+            raise ValueError(str(exc)) from exc
+
+        symbol_sha = manifest["snapshot"]["symbolArtifact"]["sha256"]
+        report_root = reports_base / _work_name(archive, symbol_sha)
+        report_root.mkdir(parents=True, exist_ok=True)
+        report = report_root / "compression-report.csv"
+        candidates_report = report_root / "compression-candidates.csv"
+        run_report = report_root / "compression-run.json"
+
+        actual_output = {
+            path.relative_to(result.profile_root).as_posix()
+            for path in result.profile_root.rglob("*.svg")
+            if path.is_file()
+        }
+        if actual_output != set(canonical_paths):
+            raise ValueError(
+                "Compression output does not contain exactly the canonical asset set"
+            )
+        for relative in canonical_paths:
+            output = result.profile_root.joinpath(*_portable_member(relative).parts)
+            try:
+                root = ET.parse(output).getroot()
+            except (ET.ParseError, OSError) as exc:
+                raise ValueError(
+                    f"Compressed SVG is not parseable for {relative}: {exc}"
+                ) from exc
+            has_active_text, _, _ = _text_state(root)
+            if has_active_text:
+                raise ValueError(
+                    f"Compressed SVG unexpectedly contains active text: {relative}"
+                )
+
+        source_bytes = int(result.summary["sourceBytes"])
+        output_bytes = int(result.summary["outputBytes"])
+        reclaimed_bytes = int(result.summary["reclaimedBytes"])
+        summary = {
+            "assetCount": int(result.summary["assetCount"]),
+            "compressedAssetCount": int(result.summary["compressedAssetCount"]),
+            "retainedAssetCount": int(result.summary["retainedAssetCount"]),
+            "sourceBytes": source_bytes,
+            "outputBytes": output_bytes,
+            "reclaimedBytes": reclaimed_bytes,
+        }
+        if summary["assetCount"] != len(canonical_paths):
+            raise ValueError(
+                "Compression result count does not match canonical asset count"
+            )
+
+        report_sources = {
+            report: result.report,
+            candidates_report: result.candidates_report,
+            run_report: result.run_report,
+        }
+        report_backups = staging / "report-backups"
+        report_backups.mkdir()
+        report_had_previous: dict[Path, bool] = {}
+        report_replacements: dict[Path, Path] = {}
+        for destination, source in report_sources.items():
+            report_had_previous[destination] = destination.exists()
+            if destination.exists():
+                shutil.copy2(destination, report_backups / destination.name)
+            replacement = destination.with_name(f".{destination.name}.compression-new")
+            replacement.unlink(missing_ok=True)
+            shutil.copy2(source, replacement)
+            report_replacements[destination] = replacement
+
+        compressed_root = materialized.work_root / "compressed"
+        prepared = staging / "prepared"
+        backup = materialized.work_root / ".compressed-previous"
+        installed_reports: list[Path] = []
+        had_previous = compressed_root.exists()
+        tree_swapped = False
+        try:
+            for destination, replacement in report_replacements.items():
+                replacement.replace(destination)
+                installed_reports.append(destination)
+
+            run_info = result.run_info
+            renderer_version = str(run_info.get("renderer_version") or "")
+            updated = add_compression(
+                manifest,
+                status="passed",
+                summary=summary,
+                report=report,
+                candidates_report=candidates_report,
+                run_report=run_report,
+                profile="balanced",
+                renderer=str(run_info.get("renderer") or renderer),
+                target_sizes=target_sizes,
+                dprs=dprs,
+                balanced_precisions=balanced_precisions,
+                max_rms=max_rms,
+                max_changed_fraction=max_changed_fraction,
+                pixel_diff_threshold=pixel_diff_threshold,
+                jobs=jobs,
+                project_root=project_root,
+            )
+
+            result.profile_root.replace(prepared)
+            if backup.exists():
+                shutil.rmtree(backup)
+            if had_previous:
+                compressed_root.replace(backup)
+            prepared.replace(compressed_root)
+            tree_swapped = True
+            write_symbol_manifest(updated, build_manifest_path)
+        except Exception:
+            if tree_swapped and compressed_root.exists():
+                shutil.rmtree(compressed_root)
+            if had_previous and backup.exists() and not compressed_root.exists():
+                backup.replace(compressed_root)
+            for destination in installed_reports:
+                previous = report_backups / destination.name
+                if report_had_previous[destination]:
+                    shutil.copy2(previous, destination)
+                else:
+                    destination.unlink(missing_ok=True)
+            for replacement in report_replacements.values():
+                replacement.unlink(missing_ok=True)
+            raise
+        else:
+            shutil.rmtree(backup, ignore_errors=True)
+        return CompressionResult(
+            compressed_root=compressed_root,
+            report=report,
+            candidates_report=candidates_report,
+            run_report=run_report,
+            summary=summary,
+            renderer=str(run_info.get("renderer") or renderer),
+            renderer_version=renderer_version,
+            status="passed",
+        )
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)

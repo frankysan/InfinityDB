@@ -70,6 +70,7 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
+import io
 import json
 import math
 import shutil
@@ -78,6 +79,7 @@ import sys
 import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import asdict, dataclass
 from importlib import import_module
 from pathlib import Path
@@ -88,12 +90,16 @@ try:
     ImageChops: Any = import_module("PIL.ImageChops")
     ImageStat: Any = import_module("PIL.ImageStat")
 except ModuleNotFoundError:
-    print(
-        "Missing dependency: Pillow\n"
-        "Install with: pip install pillow",
-        file=sys.stderr,
-    )
-    sys.exit(2)
+    Image = None
+    ImageChops = None
+    ImageStat = None
+
+
+def require_pillow() -> None:
+    if Image is None or ImageChops is None or ImageStat is None:
+        raise RuntimeError(
+            "Missing dependency: Pillow. Install InfinityDB with the 'symbols' extra."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +158,17 @@ class CandidateEvaluation:
     metrics: VisualMetrics
     error: str = ""
     renderer_failure: bool = False
+
+
+@dataclass(frozen=True)
+class CompressionRunResult:
+    output_root: Path
+    profile_root: Path
+    report: Path
+    candidates_report: Path
+    run_report: Path
+    summary: dict[str, int | float]
+    run_info: dict[str, Any]
 
 
 # ---------------------------------------------------------------------------
@@ -720,7 +737,7 @@ def candidate_record(
     error: str = "",
 ) -> CandidateResult:
     return CandidateResult(
-        file=str(relative),
+        file=relative.as_posix(),
         profile=profile,
         candidate=name,
         precision="" if precision is None else str(precision),
@@ -761,7 +778,7 @@ def process_lossless(
         shutil.copy2(source, destination)
 
         result = OutputResult(
-            file=str(relative),
+            file=relative.as_posix(),
             profile="lossless",
             status="COPIED_ORIGINAL_SVGO_FAILED",
             source_bytes=source_bytes,
@@ -801,7 +818,7 @@ def process_lossless(
         maybe_write_svgz(destination)
 
     result = OutputResult(
-        file=str(relative),
+        file=relative.as_posix(),
         profile="lossless",
         status="OK",
         source_bytes=source_bytes,
@@ -829,7 +846,7 @@ def evaluation_to_candidate_result(
 ) -> CandidateResult:
     path = evaluation.path
     return CandidateResult(
-        file=str(relative),
+        file=relative.as_posix(),
         profile=profile,
         candidate=evaluation.name,
         precision=(
@@ -954,7 +971,7 @@ def choose_lossy_output(
         maybe_write_svgz(destination)
 
     return OutputResult(
-        file=str(relative),
+        file=relative.as_posix(),
         profile=profile,
         status=status,
         source_bytes=source_bytes,
@@ -1019,7 +1036,7 @@ def process_file_profiles(
             shutil.copy2(source, destination)
             outputs.append(
                 OutputResult(
-                    file=str(relative),
+                    file=relative.as_posix(),
                     profile="lossless",
                     status="COPIED_ORIGINAL_SVGO_FAILED",
                     source_bytes=source_bytes,
@@ -1054,7 +1071,7 @@ def process_file_profiles(
                 maybe_write_svgz(destination)
             outputs.append(
                 OutputResult(
-                    file=str(relative),
+                    file=relative.as_posix(),
                     profile="lossless",
                     status="OK",
                     source_bytes=source_bytes,
@@ -1104,7 +1121,7 @@ def process_file_profiles(
                 maybe_write_svgz(destination)
             outputs.append(
                 OutputResult(
-                    file=str(relative),
+                    file=relative.as_posix(),
                     profile=profile,
                     status="REFERENCE_RENDER_FAILED",
                     source_bytes=source_bytes,
@@ -1319,7 +1336,7 @@ def write_reports(
 # Main
 # ---------------------------------------------------------------------------
 
-def main():
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Compress SVG files using rendering-lossless and "
@@ -1347,20 +1364,20 @@ def main():
     parser.add_argument(
         "--target-sizes",
         type=parse_int_list,
-        default=parse_int_list("64"),
+        default=parse_int_list("32,64"),
         help=(
             "Comma-separated CSS pixel widths used for validation "
-            "(default: 64)"
+            "(default: 32,64)"
         ),
     )
 
     parser.add_argument(
         "--dprs",
         type=parse_float_list,
-        default=parse_float_list("1,3"),
+        default=parse_float_list("1,2"),
         help=(
             "Comma-separated device-pixel ratios used for validation "
-            "(default: 1,3)"
+            "(default: 1,2)"
         ),
     )
 
@@ -1473,7 +1490,7 @@ def main():
         help="Explicit Inkscape executable/path",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.simplify_passes < 0:
         parser.error("--simplify-passes cannot be negative")
@@ -1531,6 +1548,12 @@ def main():
     needs_visual_validation = any(
         p in {"balanced", "small"} for p in profiles
     )
+    if needs_visual_validation:
+        try:
+            require_pillow()
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
 
     renderer = None
     renderer_executable = None
@@ -1872,6 +1895,137 @@ def main():
     print("  compression-run.json")
 
     return 0
+
+
+def compress_svg_tree(
+    input_path: Path,
+    output_root: Path,
+    *,
+    profile: str = "balanced",
+    target_sizes: tuple[int, ...] = (32, 64),
+    dprs: tuple[float, ...] = (1.0, 2.0),
+    balanced_precisions: tuple[int, ...] = (2, 3),
+    max_rms: float = 0.01,
+    max_changed_fraction: float = 0.01,
+    pixel_diff_threshold: int = 8,
+    jobs: int = 4,
+    renderer: str = "resvg",
+    svgo: str | None = None,
+    resvg: str | None = None,
+    inkscape: str | None = None,
+) -> CompressionRunResult:
+    """Run the standalone compressor through its production CLI contract.
+
+    This keeps one implementation for standalone and orchestrated compression
+    while returning deterministic report identities and aggregate size metrics.
+    """
+    input_path = input_path.resolve()
+    output_root = output_root.resolve()
+    svg_files = (
+        [input_path]
+        if input_path.is_file() and input_path.suffix.casefold() == ".svg"
+        else sorted(input_path.rglob("*.svg"))
+        if input_path.is_dir()
+        else []
+    )
+
+    if not svg_files:
+        profile_root = output_root / profile
+        profile_root.mkdir(parents=True, exist_ok=True)
+        reports_root = output_root / "reports"
+        reports_root.mkdir(parents=True, exist_ok=True)
+        run_info: dict[str, Any] = {
+            "input": str(input_path),
+            "output": str(output_root),
+            "profiles": [profile],
+            "jobs": jobs,
+            "elapsed_seconds": 0.0,
+            "renderer": renderer,
+            "renderer_version": None,
+            "target_sizes_css_px": list(target_sizes),
+            "dprs": list(dprs),
+            "balanced_precisions": list(balanced_precisions),
+            "small_precisions": [3, 2, 1, 0],
+            "simplify_passes": 0,
+            "max_rms": max_rms,
+            "max_changed_fraction": max_changed_fraction,
+            "pixel_diff_threshold": pixel_diff_threshold,
+            "write_svgz": False,
+            "lossless_minify_only": False,
+            "svgo_version": None,
+            "inkscape_version": None,
+            "resvg_version": None,
+        }
+        write_reports(reports_root, [], [], run_info)
+    else:
+        argv = [
+            str(input_path),
+            str(output_root),
+            "--profile",
+            profile,
+            "--target-sizes",
+            ",".join(str(value) for value in target_sizes),
+            "--dprs",
+            ",".join(f"{value:g}" for value in dprs),
+            "--balanced-precisions",
+            ",".join(str(value) for value in balanced_precisions),
+            "--max-rms",
+            str(max_rms),
+            "--max-changed",
+            str(max_changed_fraction),
+            "--pixel-diff-threshold",
+            str(pixel_diff_threshold),
+            "--jobs",
+            str(jobs),
+            "--renderer",
+            renderer,
+        ]
+        for flag, value in (("--svgo", svgo), ("--resvg", resvg), ("--inkscape", inkscape)):
+            if value:
+                argv.extend((flag, value))
+        captured = io.StringIO()
+        with redirect_stdout(captured), redirect_stderr(captured):
+            exit_code = main(argv)
+        if exit_code != 0:
+            details = captured.getvalue().strip()
+            message = f"SVG compression failed with exit code {exit_code}"
+            if details:
+                message += f": {details}"
+            raise RuntimeError(message)
+
+    reports_root = output_root / "reports"
+    report = reports_root / "compression-report.csv"
+    candidates_report = reports_root / "compression-candidates.csv"
+    run_report = reports_root / "compression-run.json"
+    if not (report.is_file() and candidates_report.is_file() and run_report.is_file()):
+        raise RuntimeError("SVG compression did not produce its required reports")
+
+    with report.open("r", encoding="utf-8-sig", newline="") as handle:
+        rows = [row for row in csv.DictReader(handle) if row.get("profile") == profile]
+    run_info = json.loads(run_report.read_text(encoding="utf-8"))
+    source_bytes = sum(int(row["source_bytes"]) for row in rows)
+    output_bytes = sum(int(row["output_bytes"]) for row in rows)
+    compressed_count = sum(
+        1 for row in rows if int(row["output_bytes"]) < int(row["source_bytes"])
+    )
+    summary: dict[str, int | float] = {
+        "assetCount": len(rows),
+        "compressedAssetCount": compressed_count,
+        "retainedAssetCount": len(rows) - compressed_count,
+        "sourceBytes": source_bytes,
+        "outputBytes": output_bytes,
+        "reclaimedBytes": max(0, source_bytes - output_bytes),
+        "reductionPercent": safe_reduction(source_bytes, output_bytes),
+    }
+    return CompressionRunResult(
+        output_root=output_root,
+        profile_root=output_root / profile,
+        report=report,
+        candidates_report=candidates_report,
+        run_report=run_report,
+        summary=summary,
+        run_info=run_info,
+    )
 
 
 if __name__ == "__main__":

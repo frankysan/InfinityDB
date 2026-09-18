@@ -1,8 +1,10 @@
 import hashlib
 import json
+import shutil
 import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -19,6 +21,7 @@ from infinity_db.symbol_manifest import (
 )
 from tools.symbol_work import (
     audit_symbol_work,
+    compress_symbol_work,
     convert_symbol_text,
     detect_symbol_duplicates,
     materialize_symbol_archive,
@@ -578,6 +581,164 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         "version": "Inkscape test",
         "jobs": 4,
     }
+
+    def fake_compress(
+        input_root: Path, output_root: Path, **kwargs
+    ) -> SimpleNamespace:
+        assert input_root == conversion.canonical_root
+        assert kwargs == {
+            "profile": "balanced",
+            "target_sizes": (32, 64),
+            "dprs": (1.0, 2.0),
+            "balanced_precisions": (2, 3),
+            "max_rms": 0.01,
+            "max_changed_fraction": 0.01,
+            "pixel_diff_threshold": 8,
+            "jobs": 4,
+            "renderer": "resvg",
+        }
+        profile_root = output_root / "balanced"
+        shutil.copytree(input_root, profile_root)
+        reports = output_root / "reports"
+        reports.mkdir(parents=True)
+        report = reports / "compression-report.csv"
+        candidates = reports / "compression-candidates.csv"
+        run_report = reports / "compression-run.json"
+        report.write_text("file,profile\n", encoding="utf-8")
+        candidates.write_text("file,profile\n", encoding="utf-8")
+        run_report.write_text("{}\n", encoding="utf-8")
+        source_bytes = sum(path.stat().st_size for path in input_root.rglob("*.svg"))
+        return SimpleNamespace(
+            profile_root=profile_root,
+            report=report,
+            candidates_report=candidates,
+            run_report=run_report,
+            summary={
+                "assetCount": 2,
+                "compressedAssetCount": 0,
+                "retainedAssetCount": 2,
+                "sourceBytes": source_bytes,
+                "outputBytes": source_bytes,
+                "reclaimedBytes": 0,
+                "reductionPercent": 0.0,
+            },
+            run_info={"renderer": "resvg", "renderer_version": "resvg test"},
+        )
+
+    fake_compression_tools = type(
+        "FakeCompressionTools",
+        (),
+        {"compress_svg_tree": staticmethod(fake_compress)},
+    )
+    monkeypatch.setattr(
+        symbol_work, "_compression_tools", lambda: fake_compression_tools
+    )
+
+    compressed = compress_symbol_work(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest_path,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+    )
+
+    assert compressed.status == "passed"
+    assert compressed.summary["assetCount"] == 2
+    assert compressed.summary["reclaimedBytes"] == 0
+    assert (compressed.compressed_root / "units" / "a.svg").is_file()
+    assert (compressed.compressed_root / "units" / "c.svg").is_file()
+    compressed_manifest = load_symbol_manifest(manifest_path)
+    assert compressed_manifest["formatVersion"] == 7
+    compression = compressed_manifest["processing"]["compression"]
+    assert compression["status"] == "passed"
+    assert compression["profile"] == "balanced"
+    assert compression["settings"] == {
+        "renderer": "resvg",
+        "targetSizesCssPx": [32, 64],
+        "dprs": [1.0, 2.0],
+        "balancedPrecisions": [2, 3],
+        "maxRms": 0.01,
+        "maxChangedFraction": 0.01,
+        "pixelDiffThreshold": 8,
+        "jobs": 4,
+    }
+
+    prior_bytes = {
+        path.relative_to(compressed.compressed_root).as_posix(): path.read_bytes()
+        for path in compressed.compressed_root.rglob("*.svg")
+    }
+
+    def fake_incomplete(
+        _input_root: Path, output_root: Path, **_kwargs
+    ) -> SimpleNamespace:
+        profile_root = output_root / "balanced"
+        profile_root.mkdir(parents=True)
+        only = profile_root / "units" / "a.svg"
+        only.parent.mkdir(parents=True)
+        only.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
+            encoding="utf-8",
+        )
+        reports = output_root / "reports"
+        reports.mkdir(parents=True)
+        report = reports / "compression-report.csv"
+        candidates = reports / "compression-candidates.csv"
+        run_report = reports / "compression-run.json"
+        report.write_text("file,profile\n", encoding="utf-8")
+        candidates.write_text("file,profile\n", encoding="utf-8")
+        run_report.write_text("{}\n", encoding="utf-8")
+        return SimpleNamespace(
+            profile_root=profile_root,
+            report=report,
+            candidates_report=candidates,
+            run_report=run_report,
+            summary={
+                "assetCount": 1,
+                "compressedAssetCount": 0,
+                "retainedAssetCount": 1,
+                "sourceBytes": only.stat().st_size,
+                "outputBytes": only.stat().st_size,
+                "reclaimedBytes": 0,
+                "reductionPercent": 0.0,
+            },
+            run_info={"renderer": "resvg", "renderer_version": "test"},
+        )
+
+    monkeypatch.setattr(
+        symbol_work,
+        "_compression_tools",
+        lambda: type(
+            "IncompleteCompressionTools",
+            (),
+            {"compress_svg_tree": staticmethod(fake_incomplete)},
+        ),
+    )
+    with pytest.raises(ValueError, match="exactly the canonical asset set"):
+        compress_symbol_work(
+            materialized,
+            archive=archive,
+            build_manifest_path=manifest_path,
+            reports_base=tmp_path / "data" / "reports" / "symbols",
+            project_root=tmp_path,
+        )
+    assert {
+        path.relative_to(compressed.compressed_root).as_posix(): path.read_bytes()
+        for path in compressed.compressed_root.rglob("*.svg")
+    } == prior_bytes
+    assert load_symbol_manifest(manifest_path)["formatVersion"] == 7
+
+    reconverted = convert_symbol_text(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest_path,
+        font_report=font_report,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+    )
+    assert reconverted.status == "passed"
+    reconverted_manifest = load_symbol_manifest(manifest_path)
+    assert reconverted_manifest["formatVersion"] == 6
+    assert "compression" not in reconverted_manifest["processing"]
 
 def test_text_conversion_failure_preserves_existing_canonical_tree(
     tmp_path: Path, monkeypatch
