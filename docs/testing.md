@@ -119,8 +119,10 @@ source checkouts intentionally contain no real raw Army snapshot. This workflow
 is hermetic: it does not acquire network data and does not require ignored
 Corvus Belli graphical assets.
 
-The broader CI/testing design and remaining installed-wheel, cross-platform, and
-optional/manual full-asset work are documented in
+The separate `Installed wheel smoke` workflow also builds a real wheel, installs
+it into a fresh virtual environment, and exercises installed build CLIs plus
+runtime startup from outside the source checkout. Cross-platform and
+optional/manual full-asset work remain documented in
 [the continuous integration strategy](ci.md).
 
 ## Reports

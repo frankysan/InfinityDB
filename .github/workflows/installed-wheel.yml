@@ -1,0 +1,79 @@
+name: Installed wheel smoke
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-wheel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Build wheel
+        run: python -m pip wheel --no-deps --wheel-dir "$RUNNER_TEMP/wheelhouse" .
+
+      - name: Install wheel in clean virtual environment
+        run: |
+          python -m venv "$RUNNER_TEMP/wheel-venv"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install --no-deps "$RUNNER_TEMP"/wheelhouse/*.whl
+
+      - name: Stage smoke-test inputs outside checkout
+        run: |
+          mkdir -p "$RUNNER_TEMP/wheel-smoke"
+          cp -R tests/fixtures/deployment-smoke "$RUNNER_TEMP/wheel-smoke/army"
+          cp -R data/curated/rules "$RUNNER_TEMP/wheel-smoke/rules"
+
+      - name: Validate installed CLI and runtime
+        working-directory: ${{ runner.temp }}/wheel-smoke
+        run: |
+          "$RUNNER_TEMP/wheel-venv/bin/infinity-db" --version
+          "$RUNNER_TEMP/wheel-venv/bin/infinity-army" --version
+          "$RUNNER_TEMP/wheel-venv/bin/infinity-db" build army --output-dir generated --compact
+          "$RUNNER_TEMP/wheel-venv/bin/infinity-army" build army --output-dir army-only --compact
+          "$RUNNER_TEMP/wheel-venv/bin/infinity-db" build-rules rules --output generated/rules.db
+          "$RUNNER_TEMP/wheel-venv/bin/infinity-db" validate-curated rules
+          "$RUNNER_TEMP/wheel-venv/bin/python" - <<'PY'
+          import sys
+          from pathlib import Path
+
+          from infinity_army_data.project_resources import maintained_config_path
+          from infinity_db.database import Database
+          from infinity_db.rules_database import RulesDatabase
+          from infinity_db.web import create_app
+
+          share_root = Path(sys.prefix) / "share" / "infinity-db" / "config"
+          required = [
+              ("catalogs", "weapon-categories.json"),
+              ("catalogs", "weapon-overrides.json"),
+              ("identity", "source-identities.json"),
+              ("validation", "source-anomalies.json"),
+          ]
+          for parts in required:
+              path = maintained_config_path(*parts)
+              assert path.is_file(), path
+              assert path.is_relative_to(share_root), (path, share_root)
+
+          database = Database(Path("generated/infinity.db"))
+          database.validate()
+          rules = RulesDatabase(Path("generated/rules.db"))
+          rules.validate()
+          app = create_app(database.path, rules.path)
+          assert app.database.path == database.path
+          assert app.rules_database is not None
+          PY

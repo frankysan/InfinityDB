@@ -12,9 +12,10 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
+from infinity_army_data.project_resources import maintained_config_path
+
 IDENTITY_CONFIG_SCHEMA_VERSION = 2
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_IDENTITY_CONFIG = PROJECT_ROOT / "config" / "identity" / "source-identities.json"
+DEFAULT_IDENTITY_CONFIG = maintained_config_path("identity", "source-identities.json")
 CATALOG_NAMES = ("skills", "equipment", "weapons")
 IDENTITY_CONFIG_METADATA_KEY = "identityConfig"
 IDENTITY_CONFIG_SHA256_METADATA_KEY = "identityConfigSha256"

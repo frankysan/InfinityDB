@@ -254,6 +254,11 @@ rules-database inputs.
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
 adds the SQLite export and web-server commands.
 
+Built wheels include the maintained identity, weapon-catalog, and source-anomaly
+configuration under the installation prefix's `share/infinity-db/config/` tree,
+so supported `infinity-db` / `infinity-army` build commands do not depend on a
+source checkout's repository-relative `config/` directory.
+
 Each build checks that required metadata is present, lossless source
 reconstruction, normalized keys and relationships, tracked source-anomaly
 ceilings for downloader-dated snapshots, and SQLite import integrity. The

@@ -52,9 +52,10 @@ and serves a read-only browser and same-origin HTTP API.
   contains the native-module browser UI.
 - Read-only application/runtime imports must not pull build-time normalization or
   maintained source-policy configuration merely to open an already-built
-  database. Production runtime must remain independent of source-checkout
-  `config/` paths; installed build/ingestion CLI resources are a separate
-  packaging contract.
+  database. Production runtime remains independent of source-checkout `config/`
+  paths. Supported installed build/ingestion CLI commands resolve the same
+  tracked identity/catalog/anomaly configuration from
+  `<sys.prefix>/share/infinity-db/config/` when no source checkout is present.
 - Standalone acquisition and processing tools remain explicitly invoked and
   independently testable. Normal builds and tests must not acquire network data
   unexpectedly.
@@ -70,10 +71,13 @@ and serves a read-only browser and same-origin HTTP API.
   fixture rather than live acquisition or ignored graphical assets. Repository
   rules/branch protection, not workflow YAML, determines whether GitHub blocks a
   merge on that check.
+- `Installed wheel smoke` builds and installs the wheel in a fresh virtual
+  environment, validates installed `infinity-db` / `infinity-army` build commands
+  and maintained config resources, then opens the generated Army/rules databases
+  through the runtime application outside the checkout.
 - **Design direction:** optional/manual full-asset GitHub validation remains
-  separate, installed-wheel validation gets its own clean environment, and
-  source checks expand to Windows/macOS without redistributing Corvus Belli
-  graphical assets. See `docs/ci.md`.
+  separate, and source checks expand to Windows/macOS without redistributing
+  Corvus Belli graphical assets. See `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 

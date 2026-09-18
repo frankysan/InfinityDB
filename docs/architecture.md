@@ -511,11 +511,14 @@ for hermetic testing.
 The `Source checks` GitHub Actions workflow now runs the hermetic project check
 runner from a clean Ubuntu/Python 3.11 checkout, using the tracked synthetic Army
 fixture for database construction and no live acquisition or third-party
-graphical assets. Full-asset GitHub validation remains optional/manual and must
-not redistribute those assets as CI artifacts. Installed-wheel validation and
-cross-platform Windows/macOS source checks remain design direction; the existing
-container smoke test continues to validate deployment packaging separately. See
-`docs/ci.md`.
+graphical assets. `Installed wheel smoke` separately installs the built wheel in
+a fresh virtual environment, verifies installed build CLIs and runtime startup,
+and consumes maintained build configuration from
+`<sys.prefix>/share/infinity-db/config/` rather than repository-relative paths.
+Full-asset GitHub validation remains optional/manual and must not redistribute
+those assets as CI artifacts. Cross-platform Windows/macOS source checks remain
+design direction; the existing container smoke test continues to validate
+deployment packaging separately. See `docs/ci.md`.
 
 ## Portability and filesystem policy
 

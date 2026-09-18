@@ -36,6 +36,18 @@ where = ["src"]
 [tool.setuptools]
 license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 
+[tool.setuptools.data-files]
+"share/infinity-db/config/catalogs" = [
+  "config/catalogs/weapon-categories.json",
+  "config/catalogs/weapon-overrides.json",
+]
+"share/infinity-db/config/identity" = [
+  "config/identity/source-identities.json",
+]
+"share/infinity-db/config/validation" = [
+  "config/validation/source-anomalies.json",
+]
+
 [tool.setuptools.package-data]
 "infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg", "static/armies/**/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
 

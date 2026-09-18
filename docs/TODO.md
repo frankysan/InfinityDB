@@ -417,9 +417,10 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] Repair the deployment-smoke runtime import boundary. Read-only runtime
     database/web imports no longer pull the database exporter, Army normalizer,
     or weapon-policy configuration from source-checkout-relative paths.
-  - [ ] Package configuration intentionally required by supported installed CLI
-    build/ingestion operations through an explicit resource contract, and verify
-    that contract in the planned installed-wheel smoke job.
+  - [x] Package configuration intentionally required by supported installed CLI
+    build/ingestion operations through the shared
+    `<sys.prefix>/share/infinity-db/config/` resource contract and verify it from
+    outside the checkout.
   - [x] Add explicit `--assets off|auto|required` handling to `run_checks.py`.
     Required CI defaults to `off`; `auto` uses full-asset tests only when a
     validated complete set exists and fails on detected partial/corrupt state;
@@ -445,7 +446,7 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Configure GitHub repository rules/branch protection to require the
     `Source checks` result for protected merges when branch protection is enabled;
     workflow YAML alone does not enforce merge blocking.
-  - [ ] Add an installed-wheel smoke job that builds/installs the wheel in a clean
+  - [x] Add an installed-wheel smoke job that builds/installs the wheel in a clean
     environment and validates supported imports, startup, CLI/resource packaging,
     and generated test databases without repository-relative assumptions.
   - [ ] Expand hermetic CI across Windows, Ubuntu/Linux, and macOS at Python 3.11;

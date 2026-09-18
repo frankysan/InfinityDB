@@ -26,6 +26,12 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add an `Installed wheel smoke` GitHub Actions workflow. Wheels now package the
+  maintained identity, weapon-catalog, and source-anomaly build configuration
+  under `share/infinity-db/config/`; the smoke job installs the wheel into a
+  fresh virtual environment and validates both installed build CLIs plus runtime
+  startup against generated fixture databases outside the source checkout.
+
 - Add a clean-checkout Linux `Source checks` GitHub Actions workflow that runs
   the normal hermetic test/lint/build/rules contract on Python 3.11 using the
   tracked synthetic Army fixture rather than live data or third-party assets.

@@ -11,11 +11,12 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
+from infinity_army_data.project_resources import maintained_config_path
+
 FORMAT_NAME = "InfinityDB source anomaly baseline"
 FORMAT_VERSION = 1
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SOURCE_ANOMALY_BASELINE = (
-    PROJECT_ROOT / "config" / "validation" / "source-anomalies.json"
+DEFAULT_SOURCE_ANOMALY_BASELINE = maintained_config_path(
+    "validation", "source-anomalies.json"
 )
 
 

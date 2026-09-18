@@ -2,8 +2,8 @@
 
 This document records the InfinityDB continuous-integration and automated
 validation contract. Sections explicitly marked design direction remain planned;
-the deployment smoke, required Linux source workflow, and local asset-test policy are
-current behavior.
+the deployment smoke, required Linux source workflow, installed-wheel smoke, and
+local asset-test policy are current behavior.
 
 The goal is to make a clean checkout independently trustworthy while still
 supporting deeper validation against a complete local Corvus Belli graphical
@@ -81,24 +81,33 @@ case handling, path separators, line endings, subprocess behavior, and Windows
 `spawn` semantics. External-tool tests may remain conditional where the
 required executable is intentionally optional.
 
-### Installed-package smoke
+### Installed-package smoke (current)
 
-A separate clean-environment job should build the project wheel, install that
-wheel, and exercise the supported installed-package surface without relying on
-repository-relative files that were not packaged deliberately.
+The `Installed wheel smoke` GitHub Actions workflow builds the project wheel,
+installs it into a fresh virtual environment, stages only controlled Army/rules
+fixtures outside the checkout, and exercises the supported installed-package
+surface from that clean working directory.
 
-At minimum this layer should verify:
+The job verifies:
 
-- imports required by the deployed application;
-- application startup against generated test databases;
-- installed CLI commands that InfinityDB intends to support;
-- packaged configuration/resources required by those supported commands.
+- installed `infinity-db` and `infinity-army` console entry points;
+- `infinity-db build` and standalone `infinity-army build`;
+- curated-rules validation and `rules.db` construction;
+- runtime `Database`, `RulesDatabase`, and application startup against the
+  generated test databases;
+- installed maintained identity, weapon-catalog, and source-anomaly
+  configuration.
 
-Build-time configuration and runtime query code should remain separated where
-runtime behavior does not require the former. If an installed CLI intentionally
-supports ingestion/build operations, its maintained configuration must be
-packaged through an explicit resource contract rather than found by walking back
-into a source checkout.
+The tracked authored configuration remains under repository `config/`. Wheel
+packaging installs the build/ingestion subset under
+`<sys.prefix>/share/infinity-db/config/`; loaders prefer the tracked source
+layout when present and otherwise resolve that installed shared-data contract.
+This avoids duplicating authored configuration inside Python packages while
+keeping installed build commands independent of a source checkout.
+
+Build-time configuration and runtime query code remain separated: opening an
+already-built database does not load Army normalization policy, while installed
+build/ingestion commands intentionally consume the packaged maintained data.
 
 ### Deployment smoke (current)
 
@@ -111,8 +120,8 @@ behavior.
 Read-only runtime imports are deliberately separated from build-time Army
 normalization and weapon-policy configuration. The installed application may
 therefore open and validate already-built databases without repository-relative
-`config/` files. Installed build/ingestion CLI resource packaging remains a
-separate planned contract for the installed-wheel smoke layer.
+`config/` files. Installed build/ingestion CLI resource packaging is validated
+separately by the installed-wheel smoke layer.
 
 This layer verifies deployment packaging; it is not a substitute for general
 source CI or installed-wheel validation.
@@ -168,16 +177,13 @@ networked or long-running benchmark.
 ## Planned implementation order
 
 The deployment-smoke runtime import boundary, local hermetic/full-asset test
-split, and clean-checkout Linux source workflow are implemented. Remaining CI
-work should proceed in this order:
+split, clean-checkout Linux source workflow, and installed-wheel smoke are
+implemented. Remaining CI work should proceed in this order:
 
-1. Add installed-wheel/package smoke validation so source-checkout assumptions
-   cannot hide missing packaged resources, including configuration intentionally
-   required by supported installed build/ingestion CLI commands.
-2. Expand the hermetic source checks to Windows and macOS.
-3. Add optional/manual full-asset integration validation without redistributing
+1. Expand the hermetic source checks to Windows and macOS.
+2. Add optional/manual full-asset integration validation without redistributing
    third-party graphical assets.
-4. Add scheduled/manual acquisition, performance, or other extended workflows
+3. Add scheduled/manual acquisition, performance, or other extended workflows
    only where they provide useful independent signals.
 
 Symbol-pipeline feature work can then continue with these validation layers in

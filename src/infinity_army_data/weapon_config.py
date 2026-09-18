@@ -10,13 +10,14 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
+from .project_resources import maintained_config_path
+
 WEAPON_CATEGORY_CONFIG_FORMAT = "InfinityDB weapon category config"
 WEAPON_CATEGORY_CONFIG_VERSION = 1
 WEAPON_OVERRIDE_CONFIG_FORMAT = "InfinityDB weapon source corrections"
 WEAPON_OVERRIDE_CONFIG_VERSION = 1
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_WEAPON_CATEGORY_CONFIG = PROJECT_ROOT / "config" / "catalogs" / "weapon-categories.json"
-DEFAULT_WEAPON_OVERRIDE_CONFIG = PROJECT_ROOT / "config" / "catalogs" / "weapon-overrides.json"
+DEFAULT_WEAPON_CATEGORY_CONFIG = maintained_config_path("catalogs", "weapon-categories.json")
+DEFAULT_WEAPON_OVERRIDE_CONFIG = maintained_config_path("catalogs", "weapon-overrides.json")
 
 
 class WeaponConfigError(ValueError):
