@@ -17,13 +17,45 @@ complete, remove it after any durable outcome is recorded in `CHANGELOG.md`,
 architecture/data-model documentation, or another appropriate reference. Git
 history retains implementation detail.
 
-## Next: performance
+## Milestone sequence
+
+- [ ] **Milestone 1 — complete the data/wiki/symbol ingestion pipeline.**
+  Treat ingestion as complete when Army data, wiki-derived curated/rules data,
+  and symbols can all be acquired from pinned external sources, validated,
+  transformed reproducibly, and published into their runtime artifacts with
+  explicit provenance. No undocumented manual transformation should remain
+  between a pinned source and a runtime artifact; intentional human curation
+  remains an explicit, reviewed input. Work through the remaining ingestion
+  tasks in this order: wiki snapshot/provenance handoff, integrated symbol
+  orchestration/publication, then ingestion-specific reliability and
+  reproducibility gaps.
+- [ ] **Milestone 2 — perform a thorough web-app consistency audit.**
+  Start this after Milestone 1 is complete. Trace the application from generated
+  storage through backend queries/API contracts to browser presentation, and
+  resolve semantic or behavioral inconsistencies before beginning the larger
+  visual-design/theming work. The detailed audit checklist is maintained below.
+
+Database optimization, canonical-payload refactors, general performance work,
+and product expansion are not Milestone 1 blockers unless a concrete ingestion
+requirement makes them necessary.
+
+## Deferred performance and storage experiments
+
+These are intentionally deferred until after the ingestion milestone and web-app
+consistency audit unless one becomes necessary to unblock that work.
 
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
   representative snapshot before and after each performance change.
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.
+- [ ] Compare otherwise equivalent deployment variants backed by SQLite and by
+  `normalized.json`, with both variants exposing the same API and representative
+  load scenario. Define the JSON variant's startup parsing, indexing, and caching
+  semantics before interpreting performance results so the comparison measures
+  runtime data models rather than repeated JSON parsing. Evaluate both request
+  performance and deployment portability/multi-platform suitability before
+  deciding whether a storage/query abstraction is justified.
 
 ## Database and data pipeline
 
@@ -128,6 +160,11 @@ history retains implementation detail.
       it; do not fabricate archive/hash provenance from the date alone.
     - [ ] Migrate curated wiki sources to exact recorded `WIKI ...zip` identity/hash
       once the new packager provides that identity.
+    - [ ] Define wiki snapshot completeness semantics. Failed or missing page
+      acquisition must be surfaced explicitly and must not silently publish an
+      apparently complete immutable snapshot; decide whether incomplete runs are
+      rejected outright or represented by an explicit incomplete status that
+      downstream curated/rules builds refuse by default.
     - [ ] Replace the current mixed `vocabularySources` locator requirement
       (`path`/`snapshotDate`/`heading`/`page`) with source-appropriate provenance
       so wiki vocabulary references do not require a printed-page field merely
@@ -421,6 +458,45 @@ history retains implementation detail.
   `docs/AI_CONTEXT.md`; replace repeated contract text with links where practical.
   As part of this pass, remove stale statements that call the already-implemented
   `army-symbol-build.json` or snapshot-manifest work merely planned/future work.
+
+## Milestone 2: web-app consistency audit
+
+- [ ] Perform a systematic end-to-end consistency audit after the ingestion
+  milestone is complete.
+  - [ ] Build the audit against one representative current production snapshot
+    with its matching `rules.db` and locally published symbol set, and record the
+    exact source/runtime artifact provenance used for the audit.
+  - [ ] Trace maintained domain concepts from normalized/database storage through
+    backend query results and API payloads to frontend rendering. Verify IDs,
+    canonical/logical identities, army hierarchy/roles, names, availability,
+    profile/loadout relationships, and source/rules provenance are interpreted
+    consistently at every layer.
+  - [ ] Audit the principal catalog and detail surfaces for parity and coverage:
+    armies, units, profiles/loadouts, Skills, Equipment, Weapons, Traits, rules
+    enrichment, Fireteams, symbols, and wiki/rules links. Confirm the browser is
+    not silently dropping backend data or synthesizing conflicting domain
+    meaning.
+  - [ ] Verify navigation, filtering, searching, ordering, labels, counts, and
+    deep links use consistent semantics across list/detail pages and API results.
+  - [ ] Exercise missing, optional, empty, stale, and error states deliberately,
+    including unavailable rules data, absent locally published symbols, unknown
+    references, empty collections, invalid/deep-link identifiers, and generated
+    artifact mismatches.
+  - [ ] Identify duplicated domain interpretation between Python and browser code.
+    Where duplication can disagree, make the backend/API semantic contract the
+    authoritative source and keep presentation-specific decisions in the
+    frontend.
+  - [ ] Verify runtime-artifact assumptions across a clean source checkout, local
+    development/deployment, and the redistributable container path, including the
+    deliberate distinction between locally acquired Corvus Belli graphics and
+    distributable project artifacts.
+  - [ ] Turn every consistency defect fixed during the audit into focused
+    regression coverage where practical, and retain a concise audit record that
+    identifies any intentionally deferred inconsistencies.
+  - [ ] Keep visual redesign, theme implementation, and broader UI restructuring
+    separate from this audit unless a consistency defect requires a minimal UI
+    correction. Begin the larger visual-design/theming milestone only after the
+    semantic audit is complete.
 
 ## Visual design, frontend architecture, and theming
 
