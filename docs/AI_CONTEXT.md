@@ -255,12 +255,16 @@ references may share one URL; every reference is preserved while each
 authoritative URL is downloaded only once.
 
 `tools/build_symbols.py` is the normal orchestration entrypoint for symbol
-refreshes. It requires either an explicit immutable Army ZIP (`--snapshot`) with
-matching generated snapshot provenance or an explicit network refresh
-(`--fetch-snapshot`); it never selects a newest snapshot implicitly. The
-orchestrator verifies archive hash, acquisition timestamp, source URL, language,
-document count, and observed per-document Army source revisions, then passes
-that exact archive through current raw symbol discovery/resolution.
+refreshes. A new build requires either an explicit immutable Army ZIP
+(`--snapshot`) with matching generated snapshot provenance or an explicit
+network refresh (`--fetch-snapshot`); it never selects a newest snapshot
+implicitly. `--stop-after` exposes every verified stage checkpoint from snapshot
+through publication. Once acquisition has created version-2 build state,
+`--resume` continues from that exact SHA-bound Army/SYMBOLS pair without
+rediscovery or reacquisition. Resume validates the existing raw work tree instead
+of rematerializing later-stage work; only version-2 state may reconstruct a
+missing raw work tree. For an external Army ZIP whose portable path is not in
+the build manifest, supply the same archive again with `--resume --snapshot`.
 
 The raw symbol resolution stage creates one immutable `SYMBOLS ...zip`,
 ordinary snapshot provenance, and acquisition-only version-2

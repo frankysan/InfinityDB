@@ -24,6 +24,7 @@ from tools.symbol_work import (
     compress_symbol_work,
     convert_symbol_text,
     detect_symbol_duplicates,
+    load_materialized_symbol_work,
     materialize_symbol_archive,
 )
 
@@ -111,6 +112,45 @@ def test_materialize_symbol_archive_verifies_and_rebuilds_work_tree(tmp_path: Pa
     assert target.read_bytes() == body
     assert second.asset_count == 1
 
+
+
+def test_load_materialized_symbol_work_verifies_without_replacing(tmp_path: Path) -> None:
+    body = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
+    archive, snapshot_manifest, manifest = _fixture(
+        tmp_path, {"units/example.svg": body}
+    )
+    work_base = tmp_path / "data" / "work" / "symbols"
+    materialized = materialize_symbol_archive(
+        archive, snapshot_manifest, manifest, work_base
+    )
+    marker = materialized.work_root / "keep-me.txt"
+    marker.write_text("derived output", encoding="utf-8")
+
+    loaded = load_materialized_symbol_work(
+        archive, snapshot_manifest, manifest, work_base
+    )
+
+    assert loaded == materialized
+    assert marker.read_text(encoding="utf-8") == "derived output"
+
+
+def test_load_materialized_symbol_work_rejects_mutated_raw_member(tmp_path: Path) -> None:
+    body = b'<svg xmlns="http://www.w3.org/2000/svg"/>'
+    archive, snapshot_manifest, manifest = _fixture(
+        tmp_path, {"units/example.svg": body}
+    )
+    work_base = tmp_path / "data" / "work" / "symbols"
+    materialized = materialize_symbol_archive(
+        archive, snapshot_manifest, manifest, work_base
+    )
+    (materialized.raw_root / "units" / "example.svg").write_text(
+        "mutated", encoding="utf-8"
+    )
+
+    with pytest.raises(ValueError, match="Materialized symbol SHA-256 mismatch"):
+        load_materialized_symbol_work(
+            archive, snapshot_manifest, manifest, work_base
+        )
 
 def test_materialize_symbol_archive_rejects_mutated_archive(tmp_path: Path) -> None:
     body = b'<svg xmlns="http://www.w3.org/2000/svg"/>'

@@ -110,6 +110,93 @@ def _work_name(archive: Path, digest: str) -> str:
     return f"{archive.stem}--{digest[:12]}"
 
 
+def load_materialized_symbol_work(
+    archive: Path,
+    snapshot_manifest_path: Path,
+    build_manifest_path: Path,
+    work_base: Path,
+) -> MaterializedSymbols:
+    """Load and verify an existing loose work tree without replacing derived output."""
+    manifest = load_symbol_manifest(build_manifest_path)
+    artifact = manifest["snapshot"]["symbolArtifact"]
+    if archive.name != artifact["name"]:
+        raise ValueError(
+            "Pinned symbol archive name does not match army-symbol-build.json: "
+            f"{archive.name} != {artifact['name']}"
+        )
+    archive_sha = sha256_file(archive)
+    if archive_sha != artifact["sha256"]:
+        raise ValueError(
+            "Pinned symbol archive SHA-256 mismatch: "
+            f"expected {artifact['sha256']}, got {archive_sha}"
+        )
+    provenance = load_snapshot_manifest(snapshot_manifest_path, archive=archive)
+    snapshot = provenance["snapshot"]
+    if snapshot["type"] != "symbols":
+        raise ValueError(
+            f"Pinned symbol provenance is not a symbol snapshot: {snapshot_manifest_path}"
+        )
+    if snapshot["archive"]["name"] != archive.name:
+        raise ValueError(
+            "Pinned symbol provenance names a different archive: "
+            f"{snapshot['archive']['name']} != {archive.name}"
+        )
+    input_artifact = provenance.get("inputArtifact")
+    army_artifact = manifest["snapshot"]["armyArtifact"]
+    if not isinstance(input_artifact, dict) or (
+        input_artifact.get("name") != army_artifact["name"]
+        or input_artifact.get("sha256") != army_artifact["sha256"]
+    ):
+        raise ValueError(
+            "Pinned symbol provenance Army input does not match army-symbol-build.json"
+        )
+
+    destination = work_base / _work_name(archive, archive_sha)
+    raw_root = destination / "raw"
+    if not raw_root.is_dir():
+        raise ValueError(f"Materialized symbol work tree is missing: {raw_root}")
+
+    expected = {asset["archivePath"]: asset for asset in manifest["assets"]}
+    if snapshot["documentCount"] != len(expected):
+        raise ValueError(
+            "Pinned symbol snapshot document count does not match army-symbol-build.json: "
+            f"{snapshot['documentCount']} != {len(expected)}"
+        )
+    actual = {
+        path.relative_to(raw_root).as_posix()
+        for path in raw_root.rglob("*")
+        if path.is_file()
+    }
+    if actual != set(expected):
+        missing = sorted(set(expected) - actual)
+        unexpected = sorted(actual - set(expected))
+        details = []
+        if missing:
+            details.append("missing: " + ", ".join(missing))
+        if unexpected:
+            details.append("unexpected: " + ", ".join(unexpected))
+        raise ValueError(
+            "Materialized symbol work tree does not match army-symbol-build.json ("
+            + "; ".join(details)
+            + ")"
+        )
+    for archive_path, asset in expected.items():
+        path = raw_root.joinpath(*_portable_member(archive_path).parts)
+        actual_sha = sha256_file(path)
+        if actual_sha != asset["sha256"]:
+            raise ValueError(
+                f"Materialized symbol SHA-256 mismatch for {archive_path}: "
+                f"expected {asset['sha256']}, got {actual_sha}"
+            )
+
+    return MaterializedSymbols(
+        work_root=destination,
+        raw_root=raw_root,
+        asset_count=len(expected),
+        build_manifest=manifest,
+    )
+
+
 def materialize_symbol_archive(
     archive: Path,
     snapshot_manifest_path: Path,

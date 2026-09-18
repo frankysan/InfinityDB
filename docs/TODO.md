@@ -139,9 +139,9 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Let future snapshot-comparison tooling write structured generated diff
     data/reports under manifest/report paths while curated snapshot notes remain
     the human interpretation of those results.
-  - [ ] Extend the thin `tools/build_symbols.py` orchestration spine through the
-    remaining processing/publication stages while keeping one pinned Army
-    snapshot authoritative for the whole run.
+  - [x] Extend `tools/build_symbols.py` through the complete processing/publication
+    pipeline while keeping one pinned Army snapshot authoritative for the whole
+    run.
     - [x] Add mutually exclusive offline `--snapshot PATH` and explicit online
       `--fetch-snapshot` modes. Verify the selected Army archive against generated
       provenance, pin archive identity/hash, language, acquisition timestamp,
@@ -162,13 +162,25 @@ consistency audit unless one becomes necessary to unblock that work.
         through version-7 build state.
       - [x] Integrate publication, mapping generation, final validation, and final
         reporting through version-8 published state.
-  - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain
-    separate, intentional operations. The current orchestrator already supports
-    `--snapshot-only`, `--language`, `--data-root`, `--static-symbols`, `--jobs`,
-    `--duplicate-render-size`, `--duplicate-renderer`, `--text-converter`,
-    `--compression-renderer`, and `--static-root`;
-    `--skip-symbol-download`, `--skip-compression`, `--keep-work`, and `--dry-run`
-    remain candidate options as later stages are integrated.
+  - [x] Keep normal project builds offline. Snapshot and symbol refreshes remain
+    separate, intentional operations. The orchestrator supports explicit
+    `--snapshot`/`--fetch-snapshot` starts, stage checkpoints through
+    `--stop-after`, SHA-bound `--resume`, `--language`, `--data-root`,
+    `--static-symbols`, `--jobs`, renderer/converter selection, and `--static-root`.
+    `--snapshot-only` remains a compatibility alias for `--stop-after snapshot`.
+  - [ ] Complete one live stage-by-stage acceptance run on a real pinned Army
+    snapshot before declaring the symbol pipeline complete.
+    - [ ] Snapshot pin/provenance checkpoint.
+    - [ ] Raw symbol acquisition/version-2 checkpoint.
+    - [ ] Verified materialization checkpoint.
+    - [ ] SVG preflight/version-3 checkpoint.
+    - [ ] Installed-font audit/version-4 checkpoint.
+    - [ ] Exact/visual deduplication/version-5 checkpoint with size review.
+    - [ ] Canonical text-to-path/version-6 checkpoint with visual spot checks.
+    - [ ] Balanced compression/version-7 checkpoint with visual/size review.
+    - [ ] Transactional publication/version-8 checkpoint and application smoke test.
+    - [ ] Deliberately trigger safe downstream failure/rollback checks after the
+      successful live run.
 
 - [ ] Complete the static-symbol and local-override model as maintained project
   knowledge rather than downloader code.

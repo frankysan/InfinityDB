@@ -220,6 +220,32 @@ python tools/build_symbols.py --fetch-snapshot
 python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip" --refresh-symbols
 ```
 
+For staged live validation, `--stop-after` exposes every verified checkpoint:
+`snapshot`, `acquisition`, `materialization`, `preflight`, `font-audit`,
+`deduplication`, `text-conversion`, `compression`, and `publication`. After raw
+symbol acquisition has created `army-symbol-build.json`, `--resume` reuses the
+exact Army/SYMBOLS artifacts recorded there instead of rediscovering or
+reacquiring them. Resume verifies the existing raw work tree byte-for-byte and
+never rematerializes a later-stage build, so canonical/compressed outputs cannot
+be discarded accidentally. If the original Army ZIP was outside the project,
+pass that same path again with `--resume --snapshot PATH`. `--snapshot-only` is
+retained as a legacy alias for `--stop-after snapshot`.
+
+A typical stage-by-stage acceptance run therefore starts with the same pinned
+Army archive and then advances only through resume checkpoints:
+
+```powershell
+python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip" --stop-after snapshot
+python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip" --stop-after acquisition
+python tools/build_symbols.py --resume --stop-after materialization
+python tools/build_symbols.py --resume --stop-after preflight
+python tools/build_symbols.py --resume --stop-after font-audit
+python tools/build_symbols.py --resume --stop-after deduplication
+python tools/build_symbols.py --resume --stop-after text-conversion
+python tools/build_symbols.py --resume --stop-after compression
+python tools/build_symbols.py --resume --stop-after publication
+```
+
 The development server listens on all local network interfaces. Open
 <http://127.0.0.1:8000> on the development machine, or use its LAN address
 (for example, `http://192.168.1.25:8000`) from another device. Allow Python

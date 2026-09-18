@@ -37,6 +37,13 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add explicit symbol-pipeline checkpoints and SHA-bound resume support to
+  `tools/build_symbols.py`. Live acceptance can now stop after snapshot,
+  acquisition, materialization, preflight, font audit, deduplication, text
+  conversion, compression, or publication, then continue without reacquiring
+  immutable inputs. Resume verifies existing raw work instead of replacing a
+  later-stage work tree.
+
 - Integrate final non-destructive symbol publication into `build_symbols.py`.
   Passed version-7 compression state now advances to version 8 after a temporary
   publication tree, generated browser mappings, and the complete

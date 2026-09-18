@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import json
 import zipfile
@@ -8,6 +9,11 @@ from types import SimpleNamespace
 import pytest
 
 from infinity_db.snapshot_provenance import write_snapshot_manifest
+from infinity_db.symbol_manifest import (
+    build_symbol_manifest,
+    load_symbol_manifest,
+    write_symbol_manifest,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -41,6 +47,71 @@ def army_snapshot(tmp_path: Path, *, language: str = "en") -> tuple[Path, Path]:
         language=language,
     )
     return archive, manifest
+
+
+def resumable_symbol_build(tmp_path: Path) -> tuple[Path, Path, Path]:
+    army, army_manifest = army_snapshot(tmp_path)
+    data_root = tmp_path / "data"
+    manifest_dir = data_root / "manifests" / "snapshots"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    (manifest_dir / army_manifest.name).write_bytes(army_manifest.read_bytes())
+
+    body = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
+    symbol_dir = data_root / "raw" / "symbols"
+    symbol_dir.mkdir(parents=True)
+    symbols = symbol_dir / "SYMBOLS 20260918-120100.zip"
+    with zipfile.ZipFile(symbols, "w") as output:
+        output.writestr("units/example.svg", body)
+    write_snapshot_manifest(
+        symbols,
+        manifest_dir,
+        snapshot_type="symbols",
+        acquired_at=datetime(2026, 9, 18, 12, 1, tzinfo=UTC),
+        source_url="https://assets.corvusbelli.net/army/img/",
+        document_count=1,
+        project_root=tmp_path,
+        input_artifact=army,
+    )
+    audit = {
+        "unitProfileReferenceCount": 0,
+        "uniqueUnitUrlCount": 0,
+        "factionReferenceCount": 0,
+        "uniqueFactionUrlCount": 0,
+        "semanticReferenceCount": 0,
+        "uniqueSemanticUrlCount": 0,
+        "resumeReferenceCount": 0,
+        "uniqueResumeUrlCount": 0,
+        "staticReferenceCount": 0,
+        "recursiveReferenceCount": 0,
+        "uniqueRecursiveUrlCount": 0,
+        "uniqueDownloadedUrlCount": 1,
+        "unknownReferenceCount": 0,
+    }
+    document = build_symbol_manifest(
+        army_artifact=army,
+        symbol_artifact=symbols,
+        acquired_at=datetime(2026, 9, 18, 12, 1, tzinfo=UTC),
+        army_acquired_at=datetime(2026, 9, 18, 12, 0, tzinfo=UTC),
+        army_language="en",
+        army_source_url="https://api.corvusbelli.com/army",
+        source_document_count=2,
+        source_revisions={"7.26246.158": 1},
+        assets=[
+            {
+                "url": "https://assets.corvusbelli.net/army/img/logo/example.svg",
+                "sourceFilename": "example.svg",
+                "archivePath": "units/example.svg",
+                "sha256": hashlib.sha256(body).hexdigest(),
+                "sourceMethod": "override",
+            }
+        ],
+        references=[],
+        audit=audit,
+        project_root=tmp_path,
+    )
+    build_manifest = data_root / "manifests" / "army-symbol-build.json"
+    write_symbol_manifest(document, build_manifest)
+    return data_root, army, build_manifest
 
 
 def stub_post_acquisition(
@@ -430,3 +501,130 @@ def test_orchestrator_fails_after_persisting_failed_font_audit(
         == 1
     )
     assert "Font audit failed" in capsys.readouterr().err
+
+def test_stop_after_acquisition_does_not_materialize(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = load_module()
+    archive, manifest = army_snapshot(tmp_path)
+    data_root = tmp_path / "data"
+    expected_manifest = data_root / "manifests" / "snapshots" / manifest.name
+    expected_manifest.parent.mkdir(parents=True)
+    expected_manifest.write_bytes(manifest.read_bytes())
+    discovery = SimpleNamespace(source_document_count=2)
+    monkeypatch.setattr(module, "discover_symbol_source", lambda *_args, **_kwargs: discovery)
+    monkeypatch.setattr(module, "print_discovery_summary", lambda _discovery: None)
+    monkeypatch.setattr(
+        module,
+        "acquire_symbol_snapshot",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            asset_count=1,
+            archive=tmp_path / "symbols.zip",
+            snapshot_manifest=tmp_path / "symbols.json",
+            build_manifest=tmp_path / "missing-build.json",
+        ),
+    )
+    monkeypatch.setattr(
+        module,
+        "materialize_symbol_archive",
+        lambda *_args, **_kwargs: pytest.fail("materialization must not run"),
+    )
+
+    assert (
+        module.main(
+            [
+                "--snapshot",
+                str(archive),
+                "--data-root",
+                str(data_root),
+                "--stop-after",
+                "acquisition",
+                "--delay",
+                "0",
+            ]
+        )
+        == 0
+    )
+    assert "Checkpoint reached -> acquisition" in capsys.readouterr().out
+
+
+def test_resume_from_v2_materializes_and_runs_preflight_without_reacquisition(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = load_module()
+    data_root, army, build_manifest = resumable_symbol_build(tmp_path)
+    monkeypatch.setattr(
+        module,
+        "discover_symbol_source",
+        lambda *_args, **_kwargs: pytest.fail("resume must not rediscover symbols"),
+    )
+    monkeypatch.setattr(
+        module,
+        "acquire_symbol_snapshot",
+        lambda *_args, **_kwargs: pytest.fail("resume must not reacquire symbols"),
+    )
+
+    assert (
+        module.main(
+            [
+                "--resume",
+                "--snapshot",
+                str(army),
+                "--data-root",
+                str(data_root),
+                "--stop-after",
+                "preflight",
+            ]
+        )
+        == 0
+    )
+    assert load_symbol_manifest(build_manifest)["formatVersion"] == 3
+    output = capsys.readouterr().out
+    assert "Resuming symbol build -> version 2" in output
+    assert "Checkpoint reached -> preflight" in output
+
+
+def test_resume_verifies_existing_work_without_rematerializing(
+    tmp_path: Path, monkeypatch
+) -> None:
+    module = load_module()
+    data_root, army, _build_manifest = resumable_symbol_build(tmp_path)
+    assert (
+        module.main(
+            [
+                "--resume",
+                "--snapshot",
+                str(army),
+                "--data-root",
+                str(data_root),
+                "--stop-after",
+                "preflight",
+            ]
+        )
+        == 0
+    )
+    work_root = next((data_root / "work" / "symbols").iterdir())
+    marker = work_root / "canonical" / "keep-me.txt"
+    marker.parent.mkdir()
+    marker.write_text("preserve derived work", encoding="utf-8")
+
+    monkeypatch.setattr(
+        module,
+        "materialize_symbol_archive",
+        lambda *_args, **_kwargs: pytest.fail("resume must verify, not rematerialize"),
+    )
+    assert (
+        module.main(
+            [
+                "--resume",
+                "--snapshot",
+                str(army),
+                "--data-root",
+                str(data_root),
+                "--stop-after",
+                "materialization",
+            ]
+        )
+        == 0
+    )
+    assert marker.read_text(encoding="utf-8") == "preserve derived work"

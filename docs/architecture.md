@@ -260,9 +260,15 @@ runtime application data.
 Symbol refresh orchestration is explicit and snapshot-pinned.
 `tools/build_symbols.py` requires either `--snapshot` for an existing immutable
 Army archive with generated provenance or `--fetch-snapshot` for an intentional
-network refresh. It verifies the selected Army archive/provenance and keeps that
-same artifact pinned through current raw symbol discovery and resolution;
-normal application/database builds never invoke it or acquire network data.
+network refresh when starting a new build. It verifies the selected Army
+archive/provenance and keeps that same artifact pinned through the complete
+pipeline; normal application/database builds never invoke it or acquire network
+data. `--stop-after` exposes snapshot, acquisition, materialization, preflight,
+font-audit, deduplication, text-conversion, compression, and publication
+checkpoints. After acquisition, `--resume` loads the SHA-bound current build
+manifest and immutable snapshots without rediscovery/reacquisition. Resume
+verifies an existing raw work tree rather than replacing it; a missing work tree
+may be reconstructed only while the manifest is still version 2.
 
 Army-symbol acquisition also writes the version-2
 `data/manifests/army-symbol-build.json`. This generated build-state document is
@@ -278,9 +284,9 @@ the cache index; its referenced symbol archive/provenance and the selected membe
 hash are validated before reuse. `--refresh-symbols` bypasses the archive cache
 without bypassing local overrides. Invalid matching overrides fail rather than
 falling through, and unused overrides plus URL/filename collisions are reported.
-Its current contract is still raw-resolution only; later symbol processing
-stages will extend the build state with their own validated fields rather than
-making the downloader assign final application paths.
+The downloader remains raw-resolution only; `tools/build_symbols.py` owns the
+subsequent versioned processing stages and the publisher alone assigns final
+application paths.
 
 ### Current: army roles and logical-unit identity
 
