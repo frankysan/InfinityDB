@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import copy
+import importlib
 import json
 import re
 import shutil
 import sqlite3
+import sys
 from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
@@ -1657,3 +1659,55 @@ def test_weapon_api_adds_curated_special_profile_when_rules_database_is_availabl
     assert payload["special_profile"]["skills"] == ["Total Reaction"]
     assert payload["special_profile"]["cc_weapon"] == "PARA CC Weapon (-3)"
     assert [record["id"] for record in payload["rules"]] == ["weapon:armed-turret"]
+
+
+def test_explicit_rules_database_path_is_required(app: Callable, tmp_path: Path) -> None:
+    missing = tmp_path / "missing-rules.db"
+    with pytest.raises(ValueError, match="Rules database does not exist"):
+        create_app(app.database.path, missing)
+
+    invalid = tmp_path / "invalid-rules.db"
+    invalid.write_text("not a SQLite database", encoding="utf-8")
+    with pytest.raises(sqlite3.DatabaseError):
+        create_app(app.database.path, invalid)
+
+
+def test_adjacent_rules_database_remains_optional_for_local_use(
+    app: Callable, tmp_path: Path
+) -> None:
+    local_root = tmp_path / "local"
+    local_root.mkdir()
+    database_path = local_root / "infinity.db"
+    shutil.copy2(app.database.path, database_path)
+    (local_root / "rules.db").write_text("not a SQLite database", encoding="utf-8")
+
+    local_app = create_app(database_path)
+
+    assert local_app.rules_database is None
+
+
+def test_wsgi_uses_explicit_rules_database_from_environment(
+    app: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "wsgi-rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated" / "rules"), rules_path)
+    monkeypatch.setenv("INFINITY_DB_DATABASE", str(app.database.path))
+    monkeypatch.setenv("INFINITY_DB_RULES_DATABASE", str(rules_path))
+    sys.modules.pop("infinity_db.web.wsgi", None)
+
+    module = importlib.import_module("infinity_db.web.wsgi")
+
+    assert module.app.rules_database is not None
+    assert module.app.rules_database.path == rules_path
+
+
+def test_wsgi_rejects_missing_explicit_rules_database(
+    app: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("INFINITY_DB_DATABASE", str(app.database.path))
+    monkeypatch.setenv("INFINITY_DB_RULES_DATABASE", str(tmp_path / "missing-rules.db"))
+    sys.modules.pop("infinity_db.web.wsgi", None)
+
+    with pytest.raises(ValueError, match="Rules database does not exist"):
+        importlib.import_module("infinity_db.web.wsgi")

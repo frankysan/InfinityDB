@@ -3,13 +3,14 @@ FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    INFINITY_DB_DATABASE=/app/data/infinity.db
+    INFINITY_DB_DATABASE=/app/data/infinity.db \
+    INFINITY_DB_RULES_DATABASE=/app/data/rules.db
 
 WORKDIR /app
 
 # The application has no runtime dependency beyond Gunicorn. Copy only its
 # runtime inputs; source snapshots and development artifacts stay out of the
-# image. The database is copied separately as the versioned release data.
+# image. Runtime databases are copied separately as versioned release data.
 COPY pyproject.toml README.md /app/
 COPY src /app/src
 RUN pip install --no-cache-dir ".[server]" \
@@ -17,6 +18,7 @@ RUN pip install --no-cache-dir ".[server]" \
     && chown -R appuser:appuser /app
 
 COPY --chown=appuser:appuser data/generated/infinity.db /app/data/infinity.db
+COPY --chown=appuser:appuser data/generated/rules.db /app/data/rules.db
 
 USER appuser
 EXPOSE 8000

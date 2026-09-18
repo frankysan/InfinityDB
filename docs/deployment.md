@@ -1,16 +1,16 @@
 # Linux deployment
 
 InfinityDB is deployed as an immutable Docker image: it contains the web
-application, static assets, and one validated `infinity.db` snapshot. Caddy
-listens on HTTP and proxies traffic to the application, which is not exposed
+application, tracked static UI assets, and validated `infinity.db` and `rules.db`
+snapshots. Caddy listens on HTTP and proxies traffic to the application, which is not exposed
 directly on the host. Put Caddy behind an external TLS reverse proxy for public
 HTTPS.
 
-The current application image can contain a generated database snapshot and
-bundled Corvus Belli-derived graphical assets. Those materials are not
-automatically covered by InfinityDB's MIT License. Review
-[third-party notices](../THIRD_PARTY_NOTICES.md) before redistributing an image
-or database that contains external data or assets.
+Corvus Belli graphical assets are not bundled with the InfinityDB source or a
+redistributable release by default. A local installation may acquire and process
+those assets separately for local browser use, but that does not grant
+redistribution rights. Review [third-party notices](../THIRD_PARTY_NOTICES.md)
+before distributing any image or database that contains external data or assets.
 
 This guide documents the **current deployment workflow**. Future acquisition,
 snapshot-manifest, and symbol-pipeline design described elsewhere is not part of
@@ -37,15 +37,22 @@ sh ./scripts/install-or-update.sh
 
 The interactive script fetches tags from `origin`, checks out the newest
 version tag in detached-HEAD mode, asks for the public domain and image
-retention count, builds the database, and deploys it. It can save those two
-settings to the ignored `.infinity-db-deploy.env` file for subsequent runs.
+retention count, builds both runtime databases, and deploys them. It can save
+those two settings to the ignored `.infinity-db-deploy.env` file for subsequent runs.
 It stops before changing tags when tracked local edits are present, but leaves
 untracked raw data and the optional config file intact.
 
-The image build deliberately requires `data/generated/infinity.db`. This makes
-an unbuilt or invalid data snapshot fail the deployment rather than serving an
-unexpected database. The database is baked into the image, so rolling back is
-simply deploying the earlier image tag.
+The image build deliberately requires both `data/generated/infinity.db` and
+`data/generated/rules.db`. This makes an incomplete runtime-data build fail
+before deployment. The Docker image explicitly configures both paths; an
+explicitly configured invalid or missing rules database causes the WSGI workers
+to fail at startup instead of silently serving the reduced no-rules feature set.
+Both databases are baked into the image, so rolling back is simply deploying the
+earlier image tag.
+
+The application factory still treats an adjacent `rules.db` as optional when no
+rules path is explicitly configured. This preserves local/development workflows;
+the stricter requirement is part of the Docker production contract.
 
 For a local smoke test, use `DOMAIN=localhost` and open
 `http://localhost`. On a public domain, replace `infinity.example.com` with
@@ -61,9 +68,10 @@ docker compose pull caddy
 docker compose up -d --build
 ```
 
-To update data, download or place the new raw snapshot and its required
+To update Army data, download or place the new raw snapshot and its required
 `metadata.json` in `data/raw/`, then run `sh ./scripts/install-or-update.sh`.
-Do not edit the SQLite file inside a running container.
+The same deployment run rebuilds `rules.db` from the tracked collections under
+`data/curated/rules/`. Do not edit either SQLite file inside a running container.
 
 `deploy.sh` retains the current build and the two newest rollback builds by
 default. After Compose has successfully started and health-checked the new

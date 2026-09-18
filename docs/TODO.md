@@ -723,11 +723,10 @@ history retains implementation detail.
 - [ ] Test a full build and container startup in CI, including the requirement
   that deployment images contain only intended runtime databases rather than the
   development raw archive.
-  - Build and package `rules.db` alongside `infinity.db` whenever the deployed
-    application is expected to expose curated trait summaries, skill declaration
-    categories, or special weapon details. The current application tolerates a
-    missing `rules.db`, so deployment validation must detect this intentionally
-    rather than silently shipping a reduced feature set.
+  - [x] Build and package `rules.db` alongside `infinity.db` for the Docker
+    deployment. The image explicitly configures the rules path, so a missing or
+    invalid `rules.db` now fails worker startup instead of silently shipping a
+    reduced feature set; local/development auto-discovery remains optional.
   - Keep Corvus Belli graphical assets outside redistributable CI/release images
     unless explicit redistribution permission is established; test local asset
     publication separately from distributable-image construction.

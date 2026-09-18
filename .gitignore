@@ -34,6 +34,10 @@ src/infinity_db/web/static/orders/**/*
 src/infinity_db/web/static/units/**/*
 image_overrides/**/*
 
+# Development
+*.zip
+*.patch
+
 # OS
 .DS_Store
 Thumbs.db

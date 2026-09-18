@@ -16,5 +16,13 @@ def _database_path() -> Path:
     return Path(value)
 
 
-# Validate the database while the WSGI worker starts, rather than on its first request.
-app = create_app(_database_path())
+def _rules_database_path() -> Path | None:
+    """Return the optional explicitly configured production rules database path."""
+    value = os.environ.get("INFINITY_DB_RULES_DATABASE")
+    return Path(value) if value else None
+
+
+# Validate explicitly configured databases while the WSGI worker starts, rather
+# than on its first request. An explicitly configured rules database is required
+# to exist and validate; omitting the setting preserves optional local behavior.
+app = create_app(_database_path(), _rules_database_path())

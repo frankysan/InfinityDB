@@ -14,11 +14,15 @@ Those data records, names, marks, and artwork remain subject to the rights and
 terms of their respective owners. InfinityDB does not relicense them under MIT.
 
 Raw Army and symbol snapshots in `data/raw/`, generated databases in
-`data/generated/`, and bundled Corvus Belli-derived graphical assets under
-`src/infinity_db/web/static/` are replaceable data or assets rather than
-original MIT-licensed project material. Before redistributing a wheel, Docker
-image, database snapshot, or bundled graphical assets, verify that the source
-terms permit that use and retain any required attribution.
+`data/generated/`, and any locally acquired Corvus Belli-derived graphical
+assets published under `src/infinity_db/web/static/` are replaceable data or
+assets rather than original MIT-licensed project material. Corvus Belli
+graphical assets are not included in InfinityDB source or redistributable
+release artifacts by default. Public availability from an asset host is not
+treated as permission to redistribute them; include such assets in a wheel,
+Docker image, release, or other distributed artifact only when permission for
+that distribution form has been established, while retaining any required
+attribution.
 
 ## Infinity Wiki and rules documents
 

@@ -214,6 +214,9 @@ data/generated/infinity.db
 data/generated/infinity.raw.db
 ```
 
+The independent curated-rules build writes `data/generated/rules.db`; it is not
+part of the Army JSON build and can be rebuilt separately with `build-rules`.
+
 The database is replaced only after the new import passes integrity checks. A
 failed import leaves the prior database available. Rebuilding replaces imported
 data, so keep future user-authored data separately. On Windows, stop the server
@@ -238,12 +241,13 @@ repeatable Docker Compose deployment with Gunicorn and Caddy is provided in the
 ## Linux deployment
 
 The supplied Docker Compose configuration packages the application and its
-validated SQLite snapshot in an immutable image. Caddy listens on HTTP and
-reverse-proxies to the application; place it behind an external TLS reverse
-proxy for public HTTPS. Build the database before building the image:
+validated Army and curated-rules SQLite snapshots in an immutable image. Caddy
+listens on HTTP and reverse-proxies to the application; place it behind an external TLS reverse
+proxy for public HTTPS. Build both runtime databases before building the image:
 
 ```sh
 infinity-db build --compact
+infinity-db build-rules
 DOMAIN=infinity.example.com IMAGE_TAG=0.5.1 docker compose up -d --build
 ```
 
@@ -266,7 +270,7 @@ src/
       app.py                # WSGI application and API routes
       server.py             # Local development server
       wsgi.py               # WSGI entry point for deployment
-      static/               # Browser pages, modules, styles, and symbols
+      static/               # Tracked UI assets; third-party symbols are local/ignored
 tests/                      # Pipeline, database, API, web, and tool-script tests
 tools/                      # Manual acquisition/processing utilities and check runner
 scripts/                    # Linux deployment, update, and image-maintenance scripts

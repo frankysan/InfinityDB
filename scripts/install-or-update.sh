@@ -76,8 +76,11 @@ fi
 echo "Installing application dependencies..."
 .venv/bin/pip install -e .
 
-echo "Building the validated database image input..."
+echo "Building the validated Army database image input..."
 .venv/bin/infinity-db build --compact
+
+echo "Building the validated rules database image input..."
+.venv/bin/infinity-db build-rules
 
 echo "Deploying image app-$release_tag..."
 DOMAIN="$domain" IMAGE_TAG="app-$release_tag" RETAIN_APP_IMAGES="$retain" \

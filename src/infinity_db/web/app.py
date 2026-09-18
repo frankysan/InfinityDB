@@ -269,7 +269,11 @@ class Application:
         self.database.validate()
         self.rules_database: RulesDatabase | None = None
         candidate_rules_path = rules_database_path or Path(database_path).with_name("rules.db")
-        if candidate_rules_path.is_file():
+        if rules_database_path is not None:
+            rules_database = RulesDatabase(candidate_rules_path)
+            rules_database.validate()
+            self.rules_database = rules_database
+        elif candidate_rules_path.is_file():
             try:
                 rules_database = RulesDatabase(candidate_rules_path)
                 rules_database.validate()

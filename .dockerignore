@@ -11,4 +11,5 @@ dist/
 data/raw/
 data/generated/*
 !data/generated/infinity.db
+!data/generated/rules.db
 data/manifests/
