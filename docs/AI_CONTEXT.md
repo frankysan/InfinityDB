@@ -154,6 +154,11 @@ and serves a read-only browser and same-origin HTTP API.
   complete timestamped `JSON`, `WIKI`, or `SYMBOLS` ZIP snapshots. Same-second
   name collisions receive `-2`, `-3`, and so on rather than overwriting.
 - Raw snapshot archives are immutable after successful acquisition.
+- Wiki acquisition fails closed for required content but excludes optional site
+  chrome/project targets (`/favicon.ico` and the `Infinity:` project namespace)
+  from completeness. Failed/incomplete wiki runs publish no immutable snapshot
+  or provenance and preserve their local crawl work under `data/work/wiki/`;
+  successful runs remove that work directory after publication.
 - Each successful acquisition writes a version-1 generated provenance record
   under `data/manifests/snapshots/`, labeled from the archive filename and
   bound by its immutable SHA-256.
@@ -272,8 +277,14 @@ scoped so a view cannot silently combine incompatible versions.
 
 PDF record citations retain document version/date plus printed-page citations.
 Wiki record citations currently retain snapshot-local paths and `snapshotDate`.
-The checked-in wiki source still references the legacy unpacked mirror identity;
-that is current provenance, not a timestamped-archive guarantee.
+The wiki downloader is fail-closed: any eligible discovered URL that cannot be
+fetched aborts publication before the timestamped archive or provenance manifest
+is created. Wiki acquisition is language-scoped: English is the default, Spanish
+is an explicit alternative, same-language pages are crawled, and directly
+referenced cross-language assets remain eligible. Archive labels and snapshot
+provenance record the selected language. The checked-in wiki source still
+references the legacy unpacked mirror identity; that is current provenance, not a
+timestamped-archive guarantee.
 
 The current curated-v2 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with `vocabularySources`, typed

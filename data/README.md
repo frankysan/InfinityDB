@@ -9,8 +9,14 @@ provenance/state, and build outputs.
   acquisition writes `JSON YYYYMMDD-HHMMSS.zip`; symbol acquisition uses the
   `raw/symbols/` subtree for `SYMBOLS YYYYMMDD-HHMMSS.zip`. Ignored by Git.
 - `wiki/` — local wiki research material. The current downloader persists
-  immutable `WIKI YYYYMMDD-HHMMSS.zip` snapshots here. Ignored by Git.
+  immutable `WIKI-<language> YYYYMMDD-HHMMSS.zip` snapshots here. English (`en`)
+  is the downloader default; Spanish (`es`) is an explicit alternative. Ignored
+  by Git.
 - `pdf/` — local rules/FAQ/ITS research documents. Ignored by Git.
+- `work/wiki/` — local wiki crawl work. Successful acquisitions remove their
+  work directory after publishing the immutable archive and provenance;
+  incomplete/error runs preserve downloaded work here for inspection. Ignored
+  by Git.
 - `manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, bound to its immutable SHA-256,
   and records the snapshot type, archive label/path when project-relative,
@@ -47,7 +53,19 @@ exact timestamped ZIP snapshot.
 ## Snapshot provenance contract
 
 Army, wiki, and symbol downloaders write version-1 `InfinityDB snapshot
-provenance` documents under `manifests/snapshots/`. The manifest filename
+provenance` documents under `manifests/snapshots/`. Wiki acquisition is
+fail-closed for required content: if any required eligible URL discovered during
+the crawl cannot be fetched, the run reports the failed URLs, publishes neither
+a `WIKI-<language> ...zip` archive nor snapshot provenance, and preserves the
+partial crawl under `work/wiki/`. Optional site chrome/project links that are not
+part of the mirrored content contract—currently `/favicon.ico` and pages in the
+`Infinity:` MediaWiki project namespace—are reported as ignored rather than
+failures. Wiki crawls are language-scoped: English is the default, Spanish is
+selected explicitly, same-language pages are mirrored, and cross-language
+assets are included only when an included page references them. Only a complete
+successful crawl becomes an immutable wiki snapshot.
+
+The manifest filename
 mirrors the archive label with a `.json` suffix, while the archive's lowercase
 SHA-256 digest is stored inside the document and is the authoritative identity
 that can be revalidated against the archive. Generated JSON serialization is

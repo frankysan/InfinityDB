@@ -338,13 +338,27 @@ can belong to the same logical unit and army while retaining different
 
 Standalone Army, wiki, and symbol acquisition uses a common immutable snapshot
 model. Downloaders stage loose files temporarily and persist complete timestamped
-archives named `JSON YYYYMMDD-HHMMSS.zip`, `WIKI YYYYMMDD-HHMMSS.zip`, or
+archives named `JSON YYYYMMDD-HHMMSS.zip`,
+`WIKI-<language> YYYYMMDD-HHMMSS.zip`, or
 `SYMBOLS YYYYMMDD-HHMMSS.zip`. A same-second collision receives `-2`, `-3`, and
 so on rather than overwriting an existing archive.
 
-The archive is the durable acquisition artifact. Corvus Belli's Army
-`metadata.json` remains source data contained in or supplied alongside Army
-snapshots; it is not InfinityDB-owned snapshot metadata.
+The archive is the durable acquisition artifact. Wiki acquisition fails closed
+for required content: every required eligible URL discovered by the crawl must
+be fetched successfully before the downloader creates a
+`WIKI-<language> ...zip` archive or provenance manifest. Optional site
+chrome/project targets outside the content contract—currently `/favicon.ico`
+and pages in the `Infinity:` MediaWiki project namespace—are ignored rather
+than treated as acquisition failures. English is the default crawl language and
+Spanish is an explicit alternative. Page links are restricted to the selected
+language tree, while assets outside that tree may still be mirrored when an
+included page directly references them. Failed runs report unresolved required
+URLs, leave no incomplete immutable snapshot, and preserve partial crawl work
+under `data/work/wiki/` for inspection; successful runs remove their work
+directory after publication.
+
+Corvus Belli's Army `metadata.json` remains source data contained in or supplied
+alongside Army snapshots; it is not InfinityDB-owned snapshot metadata.
 
 Current curated-v2 wiki citations identify wiki material with a snapshot-local
 path and `snapshotDate`. The checked-in rules collection still contains legacy

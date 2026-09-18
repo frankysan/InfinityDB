@@ -160,11 +160,10 @@ consistency audit unless one becomes necessary to unblock that work.
       it; do not fabricate archive/hash provenance from the date alone.
     - [ ] Migrate curated wiki sources to exact recorded `WIKI ...zip` identity/hash
       once the new packager provides that identity.
-    - [ ] Define wiki snapshot completeness semantics. Failed or missing page
-      acquisition must be surfaced explicitly and must not silently publish an
-      apparently complete immutable snapshot; decide whether incomplete runs are
-      rejected outright or represented by an explicit incomplete status that
-      downstream curated/rules builds refuse by default.
+    - [x] Define wiki snapshot completeness semantics. Wiki acquisition now
+      fails closed: any eligible discovered URL that cannot be fetched is
+      reported and prevents both archive and provenance publication, so
+      downstream tooling never receives an implicitly incomplete wiki snapshot.
     - [ ] Replace the current mixed `vocabularySources` locator requirement
       (`path`/`snapshotDate`/`heading`/`page`) with source-appropriate provenance
       so wiki vocabulary references do not require a printed-page field merely

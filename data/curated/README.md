@@ -38,7 +38,7 @@ The local reference corpus may include:
 - N5 FAQ revisions under `data/pdf/faq/`.
 - ITS seasons under `data/pdf/its/` and `data/pdf/legacy/`.
 - Wiki research snapshots under `data/wiki/`; the current downloader writes
-  `WIKI YYYYMMDD-HHMMSS.zip` archives.
+  `WIKI-<language> YYYYMMDD-HHMMSS.zip` archives.
 
 Core rules can provide curated skills, equipment, weapons, ammunition, traits,
 states, attributes, timing, modifiers, deployment, hacking, fireteams, and
@@ -195,7 +195,7 @@ selected mirror, for example:
 The checked-in `n5-core-v5.3.json` wiki `sources` record still identifies the
 legacy unpacked mirror at `data/wiki/20260915/`. That provenance predates the
 current timestamped-ZIP downloader and must not be rewritten to an exact
-`WIKI ...zip` archive/hash unless a migration can establish which archive was
+`WIKI-<language> ...zip` archive/hash unless a migration can establish which archive was
 actually used.
 
 ### Design direction — wiki provenance migration

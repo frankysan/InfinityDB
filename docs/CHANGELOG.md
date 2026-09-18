@@ -55,6 +55,16 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Make wiki snapshot acquisition fail closed for required content. Required
+  crawl failures publish neither the immutable `WIKI-<language> ...zip` archive
+  nor snapshot provenance and preserve partial work under `data/work/wiki/`.
+  Optional `/favicon.ico` and `Infinity:` MediaWiki project-namespace targets
+  are classified as ignored site chrome/project links rather than content
+  failures.
+- Scope wiki acquisition by language. English is now the default, Spanish can be
+  selected explicitly, cross-language page crawling is suppressed while directly
+  referenced assets remain eligible, localized special-page namespaces are skipped,
+  and both archive names and snapshot provenance record the selected language.
 - Make Army JSON acquisition coherence explicit: the downloader now verifies a
   second complete metadata/list pass byte-for-byte before publishing a snapshot,
   reports changed endpoints on instability, and prints accepted source-revision
