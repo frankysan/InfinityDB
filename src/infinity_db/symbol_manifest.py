@@ -46,6 +46,7 @@ def build_symbol_manifest(
     source_document_count: int,
     source_revisions: dict[str, int],
     assets: list[dict[str, Any]],
+    unavailable_assets: list[dict[str, Any]] | None = None,
     references: list[dict[str, Any]],
     audit: dict[str, int],
     project_root: Path,
@@ -67,6 +68,9 @@ def build_symbol_manifest(
             "acquiredAt": acquired_at.isoformat(timespec="seconds"),
         },
         "assets": sorted(assets, key=lambda item: item["url"]),
+        "unavailableAssets": sorted(
+            unavailable_assets or [], key=lambda item: item["url"]
+        ),
         "references": sorted(
             references,
             key=lambda item: (
@@ -384,7 +388,15 @@ def validate_symbol_manifest(document: Any) -> None:
             "symbol manifest.formatVersion must be one of: "
             + ", ".join(str(item) for item in sorted(supported_versions))
         )
-    allowed = {"format", "formatVersion", "snapshot", "assets", "references", "audit"}
+    allowed = {
+        "format",
+        "formatVersion",
+        "snapshot",
+        "assets",
+        "unavailableAssets",
+        "references",
+        "audit",
+    }
     if version >= SYMBOL_BUILD_PREFLIGHT_VERSION:
         allowed.add("processing")
     _only_keys(root, allowed, "symbol manifest")
@@ -433,6 +445,35 @@ def validate_symbol_manifest(document: Any) -> None:
                 f"{context}.sourceMethod must be one of: {', '.join(sorted(SOURCE_METHODS))}"
             )
 
+    unavailable_assets = root.get("unavailableAssets", [])
+    if not isinstance(unavailable_assets, list):
+        raise SymbolManifestError("symbol manifest.unavailableAssets must be an array")
+    unavailable_urls: set[str] = set()
+    unavailable_paths: set[str] = set()
+    for index, unavailable in enumerate(unavailable_assets):
+        context = f"symbol manifest.unavailableAssets[{index}]"
+        row = _object(unavailable, context)
+        _only_keys(
+            row,
+            {"url", "sourceFilename", "archivePath", "sourceMethod", "httpStatus"},
+            context,
+        )
+        url = _string(row.get("url"), f"{context}.url")
+        if url in asset_urls or url in unavailable_urls:
+            raise SymbolManifestError(f"{context}.url is duplicated or already acquired: {url}")
+        unavailable_urls.add(url)
+        _string(row.get("sourceFilename"), f"{context}.sourceFilename")
+        archive_path = _portable_path(row.get("archivePath"), f"{context}.archivePath")
+        if archive_path in archive_paths or archive_path in unavailable_paths:
+            raise SymbolManifestError(
+                f"{context}.archivePath is duplicated or already acquired: {archive_path}"
+            )
+        unavailable_paths.add(archive_path)
+        if _string(row.get("sourceMethod"), f"{context}.sourceMethod") != "network":
+            raise SymbolManifestError(f"{context}.sourceMethod must be 'network'")
+        if row.get("httpStatus") != 404:
+            raise SymbolManifestError(f"{context}.httpStatus must be 404")
+
     references = root.get("references")
     if not isinstance(references, list):
         raise SymbolManifestError("symbol manifest.references must be an array")
@@ -467,9 +508,14 @@ def validate_symbol_manifest(document: Any) -> None:
         _string(row.get("sourceDocument"), f"{context}.sourceDocument")
         _string(row.get("jsonPath"), f"{context}.jsonPath")
         asset_url = _string(row.get("assetUrl"), f"{context}.assetUrl")
-        if row["authoritative"] and asset_url not in asset_urls:
+        if (
+            row["authoritative"]
+            and asset_url not in asset_urls
+            and asset_url not in unavailable_urls
+        ):
             raise SymbolManifestError(
-                f"{context}.assetUrl does not identify a downloaded asset: {asset_url}"
+                f"{context}.assetUrl does not identify a downloaded asset or recorded "
+                f"unavailable asset: {asset_url}"
             )
         for field in ("armyId", "unitId", "factionId"):
             if field in row and type(row[field]) is not int:

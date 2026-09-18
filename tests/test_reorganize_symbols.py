@@ -180,6 +180,45 @@ def test_build_publication_maps_many_references_to_canonical_assets(tmp_path: Pa
     assert '["chung-hee-jeong", "panoceania/1-mech-engineer"]' in unit_map
 
 
+
+def test_publication_skips_recorded_unavailable_authoritative_reference(tmp_path: Path) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+    missing_url = manifest["references"][0]["assetUrl"]
+    manifest["assets"] = [row for row in manifest["assets"] if row["url"] != missing_url]
+    manifest["unavailableAssets"] = [
+        {
+            "url": missing_url,
+            "sourceFilename": "u1.svg",
+            "archivePath": "units/u1.svg",
+            "sourceMethod": "network",
+            "httpStatus": 404,
+        }
+    ]
+    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"].pop(
+        "units/u1.svg"
+    )
+    manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"][
+        "units/u2.svg"
+    ] = "units/u2.svg"
+    compressed = tmp_path / "compressed"
+    _write_compressed(compressed)
+    (compressed / "units" / "u1.svg").unlink()
+    (compressed / "units" / "u2.svg").write_bytes(SVG)
+    staging = tmp_path / "staging"
+
+    report, summary = reorganize_symbols._build_publication(
+        manifest=manifest,
+        snapshot_index=reorganize_symbols._load_snapshot_index(snapshot),
+        compressed_root=compressed,
+        staging_static=staging,
+    )
+
+    assert summary["sourceAssetCount"] == 5
+    assert "mech-engineer" not in report["unitSlugToPublishedPath"]
+    assert report["unavailableSourceAssets"][0]["url"] == missing_url
+
 def test_publication_failure_restores_previous_generated_tree(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

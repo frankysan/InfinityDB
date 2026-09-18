@@ -261,6 +261,7 @@ def _build_publication(
 ) -> tuple[dict[str, Any], dict[str, int]]:
     assets = manifest["assets"]
     asset_by_url = {row["url"]: row["archivePath"] for row in assets}
+    unavailable_urls = {row["url"] for row in manifest.get("unavailableAssets", [])}
     duplicate = manifest["processing"]["duplicateDetection"]
     canonical_by_source = duplicate["canonicalByArchivePath"]
     canonical_paths = sorted(set(canonical_by_source.values()))
@@ -279,10 +280,13 @@ def _build_publication(
     for reference in manifest["references"]:
         if not reference.get("authoritative"):
             continue
-        archive_path = asset_by_url.get(reference["assetUrl"])
+        asset_url = reference["assetUrl"]
+        archive_path = asset_by_url.get(asset_url)
         if archive_path is None:
+            if asset_url in unavailable_urls:
+                continue
             raise ValueError(
-                f"Authoritative reference has no downloaded asset: {reference['assetUrl']}"
+                f"Authoritative reference has no acquired/unavailable asset: {asset_url}"
             )
         canonical = canonical_by_source.get(archive_path)
         if not isinstance(canonical, str):
@@ -333,7 +337,14 @@ def _build_publication(
     for reference in manifest["references"]:
         if not reference.get("authoritative"):
             continue
-        source = asset_by_url[reference["assetUrl"]]
+        asset_url = reference["assetUrl"]
+        source = asset_by_url.get(asset_url)
+        if source is None:
+            if asset_url in unavailable_urls:
+                continue
+            raise ValueError(
+                f"Authoritative reference has no acquired/unavailable asset: {asset_url}"
+            )
         published = source_to_published[source]
         kind = reference["kind"]
         if kind == "faction":
@@ -434,6 +445,7 @@ def _build_publication(
         },
         "staticKeyToPublishedPath": dict(sorted(static_mapping.items())),
         "publishedSha256ByPath": dict(sorted(published_sha256.items())),
+        "unavailableSourceAssets": manifest.get("unavailableAssets", []),
     }
     return report, summary
 

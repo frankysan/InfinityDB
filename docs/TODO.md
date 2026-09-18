@@ -326,7 +326,9 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Partial/invalid snapshot acquisition must not continue or replace prior
     snapshots/publication.
   - [ ] Unknown SVG source locations require explicit review.
-  - [x] Invalid matching overrides fail; failed network downloads leave existing
+  - [x] Invalid matching overrides fail. Source-declared network assets that
+    return HTTP 404 are recorded explicitly as unavailable and omitted from the
+    immutable symbol archive; other HTTP/transport failures leave existing
     archives untouched and prevent creation/publication of an incomplete
     replacement snapshot.
   - [x] SVG parse/font errors are retained and reported rather than discarded.

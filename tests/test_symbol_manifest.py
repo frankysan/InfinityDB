@@ -103,6 +103,100 @@ def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -
     }
 
 
+
+def test_authoritative_reference_may_target_recorded_http_404(tmp_path: Path) -> None:
+    army = artifact(tmp_path / "army.zip", b"army")
+    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
+    url = "https://assets.corvusbelli.net/army/img/logo/units/missing.svg"
+    document = build_symbol_manifest(
+        army_artifact=army,
+        symbol_artifact=symbols,
+        acquired_at=datetime(2026, 9, 18, 20, 0, tzinfo=UTC),
+        **army_source_kwargs(1),
+        assets=[],
+        unavailable_assets=[
+            {
+                "url": url,
+                "sourceFilename": "missing.svg",
+                "archivePath": "units/missing.svg",
+                "sourceMethod": "network",
+                "httpStatus": 404,
+            }
+        ],
+        references=[
+            {
+                "kind": "unit-profile",
+                "authoritative": True,
+                "sourceDocument": "101-a.json",
+                "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
+                "assetUrl": url,
+                "unitId": 1,
+            }
+        ],
+        audit={
+            "unitProfileReferenceCount": 1,
+            "uniqueUnitUrlCount": 1,
+            "factionReferenceCount": 0,
+            "uniqueFactionUrlCount": 0,
+            "semanticReferenceCount": 1,
+            "uniqueSemanticUrlCount": 1,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 1,
+            "uniqueRecursiveUrlCount": 1,
+            "uniqueDownloadedUrlCount": 0,
+            "unknownReferenceCount": 0,
+        },
+        project_root=tmp_path,
+    )
+
+    validate_symbol_manifest(document)
+    assert document["unavailableAssets"][0]["httpStatus"] == 404
+
+
+def test_unavailable_asset_must_be_http_404_network_source(tmp_path: Path) -> None:
+    army = artifact(tmp_path / "army.zip", b"army")
+    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
+    url = "https://assets.corvusbelli.net/army/img/logo/units/missing.svg"
+    document = build_symbol_manifest(
+        army_artifact=army,
+        symbol_artifact=symbols,
+        acquired_at=datetime(2026, 9, 18, 20, 0, tzinfo=UTC),
+        **army_source_kwargs(1),
+        assets=[],
+        unavailable_assets=[
+            {
+                "url": url,
+                "sourceFilename": "missing.svg",
+                "archivePath": "units/missing.svg",
+                "sourceMethod": "network",
+                "httpStatus": 404,
+            }
+        ],
+        references=[],
+        audit={
+            "unitProfileReferenceCount": 0,
+            "uniqueUnitUrlCount": 0,
+            "factionReferenceCount": 0,
+            "uniqueFactionUrlCount": 0,
+            "semanticReferenceCount": 0,
+            "uniqueSemanticUrlCount": 0,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 0,
+            "uniqueRecursiveUrlCount": 0,
+            "uniqueDownloadedUrlCount": 0,
+            "unknownReferenceCount": 0,
+        },
+        project_root=tmp_path,
+    )
+    document["unavailableAssets"][0]["httpStatus"] = 500
+
+    with pytest.raises(SymbolManifestError, match="httpStatus must be 404"):
+        validate_symbol_manifest(document)
+
 def test_resume_audit_reference_may_point_to_non_downloaded_url(tmp_path: Path) -> None:
     army = artifact(tmp_path / "army.zip", b"army")
     symbols = artifact(tmp_path / "symbols.zip", b"symbols")

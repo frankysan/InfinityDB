@@ -6,6 +6,12 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Treat source-declared symbol URLs that return HTTP 404 as explicit unavailable
+  upstream assets instead of aborting the complete symbol acquisition. The
+  versioned build manifest retains their URL/reference provenance, downstream
+  processing operates on the acquired subset, publication omits unavailable
+  mappings, and non-404 network failures remain fatal.
+
 - Make `tools/svg_processor.py` clean under the project Ruff/Pylance expectations:
   optional symbol dependencies are loaded without static unresolved-import noise,
   classification results have explicit types, and remaining lint diagnostics are

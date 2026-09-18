@@ -15,6 +15,7 @@ from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
 from typing import Any, NamedTuple
+from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import urlopen
 from xml.etree import ElementTree
@@ -696,6 +697,7 @@ def acquire_symbol_snapshot(
             staging_path = Path(staging)
             files: list[Path] = []
             assets: list[dict[str, str]] = []
+            unavailable_assets: list[dict[str, Any]] = []
             used_overrides: set[str] = set()
             source_counts = {"override": 0, "cache": 0, "network": 0}
             urls = sorted(discovery.authoritative_urls)
@@ -720,8 +722,29 @@ def acquire_symbol_snapshot(
                         body = cached
                         source_method = "cache"
                     else:
-                        with opener(url, timeout=30) as response:
-                            body = response.read()
+                        try:
+                            with opener(url, timeout=30) as response:
+                                body = response.read()
+                        except HTTPError as exc:
+                            if exc.code != 404:
+                                raise
+                            unavailable_assets.append(
+                                {
+                                    "url": url,
+                                    "sourceFilename": Path(urlparse(url).path).name
+                                    or destination_name(url),
+                                    "archivePath": relative,
+                                    "sourceMethod": "network",
+                                    "httpStatus": 404,
+                                }
+                            )
+                            progress(
+                                f"[{index}/{len(urls)}] {relative} "
+                                "[unavailable HTTP 404]"
+                            )
+                            if index < len(urls) and delay:
+                                sleeper(delay)
+                            continue
                         body = _svg_bytes(body, context=f"network {url}")
                         source_method = "network"
                         if index < len(urls) and delay:
@@ -752,7 +775,8 @@ def acquire_symbol_snapshot(
                 "Symbol sources: "
                 f"override {source_counts['override']} | "
                 f"cache {source_counts['cache']} | "
-                f"network {source_counts['network']}"
+                f"network {source_counts['network']} | "
+                f"unavailable {len(unavailable_assets)}"
             )
             if unused_overrides:
                 progress(f"Unused image overrides ({len(unused_overrides)}):")
@@ -773,6 +797,8 @@ def acquire_symbol_snapshot(
                 project_root=project_root,
                 input_artifact=source,
             )
+            manifest_audit = dict(discovery.audit)
+            manifest_audit["uniqueDownloadedUrlCount"] = len(assets)
             build_manifest = build_symbol_manifest(
                 army_artifact=source,
                 symbol_artifact=archive,
@@ -783,8 +809,9 @@ def acquire_symbol_snapshot(
                 source_document_count=army_snapshot.document_count,
                 source_revisions=army_snapshot.source_revisions,
                 assets=assets,
+                unavailable_assets=unavailable_assets,
                 references=discovery.references,
-                audit=discovery.audit,
+                audit=manifest_audit,
                 project_root=project_root,
             )
             write_symbol_manifest(build_manifest, build_manifest_path)

@@ -553,6 +553,82 @@ def test_invalid_matching_override_fails_without_network(tmp_path: Path) -> None
         )
 
 
+
+def test_network_404_is_recorded_and_acquisition_continues(tmp_path: Path) -> None:
+    module = load_module()
+    url = unit_url("missing-unit")
+    source, manifest = _single_asset_army_snapshot(tmp_path, module, url=url)
+    static = static_config(tmp_path / "static.json")
+    progress: list[str] = []
+
+    def missing(*_args, **_kwargs):
+        raise module.HTTPError(url, 404, "Not Found", {}, None)
+
+    result = module.acquire_symbol_snapshot(
+        source,
+        tmp_path / "symbols",
+        manifest.parent,
+        tmp_path / "army-symbol-build.json",
+        static_symbols_path=static,
+        delay=0,
+        project_root=tmp_path,
+        opener=missing,
+        progress=progress.append,
+        army_snapshot_manifest=manifest,
+        override_root=tmp_path / "image_overrides",
+        refresh_symbols=True,
+        acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+    )
+
+    from infinity_db.symbol_manifest import load_symbol_manifest
+
+    build = load_symbol_manifest(result.build_manifest)
+    assert build["assets"] == []
+    assert build["unavailableAssets"] == [
+        {
+            "url": url,
+            "sourceFilename": "missing-unit.svg",
+            "archivePath": "units/missing-unit.svg",
+            "sourceMethod": "network",
+            "httpStatus": 404,
+        }
+    ]
+    assert build["audit"]["uniqueDownloadedUrlCount"] == 0
+    assert any("[unavailable HTTP 404]" in row for row in progress)
+    assert any("unavailable 1" in row for row in progress)
+    with zipfile.ZipFile(result.archive) as archive:
+        assert archive.namelist() == []
+
+
+def test_non_404_network_error_still_aborts_acquisition(tmp_path: Path) -> None:
+    module = load_module()
+    url = unit_url("server-error")
+    source, manifest = _single_asset_army_snapshot(tmp_path, module, url=url)
+    static = static_config(tmp_path / "static.json")
+
+    def server_error(*_args, **_kwargs):
+        raise module.HTTPError(url, 503, "Unavailable", {}, None)
+
+    with pytest.raises(module.HTTPError) as excinfo:
+        module.acquire_symbol_snapshot(
+            source,
+            tmp_path / "symbols",
+            manifest.parent,
+            tmp_path / "army-symbol-build.json",
+            static_symbols_path=static,
+            delay=0,
+            project_root=tmp_path,
+            opener=server_error,
+            army_snapshot_manifest=manifest,
+            override_root=tmp_path / "image_overrides",
+            refresh_symbols=True,
+            acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+        )
+
+    assert excinfo.value.code == 503
+    assert not (tmp_path / "army-symbol-build.json").exists()
+    assert list((tmp_path / "symbols").glob("SYMBOLS *.zip")) == []
+
 def test_validated_prior_symbol_snapshot_is_used_as_cache(tmp_path: Path) -> None:
     module = load_module()
     url = unit_url("test-unit")

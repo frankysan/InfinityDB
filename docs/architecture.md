@@ -448,7 +448,10 @@ Army-symbol acquisition is source-semantic and snapshot-pinned: every
 reference is authoritative, maintained static declarations are included,
 `resume[].logo` is audit-only, and a recursive scan fails closed on unknown
 SVG-bearing source fields. URLs are resolved once while every reference is
-preserved separately in `army-symbol-build.json`. Acquisition writes version-2
+preserved separately in `army-symbol-build.json`. A referenced network asset
+that genuinely returns HTTP 404 is preserved as an explicit unavailable source
+record and omitted from the immutable SVG archive; other HTTP/transport failures
+still abort acquisition. Acquisition writes version-2
 build state. The orchestrator then verifies the immutable `SYMBOLS` archive and
 its snapshot provenance, re-hashes every listed member, and rebuilds a derived
 `data/work/symbols/<artifact>/raw/` tree rather than modifying the raw archive.
