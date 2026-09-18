@@ -3,7 +3,7 @@ import io
 import os
 import zipfile
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "tools" / "download_wiki_snapshot.py"
 
@@ -12,6 +12,23 @@ module = importlib.util.module_from_spec(spec)
 assert spec is not None and spec.loader is not None
 spec.loader.exec_module(module)
 
+
+
+def test_mirror_path_sort_key_is_platform_neutral() -> None:
+    root = PureWindowsPath(r"C:\\wiki")
+    paths = [
+        root / "index.html",
+        root / "Rules",
+        root / "es" / "images" / "shared.png",
+    ]
+
+    ordered = sorted(paths, key=lambda path: module.mirror_path_sort_key(path, root))
+
+    assert [path.relative_to(root).as_posix() for path in ordered] == [
+        "Rules",
+        "es/images/shared.png",
+        "index.html",
+    ]
 
 def test_should_skip_special_pages() -> None:
     assert module.should_skip_url("https://infinitythewiki.com/index.php?title=Main_Page")

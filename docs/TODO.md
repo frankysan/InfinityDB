@@ -153,23 +153,6 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Let future snapshot-comparison tooling write structured generated diff
     data/reports under manifest/report paths while curated snapshot notes remain
     the human interpretation of those results.
-  - [ ] Rewrite the wiki downloader/packager provenance handoff together with
-    the curated wiki provenance contract.
-    - [ ] Preserve the current checked-in legacy wiki source identity until an
-      authoritative migration can establish which timestamped archive replaces
-      it; do not fabricate archive/hash provenance from the date alone.
-    - [ ] Migrate curated wiki sources to exact recorded `WIKI ...zip` identity/hash
-      once the new packager provides that identity.
-    - [x] Define wiki snapshot completeness semantics. Wiki acquisition now
-      fails closed: any eligible discovered URL that cannot be fetched is
-      reported and prevents both archive and provenance publication, so
-      downstream tooling never receives an implicitly incomplete wiki snapshot.
-    - [ ] Replace the current mixed `vocabularySources` locator requirement
-      (`path`/`snapshotDate`/`heading`/`page`) with source-appropriate provenance
-      so wiki vocabulary references do not require a printed-page field merely
-      because PDF vocabulary references need one.
-    - [ ] Update the curated loader/schema, existing v5.3 collection, examples,
-      validation tests, and documentation together.
   - [ ] Add a thin `tools/build_symbols.py` orchestrator with mutually exclusive
     offline `--snapshot PATH` and explicit online `--fetch-snapshot` modes.
     Once selected or downloaded, pin archive path/name, SHA-256, language,

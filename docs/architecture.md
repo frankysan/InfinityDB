@@ -360,11 +360,10 @@ directory after publication.
 Corvus Belli's Army `metadata.json` remains source data contained in or supplied
 alongside Army snapshots; it is not InfinityDB-owned snapshot metadata.
 
-Current curated-v2 wiki citations identify wiki material with a snapshot-local
-path and `snapshotDate`. The checked-in rules collection still contains legacy
-provenance from the earlier unpacked wiki mirror. That is current historical
-source identity and must not be silently rewritten to a timestamped ZIP that was
-not actually recorded at curation time.
+Curated-v3 rules provenance distinguishes local artifacts from upstream source
+URLs. The checked-in N5 v5.3 collection binds archived wiki references to the
+exact English `WIKI-en 20260918-130233.zip` snapshot/hash; exact `oldid=` wiki
+revisions remain URL-backed sources because they are not members of that mirror.
 
 The downloaders also write generated provenance outside the immutable archive
 under `data/manifests/snapshots/`. Each version-1 record mirrors the archive
@@ -558,23 +557,16 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v2 rules contract stores collection scope, source metadata,
+The current curated-v3 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, related-rule links,
-review state, and citations. PDF record citations require printed page numbers.
-Wiki record citations currently require a snapshot-local path and snapshot date.
-The current `vocabularySources` shape is older and requires a mixed locator set
-including `path`, `snapshotDate`, `heading`, and a positive `page`; it should not
-be mistaken for the desired long-term source-specific citation model.
-
-The checked-in wiki source record still points to the earlier unpacked local
-mirror identity. **Design direction:** when the wiki downloader/packager and
-curated provenance contract are rewritten, migrate wiki source/vocabulary
-provenance to exact timestamped archive identity/hash and source-appropriate
-locators. Until then, preserve the recorded legacy provenance rather than
-claiming an exact archive association that has not been established.
+review state, and source-specific citations. PDF sources carry both the local
+reviewed file and official upstream URL; PDF citations use printed pages.
+Archived wiki sources carry exact ZIP/hash provenance and citations use archive
+members, while pinned historical wiki revisions stay URL-backed.
+`vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Version 1 curated-rule files must be migrated before ingestion.
+Versions 1 and 2 curated-rule files must be migrated before ingestion.
 
 ## HTTP API
 

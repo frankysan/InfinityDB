@@ -48,35 +48,29 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v2 contract
+### Current v3 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `2`
-- `collection`: `id`, `title`, `domain`, `status`, `effectiveFrom`, and
-  `authority`
-- `sources`: PDF or wiki source records with version, authority, a local path or
-  URL, and source-specific publication metadata
-- `vocabularySources`: source references for maintained skill-type and label
-  vocabularies
-- `skillTypes`: declared skill-type vocabulary
-- `labels`: declared label vocabulary
-- `records`: concise original summaries with typed `kind`, `id`, `name`,
-  `summary`, optional facts/links, and one or more `citations`
+- `formatVersion`: `3`
+- `collection`: collection identity/scope/authority
+- `sources`: source-specific PDF or wiki provenance
+- `vocabularySources`: source references for maintained vocabularies
+- `skillTypes`, `labels`, and typed `records`
 
-Record citations distinguish PDF and wiki sources. PDF citations require a
-positive **printed** `page` number. Wiki record citations require a `path` and
-`snapshotDate`; the corresponding source may identify a preserved local mirror
-or an exact pinned revision URL.
+Source provenance is explicit and source-specific. PDF sources require the local
+reviewed file, official upstream `url`, publication date, and page count; PDF
+citations use positive **printed** page numbers. Archived wiki sources require
+the exact timestamped ZIP path, SHA-256, acquisition timestamp, language,
+document count, and wiki base URL; citations use archive `member` names and may
+add a heading. Exact pinned wiki revisions remain URL-backed sources with a
+`retrievedDate`; their citations use the source URL directly and may add a
+heading.
 
-`vocabularySources` is currently a legacy exception: each entry is required to
-contain `sourceId`, `path`, `snapshotDate`, `heading`, and a positive `page`,
-regardless of the cleaner source-specific record-citation model. The checked-in
-v5.3 collection therefore carries wiki path/date provenance together with page
-numbers for vocabulary definitions. Treat that as current schema behavior, not
-as the intended general rule for wiki provenance.
+`vocabularySources` follows the same locator rules instead of forcing wiki
+references to carry PDF page numbers.
 
 Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be
@@ -89,7 +83,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 2,
+    "formatVersion": 3,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -112,8 +106,8 @@ The main collection structure is:
             "version": "5.3",
             "publishedDate": "2026-08-10",
             "localPath": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+            "url": "https://experience.corvusbelli.com/en/infinity/resources",
             "pageCount": 196,
-            "sha256": "...",
             "authority": "primary"
         }
     ],
@@ -180,35 +174,30 @@ Army links may target existing `skills`, `equipment`, `weapons`, `ammunition`,
 They annotate Army data; they do not establish list legality or replace
 Army-derived statistics.
 
-A wiki record citation currently uses the snapshot date and a path within the
-selected mirror, for example:
+An archived wiki citation uses an archive member plus an optional heading, for
+example:
 
 ```json
 {
-    "sourceId": "wiki-20260915",
-    "path": "infinitythewiki.com/Camouflaged_State.html",
-    "snapshotDate": "2026-09-15",
+    "sourceId": "wiki-en-20260918-130233",
+    "member": "Camouflaged_State",
     "heading": "Camouflaged State"
 }
 ```
 
-The checked-in `n5-core-v5.3.json` wiki `sources` record still identifies the
-legacy unpacked mirror at `data/wiki/20260915/`. That provenance predates the
-current timestamped-ZIP downloader and must not be rewritten to an exact
-`WIKI-<language> ...zip` archive/hash unless a migration can establish which archive was
-actually used.
+The checked-in N5 v5.3 collection is bound to
+`data/wiki/WIKI-en 20260918-130233.zip` with SHA-256
+`aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a`,
+acquired 2026-09-18 at 13:02:33 +02:00 with 812 members. Pinned `oldid=` wiki
+sources remain URL-backed because the current mirror intentionally does not
+preserve query-selected historical revisions as separate archive members.
 
-### Design direction — wiki provenance migration
+Generated acquisition provenance remains under `data/manifests/snapshots/`;
+curated rules copy only the exact source identity required to reproduce what was
+reviewed.
 
-When the wiki downloader/packager and curated provenance contract are rewritten,
-migrate wiki sources to exact recorded timestamped archive identity/hash and
-make vocabulary provenance source-specific instead of requiring the current
-mixed wiki/page locator. Generated acquisition provenance belongs under
-`data/manifests/snapshots/`; curated rules will reference the source
-identity they actually used rather than duplicating downloader state.
-
-Version 1 curated-rule files are no longer accepted by the loader and must be
-migrated to the v2 collection/source/citation structure before ingestion.
+Versions 1 and 2 curated-rule files are no longer accepted by the loader and
+must be migrated to the v3 source/citation contract before ingestion.
 
 The starter file `rules/example.json` is intentionally empty and is never an
 ingestion input. Directory ingestion skips that reserved filename. Validate all

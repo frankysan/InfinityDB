@@ -83,7 +83,7 @@ function rulesReferenceSection(rules) {
       const citations = document.createElement("p");
       citations.className = "detail-source";
       citations.textContent = rule.citations.map((citation) => {
-        const location = citation.page ? `p. ${citation.page}` : citation.heading || citation.path;
+        const location = citation.page ? `p. ${citation.page}` : citation.heading || citation.member;
         return `${citation.source_title || citation.source_id}, ${location}`;
       }).join(" · ");
       article.append(citations);

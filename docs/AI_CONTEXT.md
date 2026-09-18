@@ -275,37 +275,26 @@ season/historical material, and wiki research. Keep core rules, FAQ/errata
 rulings, ITS seasons, historical sources, and wiki-derived material explicitly
 scoped so a view cannot silently combine incompatible versions.
 
-PDF record citations retain document version/date plus printed-page citations.
-Wiki record citations currently retain snapshot-local paths and `snapshotDate`.
-The wiki downloader is fail-closed: any eligible discovered URL that cannot be
-fetched aborts publication before the timestamped archive or provenance manifest
-is created. Wiki acquisition is language-scoped: English is the default, Spanish
-is an explicit alternative, same-language pages are crawled, and directly
-referenced cross-language assets remain eligible. Archive labels and snapshot
-provenance record the selected language. The checked-in wiki source still
-references the legacy unpacked mirror identity; that is current provenance, not a
-timestamped-archive guarantee.
+PDF source records retain the local reviewed file and the official upstream
+source URL; PDF citations use printed pages. Archived wiki sources retain exact
+ZIP/hash, acquisition timestamp, language, document count, and base URL;
+citations use archive members. Exact pinned `oldid=` wiki revisions remain
+URL-backed sources with retrieval dates. The checked-in N5 v5.3 collection uses
+the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 
-The current curated-v2 rules contract includes collection/source metadata,
-maintained `skillTypes` and `labels` vocabularies with `vocabularySources`, typed
-records, Army links, related-record links, review state, and citations. The
-current `vocabularySources` validator requires the mixed legacy locator fields
-`sourceId`, `path`, `snapshotDate`, `heading`, and positive `page`. Version 1
-curated-rule files must be migrated before ingestion. The reserved
-`rules/example.json` template is excluded from directory ingestion.
+The wiki downloader is fail-closed for required content, language-scoped, and
+preserves incomplete work for inspection without publishing a snapshot.
+
+The current curated-v3 rules contract includes collection/source metadata,
+maintained `skillTypes` and `labels` vocabularies with source-specific
+`vocabularySources`, typed records, Army links, related-record links, review
+state, and citations. Versions 1 and 2 must be migrated before ingestion. The
+reserved `rules/example.json` template is excluded from directory ingestion.
 
 The rules database has its own schema/versioning and replacement lifecycle. It
 must not import Army JSON data, and Army database construction must not import
 rules data. Application/service code may combine the two only through stable
 application-level identities.
-
-### Design direction
-
-When the wiki downloader/packager is rewritten, migrate legacy wiki source
-identity to exact recorded timestamped archive/hash provenance and replace the
-mixed `vocabularySources` locator with source-appropriate provenance. This is
-tracked as future work and should not be papered over by documentation-only
-changes.
 
 ## API and UI constraints
 

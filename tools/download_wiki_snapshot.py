@@ -19,7 +19,7 @@ from collections import deque
 from collections.abc import Callable
 from datetime import datetime
 from html.parser import HTMLParser
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import NamedTuple, TextIO
 
 from infinity_db.snapshot_provenance import write_snapshot_manifest
@@ -332,6 +332,11 @@ def write_bytes(path: Path, payload: bytes) -> None:
     temp_path.replace(path)
 
 
+def mirror_path_sort_key(path: PurePath, destination: PurePath) -> str:
+    """Return a platform-neutral sort key for persisted mirror paths."""
+    return path.relative_to(destination).as_posix()
+
+
 def download_wiki(
     base_url: str,
     destination: Path,
@@ -422,7 +427,9 @@ def download_wiki(
             queue.append((candidate, link.asset))
 
     return WikiDownloadResult(
-        files=tuple(sorted(saved)),
+        files=tuple(
+            sorted(saved, key=lambda path: mirror_path_sort_key(path, destination))
+        ),
         failures=tuple(failures),
         ignored=tuple(ignored[url] for url in sorted(ignored)),
     )

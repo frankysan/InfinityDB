@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import Any
 
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 1
-RULES_COMPATIBILITY_VERSION = 1
+RULES_SCHEMA_VERSION = 2
+RULES_COMPATIBILITY_VERSION = 2
 RULES_METADATA_TABLE = "__rules_metadata"
 
 
@@ -52,9 +52,13 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             title TEXT NOT NULL,
             version TEXT NOT NULL,
             published_date TEXT,
-            snapshot_date TEXT,
+            retrieved_date TEXT,
+            acquired_at TEXT,
             local_path TEXT,
             url TEXT,
+            sha256 TEXT,
+            language TEXT,
+            document_count INTEGER,
             page_count INTEGER,
             authority TEXT NOT NULL,
             PRIMARY KEY (collection_id, id),
@@ -65,10 +69,9 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             vocabulary TEXT NOT NULL,
             position INTEGER NOT NULL,
             source_id TEXT NOT NULL,
-            path TEXT NOT NULL,
-            snapshot_date TEXT NOT NULL,
+            page INTEGER,
+            member TEXT,
             heading TEXT NOT NULL,
-            page INTEGER NOT NULL,
             PRIMARY KEY (collection_id, vocabulary, position),
             FOREIGN KEY (collection_id, source_id)
                 REFERENCES sources(collection_id, id)
@@ -110,8 +113,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             position INTEGER NOT NULL,
             source_id TEXT NOT NULL,
             page INTEGER,
-            path TEXT,
-            snapshot_date TEXT,
+            member TEXT,
             heading TEXT,
             section TEXT,
             PRIMARY KEY (collection_id, record_id, position),
@@ -175,8 +177,9 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
     _insert_many(
         connection,
         "INSERT INTO sources "
-        "(collection_id, id, kind, title, version, published_date, snapshot_date, "
-        "local_path, url, page_count, authority) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "(collection_id, id, kind, title, version, published_date, retrieved_date, "
+        "acquired_at, local_path, url, sha256, language, document_count, page_count, authority) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 collection_id,
@@ -185,9 +188,13 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
                 source["title"],
                 source["version"],
                 source.get("publishedDate"),
-                source.get("snapshotDate"),
+                source.get("retrievedDate"),
+                source.get("acquiredAt"),
                 source.get("localPath"),
                 source.get("url"),
+                source.get("sha256"),
+                source.get("language"),
+                source.get("documentCount"),
                 source.get("pageCount"),
                 source["authority"],
             )
@@ -199,18 +206,17 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
         _insert_many(
             connection,
             "INSERT INTO vocabulary_sources "
-            "(collection_id, vocabulary, position, source_id, path, snapshot_date, heading, page) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "(collection_id, vocabulary, position, source_id, page, member, heading) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
             [
                 (
                     collection_id,
                     vocabulary_name,
                     position,
                     source["sourceId"],
-                    source["path"],
-                    source["snapshotDate"],
+                    source.get("page"),
+                    source.get("member"),
                     source["heading"],
-                    source["page"],
                 )
                 for position, source in enumerate(document["vocabularySources"][vocabulary_name])
             ],
@@ -268,9 +274,8 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
         _insert_many(
             connection,
             "INSERT INTO record_citations "
-            "(collection_id, record_id, position, source_id, page, path, "
-            "snapshot_date, heading, section) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "(collection_id, record_id, position, source_id, page, member, heading, section) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 (
                     collection_id,
@@ -278,8 +283,7 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
                     position,
                     citation["sourceId"],
                     citation.get("page"),
-                    citation.get("path"),
-                    citation.get("snapshotDate"),
+                    citation.get("member"),
                     citation.get("heading"),
                     citation.get("section"),
                 )
@@ -334,7 +338,7 @@ def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Pa
                     _insert_document(connection, document)
                 metadata = {
                     "format": "InfinityDB curated rules database",
-                    "formatVersion": 1,
+                    "formatVersion": 2,
                     "collectionCount": len(documents),
                     "databaseCompatibilityVersion": RULES_COMPATIBILITY_VERSION,
                 }
@@ -448,7 +452,7 @@ class RulesDatabase:
                 dict(citation)
                 for citation in connection.execute(
                     "SELECT c.source_id, s.title AS source_title, s.version AS source_version, "
-                    "c.page, c.path, c.snapshot_date, c.heading, c.section "
+                    "s.url AS source_url, c.page, c.member, c.heading, c.section "
                     "FROM record_citations AS c JOIN sources AS s "
                     "ON s.collection_id = c.collection_id AND s.id = c.source_id "
                     "WHERE c.collection_id = ? AND c.record_id = ? ORDER BY c.position",

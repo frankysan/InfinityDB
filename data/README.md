@@ -43,12 +43,11 @@ InfinityDB 0.5.1 treats generated database data as replaceable: builds validate
 new frontend and raw-archive snapshots before atomically replacing both
 generated database files.
 
-PDFs and wiki snapshots are research sources, not Army-pipeline inputs. Current
-curated-v2 PDF record citations retain source version and printed-page
-provenance. Current wiki record citations retain a snapshot-local path and
-snapshot date. The checked-in rules collection still contains legacy wiki
-provenance from the earlier unpacked mirror; do not silently relabel it as an
-exact timestamped ZIP snapshot.
+PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
+curated-v3 rules contract records the local reviewed artifact plus its upstream
+source URL. PDF citations use printed pages. Archived wiki sources bind to an
+exact timestamped ZIP/hash and citations use archive members; exact pinned wiki
+revisions remain URL-backed sources.
 
 ## Snapshot provenance contract
 

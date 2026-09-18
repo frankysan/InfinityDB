@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 2
+CURATED_FORMAT_VERSION = 3
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -15,15 +15,75 @@ REQUIRED_SOURCE_FIELDS = frozenset({"id", "kind", "title", "version", "authority
 REQUIRED_RECORD_FIELDS = frozenset({"id", "kind", "name", "summary", "citations"})
 REQUIRED_SKILL_TYPE_FIELDS = frozenset({"id", "name", "labels", "descriptions"})
 REQUIRED_LABEL_FIELDS = frozenset({"id", "name", "description"})
-REQUIRED_VOCABULARY_SOURCE_FIELDS = frozenset(
-    {"sourceId", "path", "snapshotDate", "heading", "page"}
-)
 EXCLUDED_CURATED_FILENAMES = frozenset({"example.json"})
 
 
 def _require_string(value: Any, field: str, context: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{context}: '{field}' must be a non-empty string")
+
+
+def _require_positive_int(value: Any, field: str, context: str) -> None:
+    if type(value) is not int or value < 1:
+        raise ValueError(f"{context}: '{field}' must be a positive integer")
+
+
+def _validate_reference(
+    reference: dict[str, Any],
+    source: dict[str, Any],
+    context: str,
+    *,
+    require_heading: bool = False,
+) -> None:
+    deprecated = reference.keys() & {"path", "snapshotDate"}
+    if deprecated:
+        raise ValueError(f"{context}: unsupported legacy fields {sorted(deprecated)}")
+    if require_heading:
+        _require_string(reference.get("heading"), "heading", context)
+
+    if source["kind"] == "pdf":
+        _require_positive_int(reference.get("page"), "page", context)
+        if "member" in reference:
+            raise ValueError(f"{context}: PDF references must not contain 'member'")
+        return
+
+    if source.get("localPath"):
+        _require_string(reference.get("member"), "member", context)
+        if "page" in reference:
+            raise ValueError(f"{context}: archived wiki references must not contain 'page'")
+        return
+
+    if "page" in reference or "member" in reference:
+        raise ValueError(f"{context}: URL-backed wiki references use the source URL directly")
+
+
+def _validate_source(source: dict[str, Any], context: str) -> None:
+    missing = REQUIRED_SOURCE_FIELDS - source.keys()
+    if missing:
+        raise ValueError(f"{context}: missing fields {sorted(missing)}")
+    for field in REQUIRED_SOURCE_FIELDS:
+        _require_string(source[field], field, context)
+    if source["kind"] not in {"pdf", "wiki"}:
+        raise ValueError(f"{context}: 'kind' must be 'pdf' or 'wiki'")
+
+    _require_string(source.get("url"), "url", context)
+    if source["kind"] == "pdf":
+        _require_string(source.get("publishedDate"), "publishedDate", context)
+        _require_string(source.get("localPath"), "localPath", context)
+        _require_positive_int(source.get("pageCount"), "pageCount", context)
+        return
+
+    if source.get("localPath") is not None:
+        _require_string(source.get("localPath"), "localPath", context)
+        _require_string(source.get("acquiredAt"), "acquiredAt", context)
+        _require_string(source.get("sha256"), "sha256", context)
+        sha256 = source["sha256"]
+        if len(sha256) != 64 or any(char not in "0123456789abcdefABCDEF" for char in sha256):
+            raise ValueError(f"{context}: 'sha256' must be a 64-character hexadecimal digest")
+        _require_string(source.get("language"), "language", context)
+        _require_positive_int(source.get("documentCount"), "documentCount", context)
+    else:
+        _require_string(source.get("retrievedDate"), "retrievedDate", context)
 
 
 def discover_curated_documents(directory: Path) -> list[Path]:
@@ -125,22 +185,6 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         raise ValueError("Curated source must contain a 'labels' array")
     if not isinstance(vocabulary_sources, dict):
         raise ValueError("Curated source must contain a 'vocabularySources' object")
-    for vocabulary_name in ("skillTypes", "labels"):
-        source_list = vocabulary_sources.get(vocabulary_name)
-        if not isinstance(source_list, list):
-            raise ValueError(f"vocabularySources.{vocabulary_name} must be an array")
-        for index, source in enumerate(source_list):
-            context = f"vocabularySources.{vocabulary_name}[{index}]"
-            if not isinstance(source, dict):
-                raise ValueError(f"{context}: must be an object")
-            missing = REQUIRED_VOCABULARY_SOURCE_FIELDS - source.keys()
-            if missing:
-                raise ValueError(f"{context}: missing fields {sorted(missing)}")
-            for field in ("sourceId", "path", "snapshotDate", "heading"):
-                _require_string(source[field], field, context)
-            if type(source["page"]) is not int or source["page"] < 1:
-                raise ValueError(f"{context}: 'page' must be a positive integer")
-
     skill_type_ids: set[str] = set()
     for index, skill_type in enumerate(skill_types):
         context = f"skillTypes[{index}]"
@@ -182,29 +226,33 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         label_ids.add(label["id"])
 
     source_ids: set[str] = set()
+    source_by_id: dict[str, dict[str, Any]] = {}
     for index, source in enumerate(sources):
         context = f"sources[{index}]"
         if not isinstance(source, dict):
             raise ValueError(f"{context}: must be an object")
-        missing = REQUIRED_SOURCE_FIELDS - source.keys()
-        if missing:
-            raise ValueError(f"{context}: missing fields {sorted(missing)}")
-        for field in REQUIRED_SOURCE_FIELDS:
-            _require_string(source[field], field, context)
-        if source["kind"] not in {"pdf", "wiki"}:
-            raise ValueError(f"{context}: 'kind' must be 'pdf' or 'wiki'")
-        if not isinstance(source.get("localPath"), str) and not isinstance(source.get("url"), str):
-            raise ValueError(f"{context}: requires a 'localPath' or 'url'")
-        if source["kind"] == "pdf":
-            _require_string(source.get("publishedDate"), "publishedDate", context)
-            if type(source.get("pageCount")) is not int or source["pageCount"] < 1:
-                raise ValueError(f"{context}: PDF 'pageCount' must be a positive integer")
-        elif source["kind"] == "wiki":
-            _require_string(source.get("snapshotDate"), "snapshotDate", context)
+        _validate_source(source, context)
         source_id = source["id"]
         if source_id in source_ids:
             raise ValueError(f"{context}: duplicate source id {source_id!r}")
         source_ids.add(source_id)
+        source_by_id[source_id] = source
+
+    for vocabulary_name in ("skillTypes", "labels"):
+        source_list = vocabulary_sources.get(vocabulary_name)
+        if not isinstance(source_list, list):
+            raise ValueError(f"vocabularySources.{vocabulary_name} must be an array")
+        for index, reference in enumerate(source_list):
+            context = f"vocabularySources.{vocabulary_name}[{index}]"
+            if not isinstance(reference, dict):
+                raise ValueError(f"{context}: must be an object")
+            _require_string(reference.get("sourceId"), "sourceId", context)
+            source_id = reference["sourceId"]
+            if source_id not in source_by_id:
+                raise ValueError(f"{context}: unknown source id {source_id!r}")
+            _validate_reference(
+                reference, source_by_id[source_id], context, require_heading=True
+            )
 
     record_ids: set[str] = set()
     for index, record in enumerate(records):
@@ -345,13 +393,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             source_id = citation["sourceId"]
             if source_id not in source_ids:
                 raise ValueError(f"{ref_context}: unknown source id {source_id!r}")
-            source_kind = next(source["kind"] for source in sources if source["id"] == source_id)
-            if source_kind == "pdf":
-                if not isinstance(citation.get("page"), int) or citation["page"] < 1:
-                    raise ValueError(f"{ref_context}: PDF 'page' must be a positive integer")
-            elif source_kind == "wiki":
-                _require_string(citation.get("path"), "path", ref_context)
-                _require_string(citation.get("snapshotDate"), "snapshotDate", ref_context)
+            _validate_reference(citation, source_by_id[source_id], ref_context)
 
         for link_index, link in enumerate(record.get("armyLinks", [])):
             link_context = f"{context}.armyLinks[{link_index}]"

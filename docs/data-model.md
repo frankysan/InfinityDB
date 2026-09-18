@@ -446,24 +446,20 @@ identities and structured effects; FAQs yield dated rulings; ITS material is
 isolated by season; wiki material supplies discovery, aliases, and cross-links.
 Historical documents must not be silently merged into current rules.
 
-The current curated-v2 document has collection identity, source records, typed
+The current curated-v3 document has collection identity, source records, typed
 fact records, maintained vocabularies, scope, Army links, related-record links,
-review state, and citations. Record citations are source-specific: PDF citations
-require positive printed page numbers; wiki record citations require a path and
-`snapshotDate`. A wiki source may identify a preserved local mirror or an exact
-pinned revision URL; provenance must describe the source actually reviewed.
+review state, and source-specific citations. PDF sources record the local
+reviewed file, Corvus Belli source URL, publication date, and page count; PDF
+citations require positive printed page numbers. Archived wiki sources record
+the exact timestamped ZIP path/hash, acquisition timestamp, language, document
+count, and wiki base URL; citations use archive members. Exact pinned wiki
+revisions remain URL-backed sources with a retrieval date.
 
-`vocabularySources` is a current legacy exception to that cleaner model. The
-loader requires every vocabulary-source entry to contain `sourceId`, `path`,
-`snapshotDate`, `heading`, and a positive `page`, and the checked-in v5.3
-collection therefore carries wiki path/date information together with page
-numbers. That shape is current behavior, not a statement that wiki citations
-should generally use printed pages.
-
-The checked-in wiki source record also retains the earlier unpacked local mirror
-identity (`data/wiki/20260915/`). It predates the timestamped-ZIP downloader
-lifecycle and should be preserved as recorded provenance until a real migration
-can establish the exact replacement source identity.
+`vocabularySources` uses the same source-specific locator rules, so wiki
+vocabulary references no longer carry artificial printed-page values. The
+checked-in v5.3 collection is bound to the English 2026-09-18 wiki snapshot
+(`WIKI-en 20260918-130233.zip`, SHA-256
+`aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a`).
 
 `infinity-db build-rules` defaults to `data/curated/rules/` and stores those
 curated facts in a separate SQLite database rather than either Army-derived
@@ -497,15 +493,6 @@ repository responses. Curated `skill` records may additionally carry
 positive sign is omitted or forced. `SkillCatalog` joins that hint at read time;
 it is not copied into the Army database.
 
-### Design direction
-
-When the wiki downloader/packager and curated provenance contract are rewritten,
-migrate wiki sources from legacy unpacked/date-only identity to an exact
-recorded timestamped archive identity/hash and replace the mixed
-`vocabularySources` locator shape with source-appropriate provenance. Do not
-invent an archive/hash association before that migration has authoritative
-input to bind.
-
 ## Application query model
 
 The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
@@ -519,7 +506,7 @@ The rules-reference browsers query the global `skills`, `equipment`, and
 display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
-The first rules schema stores collections, sources, vocabulary definitions,
+The rules schema stores collections, sources, vocabulary definitions,
 records, citations, Army links, and related-record links. Curated records may
 also link to `ammunition`, `extras`, `characteristics`, `troop_types`, `units`,
 and profile occurrences. These are annotations and explanations only; Army JSON

@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 2,
+        "formatVersion": 3,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -26,8 +26,6 @@ def valid_document() -> dict:
             "skillTypes": [
                 {
                     "sourceId": "n5-core-v5.3",
-                    "path": "Skills_and_Equipment_Module.html",
-                    "snapshotDate": "2026-09-15",
                     "heading": "Skills",
                     "page": 76,
                 }
@@ -35,8 +33,6 @@ def valid_document() -> dict:
             "labels": [
                 {
                     "sourceId": "n5-core-v5.3",
-                    "path": "Labels.html",
-                    "snapshotDate": "2026-09-15",
                     "heading": "Labels",
                     "page": 174,
                 }
@@ -70,6 +66,7 @@ def valid_document() -> dict:
                 "version": "5.3",
                 "publishedDate": "2026-08-10",
                 "localPath": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+                "url": "https://experience.corvusbelli.com/en/infinity/resources",
                 "pageCount": 196,
                 "authority": "primary",
             }
@@ -103,40 +100,91 @@ def test_load_curated_document_rejects_unstructured_json(tmp_path: Path) -> None
         load_curated_document(path)
 
 
-def test_load_curated_document_accepts_wiki_citation(tmp_path: Path) -> None:
+def test_load_curated_document_requires_pdf_source_url(tmp_path: Path) -> None:
+    document = valid_document()
+    del document["sources"][0]["url"]
+    path = tmp_path / "missing-pdf-url.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="'url' must be a non-empty string"):
+        load_curated_document(path)
+
+
+def test_load_curated_document_rejects_legacy_reference_locators(tmp_path: Path) -> None:
+    document = valid_document()
+    reference = document["vocabularySources"]["skillTypes"][0]
+    reference["path"] = "legacy.html"
+    reference["snapshotDate"] = "2026-09-15"
+    path = tmp_path / "legacy-reference.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unsupported legacy fields"):
+        load_curated_document(path)
+
+
+def test_load_curated_document_accepts_archived_wiki_citation(tmp_path: Path) -> None:
     document = valid_document()
     document["sources"] = [
         {
-            "id": "wiki-20260915",
+            "id": "wiki-en-20260918-130233",
             "kind": "wiki",
-            "title": "Infinity Wiki snapshot",
-            "version": "20260915",
-            "snapshotDate": "2026-09-15",
-            "localPath": "data/wiki/20260915/",
+            "title": "Infinity Wiki snapshot (English)",
+            "version": "20260918-130233",
+            "acquiredAt": "2026-09-18T13:02:33+02:00",
+            "localPath": "data/wiki/WIKI-en 20260918-130233.zip",
+            "sha256": "a" * 64,
+            "language": "en",
+            "documentCount": 812,
+            "url": "https://infinitythewiki.com/",
             "authority": "secondary",
         }
     ]
+    document["vocabularySources"] = {"skillTypes": [], "labels": []}
     document["records"][0]["citations"] = [
         {
-            "sourceId": "wiki-20260915",
-            "path": "infinitythewiki.com/Example.html",
-            "snapshotDate": "2026-09-15",
+            "sourceId": "wiki-en-20260918-130233",
+            "member": "Example",
+            "heading": "Example",
         }
     ]
     path = tmp_path / "wiki.json"
     path.write_text(json.dumps(document), encoding="utf-8")
 
-    assert load_curated_document(path)["sources"][0]["kind"] == "wiki"
+    assert load_curated_document(path)["sources"][0]["language"] == "en"
 
 
-def test_load_curated_document_rejects_v1(tmp_path: Path) -> None:
+def test_load_curated_document_accepts_url_backed_wiki_citation(tmp_path: Path) -> None:
     document = valid_document()
-    document["formatVersion"] = 1
-    path = tmp_path / "v1.json"
+    document["sources"] = [
+        {
+            "id": "wiki-example-oldid-1",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Example revision 1",
+            "version": "oldid 1",
+            "retrievedDate": "2026-09-18",
+            "url": "https://infinitythewiki.com/index.php?title=Example&oldid=1",
+            "authority": "secondary",
+        }
+    ]
+    document["vocabularySources"] = {"skillTypes": [], "labels": []}
+    document["records"][0]["citations"] = [
+        {"sourceId": "wiki-example-oldid-1", "heading": "Example"}
+    ]
+    path = tmp_path / "wiki-url.json"
     path.write_text(json.dumps(document), encoding="utf-8")
 
-    with pytest.raises(ValueError, match="Unsupported curated format version"):
-        load_curated_document(path)
+    assert load_curated_document(path)["sources"][0]["retrievedDate"] == "2026-09-18"
+
+
+def test_load_curated_document_rejects_older_versions(tmp_path: Path) -> None:
+    document = valid_document()
+    for version in (1, 2):
+        document["formatVersion"] = version
+        path = tmp_path / f"v{version}.json"
+        path.write_text(json.dumps(document), encoding="utf-8")
+
+        with pytest.raises(ValueError, match="Unsupported curated format version"):
+            load_curated_document(path)
 
 
 def test_load_curated_document_rejects_non_json_reference_file(tmp_path: Path) -> None:
@@ -164,12 +212,22 @@ def test_checked_in_n5_collection_is_valid() -> None:
     document = load_curated_document(path)
 
     assert document["collection"]["id"] == "n5-core-v5.3"
-    assert document["vocabularySources"]["skillTypes"][0]["path"].endswith(
-        "Skills_and_Equipment_Module.html"
+    sources = {source["id"]: source for source in document["sources"]}
+    assert sources["n5-core-v5.3-pdf"]["url"] == (
+        "https://experience.corvusbelli.com/en/infinity/resources"
     )
-    assert document["vocabularySources"]["labels"][0]["path"] == ("infinitythewiki.com/Labels.html")
-    assert document["vocabularySources"]["skillTypes"][0]["page"] == 76
-    assert document["vocabularySources"]["labels"][0]["page"] == 174
+    wiki_source = sources["wiki-en-20260918-130233"]
+    assert wiki_source["localPath"] == "data/wiki/WIKI-en 20260918-130233.zip"
+    assert wiki_source["sha256"] == (
+        "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a"
+    )
+    assert wiki_source["documentCount"] == 812
+    assert document["vocabularySources"]["skillTypes"][0]["member"] == (
+        "Skills_and_Equipment_Module"
+    )
+    assert document["vocabularySources"]["labels"][0]["member"] == "Labels"
+    assert "page" not in document["vocabularySources"]["skillTypes"][0]
+    assert "page" not in document["vocabularySources"]["labels"][0]
     assert [skill_type["id"] for skill_type in document["skillTypes"]] == [
         "automatic",
         "deployment-skill",

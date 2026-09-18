@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 2,
+    "formatVersion": 3,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -12,20 +12,16 @@
     "vocabularySources": {
         "skillTypes": [
             {
-                "sourceId": "wiki-20260915",
-                "path": "infinitythewiki.com/Skills_and_Equipment_Module.html",
-                "snapshotDate": "2026-09-15",
+                "sourceId": "wiki-en-20260918-130233",
                 "heading": "Common and Special Skills in Infinity",
-                "page": 76
+                "member": "Skills_and_Equipment_Module"
             }
         ],
         "labels": [
             {
-                "sourceId": "wiki-20260915",
-                "path": "infinitythewiki.com/Labels.html",
-                "snapshotDate": "2026-09-15",
+                "sourceId": "wiki-en-20260918-130233",
                 "heading": "Labels",
-                "page": 174
+                "member": "Labels"
             }
         ]
     },
@@ -234,15 +230,19 @@
             "publishedDate": "2026-08-10",
             "localPath": "data/pdf/rules/n5-rules-v5-3-en.pdf",
             "pageCount": 196,
-            "authority": "primary"
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
-            "id": "wiki-20260915",
+            "id": "wiki-en-20260918-130233",
             "kind": "wiki",
-            "title": "Infinity Wiki snapshot",
-            "version": "20260915",
-            "snapshotDate": "2026-09-15",
-            "localPath": "data/wiki/20260915/",
+            "title": "Infinity Wiki snapshot (English)",
+            "version": "20260918-130233",
+            "acquiredAt": "2026-09-18T13:02:33+02:00",
+            "localPath": "data/wiki/WIKI-en 20260918-130233.zip",
+            "sha256": "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a",
+            "language": "en",
+            "documentCount": 812,
             "url": "https://infinitythewiki.com/",
             "authority": "secondary"
         },
@@ -251,36 +251,36 @@
             "kind": "wiki",
             "title": "Infinity Wiki — Traits revision 4110",
             "version": "N5.3 / oldid 4110",
-            "snapshotDate": "2026-09-17",
             "url": "https://infinitythewiki.com/index.php?title=Traits&oldid=4110",
-            "authority": "secondary"
+            "authority": "secondary",
+            "retrievedDate": "2026-09-17"
         },
         {
             "id": "wiki-armed-turret-oldid-3919",
             "kind": "wiki",
             "title": "Infinity Wiki — Armed Turret revision 3919",
             "version": "N5.2 / oldid 3919",
-            "snapshotDate": "2026-09-17",
             "url": "https://infinitythewiki.com/index.php?title=Armed_Turret&oldid=3919",
-            "authority": "secondary"
+            "authority": "secondary",
+            "retrievedDate": "2026-09-17"
         },
         {
             "id": "wiki-super-jump-oldid-4075",
             "kind": "wiki",
             "title": "Infinity Wiki — Super-Jump revision 4075",
             "version": "N5.3 / oldid 4075",
-            "snapshotDate": "2026-09-17",
             "url": "https://infinitythewiki.com/index.php?title=Super-Jump&oldid=4075",
-            "authority": "secondary"
+            "authority": "secondary",
+            "retrievedDate": "2026-09-17"
         },
         {
             "id": "wiki-forward-deployment-oldid-3076",
             "kind": "wiki",
             "title": "Infinity Wiki — Forward Deployment revision 3076",
             "version": "N5.3 / oldid 3076",
-            "snapshotDate": "2026-09-17",
             "url": "https://infinitythewiki.com/index.php?title=Forward_Deployment&oldid=3076",
-            "authority": "secondary"
+            "authority": "secondary",
+            "retrievedDate": "2026-09-17"
         }
     ],
     "records": [
@@ -337,16 +337,14 @@
                     "section": "Camouflaged State"
                 },
                 {
-                    "sourceId": "wiki-20260915",
-                    "path": "infinitythewiki.com/Camouflaged_State.html",
-                    "snapshotDate": "2026-09-15",
-                    "heading": "Camouflaged State"
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Camouflaged State",
+                    "member": "Camouflaged_State"
                 },
                 {
-                    "sourceId": "wiki-20260915",
-                    "path": "infinitythewiki.com/Labels.html",
-                    "snapshotDate": "2026-09-15",
-                    "heading": "Marker"
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Marker",
+                    "member": "Labels"
                 }
             ],
             "review": {
@@ -406,16 +404,14 @@
                     "section": "Camouflage"
                 },
                 {
-                    "sourceId": "wiki-20260915",
-                    "path": "infinitythewiki.com/Camouflage.html",
-                    "snapshotDate": "2026-09-15",
-                    "heading": "Camouflage"
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Camouflage",
+                    "member": "Camouflage"
                 },
                 {
-                    "sourceId": "wiki-20260915",
-                    "path": "infinitythewiki.com/Labels.html",
-                    "snapshotDate": "2026-09-15",
-                    "heading": "Optional"
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Optional",
+                    "member": "Labels"
                 }
             ],
             "review": {
@@ -455,8 +451,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-super-jump-oldid-4075",
-                    "path": "index.php?title=Super-Jump&oldid=4075",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Super-Jump"
                 }
             ],
@@ -497,8 +491,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-forward-deployment-oldid-3076",
-                    "path": "index.php?title=Forward_Deployment&oldid=3076",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Forward Deployment"
                 }
             ],
@@ -521,8 +513,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Anti-materiel"
                 }
             ],
@@ -545,8 +535,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "ARM = 0"
                 }
             ],
@@ -569,8 +557,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "ARO"
                 }
             ],
@@ -593,8 +579,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "BioWeapon"
                 }
             ],
@@ -628,8 +612,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Boost"
                 }
             ],
@@ -652,8 +634,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "BS Weapon (PH)"
                 }
             ],
@@ -676,8 +656,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "BS Weapon (WIP)"
                 }
             ],
@@ -700,8 +678,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "BTS = 0"
                 }
             ],
@@ -724,8 +700,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Burst (B)"
                 }
             ],
@@ -748,8 +722,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Burst: Single Target"
                 }
             ],
@@ -772,8 +744,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "CC"
                 }
             ],
@@ -796,8 +766,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Concealed"
                 }
             ],
@@ -820,8 +788,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Continuous Damage"
                 }
             ],
@@ -847,8 +813,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Deployable"
                 }
             ],
@@ -871,8 +835,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Direct Template"
                 }
             ],
@@ -902,8 +864,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Disposable (X)"
                 }
             ],
@@ -933,8 +893,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Double Shot"
                 }
             ],
@@ -957,8 +915,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Impact Template"
                 }
             ],
@@ -988,8 +944,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Improvised"
                 }
             ],
@@ -1012,8 +966,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Indiscriminate"
                 }
             ],
@@ -1036,8 +988,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Intuitive Attack"
                 }
             ],
@@ -1060,8 +1010,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Non-Lethal"
                 }
             ],
@@ -1084,8 +1032,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Non-Reloadable"
                 }
             ],
@@ -1108,8 +1054,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Perimeter"
                 }
             ],
@@ -1132,8 +1076,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Prior Deployment"
                 }
             ],
@@ -1156,8 +1098,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Reflective"
                 }
             ],
@@ -1180,8 +1120,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Silent (X)"
                 }
             ],
@@ -1211,8 +1149,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Speculative Attack"
                 }
             ],
@@ -1235,8 +1171,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "State"
                 }
             ],
@@ -1266,8 +1200,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Suppressive Fire (SF)"
                 }
             ],
@@ -1293,8 +1225,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Target (Attribute)"
                 }
             ],
@@ -1324,8 +1254,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Targetless"
                 }
             ],
@@ -1348,8 +1276,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
-                    "path": "index.php?title=Traits&oldid=4110",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Zone of Control (ZoC)"
                 }
             ],
@@ -1431,8 +1357,6 @@
             "citations": [
                 {
                     "sourceId": "wiki-armed-turret-oldid-3919",
-                    "path": "index.php?title=Armed_Turret&oldid=3919",
-                    "snapshotDate": "2026-09-17",
                     "heading": "Armed Turret Profile"
                 }
             ],

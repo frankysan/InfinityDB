@@ -55,6 +55,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Migrate curated rules provenance to format v3. PDF sources now retain both the
+  reviewed local file and official Corvus Belli Resources URL; archived wiki
+  sources bind to exact timestamped ZIP/hash/acquisition provenance and use
+  archive-member citations, while pinned `oldid=` wiki revisions remain
+  URL-backed sources. Bump the independent rules database schema and compatibility revision to preserve
+  the richer provenance.
 - Make wiki snapshot acquisition fail closed for required content. Required
   crawl failures publish neither the immutable `WIKI-<language> ...zip` archive
   nor snapshot provenance and preserve partial work under `data/work/wiki/`.
