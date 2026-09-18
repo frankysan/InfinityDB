@@ -38,6 +38,7 @@ DEFAULT_LINT_TARGETS = (
     "tests",
     "tools/run_checks.py",
     "tools/asset_validation.py",
+    "tools/stage_full_asset_bundle.py",
 )
 EXIT_OK = 0
 EXIT_STAGE_FAILURE = 1

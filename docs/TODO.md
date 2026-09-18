@@ -452,10 +452,17 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] Expand hermetic CI across Windows, Ubuntu/Linux, and macOS at Python 3.11;
     add a Linux Python 3.14 compatibility leg without multiplying the entire
     operating-system matrix.
-  - [ ] Add optional/manual full-asset CI for a validated complete symbol set,
-    using a suitable self-hosted runner or explicit authorized acquisition. Do
-    not upload acquired/derived Corvus Belli graphical trees as workflow
-    artifacts, and do not make this a required public PR check.
+  - [ ] Complete optional/manual full-asset CI for a validated complete symbol set.
+    - [x] Add a dispatch-only `Full-asset checks` workflow restricted to `main`
+      that stages a checksum-pinned private published-asset bundle through the
+      `full-assets` environment, runs `--assets required`, and never uploads the
+      third-party graphical tree as a workflow artifact.
+    - [x] Add safe private-bundle staging with HTTPS-only download, digest/size
+      checks, traversal/symlink/case-collision guards, and published-contract
+      validation before replacing ignored local assets.
+    - [ ] Configure the repository `full-assets` environment with an authorized
+      `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256`, then record one
+      successful manual run.
   - [ ] Keep live Army/wiki/symbol acquisition and expensive performance/capacity
     checks explicit, manual, or scheduled rather than dependencies of required
     source CI.

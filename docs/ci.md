@@ -127,7 +127,7 @@ separately by the installed-wheel smoke layer.
 This layer verifies deployment packaging; it is not a substitute for general
 source CI or installed-wheel validation.
 
-### Full-asset integration mode (current local behavior)
+### Full-asset integration mode (current local and manual CI behavior)
 
 `tools/run_checks.py` has an explicit asset policy with three modes:
 
@@ -158,11 +158,32 @@ coverage uses project-owned temporary SVG fixtures for dynamic static serving,
 and version-display assertions consume the controlled application display
 version rather than relying on incidental `.git` state.
 
-A GitHub Actions full-asset run should be optional/manual rather than a required
-public PR check. Acceptable execution models include a suitably configured
-self-hosted runner or an explicit authorized acquisition step. The workflow may
-publish ordinary logs/test reports, but must not upload the acquired graphical
-asset tree as a GitHub Actions artifact.
+The dispatch-only `Full-asset checks` workflow implements the optional GitHub
+layer on a GitHub-hosted Ubuntu/Python 3.11 runner. It is restricted to the
+`main` ref and uses the `full-assets` GitHub environment so access to the private
+bundle can be controlled independently from ordinary source CI. That environment
+provides `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets. The
+URL must resolve over HTTPS, and the configured digest pins the exact bundle used
+by the run.
+
+`tools/stage_full_asset_bundle.py` downloads the bundle without printing its
+URL, enforces download/expanded-size limits, rejects path traversal, symlinks,
+encrypted members, case-colliding names, and files outside the
+`armies/`, `orders/`, and `units/` SVG trees, then validates the staged tree
+against the tracked browser mappings before replacing the ignored local asset
+directories. The workflow then runs:
+
+```text
+python tools/run_checks.py --all --assets required \
+  --build-source tests/fixtures/deployment-smoke
+```
+
+The bundle is deliberately supplied privately rather than reconstructed by CI:
+InfinityDB does not yet have an authoritative symbol publisher, and the CI layer
+must not duplicate that future publication logic. The workflow has no push or
+pull-request trigger and does not upload the bundle or staged graphical tree as a
+GitHub Actions artifact. The environment secrets therefore remain an explicit
+repository-administration prerequisite before a manual run can succeed.
 
 ## Network and scheduled workflows
 
@@ -178,13 +199,12 @@ networked or long-running benchmark.
 ## Planned implementation order
 
 The deployment-smoke runtime import boundary, local hermetic/full-asset test
-split, cross-platform source workflow, and installed-wheel smoke are implemented.
-Remaining CI work should proceed in this order:
-
-1. Add optional/manual full-asset integration validation without redistributing
-   third-party graphical assets.
-2. Add scheduled/manual acquisition, performance, or other extended workflows
-   only where they provide useful independent signals.
+split, cross-platform source workflow, installed-wheel smoke, and dispatch-only
+full-asset workflow are implemented. Repository administration still needs to
+configure the `full-assets` environment with an authorized checksum-pinned
+bundle before that manual job can run successfully. After that, remaining CI
+work should add scheduled/manual acquisition, performance, or other extended
+workflows only where they provide useful independent signals.
 
 Symbol-pipeline feature work can then continue with these validation layers in
 place, so later deduplication/conversion/publication changes receive automatic

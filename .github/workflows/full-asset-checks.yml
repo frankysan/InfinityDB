@@ -1,0 +1,38 @@
+name: Full-asset checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-asset-checks:
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: full-assets
+      deployment: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Stage private full-asset bundle
+        env:
+          FULL_ASSET_BUNDLE_URL: ${{ secrets.FULL_ASSET_BUNDLE_URL }}
+          FULL_ASSET_BUNDLE_SHA256: ${{ secrets.FULL_ASSET_BUNDLE_SHA256 }}
+        run: python tools/stage_full_asset_bundle.py
+
+      - name: Run full-asset project checks
+        run: python tools/run_checks.py --all --assets required --build-source tests/fixtures/deployment-smoke

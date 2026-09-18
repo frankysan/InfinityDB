@@ -26,6 +26,12 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add a dispatch-only `Full-asset checks` GitHub Actions workflow. The job is
+  restricted to `main`, stages a checksum-pinned private SVG bundle supplied
+  through the dedicated `full-assets` environment, and runs the normal project
+  checks with `--assets required` without uploading third-party graphical assets
+  as workflow artifacts.
+
 - Expand `Source checks` into a hermetic operating-system matrix covering Windows,
   Ubuntu/Linux, and macOS at Python 3.11, with an additional Linux Python 3.14
   compatibility leg.

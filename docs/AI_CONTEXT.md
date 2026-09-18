@@ -76,8 +76,13 @@ and serves a read-only browser and same-origin HTTP API.
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases
   through the runtime application outside the checkout.
-- **Design direction:** optional/manual full-asset GitHub validation remains
-  separate without redistributing Corvus Belli graphical assets. See `docs/ci.md`.
+- `Full-asset checks` is dispatch-only, restricted to `main`, and stages a private
+  checksum-pinned published-asset ZIP from the `full-assets` GitHub environment
+  before running `run_checks.py --assets required`. It does not upload the
+  graphical tree as an artifact, and it intentionally does not duplicate the
+  unfinished symbol publisher by reconstructing runtime paths from raw symbols.
+  Repository environment secrets must be configured before the manual job can
+  succeed. See `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 

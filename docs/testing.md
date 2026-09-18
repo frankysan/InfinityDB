@@ -122,8 +122,17 @@ Corvus Belli graphical assets.
 
 The separate `Installed wheel smoke` workflow also builds a real wheel, installs
 it into a fresh virtual environment, and exercises installed build CLIs plus
-runtime startup from outside the source checkout. Optional/manual full-asset work
-remains documented in [the continuous integration strategy](ci.md).
+runtime startup from outside the source checkout.
+
+`Full-asset checks` is a manual-only workflow for the complete ignored symbol
+set. It runs only from `main`, uses the `full-assets` GitHub environment, stages a
+private checksum-pinned ZIP whose root contains only `armies/`, `orders/`, and
+`units/` SVG trees, and then invokes the same project runner with
+`--assets required`. Configure `FULL_ASSET_BUNDLE_URL` and
+`FULL_ASSET_BUNDLE_SHA256` as environment secrets. The workflow does not upload
+the graphical tree as an artifact. See
+[the continuous integration strategy](ci.md) for the security and redistribution
+boundary.
 
 ## Reports
 

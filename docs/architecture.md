@@ -516,9 +516,13 @@ graphical assets. `Installed wheel smoke` separately installs the built wheel in
 a fresh virtual environment, verifies installed build CLIs and runtime startup,
 and consumes maintained build configuration from
 `<sys.prefix>/share/infinity-db/config/` rather than repository-relative paths.
-Full-asset GitHub validation remains optional/manual and must not redistribute
-those assets as CI artifacts; the existing container smoke test continues to
-validate deployment packaging separately. See `docs/ci.md`.
+`Full-asset checks` provides a dispatch-only GitHub layer restricted to `main`.
+It stages a private checksum-pinned published-asset bundle through the
+`full-assets` environment and validates it before running the normal checks with
+`--assets required`; CI deliberately does not reconstruct publication paths from
+raw symbols while the authoritative publisher remains unfinished. The graphical
+asset tree is never uploaded as a workflow artifact. The existing container smoke
+test continues to validate deployment packaging separately. See `docs/ci.md`.
 
 ## Portability and filesystem policy
 
