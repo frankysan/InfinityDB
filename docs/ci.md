@@ -2,8 +2,8 @@
 
 This document records the InfinityDB continuous-integration and automated
 validation contract. Sections explicitly marked design direction remain planned;
-the deployment smoke, required Linux source workflow, installed-wheel smoke, and
-local asset-test policy are current behavior.
+the deployment smoke, required cross-platform source workflow, installed-wheel
+smoke, and local asset-test policy are current behavior.
 
 The goal is to make a clean checkout independently trustworthy while still
 supporting deeper validation against a complete local Corvus Belli graphical
@@ -35,8 +35,9 @@ asset set when one is legitimately available.
 ### Required source CI (current)
 
 The `Source checks` GitHub Actions workflow runs on pull requests, pushes to
-`main`, and manual dispatch. It starts from a clean Ubuntu checkout with
-third-party graphical assets absent and delegates the validation contract to
+`main`, and manual dispatch. Its matrix covers clean Windows, Ubuntu/Linux, and
+macOS runners at Python 3.11, plus Linux at Python 3.14. Third-party graphical
+assets are absent, and each leg delegates the validation contract to
 `tools/run_checks.py` rather than duplicating the individual test/build commands
 in workflow YAML:
 
@@ -47,7 +48,7 @@ python tools/run_checks.py --all --assets off \
 
 The tracked synthetic Army fixture supplies the explicit clean-checkout input
 for the Army build stage; ordinary source archives intentionally do not contain a
-real `data/raw/` snapshot. The workflow currently covers:
+real `data/raw/` snapshot. Every matrix leg covers:
 
 - pytest hermetic tests;
 - Ruff through the normal runner lint stage;
@@ -64,17 +65,17 @@ merge blocking is a repository rules/branch-protection setting rather than a YAM
 property. Enabling that repository-side enforcement remains an administrative
 step when protected-branch policy is desired.
 
-### Cross-platform CI
+### Cross-platform CI (current)
 
-A hermetic matrix should exercise the maintained source checks on:
+The hermetic source-check matrix exercises the maintained source checks on:
 
-- Windows;
-- Ubuntu/Linux;
-- macOS.
+- Windows at Python 3.11;
+- Ubuntu/Linux at Python 3.11 and Python 3.14;
+- macOS at Python 3.11.
 
-Python 3.11 remains the minimum supported version and should be represented on
-all three platforms. Additional current Python versions may be checked on Linux
-without unnecessarily multiplying the full operating-system matrix.
+Python 3.11 remains the minimum supported version and is represented on all three
+platforms. The additional Linux Python 3.14 leg adds newer-interpreter coverage
+without multiplying the full operating-system matrix.
 
 The matrix is intended to expose real portability differences such as path
 case handling, path separators, line endings, subprocess behavior, and Windows
@@ -177,13 +178,12 @@ networked or long-running benchmark.
 ## Planned implementation order
 
 The deployment-smoke runtime import boundary, local hermetic/full-asset test
-split, clean-checkout Linux source workflow, and installed-wheel smoke are
-implemented. Remaining CI work should proceed in this order:
+split, cross-platform source workflow, and installed-wheel smoke are implemented.
+Remaining CI work should proceed in this order:
 
-1. Expand the hermetic source checks to Windows and macOS.
-2. Add optional/manual full-asset integration validation without redistributing
+1. Add optional/manual full-asset integration validation without redistributing
    third-party graphical assets.
-3. Add scheduled/manual acquisition, performance, or other extended workflows
+2. Add scheduled/manual acquisition, performance, or other extended workflows
    only where they provide useful independent signals.
 
 Symbol-pipeline feature work can then continue with these validation layers in

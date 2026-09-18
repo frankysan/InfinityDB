@@ -449,9 +449,9 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] Add an installed-wheel smoke job that builds/installs the wheel in a clean
     environment and validates supported imports, startup, CLI/resource packaging,
     and generated test databases without repository-relative assumptions.
-  - [ ] Expand hermetic CI across Windows, Ubuntu/Linux, and macOS at Python 3.11;
-    add newer Python coverage on Linux without multiplying the entire matrix
-    unnecessarily.
+  - [x] Expand hermetic CI across Windows, Ubuntu/Linux, and macOS at Python 3.11;
+    add a Linux Python 3.14 compatibility leg without multiplying the entire
+    operating-system matrix.
   - [ ] Add optional/manual full-asset CI for a validated complete symbol set,
     using a suitable self-hosted runner or explicit authorized acquisition. Do
     not upload acquired/derived Corvus Belli graphical trees as workflow

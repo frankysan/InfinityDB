@@ -26,6 +26,10 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Expand `Source checks` into a hermetic operating-system matrix covering Windows,
+  Ubuntu/Linux, and macOS at Python 3.11, with an additional Linux Python 3.14
+  compatibility leg.
+
 - Add an `Installed wheel smoke` GitHub Actions workflow. Wheels now package the
   maintained identity, weapon-catalog, and source-anomaly build configuration
   under `share/infinity-db/config/`; the smoke job installs the wheel into a

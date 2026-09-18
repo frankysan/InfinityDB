@@ -12,8 +12,21 @@ permissions:
 
 jobs:
   source-checks:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.11"
+          - os: windows-latest
+            python: "3.11"
+          - os: macos-latest
+            python: "3.11"
+          - os: ubuntu-latest
+            python: "3.14"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -21,7 +34,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: pyproject.toml
 
@@ -29,8 +42,4 @@ jobs:
         run: python -m pip install -e ".[dev]"
 
       - name: Run hermetic source checks
-        run: |
-          python tools/run_checks.py \
-            --all \
-            --assets off \
-            --build-source tests/fixtures/deployment-smoke
+        run: python tools/run_checks.py --all --assets off --build-source tests/fixtures/deployment-smoke

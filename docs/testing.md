@@ -106,8 +106,9 @@ the exact container contract and the equivalent manual command.
 
 ## Continuous integration
 
-The `Source checks` GitHub Actions workflow runs the normal check runner from a
-clean Ubuntu/Python 3.11 checkout on pull requests and pushes to `main`:
+The `Source checks` GitHub Actions workflow runs the normal check runner on
+clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests and
+pushes to `main`, plus a Linux Python 3.14 compatibility leg:
 
 ```text
 python tools/run_checks.py --all --assets off \
@@ -121,9 +122,8 @@ Corvus Belli graphical assets.
 
 The separate `Installed wheel smoke` workflow also builds a real wheel, installs
 it into a fresh virtual environment, and exercises installed build CLIs plus
-runtime startup from outside the source checkout. Cross-platform and
-optional/manual full-asset work remain documented in
-[the continuous integration strategy](ci.md).
+runtime startup from outside the source checkout. Optional/manual full-asset work
+remains documented in [the continuous integration strategy](ci.md).
 
 ## Reports
 
