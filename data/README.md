@@ -80,9 +80,12 @@ separate manifests with the same authoritative SHA-256.
 Symbol snapshot provenance also records the hash of the Army source artifact
 used by symbol acquisition. `tools/build_symbols.py` verifies the corresponding
 Army snapshot provenance before discovery and keeps that exact archive pinned
-through raw symbol acquisition. The generated `army-symbol-build.json` is
-separate build state: its current contract is acquisition-only and will be
-extended as later processing/publication stages are integrated.
+through raw symbol acquisition. The generated version-2
+`army-symbol-build.json` is separate acquisition/build state: it persists the
+Army archive identity together with source URL, language, acquisition timestamp,
+source-document count, and observed source revisions so downstream symbol stages
+do not need to rediscover that provenance. It will be extended as later
+processing/publication stages are integrated.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot

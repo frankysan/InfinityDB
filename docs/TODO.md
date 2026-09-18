@@ -161,10 +161,10 @@ consistency audit unless one becomes necessary to unblock that work.
       provenance, pin archive identity/hash, language, acquisition timestamp,
       API base URL, source-document count, and observed source revisions, and
       pass that exact archive into raw symbol discovery/acquisition.
-    - [ ] Enrich the `army-symbol-build.json` snapshot record with Army language,
-      API base URL, acquisition provenance, and source revision information so
-      later stages consume the pin from generated build state rather than CLI
-      memory or filenames.
+    - [x] Enrich the version-2 `army-symbol-build.json` snapshot record with Army
+      language, API base URL, acquisition timestamp/document count, and source
+      revision information so later stages consume the pin from generated build
+      state rather than CLI memory or filenames.
     - [ ] Integrate override/cache resolution, processing, compression, publication,
       mapping generation, validation, and final reporting behind the same pin.
   - [ ] Keep normal project builds offline. Snapshot and symbol refreshes remain

@@ -89,10 +89,11 @@ All notable changes to this project are documented in this file.
   reference, includes maintained static symbols, audits `resume` and unknown SVG
   source locations, downloads each authoritative URL once, and no longer
   generates browser symbol mappings.
-- Add the acquisition-only version-1 `army-symbol-build.json` generated state,
-  separating raw asset URL/hash/archive identity from every Army/static
-  reference so later symbol processing can extend the same manifest without
-  inferring provenance from filenames.
+- Upgrade the acquisition-only `army-symbol-build.json` generated state to
+  version 2. It now persists the verified Army source URL, language, acquisition
+  timestamp/document count, and observed source revisions alongside the Army
+  artifact identity, so later symbol stages consume the pin from build state
+  instead of CLI memory or filenames.
 - Move reinforcement-label prefixes (`REINF` / `REFUERZOS`) into the validated
   identity policy and derive profile `display_name` values in the backend. The
   browser now consumes `display_name` and `profile_identity` instead of carrying

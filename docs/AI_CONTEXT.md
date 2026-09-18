@@ -233,13 +233,15 @@ document count, and observed per-document Army source revisions, then passes
 that exact archive through current raw symbol discovery/acquisition.
 
 The raw symbol acquisition stage creates one immutable `SYMBOLS ...zip`,
-ordinary snapshot provenance, and the acquisition-only version-1
+ordinary snapshot provenance, and the acquisition-only version-2
 `data/manifests/army-symbol-build.json`. That build manifest separates raw assets
-from consumers, records Army/SYMBOLS artifact hashes, source-document count,
-raw asset URL/filename/archive-path/hash/source-method, every source/static
-reference, and discovery audit counts. It deliberately has no font, duplicate,
-conversion, compression, or published-path state yet. The downloader does not
-generate `army-symbols.js` or `unit-symbol-map.js`.
+from consumers, records Army/SYMBOLS artifact hashes, and persists the verified
+Army source pin: API/source URL, language, acquisition timestamp, source-document
+count, and observed source revisions. It also records raw asset
+URL/filename/archive-path/hash/source-method, every source/static reference, and
+discovery audit counts. It deliberately has no font, duplicate, conversion,
+compression, or published-path state yet. The downloader does not generate
+`army-symbols.js` or `unit-symbol-map.js`.
 
 ### Design direction
 

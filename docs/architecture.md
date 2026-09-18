@@ -264,10 +264,12 @@ network refresh. It verifies the selected Army archive/provenance and keeps that
 same artifact pinned through current raw symbol discovery and acquisition;
 normal application/database builds never invoke it or acquire network data.
 
-Army-symbol acquisition also writes the version-1
+Army-symbol acquisition also writes the version-2
 `data/manifests/army-symbol-build.json`. This generated build-state document is
 separate from immutable snapshot provenance: it binds the selected Army and
-SYMBOLS artifacts, records every downloaded raw asset by URL/hash/archive path,
+SYMBOLS artifacts and carries the verified Army acquisition pin (source URL,
+language, acquisition timestamp, source-document count, and observed source
+revisions). It also records every downloaded raw asset by URL/hash/archive path,
 preserves every authoritative and audit-only source reference, and stores the
 discovery audit counts. Its current contract is acquisition-only; later symbol
 processing stages will extend the build state with their own validated fields

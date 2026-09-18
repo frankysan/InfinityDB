@@ -21,9 +21,11 @@ from infinity_db.snapshot_provenance import portable_project_path, write_snapsho
 from infinity_db.symbol_manifest import build_symbol_manifest, write_symbol_manifest
 
 try:
+    from tools.download_army_json import ArmySnapshotResult, resolve_army_snapshot
     from tools.path_sanitization import sanitize_filename
     from tools.snapshot_archive import create_timestamped_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
+    from download_army_json import ArmySnapshotResult, resolve_army_snapshot
     from path_sanitization import sanitize_filename
     from snapshot_archive import create_timestamped_archive
 
@@ -443,6 +445,8 @@ def acquire_symbol_snapshot(
     sleeper: Callable[[float], Any] | None = None,
     acquired_at: datetime | None = None,
     progress: Callable[[str], Any] | None = None,
+    army_snapshot: ArmySnapshotResult | None = None,
+    army_snapshot_manifest: Path | None = None,
 ) -> SymbolSnapshotResult:
     """Download and publish one complete raw symbol snapshot for a pinned Army source."""
     if delay < 0:
@@ -456,6 +460,21 @@ def acquire_symbol_snapshot(
     opener = opener or urlopen
     sleeper = sleeper or time.sleep
     progress = progress or (lambda _message: None)
+    army_snapshot = army_snapshot or resolve_army_snapshot(
+        source,
+        manifest_directory=manifest_directory,
+        manifest=army_snapshot_manifest,
+    )
+    if army_snapshot.archive.resolve() != source.resolve():
+        raise ValueError(
+            "Resolved Army snapshot does not match the symbol acquisition source: "
+            f"{army_snapshot.archive} != {source}"
+        )
+    if discovery.source_document_count != army_snapshot.document_count:
+        raise ValueError(
+            "Symbol discovery source-document count does not match Army provenance: "
+            f"{discovery.source_document_count} != {army_snapshot.document_count}"
+        )
 
     destination.mkdir(parents=True, exist_ok=True)
     archive: Path | None = None
@@ -510,7 +529,11 @@ def acquire_symbol_snapshot(
                 army_artifact=source,
                 symbol_artifact=archive,
                 acquired_at=timestamp,
-                source_document_count=discovery.source_document_count,
+                army_acquired_at=army_snapshot.acquired_at,
+                army_language=army_snapshot.language,
+                army_source_url=army_snapshot.source_url,
+                source_document_count=army_snapshot.document_count,
+                source_revisions=army_snapshot.source_revisions,
                 assets=assets,
                 references=discovery.references,
                 audit=discovery.audit,
@@ -562,7 +585,11 @@ def print_discovery_summary(discovery: Discovery) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source", type=Path, help="Raw Army ZIP/directory or legacy master JSON")
+    parser.add_argument(
+        "source",
+        type=Path,
+        help="Raw Army ZIP; directory/master inputs are discovery-only with --dry-run",
+    )
     parser.add_argument(
         "destination",
         nargs="?",
@@ -587,6 +614,11 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=Path("data/manifests/snapshots"),
         help="Generated snapshot manifest directory (default: data/manifests/snapshots)",
+    )
+    parser.add_argument(
+        "--snapshot-manifest",
+        type=Path,
+        help="Army snapshot provenance manifest (defaults to <manifest-dir>/<source>.json)",
     )
     parser.add_argument(
         "--delay", type=float, default=0.2, help="Seconds to wait between downloads (default: 0.2)"
@@ -614,6 +646,7 @@ def main(argv: list[str] | None = None) -> int:
             delay=args.delay,
             discovery=discovery,
             progress=print,
+            army_snapshot_manifest=args.snapshot_manifest,
         )
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

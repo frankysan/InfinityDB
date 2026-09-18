@@ -107,7 +107,7 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
     expected_manifest = data_root / "manifests" / "snapshots" / manifest.name
     expected_manifest.parent.mkdir(parents=True)
     expected_manifest.write_bytes(manifest.read_bytes())
-    seen: dict[str, Path] = {}
+    seen: dict[str, object] = {}
 
     discovery = SimpleNamespace(source_document_count=2)
 
@@ -120,9 +120,10 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
         destination,
         manifest_directory,
         build_manifest_path,
-        **_kwargs,
+        **kwargs,
     ):
         seen["acquisition"] = source
+        seen["army_snapshot"] = kwargs["army_snapshot"]
         return SimpleNamespace(
             asset_count=3,
             archive=destination / "SYMBOLS 20260918-120100.zip",
@@ -148,7 +149,10 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
         == 0
     )
 
-    assert seen == {"discovery": archive, "acquisition": archive}
+    assert seen["discovery"] == archive
+    assert seen["acquisition"] == archive
+    assert seen["army_snapshot"].archive == archive
+    assert seen["army_snapshot"].source_revisions == {"7.26246.158": 1}
 
 
 def test_fetch_mode_pins_the_snapshot_returned_by_army_acquisition(
@@ -170,8 +174,9 @@ def test_fetch_mode_pins_the_snapshot_returned_by_army_acquisition(
     monkeypatch.setattr(module, "discover_symbol_source", lambda *_args, **_kwargs: discovery)
     monkeypatch.setattr(module, "print_discovery_summary", lambda _discovery: None)
 
-    def fake_symbols(source, *_args, **_kwargs):
+    def fake_symbols(source, *_args, **kwargs):
         seen["symbol_source"] = source
+        seen["army_snapshot"] = kwargs["army_snapshot"]
         return SimpleNamespace(
             asset_count=0,
             archive=tmp_path / "symbols.zip",
@@ -196,6 +201,8 @@ def test_fetch_mode_pins_the_snapshot_returned_by_army_acquisition(
 
     assert seen["language"] == "en"
     assert seen["symbol_source"] == archive
+    assert seen["army_snapshot"].archive == archive
+    assert seen["army_snapshot"].language == "en"
 
 
 def test_offline_mode_requires_snapshot_provenance(tmp_path: Path, capsys) -> None:

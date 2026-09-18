@@ -15,6 +15,17 @@ def artifact(path: Path, body: bytes) -> Path:
     return path
 
 
+def army_source_kwargs(source_document_count: int) -> dict[str, object]:
+    revisions = {} if source_document_count == 1 else {"7.26246.158": source_document_count - 1}
+    return {
+        "army_acquired_at": datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),
+        "army_language": "en",
+        "army_source_url": "https://api.corvusbelli.com/army",
+        "source_document_count": source_document_count,
+        "source_revisions": revisions,
+    }
+
+
 def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -> None:
     army = artifact(tmp_path / "army.zip", b"army")
     symbols = artifact(tmp_path / "symbols.zip", b"symbols")
@@ -66,7 +77,7 @@ def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -
         army_artifact=army,
         symbol_artifact=symbols,
         acquired_at=datetime(2026, 9, 17, 20, 0, tzinfo=UTC),
-        source_document_count=2,
+        **army_source_kwargs(2),
         assets=assets,
         references=references,
         audit=audit,
@@ -77,6 +88,13 @@ def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -
     assert len(document["references"]) == 2
     assert document["snapshot"]["armyArtifact"]["path"] == "army.zip"
     assert document["snapshot"]["symbolArtifact"]["path"] == "symbols.zip"
+    assert document["snapshot"]["armySource"] == {
+        "acquiredAt": "2026-09-18T08:35:09+00:00",
+        "language": "en",
+        "url": "https://api.corvusbelli.com/army",
+        "documentCount": 2,
+        "sourceRevisions": {"7.26246.158": 1},
+    }
 
 
 def test_resume_audit_reference_may_point_to_non_downloaded_url(tmp_path: Path) -> None:
@@ -86,7 +104,7 @@ def test_resume_audit_reference_may_point_to_non_downloaded_url(tmp_path: Path) 
         army_artifact=army,
         symbol_artifact=symbols,
         acquired_at=datetime(2026, 9, 17, 20, 0, tzinfo=UTC),
-        source_document_count=1,
+        **army_source_kwargs(1),
         assets=[],
         references=[
             {
@@ -126,7 +144,7 @@ def test_authoritative_reference_must_point_to_downloaded_asset(tmp_path: Path) 
             army_artifact=army,
             symbol_artifact=symbols,
             acquired_at=datetime(2026, 9, 17, 20, 0, tzinfo=UTC),
-            source_document_count=1,
+            **army_source_kwargs(1),
             assets=[],
             references=[
                 {
@@ -153,4 +171,39 @@ def test_authoritative_reference_must_point_to_downloaded_asset(tmp_path: Path) 
                 "unknownReferenceCount": 0,
             },
             project_root=tmp_path,
+        )
+
+
+def test_army_source_revisions_must_account_for_non_metadata_documents(
+    tmp_path: Path,
+) -> None:
+    army = artifact(tmp_path / "army.zip", b"army")
+    symbols = artifact(tmp_path / "symbols.zip", b"symbols")
+    kwargs = army_source_kwargs(2)
+    kwargs["source_revisions"] = {"7.26246.158": 2}
+
+    with pytest.raises(SymbolManifestError, match="must account for every non-metadata"):
+        build_symbol_manifest(
+            army_artifact=army,
+            symbol_artifact=symbols,
+            acquired_at=datetime(2026, 9, 18, 9, 0, tzinfo=UTC),
+            assets=[],
+            references=[],
+            audit={
+                "unitProfileReferenceCount": 0,
+                "uniqueUnitUrlCount": 0,
+                "factionReferenceCount": 0,
+                "uniqueFactionUrlCount": 0,
+                "semanticReferenceCount": 0,
+                "uniqueSemanticUrlCount": 0,
+                "resumeReferenceCount": 0,
+                "uniqueResumeUrlCount": 0,
+                "staticReferenceCount": 0,
+                "recursiveReferenceCount": 0,
+                "uniqueRecursiveUrlCount": 0,
+                "uniqueDownloadedUrlCount": 0,
+                "unknownReferenceCount": 0,
+            },
+            project_root=tmp_path,
+            **kwargs,
         )

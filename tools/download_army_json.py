@@ -23,7 +23,7 @@ from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import decode_document
 from infinity_army_data.metadata import decode_metadata
-from infinity_db.snapshot_provenance import write_snapshot_manifest
+from infinity_db.snapshot_provenance import load_snapshot_manifest, write_snapshot_manifest
 
 try:
     from tools.snapshot_archive import create_timestamped_archive
@@ -162,6 +162,60 @@ def snapshot_source_revision_counts(archive: Path) -> dict[str, int]:
                 raise ApiDownloadError(f"Invalid Army source document {name}: {exc}") from exc
             revisions[str(document.get("version"))] += 1
     return dict(sorted(revisions.items()))
+
+
+
+def resolve_army_snapshot(
+    archive: Path,
+    *,
+    manifest_directory: Path,
+    manifest: Path | None = None,
+    expected_language: str | None = None,
+) -> ArmySnapshotResult:
+    """Verify one immutable Army ZIP and resolve its generated acquisition provenance."""
+    if not archive.is_file() or not zipfile.is_zipfile(archive):
+        raise ApiDownloadError(f"Army snapshot must be a ZIP archive: {archive}")
+
+    manifest_path = manifest or manifest_directory / f"{archive.stem}.json"
+    if not manifest_path.is_file():
+        raise ApiDownloadError(
+            "Army snapshot provenance is required; expected manifest at "
+            f"{manifest_path}"
+        )
+
+    document = load_snapshot_manifest(manifest_path, archive=archive)
+    snapshot = document["snapshot"]
+    if snapshot["type"] != "army":
+        raise ApiDownloadError(
+            f"Snapshot manifest {manifest_path} describes {snapshot['type']!r}, not 'army'"
+        )
+
+    source = document["source"]
+    language = source.get("language")
+    if not isinstance(language, str) or not language:
+        raise ApiDownloadError(f"Army snapshot manifest {manifest_path} has no source language")
+    if expected_language is not None and language != expected_language:
+        raise ApiDownloadError(
+            f"Army snapshot language is {language!r}, expected {expected_language!r}"
+        )
+
+    revisions = snapshot_source_revision_counts(archive)
+    expected_documents = sum(revisions.values()) + 1
+    if snapshot["documentCount"] != expected_documents:
+        raise ApiDownloadError(
+            "Army snapshot provenance documentCount does not match archive contents: "
+            f"{snapshot['documentCount']} != {expected_documents}"
+        )
+
+    return ArmySnapshotResult(
+        archive=archive,
+        manifest=manifest_path,
+        acquired_at=datetime.fromisoformat(snapshot["acquiredAt"]),
+        language=language,
+        source_url=source["url"],
+        document_count=snapshot["documentCount"],
+        source_revisions=revisions,
+    )
 
 
 def download_snapshot(

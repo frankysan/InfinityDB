@@ -13,15 +13,13 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import NamedTuple
-
-from infinity_db.snapshot_provenance import load_snapshot_manifest
 
 try:
     from tools.download_army_json import (
         API_BASE_URL,
+        ArmySnapshotResult,
         acquire_army_snapshot,
-        snapshot_source_revision_counts,
+        resolve_army_snapshot,
     )
     from tools.download_army_symbols import (
         DEFAULT_STATIC_CONFIG,
@@ -32,8 +30,9 @@ try:
 except ImportError:  # pragma: no cover - direct script execution fallback
     from download_army_json import (
         API_BASE_URL,
+        ArmySnapshotResult,
         acquire_army_snapshot,
-        snapshot_source_revision_counts,
+        resolve_army_snapshot,
     )
     from download_army_symbols import (
         DEFAULT_STATIC_CONFIG,
@@ -43,78 +42,15 @@ except ImportError:  # pragma: no cover - direct script execution fallback
     )
 
 
-class PinnedArmySnapshot(NamedTuple):
-    """Verified provenance needed by every stage of one symbol build."""
-
-    archive: Path
-    manifest: Path
-    acquired_at: str
-    language: str
-    source_url: str
-    document_count: int
-    source_revisions: dict[str, int]
-
-
-def resolve_army_snapshot(
-    archive: Path,
-    *,
-    manifest_directory: Path,
-    manifest: Path | None = None,
-    expected_language: str | None = None,
-) -> PinnedArmySnapshot:
-    """Verify one Army archive and resolve its generated acquisition provenance."""
-    if not archive.is_file():
-        raise ValueError(f"Army snapshot does not exist: {archive}")
-
-    manifest_path = manifest or manifest_directory / f"{archive.stem}.json"
-    if not manifest_path.is_file():
-        raise ValueError(
-            "Army snapshot provenance is required; expected manifest at "
-            f"{manifest_path}"
-        )
-
-    document = load_snapshot_manifest(manifest_path, archive=archive)
-    snapshot = document["snapshot"]
-    if snapshot["type"] != "army":
-        raise ValueError(
-            f"Snapshot manifest {manifest_path} describes {snapshot['type']!r}, not 'army'"
-        )
-    source = document["source"]
-    language = source.get("language")
-    if not isinstance(language, str) or not language:
-        raise ValueError(f"Army snapshot manifest {manifest_path} has no source language")
-    if expected_language is not None and language != expected_language:
-        raise ValueError(
-            f"Army snapshot language is {language!r}, expected {expected_language!r}"
-        )
-
-    revisions = snapshot_source_revision_counts(archive)
-    expected_documents = sum(revisions.values()) + 1
-    if snapshot["documentCount"] != expected_documents:
-        raise ValueError(
-            "Army snapshot provenance documentCount does not match archive contents: "
-            f"{snapshot['documentCount']} != {expected_documents}"
-        )
-
-    return PinnedArmySnapshot(
-        archive=archive,
-        manifest=manifest_path,
-        acquired_at=snapshot["acquiredAt"],
-        language=language,
-        source_url=source["url"],
-        document_count=snapshot["documentCount"],
-        source_revisions=revisions,
-    )
-
-
-def print_pinned_snapshot(snapshot: PinnedArmySnapshot) -> None:
+def print_pinned_snapshot(snapshot: ArmySnapshotResult) -> None:
     """Print the provenance that downstream stages are pinned to."""
     print(f"Pinned Army snapshot -> {snapshot.archive}")
     print(f"Army snapshot provenance -> {snapshot.manifest}")
     print(
         "Army source -> "
         f"{snapshot.source_url} | language {snapshot.language} | "
-        f"acquired {snapshot.acquired_at} | {snapshot.document_count} documents"
+        f"acquired {snapshot.acquired_at.isoformat(timespec='seconds')} | "
+        f"{snapshot.document_count} documents"
     )
     print(
         "Army source revisions -> "
@@ -230,6 +166,7 @@ def main(argv: list[str] | None = None) -> int:
             delay=args.delay,
             discovery=discovery,
             progress=print,
+            army_snapshot=pinned,
         )
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

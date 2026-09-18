@@ -1,7 +1,7 @@
 import importlib.util
 import json
 import zipfile
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -312,6 +312,7 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
             "101-test.json",
             json.dumps(
                 {
+                    "version": "7.26246.158",
                     "units": [
                         {
                             "id": 1,
@@ -325,6 +326,19 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
                 }
             ),
         )
+
+    from infinity_db.snapshot_provenance import write_snapshot_manifest
+
+    army_manifest = write_snapshot_manifest(
+        source,
+        manifest_directory,
+        snapshot_type="army",
+        acquired_at=datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),
+        source_url="https://api.corvusbelli.com/army",
+        document_count=2,
+        project_root=tmp_path,
+        language="en",
+    )
 
     class Response:
         def __enter__(self):
@@ -357,7 +371,11 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
     )
 
     archives = list(destination.glob("SYMBOLS *.zip"))
-    manifests = list(manifest_directory.glob("*.json"))
+    manifests = [
+        path
+        for path in manifest_directory.glob("*.json")
+        if path != army_manifest
+    ]
     assert len(archives) == 1
     assert len(manifests) == 1
 
@@ -371,7 +389,14 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
     assert snapshot["source"] == {"url": module.ASSET_ROOT_URL}
 
     build = load_symbol_manifest(build_manifest)
-    assert build["snapshot"]["sourceDocumentCount"] == 2
+    assert build["formatVersion"] == 2
+    assert build["snapshot"]["armySource"] == {
+        "acquiredAt": "2026-09-18T08:35:09+00:00",
+        "language": "en",
+        "url": "https://api.corvusbelli.com/army",
+        "documentCount": 2,
+        "sourceRevisions": {"7.26246.158": 1},
+    }
     assert build["snapshot"]["armyArtifact"]["sha256"] == sha256_file(source)
     assert build["snapshot"]["symbolArtifact"]["sha256"] == sha256_file(archives[0])
     assert len(build["assets"]) == 2

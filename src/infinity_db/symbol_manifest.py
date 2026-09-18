@@ -11,7 +11,7 @@ from typing import Any
 from infinity_db.snapshot_provenance import portable_project_path, sha256_file
 
 SYMBOL_BUILD_FORMAT = "InfinityDB army symbol build"
-SYMBOL_BUILD_VERSION = 1
+SYMBOL_BUILD_VERSION = 2
 REFERENCE_KINDS = frozenset({"unit-profile", "faction", "resume-audit", "static"})
 SOURCE_METHODS = frozenset({"network"})
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -34,21 +34,31 @@ def build_symbol_manifest(
     army_artifact: Path,
     symbol_artifact: Path,
     acquired_at: datetime,
+    army_acquired_at: datetime,
+    army_language: str,
+    army_source_url: str,
     source_document_count: int,
+    source_revisions: dict[str, int],
     assets: list[dict[str, Any]],
     references: list[dict[str, Any]],
     audit: dict[str, int],
     project_root: Path,
 ) -> dict[str, Any]:
-    """Build and validate the acquisition-only version-1 symbol manifest."""
+    """Build and validate the acquisition-only version-2 symbol manifest."""
     document = {
         "format": SYMBOL_BUILD_FORMAT,
         "formatVersion": SYMBOL_BUILD_VERSION,
         "snapshot": {
             "armyArtifact": artifact_record(army_artifact, project_root=project_root),
+            "armySource": {
+                "acquiredAt": army_acquired_at.isoformat(timespec="seconds"),
+                "language": army_language,
+                "url": army_source_url,
+                "documentCount": source_document_count,
+                "sourceRevisions": dict(sorted(source_revisions.items())),
+            },
             "symbolArtifact": artifact_record(symbol_artifact, project_root=project_root),
             "acquiredAt": acquired_at.isoformat(timespec="seconds"),
-            "sourceDocumentCount": source_document_count,
         },
         "assets": sorted(assets, key=lambda item: item["url"]),
         "references": sorted(
@@ -94,7 +104,7 @@ def load_symbol_manifest(path: Path) -> dict[str, Any]:
 
 
 def validate_symbol_manifest(document: Any) -> None:
-    """Validate the acquisition-only version-1 symbol-build contract."""
+    """Validate the acquisition-only version-2 symbol-build contract."""
     root = _object(document, "symbol manifest")
     _only_keys(
         root,
@@ -111,27 +121,13 @@ def validate_symbol_manifest(document: Any) -> None:
     snapshot = _object(root.get("snapshot"), "symbol manifest.snapshot")
     _only_keys(
         snapshot,
-        {"armyArtifact", "symbolArtifact", "acquiredAt", "sourceDocumentCount"},
+        {"armyArtifact", "armySource", "symbolArtifact", "acquiredAt"},
         "symbol manifest.snapshot",
     )
     _artifact(snapshot.get("armyArtifact"), "symbol manifest.snapshot.armyArtifact")
     _artifact(snapshot.get("symbolArtifact"), "symbol manifest.snapshot.symbolArtifact")
-    acquired_at = _string(snapshot.get("acquiredAt"), "symbol manifest.snapshot.acquiredAt")
-    try:
-        parsed = datetime.fromisoformat(acquired_at)
-    except ValueError as exc:
-        raise SymbolManifestError(
-            "symbol manifest.snapshot.acquiredAt must be an ISO-8601 datetime"
-        ) from exc
-    if parsed.tzinfo is None or parsed.utcoffset() is None:
-        raise SymbolManifestError(
-            "symbol manifest.snapshot.acquiredAt must include a timezone offset"
-        )
-    source_count = snapshot.get("sourceDocumentCount")
-    if type(source_count) is not int or source_count < 1:
-        raise SymbolManifestError(
-            "symbol manifest.snapshot.sourceDocumentCount must be a positive integer"
-        )
+    _aware_datetime(snapshot.get("acquiredAt"), "symbol manifest.snapshot.acquiredAt")
+    _army_source(snapshot.get("armySource"), "symbol manifest.snapshot.armySource")
 
     assets = root.get("assets")
     if not isinstance(assets, list):
@@ -253,6 +249,48 @@ def validate_symbol_manifest(document: Any) -> None:
         raise SymbolManifestError(
             "symbol manifest.audit.unknownReferenceCount must be zero for a published manifest"
         )
+
+
+
+def _army_source(value: Any, context: str) -> None:
+    record = _object(value, context)
+    _only_keys(
+        record,
+        {"acquiredAt", "language", "url", "documentCount", "sourceRevisions"},
+        context,
+    )
+    _aware_datetime(record.get("acquiredAt"), f"{context}.acquiredAt")
+    _string(record.get("language"), f"{context}.language")
+    _string(record.get("url"), f"{context}.url")
+
+    document_count = record.get("documentCount")
+    if type(document_count) is not int or document_count < 1:
+        raise SymbolManifestError(f"{context}.documentCount must be a positive integer")
+
+    revisions = _object(record.get("sourceRevisions"), f"{context}.sourceRevisions")
+    revision_documents = 0
+    for version, count in revisions.items():
+        _string(version, f"{context}.sourceRevisions key")
+        if type(count) is not int or count < 1:
+            raise SymbolManifestError(
+                f"{context}.sourceRevisions[{version!r}] must be a positive integer"
+            )
+        revision_documents += count
+    if revision_documents + 1 != document_count:
+        raise SymbolManifestError(
+            f"{context}.sourceRevisions must account for every non-metadata Army document"
+        )
+
+
+def _aware_datetime(value: Any, context: str) -> datetime:
+    text = _string(value, context)
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError as exc:
+        raise SymbolManifestError(f"{context} must be an ISO-8601 datetime") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise SymbolManifestError(f"{context} must include a timezone offset")
+    return parsed
 
 
 def _artifact(value: Any, context: str) -> None:

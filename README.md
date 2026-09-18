@@ -148,8 +148,11 @@ pin an existing immutable Army ZIP with matching generated provenance, or
 `--fetch-snapshot` for an explicit network refresh. The current orchestration
 stage performs source-semantic discovery and raw symbol acquisition from that
 same pinned Army snapshot, writes the immutable `SYMBOLS ...zip`, and updates
-`data/manifests/army-symbol-build.json`. The standalone symbol downloader remains
-available for debugging and targeted maintenance.
+the version-2 `data/manifests/army-symbol-build.json` with the Army archive hash,
+source URL, language, acquisition timestamp/document count, and observed source
+revisions. The standalone symbol downloader remains available for debugging and
+targeted maintenance; publishing a symbol snapshot through it requires matching
+Army snapshot provenance.
 
 ```powershell
 python tools/download_wiki_snapshot.py
