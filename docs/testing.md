@@ -62,6 +62,14 @@ acquired Corvus Belli graphical-asset trees.
 See [the Linux deployment guide](deployment.md#deployment-smoke-validation) for
 the exact container contract and the equivalent manual command.
 
+## Planned continuous integration
+
+The accepted CI/testing design direction is documented in
+[the continuous integration strategy](ci.md). It defines required hermetic
+source checks, cross-platform coverage, installed-wheel validation, the existing
+deployment-smoke layer, and optional full-asset integration testing. These are
+planned contracts until their corresponding backlog tasks are implemented.
+
 ## Reports
 
 Console output can also be written verbatim to a UTF-8 text report.

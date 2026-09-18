@@ -410,6 +410,51 @@ consistency audit unless one becomes necessary to unblock that work.
   Offline rebuilds use known timestamped archives; fresh acquisition is an
   explicit separate mode.
 
+## Continuous integration and validation
+
+- [ ] Implement the accepted CI strategy documented in `docs/ci.md` before
+  resuming later symbol-processing stages.
+  - [ ] Repair the current deployment-smoke installed-package/runtime boundary.
+    The image builds, but runtime validation currently reaches build-time weapon
+    configuration through a source-checkout-relative path; separate runtime code
+    from build configuration and package any configuration intentionally required
+    by supported installed CLI operations.
+  - [ ] Add explicit `--assets off|auto|required` handling to `run_checks.py`.
+    Required CI defaults to `off`; `auto` uses full-asset tests only when a
+    validated complete set exists and fails on detected partial/corrupt state;
+    `required` fails unless the complete set validates.
+  - [ ] Split asset-dependent pytest coverage into an explicit full-asset marker
+    while making normal tests hermetic through project-owned fixtures or injected
+    temporary static roots. Test absent/present asset behavior deliberately so a
+    clean source archive passes without third-party graphical assets.
+  - [ ] Make version tests independent of incidental Git-checkout state. Test the
+    `+dev` display suffix with controlled repository/version inputs rather than
+    requiring source archives or detached release trees to contain Git metadata
+    and be ahead/dirty.
+  - [ ] Expand the normal project check runner to cover the complete maintained
+    standalone-tool surface. Lint all maintained scripts under `tools/` and add
+    focused regression tests for currently uncovered tools, allowing conditional
+    external-tool integration where appropriate.
+  - [ ] Integrate curated snapshot-note validation into routine project checks so
+    every checked-in file under `data/curated/snapshot-notes/` is validated even
+    when no downloader or comparison workflow happens to load it.
+  - [ ] Add required clean-checkout Linux CI that drives the normal check runner:
+    pytest, Ruff, Army database build, rules database build, snapshot-note
+    validation once integrated, and maintained standalone-tool checks.
+  - [ ] Add an installed-wheel smoke job that builds/installs the wheel in a clean
+    environment and validates supported imports, startup, CLI/resource packaging,
+    and generated test databases without repository-relative assumptions.
+  - [ ] Expand hermetic CI across Windows, Ubuntu/Linux, and macOS at Python 3.11;
+    add newer Python coverage on Linux without multiplying the entire matrix
+    unnecessarily.
+  - [ ] Add optional/manual full-asset CI for a validated complete symbol set,
+    using a suitable self-hosted runner or explicit authorized acquisition. Do
+    not upload acquired/derived Corvus Belli graphical trees as workflow
+    artifacts, and do not make this a required public PR check.
+  - [ ] Keep live Army/wiki/symbol acquisition and expensive performance/capacity
+    checks explicit, manual, or scheduled rather than dependencies of required
+    source CI.
+
 ## Distribution, documentation, and test reproducibility
 
 - [ ] Align all documentation and packaging language with the current
@@ -438,23 +483,6 @@ consistency audit unless one becomes necessary to unblock that work.
     separately from the source/release artifact, and make that acquisition step
     explicit rather than solving the problem by committing or redistributing the
     third-party artwork.
-- [ ] Make asset-dependent tests hermetic. Replace assumptions that ignored,
-  locally generated Corvus Belli SVG trees already exist with project-owned test
-  fixtures or an injectable temporary static root. Test the absence/presence
-  behavior deliberately so a clean source archive can pass the suite without
-  third-party graphical assets.
-- [ ] Make version tests independent of incidental Git-checkout state. Test the
-  `+dev` display suffix with controlled repository/version inputs instead of
-  requiring every source archive or detached release tree to contain Git metadata
-  and be ahead/dirty.
-- [ ] Expand the normal project check runner to cover the complete maintained
-  standalone-tool surface. Lint all maintained scripts under `tools/` and add
-  focused regression tests for currently uncovered tools such as
-  `svg_processor.py`, `svg_compress.py`, and `snapshot_archive.py`, allowing
-  conditional external-tool integration where appropriate.
-- [ ] Integrate curated snapshot-note validation into routine project checks so
-  every checked-in file under `data/curated/snapshot-notes/` is schema-validated
-  even when no downloader or comparison workflow happens to load it.
 - [ ] Reduce duplicated normative documentation after correcting the audit
   drift. Keep imported-data/identity contracts authoritative in
   `docs/data-model.md`, filesystem/provenance layout in `data/README.md`,

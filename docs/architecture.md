@@ -496,6 +496,18 @@ Acquisition tools must not become hidden network dependencies of normal builds.
 A normal build can consume explicit local snapshots. Network refreshes are
 separate, intentional operations.
 
+## Validation and CI policy
+
+**Design direction:** required source CI is hermetic and must pass from a clean
+checkout without ignored Corvus Belli graphical assets or live acquisition.
+Full-asset validation remains an explicit supported integration mode against a
+validated complete local asset set, but is not a required public pull-request
+check and must not redistribute those assets as CI artifacts. Installed-wheel
+and container smoke tests validate packaging boundaries separately from
+source-checkout tests, while maintained Python tooling receives cross-platform
+Windows/Linux/macOS coverage where practical. The detailed planned validation
+layers and asset-mode semantics are defined in `docs/ci.md`.
+
 ## Portability and filesystem policy
 
 Python tooling should support Windows, Linux, and macOS unless a component is

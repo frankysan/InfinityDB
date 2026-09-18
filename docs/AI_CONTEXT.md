@@ -55,6 +55,11 @@ and serves a read-only browser and same-origin HTTP API.
   unexpectedly.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
+- **Design direction:** required CI is hermetic and clean-checkout capable.
+  Full-asset testing remains an explicit `off` / `auto` / `required` integration
+  mode against a validated complete asset set; public required CI neither depends
+  on live acquisition nor redistributes Corvus Belli graphical assets. See
+  `docs/ci.md` for the validation-layer contract.
 
 ## Non-obvious Army data invariants
 
@@ -368,6 +373,11 @@ application-level identities.
 
 ## Decision log
 
+- 2026-09-18: CI/testing design separates required hermetic source checks from
+  explicit full-asset integration. Clean public CI must not depend on ignored
+  Corvus Belli graphical assets or live acquisition; full-asset runs require a
+  validated complete asset set and must not redistribute it. Installed-package,
+  deployment, and cross-platform checks are separate validation layers.
 - 2026-09-12: Database builds require validated Army API metadata. The importer
   enforces this too, so metadata-free normalized data cannot bypass the build
   command and become a database.
