@@ -16,8 +16,8 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_army_data.merge import make_source, merge_sources
-from infinity_db import __display_version__
 from infinity_army_data.normalize import normalize_master
+from infinity_db import __display_version__
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
 from infinity_db.rules_database import export_rules_database
