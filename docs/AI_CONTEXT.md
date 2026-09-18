@@ -50,6 +50,11 @@ and serves a read-only browser and same-origin HTTP API.
   invented canonical rule knowledge.
 - `infinity_db.web` validates HTTP input, serializes repository results, and
   contains the native-module browser UI.
+- Read-only application/runtime imports must not pull build-time normalization or
+  maintained source-policy configuration merely to open an already-built
+  database. Production runtime must remain independent of source-checkout
+  `config/` paths; installed build/ingestion CLI resources are a separate
+  packaging contract.
 - Standalone acquisition and processing tools remain explicitly invoked and
   independently testable. Normal builds and tests must not acquire network data
   unexpectedly.

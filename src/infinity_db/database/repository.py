@@ -20,7 +20,7 @@ from infinity_army_data.availability import (
     MERCENARY_AVAILABILITY,
     STANDARD_AVAILABILITY,
 )
-from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION
+from infinity_army_data.normalized_format import FORMAT_NAME, FORMAT_VERSION
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,

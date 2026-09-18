@@ -40,6 +40,7 @@ from pathlib import Path
 from typing import Any
 
 from .metadata import METADATA_TABLES, MetadataError, normalize_metadata, validate_metadata_envelope
+from .normalized_format import FORMAT_NAME, FORMAT_VERSION
 from .weapon_categories import weapon_category
 from .weapon_profiles import (
     weapon_metadata_profile_suppressed,
@@ -47,8 +48,6 @@ from .weapon_profiles import (
     weapon_profile_override,
 )
 
-FORMAT_NAME = "Infinity Army normalized JSON"
-FORMAT_VERSION = 1
 EXPECTED_MASTER_FORMAT = "Infinity Army merged JSON"
 EXPECTED_MASTER_VERSION = 1
 

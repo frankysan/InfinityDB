@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Any
 
 from infinity_army_data.metadata import MetadataError, validate_metadata_envelope
-from infinity_army_data.normalize import FORMAT_NAME, FORMAT_VERSION, validate_normalized
+from infinity_army_data.normalize import validate_normalized
+from infinity_army_data.normalized_format import FORMAT_NAME, FORMAT_VERSION
 
 from ..identities import (
     IDENTITY_CONFIG_METADATA_KEY,
@@ -25,6 +26,7 @@ from ..identities import (
     load_identity_config,
     parse_identity_metadata,
 )
+from .paths import raw_database_path
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -133,12 +135,6 @@ def sql_value(value: Any) -> Any:
     if type(value) is int and not -(2**63) <= value < 2**63:
         return str(value)
     return value
-
-
-def raw_database_path(path: Path) -> Path:
-    """Return the development archive path associated with a frontend database."""
-    return path.with_name(f"{path.stem}.raw{path.suffix}")
-
 
 def batched(
     rows: Iterable[tuple[Any, ...]], size: int = BATCH_SIZE

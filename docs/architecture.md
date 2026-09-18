@@ -480,8 +480,11 @@ from final filenames.
 | standalone `tools/` | Explicit acquisition, validation, and asset-processing workflows | New independent build/input tools |
 | deployment scripts | Package and deploy validated application output | Additional deployment targets |
 
-Only the importer consumes normalized JSON. HTTP routes query the repository;
-browser code calls the API. Neither web layer parses raw Army files. Browser
+Only the importer consumes normalized JSON. Read-only runtime imports must not
+load the importer, Army normalizer, or maintained build-policy configuration as a
+side effect; an installed application serving already-built databases is
+independent of source-checkout-relative `config/` paths. HTTP routes query the
+repository; browser code calls the API. Neither web layer parses raw Army files. Browser
 requests live in `api.js`; shared unit-row rendering lives in `unit-list.js`;
 page-specific state and rendering live in the corresponding module (for
 example, `app.js` or `catalog-detail.js`). The current UI uses native modules

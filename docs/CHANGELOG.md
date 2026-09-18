@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Fixed
+
+- Decouple read-only database/web runtime imports from the database exporter and
+  Army normalization policy. Installed runtime validation can now open generated
+  `infinity.db` and `rules.db` without repository-relative weapon configuration,
+  restoring the deployment-smoke package boundary.
+
 - Add the installed-font stage of the symbol pipeline. Infinity-specific legacy
   font aliases now live in validated `config/symbols/font-aliases.json`; the
   orchestrator resolves effective fonts and unused declarations against the local

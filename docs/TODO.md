@@ -414,11 +414,12 @@ consistency audit unless one becomes necessary to unblock that work.
 
 - [ ] Implement the accepted CI strategy documented in `docs/ci.md` before
   resuming later symbol-processing stages.
-  - [ ] Repair the current deployment-smoke installed-package/runtime boundary.
-    The image builds, but runtime validation currently reaches build-time weapon
-    configuration through a source-checkout-relative path; separate runtime code
-    from build configuration and package any configuration intentionally required
-    by supported installed CLI operations.
+  - [x] Repair the deployment-smoke runtime import boundary. Read-only runtime
+    database/web imports no longer pull the database exporter, Army normalizer,
+    or weapon-policy configuration from source-checkout-relative paths.
+  - [ ] Package configuration intentionally required by supported installed CLI
+    build/ingestion operations through an explicit resource contract, and verify
+    that contract in the planned installed-wheel smoke job.
   - [ ] Add explicit `--assets off|auto|required` handling to `run_checks.py`.
     Required CI defaults to `off`; `auto` uses full-asset tests only when a
     validated complete set exists and fails on detected partial/corrupt state;

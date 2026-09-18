@@ -93,10 +93,16 @@ into a source checkout.
 ### Deployment smoke (current)
 
 The existing `Deployment smoke test` remains a distinct Linux/container layer.
-It should continue to build synthetic `infinity.db` and tracked `rules.db`, build
-the redistributable image, validate exact runtime database contents, start the
-application under its production restrictions, and exercise representative API
+It builds synthetic `infinity.db` and tracked `rules.db`, builds the
+redistributable image, validates exact runtime database contents, starts the
+application under its production restrictions, and exercises representative API
 behavior.
+
+Read-only runtime imports are deliberately separated from build-time Army
+normalization and weapon-policy configuration. The installed application may
+therefore open and validate already-built databases without repository-relative
+`config/` files. Installed build/ingestion CLI resource packaging remains a
+separate planned contract for the installed-wheel smoke layer.
 
 This layer verifies deployment packaging; it is not a substitute for general
 source CI or installed-wheel validation.
@@ -148,17 +154,19 @@ networked or long-running benchmark.
 
 ## Planned implementation order
 
-1. Repair the current deployment-smoke packaging/runtime failure so the existing
-   workflow returns to a trustworthy baseline.
-2. Make asset-dependent tests hermetic and introduce explicit `off` / `auto` /
+The deployment-smoke runtime import boundary is now separated from build-time
+normalization/configuration. Remaining CI work should proceed in this order:
+
+1. Make asset-dependent tests hermetic and introduce explicit `off` / `auto` /
    `required` asset modes in `run_checks.py`.
-3. Add required Linux source CI around the normal check runner.
-4. Add installed-wheel/package smoke validation so source-checkout assumptions
-   cannot hide missing packaged resources.
-5. Expand the hermetic source checks to Windows and macOS.
-6. Add optional/manual full-asset integration validation without redistributing
+2. Add required Linux source CI around the normal check runner.
+3. Add installed-wheel/package smoke validation so source-checkout assumptions
+   cannot hide missing packaged resources, including configuration intentionally
+   required by supported installed build/ingestion CLI commands.
+4. Expand the hermetic source checks to Windows and macOS.
+5. Add optional/manual full-asset integration validation without redistributing
    third-party graphical assets.
-7. Add scheduled/manual acquisition, performance, or other extended workflows
+6. Add scheduled/manual acquisition, performance, or other extended workflows
    only where they provide useful independent signals.
 
 Symbol-pipeline feature work can then continue with these validation layers in
