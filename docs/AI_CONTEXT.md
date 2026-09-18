@@ -169,6 +169,12 @@ and serves a read-only browser and same-origin HTTP API.
   tooling must never modify that subtree.
 - Corvus Belli's Army `metadata.json` remains source data, not project-generated
   snapshot metadata.
+- Army JSON `version` is per-document source provenance, not a snapshot-wide
+  version. Observed values support interpreting the middle component as
+  two-digit year + ordinal day and the final component as a same-day data
+  revision/build, but that interpretation is not a documented upstream
+  contract. Preserve the raw value. Legitimate snapshots may contain multiple
+  source revisions; distinguish those from InfinityDB `acquiredAt` provenance.
 
 ### Design direction
 
@@ -371,6 +377,12 @@ changes.
   implemented. Army, wiki, and symbol acquisition now write deterministic
   SHA-256-addressed provenance records, while curated snapshot notes remain a
   separate source-controlled human layer that acquisition tooling never edits.
+- 2026-09-18: Army source-version investigation showed that mixed top-level
+  `version` values are stable source revisions, not evidence of a torn snapshot.
+  The 2026-09-10 and 2026-09-18 acquisitions were byte-identical and both split
+  36 documents at `7.26246.158` / 22 at `7.26246.159`. Snapshot coherence will
+  therefore be based on source stability across acquisition, while snapshot date
+  and per-document data revision remain separate provenance concepts.
 - 2026-09-17: Weapon catalog policy was split from implementation code.
   `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
   and explicit category decisions; `config/catalogs/weapon-overrides.json` owns

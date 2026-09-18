@@ -69,6 +69,11 @@ The human annotation contract is documented in
 notes are keyed to the immutable snapshot SHA-256 rather than to an archive
 filename and are not application/runtime inputs.
 
+Army JSON `version` values are per-document Corvus Belli source revisions, not
+InfinityDB snapshot versions. Their evidence-backed interpretation and the
+required distinction between source revision and snapshot acquisition date are
+documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-interpretation).
+
 ## Remaining design direction
 
 Exact timestamped archive/hash provenance for legacy wiki-derived curated data

@@ -359,6 +359,44 @@ automatically pruned.
 Corvus Belli's Army `metadata.json` remains source data. It is distinct from
 InfinityDB-owned acquisition provenance.
 
+### Army source revision interpretation
+
+Army list and reinforcement JSON documents carry a top-level Corvus Belli
+`version` string such as `7.26246.158`. InfinityDB preserves that value exactly
+as source provenance. It is **not** the InfinityDB snapshot identity and must not
+be treated as a snapshot-wide release number.
+
+Historical Army captures strongly indicate that the middle numeric component
+concatenates a two-digit year with a non-zero-padded ordinal day of year. For
+example, `7.26246.158` and `7.26246.159` both encode 2026 day 246, which is
+2026-09-03; older observed values such as `7.26147.195`, `7.2668.375`, and
+`7.25288.295` line up with 2026 day 147, 2026 day 68, and 2025 day 288
+respectively. The final component appears to distinguish source data
+revisions/builds on that date. The exact Corvus Belli semantics are
+undocumented, so this parsing is an evidence-backed InfinityDB interpretation
+rather than an upstream contract.
+Code must preserve and compare the raw string even if a parsed interpretation is
+shown to humans.
+
+A coherent Army snapshot may legitimately contain more than one source data
+revision. The 2026-09-10 and 2026-09-18 acquisitions both contained 36 documents
+at `7.26246.158` and 22 at `7.26246.159`; all 58 Army/reinforcement documents and
+`metadata.json` were byte-identical between those acquisitions. The split is
+stable by faction family rather than by sequential download position. Therefore
+snapshot coherence must be established by source stability during acquisition,
+not by requiring one `version` value across every document.
+
+When dates or versions are reported, keep these concepts distinct:
+
+- **snapshot acquisition date/time** — InfinityDB provenance from
+  `snapshot.acquiredAt` and the immutable archive/hash;
+- **Army source data revision** — the raw per-document Corvus Belli `version`,
+  optionally interpreted as its apparent source date plus revision/build.
+
+For example, describe the current material as an Army snapshot acquired on
+2026-09-18 containing source revisions `7.26246.158` and `7.26246.159`, rather
+than assigning either revision to the snapshot as a whole.
+
 Human-authored snapshot annotations use a separate version-1 `InfinityDB
 snapshot note` contract under `data/curated/snapshot-notes/`. Each note requires
 `snapshotSha256`, a human description, and an ordered `notableChanges` array; an

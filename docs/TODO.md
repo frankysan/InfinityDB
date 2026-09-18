@@ -69,14 +69,18 @@ history retains implementation detail.
   them.
 - [ ] Establish a migration policy for future persistent user-authored data;
   imported snapshots are intentionally replaced wholesale today.
-- [ ] Enforce Army snapshot source-version coherence at both acquisition and
-  import boundaries. Pin the reported Army API version for one acquisition,
-  verify every downloaded source document uses that same version, and recheck
-  before committing the immutable snapshot so an upstream update during a
-  sequential download cannot silently create a mixed-version archive. Merge and
-  build validation must also reject mixed-version snapshots supplied from other
-  sources unless a future explicit reviewed override is designed. Diagnostics
-  should list the conflicting versions and affected source documents.
+- [ ] Enforce Army snapshot acquisition coherence without assuming a single
+  Corvus Belli source revision. The 2026-09-18 investigation found a stable,
+  byte-identical 36-document `7.26246.158` / 22-document `7.26246.159` split in
+  both the 2026-09-10 and 2026-09-18 acquisitions, so mixed top-level `version`
+  values are legitimate. After the normal download pass, re-fetch the same
+  metadata and Army/reinforcement endpoints and compare response bytes or
+  SHA-256 values before committing the immutable archive. Abort and report the
+  changed endpoint(s) when either pass differs. Preserve and report each raw
+  source revision, and expose revision topology diagnostically, but do not reject
+  a snapshot merely because multiple revisions occur. Import/build validation
+  should continue to preserve those per-document revisions and distinguish them
+  from the InfinityDB snapshot acquisition date/hash.
 - [ ] Establish a regression baseline for tolerated source-data anomalies. Keep
   current source ambiguities non-fatal where the model intentionally preserves
   them, but record warning categories/counts for a known snapshot and flag new
