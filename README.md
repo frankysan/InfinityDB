@@ -208,8 +208,13 @@ JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
 adds the SQLite export and web-server commands.
 
 Each build checks that required metadata is present, lossless source
-reconstruction, normalized keys and relationships, and SQLite import
-integrity. It writes the following ignored, generated artifacts:
+reconstruction, normalized keys and relationships, tracked source-anomaly
+ceilings for downloader-dated snapshots, and SQLite import integrity. The
+source-anomaly baseline allows warning counts to decrease but rejects new
+warning categories or growth above the reviewed baseline before database
+export. Ad-hoc inputs without downloader snapshot provenance are not compared
+against that production-source baseline. The build writes the following
+ignored, generated artifacts:
 
 ```text
 data/generated/master.json

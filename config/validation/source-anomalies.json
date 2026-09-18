@@ -1,0 +1,19 @@
+{
+  "format": "InfinityDB source anomaly baseline",
+  "formatVersion": 1,
+  "baseline": {
+    "snapshotDownloadedOn": "2026-09-18",
+    "snapshotArchiveSha256": "041d625bf45ecbd161ddc3a6723e106bd9d5c1a9d9aa088d94b10166fb8c9815",
+    "sourceVersions": {
+      "7.26246.158": 36,
+      "7.26246.159": 22
+    },
+    "warningCounts": {
+      "anonymous_reference": 95,
+      "catalog_placeholder": 1,
+      "fireteam_unit_not_in_army": 1,
+      "unit_placeholder": 5,
+      "unresolved_fireteam_slug": 14
+    }
+  }
+}

@@ -62,6 +62,14 @@ raw Army JSON
 - Peripheral IDs are army-local.
 - Referenced but undefined factions/units/categories are retained as explicit
   placeholder records rather than discarded.
+- Normalization warnings remain source-preservation diagnostics, not automatic
+  corrections. InfinityDB tracks a reviewed warning-count baseline in
+  `config/validation/source-anomalies.json` for the exact 2026-09-18 Army
+  snapshot. For downloader-dated snapshots at or after that baseline,
+  `infinity-db build` and `normalize` allow known warning counts to decrease but
+  reject new categories or counts above the reviewed ceiling before database
+  export. The standalone `infinity-army` pipeline does not impose this
+  project-specific baseline.
 
 ## Army identities, grouping, playability, and mercenary availability
 
