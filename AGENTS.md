@@ -35,7 +35,8 @@ Virtual-environment interpreters are normally:
 - Linux/macOS: `.venv/bin/python`
 
 Use `tools/run_checks.py` as the standard entry point for repository checks. It
-invokes pytest, Ruff, and data-build validation through the same Python
+invokes pytest, Ruff, Army data-build validation, and curated rules-database
+validation through the same Python
 interpreter that launched the runner and keeps stage selection/reporting
 consistent across local development and agent handoffs. Examples:
 

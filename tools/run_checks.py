@@ -13,10 +13,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import TextIO
 
-STAGE_ORDER = ("test", "lint", "build")
+STAGE_ORDER = ("test", "lint", "build", "rules")
 PROFILES = {
     "code": ("test", "lint"),
-    "data": ("build",),
+    "data": ("build", "rules"),
     "all": STAGE_ORDER,
 }
 DEFAULT_LINT_TARGETS = (
@@ -77,7 +77,7 @@ class Reporter:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run InfinityDB tests, linting, and data-build validation.",
+        description="Run InfinityDB tests, linting, and database-build validation.",
     )
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument(
@@ -101,7 +101,7 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="*",
         help=(
             "Optional pytest/Ruff targets. Test targets should be pytest-compatible "
-            "paths or node IDs; build ignores these targets."
+            "paths or node IDs; build/rules stages ignore these targets."
         ),
     )
     parser.add_argument(
@@ -159,6 +159,8 @@ def stage_definitions(
             if build_source is not None:
                 command.append(str(build_source))
             command.append("--compact")
+        elif name == "rules":
+            command = [python, "-m", "infinity_db", "build-rules"]
         else:  # pragma: no cover - guarded by argparse/selected_stage_names
             raise ValueError(f"Unknown stage: {name}")
         stages.append(Stage(name=name, command=tuple(command)))
@@ -281,9 +283,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with Reporter(report_path) as reporter:
             write_header(reporter, stages, args.targets, started_at)
-            if args.targets and "build" in stage_names:
+            if args.targets and ({"build", "rules"} & set(stage_names)):
                 reporter.write(
-                    "Note: positional targets apply to pytest/Ruff only; build uses --build-source."
+                    "Note: positional targets apply to pytest/Ruff only; "
+                    "build uses --build-source and rules uses curated defaults."
                 )
             results: list[StageResult] = []
             for stage in stages:

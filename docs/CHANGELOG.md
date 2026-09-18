@@ -19,7 +19,8 @@ All notable changes to this project are documented in this file.
   builds, and exercises healthy non-root/read-only Gunicorn startup.
 - Add project-level markdownlint configuration that keeps `MD024` duplicate-heading checks within sibling headings, allowing standard changelog headings such as `Added`, `Changed`, and `Fixed` to repeat under different releases.
 - Add `tools/run_checks.py` as the standard development-check orchestrator for
-  pytest, Ruff, and Army build validation, with selectable stages/profiles,
+  pytest, Ruff, Army build validation, and curated rules-database build
+  validation, with selectable stages/profiles,
   targeted pytest/Ruff paths, fail-fast mode, deterministic exit codes, and
   live console output that can be mirrored to a report file.
 - Add deterministic timestamped check reports under ignored `reports/` when

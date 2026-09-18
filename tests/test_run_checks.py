@@ -33,12 +33,18 @@ def test_stage_selection_uses_canonical_order() -> None:
 def test_all_profile_includes_code_and_data_stages() -> None:
     args = run_checks.build_parser().parse_args(["--profile", "all"])
 
-    assert run_checks.selected_stage_names(args) == ("test", "lint", "build")
+    assert run_checks.selected_stage_names(args) == ("test", "lint", "build", "rules")
+
+
+def test_data_profile_builds_army_and_rules_databases() -> None:
+    args = run_checks.build_parser().parse_args(["--profile", "data"])
+
+    assert run_checks.selected_stage_names(args) == ("build", "rules")
 
 
 def test_stage_commands_use_current_python_and_forward_targets() -> None:
     stages = run_checks.stage_definitions(
-        ("test", "lint", "build"),
+        ("test", "lint", "build", "rules"),
         ["tests/test_cli.py"],
         build_source=Path("data/raw/example.zip"),
     )
@@ -64,6 +70,12 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "build",
         str(Path("data/raw/example.zip")),
         "--compact",
+    )
+    assert stages[3].command == (
+        sys.executable,
+        "-m",
+        "infinity_db",
+        "build-rules",
     )
 
 

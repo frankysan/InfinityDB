@@ -1,7 +1,8 @@
 # Development checks
 
 InfinityDB provides `tools/run_checks.py` as the standard local entry point for
-Python tests, Ruff linting, and Army data-build validation. The runner only
+Python tests, Ruff linting, Army data-build validation, and curated
+rules-database validation. The runner only
 orchestrates the existing authoritative tools; it does not replace pytest,
 Ruff, or `infinity-db build`.
 
@@ -11,15 +12,17 @@ Run it with the project virtual-environment Python:
 # Code checks: pytest followed by Ruff
 python tools/run_checks.py --profile code
 
-# Data/build validation
+# Data/build validation (`infinity.db`, `infinity.raw.db`, and `rules.db`)
 python tools/run_checks.py --profile data
 
-# Tests, lint, and data build
+# Tests, lint, Army data build, and rules database build
 python tools/run_checks.py --all
 ```
 
-The available stages are `test`, `lint`, and `build`. The named profiles are
-`code` (`test` + `lint`), `data` (`build`), and `all`.
+The available stages are `test`, `lint`, `build`, and `rules`. The `build`
+stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
+`rules.db` from the tracked curated rules collections. The named profiles are
+`code` (`test` + `lint`), `data` (`build` + `rules`), and `all`.
 
 ## Targeted checks
 
@@ -32,11 +35,14 @@ python tools/run_checks.py --stage lint src/infinity_army_data/availability.py t
 ```
 
 When no target is supplied, pytest runs the full suite and Ruff uses the
-repository defaults defined by the runner. The build stage ignores positional
-targets; use `--build-source PATH` to select an Army source directory or ZIP.
+repository defaults defined by the runner. The build and rules stages ignore
+positional targets; use `--build-source PATH` to select an Army source directory
+or ZIP for the Army build. The rules stage
+always uses the normal curated-rules defaults.
 
 ```powershell
 python tools/run_checks.py --stage build --build-source "data/raw/JSON 20260910-204106.zip"
+python tools/run_checks.py --stage rules
 ```
 
 By default, requested stages continue after a failed stage so one run can show

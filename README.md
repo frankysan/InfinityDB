@@ -313,14 +313,14 @@ direction, and unimplemented work respectively.
 ## Development checks
 
 Use `tools/run_checks.py` as the standard development entry point. It
-orchestrates pytest, Ruff, and Army data-build validation while preserving the
-underlying tools as the authoritative checks.
+orchestrates pytest, Ruff, Army data-build validation, and curated rules-database
+validation while preserving the underlying tools as the authoritative checks.
 
 ```powershell
 # Full code checks: pytest, then Ruff
 python tools/run_checks.py --profile code
 
-# Data/build validation
+# Data/build validation (`infinity.db`, `infinity.raw.db`, and `rules.db`)
 python tools/run_checks.py --profile data
 
 # All stages
