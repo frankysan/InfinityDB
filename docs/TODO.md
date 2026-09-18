@@ -69,6 +69,22 @@ history retains implementation detail.
   them.
 - [ ] Establish a migration policy for future persistent user-authored data;
   imported snapshots are intentionally replaced wholesale today.
+- [ ] Enforce Army snapshot source-version coherence at both acquisition and
+  import boundaries. Pin the reported Army API version for one acquisition,
+  verify every downloaded source document uses that same version, and recheck
+  before committing the immutable snapshot so an upstream update during a
+  sequential download cannot silently create a mixed-version archive. Merge and
+  build validation must also reject mixed-version snapshots supplied from other
+  sources unless a future explicit reviewed override is designed. Diagnostics
+  should list the conflicting versions and affected source documents.
+- [ ] Establish a regression baseline for tolerated source-data anomalies. Keep
+  current source ambiguities non-fatal where the model intentionally preserves
+  them, but record warning categories/counts for a known snapshot and flag new
+  categories or unexpected growth on later snapshots. The 2026-09-10 merged
+  snapshot audit observed 95 anonymous references, 5 placeholder units, 1
+  placeholder catalog value, 14 unresolved Fireteam slugs, and 1 Fireteam member
+  outside its army roster; verify these counts from aligned generated artifacts
+  before making them an automated baseline.
 
 ## Configuration and domain knowledge
 
@@ -415,6 +431,12 @@ history retains implementation detail.
   - `download_army_symbols.py`: own complete discovery, static declarations,
     override/cache/network source resolution, recursive SVG audit, and manifest
     reference/asset updates while retaining complete timestamped archive output.
+  - [ ] Make the symbol-downloader input contract match its CLI and tests. Prefer
+    the immutable raw Army ZIP as the authoritative input; either fully support
+    directory/current merged-master inputs end to end or stop advertising them.
+    In particular, do not claim legacy/current `master.json` compatibility unless
+    discovery can consume that schema without treating ordinary embedded SVG
+    references as unknown fields.
   - `svg_processor.py`: keep font audit, alias normalization, complete-set
     duplicate detection, deterministic representative ranking, persistent
     Inkscape conversion, and reports; add structured manifest updates and
@@ -509,6 +531,169 @@ history retains implementation detail.
   Offline rebuilds use known timestamped archives; fresh acquisition is an
   explicit separate mode.
 
+## Distribution, documentation, and test reproducibility
+
+- [ ] Align all documentation and packaging language with the current
+  third-party graphical-asset redistribution policy.
+  - State explicitly that Corvus Belli graphical assets are **not bundled with
+    InfinityDB source code or redistributable releases by default**. Public
+    availability from Corvus Belli asset hosts is not treated as permission to
+    redistribute the files, and InfinityDB's MIT License does not relicense
+    them.
+  - Keep raw symbol snapshots, processed symbols, locally corrected derivatives,
+    and locally published runtime copies ignored/uncommitted unless explicit
+    redistribution permission covering the intended distribution form has been
+    established.
+  - Distinguish local application publication from redistribution: the symbol
+    pipeline may acquire/process/publish assets into a local installation's
+    runtime static tree, while source archives, wheels, GitHub releases, Docker
+    images distributed by InfinityDB, and similar prebuilt artifacts must exclude
+    those graphical assets under the current rights assumption.
+  - Correct current wording that implies bundled assets in `README.md`,
+    `docs/architecture.md`, `docs/deployment.md`, and
+    `THIRD_PARTY_NOTICES.md`; keep historical CHANGELOG entries intact when they
+    accurately describe past behavior. Use `docs/AI_CONTEXT.md` and the existing
+    symbol-pipeline rights invariant as the policy baseline rather than creating
+    a competing rights contract.
+  - Document how a clean/local deployment obtains required runtime symbols
+    separately from the source/release artifact, and make that acquisition step
+    explicit rather than solving the problem by committing or redistributing the
+    third-party artwork.
+- [ ] Make asset-dependent tests hermetic. Replace assumptions that ignored,
+  locally generated Corvus Belli SVG trees already exist with project-owned test
+  fixtures or an injectable temporary static root. Test the absence/presence
+  behavior deliberately so a clean source archive can pass the suite without
+  third-party graphical assets.
+- [ ] Make version tests independent of incidental Git-checkout state. Test the
+  `+dev` display suffix with controlled repository/version inputs instead of
+  requiring every source archive or detached release tree to contain Git metadata
+  and be ahead/dirty.
+- [ ] Expand the normal project check runner to cover the complete maintained
+  standalone-tool surface. Lint all maintained scripts under `tools/` and add
+  focused regression tests for currently uncovered tools such as
+  `svg_processor.py`, `svg_compress.py`, and `snapshot_archive.py`, allowing
+  conditional external-tool integration where appropriate.
+- [ ] Integrate curated snapshot-note validation into routine project checks so
+  every checked-in file under `data/curated/snapshot-notes/` is schema-validated
+  even when no downloader or comparison workflow happens to load it.
+- [ ] Reduce duplicated normative documentation after correcting the audit
+  drift. Keep imported-data/identity contracts authoritative in
+  `docs/data-model.md`, filesystem/provenance layout in `data/README.md`,
+  architecture rationale in `docs/architecture.md`, and concise invariants in
+  `docs/AI_CONTEXT.md`; replace repeated contract text with links where practical.
+  As part of this pass, remove stale statements that call the already-implemented
+  `army-symbol-build.json` or snapshot-manifest work merely planned/future work.
+
+
+## Visual design, frontend architecture, and theming
+
+- [ ] Define and document InfinityDB's visual-design and UI/UX guiding
+  principles before larger presentation changes.
+  - Optimize first for fast lookup, comparison, and scanning of dense game data;
+    prefer clarity, hierarchy, and legibility over decorative complexity while
+    avoiding an unnecessarily cramped interface.
+  - Keep navigation, page hierarchy, terminology, controls, tables, cards,
+    badges, and feedback states predictable across catalog and detail views.
+    Extend shared design-system primitives instead of giving individual pages
+    their own visual language.
+  - Use progressive disclosure for secondary, provenance, and developer-only
+    information so technical depth remains available without overwhelming the
+    default reading flow.
+  - Treat responsive behavior as a content-priority decision rather than simple
+    shrinking. Define deliberate phone, tablet/compact, and desktop behavior for
+    navigation, filters, tables/statlines, detail groups, and multi-column data.
+  - Treat accessibility as part of the design contract: semantic HTML, complete
+    keyboard operation, visible focus, sufficient contrast, non-color-only
+    meaning, useful touch targets, reduced-motion support where motion exists,
+    and sensible screen-reader labels/status announcements.
+  - Keep theme and faction/army accent colors subordinate to semantic meaning.
+    Source/domain state must remain understandable regardless of selected theme,
+    color perception, or whether a particular graphical asset is available.
+  - Preserve the current lightweight/browser-native direction unless a concrete
+    requirement justifies changing it. New visual work should not implicitly
+    introduce a frontend framework or build pipeline.
+  - Once agreed, record durable principles in the canonical architecture/design
+    documentation and keep this TODO focused on remaining implementation work.
+
+- [ ] Define a clearer backend/frontend responsibility boundary and reflect it
+  in source organization without changing the current same-origin deployment
+  model merely for architectural fashion.
+  - Backend Python owns imported-data/domain semantics, identity and rules
+    interpretation, database access/querying, request validation, stable API
+    contracts, application/version metadata, and HTTP concerns. Domain meaning
+    that would otherwise require browser code to infer IDs, names, source quirks,
+    or rules semantics belongs in backend/API fields.
+  - Frontend code owns information presentation, interaction state, responsive
+    behavior, accessibility behavior, client-side display formatting, theme/UI
+    preferences, and composition of semantic API data into views. It must not
+    duplicate maintained domain interpretation already represented by the
+    backend contract.
+  - Keep API payloads semantic rather than presentational: expose roles, states,
+    identities, labels, and relationships rather than CSS class names, literal
+    colors, layout instructions, or page-specific markup.
+  - Split the current Python web layer so API handling, shared page-shell/static
+    delivery, and top-level request dispatch are visibly separate concerns.
+    Keep existing URLs and the shared shell contract stable while doing so.
+  - Organize the browser side around explicit shared layers (API transport,
+    preferences/theme state, reusable view/components, and page modules) so page
+    scripts stop accumulating cross-cutting behavior. Continue routing browser
+    HTTP access through `api.js` rather than ad hoc `fetch()` calls.
+  - Preserve native ES modules and the no-frontend-build-tool decision for now;
+    source-tree separation should improve ownership and maintainability without
+    requiring bundling/transpilation.
+  - Add focused contract/regression coverage as responsibilities move so a
+    frontend refactor cannot silently recreate backend domain logic, and backend
+    changes cannot silently break established browser contracts.
+
+- [ ] Introduce first-class customizable theme support, with Light and Dark as
+  the initial themes and an extension contract that does not require component
+  rewrites when more themes are added later.
+  - Refactor the CSS token model into semantic theme tokens versus theme-neutral
+    layout/component rules. Components should consume tokens such as surfaces,
+    text, borders, actions, focus, status, shadows, and data emphasis rather than
+    hard-coded light-theme colors.
+  - Keep faction/army colors as domain accent tokens layered onto the selected
+    theme. Define contrast-safe treatments for both Light and Dark rather than
+    assuming the current accent/background pairings work unchanged in both.
+  - Define a stable theme identifier/preference contract (`light` and `dark`
+    initially), and decide/document default startup behavior such as following
+    the operating-system preference versus a fixed project default. An explicit
+    user selection must take precedence over the default.
+  - Integrate the theme selector with the existing Settings/preferences model.
+    Theme changes apply immediately; persistence follows the existing
+    remember-settings consent policy rather than creating an unrelated storage
+    mechanism.
+  - Resolve and apply the selected theme before first meaningful paint to avoid
+    a light-to-dark or dark-to-light flash during navigation/reload.
+  - Replace hard-coded light-only browser metadata/assumptions with theme-aware
+    `color-scheme` behavior so form controls, scrollbars, and other user-agent UI
+    remain coherent with the selected theme.
+  - Keep the InfinityDB logo and other project-owned themed graphics driven by
+    the same semantic token contract where practical; do not fork separate
+    light/dark asset files when CSS-variable theming is sufficient.
+  - Audit status colors, range-modifier colors, links, focus indicators, muted
+    text, tables, selected rows, dialogs, menus, and faction accents for contrast
+    and distinguishability in every supported theme.
+  - Add regression coverage for preference initialization/switching/persistence
+    and representative core pages in both themes. Consider targeted visual
+    regression screenshots at compact and desktop widths once the theme tokens
+    stabilize.
+
+- [ ] Refactor the frontend design-system structure after the principles and
+  theme contract are agreed.
+  - Review the current monolithic `styles.css` and separate foundational tokens,
+    theme values, shared components/layout, and page-specific exceptions where
+    doing so improves ownership without requiring a CSS build step.
+  - Inventory repeated or one-off component styles and either promote recurring
+    patterns to shared primitives or remove unnecessary variants. Avoid adding
+    new page-local copies during the transition.
+  - Define which responsive/layout behaviors are shared primitives versus
+    intentional page-specific composition, and document the small set of
+    supported density variants rather than allowing arbitrary per-page spacing.
+  - Keep existing shared shell, navigation, detail-group, table-density, badge,
+    and settings patterns working during the migration; visual cleanup should be
+    incremental rather than a simultaneous rewrite of every page.
+
 ## Reliability and operations
 
 - [ ] Establish production load monitoring and a repeatable capacity test for
@@ -536,8 +721,16 @@ history retains implementation detail.
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
 - [ ] Test a full build and container startup in CI, including the requirement
-  that deployment images contain only `infinity.db`, not the development raw
-  archive.
+  that deployment images contain only intended runtime databases rather than the
+  development raw archive.
+  - Build and package `rules.db` alongside `infinity.db` whenever the deployed
+    application is expected to expose curated trait summaries, skill declaration
+    categories, or special weapon details. The current application tolerates a
+    missing `rules.db`, so deployment validation must detect this intentionally
+    rather than silently shipping a reduced feature set.
+  - Keep Corvus Belli graphical assets outside redistributable CI/release images
+    unless explicit redistribution permission is established; test local asset
+    publication separately from distributable-image construction.
 
 ## Potential product features
 
