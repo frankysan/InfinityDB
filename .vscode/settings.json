@@ -3,6 +3,11 @@
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
   "python.testing.pytestArgs": ["tests"],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/src",
+    "${workspaceFolder}/tools"
+  ],
   "editor.formatOnSave": true,
   "files.exclude": {
     "**/__pycache__": true,

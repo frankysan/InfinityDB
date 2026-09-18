@@ -80,7 +80,7 @@ class Builder:
         return row
 
     def warn(self, code: str, message: str, **context: Any) -> None:
-        item = {"code": code, "message": message}
+        item: dict[str, Any] = {"code": code, "message": message}
         if context:
             item["context"] = context
         self.warnings.append(item)

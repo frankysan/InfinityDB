@@ -70,8 +70,10 @@ and serves a read-only browser and same-origin HTTP API.
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
   uses the tracked synthetic Army fixture rather than live acquisition or ignored
-  graphical assets. Repository rules/branch-protection settings, not workflow
-  YAML, determine whether GitHub blocks a merge on those checks.
+  graphical assets. Each leg installs the symbol Python dependencies and runs
+  pytest, full-tree Ruff linting, and Pyright through `run_checks.py`. Repository
+  rules/branch-protection settings, not workflow YAML, determine whether GitHub
+  blocks a merge on those checks.
 - `Installed wheel smoke` builds and installs the wheel in a fresh virtual
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases

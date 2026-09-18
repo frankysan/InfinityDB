@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .paths import raw_database_path
 from .repository import ArmySelectionError, Database
 from .schema import DATABASE_COMPATIBILITY_VERSION, SCHEMA_VERSION
+
+if TYPE_CHECKING:
+    from .importer import export_database
 
 __all__ = [
     "DATABASE_COMPATIBILITY_VERSION",

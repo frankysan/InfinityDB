@@ -19,6 +19,7 @@ server = [
 dev = [
   "pytest>=8.0",
   "ruff>=0.12",
+  "pyright[nodejs]>=1.1.414,<1.2",
 ]
 symbols = [
   "fonttools>=4.0",
@@ -60,6 +61,13 @@ markers = [
   "full_assets: requires the complete validated local Corvus Belli graphical asset set",
 ]
 cache_dir = ".cache/pytest"
+
+[tool.pyright]
+include = ["src", "tools"]
+extraPaths = ["src", "tools"]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+reportMissingTypeStubs = false
 
 [tool.ruff]
 target-version = "py311"

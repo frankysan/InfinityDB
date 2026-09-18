@@ -26,9 +26,9 @@ except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
         select_asset_mode,
     )
 
-STAGE_ORDER = ("test", "lint", "build", "rules")
+STAGE_ORDER = ("test", "lint", "type", "build", "rules")
 PROFILES = {
-    "code": ("test", "lint"),
+    "code": ("test", "lint", "type"),
     "data": ("build", "rules"),
     "all": STAGE_ORDER,
 }
@@ -36,12 +36,7 @@ DEFAULT_LINT_TARGETS = (
     "src/infinity_db",
     "src/infinity_army_data",
     "tests",
-    "tools/run_checks.py",
-    "tools/asset_validation.py",
-    "tools/stage_full_asset_bundle.py",
-    "tools/build_symbols.py",
-    "tools/svg_processor.py",
-    "tools/symbol_work.py",
+    "tools",
 )
 EXIT_OK = 0
 EXIT_STAGE_FAILURE = 1
@@ -96,7 +91,7 @@ class Reporter:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run InfinityDB tests, linting, and database-build validation.",
+        description="Run InfinityDB tests, linting, type checks, and database-build validation.",
     )
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument(
@@ -185,6 +180,8 @@ def stage_definitions(
         elif name == "lint":
             command = [python, "-m", "ruff", "check"]
             command.extend(targets or DEFAULT_LINT_TARGETS)
+        elif name == "type":
+            command = [python, "-m", "pyright"]
         elif name == "build":
             command = [python, "-m", "infinity_db", "build"]
             if build_source is not None:
@@ -324,10 +321,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with Reporter(report_path) as reporter:
             write_header(reporter, stages, args.targets, started_at, asset_selection)
-            if args.targets and ({"build", "rules"} & set(stage_names)):
+            if args.targets and ({"type", "build", "rules"} & set(stage_names)):
                 reporter.write(
                     "Note: positional targets apply to pytest/Ruff only; "
-                    "build uses --build-source and rules uses curated defaults."
+                    "type uses project Pyright configuration, build uses --build-source, "
+                    "and rules uses curated defaults."
                 )
             results: list[StageResult] = []
             for stage in stages:

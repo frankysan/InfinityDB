@@ -397,10 +397,14 @@ consistency audit unless one becomes necessary to unblock that work.
     `+dev` display suffix with controlled repository/version inputs rather than
     requiring source archives or detached release trees to contain Git metadata
     and be ahead/dirty.
-  - [ ] Expand the normal project check runner to cover the complete maintained
-    standalone-tool surface. Lint all maintained scripts under `tools/` and add
-    focused regression tests for currently uncovered tools, allowing conditional
-    external-tool integration where appropriate.
+  - [x] Make the normal Ruff stage cover the complete maintained `tools/` tree
+    rather than a hand-maintained script allow-list.
+  - [x] Add Pyright as a normal `run_checks.py` type stage over maintained
+    `src/` and `tools/` code so editor-visible type regressions fail required CI.
+  - [x] Install the real `symbols` Python dependency set in required source CI and
+    exercise fontTools, tinycss2/cssselect2, and Pillow with synthetic fixtures.
+  - [ ] Add focused regression tests for currently uncovered standalone tools,
+    allowing conditional external-tool integration where appropriate.
   - [ ] Integrate curated snapshot-note validation into routine project checks so
     every checked-in file under `data/curated/snapshot-notes/` is validated even
     when no downloader or comparison workflow happens to load it.

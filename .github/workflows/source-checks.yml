@@ -39,7 +39,10 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install development dependencies
-        run: python -m pip install -e ".[dev]"
+        run: python -m pip install -e ".[dev,symbols]"
+
+      - name: Verify symbol Python dependencies
+        run: python -c "import cssselect2, fontTools.ttLib, PIL.Image, tinycss2"
 
       - name: Run hermetic source checks
         run: python tools/run_checks.py --all --assets off --build-source tests/fixtures/deployment-smoke

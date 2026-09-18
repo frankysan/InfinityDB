@@ -13,7 +13,7 @@ WEAPON_CATEGORIES = _CONFIG.categories
 def weapon_category(name: object, weapon_id: int | None = None) -> str:
     """Classify a weapon name using maintained policy and generic matching mechanics."""
 
-    if weapon_id in _CONFIG.overrides:
+    if weapon_id is not None and weapon_id in _CONFIG.overrides:
         return _CONFIG.overrides[weapon_id]
     text = str(name or "")
     for rule in _CONFIG.rules:

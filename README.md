@@ -101,7 +101,7 @@ library at runtime; SQLite is included with Python.
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,symbols]"
 ```
 
 Select `.venv` as the Python interpreter in VS Code.
@@ -352,7 +352,7 @@ data/
   manifests/                # Ignored generated provenance/build-state records
   generated/                # Ignored database, JSON, and validation artifacts
 reports/                    # Ignored timestamped local development-check reports
-.vscode/                    # Shared build, serve, test, lint, and debug tasks
+.vscode/                    # Shared build, serve, test, lint, type-check, and debug tasks
 Dockerfile                  # Immutable application image for deployment
 compose.yaml                # Gunicorn, Caddy, and application Compose deployment
 Caddyfile                    # Reverse-proxy configuration for the Compose deployment
@@ -365,11 +365,12 @@ direction, and unimplemented work respectively.
 ## Development checks
 
 Use `tools/run_checks.py` as the standard development entry point. It
-orchestrates pytest, Ruff, Army data-build validation, and curated rules-database
-validation while preserving the underlying tools as the authoritative checks.
+orchestrates pytest, Ruff, Pyright type checking, Army data-build validation, and
+curated rules-database validation while preserving the underlying tools as the
+authoritative checks.
 
 ```powershell
-# Full code checks: pytest, then Ruff
+# Full code checks: pytest, Ruff, then Pyright
 python tools/run_checks.py --profile code
 
 # Data/build validation (`infinity.db`, `infinity.raw.db`, and `rules.db`)
@@ -404,7 +405,7 @@ pipeline, preservation of normalized records, safe database replacement, army
 membership, pagination, search, API validation, reference catalogs, unit
 details, profile data, static-symbol delivery, and the standalone tool scripts
 used for local Army and wiki data fetches. VS Code includes build, serve, test,
-and lint tasks, plus build and web-server debug configurations.
+lint, and type-check tasks, plus build and web-server debug configurations.
 
 ## LLM code disclosure
 

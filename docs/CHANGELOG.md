@@ -37,6 +37,11 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Expand the normal code-check contract with Pyright type checking, full `tools/`
+  Ruff coverage, and synthetic integration tests against the real symbol Python
+  dependency stack. Required source CI now installs `.[dev,symbols]` on every
+  platform/interpreter leg.
+
 - Integrate exact-first visual symbol deduplication into `build_symbols.py`.
   Successful font-audited builds now produce version-5 symbol state with
   duplicate reports, renderer settings, conservative render-error handling, and

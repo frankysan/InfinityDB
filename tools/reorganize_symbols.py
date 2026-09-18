@@ -126,7 +126,8 @@ def reorganize(snapshot: Path, static: Path) -> None:
             (identifier for identifier, path in army_paths.items() if path == relative), None
         )
         folder = new_armies / slugify(source.relative_to(old_armies).parts[0])
-        slug = factions.get(army_id, slugify(SOURCE_SUFFIX.sub("", source.stem)))
+        fallback_slug = slugify(SOURCE_SUFFIX.sub("", source.stem))
+        slug = factions.get(army_id, fallback_slug) if army_id is not None else fallback_slug
         stem = f"{army_id}-{slug}" if army_id is not None else slug
         folder.mkdir(parents=True, exist_ok=True)
         shutil.move(source, unique_path(folder, stem))

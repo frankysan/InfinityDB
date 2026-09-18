@@ -67,24 +67,27 @@ The output path must be separate from the input path.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
 import argparse
 import csv
 import gzip
 import json
 import math
-import os
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
+from importlib import import_module
+from pathlib import Path
+from typing import Any
 
 try:
-    from PIL import Image, ImageChops, ImageStat
-except ImportError:
+    Image: Any = import_module("PIL.Image")
+    ImageChops: Any = import_module("PIL.ImageChops")
+    ImageStat: Any = import_module("PIL.ImageStat")
+except ModuleNotFoundError:
     print(
         "Missing dependency: Pillow\n"
         "Install with: pip install pillow",
@@ -212,8 +215,7 @@ def is_relative_to(path: Path, other: Path) -> bool:
 def run_command(args: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(
         args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
     )
 
@@ -500,15 +502,15 @@ def simplify_svg(
 # Visual comparison
 # ---------------------------------------------------------------------------
 
-def composite_on_background(image: Image.Image, value: int) -> Image.Image:
+def composite_on_background(image: Any, value: int) -> Any:
     image = image.convert("RGBA")
     bg = Image.new("RGBA", image.size, (value, value, value, 255))
     return Image.alpha_composite(bg, image).convert("RGB")
 
 
 def compare_rgb_images(
-    reference: Image.Image,
-    candidate: Image.Image,
+    reference: Any,
+    candidate: Any,
     pixel_diff_threshold: int,
 ) -> tuple[float, float]:
     if reference.size != candidate.size:
@@ -905,19 +907,19 @@ def choose_lossy_output(
     destination.parent.mkdir(parents=True, exist_ok=True)
     source_bytes = source.stat().st_size
 
-    passing = [
-        item
-        for item in evaluations
-        if item.passed and item.path is not None and item.path.exists()
-    ]
+    passing: list[tuple[CandidateEvaluation, Path]] = []
+    for item in evaluations:
+        candidate_path = item.path
+        if item.passed and candidate_path is not None and candidate_path.exists():
+            passing.append((item, candidate_path))
 
     error = ""
     if passing:
-        passing.sort(key=lambda item: item.path.stat().st_size)
-        chosen = passing[0]
+        passing.sort(key=lambda pair: pair[1].stat().st_size)
+        chosen, chosen_path = passing[0]
 
-        if chosen.path.stat().st_size < source_bytes:
-            shutil.copy2(chosen.path, destination)
+        if chosen_path.stat().st_size < source_bytes:
+            shutil.copy2(chosen_path, destination)
             status = "OK"
             chosen_label = chosen.name
             precision = chosen.precision
@@ -1161,45 +1163,45 @@ def process_file_profiles(
         current_base = source
         if simplify_passes > 0:
             assert inkscape is not None
-        for pass_count in range(1, simplify_passes + 1):
-            simplified = (
-                temp_dir / "simplified" / f"pass-{pass_count}.svg"
-            )
-            ok, simplify_error = simplify_svg(
-                inkscape, current_base, simplified, 1
-            )
+            for pass_count in range(1, simplify_passes + 1):
+                simplified = (
+                    temp_dir / "simplified" / f"pass-{pass_count}.svg"
+                )
+                ok, simplify_error = simplify_svg(
+                    inkscape, current_base, simplified, 1
+                )
 
-            if not ok:
-                had_renderer_failure = True
-                small_evals.append(
-                    CandidateEvaluation(
-                        name=f"simplify-{pass_count}",
-                        precision=None,
-                        simplify_passes=pass_count,
-                        path=None,
-                        passed=False,
-                        metrics=VisualMetrics(),
-                        error=simplify_error,
-                        renderer_failure=True,
+                if not ok:
+                    had_renderer_failure = True
+                    small_evals.append(
+                        CandidateEvaluation(
+                            name=f"simplify-{pass_count}",
+                            precision=None,
+                            simplify_passes=pass_count,
+                            path=None,
+                            passed=False,
+                            metrics=VisualMetrics(),
+                            error=simplify_error,
+                            renderer_failure=True,
+                        )
                     )
-                )
-                break
+                    break
 
-            for precision in small_precisions:
-                evaluation = build_candidate_evaluation(
-                    source_base=simplified,
-                    label=f"s{pass_count}-p{precision}",
-                    precision=precision,
-                    simplify_passes=pass_count,
-                    svgo=svgo,
-                    lossy_config=lossy_config,
-                    validator=validator,
-                    temp_dir=temp_dir,
-                )
-                small_evals.append(evaluation)
-                had_renderer_failure |= evaluation.renderer_failure
+                for precision in small_precisions:
+                    evaluation = build_candidate_evaluation(
+                        source_base=simplified,
+                        label=f"s{pass_count}-p{precision}",
+                        precision=precision,
+                        simplify_passes=pass_count,
+                        svgo=svgo,
+                        lossy_config=lossy_config,
+                        validator=validator,
+                        temp_dir=temp_dir,
+                    )
+                    small_evals.append(evaluation)
+                    had_renderer_failure |= evaluation.renderer_failure
 
-            current_base = simplified
+                current_base = simplified
 
         profile_evaluations["small"] = small_evals
 
@@ -1687,7 +1689,9 @@ def main():
                 row.file_runtime_seconds = file_runtime
             return index, source, relative, outputs, candidates, renderer_failed
 
-        completed: dict[int, tuple[Path, Path, list[OutputResult], list[CandidateResult], bool]] = {}
+        completed: dict[
+            int, tuple[Path, Path, list[OutputResult], list[CandidateResult], bool]
+        ] = {}
 
         if args.jobs == 1 or len(files) == 1:
             for index, source in enumerate(files, 1):

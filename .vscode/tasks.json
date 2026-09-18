@@ -27,15 +27,22 @@
       "label": "Python: Tests",
       "type": "shell",
       "command": "${workspaceFolder}/.venv/Scripts/python.exe",
-      "args": ["-m", "pytest", "-q"],
+      "args": ["tools/run_checks.py", "--stage", "test"],
       "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Python: Type check",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["tools/run_checks.py", "--stage", "type"],
       "problemMatcher": []
     },
     {
       "label": "Python: Ruff",
       "type": "shell",
       "command": "${workspaceFolder}/.venv/Scripts/python.exe",
-      "args": ["-m", "ruff", "check", "src/infinity_db", "src/infinity_army_data/cli.py", "tests"],
+      "args": ["tools/run_checks.py", "--stage", "lint"],
       "problemMatcher": []
     }
   ]

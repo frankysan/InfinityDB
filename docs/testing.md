@@ -1,28 +1,29 @@
 # Development checks
 
 InfinityDB provides `tools/run_checks.py` as the standard local entry point for
-Python tests, Ruff linting, Army data-build validation, and curated
-rules-database validation. The runner only
+Python tests, Ruff linting, Pyright type checking, Army data-build validation,
+and curated rules-database validation. The runner only
 orchestrates the existing authoritative tools; it does not replace pytest,
 Ruff, or `infinity-db build`.
 
 Run it with the project virtual-environment Python:
 
 ```powershell
-# Code checks: pytest followed by Ruff
+# Code checks: pytest, Ruff, then Pyright
 python tools/run_checks.py --profile code
 
 # Data/build validation (`infinity.db`, `infinity.raw.db`, and `rules.db`)
 python tools/run_checks.py --profile data
 
-# Tests, lint, Army data build, and rules database build
+# Tests, lint, type checking, Army data build, and rules database build
 python tools/run_checks.py --all
 ```
 
-The available stages are `test`, `lint`, `build`, and `rules`. The `build`
+The available stages are `test`, `lint`, `type`, `build`, and `rules`. The `type`
+stage runs Pyright over the maintained `src/` and `tools/` trees. The `build`
 stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
 `rules.db` from the tracked curated rules collections. The named profiles are
-`code` (`test` + `lint`), `data` (`build` + `rules`), and `all`.
+`code` (`test` + `lint` + `type`), `data` (`build` + `rules`), and `all`.
 
 ## Graphical asset test modes
 
@@ -75,10 +76,11 @@ python tools/run_checks.py --stage test tests/test_availability.py
 python tools/run_checks.py --stage lint src/infinity_army_data/availability.py tests/test_availability.py
 ```
 
-When no target is supplied, pytest runs the full suite and Ruff uses the
-repository defaults defined by the runner, including the maintained symbol
-toolchain (`build_symbols.py`, `svg_processor.py`, and `symbol_work.py`). The
-build and rules stages ignore positional targets; use `--build-source PATH` to
+When no target is supplied, pytest runs the full suite and Ruff checks the full
+maintained `tools/` tree along with `src/` and `tests/`. The type stage always
+uses the project Pyright configuration; positional targets remain specific to
+pytest and Ruff. The build and rules stages ignore positional targets; use
+`--build-source PATH` to
 select an Army source directory
 or ZIP for the Army build. The rules stage
 always uses the normal curated-rules defaults.
@@ -116,6 +118,11 @@ leg:
 python tools/run_checks.py --all --assets off \
   --build-source tests/fixtures/deployment-smoke
 ```
+
+Each source-check leg installs both the development and symbol Python dependency
+sets. This makes Pyright and the real fontTools/tinycss2/cssselect2/Pillow
+integration fixtures part of required CI without requiring external renderers or
+third-party artwork.
 
 The synthetic deployment fixture is the explicit Army build input because clean
 source checkouts intentionally contain no real raw Army snapshot. This workflow
@@ -168,6 +175,6 @@ and duration, followed by an overall summary.
 - `1`: at least one requested check stage failed.
 - `2`: runner/configuration error or a stage could not be started.
 
-Direct pytest or Ruff commands remain useful when debugging one tool in
+Direct pytest, Ruff, or Pyright commands remain useful when debugging one tool in
 isolation, but normal development and handoff checks should prefer this runner
 so the command set and reporting format stay consistent.

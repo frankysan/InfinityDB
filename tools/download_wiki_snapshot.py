@@ -25,11 +25,23 @@ from typing import NamedTuple, TextIO
 from infinity_db.snapshot_provenance import write_snapshot_manifest
 
 try:
-    from tools.path_sanitization import sanitize_path_component, sanitize_relative_path
+    from tools.path_sanitization import (
+        sanitize_path_component as _sanitize_path_component,
+    )
+    from tools.path_sanitization import (
+        sanitize_relative_path,
+    )
     from tools.snapshot_archive import create_timestamped_archive
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from path_sanitization import sanitize_path_component, sanitize_relative_path
+    from path_sanitization import (
+        sanitize_path_component as _sanitize_path_component,
+    )
+    from path_sanitization import (
+        sanitize_relative_path,
+    )
     from snapshot_archive import create_timestamped_archive
+
+sanitize_path_component = _sanitize_path_component
 
 ROOT_URL = "https://infinitythewiki.com/"
 SUPPORTED_LANGUAGES = ("en", "es")

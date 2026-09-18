@@ -49,16 +49,19 @@ python tools/run_checks.py --all --assets off \
 
 The tracked synthetic Army fixture supplies the explicit clean-checkout input
 for the Army build stage; ordinary source archives intentionally do not contain a
-real `data/raw/` snapshot. Every matrix leg covers:
+real `data/raw/` snapshot. Every matrix leg installs `.[dev,symbols]` and covers:
 
-- pytest hermetic tests;
-- Ruff through the normal runner lint stage;
+- pytest hermetic tests, including synthetic integration against the real
+  fontTools, tinycss2/cssselect2, and Pillow Python dependencies;
+- Ruff across the maintained `src/`, `tests/`, and complete `tools/` trees;
+- Pyright type checking across maintained `src/` and `tools/` code;
 - `infinity.db` / `infinity.raw.db` construction from the controlled fixture;
 - `rules.db` construction from tracked curated rules data.
 
-Snapshot-note validation and broader maintained-tool coverage join this same
-runner when their backlog items are implemented. A clean source archive is
-expected to be genuinely green; absent ignored graphical assets are not a
+Snapshot-note validation and focused regression coverage for the remaining
+standalone tools join this same runner when their backlog items are implemented.
+A clean source archive is expected to be genuinely green; absent ignored
+graphical assets are not a
 known-failing state.
 
 The workflow defines InfinityDB's required source-validation contract, but GitHub
@@ -205,8 +208,8 @@ full-asset workflow are implemented. These core validation layers are sufficient
 for symbol-pipeline feature work to continue with automatic clean-environment and
 cross-platform coverage.
 
-Non-blocking CI follow-up remains in the backlog: broaden the normal runner's
-maintained-tool coverage, validate checked-in snapshot notes routinely, configure
+Non-blocking CI follow-up remains in the backlog: add focused regression coverage
+for still-under-tested standalone tools, validate checked-in snapshot notes routinely, configure
 repository rules/branch protection if required, and configure the `full-assets`
 environment with an authorized checksum-pinned bundle plus one successful manual
 run. Scheduled/manual acquisition, performance, or other extended workflows

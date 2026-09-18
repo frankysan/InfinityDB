@@ -33,7 +33,7 @@ def test_stage_selection_uses_canonical_order() -> None:
 def test_all_profile_includes_code_and_data_stages() -> None:
     args = run_checks.build_parser().parse_args(["--profile", "all"])
 
-    assert run_checks.selected_stage_names(args) == ("test", "lint", "build", "rules")
+    assert run_checks.selected_stage_names(args) == ("test", "lint", "type", "build", "rules")
 
 
 def test_data_profile_builds_army_and_rules_databases() -> None:
@@ -44,7 +44,7 @@ def test_data_profile_builds_army_and_rules_databases() -> None:
 
 def test_stage_commands_use_current_python_and_forward_targets() -> None:
     stages = run_checks.stage_definitions(
-        ("test", "lint", "build", "rules"),
+        ("test", "lint", "type", "build", "rules"),
         ["tests/test_cli.py"],
         build_source=Path("data/raw/example.zip"),
     )
@@ -68,12 +68,17 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
     assert stages[2].command == (
         sys.executable,
         "-m",
+        "pyright",
+    )
+    assert stages[3].command == (
+        sys.executable,
+        "-m",
         "infinity_db",
         "build",
         str(Path("data/raw/example.zip")),
         "--compact",
     )
-    assert stages[3].command == (
+    assert stages[4].command == (
         sys.executable,
         "-m",
         "infinity_db",
@@ -117,10 +122,15 @@ def test_lint_stage_uses_project_defaults_without_targets() -> None:
     )
 
 
-def test_default_lint_targets_include_symbol_toolchain() -> None:
-    assert "tools/build_symbols.py" in run_checks.DEFAULT_LINT_TARGETS
-    assert "tools/svg_processor.py" in run_checks.DEFAULT_LINT_TARGETS
-    assert "tools/symbol_work.py" in run_checks.DEFAULT_LINT_TARGETS
+def test_default_lint_targets_cover_complete_tools_tree() -> None:
+    assert "tools" in run_checks.DEFAULT_LINT_TARGETS
+    assert not any(target.startswith("tools/") for target in run_checks.DEFAULT_LINT_TARGETS)
+
+
+def test_type_stage_uses_project_pyright_configuration() -> None:
+    [stage] = run_checks.stage_definitions(("type",), [], build_source=None)
+
+    assert stage.command == (sys.executable, "-m", "pyright")
 
 
 def test_report_without_path_uses_timestamped_repository_filename() -> None:

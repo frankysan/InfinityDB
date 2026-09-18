@@ -35,8 +35,8 @@ Virtual-environment interpreters are normally:
 - Linux/macOS: `.venv/bin/python`
 
 Use `tools/run_checks.py` as the standard entry point for repository checks. It
-invokes pytest, Ruff, Army data-build validation, and curated rules-database
-validation through the same Python
+invokes pytest, Ruff, Pyright type checking, Army data-build validation, and
+curated rules-database validation through the same Python
 interpreter that launched the runner and keeps stage selection/reporting
 consistent across local development and agent handoffs. Examples:
 
@@ -56,13 +56,14 @@ the report header. An explicit report path overrides that convention. Requested
 stages continue after failures by default; use `--fail-fast` when appropriate.
 See `docs/testing.md` for the complete contract.
 
-Direct pytest/Ruff commands remain appropriate when debugging those tools in
-isolation, and package installation still runs through the virtual-environment
+Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
+tools in isolation, and package installation still runs through the virtual-environment
 Python, for example:
 
 ```text
 <venv-python> -m pytest tests/test_specific.py -q
 <venv-python> -m ruff check path/to/file.py
+<venv-python> -m pyright
 <venv-python> -m pip install ...
 ```
 
