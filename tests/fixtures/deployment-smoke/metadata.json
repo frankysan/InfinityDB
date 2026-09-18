@@ -2,10 +2,11 @@
   "factions": [
     {
       "id": 101,
-      "name": "Deployment Test Army"
+      "name": "Deployment Test Army",
+      "parent": 101
     },
     {
-      "id": 201,
+      "id": 102,
       "name": "Deployment Test Sectorial",
       "parent": 101
     }

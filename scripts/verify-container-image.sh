@@ -124,9 +124,16 @@ import json
 from urllib.request import urlopen
 
 with urlopen("http://127.0.0.1:8000/api/armies", timeout=3) as response:
-    armies = json.load(response)["items"]
+    armies = {item["id"]: item for item in json.load(response)["items"]}
 if not armies:
     raise SystemExit("/api/armies returned no deployment-fixture armies")
+
+main = armies.get(101)
+sectorial = armies.get(102)
+if main is None or main.get("role") != "main" or main.get("group_id") is not None:
+    raise SystemExit(f"Army 101 hierarchy mismatch: {main!r}")
+if sectorial is None or sectorial.get("role") != "sectorial" or sectorial.get("group_id") != 101:
+    raise SystemExit(f"Army 102 hierarchy mismatch: {sectorial!r}")
 
 with urlopen("http://127.0.0.1:8000/api/skills/74", timeout=3) as response:
     skill = json.load(response)
