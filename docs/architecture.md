@@ -508,12 +508,14 @@ pytest excludes those tests by default. A detected partial/corrupt local asset
 tree is an error in `auto`/`required`, while a completely absent tree is valid
 for hermetic testing.
 
-**Design direction:** required source CI uses the hermetic mode and must pass
-from a clean checkout without live acquisition. Full-asset GitHub validation
-remains optional/manual and must not redistribute those assets as CI artifacts.
-Installed-wheel and container smoke tests validate packaging boundaries
-separately from source-checkout tests, while maintained Python tooling receives
-cross-platform Windows/Linux/macOS coverage where practical. See `docs/ci.md`.
+The `Source checks` GitHub Actions workflow now runs the hermetic project check
+runner from a clean Ubuntu/Python 3.11 checkout, using the tracked synthetic Army
+fixture for database construction and no live acquisition or third-party
+graphical assets. Full-asset GitHub validation remains optional/manual and must
+not redistribute those assets as CI artifacts. Installed-wheel validation and
+cross-platform Windows/macOS source checks remain design direction; the existing
+container smoke test continues to validate deployment packaging separately. See
+`docs/ci.md`.
 
 ## Portability and filesystem policy
 

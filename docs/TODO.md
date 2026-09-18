@@ -439,9 +439,12 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Integrate curated snapshot-note validation into routine project checks so
     every checked-in file under `data/curated/snapshot-notes/` is validated even
     when no downloader or comparison workflow happens to load it.
-  - [ ] Add required clean-checkout Linux CI that drives the normal check runner:
-    pytest, Ruff, Army database build, rules database build, snapshot-note
-    validation once integrated, and maintained standalone-tool checks.
+  - [x] Add clean-checkout Linux source CI that drives the normal check runner in
+    hermetic asset mode, using the tracked synthetic Army fixture for the Army
+    database build and the tracked curated collections for `rules.db`.
+  - [ ] Configure GitHub repository rules/branch protection to require the
+    `Source checks` result for protected merges when branch protection is enabled;
+    workflow YAML alone does not enforce merge blocking.
   - [ ] Add an installed-wheel smoke job that builds/installs the wheel in a clean
     environment and validates supported imports, startup, CLI/resource packaging,
     and generated test databases without repository-relative assumptions.

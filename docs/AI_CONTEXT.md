@@ -65,9 +65,15 @@ and serves a read-only browser and same-origin HTTP API.
   published symbol contract before enabling `full_assets`; direct pytest is
   hermetic by default. `auto` may fall back only when the asset tree is entirely
   absent, never when it is partial/corrupt.
-- **Design direction:** required public CI uses hermetic mode, does not depend on
-  live acquisition, and does not redistribute Corvus Belli graphical assets.
-  Optional/manual full-asset GitHub validation remains separate. See `docs/ci.md`.
+- GitHub `Source checks` runs the hermetic project checks on clean Ubuntu/Python
+  3.11 for pull requests and pushes to `main`, using the tracked synthetic Army
+  fixture rather than live acquisition or ignored graphical assets. Repository
+  rules/branch protection, not workflow YAML, determines whether GitHub blocks a
+  merge on that check.
+- **Design direction:** optional/manual full-asset GitHub validation remains
+  separate, installed-wheel validation gets its own clean environment, and
+  source checks expand to Windows/macOS without redistributing Corvus Belli
+  graphical assets. See `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 

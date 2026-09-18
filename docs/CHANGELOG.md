@@ -26,6 +26,10 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add a clean-checkout Linux `Source checks` GitHub Actions workflow that runs
+  the normal hermetic test/lint/build/rules contract on Python 3.11 using the
+  tracked synthetic Army fixture rather than live data or third-party assets.
+
 - Add explicit hermetic/full-asset test modes. `run_checks.py --assets
   off|auto|required` validates the complete current published symbol set before
   enabling `full_assets` pytest coverage; direct pytest is hermetic by default,
@@ -88,6 +92,9 @@ All notable changes to this project are documented in this file.
   under `data/curated/snapshot-notes/`.
 
 ### Changed
+
+- Update the official checkout and Python setup actions used by GitHub workflows
+  to their current Node-24-compatible major versions.
 
 - Resolve raw Army symbols through Git-ignored local overrides, a validated
   prior immutable symbol snapshot/cache, then upstream network access. Add

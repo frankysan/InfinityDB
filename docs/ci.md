@@ -2,7 +2,8 @@
 
 This document records the InfinityDB continuous-integration and automated
 validation contract. Sections explicitly marked design direction remain planned;
-the deployment smoke and local asset-test policy are current behavior.
+the deployment smoke, required Linux source workflow, and local asset-test policy are
+current behavior.
 
 The goal is to make a clean checkout independently trustworthy while still
 supporting deeper validation against a complete local Corvus Belli graphical
@@ -31,27 +32,37 @@ asset set when one is legitimately available.
 
 ## Validation layers
 
-### Required source CI
+### Required source CI (current)
 
-The normal push/pull-request workflow should run from a clean checkout with
-third-party graphical assets absent. Its authoritative command surface should be
-`tools/run_checks.py`, extended as needed rather than duplicating project-check
-logic in workflow YAML.
+The `Source checks` GitHub Actions workflow runs on pull requests, pushes to
+`main`, and manual dispatch. It starts from a clean Ubuntu checkout with
+third-party graphical assets absent and delegates the validation contract to
+`tools/run_checks.py` rather than duplicating the individual test/build commands
+in workflow YAML:
 
-The required source layer should cover:
+```text
+python tools/run_checks.py --all --assets off \
+  --build-source tests/fixtures/deployment-smoke
+```
+
+The tracked synthetic Army fixture supplies the explicit clean-checkout input
+for the Army build stage; ordinary source archives intentionally do not contain a
+real `data/raw/` snapshot. The workflow currently covers:
 
 - pytest hermetic tests;
-- Ruff over all maintained Python packages and tools;
-- `infinity.db` / `infinity.raw.db` construction from controlled fixture or
-  pinned test input;
-- `rules.db` construction from tracked curated rules data;
-- curated snapshot-note/schema validation once integrated into the normal check
-  runner;
-- maintained standalone-tool regression coverage that does not require external
-  proprietary assets or live network acquisition.
+- Ruff through the normal runner lint stage;
+- `infinity.db` / `infinity.raw.db` construction from the controlled fixture;
+- `rules.db` construction from tracked curated rules data.
 
-A clean source archive should be genuinely green. Missing ignored graphical
-assets must not be represented as a known-failing normal test state.
+Snapshot-note validation and broader maintained-tool coverage join this same
+runner when their backlog items are implemented. A clean source archive is
+expected to be genuinely green; absent ignored graphical assets are not a
+known-failing state.
+
+The workflow defines InfinityDB's required source-validation contract, but GitHub
+merge blocking is a repository rules/branch-protection setting rather than a YAML
+property. Enabling that repository-side enforcement remains an administrative
+step when protected-branch policy is desired.
 
 ### Cross-platform CI
 
@@ -156,17 +167,17 @@ networked or long-running benchmark.
 
 ## Planned implementation order
 
-The deployment-smoke runtime import boundary and local hermetic/full-asset
-test split are implemented. Remaining CI work should proceed in this order:
+The deployment-smoke runtime import boundary, local hermetic/full-asset test
+split, and clean-checkout Linux source workflow are implemented. Remaining CI
+work should proceed in this order:
 
-1. Add required Linux source CI around the normal check runner.
-2. Add installed-wheel/package smoke validation so source-checkout assumptions
+1. Add installed-wheel/package smoke validation so source-checkout assumptions
    cannot hide missing packaged resources, including configuration intentionally
    required by supported installed build/ingestion CLI commands.
-3. Expand the hermetic source checks to Windows and macOS.
-4. Add optional/manual full-asset integration validation without redistributing
+2. Expand the hermetic source checks to Windows and macOS.
+3. Add optional/manual full-asset integration validation without redistributing
    third-party graphical assets.
-5. Add scheduled/manual acquisition, performance, or other extended workflows
+4. Add scheduled/manual acquisition, performance, or other extended workflows
    only where they provide useful independent signals.
 
 Symbol-pipeline feature work can then continue with these validation layers in

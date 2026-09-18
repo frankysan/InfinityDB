@@ -104,13 +104,24 @@ acquired Corvus Belli graphical-asset trees.
 See [the Linux deployment guide](deployment.md#deployment-smoke-validation) for
 the exact container contract and the equivalent manual command.
 
-## Planned continuous integration
+## Continuous integration
 
-The accepted CI/testing design direction is documented in
-[the continuous integration strategy](ci.md). The local hermetic/full-asset test
-split described above is implemented; required source CI, cross-platform
-coverage, installed-wheel validation, and optional/manual GitHub full-asset
-execution remain planned until their corresponding backlog tasks are completed.
+The `Source checks` GitHub Actions workflow runs the normal check runner from a
+clean Ubuntu/Python 3.11 checkout on pull requests and pushes to `main`:
+
+```text
+python tools/run_checks.py --all --assets off \
+  --build-source tests/fixtures/deployment-smoke
+```
+
+The synthetic deployment fixture is the explicit Army build input because clean
+source checkouts intentionally contain no real raw Army snapshot. This workflow
+is hermetic: it does not acquire network data and does not require ignored
+Corvus Belli graphical assets.
+
+The broader CI/testing design and remaining installed-wheel, cross-platform, and
+optional/manual full-asset work are documented in
+[the continuous integration strategy](ci.md).
 
 ## Reports
 
