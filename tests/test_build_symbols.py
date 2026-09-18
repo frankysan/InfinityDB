@@ -10,6 +10,7 @@ import pytest
 
 from infinity_db.snapshot_provenance import write_snapshot_manifest
 from infinity_db.symbol_manifest import (
+    add_font_audit,
     build_symbol_manifest,
     load_symbol_manifest,
     write_symbol_manifest,
@@ -628,3 +629,94 @@ def test_resume_verifies_existing_work_without_rematerializing(
         == 0
     )
     assert marker.read_text(encoding="utf-8") == "preserve derived work"
+
+
+def test_resume_retries_failed_v4_font_audit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = load_module()
+    data_root, army, build_manifest = resumable_symbol_build(tmp_path)
+    assert (
+        module.main(
+            [
+                "--resume",
+                "--snapshot",
+                str(army),
+                "--data-root",
+                str(data_root),
+                "--stop-after",
+                "preflight",
+            ]
+        )
+        == 0
+    )
+
+    report = tmp_path / "font-audit.json"
+    report.write_text("{}\n", encoding="utf-8")
+    aliases = tmp_path / "font-aliases.json"
+    aliases.write_text("{}\n", encoding="utf-8")
+    failed = add_font_audit(
+        load_symbol_manifest(build_manifest),
+        status="failed",
+        summary={
+            "svgCount": 1,
+            "fontAvailableAssetCount": 0,
+            "fontMissingAssetCount": 1,
+            "noActiveTextAssetCount": 0,
+            "implicitDefaultAssetCount": 0,
+            "effectiveFontReferenceCount": 1,
+            "availableFontReferenceCount": 0,
+            "missingFontReferenceCount": 1,
+            "ambiguousFontReferenceCount": 0,
+            "genericFontReferenceCount": 0,
+            "normalizedAliasReferenceCount": 0,
+            "unusedDeclarationCount": 0,
+        },
+        report=report,
+        aliases=aliases,
+        project_root=tmp_path,
+    )
+    write_symbol_manifest(failed, build_manifest)
+
+    def rerun_font_audit(*_args, **kwargs):
+        path = kwargs["build_manifest_path"]
+        document = load_symbol_manifest(path)
+        assert document["formatVersion"] == 4
+        assert document["processing"]["fontAudit"]["status"] == "failed"
+        document["processing"]["fontAudit"]["status"] = "passed"
+        summary = document["processing"]["fontAudit"]["summary"]
+        summary["fontAvailableAssetCount"] = 1
+        summary["fontMissingAssetCount"] = 0
+        summary["availableFontReferenceCount"] = 1
+        summary["missingFontReferenceCount"] = 0
+        write_symbol_manifest(document, path)
+        return SimpleNamespace(
+            report=report,
+            status="passed",
+            summary={
+                "fontAvailableAssetCount": 1,
+                "fontMissingAssetCount": 0,
+                "normalizedAliasReferenceCount": 0,
+                "unusedDeclarationCount": 0,
+            },
+        )
+
+    monkeypatch.setattr(module, "audit_symbol_fonts", rerun_font_audit)
+    assert (
+        module.main(
+            [
+                "--resume",
+                "--snapshot",
+                str(army),
+                "--data-root",
+                str(data_root),
+                "--stop-after",
+                "font-audit",
+            ]
+        )
+        == 0
+    )
+    output = capsys.readouterr().out
+    assert "Resuming symbol build -> version 4" in output
+    assert "Checkpoint reached -> font-audit" in output
+    assert load_symbol_manifest(build_manifest)["processing"]["fontAudit"]["status"] == "passed"

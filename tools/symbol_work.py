@@ -19,6 +19,7 @@ from infinity_db.symbol_manifest import (
     SYMBOL_BUILD_COMPRESSION_VERSION,
     SYMBOL_BUILD_DUPLICATE_VERSION,
     SYMBOL_BUILD_FONT_AUDIT_VERSION,
+    SYMBOL_BUILD_PREFLIGHT_VERSION,
     SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
     SYMBOL_BUILD_VERSION,
     add_compression,
@@ -537,8 +538,23 @@ def audit_symbol_fonts(
 ) -> FontAuditResult:
     """Resolve effective SVG fonts against the installed font environment."""
     manifest = load_symbol_manifest(build_manifest_path)
+    font_audit_state = manifest.get("processing", {}).get("fontAudit")
+    if manifest.get("formatVersion") == SYMBOL_BUILD_FONT_AUDIT_VERSION:
+        if (
+            not isinstance(font_audit_state, dict)
+            or font_audit_state.get("status") != "failed"
+        ):
+            raise ValueError(
+                "Font audit rerun requires a failed version-4 font audit state"
+            )
+        manifest = json.loads(json.dumps(manifest))
+        manifest["formatVersion"] = SYMBOL_BUILD_PREFLIGHT_VERSION
+        del manifest["processing"]["fontAudit"]
     preflight = manifest.get("processing", {}).get("svgPreflight", {})
-    if manifest.get("formatVersion") != 3 or preflight.get("status") != "passed":
+    if (
+        manifest.get("formatVersion") != SYMBOL_BUILD_PREFLIGHT_VERSION
+        or preflight.get("status") != "passed"
+    ):
         raise ValueError("Font audit requires passed version-3 SVG preflight state")
 
     tools = _font_tools()

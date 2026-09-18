@@ -593,7 +593,9 @@ def main(argv: list[str] | None = None) -> int:
             f"{symbols.archive.stem}--{symbol_sha[:12]}"
         )
         font_status = _existing_stage_status(current, "fontAudit")
-        if current_version == 3:
+        if current_version == 3 or (
+            current_version == 4 and font_status == "failed"
+        ):
             font_audit = audit_symbol_fonts(
                 materialized,
                 archive=symbols.archive,

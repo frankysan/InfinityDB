@@ -388,6 +388,52 @@ def test_font_audit_classifies_effective_fonts_and_unused_declarations(
     assert updated["processing"]["fontAudit"]["status"] == "failed"
     assert updated["processing"]["fontAudit"]["aliases"]["sha256"]
 
+    def fixed_find(reference, _exact, _compact, *, overrides=None):
+        result = fake_find(reference, _exact, _compact, overrides=overrides)
+        if reference != "Missing":
+            return result
+        return {
+            "status": "FOUND",
+            "match_type": "family",
+            "matched_name": "Missing",
+            "family": "Missing",
+            "subfamily": "Regular",
+            "full_name": "Missing Regular",
+            "postscript": "Missing-Regular",
+            "font_file": str(tmp_path / "fonts" / "missing.ttf"),
+            "normalize": "NO",
+            "weight": "400",
+            "style": "normal",
+            "stretch": "normal",
+        }
+
+    fixed_tools = type(
+        "FixedFontTools",
+        (),
+        {
+            "load_font_reference_overrides": staticmethod(lambda _path: {}),
+            "load_font_index": staticmethod(lambda: ({}, {}, 5, 8)),
+            "scan_svg": staticmethod(fake_scan),
+            "find_font": staticmethod(fixed_find),
+            "normal_key": staticmethod(normal_key),
+        },
+    )
+    monkeypatch.setattr(symbol_work, "_font_tools", lambda: fixed_tools)
+
+    rerun = symbol_work.audit_symbol_fonts(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+        alias_config=alias_config,
+    )
+
+    assert rerun.status == "passed"
+    rerun_manifest = load_symbol_manifest(manifest)
+    assert rerun_manifest["formatVersion"] == 4
+    assert rerun_manifest["processing"]["fontAudit"]["status"] == "passed"
+
 
 def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypatch) -> None:
     body = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
