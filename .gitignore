@@ -16,6 +16,9 @@ reports/
 # VS Code local overrides
 .vscode/*.local.json
 
+# User-specific agent preferences
+/AGENTS.local.md
+
 # Raw and generated Infinity data
 data/raw/*
 !data/raw/.gitkeep

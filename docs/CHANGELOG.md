@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Support an optional Git-ignored root `AGENTS.local.md` for user-specific agent
+  workflow and communication preferences while keeping tracked project
+  instructions authoritative.
 - Add a Docker deployment smoke workflow that builds `infinity.db` from a
   synthetic Army fixture plus the tracked `rules.db`, validates the image's
   runtime-data contract, rejects third-party symbol trees in redistributable

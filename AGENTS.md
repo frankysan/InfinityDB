@@ -3,6 +3,15 @@
 This file contains repository-wide instructions for coding agents working on
 InfinityDB.
 
+After reading this file, also read root-level `AGENTS.local.md` when it exists.
+That optional companion is intentionally Git-ignored and is reserved for
+user-specific workflow, communication, tooling, and machine-local preferences.
+It must not define project architecture, data semantics, repository-wide
+constraints, or durable decisions that other contributors need. Tracked
+repository instructions and documentation take precedence if the local file
+conflicts with them. Promote a local preference into tracked project
+documentation only when the user explicitly wants it to become project policy.
+
 Before making substantial changes, read:
 
 - `docs/architecture.md` — architecture, engineering principles, and subsystem

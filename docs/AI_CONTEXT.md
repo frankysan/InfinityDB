@@ -8,6 +8,9 @@ model.
 ## Documentation hierarchy and status
 
 - `AGENTS.md` contains immediate repository-wide instructions for coding agents.
+- Root-level `AGENTS.local.md`, when present, contains intentionally Git-ignored
+  user-specific workflow/preferences for that checkout. It is non-authoritative
+  for project design and must not replace tracked repository decisions.
 - `docs/architecture.md` is authoritative for architecture, engineering
   principles, subsystem boundaries, data-path roles, and lasting design
   direction.
