@@ -6,6 +6,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Synchronize reference documentation with the completed manifest-backed symbol
+  pipeline and add a dedicated server-migration guide that distinguishes exact
+  runtime transfer from rebuild/source-provenance requirements.
+- Define symbol manifest stage transitions as forward-only. Failed-stage retry is
+  explicit; passed later states cannot be silently demoted by invoking an earlier
+  processing helper.
 - Reduce `tools/build_symbols.py` console noise to compact stage-level output
   with a single updating progress line for the active interactive stage, while
   retaining the complete verbose transcript in timestamped `data/logs/symbols/`
@@ -19,6 +25,16 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Validate the complete published symbol inventory rather than treating only the
+  currently browser-referenced subset as the full asset set. New publications
+  SHA-bind `symbol-inventory.json`, while browser-only variants remain required
+  future-use assets.
+- Publish characteristic icons under `static/characteristics/` instead of the
+  legacy `static/orders/` location, with browser routes, packaging, asset checks,
+  and rollback handling using the same maintained classification.
+- Harden version-5 duplicate summary invariants and the v5-to-v8 promotion
+  boundaries so impossible counts, downstream manifest rollback, and terminal
+  republishing are rejected.
 - Preserve distinct unit profile-slot symbol artwork during publication by keeping
   the first profile at the stable unit path and assigning deterministic
   `--<group>-<profile>` suffixes to later distinct profile symbols and
@@ -62,6 +78,13 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Bind every balanced compression output SVG by SHA-256 in the version-7
+  compression report and verify those exact bytes before version-8 publication.
+  Publication also reconciles the incoming/previous asset inventories and
+  transactionally preserves removed prior SVGs under `data/backups/symbols/`.
+- Generate `symbol-inventory.json` as the authoritative complete publication
+  contract, distinct from the smaller subset currently referenced by browser
+  mappings/endpoints.
 - Add explicit symbol-pipeline checkpoints and SHA-bound resume support to
   `tools/build_symbols.py`. Live acceptance can now stop after snapshot,
   acquisition, materialization, preflight, font audit, deduplication, text

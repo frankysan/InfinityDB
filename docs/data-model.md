@@ -470,8 +470,11 @@ retained in a timestamped `data/backups/symbols/` backup whose manifest records 
 original published paths and SHA-256 values. Detailed reports live under
 `data/reports/symbols/`.
 Loaders continue to accept versions 2 through 8 so prior immutable symbol caches
-and completed intermediate processing states remain valid inputs; version-5
-manifests produced before size accounting remain valid for compatibility.
+and completed intermediate processing states remain readable/valid; version-5
+manifests produced before size accounting remain valid for compatibility. Stage
+promotion itself is forward-only: each successful stage advances from its defined
+source version, and failed-stage retry is handled explicitly instead of demoting
+later passed state. Version 8 is terminal published state.
 
 ### Design direction
 

@@ -61,6 +61,13 @@ and serves a read-only browser and same-origin HTTP API.
   unexpectedly.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
+- Server migration distinguishes exact runtime transfer from rebuildability.
+  Exact runtime preservation copies the generated databases and complete local
+  published symbol inventory on the same Git revision; reproducible rebuilds
+  additionally preserve immutable Army/SYMBOLS snapshots, generated provenance,
+  `army-symbol-build.json`, and local overrides. Cross-machine SVG regeneration
+  is not promised byte-identical because fonts and external processor versions
+  remain environment-sensitive; see `docs/server-migration.md`.
 - Local tests separate hermetic and full-asset coverage explicitly.
   `run_checks.py --assets off|auto|required` validates the complete generated
   publication inventory (`symbol-inventory.json`, path + SHA-256 for every
@@ -310,9 +317,13 @@ reports are validated before atomic promotion. Final publication then consumes t
 same pinned Army snapshot, version-7 compressed tree, and authoritative build
 manifest; it generates the application asset tree plus `army-symbols.js` and
 `unit-symbol-map.js`, writes a complete source/canonical-to-published mapping, and
-promotes passed state to version 8. Versions 2 through 8 remain accepted as valid
-stage state, and earlier version-5 state without size metrics remains compatible.
-The downloader still does not generate browser mappings; only the publisher does.
+promotes passed state to version 8. Loaders accept versions 2 through 8 as valid
+historical/intermediate state, and earlier version-5 state without size metrics
+remains compatible. Promotion helpers are intentionally forward-only: preflight,
+deduplication, compression, and publication accept only their immediate source
+version, while failed-stage retry is explicit rather than implemented by silently
+demoting later passed state. Version 8 is terminal published state. The downloader
+still does not generate browser mappings; only the publisher does.
 
 Raw source resolution now follows this implemented order:
 

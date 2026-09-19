@@ -516,9 +516,8 @@ a timestamped `data/backups/symbols/` backup as part of the same transaction. Fa
 publication removes that staged backup while restoring the prior generated tree.
 Maintained static-symbol categories remain publication namespaces: order symbols
 publish under `orders/`, while characteristic symbols publish under `characteristics/`.
-Canonical processing may collapse equivalent
-assets without
-discarding their source references. For unit artwork, source profile slot
+Canonical processing may collapse equivalent assets without discarding their
+source references. For unit artwork, source profile slot
 `profileGroups[0].profiles[0]` retains the stable
 `units/<canonical-army-slug>/<unit-id>-<unit-slug>.svg` browser path. Distinct
 later profile-slot artwork is preserved with deterministic one-based
@@ -530,6 +529,10 @@ keys still fail rather than using legacy first-symbol-wins behavior. Source
 resolution, validation, deduplication, conversion, compression, and publishing
 remain distinct stages with provenance recorded rather than inferred from final
 filenames.
+Manifest promotions are forward-only: an earlier stage helper cannot demote a
+later passed build state. Where retry is supported, the stage performs an explicit
+in-memory retry transition and replaces persistent state only after the new result
+validates.
 
 ## Module boundaries
 

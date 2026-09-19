@@ -75,17 +75,20 @@ Current release: **0.5.1** (2026-09-14).
   utilities; broader maintained-tool coverage remains tracked in the backlog.
 - Uses snapshot-aware API validators and release-fingerprinted static modules,
   so browsers refresh safely when either deployed application or data changes.
-- Includes server deployment, update, and image-pruning scripts; see the
-  [Linux deployment guide](docs/deployment.md) for the supported workflow.
+- Includes server deployment, update, image-pruning, and migration guidance;
+  see the [Linux deployment guide](docs/deployment.md) for the supported workflow
+  and the [server migration guide](docs/server-migration.md) for the local state
+  required to reproduce or transfer an installation.
 
 ## Design direction
 
 Accepted architectural direction is documented separately from current
-features. Generated snapshot provenance under `data/manifests/snapshots/` and
-the separate human-authored snapshot-note contract are now implemented. Major
-remaining directions include exact migration of legacy wiki provenance and the
-complete manifest-backed symbol pipeline; see
-[architecture](docs/architecture.md) and [the backlog](docs/TODO.md).
+features. Generated snapshot provenance under `data/manifests/snapshots/`, the
+separate human-authored snapshot-note contract, and the complete manifest-backed
+symbol pipeline through publication are implemented. Major remaining directions
+include exact migration of legacy wiki provenance and the canonical logical-unit
+payload/delta model; see [architecture](docs/architecture.md) and
+[the backlog](docs/TODO.md).
 
 The current curated rules schema records wiki pages by snapshot-local path and
 snapshot date, and the checked-in v5.3 collection still contains legacy
@@ -157,9 +160,12 @@ text-to-path conversion promotes it to version 6, display-aware canonical
 compression promotes it to version 7, and final publication promotes it to version
 8. The generated state binds reports, tracked font-alias configuration,
 renderer/converter settings, a portable raw-asset-to-canonical mapping, the final
-source-to-published mapping, and generated browser-map identities to the exact
-symbol artifact. Version 8 is the complete published state; version 7 remains the
-validated compressed intermediate state.
+source-to-published mapping, the complete published inventory, and generated
+browser-map identities to the exact symbol artifact. Stage transitions are
+forward-only: retry handling is explicit for failed stages, while passed later
+states are not silently demoted by rerunning earlier helpers. Version 8 is the
+terminal complete published state; version 7 remains the validated compressed
+intermediate state.
 
 Raw symbol resolution is ordered and offline-friendly: a matching local SVG
 under Git-ignored `image_overrides/<category>/` wins first, then an exact-URL
@@ -193,12 +199,17 @@ with the `balanced` profile, `resvg` validation, p2-first/p3-rescue precision,
 32/64 CSS-pixel targets at DPR 1/2, RMS/changed-fraction limits of 0.01, and
 pixel-difference threshold 8. It atomically replaces
 `data/work/symbols/.../compressed/` only after the complete output set validates.
-The final publisher consumes that verified compressed tree plus the same pinned Army
-snapshot and authoritative build manifest, materializes the ignored
-`armies/`, `orders/`, and `units/` trees under `src/infinity_db/web/static/`,
-generates `army-symbols.js` and `unit-symbol-map.js`, writes a complete SHA-bound
-source-to-published mapping report, and promotes the manifest to version 8 only
-after the new publication validates. Install the Python dependencies with
+The final publisher consumes that verified compressed tree plus the same pinned
+Army snapshot and authoritative build manifest. It verifies the per-file hashes
+bound into the version-7 compression report, materializes the ignored `armies/`,
+`characteristics/`, `orders/`, and `units/` trees under
+`src/infinity_db/web/static/`, generates `army-symbols.js`, `unit-symbol-map.js`,
+and the complete SHA-bound `symbol-inventory.json`, writes the source-to-published
+mapping report, and promotes the manifest to version 8 only after the new
+publication validates. Before replacement it compares the staged and existing
+published trees by path/hash, records added/removed/changed symbols, and preserves
+removed prior SVGs under timestamped `data/backups/symbols/` storage as part of
+the same transaction. Install the Python dependencies with
 `pip install -e ".[symbols]"`; compression also requires SVGO v4+
 (`npm install -g svgo`) and, by default, the external `resvg` executable. Text
 conversion requires Inkscape unless another backend is selected. The standalone
@@ -375,7 +386,10 @@ DOMAIN=infinity.example.com IMAGE_TAG=0.5.1 docker compose up -d --build
 
 Replace the hostname with the public domain configured at the external TLS
 reverse proxy. See the [Linux deployment guide](docs/deployment.md) for
-prerequisites, updates, rollback behavior, and operational commands.
+prerequisites, updates, rollback behavior, and operational commands. When moving
+an existing installation to another host, use the
+[server migration guide](docs/server-migration.md) to preserve the required
+ignored/generated state.
 
 ## Project layout
 
@@ -405,7 +419,11 @@ data/
     rules/                  # Current source-controlled rules-reference collections
     snapshot-notes/         # Source-controlled human snapshot annotations
   manifests/                # Ignored generated provenance/build-state records
-  generated/                # Ignored database, JSON, and validation artifacts
+  work/                      # Ignored rebuildable processing work trees
+  reports/                   # Ignored generated processing reports
+  logs/                      # Ignored verbose pipeline logs
+  backups/                   # Ignored historical removed-symbol backups
+  generated/                 # Ignored database, JSON, and validation artifacts
 reports/                    # Ignored timestamped local development-check reports
 .vscode/                    # Shared build, serve, test, lint, type-check, and debug tasks
 Dockerfile                  # Immutable application image for deployment
@@ -414,8 +432,9 @@ Caddyfile                    # Reverse-proxy configuration for the Compose deplo
 ```
 
 See [architecture](docs/architecture.md), the [data model](docs/data-model.md),
-and [the backlog](docs/TODO.md) for current boundaries, accepted design
-direction, and unimplemented work respectively.
+the [server migration guide](docs/server-migration.md), and
+[the backlog](docs/TODO.md) for current boundaries, persistence semantics,
+installation-transfer requirements, and unimplemented work respectively.
 
 ## Development checks
 

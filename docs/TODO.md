@@ -117,7 +117,7 @@ consistency audit unless one becomes necessary to unblock that work.
 
 ## Army snapshot and symbol pipeline
 
-- [ ] Replace the current migration-oriented symbol workflow with one
+- [x] Replace the current migration-oriented symbol workflow with one
   reproducible, manifest-backed pipeline tied to a single pinned Army snapshot.
   - [x] Keep acquisition and processing tools independently runnable for
     debugging and targeted maintenance; orchestration must call reusable logic
@@ -136,9 +136,6 @@ consistency audit unless one becomes necessary to unblock that work.
     output lifecycle as Army acquisition. The wiki downloader no longer keeps
     a dated unpacked mirror as its primary output, and the symbol downloader no
     longer incrementally fills a long-lived loose destination directory.
-  - [ ] Let future snapshot-comparison tooling write structured generated diff
-    data/reports under manifest/report paths while curated snapshot notes remain
-    the human interpretation of those results.
   - [x] Extend `tools/build_symbols.py` through the complete processing/publication
     pipeline while keeping one pinned Army snapshot authoritative for the whole
     run.
@@ -168,19 +165,24 @@ consistency audit unless one becomes necessary to unblock that work.
     `--stop-after`, SHA-bound `--resume`, `--language`, `--data-root`,
     `--static-symbols`, `--jobs`, renderer/converter selection, and `--static-root`.
     `--snapshot-only` remains a compatibility alias for `--stop-after snapshot`.
-  - [ ] Complete one live stage-by-stage acceptance run on a real pinned Army
-    snapshot before declaring the symbol pipeline complete.
-    - [ ] Snapshot pin/provenance checkpoint.
-    - [ ] Raw symbol acquisition/version-2 checkpoint.
-    - [ ] Verified materialization checkpoint.
-    - [ ] SVG preflight/version-3 checkpoint.
-    - [ ] Installed-font audit/version-4 checkpoint.
-    - [ ] Exact/visual deduplication/version-5 checkpoint with size review.
-    - [ ] Canonical text-to-path/version-6 checkpoint with visual spot checks.
-    - [ ] Balanced compression/version-7 checkpoint with visual/size review.
-    - [ ] Transactional publication/version-8 checkpoint and application smoke test.
-    - [ ] Deliberately trigger safe downstream failure/rollback checks after the
-      successful live run.
+
+- [ ] Let future snapshot-comparison tooling write structured generated diff
+  data/reports under manifest/report paths while curated snapshot notes remain
+  the human interpretation of those results.
+
+- [ ] Complete one live stage-by-stage acceptance run on a real pinned Army
+  snapshot before declaring the symbol pipeline complete.
+  - [ ] Snapshot pin/provenance checkpoint.
+  - [ ] Raw symbol acquisition/version-2 checkpoint.
+  - [ ] Verified materialization checkpoint.
+  - [ ] SVG preflight/version-3 checkpoint.
+  - [ ] Installed-font audit/version-4 checkpoint.
+  - [ ] Exact/visual deduplication/version-5 checkpoint with size review.
+  - [ ] Canonical text-to-path/version-6 checkpoint with visual spot checks.
+  - [ ] Balanced compression/version-7 checkpoint with visual/size review.
+  - [ ] Transactional publication/version-8 checkpoint and application smoke test.
+  - [ ] Deliberately trigger safe downstream failure/rollback checks after the
+    successful live run.
 
 - [ ] Complete the static-symbol and local-override model as maintained project
   knowledge rather than downloader code.
@@ -200,17 +202,18 @@ consistency audit unless one becomes necessary to unblock that work.
     download. A valid override suppresses all network access for that asset; an
     invalid matching override is an error and must not silently fall back
     upstream.
-  - [ ] Report unused overrides and filename collisions. Preserve provenance
-    such as origin URL, resolved local source, source method, source/override
-    SHA-256, and whether an upstream download occurred.
+  - [x] Report unused overrides and URL/filename collisions. Preserve origin
+    URL, resolved source method, acquired SVG SHA-256, and whether resolution
+    used an override, validated cache entry, or network download.
   - [ ] Keep corrected derivative SVG content uncommitted unless redistribution
     rights are established. Committed metadata may document recommended local
     overrides and their reasons; `cube.svg` is the known case where the upstream
     asset renders with horizontal raster/mask artifacts.
-  - [ ] Run overrides through the normal processing pipeline by default. Add a
-    `publish_as_is` escape hatch only if a concrete future use case justifies it.
+  - [x] Run overrides through the normal processing pipeline by default. No
+    `publish_as_is` bypass exists; add one only if a concrete future use case
+    justifies it.
 
-- [ ] Treat timestamped symbol archives as the immutable raw acquisition
+- [x] Treat timestamped symbol archives as the immutable raw acquisition
   artifacts and keep extraction/work, generated state, reports, overrides, and
   published assets conceptually separate.
   - [x] The current symbol downloader stages a complete run temporarily and
@@ -327,10 +330,10 @@ consistency audit unless one becomes necessary to unblock that work.
     duplicate renderer/settings, conversion backend/settings, and compression
     profile/settings.
 
-- [ ] Preserve conservative failure behavior throughout symbol processing.
-  - [ ] Partial/invalid snapshot acquisition must not continue or replace prior
+- [x] Preserve conservative failure behavior throughout symbol processing.
+  - [x] Partial/invalid snapshot acquisition must not continue or replace prior
     snapshots/publication.
-  - [ ] Unknown SVG source locations require explicit review.
+  - [x] Unknown SVG source locations require explicit review.
   - [x] Invalid matching overrides fail. Source-declared network assets that
     return HTTP 404 are recorded explicitly as unavailable and omitted from the
     immutable symbol archive; other HTTP/transport failures leave existing
@@ -340,8 +343,8 @@ consistency audit unless one becomes necessary to unblock that work.
   - [x] Duplicate-render uncertainty keeps assets unique.
   - [x] Text conversion failure retains the verified source/canonical tree and
     records failed conversion state rather than claiming a successful replacement.
-  - [ ] Compression falls back to a validated lossless/path-only asset.
-  - [ ] Publication failure leaves the previous published tree intact.
+  - [x] Compression falls back to a validated lossless/path-only asset.
+  - [x] Publication failure leaves the previous published tree intact.
 
 - [ ] Standardize symbol-pipeline reports around detailed machine/human outputs
   plus one concise build summary.
@@ -373,9 +376,10 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] SVG fixtures: exact duplicate, XML-different visual duplicate, no-text,
     normal text, alias-font, missing-font, empty-text cleanup, and troublesome
     real-world conversion cases.
-  - [ ] Publisher tests: several references to one canonical asset, faction assets,
-    deterministic paths, no destructive raw/work mutation, and failed build
-    preserving the prior static tree.
+  - [x] Publisher tests: several references to one canonical asset, deterministic
+    unit/profile/army paths, category-specific static assets, strict v7-to-v8
+    publication, compressed-input hash verification, reconciliation/backups, and
+    failed publication preserving the prior static tree.
   - [ ] Run core portability coverage on Windows, Ubuntu/Linux, and macOS when CI
     permits: project-relative path generation, path sanitization, executable
     discovery including `.exe`/`.cmd`, subprocess argument construction without
@@ -481,10 +485,10 @@ consistency audit unless one becomes necessary to unblock that work.
     accurately describe past behavior. Use `docs/AI_CONTEXT.md` and the existing
     symbol-pipeline rights invariant as the policy baseline rather than creating
     a competing rights contract.
-  - [ ] Document how a clean/local deployment obtains required runtime symbols
-    separately from the source/release artifact, and make that acquisition step
-    explicit rather than solving the problem by committing or redistributing the
-    third-party artwork.
+  - [x] Document how a clean/local deployment obtains required runtime symbols
+    separately from the source/release artifact, and make server migration
+    requirements explicit without committing or redistributing third-party
+    artwork. See `docs/deployment.md` and `docs/server-migration.md`.
 - [ ] Reduce duplicated normative documentation after correcting the audit
   drift. Keep imported-data/identity contracts authoritative in
   `docs/data-model.md`, filesystem/provenance layout in `data/README.md`,

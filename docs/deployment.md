@@ -12,10 +12,11 @@ those assets separately for local browser use, but that does not grant
 redistribution rights. Review [third-party notices](../THIRD_PARTY_NOTICES.md)
 before distributing any image or database that contains external data or assets.
 
-This guide documents the **current deployment workflow**. Acquisition and
-snapshot-provenance tooling are separate from deployment, and unfinished later
-symbol-processing/publication stages described elsewhere are not part of the
-deployment contract until they are implemented and explicitly added here.
+This guide documents the **current deployment workflow**. Army/wiki/symbol
+acquisition and symbol processing/publication are explicit workflows separate
+from deployment; `install-or-update.sh` does not perform network acquisition or
+rebuild the local symbol publication. For moving an existing installation to a
+new host, see the [server migration guide](server-migration.md).
 
 ## Prerequisites
 
@@ -59,6 +60,24 @@ For a local smoke test, use `DOMAIN=localhost` and open
 `http://localhost`. On a public domain, replace `infinity.example.com` with
 the real hostname before running Compose and configure the external TLS proxy
 to forward that host to Caddy.
+
+
+## Local graphical symbols
+
+The deployment scripts do not acquire Corvus Belli graphical assets. When a local
+installation should serve symbols, prepare the complete published asset set
+separately before building the Docker image. A complete local publication consists
+of the ignored `armies/`, `characteristics/`, `orders/`, and `units/` trees plus
+`src/infinity_db/web/static/symbol-inventory.json`; the tracked browser maps must
+come from the same repository revision/publication. On a validation checkout with
+the development dependencies installed, `tools/run_checks.py --assets required`
+validates that publication before deployment.
+
+For an exact server replacement, copy the already-published local asset set rather
+than relying on cross-machine SVG regeneration. See
+[server migration](server-migration.md) for the full transfer checklist and the
+current reproducibility limits. Local publication does not change the third-party
+redistribution boundary described above.
 
 ## Deployment smoke validation
 

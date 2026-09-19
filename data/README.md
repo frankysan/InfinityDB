@@ -20,12 +20,15 @@ provenance/state, and build outputs.
 - `work/symbols/` — rebuildable loose symbol work trees keyed to the immutable
   `SYMBOLS ...zip` identity. The orchestrator verifies the raw archive and every
   member hash before replacing this derived work tree. Ignored by Git.
-- `reports/symbols/` — generated symbol-processing reports. The current
-  `svg-preflight.json` records parse/text/font-declaration findings and is bound
-  back into `army-symbol-build.json` by SHA-256. Ignored by Git.
+- `reports/symbols/` — generated, SHA-bound symbol-processing reports for
+  structural preflight, installed-font audit, duplicate detection, text
+  conversion, compression, and publication. Ignored by Git.
 - `logs/symbols/` — complete verbose transcripts from `tools/build_symbols.py`.
   Interactive console output is intentionally compact; these timestamped logs
   retain detailed per-stage and per-asset diagnostics. Ignored by Git.
+- `backups/symbols/` — timestamped backups of SVGs that existed in the previous
+  publication but not in the incoming one. Publication creates these only as
+  part of a successful replacement transaction. Ignored by Git.
 - `manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, bound to its immutable SHA-256,
   and records the snapshot type, archive label/path when project-relative,
@@ -33,6 +36,10 @@ provenance/state, and build outputs.
   document count, optional language, and optional input-artifact provenance.
   Ignored by Git, excluded from Docker build context, and outside Python package
   data.
+- `manifests/army-symbol-build.json` — generated current symbol-build state from
+  acquisition version 2 through terminal publication version 8. It binds the
+  pinned Army/SYMBOLS artifacts, stage reports/settings, canonical mapping, and
+  publication artifacts. Ignored by Git.
 - `curated/rules/` — source-controlled, human-reviewed rules-reference
   collections consumed by `infinity-db build-rules`.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
@@ -89,19 +96,24 @@ separate manifests with the same authoritative SHA-256.
 Symbol snapshot provenance also records the hash of the Army source artifact
 used by symbol acquisition. `tools/build_symbols.py` verifies the corresponding
 Army snapshot provenance before discovery and keeps that exact archive pinned
-through raw symbol acquisition. Acquisition writes version-2
+through the complete symbol build. Acquisition writes version-2
 `army-symbol-build.json`, persisting the Army archive identity together with
 source URL, language, acquisition timestamp, source-document count, and observed
-source revisions. After verified extraction and SVG structural preflight, the
-orchestrator promotes the same build state to version 3 and records the preflight
-status, summary, and exact generated report artifact. Installed-font audit then
-promotes the state to version 4 and records its environment-specific report plus
-the exact tracked `config/symbols/font-aliases.json` artifact. Integrated
-exact-first visual duplicate detection then promotes state to version 5 with
-duplicate report identities, renderer settings, and a complete portable mapping
-from every raw archive path to its selected canonical archive path. Version-2
-state remains valid for standalone acquisition/prior symbol caches; versions 3
-and 4 remain valid earlier processing states awaiting their next stage.
+source revisions. Verified structural preflight promotes state to version 3;
+installed-font audit promotes passed preflight to version 4; exact-first visual
+deduplication promotes passed font-audit state to version 5; canonical text
+conversion promotes version 5 to version 6; balanced compression promotes passed
+version 6 to version 7; and final publication promotes passed version 7 to the
+terminal version-8 state.
+
+Each stage records the reports/settings needed by its successor. Version 7 binds
+every compressed canonical SVG through the SHA-bound compression report. Version
+8 binds the complete `symbol-inventory.json`, browser maps, publication report,
+and final byte/count accounting; the inventory covers all published SVGs, not
+only the subset currently referenced by the browser. Stage promotion is
+forward-only. Failed-stage retry is explicit where supported; later passed states
+are not silently rolled back to rerun an earlier helper. Loaders still accept
+versions 2 through 8 as valid historical/intermediate state for compatibility.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
@@ -113,12 +125,13 @@ InfinityDB snapshot versions. Their evidence-backed interpretation and the
 required distinction between source revision and snapshot acquisition date are
 documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-interpretation).
 
-## Remaining design direction
+## Symbol build lifecycle
 
-The symbol orchestrator currently stops after verified raw extraction, structural
-SVG preflight, installed-font audit, and canonical selection/deduplication. Later
-stages will consume the same pinned Army/SYMBOLS build state for text conversion,
-compression, publication, generated browser mappings, and final validation.
+The complete current symbol lifecycle, stage invariants, and publication contract
+are documented in [`docs/architecture.md`](../docs/architecture.md) and
+[`docs/data-model.md`](../docs/data-model.md). This file remains authoritative for
+where local data classes live; it does not duplicate the complete processing
+algorithm or backlog.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not automatically covered by InfinityDB's MIT
