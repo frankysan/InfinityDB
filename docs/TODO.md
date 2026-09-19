@@ -252,6 +252,9 @@ consistency audit unless one becomes necessary to unblock that work.
     while making normal tests hermetic through project-owned fixtures or injected
     temporary static roots. Test absent/present asset behavior deliberately so a
     clean source archive passes without third-party graphical assets.
+  - [x] Make local production deployment fail closed unless a complete published
+    symbol set is bound to terminal v8 build-manifest state, then revalidate the
+    installed Docker package and representative symbol routes before activation.
   - [x] Make version tests independent of incidental Git-checkout state. Test the
     `+dev` display suffix with controlled repository/version inputs rather than
     requiring source archives or detached release trees to contain Git metadata

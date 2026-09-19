@@ -39,10 +39,13 @@ sh ./scripts/install-or-update.sh
 
 The interactive script fetches tags from `origin`, checks out the newest
 version tag in detached-HEAD mode, asks for the public domain and image
-retention count, builds both runtime databases, and deploys them. It can save
-those two settings to the ignored `.infinity-db-deploy.env` file for subsequent runs.
-It stops before changing tags when tracked local edits are present, but leaves
-untracked raw data and the optional config file intact.
+retention count, builds both runtime databases, validates the existing local
+symbol publication against terminal version-8 `data/manifests/army-symbol-build.json`,
+and deploys only after the exact built image passes production startup and
+installed-symbol validation. It can save the domain and retention settings to
+the ignored `.infinity-db-deploy.env` file for subsequent runs. It stops before
+changing tags when tracked local edits are present, but leaves untracked raw data,
+generated manifests, published symbols, and the optional config file intact.
 
 The image build deliberately requires both `data/generated/infinity.db` and
 `data/generated/rules.db`. This makes an incomplete runtime-data build fail
@@ -66,12 +69,27 @@ to forward that host to Caddy.
 
 The deployment scripts do not acquire Corvus Belli graphical assets. When a local
 installation should serve symbols, prepare the complete published asset set
-separately before building the Docker image. A complete local publication consists
-of the ignored `armies/`, `characteristics/`, `orders/`, and `units/` trees plus
-`src/infinity_db/web/static/symbol-inventory.json`; the tracked browser maps must
-come from the same repository revision/publication. On a validation checkout with
-the development dependencies installed, `tools/run_checks.py --assets required`
-validates that publication before deployment.
+separately before building the Docker image. A deployable local publication consists
+of the ignored `armies/`, `characteristics/`, `orders/`, and `units/` trees,
+`src/infinity_db/web/static/symbol-inventory.json`, and the terminal version-8
+`data/manifests/army-symbol-build.json` that promoted them. The tracked
+`army-symbols.js` and `unit-symbol-map.js` files must be the exact SHA-bound maps
+recorded by that manifest.
+
+`deploy.sh` runs `tools/verify_deployment_assets.py` before Docker is allowed to
+build. That guard verifies the v8 manifest bindings and the complete inventory by
+path/hash rather than accepting merely non-empty directories. It then builds the
+application image, runs `scripts/verify-container-image.sh --published-assets` to
+revalidate the installed Python package and representative production symbol routes,
+and only then starts Compose with `--no-build`. The image that passed validation is
+therefore the image that is deployed. A missing manifest, partial publication,
+stale browser map, package-data omission, or symbol hash mismatch fails before the
+running service is replaced.
+
+On a validation checkout with the development dependencies installed,
+`tools/run_checks.py --assets required` remains useful for full project testing;
+the deployment guard is narrower and specifically binds deployment to one promoted
+publication.
 
 For an exact server replacement, copy the already-published local asset set rather
 than relying on cross-machine SVG regeneration. See
@@ -94,9 +112,12 @@ and non-root image user, and starts Gunicorn with a read-only root filesystem,
 then exercises Army, rules-enriched Skill, and version API endpoints. In
 `--redistributable` mode it also rejects the ignored `armies/`,
 `characteristics/`, `orders/`, and `units/` Corvus Belli graphical-asset trees if
-they appear in either the copied
-source tree or the installed Python package. This keeps CI/release validation
-separate from local asset publication.
+they appear in either the copied source tree or the installed Python package.
+In `--published-assets` mode it instead requires the installed package to contain
+exactly the `symbol-inventory.json` publication, re-hashes every SVG, verifies the
+published byte total, and requests one served symbol from each namespace. These
+modes keep redistributable CI/release validation separate from local asset-backed
+deployment validation.
 
 The same image verifier can be run manually after preparing the two generated
 databases and building an image:
@@ -112,7 +133,8 @@ sh ./scripts/verify-container-image.sh infinity-db:smoke --redistributable
 docker compose ps
 docker compose logs -f app caddy
 docker compose pull caddy
-docker compose up -d --build
+# Rebuild/deploy only through the guarded deployment path:
+DOMAIN=infinity.example.com IMAGE_TAG=app-local sh ./scripts/deploy.sh
 ```
 
 To update Army data, download or place the new raw snapshot and its required

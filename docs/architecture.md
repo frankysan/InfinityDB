@@ -539,6 +539,19 @@ later passed build state. Where retry is supported, the stage performs an explic
 in-memory retry transition and replaces persistent state only after the new result
 validates.
 
+Production deployment with locally published third-party symbols is fail-closed.
+The host-side deployment guard requires terminal version-8 symbol-build state and
+verifies that its SHA-bound `symbol-inventory.json`, `army-symbols.js`, and
+`unit-symbol-map.js` artifacts are the exact local files being packaged. The
+inventory must then validate the complete ignored publication by path, SVG
+parseability, byte count, and SHA-256. After Docker builds the application image,
+the image verifier revalidates the installed package against that inventory and
+exercises one served asset from each publication namespace before Compose may
+replace the running service. Redistributable CI/release images use the opposite
+explicit mode and must contain none of the ignored third-party graphical trees.
+This keeps publication, packaging, and deployment separate while preventing a
+clean checkout from silently producing a symbol-less local deployment image.
+
 ## Module boundaries
 
 | Layer | Responsibility | Extension point |

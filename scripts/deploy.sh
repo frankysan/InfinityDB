@@ -26,5 +26,25 @@ if [ "$RETAIN_APP_IMAGES" -lt 1 ]; then
   exit 2
 fi
 
-docker compose up -d --build --wait
+repo_root="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
+cd "$repo_root"
+
+python=".venv/bin/python"
+if [ ! -x "$python" ]; then
+  echo "Deployment requires $python; run scripts/install-or-update.sh or prepare the project virtual environment first." >&2
+  exit 2
+fi
+
+echo "Validating manifest-bound published symbol set..."
+"$python" tools/verify_deployment_assets.py
+
+echo "Building application image infinity-db:$IMAGE_TAG..."
+docker compose build app
+
+# Verify the exact image that Compose will deploy. The published-assets mode
+# checks that the locally validated symbol publication survived Docker/package
+# installation and that production routes can serve representative assets.
+sh ./scripts/verify-container-image.sh "infinity-db:$IMAGE_TAG" --published-assets
+
+docker compose up -d --no-build --wait
 exec sh "$(dirname "$0")/prune-app-images.sh" "$RETAIN_APP_IMAGES"

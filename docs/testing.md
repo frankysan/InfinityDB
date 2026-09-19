@@ -105,8 +105,11 @@ because it requires a Docker daemon. The GitHub Actions `Deployment smoke test`
 workflow builds the real application databases from a small synthetic Army
 fixture plus the tracked curated rules collection, builds the Docker image, and
 uses `scripts/verify-container-image.sh` to validate image contents and healthy
-production startup. Redistributable-image validation also rejects locally
-acquired Corvus Belli graphical-asset trees.
+production startup. `--redistributable` rejects locally acquired Corvus Belli
+graphical-asset trees. Local production deployment uses the complementary
+`--published-assets` mode after `tools/verify_deployment_assets.py` has bound the
+host publication to terminal symbol-build manifest state; it revalidates the
+installed inventory/hashes and live symbol routes before Compose activation.
 
 See [the Linux deployment guide](deployment.md#deployment-smoke-validation) for
 the exact container contract and the equivalent manual command.

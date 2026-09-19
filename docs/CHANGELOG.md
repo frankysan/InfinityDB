@@ -85,6 +85,12 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Fail deployment closed when the local symbol publication is absent, partial,
+  stale, or not bound to terminal version-8 symbol-build state. Deployment now
+  verifies the manifest-bound host publication before Docker build, validates the
+  exact built image/package against `symbol-inventory.json`, exercises served
+  symbols from every namespace, and activates Compose without rebuilding only
+  after those checks pass.
 - Bind every balanced compression output SVG by SHA-256 in the version-7
   compression report and verify those exact bytes before version-8 publication.
   Publication also reconciles the incoming/previous asset inventories and

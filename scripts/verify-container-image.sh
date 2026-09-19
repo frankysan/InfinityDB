@@ -3,16 +3,26 @@
 set -eu
 
 usage() {
-  echo "Usage: $0 IMAGE [--redistributable]" >&2
+  echo "Usage: $0 IMAGE [--redistributable|--published-assets]" >&2
   exit 2
 }
 
 [ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
 image="$1"
 redistributable=0
+published_assets=0
 if [ "$#" -eq 2 ]; then
-  [ "$2" = "--redistributable" ] || usage
-  redistributable=1
+  case "$2" in
+    --redistributable)
+      redistributable=1
+      ;;
+    --published-assets)
+      published_assets=1
+      ;;
+    *)
+      usage
+      ;;
+  esac
 fi
 
 docker image inspect "$image" >/dev/null
@@ -67,6 +77,74 @@ for root in roots:
         candidate = root.joinpath(name)
         if candidate.is_dir():
             raise SystemExit(f"Redistributable image contains third-party asset tree: {candidate}")
+'
+fi
+
+if [ "$published_assets" -eq 1 ]; then
+  # Deployment images with local third-party symbols must contain the complete
+  # publication that was validated before the Docker build. Revalidate the
+  # installed package so package-data omissions cannot reach production.
+  docker run --rm --entrypoint python "$image" -c '
+import hashlib
+import json
+from importlib.resources import files
+from pathlib import Path, PurePosixPath
+
+root = Path(files("infinity_db.web").joinpath("static"))
+inventory_path = root / "symbol-inventory.json"
+try:
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as exc:
+    raise SystemExit(f"Installed published symbol inventory is unavailable: {exc}") from exc
+
+if inventory.get("format") != "InfinityDB published symbol inventory":
+    raise SystemExit("Installed published symbol inventory has an unexpected format")
+if inventory.get("formatVersion") != 1:
+    raise SystemExit("Installed published symbol inventory has an unsupported formatVersion")
+expected = inventory.get("publishedSha256ByPath")
+summary = inventory.get("summary")
+if not isinstance(expected, dict) or not expected or not isinstance(summary, dict):
+    raise SystemExit("Installed published symbol inventory is incomplete")
+if summary.get("publishedAssetCount") != len(expected):
+    raise SystemExit("Installed published symbol inventory count does not match its paths")
+
+categories = {"armies", "characteristics", "orders", "units"}
+actual = set()
+for category in categories:
+    category_root = root / category
+    if category_root.is_dir():
+        actual.update(
+            path.relative_to(root).as_posix()
+            for path in category_root.rglob("*.svg")
+            if path.is_file()
+        )
+if actual != set(expected):
+    missing = sorted(set(expected) - actual)
+    unexpected = sorted(actual - set(expected))
+    raise SystemExit(
+        f"Installed symbol set does not match inventory: missing={missing[:5]!r} "
+        f"unexpected={unexpected[:5]!r}"
+    )
+
+published_bytes = 0
+for relative, digest in sorted(expected.items()):
+    portable = PurePosixPath(relative)
+    if (
+        portable.is_absolute()
+        or ".." in portable.parts
+        or len(portable.parts) < 2
+        or portable.parts[0] not in categories
+        or portable.suffix != ".svg"
+    ):
+        raise SystemExit(f"Invalid installed symbol inventory path: {relative!r}")
+    path = root.joinpath(*portable.parts)
+    data = path.read_bytes()
+    published_bytes += len(data)
+    actual_digest = hashlib.sha256(data).hexdigest()
+    if actual_digest != digest:
+        raise SystemExit(f"Installed symbol SHA-256 mismatch: {relative}")
+if summary.get("publishedBytes") != published_bytes:
+    raise SystemExit("Installed symbol inventory byte total does not match installed files")
 '
 fi
 
@@ -145,5 +223,28 @@ with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
 if not version.get("version") or not version.get("snapshot_revision"):
     raise SystemExit("/api/version returned incomplete runtime identity")
 '
+
+if [ "$published_assets" -eq 1 ]; then
+  docker exec "$container" python -c '
+import json
+from importlib.resources import files
+from pathlib import Path
+from urllib.request import urlopen
+
+root = Path(files("infinity_db.web").joinpath("static"))
+inventory = json.loads((root / "symbol-inventory.json").read_text(encoding="utf-8"))
+paths = sorted(inventory["publishedSha256ByPath"])
+for category in ("armies", "characteristics", "orders", "units"):
+    try:
+        relative = next(path for path in paths if path.startswith(category + "/"))
+    except StopIteration as exc:
+        raise SystemExit(f"Installed symbol inventory has no {category} asset") from exc
+    with urlopen(f"http://127.0.0.1:8000/static/{relative}", timeout=3) as response:
+        if response.status != 200:
+            raise SystemExit(f"Published symbol route returned {response.status}: {relative}")
+        if response.headers.get_content_type() != "image/svg+xml":
+            raise SystemExit(f"Published symbol route has wrong content type: {relative}")
+'
+fi
 
 printf 'Validated image %s and healthy production startup.\n' "$image"

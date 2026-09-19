@@ -590,3 +590,9 @@ application-level identities.
   for provenance, and repository reads consume the materialized relation. Legacy
   identity discovery is retained only behind the builder for older normalized
   inputs.
+- 2026-09-19: Local production deployment with symbols is fail-closed. `deploy.sh`
+  requires a terminal v8 `army-symbol-build.json` whose SHA-bound inventory and
+  browser maps match the local publication, verifies the complete published set,
+  then validates the exact built image in `--published-assets` mode before Compose
+  activation. Redistributable-image verification remains the inverse contract and
+  rejects third-party graphical trees.

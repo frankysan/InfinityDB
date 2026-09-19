@@ -376,18 +376,23 @@ repeatable Docker Compose deployment with Gunicorn and Caddy is provided in the
 The supplied Docker Compose configuration packages the application and its
 validated Army and curated-rules SQLite snapshots in an immutable image. Caddy
 listens on HTTP and reverse-proxies to the application; place it behind an external TLS reverse
-proxy for public HTTPS. Build both runtime databases before building the image:
+proxy for public HTTPS. Build both runtime databases and prepare one manifest-bound local symbol
+publication before deploying the image:
 
 ```sh
 infinity-db build --compact
 infinity-db build-rules
-DOMAIN=infinity.example.com IMAGE_TAG=0.5.1 docker compose up -d --build
+DOMAIN=infinity.example.com IMAGE_TAG=app-local sh ./scripts/deploy.sh
 ```
 
 Replace the hostname with the public domain configured at the external TLS
-reverse proxy. See the [Linux deployment guide](docs/deployment.md) for
-prerequisites, updates, rollback behavior, and operational commands. When moving
-an existing installation to another host, use the
+proxy. Local deployments that serve the ignored third-party symbol publication
+must retain the terminal v8 `data/manifests/army-symbol-build.json` that promoted
+those assets; `deploy.sh` verifies that manifest-bound publication and the exact
+built image before replacing the running service. See the
+[Linux deployment guide](docs/deployment.md) for prerequisites,
+symbol-publication requirements, updates, rollback behavior, and operational
+commands. When moving an existing installation to another host, use the
 [server migration guide](docs/server-migration.md) to preserve the required
 ignored/generated state.
 
