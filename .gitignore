@@ -13,6 +13,9 @@ build/
 # Local check reports
 reports/
 
+# Local audit evidence may include environment- or deployment-specific details.
+docs/audits/
+
 # VS Code local overrides
 .vscode/*.local.json
 
