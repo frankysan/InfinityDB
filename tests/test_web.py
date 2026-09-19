@@ -1199,6 +1199,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     status, _, body = request(app, "/about")
     assert status == 200
     assert b"surface surface--highlighted about-callout" in body
+    assert b"surface about-principles" in body
     assert b"surface surface--subtle about-disclosure" in body
 
     assert_css_rule(
