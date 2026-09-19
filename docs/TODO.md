@@ -217,10 +217,10 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
   - [x] Treat current snapshot counts as diagnostics, not expected constants.
 
 - [ ] **Canonicalize profile payloads conservatively.**
-  - [ ] Inventory every current profile field and nested relationship.
-  - [ ] Classify each as canonical fact, contextual fact/delta, relationship,
+  - [x] Inventory every current profile field and nested relationship.
+  - [x] Classify each as canonical fact, contextual fact/delta, relationship,
     source/provenance, or normalization-only structure.
-  - [ ] Prove exact-equality groups before changing storage.
+  - [x] Prove exact-equality groups before changing storage.
   - [ ] Design canonical profile payload + source/context occurrence relations.
   - [ ] Preserve genuine AVA, profile-group, army, and source differences
     explicitly.

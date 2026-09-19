@@ -536,6 +536,164 @@ The second view measures the additional exact repetition exposed by the existing
 logical-unit identity relation. Both are diagnostics for the selected snapshot,
 not compatibility requirements or expected constants.
 
+#### Profile semantic classification audit
+
+`tools/audit_profile_semantics.py` performs the next read-only evidence pass for
+profile canonicalization. It compares repeated Army occurrences of the same
+source profile key:
+
+```text
+(unit_id, group_id, profile_id)
+```
+
+That key is an **observational comparison key**, not a proposed canonical
+application identity. It is useful because the source repeats the same
+unit/group/profile identifiers across army lists, allowing the audit to isolate
+which values actually change with army context before InfinityDB invents a new
+profile identity.
+
+The report is deterministic and can be written with:
+
+```text
+python tools/audit_profile_semantics.py data/generated/infinity.db \
+  --output reports/profile-semantics.json
+```
+
+The 2026-09-18 frontend database contains:
+
+- 5,020 profile occurrences;
+- 1,137 distinct source profile keys;
+- 698 source profile keys repeated in more than one army, covering 4,581
+  occurrences;
+- 306 repeated source profile keys whose complete baseline payload varies by
+  army context.
+
+The 306 varying keys separate into progressively clearer categories:
+
+- excluding AVA reduces the count from 306 to 26, so AVA is the sole difference
+  for 280 repeated source profile keys;
+- excluding the three observed army-specific logo variations reduces 26 to 23;
+- treating absolute `display_order` values as presentation context and treating
+  omitted quantity versus explicit quantity `1` as equivalent **for diagnostic
+  comparison only** reduces 23 to 16;
+- the remaining 16 consist of one genuine WIP variation, 11 genuine
+  characteristic-set variations, and four genuine skill-set variations.
+
+The diagnostic quantity normalization is evidence of source-representation
+duplication, not yet an application rule. InfinityDB still preserves the exact
+source distinction until the canonical-profile design explicitly decides how
+omitted and explicit default values are represented.
+
+##### Profile fields
+
+The current classification is:
+
+| Field | Classification | Current evidence / treatment |
+| --- | --- | --- |
+| `army_id` | source/provenance | Identifies the owning Army occurrence; never canonical profile identity. |
+| `unit_id` | source/provenance | Identifies the original source unit. |
+| `group_id` | source/provenance | Source-local profile-group identity. |
+| `profile_id` | source/provenance | Source-local profile identity. |
+| `position` | normalization-only | Generated from source array order; preserve relative order where needed, not the literal ordinal as profile identity. |
+| `name` | canonical fact candidate | No variation across repeated occurrences of the same source profile key. |
+| `logo` | contextual delta | Three source profile keys have army-specific logo values; this is presentation context, not gameplay identity. |
+| `type_id` | relationship | Relationship to the troop-type catalog; no same-source-key variation observed. |
+| `move_1` | canonical fact candidate | No same-source-key variation observed. |
+| `move_2` | canonical fact candidate | No same-source-key variation observed. |
+| `cc` | canonical fact candidate | No same-source-key variation observed. |
+| `bs` | canonical fact candidate | No same-source-key variation observed. |
+| `ph` | canonical fact candidate | No same-source-key variation observed. |
+| `wip` | contextual delta | One source profile key varies by army context, affecting four occurrences. |
+| `arm` | canonical fact candidate | No same-source-key variation observed. |
+| `bts` | canonical fact candidate | No same-source-key variation observed. |
+| `vitality` | canonical fact candidate | No same-source-key variation observed. |
+| `silhouette` | canonical fact candidate | No same-source-key variation observed. |
+| `ava` | contextual delta | 297 source profile keys vary by army context, affecting 909 occurrences. |
+| `is_structure` | canonical fact candidate | Determines Wounds-versus-Structure interpretation; no same-source-key variation observed. |
+| `notes` | canonical fact candidate, unproven | Present in the source model but unpopulated in this snapshot; retain until populated evidence exists. |
+
+“Canonical fact candidate” means the current snapshot supplies evidence that the
+field can be shared for one source-profile concept. It does **not** mean the
+schema may assume permanent invariance. A later snapshot may introduce a
+contextual variation in any source-provided field, and canonicalization must
+fail visibly or preserve a delta rather than discard it.
+
+##### Profile groups
+
+`profile_groups` remains context outside the profile payload. Across repeated
+source group keys `(unit_id, group_id)`, the current snapshot shows no variation
+in `position`, `category_id`, `isc`, or `notes`; `notes` is entirely unpopulated.
+
+The fields are classified as follows:
+
+- `army_id`, `unit_id`, and `group_id` are source/provenance;
+- `position` is normalization-only array ordering;
+- `category_id` is a relationship to the category/classification catalog;
+- `isc` is a profile-group display fact;
+- `notes` is a retained but currently unpopulated group fact.
+
+This observed stability does not move profile-group context into canonical
+profile identity. Group membership and grouping remain explicit occurrence
+context until their own identity is designed.
+
+##### Nested profile relationships
+
+The normalized occurrence tables contain both meaningful relationships and
+source/normalization mechanics. Common fields are treated as follows:
+
+- parent `army_id` / `unit_id` / `group_id` / `profile_id` columns are
+  source/provenance;
+- `occurrence_id` is a normalization-only surrogate;
+- `position` is a normalization-only ordinal preserving source array order;
+- catalog `item_id`, `characteristic_id`, and `extra_id` values are semantic
+  relationships;
+- `display_order` is source presentation context. In the current profile data it
+  never changes relative item ordering, although its absolute number can differ;
+- `quantity` is a semantic relationship attribute. Current profile skill and
+  equipment data only uses explicit quantity `1`; omission versus explicit `1`
+  accounts for several otherwise-identical source representations;
+- `raw` is source/provenance fallback for malformed or unmodeled content. It is
+  currently null throughout the populated profile reference/include tables, but
+  any future non-null value must block destructive canonicalization until the
+  unmodeled content is understood;
+- extra-row `position` is normalization-only ordering while `extra_id` is the
+  semantic relationship.
+
+Observed relationship behavior is:
+
+| Relationship | Rows | Raw same-source variants | Variants after diagnostic representation normalization | Interpretation |
+| --- | ---: | ---: | ---: | --- |
+| characteristics | 15,011 | 11 | 11 | Genuine contextual relationship differences. |
+| skills | 26,823 | 10 | 4 | Four genuine contextual skill-set differences; six are representation-only. |
+| equipment | 2,629 | 1 | 0 | The only difference is representation-only. |
+| weapons | 10 | 0 | 0 | No same-source-profile variation observed. |
+| includes | 2 | 0 | 0 | Relationship is rare but must remain explicit. |
+| peripherals | 0 | 0 | 0 | Supported by the model but absent from profile-level data in this snapshot. |
+
+The diagnostic normalized relationship view removes absolute `display_order`
+values and treats omitted quantity and explicit `1` as equivalent while
+preserving relative row/extras ordering. It exists to identify source-encoding
+duplication; it does not rewrite normalized data.
+
+##### Design consequence
+
+A canonical profile model must therefore separate at least three concerns:
+
+1. a reusable profile payload containing invariant profile facts and stable
+   relationships;
+2. an occurrence/context layer retaining Army membership, source keys,
+   profile-group membership, AVA, presentation context, and genuine contextual
+   gameplay differences;
+3. source provenance sufficient to reconstruct and audit every original
+   occurrence.
+
+The 16 residual contextual variants demonstrate why canonicalization cannot be
+implemented as “pick one representative profile row and discard the rest.”
+Conversely, the large AVA-only and representation-only populations demonstrate
+that preserving every full source payload in the application model is also
+unnecessary.
+
+
 #### First implementation targets
 
 ### 1. Profile payloads
