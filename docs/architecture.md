@@ -342,8 +342,10 @@ Every source-defined unit maps to exactly one logical unit.
 
 ### Canonical application data and semantic deduplication
 
-InfinityDB will progressively separate its **lossless source model** from a
-**canonical application model**.
+InfinityDB is progressively separating its **lossless source model** from a
+**canonical application model**. Profile and loadout payloads are already
+materialized and consumed by unit-detail reads; broader unit, relationship, and
+catalog canonicalization remains in progress.
 
 The merged and normalized source layers remain source-oriented and lossless.
 Repeated records in those layers are not inherently defects: repetition may
@@ -359,9 +361,11 @@ source documents.
 
 The existing `logical_units` and `logical_unit_sources` relation is the first
 application-level identity layer. It establishes which source unit records
-represent one logical unit while preserving every source occurrence. The next
-stage extends this principle from **identity deduplication** to **semantic
-payload deduplication**.
+represent one logical unit while preserving every source occurrence. Canonical
+profile and loadout payload layers now extend that principle from **identity
+deduplication** to **semantic payload deduplication** for unit-detail data.
+Canonical logical-unit facts and wider relationships/catalog overlap remain the
+next semantic stages.
 
 Semantic deduplication must be evidence-driven and lossless:
 
@@ -401,13 +405,23 @@ tables into logical copies, because normal and optional-mercenary occurrences
 can belong to the same logical unit and army while retaining different
 `availability_kind` semantics.
 
-Schema version 12 adds a derived canonical-profile layer beside those lossless
-source tables. Build-time materialization scopes reusable profile payloads to an
-existing `logical_unit`, stores AVA/logo/source keys/group context on a
-one-to-one occurrence relation, and keeps context-local includes/peripherals in
-their source relationships. The repository has not switched to this layer yet;
-the current read path continues to use source profile tables until equivalence
-coverage is complete.
+Schema version 12 introduced the derived canonical-profile layer, and schema
+version 13 added the corresponding canonical-loadout layer beside the lossless
+source tables. Build-time materialization scopes reusable payloads to an existing
+`logical_unit` and keeps source/Army context on one-to-one occurrence relations:
+profile AVA/logo and loadout points/SWC remain contextual, while source-local
+includes/peripherals remain in their lossless source relationships pending their
+own identity audit.
+
+Unit-detail repository reads now consume both canonical payload layers. Source
+profile/loadout tables remain available for provenance, deferred relationships,
+validation, and source-oriented repository paths such as catalog reverse
+lookups. Compatibility revision 19 also requires unit-oriented indexes on both
+canonical occurrence tables so this read-path split does not regress unit-detail
+query behavior. The physical removal of source-only tables from `infinity.db`
+remains a later design step after canonical unit, relationship, and catalog
+coverage is complete; `infinity.raw.db` is the intended long-term home for that
+lossless source representation.
 
 ## Snapshot acquisition and provenance
 

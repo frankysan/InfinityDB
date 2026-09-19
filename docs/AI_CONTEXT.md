@@ -80,21 +80,24 @@ and serves a read-only browser and same-origin HTTP API.
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
   uses the tracked synthetic Army fixture rather than live acquisition or ignored
   graphical assets. Each leg installs the symbol Python dependencies and runs
-  pytest, full-tree Ruff linting, and Pyright through `run_checks.py`. Repository
-  rules/branch-protection settings, not workflow YAML, determine whether GitHub
-  blocks a merge on those checks.
+  pytest, full-tree Ruff linting, and Pyright across `src/`, `tools/`, and
+  `tests/` through `run_checks.py`; VS Code is configured for workspace-wide
+  diagnostics. GitHub's active `Protect main` ruleset requires pull requests,
+  resolved review threads, the four source-check matrix jobs,
+  `deployment-smoke`, and `installed-wheel` to be current and passing before
+  `main` can advance; it also blocks deletion/non-fast-forward updates and has no
+  bypass actors.
 - `Installed wheel smoke` is configured to build and install the wheel in a fresh virtual
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases
   through the runtime application outside the checkout.
 - `Full-asset checks` is configured as dispatch-only, restricted to `main`, and stages a private
-  checksum-pinned published-asset ZIP from the `full-assets` GitHub environment
-  before running `run_checks.py --assets required` once that environment is
-  configured. It does not upload the
-  graphical tree as an artifact, and it intentionally does not rerun the
-  network/external-tool-sensitive symbol pipeline from raw inputs.
-  Repository environment secrets must be configured before the manual job can
-  succeed. See `docs/ci.md`.
+  checksum-pinned published-asset ZIP from the existing `full-assets` GitHub
+  environment before running `run_checks.py --assets required`. It does not
+  upload the graphical tree as an artifact, and it intentionally does not rerun
+  the network/external-tool-sensitive symbol pipeline from raw inputs. The
+  environment exists, but its authorized bundle URL/digest secrets still must be
+  configured before the manual job can succeed. See `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 

@@ -8,8 +8,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 ### Changed
 
 - Consolidated legacy release notes around user and operator outcomes.
-- Improve unit-detail query performance while migrating profile and loadout data
-  to the canonical application model.
+- Improve unit-detail query performance and move profile/loadout reads to the
+  canonical application model without changing their player-visible output.
 
 ### Upgrade notes
 

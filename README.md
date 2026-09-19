@@ -84,12 +84,14 @@ Current release: **0.6.0** (2026-09-19).
 ## Current implementation and design direction
 
 Generated snapshot provenance under `data/manifests/snapshots/`, the separate
-human-authored snapshot-note contract, and the complete manifest-backed symbol
-pipeline through publication are current implementation. Accepted but
-unimplemented architectural direction is documented separately. Major remaining
-directions include exact migration of legacy wiki provenance and the canonical
-logical-unit payload/delta model; see [architecture](docs/architecture.md) and
-[the backlog](docs/TODO.md).
+human-authored snapshot-note contract, the complete manifest-backed symbol
+pipeline through publication, and canonical profile/loadout payloads used by
+unit-detail reads are current implementation. Accepted but unimplemented
+architectural direction is documented separately. Major remaining directions
+include exact migration of legacy wiki provenance, canonical logical-unit and
+relationship/catalog modeling, and the eventual physical separation of
+source-only Army tables into `infinity.raw.db`; see
+[architecture](docs/architecture.md) and [the backlog](docs/TODO.md).
 
 The current curated rules schema records wiki pages by snapshot-local path and
 snapshot date, and the checked-in v5.3 collection still contains legacy

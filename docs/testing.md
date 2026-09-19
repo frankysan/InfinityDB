@@ -20,8 +20,8 @@ python tools/run_checks.py --all
 ```
 
 The available stages are `test`, `lint`, `type`, `build`, and `rules`. The `type`
-stage runs Pyright over the maintained `src/` and `tools/` trees. The `build`
-stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
+stage runs Pyright over the maintained `src/`, `tools/`, and `tests/` trees. The
+`build` stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
 `rules.db` from the tracked curated rules collections. Both use isolated system
 temporary output directories: check execution never writes `data/generated/`.
 The named profiles are

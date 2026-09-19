@@ -246,23 +246,23 @@ The enforced invariants are:
 
 ### Canonical application model and semantic deduplication
 
-The materialized logical-unit relation currently answers:
+The materialized logical-unit relation answers:
 
 > Which source unit records belong to the same application-level unit?
 
-It does not yet answer:
+Canonical profile and loadout layers now additionally answer, conservatively:
 
-> Which facts carried by those source records are the same fact, and which
-> differences are meaningful context?
+> Which complete profile/loadout payloads can be reused within that logical unit,
+> and which values must remain attached to a source/Army occurrence?
 
-Repository/API assembly therefore still reconstructs application objects from
-repeated source-backed profile, loadout, option, occurrence, and army records.
-This is correct and source-faithful, but it makes semantic completeness harder
-to reason about and causes the application layer to repeatedly merge information
-that is often identical.
+Unit-detail repository/API assembly consumes those canonical profile/loadout
+payloads while retaining source occurrence context. Other unit-level facts,
+source-local relationships, catalog reverse lookups, and wider metadata overlap
+remain partly source-backed, so the application model is intentionally only
+partially canonicalized at this stage.
 
-InfinityDB will progressively introduce a canonical application model between
-the normalized source model and repository/API presentation.
+InfinityDB is progressively introducing the remaining canonical application
+model between the normalized source model and repository/API presentation.
 
 ```text
 Infinity Army JSON
@@ -395,9 +395,11 @@ Canonicalization must preserve all of the following:
 
 #### Exact equality before semantic equivalence
 
-The first implementation stages must deduplicate only records whose complete
-application-relevant payloads are exactly equal after contextual identity and
-provenance fields have been deliberately excluded.
+The initial profile/loadout implementation stages deduplicated only records whose
+complete application-relevant payloads were exactly equal after contextual
+identity and provenance fields had been deliberately excluded. Remaining
+canonicalization work keeps the same evidence-first rule unless a broader
+semantic equivalence is explicitly established.
 
 This is intentionally conservative.
 
@@ -894,8 +896,9 @@ same source loadout key:
 ```
 
 As with the profile audit, that key is an **observational comparison key**, not
-a proposed application identity. It lets InfinityDB inspect which values really
-change between Army contexts before a canonical loadout model is designed.
+an application identity. It was used to inspect which values really change
+between Army contexts before the canonical loadout boundary was selected, and
+remains useful as a diagnostic comparison key for later snapshots.
 
 Run the audit with:
 
@@ -920,8 +923,9 @@ For the 2026-09-18 frontend database, the audit reports:
 Those final 21 variations are disjoint in the current snapshot: two points
 variations, one SWC variation, one order-generation variation, two skill
 variations, eight weapon variations, and seven peripheral-context variations.
-This is evidence for the next design step, not permission to normalize those
-remaining differences away.
+They were the evidence used to select the conservative materialization boundary
+documented below; they are not permission to normalize the remaining
+differences away.
 
 The peripheral result is particularly important. Peripheral IDs are army-local,
 so direct cross-army comparison exaggerates semantic variation: 111 repeated
@@ -993,11 +997,12 @@ retains that fallback exactly; the loadout canonicalizer must not infer that an
 anonymous/empty source object is safely discardable merely because nearby
 weapon rows look redundant.
 
-This evidence pass intentionally stops before selecting the canonical loadout
-payload boundary. In particular, it does not yet decide whether points/SWC,
-order-generation differences, includes, or peripheral relationships belong in
-the reusable payload or in an occurrence/context layer. That decision belongs
-to the next TODO item and must preserve every observed player-relevant variant.
+The classification audit itself intentionally stopped before selecting the
+canonical loadout payload boundary. That separation keeps the evidence report
+independent from the application rule chosen afterward. The implemented boundary
+below keeps points/SWC and deferred source-local relationships outside the
+payload while retaining exact order/skill/equipment/weapon representation inside
+it; the audit's diagnostic normalizations still do not become application rules.
 
 #### Canonical loadout payload materialization
 
@@ -1210,55 +1215,19 @@ Canonical include/peripheral identities, representation normalization, and
 eventual movement of lossless source-only tables to `infinity.raw.db` remain
 separate evidence-driven decisions.
 
-#### First implementation targets
+#### Next implementation targets
 
-### 1. Profile payloads
+Canonical profile and loadout payloads, their occurrence mappings, and the
+unit-detail read-path migrations are complete. The remaining semantic work is:
 
-Establish a canonical profile identity/payload independent of the source
-occurrence that carries it.
+### 1. Canonical unit payload
 
-The audit must determine which current profile fields are:
-
-- invariant profile facts;
-- army/context-specific values;
-- profile-group relationships;
-- presentation metadata;
-- or source provenance.
-
-Nested characteristics, skills, equipment, weapons, extras, includes, and
-peripheral relationships must participate in equality testing where they affect
-the profile's meaning.
-
-A profile occurrence should ultimately be able to reference one canonical
-profile payload plus any explicit contextual differences required by that
-occurrence.
-
-### 2. Loadout payloads
-
-Apply the same model to loadouts after the profile model is understood.
-
-Equality must account for the complete loadout meaning, including points, SWC,
-minis, disabled state, skills, equipment, weapons, extras, orders,
-characteristics, includes, peripherals, and any other modeled gameplay-bearing
-fields.
-
-Source `option_id`, army/group membership, source position, and similar
-provenance/context fields must not automatically define a separate canonical
-payload.
-
-A loadout occurrence should ultimately reference one canonical loadout payload
-plus explicit contextual differences.
-
-### 3. Canonical unit payload
-
-Once profile and loadout behavior is understood, audit the fields currently
-repeated across the source units belonging to each `logical_unit`.
-
-Promote only fields demonstrated to be invariant or governed by an explicit,
-reviewed semantic rule. Army memberships, availability occurrences,
+Audit the fields currently repeated across the source units belonging to each
+`logical_unit`. Promote only fields demonstrated to be invariant or governed by
+an explicit, reviewed semantic rule. Army memberships, availability occurrences,
 source-specific variants, and genuine differences remain separate.
 
-### 4. Relationships
+### 2. Relationships
 
 Re-evaluate includes, peripherals, dependencies, relations, Fireteams, and
 similar structures after the entities they reference have stable canonical
@@ -1274,14 +1243,12 @@ The audit must distinguish:
 A relationship is not automatically redundant merely because both endpoint
 entities are already visible in the UI.
 
-### 5. Catalog and metadata overlap
+### 3. Catalog and metadata overlap
 
-After unit/profile/loadout canonicalization, examine overlapping information
-between Army catalogs, occurrence tables, and `metadata_*` collections.
-
-Canonicalize only where the sources demonstrably describe the same application
-concept. Preserve source-specific metadata and alternate modes where they carry
-distinct gameplay meaning.
+Examine overlapping information between Army catalogs, occurrence tables, and
+`metadata_*` collections. Canonicalize only where the sources demonstrably
+describe the same application concept. Preserve source-specific metadata and
+alternate modes where they carry distinct gameplay meaning.
 
 #### Relationship to version 1.0.0 completeness
 
@@ -1380,13 +1347,16 @@ normalization-time availability classification part of the generated database
 contract; repository mercenary filtering consumes `availability_kind` directly
 for current snapshots.
 
-Frontend-only `logical_units` and `logical_unit_sources` tables are derived
-application structure, not normalized source facts, and therefore do not replace
-`units` or duplicate profile/loadout/occurrence tables. Repository unit queries
-map a requested source or representative ID through `logical_unit_sources`, then
-aggregate the associated original source rows. The normalized-input table
-registry remains separate from these derived frontend tables so generated
-application structure cannot be supplied as normalized source data.
+Frontend-only `logical_units`, `logical_unit_sources`, and canonical
+profile/loadout payload tables are derived application structure, not normalized
+source facts, and therefore do not rewrite the source tables. Repository unit
+queries map a requested source or representative ID through
+`logical_unit_sources`, combine source-backed unit/Army context with canonical
+profile/loadout payload occurrences, and continue to use original source rows for
+relationships or repository paths that have not yet been canonicalized. The
+normalized-input table registry remains separate from these derived frontend
+tables so generated application structure cannot be supplied as normalized
+source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 13 and the application
@@ -1395,6 +1365,16 @@ database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
 planner statistics in the immutable snapshot.
+
+**Design direction:** while canonicalization is in progress, `infinity.db`
+intentionally contains both derived application tables and lossless normalized
+source tables needed by remaining runtime/provenance paths. After canonical unit,
+relationship, and catalog coverage is complete, source/provenance-only normalized
+tables should move exclusively to `infinity.raw.db`. Normal repository/API/web
+serving should then require only the self-contained canonical `infinity.db`
+(alongside `rules.db` and assets), with `infinity.raw.db` retained as a build and
+audit artifact. The split must preserve canonical-to-source traceability and is
+not justified by file-size reduction alone.
 
 ## Snapshot provenance and human annotations
 

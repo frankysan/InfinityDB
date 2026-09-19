@@ -120,12 +120,12 @@ refactoring, coverage, and optimization work rather than Milestone 1 blockers.
 
 - [ ] **Milestone 2 — establish the canonical application model and advance
   1.0 completeness.**
-  Begin with conservative semantic deduplication of data InfinityDB already
-  possesses. Use that work to distinguish canonical player-relevant facts,
-  contextual variation, relationships, provenance, redundant source
-  representation, and normalization-only structure. Then use the resulting
-  source-to-presentation inventory as groundwork for the broader web-app
-  consistency audit. The detailed checklist is maintained below.
+  Conservative semantic deduplication is underway. Canonical profile and loadout
+  payloads and their unit-detail read paths are complete; the next active
+  entity-level step is the logical-unit payload audit, followed by relationship
+  and catalog/metadata overlap. Use the resulting source-to-presentation
+  inventory as groundwork for the broader web-app consistency audit. The
+  detailed checklist is maintained below.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
@@ -166,20 +166,6 @@ consistency work unless one becomes necessary to unblock that work.
   so retaining `normalized.json` and `infinity.raw.db` duplicates the same
   lossless data. Decide whether post-export development workflows need both,
   or document one as a regenerable/transient artifact.
-- [ ] Prototype loadout payload templates, following the existing
-  `option_weapon_templates` design. In the current snapshot, 52,554
-  `option_weapons` links already share 490 payload templates; similarly,
-  12,993 loadout-option rows have only 3,045 distinct payloads when their
-  army/unit/group/option IDs and position are excluded. A template/link split
-  could reduce repeated `name`, points, SWC, mini, and disabled values, but
-  must be query-plan and database-size benchmarked before changing the
-  read-optimized schema. 2026-09-14 probe: isolating the table and its unit
-  index reduced 884,736 bytes to 819,200 bytes (64 KiB, 7.4%), while the
-  largest unit-detail loadout query (368 rows) retained indexed access but was
-  roughly 14% slower from the extra template primary-key lookup. The checked-in
-  `infinity.db` has 3,045 loadout rows whereas `normalized.json` has 12,993,
-  so regenerate aligned artifacts before treating this as a whole-database
-  decision.
 - [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
   list raw rows by normalized table, and verify that an archive matches its
   frontend sibling's metadata.
@@ -188,9 +174,6 @@ consistency work unless one becomes necessary to unblock that work.
   process stops between replacing either output.
 - [ ] Add database-size reporting to `infinity-db build` so snapshot growth is
   visible in build output and CI.
-- [ ] Decide whether dynamic, source-only columns should remain in the frontend
-  schema or move exclusively to the raw archive once no runtime query consumes
-  them.
 - [ ] Establish a migration policy for future persistent user-authored data;
   imported snapshots are intentionally replaced wholesale today.
 
@@ -206,46 +189,12 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-- [x] **Establish the semantic-deduplication baseline.**
-  - [x] Add a reproducible development audit that reports repeated profile and
-    loadout payloads without modifying the database.
-  - [x] Define the exact payload components included in equality comparisons.
-  - [x] Separate semantic fields from source identity, context, ordering, and
-    provenance fields explicitly rather than by undocumented exclusion.
-  - [x] Record representative equality and difference cases as regression
-    fixtures/tests.
-  - [x] Treat current snapshot counts as diagnostics, not expected constants.
-
-- [x] **Canonicalize profile payloads conservatively.**
-  - [x] Inventory every current profile field and nested relationship.
-  - [x] Classify each as canonical fact, contextual fact/delta, relationship,
-    source/provenance, or normalization-only structure.
-  - [x] Prove exact-equality groups before changing storage.
-  - [x] Design canonical profile payload + source/context occurrence relations.
-  - [x] Preserve genuine AVA, profile-group, army, and source differences
-    explicitly.
-  - [x] Preserve characteristics, skills, equipment, weapons, extras, includes,
-    peripherals, and other gameplay-bearing nested information.
-  - [x] Update repository/API assembly to consume the canonical model without
-    changing player-visible semantics unintentionally.
-  - [x] Add reconstruction/provenance and behavioral regression tests.
-  - [x] Re-evaluate and simplify the remaining query-time logical-source profile
-    merge/deduplication only where occurrence and availability semantics remain
-    unchanged.
-
-- [x] **Canonicalize loadout payloads conservatively.**
-  - [x] Inventory every loadout field and nested relationship.
-  - [x] Classify canonical facts versus contextual/source differences.
-  - [x] Compare complete loadout meaning, including points, SWC, minis,
-    disabled state, skills, equipment, weapons, extras, orders,
-    characteristics, includes, and peripherals.
-  - [x] Design canonical loadout payload + source/context occurrence relations.
-  - [x] Preserve every genuine army/loadout variation explicitly.
-  - [x] Update repository/API assembly and regression coverage.
-  - [x] Re-evaluate the remaining logical-source loadout merge as occurrence
-    reconciliation rather than canonical payload deduplication.
-  - [x] Measure database size and query behavior as secondary outcomes, without
-    using storage savings as the semantic acceptance criterion.
+Profile/loadout groundwork is complete: the semantic-deduplication baseline,
+field classification, canonical payload materialization, unit-detail read-path
+migration, occurrence reconciliation, and secondary storage/query measurements
+are all implemented. Durable contracts and evidence are recorded in
+`docs/data-model.md`; completed implementation checklists have been removed from
+this active backlog.
 
 - [ ] **Extend canonicalization to logical-unit payloads.**
   - [ ] Audit fields across every existing `logical_unit` for invariance.
@@ -451,7 +400,8 @@ new correctness or reproducibility defect.
   - [x] Make the normal Ruff stage cover the complete maintained `tools/` tree
     rather than a hand-maintained script allow-list.
   - [x] Add Pyright as a normal `run_checks.py` type stage over maintained
-    `src/` and `tools/` code so editor-visible type regressions fail required CI.
+    `src/`, `tools/`, and `tests/` code so editor-visible type regressions fail
+    required CI, and configure VS Code for workspace-wide diagnostics.
   - [x] Install the real `symbols` Python dependency set in required source CI and
     exercise fontTools, tinycss2/cssselect2, and Pillow with synthetic fixtures.
   - [x] Add focused regression tests for standalone tools, allowing conditional
@@ -462,9 +412,11 @@ new correctness or reproducibility defect.
   - [x] Add clean-checkout Linux source CI that drives the normal check runner in
     hermetic asset mode, using the tracked synthetic Army fixture for the Army
     database build and the tracked curated collections for `rules.db`.
-  - [ ] Configure GitHub repository rules/branch protection to require the
-    `Source checks` result for protected merges when branch protection is enabled;
-    workflow YAML alone does not enforce merge blocking.
+  - [x] Protect `main` with the active `Protect main` repository ruleset:
+    require pull requests, resolved review threads, an up-to-date required-check
+    set (four `Source checks` matrix jobs plus `deployment-smoke` and
+    `installed-wheel`), block deletion/non-fast-forward updates, and allow no
+    bypass actors.
   - [ ] Establish and retain release evidence for the configured GitHub Actions
     workflows. Before claiming a release has passed hosted CI, record successful
     `Source checks`, `Installed wheel smoke`, and `Deployment smoke test` runs
@@ -484,9 +436,9 @@ new correctness or reproducibility defect.
     - [x] Add safe private-bundle staging with HTTPS-only download, digest/size
       checks, traversal/symlink/case-collision guards, and published-contract
       validation before replacing ignored local assets.
-    - [ ] Configure the repository `full-assets` environment with an authorized
-      `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256`, then record one
-      successful manual run.
+    - [ ] Add authorized `FULL_ASSET_BUNDLE_URL` and
+      `FULL_ASSET_BUNDLE_SHA256` secrets to the existing repository
+      `full-assets` environment, then record one successful manual run.
   - [ ] Keep live Army/wiki/symbol acquisition and expensive performance/capacity
     checks explicit, manual, or scheduled rather than dependencies of required
     source CI.
