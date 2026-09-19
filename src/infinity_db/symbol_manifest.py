@@ -96,6 +96,18 @@ def add_svg_preflight(
 ) -> dict[str, Any]:
     """Promote acquisition state to version 3 with deterministic SVG preflight state."""
     validate_symbol_manifest(document)
+    version = document.get("formatVersion")
+    if version == SYMBOL_BUILD_PREFLIGHT_VERSION:
+        preflight = document.get("processing", {}).get("svgPreflight")
+        if not isinstance(preflight, dict) or preflight.get("status") != "failed":
+            raise SymbolManifestError(
+                "SVG preflight rerun requires a failed version-3 SVG preflight state"
+            )
+    elif version != SYMBOL_BUILD_ACQUISITION_VERSION:
+        raise SymbolManifestError(
+            "SVG preflight requires version-2 acquisition state or failed "
+            "version-3 SVG preflight state"
+        )
     if status not in {"passed", "failed"}:
         raise SymbolManifestError("SVG preflight status must be 'passed' or 'failed'")
     promoted = json.loads(json.dumps(document))
@@ -1100,6 +1112,19 @@ def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> N
         raise SymbolManifestError(
             f"{context}.summary.rendersAvoidedExactCount must equal "
             "sourceAssetCount - uniqueByteSetCount"
+        )
+    if summary["rendersAvoidedExactCount"] > summary["redundantAssetCount"]:
+        raise SymbolManifestError(
+            f"{context}.summary.rendersAvoidedExactCount cannot exceed redundantAssetCount"
+        )
+    duplicate_group_count = summary["exactGroupCount"] + summary["visualGroupCount"]
+    if duplicate_group_count > summary["redundantAssetCount"]:
+        raise SymbolManifestError(
+            f"{context} duplicate group count cannot exceed redundantAssetCount"
+        )
+    if summary["renderErrorCount"] > asset_count:
+        raise SymbolManifestError(
+            f"{context}.summary.renderErrorCount cannot exceed sourceAssetCount"
         )
 
     renderer = _object(record.get("renderer"), f"{context}.renderer")

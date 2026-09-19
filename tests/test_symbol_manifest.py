@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+import infinity_db.symbol_manifest as symbol_manifest
 from infinity_db.symbol_manifest import (
     SymbolManifestError,
     add_compression,
@@ -30,6 +31,32 @@ def army_source_kwargs(source_document_count: int) -> dict[str, object]:
         "source_document_count": source_document_count,
         "source_revisions": revisions,
     }
+
+
+def assert_svg_preflight_rejects_later_state(
+    document: dict[str, object],
+    *,
+    report: Path,
+    project_root: Path,
+) -> None:
+    with pytest.raises(
+        SymbolManifestError,
+        match="SVG preflight requires version-2 acquisition state or failed version-3",
+    ):
+        add_svg_preflight(
+            document,
+            status="passed",
+            summary={
+                "svgCount": 0,
+                "parseErrorCount": 0,
+                "activeTextAssetCount": 0,
+                "noActiveTextAssetCount": 0,
+                "fontDeclaredAssetCount": 0,
+                "uniqueDeclaredFontCount": 0,
+            },
+            report=report,
+            project_root=project_root,
+        )
 
 
 def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -> None:
@@ -350,7 +377,15 @@ def test_svg_preflight_promotes_manifest_to_version_3(tmp_path: Path) -> None:
         symbol_artifact=symbols,
         acquired_at=datetime(2026, 9, 18, 9, 0, tzinfo=UTC),
         **army_source_kwargs(1),
-        assets=[],
+        assets=[
+            {
+                "url": "https://assets.corvusbelli.net/army/img/logo/units/example.svg",
+                "sourceFilename": "example.svg",
+                "archivePath": "units/example.svg",
+                "sha256": "1" * 64,
+                "sourceMethod": "network",
+            }
+        ],
         references=[],
         audit={
             "unitProfileReferenceCount": 0,
@@ -364,16 +399,16 @@ def test_svg_preflight_promotes_manifest_to_version_3(tmp_path: Path) -> None:
             "staticReferenceCount": 0,
             "recursiveReferenceCount": 0,
             "uniqueRecursiveUrlCount": 0,
-            "uniqueDownloadedUrlCount": 0,
+            "uniqueDownloadedUrlCount": 1,
             "unknownReferenceCount": 0,
         },
         project_root=tmp_path,
     )
     summary = {
-        "svgCount": 0,
+        "svgCount": 1,
         "parseErrorCount": 0,
         "activeTextAssetCount": 0,
-        "noActiveTextAssetCount": 0,
+        "noActiveTextAssetCount": 1,
         "fontDeclaredAssetCount": 0,
         "uniqueDeclaredFontCount": 0,
     }
@@ -389,6 +424,41 @@ def test_svg_preflight_promotes_manifest_to_version_3(tmp_path: Path) -> None:
     assert promoted["formatVersion"] == 3
     assert promoted["processing"]["svgPreflight"]["report"]["path"] == "svg-preflight.json"
     validate_symbol_manifest(promoted)
+
+    with pytest.raises(
+        SymbolManifestError,
+        match="SVG preflight rerun requires a failed version-3 SVG preflight state",
+    ):
+        add_svg_preflight(
+            promoted,
+            status="passed",
+            summary=summary,
+            report=report,
+            project_root=tmp_path,
+        )
+
+    failed = add_svg_preflight(
+        document,
+        status="failed",
+        summary={
+            **summary,
+            "parseErrorCount": 1,
+            "noActiveTextAssetCount": 0,
+        },
+        report=report,
+        project_root=tmp_path,
+    )
+    retried = add_svg_preflight(
+        failed,
+        status="passed",
+        summary=summary,
+        report=report,
+        project_root=tmp_path,
+    )
+
+    assert retried["formatVersion"] == 3
+    assert retried["processing"]["svgPreflight"]["status"] == "passed"
+
 
 def test_font_audit_promotes_preflight_manifest_to_version_4(tmp_path: Path) -> None:
     army = artifact(tmp_path / "army.zip", b"army")
@@ -463,6 +533,61 @@ def test_font_audit_promotes_preflight_manifest_to_version_4(tmp_path: Path) -> 
     assert font_audit["aliases"]["path"] == "font-aliases.json"
     assert font_audit["report"]["path"] == "font-audit.json"
     validate_symbol_manifest(promoted)
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    [
+        (
+            {"uniqueByteSetCount": 1, "rendersAvoidedExactCount": 2},
+            "rendersAvoidedExactCount cannot exceed redundantAssetCount",
+        ),
+        (
+            {"exactGroupCount": 2},
+            "duplicate group count cannot exceed redundantAssetCount",
+        ),
+        (
+            {"renderErrorCount": 4},
+            "renderErrorCount cannot exceed sourceAssetCount",
+        ),
+    ],
+)
+def test_duplicate_detection_rejects_impossible_summary_counts(
+    updates: dict[str, int],
+    message: str,
+) -> None:
+    summary = {
+        "sourceAssetCount": 3,
+        "uniqueByteSetCount": 2,
+        "rendersAvoidedExactCount": 1,
+        "exactGroupCount": 1,
+        "visualGroupCount": 0,
+        "redundantAssetCount": 1,
+        "canonicalAssetCount": 2,
+        "renderErrorCount": 0,
+        **updates,
+    }
+    report = {"name": "report.csv", "sha256": "0" * 64}
+    record = {
+        "status": "passed",
+        "summary": summary,
+        "renderer": {"name": "resvg", "renderSize": 512, "jobs": 4},
+        "canonicalByArchivePath": {
+            "units/a.svg": "units/a.svg",
+            "units/b.svg": "units/a.svg",
+            "units/c.svg": "units/c.svg",
+        },
+        "groupsReport": report,
+        "errorsReport": report,
+        "summaryReport": report,
+    }
+
+    with pytest.raises(SymbolManifestError, match=message):
+        symbol_manifest._duplicate_detection(
+            record,
+            {"units/a.svg", "units/b.svg", "units/c.svg"},
+            "duplicateDetection",
+        )
 
 
 def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -> None:
@@ -542,6 +667,9 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         aliases=aliases,
         project_root=tmp_path,
     )
+    assert_svg_preflight_rejects_later_state(
+        document, report=preflight_report, project_root=tmp_path
+    )
     document = add_duplicate_detection(
         document,
         summary={
@@ -567,6 +695,9 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         jobs=4,
         project_root=tmp_path,
     )
+    assert_svg_preflight_rejects_later_state(
+        document, report=preflight_report, project_root=tmp_path
+    )
     document = add_text_conversion(
         document,
         status="passed",
@@ -583,6 +714,9 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         converter_version="test",
         jobs=4,
         project_root=tmp_path,
+    )
+    assert_svg_preflight_rejects_later_state(
+        document, report=preflight_report, project_root=tmp_path
     )
     document = add_compression(
         document,
@@ -610,6 +744,9 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         project_root=tmp_path,
     )
     assert document["formatVersion"] == 7
+    assert_svg_preflight_rejects_later_state(
+        document, report=preflight_report, project_root=tmp_path
+    )
 
     published = add_publication(
         document,
@@ -630,4 +767,7 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
 
     assert published["formatVersion"] == 8
     assert published["processing"]["publication"]["status"] == "passed"
+    assert_svg_preflight_rejects_later_state(
+        published, report=preflight_report, project_root=tmp_path
+    )
     validate_symbol_manifest(published)
