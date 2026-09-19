@@ -234,9 +234,9 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
     unchanged.
 
 - [ ] **Canonicalize loadout payloads conservatively.**
-  - [ ] Inventory every loadout field and nested relationship.
-  - [ ] Classify canonical facts versus contextual/source differences.
-  - [ ] Compare complete loadout meaning, including points, SWC, minis,
+  - [x] Inventory every loadout field and nested relationship.
+  - [x] Classify canonical facts versus contextual/source differences.
+  - [x] Compare complete loadout meaning, including points, SWC, minis,
     disabled state, skills, equipment, weapons, extras, orders,
     characteristics, includes, and peripherals.
   - [ ] Design canonical loadout payload + source/context occurrence relations.

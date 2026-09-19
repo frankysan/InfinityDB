@@ -883,6 +883,122 @@ explicit identity evidence for those overlapping source profile occurrences. It
 must not be replaced merely by canonical payload identity or by source-local
 profile IDs.
 
+#### Loadout semantic classification audit
+
+`tools/audit_loadout_semantics.py` performs the corresponding read-only evidence
+pass for loadout canonicalization. It compares repeated Army occurrences of the
+same source loadout key:
+
+```text
+(unit_id, group_id, option_id)
+```
+
+As with the profile audit, that key is an **observational comparison key**, not
+a proposed application identity. It lets InfinityDB inspect which values really
+change between Army contexts before a canonical loadout model is designed.
+
+Run the audit with:
+
+```text
+python tools/audit_loadout_semantics.py data/generated/infinity.db \
+  --output reports/loadout-semantics.json
+```
+
+For the 2026-09-18 frontend database, the audit reports:
+
+- 12,993 loadout occurrences;
+- 3,593 distinct source loadout keys;
+- 2,162 source loadout keys repeated in more than one Army, covering 11,562
+  occurrences;
+- 130 repeated keys whose complete conservative payload varies by Army context;
+- 125 varying keys after diagnostic normalization of absolute `display_order`
+  and omitted-versus-explicit quantity `1`;
+- 26 varying keys when army-local peripheral IDs are compared through their
+  referenced peripheral definition (`name` + `mercs`) instead of raw local IDs;
+- 21 varying keys when both diagnostic normalizations are applied.
+
+Those final 21 variations are disjoint in the current snapshot: two points
+variations, one SWC variation, one order-generation variation, two skill
+variations, eight weapon variations, and seven peripheral-context variations.
+This is evidence for the next design step, not permission to normalize those
+remaining differences away.
+
+The peripheral result is particularly important. Peripheral IDs are army-local,
+so direct cross-army comparison exaggerates semantic variation: 111 repeated
+source loadout keys differ when raw peripheral IDs are compared, but only seven
+still differ after resolving each ID to the referenced peripheral definition.
+The 104 collapsed cases are therefore local-identity/provenance differences,
+not evidence of different peripheral names or roles. The remaining seven all
+involve the same `TURTLEMEK` name with an Army-context difference in the
+peripheral definition's `mercs` value. Canonical peripheral identity remains a
+later relationship task; the audit resolution is diagnostic only.
+
+##### Loadout fields
+
+The current classification is:
+
+| Field | Classification | Current evidence / treatment |
+| --- | --- | --- |
+| `army_id` | source/provenance | Identifies the owning Army occurrence. |
+| `unit_id` | source/provenance | Identifies the original source unit. |
+| `group_id` | source/provenance | Source-local profile-group identity. |
+| `option_id` | source/provenance | Source-local loadout identity. |
+| `position` | normalization-only | Generated from source option-array order; 67 repeated source keys change literal position. |
+| `name` | canonical fact candidate | No variation across repeated source loadout keys. |
+| `points` | contextual delta | Two repeated source keys vary by Army context, affecting 16 occurrences. |
+| `swc` | contextual delta | One repeated source key varies by Army context, affecting two occurrences. |
+| `minis` | canonical fact candidate | No same-source-key variation observed. |
+| `disabled` | canonical fact candidate | No same-source-key variation observed. |
+
+“Canonical fact candidate” has the same conservative meaning as in the profile
+audit: the current snapshot supports reuse, but later source variation must fail
+visibly or become explicit context rather than being discarded.
+
+##### Nested loadout relationships
+
+Normalized relationship rows mix gameplay meaning with source and
+normalization mechanics. Their common field semantics are:
+
+- parent `army_id` / `unit_id` / `group_id` / `option_id` columns are source
+  provenance;
+- `occurrence_id`, weapon `template_id`, and literal `position` values are
+  normalization-only identities/order bookkeeping;
+- catalog `item_id`, `characteristic_id`, and `extra_id` values are semantic
+  relationships, except that peripheral `item_id` is only army-local;
+- `display_order` is presentation context, not entity identity;
+- `quantity` is a relationship attribute. The audit treats omitted quantity and
+  explicit `1` as equivalent only in its diagnostic normalized view;
+- `order_type`, `list_count`, and `total_count` are order-generation relationship
+  attributes;
+- `target_group_id` / `target_option_id` identify a source-local include
+  relationship;
+- `raw` is source/provenance fallback for malformed or unmodeled content and
+  must continue to block destructive canonicalization until understood.
+
+Observed relationship behavior is:
+
+| Relationship | Rows | Extras | Raw same-source variants | After representation normalization | Interpretation |
+| --- | ---: | ---: | ---: | ---: | --- |
+| characteristics | 0 | — | 0 | 0 | Supported by the model but absent from loadouts in this snapshot. |
+| orders | 15,195 | — | 1 | 1 | One genuine Army-context order-generation difference. |
+| skills | 6,330 | 1,594 | 2 | 2 | Two genuine contextual skill/extra differences. |
+| equipment | 2,798 | 457 | 1 | 0 | The only same-source variation is representation-only. |
+| weapons | 52,554 | 11,526 | 12 | 8 | Four differences are representation-only; eight retain source-shape/content differences for later classification. |
+| includes | 949 | — | 0 | 0 | Stable for repeated source loadout keys, but the target remains source-local. |
+| peripherals | 818 | — | 111 | 111 | Raw army-local IDs differ widely; resolving the target definition reduces this to seven contextual variants. |
+
+The weapon source also contains one non-null raw fallback template (`{}`),
+referenced by 95 normalized weapon occurrences. The conservative comparison
+retains that fallback exactly; the loadout canonicalizer must not infer that an
+anonymous/empty source object is safely discardable merely because nearby
+weapon rows look redundant.
+
+This evidence pass intentionally stops before selecting the canonical loadout
+payload boundary. In particular, it does not yet decide whether points/SWC,
+order-generation differences, includes, or peripheral relationships belong in
+the reusable payload or in an occurrence/context layer. That decision belongs
+to the next TODO item and must preserve every observed player-relevant variant.
+
 #### First implementation targets
 
 ### 1. Profile payloads
