@@ -233,7 +233,7 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
     merge/deduplication only where occurrence and availability semantics remain
     unchanged.
 
-- [ ] **Canonicalize loadout payloads conservatively.**
+- [x] **Canonicalize loadout payloads conservatively.**
   - [x] Inventory every loadout field and nested relationship.
   - [x] Classify canonical facts versus contextual/source differences.
   - [x] Compare complete loadout meaning, including points, SWC, minis,
@@ -242,7 +242,9 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
   - [x] Design canonical loadout payload + source/context occurrence relations.
   - [x] Preserve every genuine army/loadout variation explicitly.
   - [x] Update repository/API assembly and regression coverage.
-  - [ ] Measure database size and query behavior as secondary outcomes, without
+  - [x] Re-evaluate the remaining logical-source loadout merge as occurrence
+    reconciliation rather than canonical payload deduplication.
+  - [x] Measure database size and query behavior as secondary outcomes, without
     using storage savings as the semantic acceptance criterion.
 
 - [ ] **Extend canonicalization to logical-unit payloads.**

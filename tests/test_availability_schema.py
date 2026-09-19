@@ -12,7 +12,7 @@ def test_availability_semantics_are_explicit_schema_fields() -> None:
     assert "display_army_id" in TABLES["units"].fields
     assert "availability_kind" in TABLES["army_units"].fields
     assert SCHEMA_VERSION == 13
-    assert DATABASE_COMPATIBILITY_VERSION == 18
+    assert DATABASE_COMPATIBILITY_VERSION == 19
 
 
 def test_logical_unit_identity_is_frontend_derived_schema() -> None:

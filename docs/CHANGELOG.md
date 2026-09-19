@@ -8,6 +8,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 ### Changed
 
 - Consolidated legacy release notes around user and operator outcomes.
+- Improve unit-detail query performance while migrating profile and loadout data
+  to the canonical application model.
 
 ### Upgrade notes
 

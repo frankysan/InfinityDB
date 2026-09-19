@@ -17,6 +17,7 @@ from infinity_db.database.repository import (
     army_required_flags,
     canonical_skill_id,
     catalog_merge_key,
+    logical_source_loadout_merge_key,
     merged_catalog_name,
     merged_skill_name,
     skill_merge_key,
@@ -25,6 +26,7 @@ from infinity_db.database.repository import (
 from infinity_db.database.schema import (
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
+    DATABASE_TABLES,
     INDEXES,
     METADATA_TABLE,
     RAW_ROWS_TABLE,
@@ -275,7 +277,7 @@ def test_database_preserves_every_normalized_table_and_field(
         )
         indexes = {
             row[1]
-            for table_name in TABLES
+            for table_name in DATABASE_TABLES
             for row in connection.execute(f"PRAGMA index_list({quote(table_name)})")
         }
         assert {index_name for index_name, _, _ in INDEXES} <= indexes
@@ -1201,6 +1203,31 @@ def test_logical_source_profile_merge_keeps_scalar_variants_separate(
     assert details is not None
     first_army = next(army for army in details["armies"] if army["id"] == 101)
     assert sorted(profile["wip"] for profile in first_army["profiles"]) == [13, 14]
+
+
+def test_logical_source_loadout_merge_key_preserves_occurrence_identity() -> None:
+    occurrence_key = (101, ("mercs",))
+    loadout = {
+        "group_id": 1,
+        "option_id": 1,
+        "name": "Loadout",
+        "points": 10,
+        "swc": "0.5",
+        "minis": 1,
+        "disabled": 0,
+    }
+
+    baseline = logical_source_loadout_merge_key(occurrence_key, loadout)
+    assert logical_source_loadout_merge_key(occurrence_key, loadout) == baseline
+    assert logical_source_loadout_merge_key(
+        occurrence_key, {**loadout, "option_id": 2}
+    ) != baseline
+    assert logical_source_loadout_merge_key(
+        occurrence_key, {**loadout, "points": 11}
+    ) != baseline
+    assert logical_source_loadout_merge_key(
+        (101, ("reinforcement",)), loadout
+    ) != baseline
 
 
 def test_details_keep_normal_and_mercenary_army_occurrences_separate(

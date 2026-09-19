@@ -175,8 +175,9 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. Schema version 13 materializes reusable canonical profile and loadout
-  payloads scoped to each logical unit plus one occurrence row per
+  dynamically. Schema version 13 / compatibility revision 19 materializes
+  reusable canonical profile and loadout payloads scoped to each logical unit
+  plus one occurrence row per
   source profile/loadout. Profile AVA/logo and loadout points/SWC remain
   occurrence context; source/profile-group keys, includes, and peripherals
   remain occurrence/source context; WIP, characteristics, skills,
@@ -202,9 +203,13 @@ and serves a read-only browser and same-origin HTTP API.
   lossless provenance/context and continue to support repository paths such as
   catalog reverse lookups. Canonical payload identity is deliberately not used
   as logical-source occurrence identity because overlapping source records can
-  contribute complementary nested loadout relationships. Canonical unit-payload
-  work remains staged behind the same field-level invariance and provenance
-  requirements.
+  contribute complementary nested loadout relationships. Current production
+  evidence shows 31 logical-source loadout occurrence merges and all pairs already
+  share one canonical loadout payload; the merge remains occurrence reconciliation,
+  not payload identity. Canonical profile/loadout occurrence tables require
+  unit-oriented indexes because unit-detail assembly filters them by source unit.
+  Canonical unit-payload work remains staged behind the same field-level
+  invariance and provenance requirements.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data

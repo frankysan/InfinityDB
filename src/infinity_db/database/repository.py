@@ -61,7 +61,7 @@ class ArmySelectionError(ValueError):
 class RowLike(Protocol):
     """Minimal row interface shared by sqlite3.Row and test dictionaries."""
 
-    def __getitem__(self, key: str) -> Any: ...
+    def __getitem__(self, key: str, /) -> Any: ...
 
     def keys(self) -> Iterable[str]: ...
 
@@ -220,6 +220,28 @@ def logical_source_profile_merge_key(
         profile["silhouette"],
         profile["type"],
         profile["classification"],
+    )
+
+
+def logical_source_loadout_merge_key(
+    army_occurrence_key: tuple[int, tuple[str, ...]], loadout: RowLike
+) -> tuple[Any, ...]:
+    """Return the context key used to merge one loadout across logical-unit sources.
+
+    Canonical payload identity is intentionally not used as occurrence identity.
+    Distinct source-local options may reuse the same payload, while overlapping
+    source records may still need to collapse when their effective Army
+    occurrence, local option coordinates, costs, and visible scalar facts agree.
+    """
+    return (
+        army_occurrence_key,
+        loadout["group_id"],
+        loadout["option_id"],
+        loadout["name"],
+        loadout["points"],
+        loadout["swc"],
+        loadout["minis"],
+        loadout["disabled"],
     )
 
 
@@ -1914,15 +1936,8 @@ class Database:
                 loadout_item["equipment"] = []
                 loadout_item["weapons"] = []
                 loadout_item["orders"] = []
-                loadout_key = (
-                    army["_occurrence_key"],
-                    loadout["group_id"],
-                    loadout["option_id"],
-                    loadout["name"],
-                    loadout["points"],
-                    loadout["swc"],
-                    loadout["minis"],
-                    loadout["disabled"],
+                loadout_key = logical_source_loadout_merge_key(
+                    army["_occurrence_key"], loadout
                 )
                 loadout_keys_by_source[
                     (

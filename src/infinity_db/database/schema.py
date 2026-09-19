@@ -10,7 +10,7 @@ SCHEMA_VERSION = 13
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 18
+DATABASE_COMPATIBILITY_VERSION = 19
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -398,6 +398,16 @@ DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
 # queries; this is a read-only snapshot, so their small import cost is repaid by
 # every cold-cache detail request.
 INDEXES = (
+    (
+        "profile_payload_occurrences_unit",
+        "profile_payload_occurrences",
+        "unit_id, army_id, group_id, position, profile_id, profile_payload_id",
+    ),
+    (
+        "loadout_payload_occurrences_unit",
+        "loadout_payload_occurrences",
+        "unit_id, army_id, group_id, position, option_id, loadout_payload_id",
+    ),
     ("profiles_unit", "profiles", "unit_id, army_id, group_id, position, profile_id"),
     (
         "loadout_options_unit",

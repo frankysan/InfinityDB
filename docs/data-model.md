@@ -1169,8 +1169,44 @@ output remains unchanged. The migration was accepted only after serialized
 `get_unit()` output for all 920 source-defined unit IDs in the audited production
 database was byte-for-byte identical before and after the read-path switch.
 
-Canonical include/peripheral identities, any later simplification of
-logical-source loadout occurrence merging, representation normalization, and
+The remaining query-time loadout merge is an **occurrence reconciliation**, not
+canonical payload deduplication. In the audited production database, 31 visible
+loadout keys each reconcile exactly two logical-source occurrences (62 source
+occurrences total). All 31 pairs already reference the same canonical
+`loadout_payload_id`; no current merge combines distinct canonical payload
+variants.
+
+The merge nevertheless retains effective Army occurrence, source-local
+`group_id`/`option_id`, name, points, SWC, minis, and disabled state in its key.
+Distinct source options can legitimately reuse one canonical payload, so payload
+identity alone is not occurrence identity. Nested items continue to be appended
+uniquely when overlapping source occurrences reconcile, preserving the robust
+source-overlap behavior without treating the merge itself as payload
+canonicalization.
+
+Secondary measurements on the same 2026-09-18 production snapshot confirm the
+expected storage benefit while also exposing a read-path indexing requirement:
+
+- the legacy lossless loadout tables plus their indexes occupy about 5.54 MiB;
+- the canonical loadout payload/occurrence tables plus their indexes occupy about
+  2.04 MiB, approximately 63.1% less for the corresponding application model;
+- while both representations coexist during migration, this is not yet a net
+  database-size saving; the physical benefit is realized only after source-only
+  tables move to `infinity.raw.db`;
+- before unit-oriented canonical-occurrence indexes were added, a diagnostic pass
+  over all 920 source-unit `get_unit()` lookups took about 12.3-12.5 seconds on
+  the acceptance environment, versus about 6.5-6.7 seconds for the preceding
+  source-loadout read path;
+- adding the loadout occurrence index restored approximately legacy performance
+  (about 6.7-6.9 seconds), and indexing both canonical profile and loadout
+  occurrence tables reduced the same diagnostic pass to about 3.0 seconds.
+
+Those timings and byte counts are snapshot/environment diagnostics, not release
+performance guarantees or schema invariants. Query-plan regression tests require
+the canonical occurrence tables to use their unit-oriented indexes because unit
+detail assembly filters them by source unit.
+
+Canonical include/peripheral identities, representation normalization, and
 eventual movement of lossless source-only tables to `infinity.raw.db` remain
 separate evidence-driven decisions.
 
@@ -1354,7 +1390,7 @@ application structure cannot be supplied as normalized source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 13 and the application
-compatibility revision is 18. Imports build temporary sibling files, check
+compatibility revision is 19. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
