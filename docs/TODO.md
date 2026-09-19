@@ -206,15 +206,15 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-- [ ] **Establish the semantic-deduplication baseline.**
-  - [ ] Add a reproducible development audit that reports repeated profile and
+- [x] **Establish the semantic-deduplication baseline.**
+  - [x] Add a reproducible development audit that reports repeated profile and
     loadout payloads without modifying the database.
-  - [ ] Define the exact payload components included in equality comparisons.
-  - [ ] Separate semantic fields from source identity, context, ordering, and
+  - [x] Define the exact payload components included in equality comparisons.
+  - [x] Separate semantic fields from source identity, context, ordering, and
     provenance fields explicitly rather than by undocumented exclusion.
-  - [ ] Record representative equality and difference cases as regression
+  - [x] Record representative equality and difference cases as regression
     fixtures/tests.
-  - [ ] Treat current snapshot counts as diagnostics, not expected constants.
+  - [x] Treat current snapshot counts as diagnostics, not expected constants.
 
 - [ ] **Canonicalize profile payloads conservatively.**
   - [ ] Inventory every current profile field and nested relationship.

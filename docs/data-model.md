@@ -457,6 +457,85 @@ particular counts.
 They demonstrate that useful semantic deduplication can begin with exact
 equality rather than heuristic matching.
 
+#### Current baseline audit
+
+`tools/audit_semantic_deduplication.py` is the read-only development audit for
+this first exact-equality stage. It operates on an already-built frontend
+`infinity.db`; it does not modify the database or participate in normal runtime
+queries.
+
+A normal summary can be generated with:
+
+```text
+python tools/audit_semantic_deduplication.py data/generated/infinity.db \
+  --output reports/semantic-deduplication.json
+```
+
+Add `--details` when investigating duplicate groups. Detailed output adds every
+repeated payload fingerprint and its source occurrence keys; the normal report
+keeps the same deterministic summary and field contract without the much larger
+group listing.
+
+The baseline comparison deliberately defines its payload fields explicitly.
+Schema drift in any audited table fails the audit until the new field is
+classified rather than being silently ignored or silently changing equality.
+
+For profile payloads, the top-level semantic fields are:
+
+- `name`, `logo`, `type_id`;
+- `move_1`, `move_2`, `cc`, `bs`, `ph`, `wip`, `arm`, `bts`, `vitality`,
+  `silhouette`, `ava`, `is_structure`, and `notes`.
+
+The profile payload also includes the ordered nested content from:
+
+- `profile_characteristics`;
+- `profile_skills` and `profile_skill_extras`;
+- `profile_equipment` and `profile_equipment_extras`;
+- `profile_weapons` and `profile_weapon_extras`;
+- `profile_includes`;
+- `profile_peripherals`.
+
+For loadout payloads, the top-level semantic fields are `name`, `points`, `swc`,
+`minis`, and `disabled`. The payload also includes the ordered nested content
+from:
+
+- `option_characteristics`;
+- `option_orders`;
+- `option_skills` and `option_skill_extras`;
+- `option_equipment` and `option_equipment_extras`;
+- `option_weapons`, resolved through `option_weapon_templates`, together with
+  `option_weapon_extras`;
+- `option_includes`;
+- `option_peripherals`.
+
+Parent identity and occurrence/provenance fields are not payload identity:
+`army_id`, `unit_id`, `group_id`, `profile_id` / `option_id`, occurrence IDs,
+template IDs, and literal `position` values are excluded. Nested rows and extras
+are still read in `position` order, so changing their relative order changes the
+payload even though the absolute position numbers do not.
+
+Valid JSON in `raw` fields is parsed before hashing so whitespace and object-key
+order do not manufacture false differences. Unknown/unmodeled `raw` content
+remains part of the payload, preserving conservative equality.
+
+The first pass intentionally retains referenced catalog IDs and
+`target_group_id` / `target_option_id` values as semantic content. Those
+relationships may later become canonical references, but the baseline does not
+guess equivalence before the referenced identities are audited.
+
+`profile_groups` and wider unit/army context are outside the profile/loadout
+payload itself. They remain contextual data for subsequent classification rather
+than being silently folded into this equality definition.
+
+The audit reports both:
+
+- distinct payloads within each source unit; and
+- distinct payloads within each materialized logical unit.
+
+The second view measures the additional exact repetition exposed by the existing
+logical-unit identity relation. Both are diagnostics for the selected snapshot,
+not compatibility requirements or expected constants.
+
 #### First implementation targets
 
 ### 1. Profile payloads
