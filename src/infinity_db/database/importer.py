@@ -32,6 +32,7 @@ from ..identities import (
     load_identity_config,
     parse_identity_metadata,
 )
+from .loadout_payloads import materialize_loadout_payloads
 from .paths import raw_database_path
 from .profile_payloads import materialize_profile_payloads
 from .schema import (
@@ -320,6 +321,7 @@ def export_database(
                     ),
                 )
                 materialize_profile_payloads(connection)
+                materialize_loadout_payloads(connection)
                 create_indexes(connection)
                 # The frontend database is an immutable snapshot. Persist planner
                 # statistics at build time so read-only connections make informed

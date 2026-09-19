@@ -9,6 +9,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 - Consolidated legacy release notes around user and operator outcomes.
 
+### Upgrade notes
+
+- Rebuild existing generated Army databases before deploying this version.
+
 ### Fixed
 
 - Keep generated deployment artifacts safe when development, CI, and deployment

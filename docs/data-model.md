@@ -999,7 +999,7 @@ order-generation differences, includes, or peripheral relationships belong in
 the reusable payload or in an occurrence/context layer. That decision belongs
 to the next TODO item and must preserve every observed player-relevant variant.
 
-#### Canonical loadout payload design (design direction)
+#### Canonical loadout payload materialization
 
 The accepted first loadout migration boundary mirrors the conservative profile
 model: deduplicate exact reusable application payloads **within an existing
@@ -1078,9 +1078,9 @@ conservatively: one exact equipment representation variant, one order-generation
 variant, two skill/extra variants, and twelve weapon variants. No one of those
 is discarded or rewritten merely because most occurrences agree.
 
-##### Planned derived application tables
+##### Derived application tables
 
-The first materialized application-side shape should be:
+The materialized application-side shape is:
 
 ```text
 loadout_payloads
@@ -1111,30 +1111,31 @@ loadout_payload_weapons
 loadout_payload_weapon_extras
 ```
 
-`loadout_payload_occurrences` should remain one-to-one with the current source
+`loadout_payload_occurrences` is one-to-one with the current source
 `loadout_options` rows. Its composite source key stays `(army_id, unit_id,
-group_id, option_id)` and should reference exactly one reusable payload. The
+group_id, option_id)` and references exactly one reusable payload. The
 source `loadout_options` and nested `option_*` tables remain unchanged for
 provenance, lossless auditing, deferred relationships, and migration comparison.
 
-Nested payload tables should use payload-relative ordering instead of carrying
+Nested payload tables use payload-relative ordering instead of carrying
 normalization-only source `occurrence_id` or weapon `template_id` identities into
 the canonical application layer. Extras remain attached to their specific
 payload relationship occurrence. The one currently non-null weapon raw fallback
 (`{}`), referenced by 95 source occurrences, remains part of exact payload
 equality and must not be silently inferred away.
 
-As with profiles, `payload_sha256` should fingerprint a versioned canonical JSON
+As with profiles, `payload_sha256` fingerprints a versioned canonical JSON
 serialization while equality remains scoped by `logical_unit_id`. Materialization
-should compare serialized payload content before coalescing hash matches and fail
-visibly on an in-scope collision. Internal integer payload IDs should be assigned
+compares serialized payload content before coalescing hash matches and fails
+visibly on an in-scope collision. Internal integer payload IDs are assigned
 deterministically from the sorted logical-unit/fingerprint set and must not become
 public API or URL identities.
 
-##### Planned build/read-path invariants
+##### Build and read-path invariants
 
-The implementation must prove all of the following before the source read path
-can be retired for unit-detail loadout assembly:
+The materializer and database validation enforce the storage/provenance portion
+of the following contract. Repository/API assembly still reads the source loadout
+tables and will migrate in a separate behavior-preserving step:
 
 - every source loadout occurrence maps to exactly one reusable loadout payload;
 - every payload has at least one supporting source occurrence;
@@ -1149,12 +1150,12 @@ can be retired for unit-detail loadout assembly:
   reconstructable;
 - no army-local peripheral ID is promoted to cross-Army canonical identity by
   this migration;
-- public repository/API/web loadout behavior is unchanged when assembly moves to
-  the canonical layer.
+- the current repository/API/web loadout read path remains unchanged until a
+  dedicated before/after migration proves behavioral equivalence.
 
-This design intentionally leaves source-occurrence merge behavior, canonical
-include/peripheral identities, and any future representation normalization as
-separate evidence-driven decisions.
+This materialization intentionally leaves repository read-path migration,
+source-occurrence merge behavior, canonical include/peripheral identities, and
+any future representation normalization as separate evidence-driven decisions.
 
 #### First implementation targets
 
@@ -1335,8 +1336,8 @@ registry remains separate from these derived frontend tables so generated
 application structure cannot be supplied as normalized source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 12 and the application
-compatibility revision is 17. Imports build temporary sibling files, check
+records its schema version. The current schema version is 13 and the application
+compatibility revision is 18. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

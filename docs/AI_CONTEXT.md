@@ -175,10 +175,11 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. Schema version 12 additionally materializes reusable canonical
-  profile payloads scoped to each logical unit plus one occurrence row per
-  source profile. AVA, logo, source/profile-group keys, includes, and
-  peripherals remain occurrence/source context; WIP, characteristics, skills,
+  dynamically. Schema version 13 materializes reusable canonical profile and loadout
+  payloads scoped to each logical unit plus one occurrence row per
+  source profile/loadout. Profile AVA/logo and loadout points/SWC remain
+  occurrence context; source/profile-group keys, includes, and peripherals
+  remain occurrence/source context; WIP, characteristics, skills,
   equipment, weapons, extras, and exact representation values remain in the
   payload and therefore split payload variants when they differ. Unit-detail
   profile assembly now reads the canonical profile payload/occurrence layer;
@@ -189,14 +190,15 @@ and serves a read-only browser and same-origin HTTP API.
   source-local group/profile coordinates, scalar profile facts, type, and
   classification agree; complementary nested items are accumulated and
   restrictive numeric AVA is retained. A canonical payload ID must not be used
-  as source-occurrence identity. The accepted loadout design direction follows
-  the same logical-unit-scoped, exact-payload approach: `name`, `minis`,
-  `disabled`, characteristics, orders, skills, equipment, weapons, extras, and
-  exact representation values belong to the reusable payload; points, SWC,
+  as source-occurrence identity. The loadout materializer follows the same
+  logical-unit-scoped, exact-payload approach: `name`, `minis`, `disabled`,
+  characteristics, orders, skills, equipment, weapons, extras, and exact
+  representation values belong to the reusable payload; points, SWC,
   source/group/option keys, source position, includes, and peripherals remain
   occurrence/source context. Includes and peripherals are deferred because their
-  targets are source-local/army-local. This loadout layer is a design direction,
-  not yet materialized current behavior. Canonical unit-payload work remains
+  targets are source-local/army-local. Repository loadout assembly still reads
+  the source tables until a dedicated equivalence migration. Canonical unit-payload
+  work remains
   staged behind the same field-level invariance and provenance requirements.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.

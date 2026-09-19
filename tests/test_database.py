@@ -243,6 +243,32 @@ def test_database_preserves_every_normalized_table_and_field(
             "SELECT raw FROM profile_payload_skills"
         ).fetchone()[0]
         assert json.loads(payload_skill_raw) == json.loads(source_skill_raw)
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT army_id, points, swc FROM loadout_payload_occurrences ORDER BY army_id"
+        ).fetchall() == [(101, 10, "0.5"), (201, 10, "0.5")]
+        for table in (
+            "loadout_payload_characteristics",
+            "loadout_payload_orders",
+            "loadout_payload_skills",
+            "loadout_payload_skill_extras",
+            "loadout_payload_equipment",
+            "loadout_payload_equipment_extras",
+            "loadout_payload_weapons",
+            "loadout_payload_weapon_extras",
+        ):
+            assert connection.execute(
+                f"SELECT COUNT(*) FROM {quote(table)}"
+            ).fetchone()[0] == 1
+        source_loadout_skill_raw = connection.execute(
+            "SELECT raw FROM option_skills WHERE army_id = 101"
+        ).fetchone()[0]
+        payload_loadout_skill_raw = connection.execute(
+            "SELECT raw FROM loadout_payload_skills"
+        ).fetchone()[0]
+        assert json.loads(payload_loadout_skill_raw) == json.loads(source_loadout_skill_raw)
         assert any(
             row[1] == "logical_unit_sources_logical"
             for row in connection.execute("PRAGMA index_list(logical_unit_sources)")
@@ -1701,6 +1727,158 @@ def test_database_validation_rejects_invalid_profile_payload_context(
         connection.close()
 
     with pytest.raises(ValueError, match="canonical profile payloads"):
+        Database(path).validate()
+
+
+def test_loadout_payload_materialization_preserves_context_and_payload_variants(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    loadouts = data["tables"]["loadout_options"]
+    first = next(row for row in loadouts if row["army_id"] == 101)
+    second = next(row for row in loadouts if row["army_id"] == 201)
+    first["points"] = 10
+    first["swc"] = "0.5"
+    second["points"] = 11
+    second["swc"] = "1"
+
+    path = tmp_path / "shared-loadouts.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT army_id, points, swc FROM loadout_payload_occurrences ORDER BY army_id"
+        ).fetchall() == [(101, 10, "0.5"), (201, 11, "1")]
+    finally:
+        connection.close()
+
+    data = copy.deepcopy(normalized)
+    next(
+        row
+        for row in data["tables"]["option_orders"]
+        if row["army_id"] == 201
+    )["total_count"] = 2
+    variant_path = tmp_path / "variant-loadouts.sqlite3"
+    export_database(data, variant_path)
+    variant = sqlite3.connect(variant_path)
+    try:
+        assert variant.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 2
+        assert variant.execute(
+            "SELECT DISTINCT loadout_payload_id FROM loadout_payload_occurrences"
+        ).fetchall() == [(1,), (2,)]
+    finally:
+        variant.close()
+
+
+def test_loadout_payloads_do_not_merge_across_logical_units(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    for table in (
+        "option_characteristics",
+        "option_orders",
+        "option_skills",
+        "option_skill_extras",
+        "option_equipment",
+        "option_equipment_extras",
+        "option_weapons",
+        "option_weapon_extras",
+        "option_includes",
+        "option_peripherals",
+    ):
+        data["tables"][table] = []
+
+    group = copy.deepcopy(
+        next(
+            row
+            for row in data["tables"]["profile_groups"]
+            if row["army_id"] == 201 and row["unit_id"] == 1
+        )
+    )
+    group["unit_id"] = 2
+    data["tables"]["profile_groups"].append(group)
+
+    loadout = copy.deepcopy(
+        next(
+            row
+            for row in data["tables"]["loadout_options"]
+            if row["army_id"] == 201 and row["unit_id"] == 1
+        )
+    )
+    loadout["unit_id"] = 2
+    data["tables"]["loadout_options"].append(loadout)
+
+    path = tmp_path / "scoped-loadouts.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT logical_unit_id, COUNT(*) FROM loadout_payloads "
+            "GROUP BY logical_unit_id ORDER BY logical_unit_id"
+        ).fetchall() == [(1, 1), (2, 1)]
+    finally:
+        connection.close()
+
+
+def test_loadout_payload_materialization_is_deterministic(
+    tmp_path: Path, normalized: dict
+) -> None:
+    first = tmp_path / "first-loadouts.sqlite3"
+    second = tmp_path / "second-loadouts.sqlite3"
+    export_database(normalized, first)
+    export_database(normalized, second)
+
+    first_connection = sqlite3.connect(first)
+    second_connection = sqlite3.connect(second)
+    try:
+        tables = (
+            "loadout_payloads",
+            "loadout_payload_occurrences",
+            "loadout_payload_characteristics",
+            "loadout_payload_orders",
+            "loadout_payload_skills",
+            "loadout_payload_skill_extras",
+            "loadout_payload_equipment",
+            "loadout_payload_equipment_extras",
+            "loadout_payload_weapons",
+            "loadout_payload_weapon_extras",
+        )
+        for table in tables:
+            left = first_connection.execute(
+                f"SELECT * FROM {quote(table)} ORDER BY rowid"
+            ).fetchall()
+            right = second_connection.execute(
+                f"SELECT * FROM {quote(table)} ORDER BY rowid"
+            ).fetchall()
+            assert left == right
+    finally:
+        first_connection.close()
+        second_connection.close()
+
+
+def test_database_validation_rejects_invalid_loadout_payload_context(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army-loadouts.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            "UPDATE loadout_payload_occurrences SET points = 999 WHERE army_id = 101"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(ValueError, match="canonical loadout payloads"):
         Database(path).validate()
 
 

@@ -516,6 +516,48 @@ class Database:
                     "rebuild the database"
                 )
 
+            source_loadout_count = connection.execute(
+                "SELECT COUNT(*) FROM loadout_options"
+            ).fetchone()[0]
+            loadout_occurrence_count = connection.execute(
+                "SELECT COUNT(*) FROM loadout_payload_occurrences"
+            ).fetchone()[0]
+            unsupported_loadout_payload = connection.execute(
+                "SELECT 1 FROM loadout_payloads AS lp "
+                "LEFT JOIN loadout_payload_occurrences AS lpo "
+                "ON lpo.loadout_payload_id = lp.id "
+                "WHERE lpo.loadout_payload_id IS NULL "
+                "OR lp.payload_sha256 IS NULL "
+                "OR length(lp.payload_sha256) != 64 LIMIT 1"
+            ).fetchone()
+            invalid_loadout_logical_unit = connection.execute(
+                "SELECT 1 FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = lpo.unit_id "
+                "WHERE lp.logical_unit_id != lus.logical_unit_id LIMIT 1"
+            ).fetchone()
+            invalid_loadout_context = connection.execute(
+                "SELECT 1 FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_options AS o "
+                "ON o.army_id = lpo.army_id "
+                "AND o.unit_id = lpo.unit_id "
+                "AND o.group_id = lpo.group_id "
+                "AND o.option_id = lpo.option_id "
+                "WHERE NOT (lpo.position IS o.position) "
+                "OR NOT (lpo.points IS o.points) "
+                "OR NOT (lpo.swc IS o.swc) LIMIT 1"
+            ).fetchone()
+            if (
+                source_loadout_count != loadout_occurrence_count
+                or unsupported_loadout_payload is not None
+                or invalid_loadout_logical_unit is not None
+                or invalid_loadout_context is not None
+            ):
+                raise ValueError(
+                    "Database has invalid materialized canonical loadout payloads; "
+                    "rebuild the database"
+                )
+
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
