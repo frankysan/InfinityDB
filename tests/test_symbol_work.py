@@ -13,6 +13,7 @@ from infinity_db.snapshot_provenance import write_snapshot_manifest
 from infinity_db.symbol_manifest import (
     add_duplicate_detection,
     add_font_audit,
+    add_publication,
     add_svg_preflight,
     build_symbol_manifest,
     load_symbol_manifest,
@@ -679,6 +680,72 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         )
     assert load_symbol_manifest(manifest_path)["formatVersion"] == 6
 
+    compressed_root = materialized.work_root / "compressed"
+    shutil.copytree(conversion.canonical_root, compressed_root)
+    prior_bytes = {
+        path.relative_to(compressed_root).as_posix(): path.read_bytes()
+        for path in compressed_root.rglob("*.svg")
+    }
+
+    def fake_incomplete(
+        _input_root: Path, output_root: Path, **_kwargs
+    ) -> SimpleNamespace:
+        profile_root = output_root / "balanced"
+        profile_root.mkdir(parents=True)
+        only = profile_root / "units" / "a.svg"
+        only.parent.mkdir(parents=True)
+        only.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
+            encoding="utf-8",
+        )
+        reports = output_root / "reports"
+        reports.mkdir(parents=True)
+        report = reports / "compression-report.csv"
+        candidates = reports / "compression-candidates.csv"
+        run_report = reports / "compression-run.json"
+        report.write_text("file,profile\n", encoding="utf-8")
+        candidates.write_text("file,profile\n", encoding="utf-8")
+        run_report.write_text("{}\n", encoding="utf-8")
+        return SimpleNamespace(
+            profile_root=profile_root,
+            report=report,
+            candidates_report=candidates,
+            run_report=run_report,
+            summary={
+                "assetCount": 1,
+                "compressedAssetCount": 0,
+                "retainedAssetCount": 1,
+                "sourceBytes": only.stat().st_size,
+                "outputBytes": only.stat().st_size,
+                "reclaimedBytes": 0,
+                "reductionPercent": 0.0,
+            },
+            run_info={"renderer": "resvg", "renderer_version": "test"},
+        )
+
+    monkeypatch.setattr(
+        symbol_work,
+        "_compression_tools",
+        lambda: type(
+            "IncompleteCompressionTools",
+            (),
+            {"compress_svg_tree": staticmethod(fake_incomplete)},
+        ),
+    )
+    with pytest.raises(ValueError, match="exactly the canonical asset set"):
+        compress_symbol_work(
+            materialized,
+            archive=archive,
+            build_manifest_path=manifest_path,
+            reports_base=tmp_path / "data" / "reports" / "symbols",
+            project_root=tmp_path,
+        )
+    assert {
+        path.relative_to(compressed_root).as_posix(): path.read_bytes()
+        for path in compressed_root.rglob("*.svg")
+    } == prior_bytes
+    assert load_symbol_manifest(manifest_path)["formatVersion"] == 6
+
     def fake_compress(
         input_root: Path, output_root: Path, **kwargs
     ) -> SimpleNamespace:
@@ -760,57 +827,19 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         "jobs": 4,
     }
 
-    prior_bytes = {
-        path.relative_to(compressed.compressed_root).as_posix(): path.read_bytes()
-        for path in compressed.compressed_root.rglob("*.svg")
-    }
-
-    def fake_incomplete(
-        _input_root: Path, output_root: Path, **_kwargs
-    ) -> SimpleNamespace:
-        profile_root = output_root / "balanced"
-        profile_root.mkdir(parents=True)
-        only = profile_root / "units" / "a.svg"
-        only.parent.mkdir(parents=True)
-        only.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
-            encoding="utf-8",
-        )
-        reports = output_root / "reports"
-        reports.mkdir(parents=True)
-        report = reports / "compression-report.csv"
-        candidates = reports / "compression-candidates.csv"
-        run_report = reports / "compression-run.json"
-        report.write_text("file,profile\n", encoding="utf-8")
-        candidates.write_text("file,profile\n", encoding="utf-8")
-        run_report.write_text("{}\n", encoding="utf-8")
-        return SimpleNamespace(
-            profile_root=profile_root,
-            report=report,
-            candidates_report=candidates,
-            run_report=run_report,
-            summary={
-                "assetCount": 1,
-                "compressedAssetCount": 0,
-                "retainedAssetCount": 1,
-                "sourceBytes": only.stat().st_size,
-                "outputBytes": only.stat().st_size,
-                "reclaimedBytes": 0,
-                "reductionPercent": 0.0,
-            },
-            run_info={"renderer": "resvg", "renderer_version": "test"},
-        )
+    def unexpected_compress(*_args, **_kwargs):
+        raise AssertionError("compression work must not run for downstream manifest states")
 
     monkeypatch.setattr(
         symbol_work,
         "_compression_tools",
         lambda: type(
-            "IncompleteCompressionTools",
+            "UnexpectedCompressionTools",
             (),
-            {"compress_svg_tree": staticmethod(fake_incomplete)},
+            {"compress_svg_tree": staticmethod(unexpected_compress)},
         ),
     )
-    with pytest.raises(ValueError, match="exactly the canonical asset set"):
+    with pytest.raises(ValueError, match="version-6 text-conversion state"):
         compress_symbol_work(
             materialized,
             archive=archive,
@@ -818,11 +847,9 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
             reports_base=tmp_path / "data" / "reports" / "symbols",
             project_root=tmp_path,
         )
-    assert {
-        path.relative_to(compressed.compressed_root).as_posix(): path.read_bytes()
-        for path in compressed.compressed_root.rglob("*.svg")
-    } == prior_bytes
-    assert load_symbol_manifest(manifest_path)["formatVersion"] == 7
+    preserved_manifest = load_symbol_manifest(manifest_path)
+    assert preserved_manifest["formatVersion"] == 7
+    assert preserved_manifest["processing"]["compression"] == compression
 
     with pytest.raises(ValueError, match="version-5 duplicate-detection state"):
         convert_symbol_text(
@@ -836,6 +863,42 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
     preserved_manifest = load_symbol_manifest(manifest_path)
     assert preserved_manifest["formatVersion"] == 7
     assert preserved_manifest["processing"]["compression"] == compression
+
+    publication_report = tmp_path / "publication-map.json"
+    army_map = tmp_path / "army-symbols.js"
+    unit_map = tmp_path / "unit-symbol-map.js"
+    publication_report.write_text("{}\n", encoding="utf-8")
+    army_map.write_text("map\n", encoding="utf-8")
+    unit_map.write_text("map\n", encoding="utf-8")
+    published = add_publication(
+        preserved_manifest,
+        summary={
+            "sourceAssetCount": 3,
+            "canonicalAssetCount": 2,
+            "publishedAssetCount": 2,
+            "factionMappingCount": 0,
+            "unitMappingCount": 0,
+            "staticMappingCount": 0,
+            "publishedBytes": 0,
+        },
+        mapping_report=publication_report,
+        army_map=army_map,
+        unit_map=unit_map,
+        project_root=tmp_path,
+    )
+    write_symbol_manifest(published, manifest_path)
+
+    with pytest.raises(ValueError, match="version-6 text-conversion state"):
+        compress_symbol_work(
+            materialized,
+            archive=archive,
+            build_manifest_path=manifest_path,
+            reports_base=tmp_path / "data" / "reports" / "symbols",
+            project_root=tmp_path,
+        )
+    preserved_published = load_symbol_manifest(manifest_path)
+    assert preserved_published["formatVersion"] == 8
+    assert preserved_published["processing"]["publication"]["status"] == "passed"
 
 
 def test_text_conversion_failure_preserves_existing_canonical_tree(

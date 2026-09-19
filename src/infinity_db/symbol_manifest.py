@@ -267,16 +267,10 @@ def add_compression(
 ) -> dict[str, Any]:
     """Promote text-converted state to version 7 with compression state."""
     validate_symbol_manifest(document)
-    if document.get("formatVersion") not in {
-        SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
-        SYMBOL_BUILD_COMPRESSION_VERSION,
-        SYMBOL_BUILD_VERSION,
-    }:
+    if document.get("formatVersion") != SYMBOL_BUILD_TEXT_CONVERSION_VERSION:
         raise SymbolManifestError(
             "Compression requires version-"
-            f"{SYMBOL_BUILD_TEXT_CONVERSION_VERSION}, version-"
-            f"{SYMBOL_BUILD_COMPRESSION_VERSION}, or version-{SYMBOL_BUILD_VERSION} "
-            "text-converted state"
+            f"{SYMBOL_BUILD_TEXT_CONVERSION_VERSION} text-converted state"
         )
     if document["processing"]["textConversion"]["status"] != "passed":
         raise SymbolManifestError("Compression requires passed text conversion")
@@ -287,7 +281,6 @@ def add_compression(
 
     promoted = json.loads(json.dumps(document))
     promoted["formatVersion"] = SYMBOL_BUILD_COMPRESSION_VERSION
-    promoted["processing"].pop("publication", None)
     promoted["processing"]["compression"] = {
         "status": status,
         "summary": dict(sorted(summary.items())),

@@ -89,6 +89,45 @@ def assert_text_conversion_rejects_later_state(
         )
 
 
+def assert_compression_rejects_later_state(
+    document: dict[str, object],
+    *,
+    report: Path,
+    candidates_report: Path,
+    run_report: Path,
+    project_root: Path,
+) -> None:
+    with pytest.raises(
+        SymbolManifestError,
+        match="Compression requires version-6 text-converted state",
+    ):
+        add_compression(
+            document,
+            status="passed",
+            summary={
+                "assetCount": 0,
+                "compressedAssetCount": 0,
+                "retainedAssetCount": 0,
+                "sourceBytes": 0,
+                "outputBytes": 0,
+                "reclaimedBytes": 0,
+            },
+            report=report,
+            candidates_report=candidates_report,
+            run_report=run_report,
+            profile="balanced",
+            renderer="resvg",
+            target_sizes=[32, 64],
+            dprs=[1.0, 2.0],
+            balanced_precisions=[2, 3],
+            max_rms=0.01,
+            max_changed_fraction=0.01,
+            pixel_diff_threshold=8,
+            jobs=4,
+            project_root=project_root,
+        )
+
+
 def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -> None:
     army = artifact(tmp_path / "army.zip", b"army")
     symbols = artifact(tmp_path / "symbols.zip", b"symbols")
@@ -780,6 +819,13 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         project_root=tmp_path,
     )
     assert document["formatVersion"] == 7
+    assert_compression_rejects_later_state(
+        document,
+        report=compression_report,
+        candidates_report=compression_candidates,
+        run_report=compression_run,
+        project_root=tmp_path,
+    )
     assert_text_conversion_rejects_later_state(
         document,
         report=conversion_report,
@@ -809,6 +855,13 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
 
     assert published["formatVersion"] == 8
     assert published["processing"]["publication"]["status"] == "passed"
+    assert_compression_rejects_later_state(
+        published,
+        report=compression_report,
+        candidates_report=compression_candidates,
+        run_report=compression_run,
+        project_root=tmp_path,
+    )
     assert_text_conversion_rejects_later_state(
         published,
         report=conversion_report,
