@@ -102,6 +102,22 @@ def require_pillow() -> None:
         )
 
 
+class _TeeStream:
+    """Mirror compressor CLI output while retaining it for error diagnostics."""
+
+    def __init__(self, captured: io.StringIO, forwarded: Any) -> None:
+        self._captured = captured
+        self._forwarded = forwarded
+
+    def write(self, text: str) -> int:
+        self._captured.write(text)
+        return self._forwarded.write(text)
+
+    def flush(self) -> None:
+        self._captured.flush()
+        self._forwarded.flush()
+
+
 # ---------------------------------------------------------------------------
 # Data structures
 # ---------------------------------------------------------------------------
@@ -1744,8 +1760,9 @@ def main(argv: list[str] | None = None) -> int:
                 for future in as_completed(futures):
                     index, src, relative, outputs, candidates, failed = future.result()
                     completed[index] = (src, relative, outputs, candidates, failed)
+                    completed_count = len(completed)
                     print(
-                        f"[{index}/{len(files)}] {relative} "
+                        f"[{completed_count}/{len(files)}] {relative} "
                         f"({src.stat().st_size:,} bytes)"
                     )
                     for row in outputs:
@@ -1913,6 +1930,7 @@ def compress_svg_tree(
     svgo: str | None = None,
     resvg: str | None = None,
     inkscape: str | None = None,
+    stream_output: bool = False,
 ) -> CompressionRunResult:
     """Run the standalone compressor through its production CLI contract.
 
@@ -1984,7 +2002,13 @@ def compress_svg_tree(
             if value:
                 argv.extend((flag, value))
         captured = io.StringIO()
-        with redirect_stdout(captured), redirect_stderr(captured):
+        if stream_output:
+            stdout_target = _TeeStream(captured, sys.stdout)
+            stderr_target = _TeeStream(captured, sys.stderr)
+        else:
+            stdout_target = captured
+            stderr_target = captured
+        with redirect_stdout(stdout_target), redirect_stderr(stderr_target):
             exit_code = main(argv)
         if exit_code != 0:
             details = captured.getvalue().strip()

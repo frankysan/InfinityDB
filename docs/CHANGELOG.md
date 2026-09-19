@@ -25,6 +25,9 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Stream orchestrated compression progress through the pipeline console/logging
+  layer so the compression stage shows a monotonic running status indicator and
+  its full per-file transcript is retained in the symbol-build log.
 - Validate the complete published symbol inventory rather than treating only the
   currently browser-referenced subset as the full asset set. New publications
   SHA-bind `symbol-inventory.json`, while browser-only variants remain required

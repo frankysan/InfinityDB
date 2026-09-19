@@ -767,6 +767,7 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
             "pixel_diff_threshold": 8,
             "jobs": 4,
             "renderer": "resvg",
+            "stream_output": True,
         }
         profile_root = output_root / "balanced"
         shutil.copytree(input_root, profile_root)

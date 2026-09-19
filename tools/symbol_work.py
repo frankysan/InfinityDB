@@ -1157,6 +1157,7 @@ def compress_symbol_work(
                 pixel_diff_threshold=pixel_diff_threshold,
                 jobs=jobs,
                 renderer=renderer,
+                stream_output=True,
             )
         except RuntimeError as exc:
             raise ValueError(str(exc)) from exc
