@@ -118,20 +118,23 @@ stage-by-stage acceptance, rollback/reproducibility validation, and guarded
 local deployment packaging. Remaining pipeline items below are follow-up
 refactoring, coverage, and optimization work rather than Milestone 1 blockers.
 
-- [ ] **Milestone 2 — perform a thorough web-app consistency audit.**
-  Trace the application from generated storage through backend queries/API
-  contracts to browser presentation, and resolve semantic or behavioral
-  inconsistencies before beginning the larger visual-design/theming work. The
-  detailed audit checklist is maintained below.
+- [ ] **Milestone 2 — establish the canonical application model and advance
+  1.0 completeness.**
+  Begin with conservative semantic deduplication of data InfinityDB already
+  possesses. Use that work to distinguish canonical player-relevant facts,
+  contextual variation, relationships, provenance, redundant source
+  representation, and normalization-only structure. Then use the resulting
+  source-to-presentation inventory as groundwork for the broader web-app
+  consistency audit. The detailed checklist is maintained below.
 
-Database optimization, canonical-payload refactors, general performance work,
-and product expansion remain deferred until after the consistency audit unless a
-concrete requirement makes them necessary.
+General performance and storage experiments remain deferred unless they become
+necessary to establish semantic correctness, losslessness, or acceptable
+application behavior during this work.
 
 ## Deferred performance and storage experiments
 
-These are intentionally deferred until after the ingestion milestone and web-app
-consistency audit unless one becomes necessary to unblock that work.
+These are intentionally deferred until after the canonical-data and web-app
+consistency work unless one becomes necessary to unblock that work.
 
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
@@ -191,18 +194,98 @@ consistency audit unless one becomes necessary to unblock that work.
 - [ ] Establish a migration policy for future persistent user-authored data;
   imported snapshots are intentionally replaced wholesale today.
 
-## Canonical logical-unit model
+## Milestone 2: canonical data model and application completeness
 
-- [ ] Evaluate a canonical logical-unit payload/delta model.
-  - [ ] Audit fields for invariance across every materialized logical unit before
-    promoting them to shared canonical data.
-  - [ ] Store army-specific membership/availability, loadout/profile differences,
-    and other true variations as explicit deltas rather than repeated full unit
-    payloads where this can be done losslessly.
-  - [ ] Preserve source IDs, exact raw provenance, and reconstructability of the
-    imported Army data even when invariant application fields are deduplicated.
-  - [ ] Treat this as a data-model refactor distinct from the completed maintained-
-    domain-knowledge extraction work.
+Milestone 2 begins the version-1.0 completeness effort by clarifying the
+application-level meaning of the data InfinityDB already possesses.
+
+The first workstream is semantic deduplication and canonicalization. This is
+deliberately performed before the broader web-app consistency audit because it
+helps distinguish distinct player-relevant facts from repeated source
+representation, normalization artifacts, provenance, and contextual variation.
+
+The detailed design and invariants are maintained in `docs/data-model.md`.
+
+- [ ] **Establish the semantic-deduplication baseline.**
+  - [ ] Add a reproducible development audit that reports repeated profile and
+    loadout payloads without modifying the database.
+  - [ ] Define the exact payload components included in equality comparisons.
+  - [ ] Separate semantic fields from source identity, context, ordering, and
+    provenance fields explicitly rather than by undocumented exclusion.
+  - [ ] Record representative equality and difference cases as regression
+    fixtures/tests.
+  - [ ] Treat current snapshot counts as diagnostics, not expected constants.
+
+- [ ] **Canonicalize profile payloads conservatively.**
+  - [ ] Inventory every current profile field and nested relationship.
+  - [ ] Classify each as canonical fact, contextual fact/delta, relationship,
+    source/provenance, or normalization-only structure.
+  - [ ] Prove exact-equality groups before changing storage.
+  - [ ] Design canonical profile payload + source/context occurrence relations.
+  - [ ] Preserve genuine AVA, profile-group, army, and source differences
+    explicitly.
+  - [ ] Preserve characteristics, skills, equipment, weapons, extras, includes,
+    peripherals, and other gameplay-bearing nested information.
+  - [ ] Update repository/API assembly to consume the canonical model without
+    changing player-visible semantics unintentionally.
+  - [ ] Add reconstruction/provenance and behavioral regression tests.
+
+- [ ] **Canonicalize loadout payloads conservatively.**
+  - [ ] Inventory every loadout field and nested relationship.
+  - [ ] Classify canonical facts versus contextual/source differences.
+  - [ ] Compare complete loadout meaning, including points, SWC, minis,
+    disabled state, skills, equipment, weapons, extras, orders,
+    characteristics, includes, and peripherals.
+  - [ ] Design canonical loadout payload + source/context occurrence relations.
+  - [ ] Preserve every genuine army/loadout variation explicitly.
+  - [ ] Update repository/API assembly and regression coverage.
+  - [ ] Measure database size and query behavior as secondary outcomes, without
+    using storage savings as the semantic acceptance criterion.
+
+- [ ] **Extend canonicalization to logical-unit payloads.**
+  - [ ] Audit fields across every existing `logical_unit` for invariance.
+  - [ ] Promote only facts proven invariant or governed by an explicit reviewed
+    semantic rule.
+  - [ ] Keep army membership, availability, source variants, and genuine
+    profile/loadout differences as explicit context.
+  - [ ] Preserve source IDs and full traceability from canonical facts back to
+    supporting source occurrences.
+
+- [ ] **Audit relationships after entity canonicalization.**
+  - [ ] Revisit includes and peripherals and distinguish visible endpoint data
+    from the independently meaningful relationship between those endpoints.
+  - [ ] Audit relation/dependency structures.
+  - [ ] Audit Fireteam structures.
+  - [ ] Identify normalization-only link structures that do not constitute
+    additional player-facing information.
+  - [ ] Record any distinct player-relevant relationship not currently
+    presentable by the application as a 1.0 completeness gap.
+
+- [ ] **Audit catalog and metadata overlap.**
+  - [ ] Compare Army catalogs, occurrence data, and `metadata_*` collections by
+    semantic concept rather than table identity.
+  - [ ] Preserve genuinely distinct weapon modes, profile variants, source
+    metadata, and gameplay contexts.
+  - [ ] Identify player-relevant metadata currently stored but not represented
+    through the application.
+
+- [ ] **Maintain a source-to-presentation completeness inventory while
+  canonicalizing.**
+  - [ ] Trace relevant original Army JSON constructs through normalization,
+    canonical application meaning, repository/API representation, and web
+    presentation.
+  - [ ] Classify each construct as explicitly presented, implicitly represented,
+    operationally consumed, redundant source representation,
+    normalization-only structure, or unrepresented player information.
+  - [ ] Add confirmed unrepresented player information to the 1.0 completeness
+    backlog.
+  - [ ] Do not treat unused tables/columns alone as proof of a completeness gap.
+
+Completion of every possible deduplication opportunity is **not** itself a
+version-1.0 requirement. Canonicalization blocks 1.0 only where unresolved
+duplication prevents InfinityDB from establishing data correctness,
+distinguishing genuinely different player-relevant facts, or satisfying the
+documented completeness requirements.
 
 ## Army snapshot and symbol pipeline
 
@@ -391,12 +474,12 @@ new correctness or reproducibility defect.
   As part of this pass, remove stale statements that call the already-implemented
   `army-symbol-build.json` or snapshot-manifest work merely planned/future work.
 
-## Milestone 2: web-app consistency audit
+## Broader web-app consistency audit
 
-- [ ] Perform a systematic end-to-end consistency audit after the ingestion
-  milestone is complete. This is an audit and bounded correctness-fix milestone,
-  not a Fireteam feature, canonical-payload refactor, visual redesign, or broader
-  frontend restructuring effort.
+- [ ] Perform a systematic end-to-end consistency audit after the canonical-model
+  groundwork above is sufficiently established. This remains an audit and bounded
+  correctness-fix effort rather than a visual redesign or broad frontend
+  restructuring project.
   - [ ] Establish one pinned production audit baseline before inspecting behavior:
     the Git commit, Army snapshot/provenance, generated `infinity.db` and
     `rules.db`, terminal symbol manifest/inventory, and locally published symbol
@@ -405,23 +488,22 @@ new correctness or reproducibility defect.
     document (for example, `docs/audits/web-consistency-YYYY-MM.md`); do not mix
     production observations with synthetic test fixtures.
   - [ ] Create and maintain an explicit audit matrix for each concept, recording
-    its storage representation, repository/application interpretation, API
-    representation, browser consumers, existing coverage, and audit result. Cover
-    logical/source unit identity; army hierarchy, role, and playability;
-    faction/display identity; optional availability; names/slugs; profiles and
-    loadouts; catalog/rules enrichment; distance/range semantics; symbols;
-    source/wiki/rules provenance; filtering/search/sorting/counts; and deep-link
-    identifiers.
+    its source meaning, storage representation, canonical/application
+    interpretation, API representation, browser consumers, existing coverage,
+    and audit result. Cover logical/source unit identity; army hierarchy, role,
+    and playability; faction/display identity; optional availability;
+    names/slugs; profiles and loadouts; catalog/rules enrichment; distance/range
+    semantics; symbols; source/wiki/rules provenance;
+    filtering/search/sorting/counts; and deep-link identifiers.
   - [ ] Begin with the army/unit identity and availability vertical slice. Trace
     `main_army_id` and `display_army_id`, faction grouping, role/playability,
     mercenary and reinforcement availability, logical identity, and their unit
     explorer/detail consumers from storage through the API to the browser.
   - [ ] Audit the backend and API contracts before browser presentation. Trace
-    generated database rows through repository queries and application-level
-    composition (including `SkillCatalog`, `TraitCatalog`, and `CatalogRules`) to
-    the JSON API. Add focused contract coverage wherever intentional behavior is
-    not sufficiently pinned; do not combine this work with database optimization
-    or canonical-payload refactoring.
+    generated database rows through the canonical/application model, repository
+    queries, and application-level composition (including `SkillCatalog`,
+    `TraitCatalog`, and `CatalogRules`) to the JSON API. Add focused contract
+    coverage wherever intentional behavior is not sufficiently pinned.
   - [ ] Audit browser semantic ownership. Inventory domain interpretation in
     browser modules, beginning with `unit.js`, the army selector, catalog detail
     modules, symbol lookup, rules links, and optional-unit filtering. Keep display
@@ -436,10 +518,11 @@ new correctness or reproducibility defect.
     deep-link state, cross-links, optional-unit behavior, source/rules links,
     catalog-item unit usage, and symbol identity. Use a deliberate manual browser
     pass unless lightweight browser automation is added for a concrete audit need.
-  - [ ] Treat Fireteams as storage preservation and deferred-UI scope during this
-    milestone. Verify their imported data is retained and record that no Fireteam
-    repository query, HTTP API, or browser surface currently exists; keep the
-    separately planned rule-aware Fireteams feature as the implementation path.
+  - [ ] Treat Fireteams as preserved source data whose 1.0 presentation remains a
+    separate implementation task. Verify their imported data is retained, record
+    the current absence of a Fireteam repository/API/browser surface, and feed
+    confirmed player-relevant Fireteam information into the 1.0 completeness
+    backlog.
   - [ ] Exercise degraded states deliberately: rules database available versus
     unavailable; clean redistributable source checkout without graphical assets;
     complete local published assets; unknown unit/catalog/trait IDs; empty search
@@ -453,14 +536,14 @@ new correctness or reproducibility defect.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
     coverage where practical. Record intentional deferrals in the audit document
     and TODO rather than silently leaving them unresolved. Keep CI hardening,
-    storage experiments, database optimization, canonical logical-unit payload
-    work, the Changes page, visual theming, and broader UI restructuring outside
-    this milestone unless required for a minimal correctness fix.
-  - [ ] Close with a second storage-to-browser matrix pass, complete normal project
-    checks, and full-asset validation against the pinned production publication
-    when it is available. Update canonical documentation, `TODO.md`, and
-    `CHANGELOG.md` for material findings before starting the later visual-design,
-    frontend-architecture, or theming work.
+    unrelated storage experiments, the Changes page, visual theming, and broader
+    UI restructuring outside this audit unless required for a minimal correctness
+    or 1.0-completeness fix.
+  - [ ] Close with a second source-to-storage-to-browser matrix pass, complete
+    normal project checks, and full-asset validation against the pinned production
+    publication when it is available. Update canonical documentation, `TODO.md`,
+    and `CHANGELOG.md` for material findings before starting the later
+    visual-design, frontend-architecture, or theming work.
 
 ## Visual design, frontend architecture, and theming
 

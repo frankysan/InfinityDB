@@ -244,21 +244,330 @@ The enforced invariants are:
 - repository reads consume the materialized relation and do not repeat generic,
   mercenary, reinforcement, or alias identity resolution.
 
-### Design direction: canonical logical-unit payload and source deltas
+### Canonical application model and semantic deduplication
 
-The current materialized relation answers **which source rows belong to one
-logical unit**, but repository/API assembly still reads shared data from source
-rows. A later normalization/modeling pass should evaluate whether each logical
-unit can have one canonical application payload for fields proven invariant
-across its source rows, with army occurrences, profiles/loadouts, and other
-source-specific records storing only meaningful differences.
+The materialized logical-unit relation currently answers:
 
-That future deduplication must remain lossless: original source IDs, raw rows,
-army membership, availability provenance, source/profile identity, and genuine
-loadout/profile differences must remain recoverable. Fields should be promoted
-to the canonical logical-unit payload only after an audit demonstrates that they
-are invariant or that an explicit precedence rule is justified. This is a
-design direction, not current behavior.
+> Which source unit records belong to the same application-level unit?
+
+It does not yet answer:
+
+> Which facts carried by those source records are the same fact, and which
+> differences are meaningful context?
+
+Repository/API assembly therefore still reconstructs application objects from
+repeated source-backed profile, loadout, option, occurrence, and army records.
+This is correct and source-faithful, but it makes semantic completeness harder
+to reason about and causes the application layer to repeatedly merge information
+that is often identical.
+
+InfinityDB will progressively introduce a canonical application model between
+the normalized source model and repository/API presentation.
+
+```text
+Infinity Army JSON
+        |
+        v
+merged / normalized source model
+  lossless, source-oriented, may be repetitive
+        |
+        v
+canonical application model
+  semantic identities + canonical facts + contextual deltas
+        |
+        v
+repository / HTTP API
+        |
+        v
+web presentation
+```
+
+#### Purpose
+
+Canonicalization has two equal goals:
+
+1. represent the same player-relevant fact once where equivalence can be proven;
+2. make it possible to audit whether every distinct player-relevant fact reaches
+   the application and web presentation.
+
+Database-size reduction and query-performance improvements are useful possible
+consequences, but are not the semantic criterion for performing a
+deduplication.
+
+#### Source structure is not application semantics
+
+Normalized tables are intentionally derived from the structure of the Army JSON.
+A normalized table, link row, occurrence row, position, or foreign key does not
+by itself establish that Infinity Army contains an additional independent
+player-facing datapoint.
+
+For example, a nested source relationship may become a dedicated relational
+table while the referenced model also appears through ordinary profile/loadout
+records. The application-level audit must therefore trace the meaning of the
+original source construct rather than count normalized tables or columns.
+
+The relevant pipeline for completeness analysis is:
+
+```text
+original source construct
+        |
+        v
+normalized representation
+        |
+        v
+canonical application meaning
+        |
+        v
+repository/API representation
+        |
+        v
+web presentation
+```
+
+#### Semantic classification
+
+During canonicalization, each source-backed value or relationship should be
+classified according to its application meaning.
+
+### Canonical fact
+
+A fact that is invariant for the logical entity and can be stored once without
+losing meaning. Examples may include invariant statistics, names,
+classifications, or complete profile/loadout payloads proven identical across
+source occurrences.
+
+### Contextual fact or delta
+
+A genuine variation that applies only in a particular army, sectorial,
+availability mode, profile, loadout, or other context. Contextual differences
+must remain explicit rather than being hidden by precedence rules or arbitrary
+representative selection.
+
+Examples may include army-specific AVA, points/SWC differences, availability
+category, disabled status, or other source variations discovered during the
+audit.
+
+### Relationship
+
+A meaningful association between canonical entities, such as an included model,
+peripheral, dependency, Fireteam membership, or another gameplay relationship.
+Normalization may represent the relationship separately from the entities it
+connects. The relationship must be evaluated on its own player-facing meaning.
+
+### Source/provenance fact
+
+Information required to identify where a canonical fact or contextual delta
+came from, but which is not itself normally player-facing. Examples include
+source document identity, source row IDs, positions, hashes, and source
+revisions.
+
+### Normalization-only structure
+
+Structure created because nested JSON was converted into relational data.
+Normalization-only structure is not counted as an additional player-relevant
+datapoint unless the original source relationship itself has independent
+gameplay meaning.
+
+These classifications are semantic rather than tied permanently to individual
+columns. A field may prove canonical in one domain and contextual in another.
+
+#### Invariants
+
+Canonicalization must preserve all of the following:
+
+- every source-defined record remains recoverable from the lossless source/raw
+  layers;
+- every canonical application record can be traced to one or more supporting
+  source occurrences;
+- no genuine source variation is discarded merely because most occurrences are
+  identical;
+- army membership and `army_units.availability_kind` remain explicit source
+  provenance;
+- canonicalization never depends solely on numeric-ID conventions;
+- current curated identity rules remain pinned and reproducible;
+- normalization warnings and source anomalies remain visible rather than being
+  silently resolved by deduplication;
+- application identity must not imply source ownership, playability, or
+  availability unless those semantics are independently established;
+- equivalent presentation does not prove equivalent source semantics;
+- deduplication must not prevent reconstruction or auditing of the source
+  evidence that produced the application record.
+
+#### Exact equality before semantic equivalence
+
+The first implementation stages must deduplicate only records whose complete
+application-relevant payloads are exactly equal after contextual identity and
+provenance fields have been deliberately excluded.
+
+This is intentionally conservative.
+
+Records must not be merged merely because they have:
+
+- the same or similar name;
+- the same profile or option number;
+- similar statistics;
+- related source IDs;
+- the same visible browser rendering;
+- an apparent generic/mercenary/reinforcement relationship that has not already
+  been established through maintained identity evidence.
+
+When non-identical records appear to represent the same logical concept, the
+difference must first be classified. It may be:
+
+- a genuine contextual delta;
+- provenance;
+- a normalization artifact;
+- redundant source representation;
+- an upstream inconsistency;
+- or evidence that the records should remain separate.
+
+Only after that distinction is understood should a broader canonicalization
+rule be introduced.
+
+#### Initial empirical baseline
+
+The frontend database built from the Army snapshot acquired on 2026-09-18
+contains substantial exact repetition even under a conservative comparison of
+complete profile/loadout payloads and their nested gameplay content.
+
+Profiles:
+
+- 5,020 stored profile occurrences;
+- 1,479 distinct complete payloads when deduplicated only within each source
+  unit;
+- 3,541 repeated occurrences, approximately 70.5%;
+- 1,430 distinct payloads when existing materialized logical-unit identity is
+  also taken into account;
+- 3,590 repeated occurrences, approximately 71.5%.
+
+Loadouts:
+
+- 12,993 stored loadout occurrences;
+- 4,210 distinct complete payloads when deduplicated only within each source
+  unit;
+- 8,783 repeated occurrences, approximately 67.6%;
+- 4,067 distinct payloads when existing materialized logical-unit identity is
+  also taken into account;
+- 8,926 repeated occurrences, approximately 68.7%.
+
+These figures are investigative evidence, not database invariants. Snapshot
+contents will change, and the canonical schema must not depend on these
+particular counts.
+
+They demonstrate that useful semantic deduplication can begin with exact
+equality rather than heuristic matching.
+
+#### First implementation targets
+
+### 1. Profile payloads
+
+Establish a canonical profile identity/payload independent of the source
+occurrence that carries it.
+
+The audit must determine which current profile fields are:
+
+- invariant profile facts;
+- army/context-specific values;
+- profile-group relationships;
+- presentation metadata;
+- or source provenance.
+
+Nested characteristics, skills, equipment, weapons, extras, includes, and
+peripheral relationships must participate in equality testing where they affect
+the profile's meaning.
+
+A profile occurrence should ultimately be able to reference one canonical
+profile payload plus any explicit contextual differences required by that
+occurrence.
+
+### 2. Loadout payloads
+
+Apply the same model to loadouts after the profile model is understood.
+
+Equality must account for the complete loadout meaning, including points, SWC,
+minis, disabled state, skills, equipment, weapons, extras, orders,
+characteristics, includes, peripherals, and any other modeled gameplay-bearing
+fields.
+
+Source `option_id`, army/group membership, source position, and similar
+provenance/context fields must not automatically define a separate canonical
+payload.
+
+A loadout occurrence should ultimately reference one canonical loadout payload
+plus explicit contextual differences.
+
+### 3. Canonical unit payload
+
+Once profile and loadout behavior is understood, audit the fields currently
+repeated across the source units belonging to each `logical_unit`.
+
+Promote only fields demonstrated to be invariant or governed by an explicit,
+reviewed semantic rule. Army memberships, availability occurrences,
+source-specific variants, and genuine differences remain separate.
+
+### 4. Relationships
+
+Re-evaluate includes, peripherals, dependencies, relations, Fireteams, and
+similar structures after the entities they reference have stable canonical
+identities.
+
+The audit must distinguish:
+
+- the existence of a related entity;
+- the relationship between entities;
+- repeated presentation of that entity elsewhere;
+- and normalization-only relational structure.
+
+A relationship is not automatically redundant merely because both endpoint
+entities are already visible in the UI.
+
+### 5. Catalog and metadata overlap
+
+After unit/profile/loadout canonicalization, examine overlapping information
+between Army catalogs, occurrence tables, and `metadata_*` collections.
+
+Canonicalize only where the sources demonstrably describe the same application
+concept. Preserve source-specific metadata and alternate modes where they carry
+distinct gameplay meaning.
+
+#### Relationship to version 1.0.0 completeness
+
+Semantic deduplication is an investigative path toward the 1.0.0 requirement,
+not a requirement that every source table be physically minimized before 1.0.
+
+For each source construct encountered during this work, record whether its
+player-relevant meaning is:
+
+- explicitly presented;
+- implicitly represented by another presented structure;
+- operationally consumed without direct presentation;
+- redundant with another source representation;
+- normalization-only structure;
+- or currently unrepresented in the application.
+
+An item becomes a 1.0 completeness gap when distinct player-relevant information
+cannot be accessed through the web application. Repetition in the normalized
+source model alone is not a completeness defect.
+
+Conversely, the fact that an entity appears somewhere in the UI does not prove
+that all useful relationships involving that entity are represented.
+
+#### Non-goals
+
+This work does not:
+
+- rewrite the acquired Army JSON;
+- make the normalized source model lossy;
+- merge records based on superficial similarity;
+- eliminate provenance to reduce database size;
+- require every canonicalization opportunity to be completed before 1.0;
+- require specialized final-form UI for every newly identified datapoint;
+- include ITS-specific data in the 1.0 scope.
+
+The work may change the frontend database schema, repository assembly, and API
+contracts where that produces a clearer canonical application model. Such
+changes must use the normal database compatibility/versioning process and carry
+regression coverage proving that meaningful source variation is preserved.
 
 Legacy duplicate matching is now a build-compatibility concern. When older
 normalized inputs lack the persisted generic or mercenary evidence, database

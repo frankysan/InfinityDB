@@ -340,12 +340,48 @@ persisted generic and mercenary matches and the database-build reinforcement
 audit into frontend-only `logical_units` and `logical_unit_sources` tables.
 Every source-defined unit maps to exactly one logical unit.
 
-A later data-model refactor may materialize a canonical application payload per
-logical unit and represent army/loadout/source-specific information as explicit
-deltas. That work must be field-by-field and lossless: source IDs, raw rows,
-availability, army membership, and genuine profile/loadout differences remain
-provenance even if repeated invariant fields are promoted to the canonical
-logical-unit payload.
+### Canonical application data and semantic deduplication
+
+InfinityDB will progressively separate its **lossless source model** from a
+**canonical application model**.
+
+The merged and normalized source layers remain source-oriented and lossless.
+Repeated records in those layers are not inherently defects: repetition may
+represent provenance, army context, source-document structure, or the way the
+Infinity Army API expresses relationships. Source rows must not be physically
+merged merely because their payloads appear equivalent.
+
+The frontend/application model has different requirements. It should represent
+each distinct player-relevant fact once where that can be established safely,
+and represent genuine contextual differences explicitly rather than repeating
+complete payloads solely because the same information appeared in several
+source documents.
+
+The existing `logical_units` and `logical_unit_sources` relation is the first
+application-level identity layer. It establishes which source unit records
+represent one logical unit while preserving every source occurrence. The next
+stage extends this principle from **identity deduplication** to **semantic
+payload deduplication**.
+
+Semantic deduplication must be evidence-driven and lossless:
+
+- exact semantic equality is the first and safest deduplication criterion;
+- similarity of names, IDs, or payloads is never sufficient by itself;
+- genuine army-, profile-, loadout-, source-, or availability-specific
+  differences remain explicit contextual data;
+- normalization-only structures must not automatically be interpreted as
+  independent player-facing facts;
+- source IDs, source rows, army membership, availability provenance, and
+  reconstructability remain preserved even when application payloads are
+  canonicalized;
+- every deduplicated application record must remain traceable to the source
+  occurrences that support it.
+
+This canonicalization work is also part of the version-1.0 completeness effort.
+Determining whether two source structures represent one fact or several distinct
+facts clarifies what information InfinityDB must ultimately expose to players.
+The goal is therefore not database-size reduction by itself. Storage and query
+improvements are secondary benefits of a clearer semantic model.
 
 The build-time resolver treats those inputs as identity evidence, combines their
 transitive connected components, selects one deterministic representative,
