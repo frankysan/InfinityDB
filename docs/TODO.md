@@ -221,7 +221,7 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
   - [x] Classify each as canonical fact, contextual fact/delta, relationship,
     source/provenance, or normalization-only structure.
   - [x] Prove exact-equality groups before changing storage.
-  - [ ] Design canonical profile payload + source/context occurrence relations.
+  - [x] Design canonical profile payload + source/context occurrence relations.
   - [ ] Preserve genuine AVA, profile-group, army, and source differences
     explicitly.
   - [ ] Preserve characteristics, skills, equipment, weapons, extras, includes,

@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB profile semantics audit"
-REPORT_FORMAT_VERSION = 1
+REPORT_FORMAT_VERSION = 2
 
 PROFILE_KEY = ("army_id", "unit_id", "group_id", "profile_id")
 SOURCE_PROFILE_KEY = ("unit_id", "group_id", "profile_id")
@@ -69,6 +69,7 @@ EXPECTED_COLUMNS: dict[str, tuple[str, ...]] = {
     "profile_weapon_extras": ("occurrence_id", "position", *EXTRA_FIELDS),
     "profile_includes": (*PROFILE_KEY, "position", *INCLUDE_FIELDS),
     "profile_peripherals": ("occurrence_id", *PROFILE_KEY, "position", *ITEM_FIELDS),
+    "logical_unit_sources": ("source_unit_id", "logical_unit_id"),
     "__infinity_metadata": ("key", "value"),
 }
 
@@ -289,6 +290,28 @@ RELATIONSHIP_CLASSIFICATION: dict[str, dict[str, Any]] = {
     },
 }
 
+
+CANDIDATE_PAYLOAD_FIELDS = tuple(
+    field
+    for field in PROFILE_FIELDS
+    if field
+    not in {
+        "army_id",
+        "unit_id",
+        "group_id",
+        "profile_id",
+        "position",
+        "ava",
+        "logo",
+    }
+)
+CANDIDATE_PAYLOAD_RELATIONSHIPS = (
+    "characteristics",
+    "skills",
+    "equipment",
+    "weapons",
+)
+CANDIDATE_CONTEXT_RELATIONSHIPS = ("includes", "peripherals", "profile_groups")
 
 class ProfileSemanticsAuditError(ValueError):
     """Raised when a database cannot be classified safely."""
@@ -628,6 +651,91 @@ def _variant_identity_count(
     return count
 
 
+
+def _candidate_payload(
+    profile: Mapping[str, Any],
+    relationship_rows: Mapping[str, Mapping[tuple[Any, ...], list[dict[str, Any]]]],
+    extras: Mapping[str, Mapping[Any, list[dict[str, Any]]]],
+) -> dict[str, Any]:
+    parent = _row_key(profile, PROFILE_KEY)
+    payload = {field: profile[field] for field in CANDIDATE_PAYLOAD_FIELDS}
+    for name in CANDIDATE_PAYLOAD_RELATIONSHIPS:
+        payload[name] = _relationship_payload(
+            name,
+            relationship_rows[name].get(parent, []),
+            extras=extras.get(name),
+            normalize_representation=False,
+        )
+    return payload
+
+
+def _candidate_model_evidence(
+    connection: sqlite3.Connection,
+    profile_rows: list[dict[str, Any]],
+    relationship_rows: Mapping[str, Mapping[tuple[Any, ...], list[dict[str, Any]]]],
+    extras: Mapping[str, Mapping[Any, list[dict[str, Any]]]],
+) -> dict[str, Any]:
+    logical_units = {
+        row["source_unit_id"]: row["logical_unit_id"]
+        for row in connection.execute(
+            "SELECT source_unit_id, logical_unit_id "
+            "FROM logical_unit_sources ORDER BY source_unit_id"
+        )
+    }
+    source_payloads: set[tuple[int, str]] = set()
+    logical_payloads: set[tuple[int, str]] = set()
+    for profile in profile_rows:
+        source_unit_id = profile["unit_id"]
+        try:
+            logical_unit_id = logical_units[source_unit_id]
+        except KeyError as exc:
+            raise ProfileSemanticsAuditError(
+                f"Source unit {source_unit_id} has no logical-unit mapping"
+            ) from exc
+        payload = _candidate_payload(profile, relationship_rows, extras)
+        fingerprint = hashlib.sha256(
+            _canonical_json(payload).encode("utf-8")
+        ).hexdigest()
+        source_payloads.add((source_unit_id, fingerprint))
+        logical_payloads.add((logical_unit_id, fingerprint))
+
+    occurrence_count = len(profile_rows)
+    logical_count = len(logical_payloads)
+    repeated = occurrence_count - logical_count
+    return {
+        "status": "design_candidate",
+        "scope": "logical_unit",
+        "payloadFields": list(CANDIDATE_PAYLOAD_FIELDS),
+        "payloadRelationships": list(CANDIDATE_PAYLOAD_RELATIONSHIPS),
+        "occurrenceContextFields": [
+            "army_id",
+            "unit_id",
+            "group_id",
+            "profile_id",
+            "position",
+            "ava",
+            "logo",
+        ],
+        "deferredContextRelationships": list(CANDIDATE_CONTEXT_RELATIONSHIPS),
+        "representationPolicy": (
+            "Preserve exact display_order, quantity, raw, and relative ordering in the "
+            "first canonical payload model; diagnostic representation normalization is not "
+            "yet an application rule."
+        ),
+        "profileOccurrenceCount": occurrence_count,
+        "sourceUnitDistinctPayloadCount": len(source_payloads),
+        "logicalUnitDistinctPayloadCount": logical_count,
+        "additionalDistinctPayloadReductionFromLogicalIdentity": (
+            len(source_payloads) - logical_count
+        ),
+        "repeatedOccurrenceCount": repeated,
+        "repeatPercent": round(
+            (repeated / occurrence_count * 100) if occurrence_count else 0.0,
+            2,
+        ),
+    }
+
+
 def _profile_group_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
     rows = [dict(row) for row in connection.execute(
         "SELECT * FROM profile_groups ORDER BY army_id, unit_id, group_id"
@@ -669,6 +777,9 @@ def audit_database(path: Path) -> dict[str, Any]:
             "weapons": _extras_by_occurrence(connection, "profile_weapon_extras"),
         }
         metadata = _metadata(connection)
+        candidate_model = _candidate_model_evidence(
+            connection, profile_rows, relationship_rows, extras
+        )
         staged = {
             "baselineVariantIdentityCount": _variant_identity_count(
                 profile_rows, relationship_rows, extras
@@ -720,6 +831,7 @@ def audit_database(path: Path) -> dict[str, Any]:
             ),
             "profileGroups": _profile_group_evidence(connection),
             "relationships": relationships,
+            "candidateModel": candidate_model,
             "representationNormalization": {
                 "displayOrder": (
                     "Ignored only in the diagnostic normalized view. Source display_order is "
@@ -768,6 +880,13 @@ def main(argv: list[str] | None = None) -> int:
         f"{summary['withoutAvaOrLogoVariantIdentityCount']} without AVA/logo -> "
         f"{summary['withoutAvaOrLogoAndNormalizedRepresentationVariantIdentityCount']} "
         "after representation normalization"
+    )
+    candidate = report["candidateModel"]
+    print(
+        "Initial canonical-payload candidate: "
+        f"{candidate['logicalUnitDistinctPayloadCount']} logical-unit payloads from "
+        f"{candidate['profileOccurrenceCount']} occurrences "
+        f"({candidate['repeatPercent']:.2f}% reusable occurrences)"
     )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)

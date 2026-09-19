@@ -73,6 +73,13 @@ def _fixture_database(tmp_path: Path) -> Path:
                 sort_keys=True,
             ),
         )
+        for unit_id in range(1, 6):
+            _insert(
+                connection,
+                "logical_unit_sources",
+                source_unit_id=unit_id,
+                logical_unit_id=unit_id,
+            )
 
         # Each source-profile key occurs in two armies.  The five keys isolate
         # AVA, logo, representation-only skill data, real skill data, and WIP.
@@ -181,6 +188,24 @@ def test_profile_semantics_stages_context_and_representation_variation(tmp_path:
     assert report["fields"]["logo"]["sameSourceVariantIdentityCount"] == 1
     assert report["fields"]["wip"]["sameSourceVariantIdentityCount"] == 1
 
+    candidate = report["candidateModel"]
+    assert candidate["scope"] == "logical_unit"
+    assert candidate["profileOccurrenceCount"] == 10
+    assert candidate["sourceUnitDistinctPayloadCount"] == 8
+    assert candidate["logicalUnitDistinctPayloadCount"] == 8
+    assert candidate["repeatedOccurrenceCount"] == 2
+    assert candidate["payloadRelationships"] == [
+        "characteristics",
+        "skills",
+        "equipment",
+        "weapons",
+    ]
+    assert candidate["deferredContextRelationships"] == [
+        "includes",
+        "peripherals",
+        "profile_groups",
+    ]
+
     skills = report["relationships"]["skills"]
     assert skills["sameSourceRawVariantIdentityCount"] == 2
     assert skills["sameSourceNormalizedVariantIdentityCount"] == 1
@@ -216,6 +241,47 @@ def test_profile_semantics_rejects_unclassified_schema_drift(tmp_path: Path) -> 
         audit_database(database)
 
 
+def test_candidate_payloads_reuse_exact_payload_across_one_logical_unit(
+    tmp_path: Path,
+) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "UPDATE logical_unit_sources SET logical_unit_id = 1 WHERE source_unit_id = 2"
+        )
+        connection.execute(
+            "UPDATE profiles SET name = 'Profile 1' WHERE unit_id = 2"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    candidate = audit_database(database)["candidateModel"]
+
+    assert candidate["sourceUnitDistinctPayloadCount"] == 8
+    assert candidate["logicalUnitDistinctPayloadCount"] == 7
+    assert candidate["additionalDistinctPayloadReductionFromLogicalIdentity"] == 1
+
+
+def test_profile_semantics_requires_complete_logical_unit_mapping(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "DELETE FROM logical_unit_sources WHERE source_unit_id = 5"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(
+        ProfileSemanticsAuditError,
+        match="Source unit 5 has no logical-unit mapping",
+    ):
+        audit_database(database)
+
+
 def test_profile_semantics_is_read_only_and_json_is_deterministic(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
@@ -231,6 +297,9 @@ def test_profile_semantics_is_read_only_and_json_is_deterministic(
     assert first.read_bytes() == second.read_bytes()
 
     report = json.loads(first.read_text(encoding="utf-8"))
+    assert report["formatVersion"] == 2
     assert report["sourceProfileKey"] == ["unit_id", "group_id", "profile_id"]
     assert "not a proposed canonical" in report["sourceProfileKeyCaveat"]
-    assert "Profiles: 10 occurrences" in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert "Profiles: 10 occurrences" in output
+    assert "8 logical-unit payloads from 10 occurrences" in output

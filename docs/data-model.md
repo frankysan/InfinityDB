@@ -693,6 +693,165 @@ Conversely, the large AVA-only and representation-only populations demonstrate
 that preserving every full source payload in the application model is also
 unnecessary.
 
+##### Accepted initial profile-payload design
+
+**Design direction — not yet implemented.** The first storage refactor will
+canonicalize reusable **profile payloads**, not introduce a new global semantic
+profile identity. A payload remains scoped to one existing `logical_unit`; two
+unrelated units are not merged merely because their profile data happens to be
+identical.
+
+The design deliberately stops at exact application-payload equality. It does
+not yet try to factor every army-specific gameplay difference into fine-grained
+field deltas. This keeps the first migration mechanically provable and leaves
+broader semantic equivalence for later evidence-driven work.
+
+For the 2026-09-18 database, the proposed first boundary gives:
+
+- 5,020 source profile occurrences;
+- 1,163 distinct candidate payloads when scoped by source unit;
+- 1,108 distinct candidate payloads when scoped by materialized logical unit;
+- 55 additional duplicate payloads exposed by existing logical-unit identity;
+- 3,912 repeated occurrences represented by those 1,108 logical-unit payloads,
+  approximately 77.93% of stored profile occurrences.
+
+`tools/audit_profile_semantics.py` reports these values under `candidateModel`.
+They remain snapshot diagnostics, not schema constants.
+
+###### Payload boundary
+
+The initial reusable payload contains the exact current values of:
+
+- `name`, `type_id`, `move_1`, `move_2`, `cc`, `bs`, `ph`, `wip`, `arm`, `bts`,
+  `vitality`, `silhouette`, `is_structure`, and `notes`;
+- characteristics, preserving their relative order;
+- skills plus extras;
+- equipment plus extras;
+- weapons plus extras.
+
+Skill/equipment/weapon payloads initially preserve exact `display_order`,
+`quantity`, `raw`, and relative ordering. The audit has shown some
+`display_order` and omitted-versus-`1` quantity differences to be
+representation-only in the current snapshot, but that diagnostic normalization
+is **not** promoted into the first storage contract. Those records remain
+separate payloads until application behavior and source meaning justify a
+normalization rule explicitly.
+
+The following stay outside the reusable payload:
+
+- `army_id`, `unit_id`, `group_id`, and `profile_id` — source/provenance keys;
+- profile `position` — occurrence ordering/context;
+- `ava` — army-contextual gameplay data;
+- `logo` — observed army-contextual presentation data;
+- profile-group `category_id`, `isc`, `notes`, and group ordering — profile-group
+  context;
+- `profile_includes` — references to army/unit-local loadout identities;
+- `profile_peripherals` — references to army-local peripheral identities.
+
+Includes and peripherals are intentionally deferred because their numeric target
+identities are contextual. They remain losslessly available through the current
+source tables until the related entities have canonical identities of their own.
+They must not be dropped merely because they are outside the first reusable
+payload.
+
+The 16 residual contextual variants identified by the classification audit are
+therefore handled conservatively: WIP, characteristic, or skill differences
+produce **different payloads**. Only AVA, logo, source identity, ordering, and
+the deferred context-local relationships are separated from the payload in this
+first model. A later layer may group multiple payload variants under a stronger
+semantic profile identity, but that is not required for the first migration.
+
+###### Derived application tables
+
+The intended application-side shape is:
+
+```text
+profile_payloads
+  id                  internal deterministic payload row ID
+  logical_unit_id     owning application logical unit
+  payload_sha256      SHA-256 of versioned canonical payload serialization
+  name
+  type_id
+  move_1 / move_2
+  cc / bs / ph / wip / arm / bts
+  vitality / silhouette / is_structure
+  notes
+
+profile_payload_occurrences
+  army_id
+  unit_id
+  group_id
+  profile_id
+  profile_payload_id
+  position
+  ava
+  logo
+
+profile_payload_characteristics
+profile_payload_skills
+profile_payload_skill_extras
+profile_payload_equipment
+profile_payload_equipment_extras
+profile_payload_weapons
+profile_payload_weapon_extras
+```
+
+`profile_payload_occurrences` is one-to-one with the current source `profiles`
+rows. Its composite source key remains `(army_id, unit_id, group_id,
+profile_id)` and references exactly one reusable payload. The source `profiles`
+and nested source tables remain unchanged for provenance and lossless auditing.
+
+The nested payload tables use payload-relative ordering rather than copying the
+source `occurrence_id` surrogate into the canonical layer. Extras remain linked
+to the specific payload relationship occurrence. This keeps normalization-only
+source identifiers out of application identity while preserving ordered
+relationship meaning.
+
+`payload_sha256` is a deterministic fingerprint of a versioned canonical JSON
+serialization of the reusable payload. Payload equality is still scoped by
+`logical_unit_id`; the hash does not authorize merging identical payload bytes
+across unrelated logical units. Implementations must compare/validate the
+serialized payload when coalescing rows rather than treating a hash match as
+independent semantic evidence.
+
+The integer `profile_payloads.id` is an internal database key, assigned
+deterministically from the sorted `(logical_unit_id, payload_sha256)` set for a
+build. It is not a public API identifier and is not promised stable across
+snapshots when source payloads change.
+
+###### Build and read-path invariants
+
+The first implementation must enforce all of the following:
+
+- every source profile occurrence maps to exactly one `profile_payload`;
+- every payload has at least one supporting source occurrence;
+- the occurrence's source unit maps to the same `logical_unit` that owns the
+  payload;
+- identical candidate payloads inside one logical unit reuse one payload row;
+- WIP, characteristics, skills, equipment, weapons, extras, `raw`, and exact
+  representation values remain distinct whenever they differ;
+- AVA and logo retain their source occurrence values rather than being selected
+  from a representative row;
+- profile-group context remains attached through the source occurrence key;
+- includes and peripherals remain available through their existing contextual
+  source relationships until their own canonicalization stage;
+- current source and raw tables are not rewritten or made lossy;
+- non-null `raw` fallback content participates in payload equality and can never
+  be silently discarded;
+- canonical-profile IDs remain internal and must not leak into public URLs or
+  API contracts during this migration.
+
+Repository migration should then be mechanical: assemble the same public profile
+objects through `profile_payload_occurrences -> profile_payloads` and the nested
+payload tables while retaining existing army/profile-group context. The current
+HTTP/browser result is the behavioral acceptance criterion; canonicalization
+must not intentionally change player-visible profile semantics as part of the
+storage refactor.
+
+Before switching the read path, regression coverage must prove source-to-payload
+traceability and compare representative repository/API results before and after
+the migration. Only after that equivalence is established should the existing
+query-time profile deduplication logic be simplified or removed.
 
 #### First implementation targets
 
