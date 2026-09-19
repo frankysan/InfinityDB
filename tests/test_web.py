@@ -824,6 +824,7 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
     package_root = tmp_path / "package"
     fixture_paths = (
         "static/armies/test/101-test.svg",
+        "static/characteristics/cube.svg",
         "static/orders/regular.svg",
         "static/units/test/1-test.svg",
     )
@@ -837,6 +838,7 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
 
     for url in (
         "/static/armies/test/101-test.svg",
+        "/static/characteristics/cube.svg",
         "/static/orders/regular.svg",
         "/static/units/test/1-test.svg",
     ):
@@ -844,6 +846,10 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert body == svg
+
+    for url in ("/static/orders/cube.svg", "/static/characteristics/regular.svg"):
+        status, _, _ = request(app, url)
+        assert status == 404
 
 
 @pytest.mark.full_assets
@@ -1211,20 +1217,19 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
 @pytest.mark.full_assets
 @pytest.mark.parametrize(
     "symbol",
-    [
-        "regular",
-        "irregular",
-        "peripheral",
-        "impetuous",
-        "tactical",
-        "lieutenant",
-        "hackable",
-        "cube",
-        "cube-2",
-    ],
+    ["regular", "irregular", "impetuous", "tactical", "lieutenant"],
 )
 def test_order_symbols_are_served(app: Callable, symbol: str) -> None:
     status, headers, body = request(app, f"/static/orders/{symbol}.svg")
+    assert status == 200
+    assert headers["content-type"] == "image/svg+xml"
+    assert b"<svg" in body
+
+
+@pytest.mark.full_assets
+@pytest.mark.parametrize("symbol", ["peripheral", "hackable", "cube", "cube-2"])
+def test_characteristic_symbols_are_served(app: Callable, symbol: str) -> None:
+    status, headers, body = request(app, f"/static/characteristics/{symbol}.svg")
     assert status == 200
     assert headers["content-type"] == "image/svg+xml"
     assert b"<svg" in body
@@ -1245,6 +1250,7 @@ def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -
     assert b"function generalLieutenantOrderCount(profiles, loadouts)" in body
     assert b'Array(lieutenantOrderCount([loadout])).fill("lieutenant")' in body
     assert b"function characteristicSymbolTypes(profiles)" in body
+    assert b"symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`" in body
     assert b"symbol.title = symbolLabels[symbolType]" in body
     assert b'"profile-summary loadout-start"' in body
 

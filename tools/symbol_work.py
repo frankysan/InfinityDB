@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 import re
@@ -1049,6 +1050,47 @@ def convert_symbol_text(
     )
 
 
+def _bind_compression_output_hashes(
+    report: Path,
+    *,
+    profile_root: Path,
+    canonical_paths: list[str],
+) -> None:
+    """Bind each balanced compression-report row to its exact output bytes."""
+    try:
+        with report.open("r", encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            fieldnames = list(reader.fieldnames or [])
+            rows = list(reader)
+    except OSError as exc:
+        raise ValueError(f"Could not load compression report {report}: {exc}") from exc
+    if "file" not in fieldnames or "profile" not in fieldnames:
+        raise ValueError("Compression report requires file/profile columns")
+    if "output_sha256" not in fieldnames:
+        fieldnames.append("output_sha256")
+
+    expected = set(canonical_paths)
+    seen: set[str] = set()
+    for row in rows:
+        if row.get("profile") != "balanced":
+            continue
+        relative = row.get("file")
+        if not isinstance(relative, str) or relative not in expected:
+            raise ValueError(f"Compression report contains unexpected balanced asset: {relative}")
+        if relative in seen:
+            raise ValueError(f"Compression report repeats balanced asset: {relative}")
+        seen.add(relative)
+        output = profile_root.joinpath(*_portable_member(relative).parts)
+        row["output_sha256"] = sha256_file(output)
+    if seen != expected:
+        raise ValueError("Compression report does not cover exactly the canonical asset set")
+
+    with report.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def compress_symbol_work(
     materialized: MaterializedSymbols,
     *,
@@ -1148,6 +1190,12 @@ def compress_symbol_work(
                 raise ValueError(
                     f"Compressed SVG unexpectedly contains active text: {relative}"
                 )
+
+        _bind_compression_output_hashes(
+            result.report,
+            profile_root=result.profile_root,
+            canonical_paths=canonical_paths,
+        )
 
         source_bytes = int(result.summary["sourceBytes"])
         output_bytes = int(result.summary["outputBytes"])

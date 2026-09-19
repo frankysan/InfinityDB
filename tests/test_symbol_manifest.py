@@ -855,6 +855,21 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
 
     assert published["formatVersion"] == 8
     assert published["processing"]["publication"]["status"] == "passed"
+    with pytest.raises(SymbolManifestError, match="version-7 compressed state"):
+        add_publication(
+            published,
+            summary=published["processing"]["publication"]["summary"],
+            mapping_report=publication_report,
+            army_map=army_map,
+            unit_map=unit_map,
+            project_root=tmp_path,
+        )
+    published["processing"]["publication"]["summary"]["publishedBytes"] = 1
+    with pytest.raises(
+        SymbolManifestError, match="publishedBytes must equal compression outputBytes"
+    ):
+        validate_symbol_manifest(published)
+    published["processing"]["publication"]["summary"]["publishedBytes"] = 0
     assert_compression_rejects_later_state(
         published,
         report=compression_report,

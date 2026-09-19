@@ -173,7 +173,8 @@ by the run.
 `tools/stage_full_asset_bundle.py` downloads the bundle without printing its
 URL, enforces download/expanded-size limits, rejects path traversal, symlinks,
 encrypted members, case-colliding names, and files outside the
-`armies/`, `orders/`, and `units/` SVG trees, then validates the staged tree
+`armies/`, `characteristics/`, `orders/`, and `units/` SVG trees, then validates
+the staged tree
 against the tracked browser mappings before replacing the ignored local asset
 directories. The workflow then runs:
 

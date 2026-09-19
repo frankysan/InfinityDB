@@ -496,14 +496,25 @@ validation, p2-first/p3-rescue precision, 32/64 CSS-pixel targets at DPR 1/2,
 RMS/changed-fraction limits of 0.01, and pixel-difference threshold 8. The
 complete balanced output is revalidated and atomically promoted to the derived
 `compressed/` work tree; successful state advances to manifest version 7 with
-SHA-bound compression reports and settings. Compression failure leaves prior
-compressed output and version-6 state intact. Final publication consumes that exact
-version-7 compressed work tree, the pinned Army snapshot, and the authoritative
-build manifest. It materializes a temporary application asset tree, generates the
+SHA-bound compression reports and settings. The balanced compression report binds
+each canonical output path to its SHA-256, so later stages can verify the exact
+version-7 bytes. Compression failure leaves prior compressed output and version-6
+state intact. Final publication verifies and consumes that hash-bound version-7
+compressed work tree, the pinned Army snapshot, and the authoritative build
+manifest. It materializes a temporary application asset tree, generates the
 browser maps from authoritative references plus the canonical mapping, validates
 the complete result, transactionally replaces only the generated static symbol
 outputs, and advances successful state to version 8 with a SHA-bound complete
-publication mapping. Canonical processing may collapse equivalent assets without
+publication mapping. Before replacement, publication compares the existing generated
+SVG inventory with the staged incoming inventory by path and SHA-256. Added, removed,
+changed, and unchanged counts plus path-level differences are recorded in the
+publication mapping; symbols present only in the previous publication are preserved in
+a timestamped `data/backups/symbols/` backup as part of the same transaction. Failed
+publication removes that staged backup while restoring the prior generated tree.
+Maintained static-symbol categories remain publication namespaces: order symbols
+publish under `orders/`, while characteristic symbols publish under `characteristics/`.
+Canonical processing may collapse equivalent
+assets without
 discarding their source references. For unit artwork, source profile slot
 `profileGroups[0].profiles[0]` retains the stable
 `units/<canonical-army-slug>/<unit-id>-<unit-slug>.svg` browser path. Distinct

@@ -8,14 +8,16 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 ASSET_MODES = ("off", "auto", "required")
-PUBLISHED_ASSET_CATEGORIES = ("armies", "orders", "units")
+PUBLISHED_ASSET_CATEGORIES = ("armies", "characteristics", "orders", "units")
 ORDER_SYMBOL_NAMES = (
     "regular",
     "irregular",
-    "peripheral",
     "impetuous",
     "tactical",
     "lieutenant",
+)
+CHARACTERISTIC_SYMBOL_NAMES = (
+    "peripheral",
     "hackable",
     "cube",
     "cube-2",
@@ -97,6 +99,10 @@ def expected_asset_paths(static_root: Path) -> tuple[PurePosixPath, ...]:
         for value in unit_values
     )
     expected.update(PurePosixPath("orders") / f"{name}.svg" for name in ORDER_SYMBOL_NAMES)
+    expected.update(
+        PurePosixPath("characteristics") / f"{name}.svg"
+        for name in CHARACTERISTIC_SYMBOL_NAMES
+    )
     return tuple(sorted(expected, key=str))
 
 

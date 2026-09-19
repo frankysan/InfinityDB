@@ -57,7 +57,7 @@ if [ "$redistributable" -eq 1 ]; then
 from importlib.resources import files
 from pathlib import Path
 
-blocked = ("armies", "orders", "units")
+blocked = ("armies", "characteristics", "orders", "units")
 roots = [
     Path("/app/src/infinity_db/web/static"),
     files("infinity_db.web").joinpath("static"),

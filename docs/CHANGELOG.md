@@ -69,9 +69,12 @@ All notable changes to this project are documented in this file.
   Passed version-7 compression state now advances to version 8 after a temporary
   publication tree, generated browser mappings, and the complete
   source/canonical-to-published mapping validate. The publisher transactionally
-  replaces only generated `armies/`, `orders/`, `units/`, `army-symbols.js`, and
-  `unit-symbol-map.js` outputs, restores prior publication on failure, and removes
-  the legacy first-symbol-wins mapping behavior.
+  replaces only generated `armies/`, `characteristics/`, `orders/`, `units/`,
+  `army-symbols.js`, and `unit-symbol-map.js` outputs, restores prior publication
+  on failure, and removes the legacy first-symbol-wins mapping behavior. Before
+  replacement it records added/removed/changed symbol differences against the
+  previous generated tree and preserves removed prior SVGs in timestamped local
+  backups under `data/backups/symbols/`.
 
 - Integrate display-aware canonical symbol compression into `build_symbols.py`.
   Passed version-6 text-conversion state now advances to version 7 using the

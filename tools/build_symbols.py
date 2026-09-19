@@ -789,6 +789,7 @@ def main(argv: list[str] | None = None) -> int:
                 reports_base=symbol_reports,
                 static_root=args.static_root,
                 project_root=project_root,
+                backup_base=args.data_root / "backups" / "symbols",
             )
             print(
                 "Publication -> "
@@ -797,6 +798,14 @@ def main(argv: list[str] | None = None) -> int:
                 f"{publication.summary['factionMappingCount']} faction mappings | "
                 f"{publication.summary['staticMappingCount']} static mappings"
             )
+            print(
+                "Publication changes -> "
+                f"+{publication.changes['addedAssetCount']} added | "
+                f"~{publication.changes['changedAssetCount']} changed | "
+                f"-{publication.changes['removedAssetCount']} removed"
+            )
+            if publication.removed_backup is not None:
+                print(f"Removed symbol backup -> {publication.removed_backup}")
             print(f"Published symbol root -> {publication.static_root}")
             print(f"Publication mapping -> {publication.mapping_report}")
             current_version = 8

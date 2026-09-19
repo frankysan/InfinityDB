@@ -11,6 +11,7 @@ Raw snapshots and processing work trees are never moved or deleted.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 import shutil
@@ -18,13 +19,13 @@ import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import defaultdict
+from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, NamedTuple
 
 from infinity_db.snapshot_provenance import sha256_file
 from infinity_db.symbol_manifest import (
     SYMBOL_BUILD_COMPRESSION_VERSION,
-    SYMBOL_BUILD_VERSION,
     add_publication,
     load_symbol_manifest,
     write_symbol_manifest,
@@ -38,8 +39,10 @@ except ImportError:  # pragma: no cover - direct script execution fallback
 SYMBOL_MAP = "unit-symbol-map.js"
 ARMY_MAP = "army-symbols.js"
 PUBLICATION_MAPPING_FORMAT = "InfinityDB symbol publication mapping"
-PUBLICATION_MAPPING_VERSION = 1
-GENERATED_CATEGORIES = ("armies", "orders", "units")
+PUBLICATION_MAPPING_VERSION = 2
+REMOVED_SYMBOL_BACKUP_FORMAT = "InfinityDB removed symbol backup"
+REMOVED_SYMBOL_BACKUP_VERSION = 1
+GENERATED_CATEGORIES = ("armies", "characteristics", "orders", "units")
 _TEXT_ROOT_TAGS = {"text", "flowRoot"}
 _STATIC_PUBLIC_STEMS = {"cube2": "cube-2"}
 _UNIT_PROFILE_JSON_PATH = re.compile(
@@ -64,6 +67,8 @@ class PublicationResult(NamedTuple):
     army_map: Path
     unit_map: Path
     summary: dict[str, int]
+    changes: dict[str, int]
+    removed_backup: Path | None
     status: str
 
 
@@ -213,7 +218,7 @@ def _static_public_path(reference: dict[str, Any]) -> str:
     if category not in {"orders", "characteristics"}:
         raise ValueError(f"Unsupported static symbol category: {category!r}")
     stem = _STATIC_PUBLIC_STEMS.get(key, slugify(key))
-    return f"orders/{stem}.svg"
+    return f"{category}/{stem}.svg"
 
 
 def _publication_candidate(reference: dict[str, Any], index: SnapshotIndex) -> str:
@@ -381,7 +386,7 @@ def _build_publication(
                 f"Canonical asset crosses incompatible publication namespaces {canonical}: "
                 + ", ".join(candidates)
             )
-        if "orders" in namespaces and len(candidates) != 1:
+        if namespaces & {"orders", "characteristics"} and len(candidates) != 1:
             raise ValueError(
                 "Static symbols with different public keys cannot share one physical canonical "
                 f"asset: {canonical}: {', '.join(candidates)}"
@@ -537,6 +542,110 @@ def _build_publication(
     return report, summary
 
 
+def _published_symbol_inventory(static_root: Path) -> dict[str, str]:
+    inventory: dict[str, str] = {}
+    for category in GENERATED_CATEGORIES:
+        category_root = static_root / category
+        if not category_root.is_dir():
+            continue
+        for path in sorted(category_root.rglob("*.svg")):
+            if not path.is_file():
+                continue
+            relative = path.relative_to(static_root).as_posix()
+            inventory[relative] = sha256_file(path)
+    return inventory
+
+
+def _publication_changes(
+    existing: dict[str, str], incoming: dict[str, str]
+) -> tuple[dict[str, Any], dict[str, int]]:
+    added = [
+        {"path": path, "sha256": incoming[path]}
+        for path in sorted(set(incoming) - set(existing))
+    ]
+    removed = [
+        {"path": path, "sha256": existing[path]}
+        for path in sorted(set(existing) - set(incoming))
+    ]
+    changed = [
+        {
+            "path": path,
+            "previousSha256": existing[path],
+            "incomingSha256": incoming[path],
+        }
+        for path in sorted(set(existing) & set(incoming))
+        if existing[path] != incoming[path]
+    ]
+    unchanged_count = sum(
+        1
+        for path in set(existing) & set(incoming)
+        if existing[path] == incoming[path]
+    )
+    summary = {
+        "addedAssetCount": len(added),
+        "removedAssetCount": len(removed),
+        "changedAssetCount": len(changed),
+        "unchangedAssetCount": unchanged_count,
+    }
+    return {
+        "summary": summary,
+        "added": added,
+        "removed": removed,
+        "changed": changed,
+    }, summary
+
+
+def _backup_destination(backup_base: Path, *, symbol_sha256: str, created_at: datetime) -> Path:
+    stem = f"{created_at.strftime('%Y%m%d-%H%M%S')}--{symbol_sha256[:12]}"
+    candidate = backup_base / stem
+    suffix = 1
+    while candidate.exists():
+        candidate = backup_base / f"{stem}-{suffix:02d}"
+        suffix += 1
+    return candidate
+
+
+def _stage_removed_symbol_backup(
+    *,
+    static_root: Path,
+    staging_root: Path,
+    removed: list[dict[str, str]],
+    symbol_artifact: dict[str, Any],
+    created_at: datetime,
+) -> Path:
+    staged_backup = staging_root / "removed-symbol-backup"
+    removed_root = staged_backup / "removed"
+    for row in removed:
+        relative = row["path"]
+        source = static_root.joinpath(*_portable_member(relative).parts)
+        if not source.is_file():
+            raise ValueError(f"Published symbol disappeared before backup: {relative}")
+        if sha256_file(source) != row["sha256"]:
+            raise ValueError(f"Published symbol changed before backup: {relative}")
+        destination = removed_root.joinpath(*_portable_member(relative).parts)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+
+    manifest = {
+        "format": REMOVED_SYMBOL_BACKUP_FORMAT,
+        "formatVersion": REMOVED_SYMBOL_BACKUP_VERSION,
+        "createdAt": created_at.isoformat(timespec="seconds"),
+        "incomingSymbolArtifact": {
+            "name": symbol_artifact["name"],
+            "sha256": symbol_artifact["sha256"],
+        },
+        "summary": {"removedAssetCount": len(removed)},
+        "removed": removed,
+    }
+    staged_backup.mkdir(parents=True, exist_ok=True)
+    (staged_backup / "backup-manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    return staged_backup
+
+
 def _remove_path(path: Path) -> None:
     if not path.exists():
         return
@@ -544,6 +653,75 @@ def _remove_path(path: Path) -> None:
         shutil.rmtree(path)
     else:
         path.unlink()
+
+
+def _resolve_compression_report(
+    record: dict[str, Any],
+    *,
+    project_root: Path,
+    report_root: Path,
+) -> Path:
+    candidates: list[Path] = []
+    portable = record.get("path")
+    if isinstance(portable, str):
+        candidates.append(project_root / Path(portable))
+    name = record.get("name")
+    if isinstance(name, str):
+        candidates.append(report_root / name)
+    for candidate in candidates:
+        if candidate.is_file() and sha256_file(candidate) == record.get("sha256"):
+            return candidate
+    raise ValueError("Could not resolve SHA-bound compression report")
+
+
+def _verify_compressed_work_tree(
+    manifest: dict[str, Any],
+    *,
+    compressed_root: Path,
+    compression_report: Path,
+) -> None:
+    canonical_map = manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"]
+    canonical_paths = set(canonical_map.values())
+    actual = {
+        path.relative_to(compressed_root).as_posix()
+        for path in compressed_root.rglob("*.svg")
+        if path.is_file()
+    }
+    if actual != canonical_paths:
+        raise ValueError(
+            "Compressed symbol work tree does not contain exactly the manifest canonical set"
+        )
+
+    try:
+        with compression_report.open("r", encoding="utf-8-sig", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+    except OSError as exc:
+        raise ValueError(
+            f"Could not load compression report {compression_report}: {exc}"
+        ) from exc
+    expected_hashes: dict[str, str] = {}
+    for row in rows:
+        if row.get("profile") != "balanced":
+            continue
+        relative = row.get("file")
+        digest = row.get("output_sha256")
+        if not isinstance(relative, str) or relative not in canonical_paths:
+            raise ValueError(f"Compression report contains unexpected balanced asset: {relative}")
+        if relative in expected_hashes:
+            raise ValueError(f"Compression report repeats balanced asset: {relative}")
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ValueError(f"Compression report has invalid output SHA-256 for {relative}")
+        expected_hashes[relative] = digest
+    if set(expected_hashes) != canonical_paths:
+        raise ValueError("Compression report hashes do not cover exactly the canonical asset set")
+
+    for relative, expected in expected_hashes.items():
+        path = compressed_root.joinpath(*_portable_member(relative).parts)
+        actual_sha = sha256_file(path)
+        if actual_sha != expected:
+            raise ValueError(
+                f"Compressed SVG SHA-256 does not match version-7 report for {relative}"
+            )
 
 
 def publish_symbols(
@@ -554,13 +732,11 @@ def publish_symbols(
     reports_base: Path,
     static_root: Path,
     project_root: Path,
+    backup_base: Path | None = None,
 ) -> PublicationResult:
     """Publish one verified version-7 compressed build transactionally."""
     manifest = load_symbol_manifest(build_manifest_path)
-    if manifest.get("formatVersion") not in {
-        SYMBOL_BUILD_COMPRESSION_VERSION,
-        SYMBOL_BUILD_VERSION,
-    }:
+    if manifest.get("formatVersion") != SYMBOL_BUILD_COMPRESSION_VERSION:
         raise ValueError(
             "Publication requires passed "
             f"version-{SYMBOL_BUILD_COMPRESSION_VERSION} compression state"
@@ -588,6 +764,19 @@ def publish_symbols(
         f"{Path(symbol_artifact['name']).stem}--{symbol_artifact['sha256'][:12]}"
     )
     report_destination = report_root / "publication-map.json"
+    compression_record = processing["compression"].get("report")
+    if not isinstance(compression_record, dict):
+        raise ValueError("Compression state is missing its report identity")
+    compression_report = _resolve_compression_report(
+        compression_record,
+        project_root=project_root,
+        report_root=report_root,
+    )
+    _verify_compressed_work_tree(
+        manifest,
+        compressed_root=compressed_root,
+        compression_report=compression_report,
+    )
 
     static_root.parent.mkdir(parents=True, exist_ok=True)
     static_root.mkdir(parents=True, exist_ok=True)
@@ -602,6 +791,39 @@ def publish_symbols(
             compressed_root=compressed_root,
             staging_static=staging_static,
         )
+        previous_inventory = _published_symbol_inventory(static_root)
+        incoming_inventory = _published_symbol_inventory(staging_static)
+        changes, change_summary = _publication_changes(previous_inventory, incoming_inventory)
+        report_document["previousPublicationComparison"] = changes
+
+        created_at = datetime.now(UTC)
+        removed_backup: Path | None = None
+        staged_removed_backup: Path | None = None
+        removed = changes["removed"]
+        if removed:
+            if backup_base is None:
+                backup_base = reports_base / "removed-backups"
+            removed_backup = _backup_destination(
+                backup_base,
+                symbol_sha256=symbol_artifact["sha256"],
+                created_at=created_at,
+            )
+            staged_removed_backup = _stage_removed_symbol_backup(
+                static_root=static_root,
+                staging_root=staging,
+                removed=removed,
+                symbol_artifact=symbol_artifact,
+                created_at=created_at,
+            )
+            try:
+                backup_path = removed_backup.relative_to(project_root).as_posix()
+            except ValueError:
+                backup_path = str(removed_backup)
+            report_document["previousPublicationComparison"]["removedBackup"] = {
+                "path": backup_path,
+                "manifest": "backup-manifest.json",
+            }
+
         staged_report = staging / "publication-map.json"
         staged_report.write_text(
             json.dumps(report_document, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
@@ -622,6 +844,9 @@ def publish_symbols(
         report_root.mkdir(parents=True, exist_ok=True)
         destinations.append(report_destination)
         staged_paths.append(staged_report)
+        if removed_backup is not None and staged_removed_backup is not None:
+            destinations.append(removed_backup)
+            staged_paths.append(staged_removed_backup)
 
         backups = {
             destination: backup_root / str(index)
@@ -665,6 +890,8 @@ def publish_symbols(
             army_map=static_root / ARMY_MAP,
             unit_map=static_root / SYMBOL_MAP,
             summary=summary,
+            changes=change_summary,
+            removed_backup=removed_backup,
             status="passed",
         )
     finally:
@@ -704,6 +931,7 @@ def main(argv: list[str] | None = None) -> int:
             reports_base=args.data_root / "reports" / "symbols",
             static_root=args.static,
             project_root=Path.cwd(),
+            backup_base=args.data_root / "backups" / "symbols",
         )
     except (OSError, ValueError, zipfile.BadZipFile) as exc:
         print(f"ERROR: {exc}")
@@ -716,6 +944,14 @@ def main(argv: list[str] | None = None) -> int:
         f"{result.summary['factionMappingCount']} faction mappings | "
         f"{result.summary['staticMappingCount']} static mappings"
     )
+    print(
+        "Publication changes -> "
+        f"+{result.changes['addedAssetCount']} added | "
+        f"~{result.changes['changedAssetCount']} changed | "
+        f"-{result.changes['removedAssetCount']} removed"
+    )
+    if result.removed_backup is not None:
+        print(f"Removed symbol backup -> {result.removed_backup}")
     print(f"Publication root -> {result.static_root}")
     print(f"Publication mapping -> {result.mapping_report}")
     return 0

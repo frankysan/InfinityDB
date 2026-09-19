@@ -703,7 +703,14 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         report = reports / "compression-report.csv"
         candidates = reports / "compression-candidates.csv"
         run_report = reports / "compression-run.json"
-        report.write_text("file,profile\n", encoding="utf-8")
+        report.write_text(
+            "file,profile\n"
+            + "".join(
+                f"{path.relative_to(profile_root).as_posix()},balanced\n"
+                for path in sorted(profile_root.rglob("*.svg"))
+            ),
+            encoding="utf-8",
+        )
         candidates.write_text("file,profile\n", encoding="utf-8")
         run_report.write_text("{}\n", encoding="utf-8")
         return SimpleNamespace(
@@ -768,7 +775,14 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         report = reports / "compression-report.csv"
         candidates = reports / "compression-candidates.csv"
         run_report = reports / "compression-run.json"
-        report.write_text("file,profile\n", encoding="utf-8")
+        report.write_text(
+            "file,profile\n"
+            + "".join(
+                f"{path.relative_to(profile_root).as_posix()},balanced\n"
+                for path in sorted(profile_root.rglob("*.svg"))
+            ),
+            encoding="utf-8",
+        )
         candidates.write_text("file,profile\n", encoding="utf-8")
         run_report.write_text("{}\n", encoding="utf-8")
         source_bytes = sum(path.stat().st_size for path in input_root.rglob("*.svg"))
@@ -816,6 +830,11 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
     compression = compressed_manifest["processing"]["compression"]
     assert compression["status"] == "passed"
     assert compression["profile"] == "balanced"
+    compression_report_text = compressed.report.read_text(encoding="utf-8-sig")
+    assert "output_sha256" in compression_report_text.splitlines()[0]
+    assert hashlib.sha256(
+        (compressed.compressed_root / "units" / "a.svg").read_bytes()
+    ).hexdigest() in compression_report_text
     assert compression["settings"] == {
         "renderer": "resvg",
         "targetSizesCssPx": [32, 64],
@@ -879,7 +898,7 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
             "factionMappingCount": 0,
             "unitMappingCount": 0,
             "staticMappingCount": 0,
-            "publishedBytes": 0,
+            "publishedBytes": compression["summary"]["outputBytes"],
         },
         mapping_report=publication_report,
         army_map=army_map,

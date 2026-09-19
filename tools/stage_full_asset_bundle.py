@@ -133,7 +133,8 @@ def _validated_members(
             continue
         if relative.parts[0] not in categories:
             raise AssetBundleError(
-                f"Bundle member is outside armies/orders/units: {name!r}"
+                "Bundle member is outside published asset categories "
+                f"{sorted(categories)!r}: {name!r}"
             )
         if info.is_dir():
             continue

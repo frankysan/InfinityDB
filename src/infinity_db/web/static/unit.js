@@ -201,6 +201,18 @@ const symbolLabels = {
   "cube-2": "Cube 2.0",
 };
 
+const symbolCategories = {
+  regular: "orders",
+  irregular: "orders",
+  peripheral: "characteristics",
+  impetuous: "orders",
+  tactical: "orders",
+  lieutenant: "orders",
+  hackable: "characteristics",
+  cube: "characteristics",
+  "cube-2": "characteristics",
+};
+
 function prominentOrderType(loadouts) {
   const counts = new Map(orderTypes.map((type) => [type, 0]));
   for (const loadout of loadouts) {
@@ -286,7 +298,7 @@ function nameWithOrderSymbols(nameText, symbolTypes) {
   for (const symbolType of symbolTypes) {
     const symbol = document.createElement("img");
     symbol.className = "order-symbol";
-    symbol.src = `/static/orders/${symbolType}.svg`;
+    symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`;
     symbol.alt = symbolLabels[symbolType];
     symbol.title = symbolLabels[symbolType];
     name.append(symbol);

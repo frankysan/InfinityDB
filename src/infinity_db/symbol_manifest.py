@@ -316,10 +316,7 @@ def add_publication(
 ) -> dict[str, Any]:
     """Promote compressed version-7 state to version 8 publication state."""
     validate_symbol_manifest(document)
-    if document.get("formatVersion") not in {
-        SYMBOL_BUILD_COMPRESSION_VERSION,
-        SYMBOL_BUILD_VERSION,
-    }:
+    if document.get("formatVersion") != SYMBOL_BUILD_COMPRESSION_VERSION:
         raise SymbolManifestError(
             "Publication requires version-"
             f"{SYMBOL_BUILD_COMPRESSION_VERSION} compressed state"
@@ -770,6 +767,7 @@ def _processing(value: Any, archive_paths: set[str], version: int, context: str)
         record.get("publication"),
         asset_count,
         record["duplicateDetection"]["summary"]["canonicalAssetCount"],
+        record["compression"]["summary"]["outputBytes"],
         f"{context}.publication",
     )
 
@@ -963,6 +961,7 @@ def _publication(
     value: Any,
     source_asset_count: int,
     canonical_asset_count: int,
+    compression_output_bytes: int,
     context: str,
 ) -> None:
     record = _object(value, context)
@@ -1008,6 +1007,10 @@ def _publication(
     if summary["publishedAssetCount"] != canonical_asset_count:
         raise SymbolManifestError(
             f"{context}.summary.publishedAssetCount must equal canonical asset count"
+        )
+    if summary["publishedBytes"] != compression_output_bytes:
+        raise SymbolManifestError(
+            f"{context}.summary.publishedBytes must equal compression outputBytes"
         )
     _artifact(record.get("mappingReport"), f"{context}.mappingReport")
     _artifact(record.get("armyMap"), f"{context}.armyMap")

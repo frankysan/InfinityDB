@@ -135,8 +135,9 @@ runtime startup from outside the source checkout.
 
 `Full-asset checks` is a manual-only workflow for the complete ignored symbol
 set. It runs only from `main`, uses the `full-assets` GitHub environment, stages a
-private checksum-pinned ZIP whose root contains only `armies/`, `orders/`, and
-`units/` SVG trees, and then invokes the same project runner with
+private checksum-pinned ZIP whose root contains only `armies/`,
+`characteristics/`, `orders/`, and `units/` SVG trees, and then invokes the same
+project runner with
 `--assets required`. Configure `FULL_ASSET_BUNDLE_URL` and
 `FULL_ASSET_BUNDLE_SHA256` as environment secrets. The workflow does not upload
 the graphical tree as an artifact. See

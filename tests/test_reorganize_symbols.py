@@ -138,6 +138,43 @@ def _write_compressed(root: Path) -> None:
         path.write_bytes(SVG)
 
 
+def _write_compression_report(
+    manifest: dict[str, Any],
+    *,
+    compressed_root: Path,
+    reports_base: Path,
+    project_root: Path,
+) -> Path:
+    symbol_artifact = manifest["snapshot"]["symbolArtifact"]
+    report_root = reports_base / (
+        f"{Path(symbol_artifact['name']).stem}--{symbol_artifact['sha256'][:12]}"
+    )
+    report_root.mkdir(parents=True, exist_ok=True)
+    report = report_root / "compression-report.csv"
+    canonical = sorted(
+        set(manifest["processing"]["duplicateDetection"]["canonicalByArchivePath"].values())
+    )
+    rows = ["file,profile,output_sha256"]
+    for relative in canonical:
+        path = compressed_root / relative
+        rows.append(f"{relative},balanced,{reorganize_symbols.sha256_file(path)}")
+    report.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    manifest["processing"]["compression"] = {
+        "status": "passed",
+        "summary": {
+            "outputBytes": sum(
+                (compressed_root / relative).stat().st_size for relative in canonical
+            )
+        },
+        "report": {
+            "name": report.name,
+            "path": report.relative_to(project_root).as_posix(),
+            "sha256": reorganize_symbols.sha256_file(report),
+        },
+    }
+    return report
+
+
 def test_slugify_matches_asset_sanitization() -> None:
     assert slugify("Special:Recent Changes?new=1*") == "special-recent-changes-new-1"
 
@@ -169,10 +206,11 @@ def test_build_publication_maps_many_references_to_canonical_assets(tmp_path: Pa
     source_map = report["sourceArchivePathToPublishedPath"]
     assert source_map["units/u2.svg"] == "units/panoceania/1-mech-engineer.svg"
     assert source_map["factions/f2.svg"] == "armies/panoceania/101-panoceania.svg"
-    assert report["staticKeyToPublishedPath"]["cube2"] == "orders/cube-2.svg"
+    assert report["staticKeyToPublishedPath"]["regular"] == "orders/regular.svg"
+    assert report["staticKeyToPublishedPath"]["cube2"] == "characteristics/cube-2.svg"
     assert (staging / "units" / "panoceania" / "1-mech-engineer.svg").is_file()
     assert (staging / "armies" / "panoceania" / "101-panoceania.svg").is_file()
-    assert (staging / "orders" / "cube-2.svg").is_file()
+    assert (staging / "characteristics" / "cube-2.svg").is_file()
 
     army_map = (staging / "army-symbols.js").read_text(encoding="utf-8")
     assert '[101, "panoceania/101-panoceania.svg"]' in army_map
@@ -180,8 +218,6 @@ def test_build_publication_maps_many_references_to_canonical_assets(tmp_path: Pa
     unit_map = (staging / "unit-symbol-map.js").read_text(encoding="utf-8")
     assert '["mech-engineer", "panoceania/1-mech-engineer"]' in unit_map
     assert '["chung-hee-jeong", "panoceania/1-mech-engineer"]' in unit_map
-
-
 
 def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> None:
     snapshot = tmp_path / "army.zip"
@@ -385,6 +421,179 @@ def test_publication_skips_recorded_unavailable_authoritative_reference(tmp_path
     assert "mech-engineer" not in report["unitSlugToPublishedPath"]
     assert report["unavailableSourceAssets"][0]["url"] == missing_url
 
+def test_publication_rejects_version_8_before_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+    manifest["formatVersion"] = 8
+    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
+
+    with pytest.raises(ValueError, match="version-7 compression state"):
+        publish_symbols(
+            army_snapshot=snapshot,
+            build_manifest_path=tmp_path / "manifest.json",
+            work_root=tmp_path / "work",
+            reports_base=tmp_path / "reports",
+            static_root=tmp_path / "static",
+            project_root=tmp_path,
+        )
+    assert not (tmp_path / "static").exists()
+
+
+def test_publication_rejects_modified_compressed_asset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+    compressed = tmp_path / "work" / "compressed"
+    _write_compressed(compressed)
+    _write_compression_report(
+        manifest,
+        compressed_root=compressed,
+        reports_base=tmp_path / "reports",
+        project_root=tmp_path,
+    )
+    (compressed / "units" / "u1.svg").write_bytes(
+        b'<svg xmlns="http://www.w3.org/2000/svg"><circle r="1"/></svg>'
+    )
+    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
+
+    with pytest.raises(ValueError, match="SHA-256 does not match version-7 report"):
+        publish_symbols(
+            army_snapshot=snapshot,
+            build_manifest_path=tmp_path / "manifest.json",
+            work_root=tmp_path / "work",
+            reports_base=tmp_path / "reports",
+            static_root=tmp_path / "static",
+            project_root=tmp_path,
+        )
+    assert not (tmp_path / "static").exists()
+
+
+
+def test_publication_records_changes_and_backs_up_removed_symbols(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+    compressed = tmp_path / "work" / "compressed"
+    _write_compressed(compressed)
+    _write_compression_report(
+        manifest,
+        compressed_root=compressed,
+        reports_base=tmp_path / "reports",
+        project_root=tmp_path,
+    )
+
+    static = tmp_path / "static"
+    obsolete = static / "orders" / "obsolete.svg"
+    obsolete.parent.mkdir(parents=True, exist_ok=True)
+    obsolete.write_bytes(b"obsolete")
+    (static / "orders" / "regular.svg").write_bytes(b"old regular")
+    characteristic = static / "characteristics" / "cube-2.svg"
+    characteristic.parent.mkdir(parents=True, exist_ok=True)
+    characteristic.write_bytes(SVG)
+
+    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
+    monkeypatch.setattr(
+        reorganize_symbols,
+        "add_publication",
+        lambda document, **_kwargs: {**document, "formatVersion": 8},
+    )
+    monkeypatch.setattr(
+        reorganize_symbols,
+        "write_symbol_manifest",
+        lambda _document, path: path,
+    )
+
+    result = publish_symbols(
+        army_snapshot=snapshot,
+        build_manifest_path=tmp_path / "manifest.json",
+        work_root=tmp_path / "work",
+        reports_base=tmp_path / "reports",
+        static_root=static,
+        project_root=tmp_path,
+        backup_base=tmp_path / "backups",
+    )
+
+    assert result.changes == {
+        "addedAssetCount": 2,
+        "removedAssetCount": 1,
+        "changedAssetCount": 1,
+        "unchangedAssetCount": 1,
+    }
+    assert result.removed_backup is not None
+    backed_up_obsolete = result.removed_backup / "removed" / "orders" / "obsolete.svg"
+    assert backed_up_obsolete.read_bytes() == b"obsolete"
+    backup_manifest = json.loads(
+        (result.removed_backup / "backup-manifest.json").read_text(encoding="utf-8")
+    )
+    assert backup_manifest["summary"] == {"removedAssetCount": 1}
+    assert backup_manifest["removed"] == [
+        {
+            "path": "orders/obsolete.svg",
+            "sha256": reorganize_symbols.sha256_file(backed_up_obsolete),
+        }
+    ]
+
+    report = json.loads(result.mapping_report.read_text(encoding="utf-8"))
+    comparison = report["previousPublicationComparison"]
+    assert comparison["summary"] == result.changes
+    assert [row["path"] for row in comparison["added"]] == [
+        "armies/panoceania/101-panoceania.svg",
+        "units/panoceania/1-mech-engineer.svg",
+    ]
+    assert [row["path"] for row in comparison["removed"]] == ["orders/obsolete.svg"]
+    assert [row["path"] for row in comparison["changed"]] == ["orders/regular.svg"]
+    assert comparison["removedBackup"]["manifest"] == "backup-manifest.json"
+
+
+def test_publication_failure_does_not_leave_removed_symbol_backup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    snapshot = tmp_path / "army.zip"
+    _write_snapshot(snapshot)
+    manifest = _manifest(snapshot)
+    compressed = tmp_path / "work" / "compressed"
+    _write_compressed(compressed)
+    _write_compression_report(
+        manifest,
+        compressed_root=compressed,
+        reports_base=tmp_path / "reports",
+        project_root=tmp_path,
+    )
+
+    static = tmp_path / "static"
+    obsolete = static / "orders" / "obsolete.svg"
+    obsolete.parent.mkdir(parents=True, exist_ok=True)
+    obsolete.write_bytes(b"obsolete")
+    backup_base = tmp_path / "backups"
+
+    monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
+    monkeypatch.setattr(
+        reorganize_symbols,
+        "add_publication",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(ValueError("manifest failure")),
+    )
+
+    with pytest.raises(ValueError, match="manifest failure"):
+        publish_symbols(
+            army_snapshot=snapshot,
+            build_manifest_path=tmp_path / "manifest.json",
+            work_root=tmp_path / "work",
+            reports_base=tmp_path / "reports",
+            static_root=static,
+            project_root=tmp_path,
+            backup_base=backup_base,
+        )
+
+    assert obsolete.read_bytes() == b"obsolete"
+    assert not backup_base.exists() or not any(backup_base.iterdir())
+
 def test_publication_failure_restores_previous_generated_tree(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -393,11 +602,20 @@ def test_publication_failure_restores_previous_generated_tree(
     manifest = _manifest(snapshot)
     compressed = tmp_path / "work" / "compressed"
     _write_compressed(compressed)
+    _write_compression_report(
+        manifest,
+        compressed_root=compressed,
+        reports_base=tmp_path / "reports",
+        project_root=tmp_path,
+    )
 
     static = tmp_path / "static"
     old_army = static / "armies" / "old.svg"
     old_army.parent.mkdir(parents=True)
     old_army.write_bytes(b"old army")
+    old_characteristics = static / "characteristics" / "old.svg"
+    old_characteristics.parent.mkdir(parents=True)
+    old_characteristics.write_bytes(b"old characteristic")
     old_orders = static / "orders" / "old.svg"
     old_orders.parent.mkdir(parents=True)
     old_orders.write_bytes(b"old order")
@@ -408,7 +626,7 @@ def test_publication_failure_restores_previous_generated_tree(
     (static / "unit-symbol-map.js").write_text("old unit map\n", encoding="utf-8")
 
     report = tmp_path / "reports" / "SYMBOLS test--aaaaaaaaaaaa" / "publication-map.json"
-    report.parent.mkdir(parents=True)
+    report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text("old report\n", encoding="utf-8")
 
     monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
@@ -429,6 +647,7 @@ def test_publication_failure_restores_previous_generated_tree(
         )
 
     assert old_army.read_bytes() == b"old army"
+    assert old_characteristics.read_bytes() == b"old characteristic"
     assert old_orders.read_bytes() == b"old order"
     assert old_units.read_bytes() == b"old unit"
     assert (static / "army-symbols.js").read_text(encoding="utf-8") == "old army map\n"
@@ -444,9 +663,15 @@ def test_publication_backup_failure_restores_already_moved_outputs(
     manifest = _manifest(snapshot)
     compressed = tmp_path / "work" / "compressed"
     _write_compressed(compressed)
+    _write_compression_report(
+        manifest,
+        compressed_root=compressed,
+        reports_base=tmp_path / "reports",
+        project_root=tmp_path,
+    )
 
     static = tmp_path / "static"
-    for category in ("armies", "orders", "units"):
+    for category in ("armies", "characteristics", "orders", "units"):
         path = static / category / "old.svg"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(f"old {category}".encode())
@@ -475,6 +700,7 @@ def test_publication_backup_failure_restores_already_moved_outputs(
         )
 
     assert (static / "armies" / "old.svg").read_bytes() == b"old armies"
+    assert (static / "characteristics" / "old.svg").read_bytes() == b"old characteristics"
     assert (static / "orders" / "old.svg").read_bytes() == b"old orders"
     assert (static / "units" / "old.svg").read_bytes() == b"old units"
     assert (static / "army-symbols.js").read_text(encoding="utf-8") == "old army map\n"

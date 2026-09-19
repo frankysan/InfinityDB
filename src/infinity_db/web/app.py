@@ -46,7 +46,10 @@ ASSETS = {
 ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
 UNIT_SYMBOL_PATH = re.compile(r"/static/units/[a-z0-9-]+/[a-z0-9-]+\.svg")
 ORDER_SYMBOL_PATH = re.compile(
-    r"/static/orders/(regular|irregular|peripheral|impetuous|tactical|lieutenant|hackable|cube|cube-2)\.svg"
+    r"/static/orders/(regular|irregular|impetuous|tactical|lieutenant)\.svg"
+)
+CHARACTERISTIC_SYMBOL_PATH = re.compile(
+    r"/static/characteristics/(peripheral|hackable|cube|cube-2)\.svg"
 )
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
 MODULE_IMPORT_URL = re.compile(
@@ -353,6 +356,17 @@ class Application:
                 payload = {"error": "Resource not found"}
         elif match := ORDER_SYMBOL_PATH.fullmatch(path):
             asset = files("infinity_db.web").joinpath("static", "orders", f"{match.group(1)}.svg")
+            if asset.is_file():
+                body = asset.read_bytes()
+                content_type = "image/svg+xml"
+                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
+            else:
+                status = HTTPStatus.NOT_FOUND
+                payload = {"error": "Resource not found"}
+        elif match := CHARACTERISTIC_SYMBOL_PATH.fullmatch(path):
+            asset = files("infinity_db.web").joinpath(
+                "static", "characteristics", f"{match.group(1)}.svg"
+            )
             if asset.is_file():
                 body = asset.read_bytes()
                 content_type = "image/svg+xml"

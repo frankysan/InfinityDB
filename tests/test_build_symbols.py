@@ -220,6 +220,13 @@ def stub_post_acquisition(
         army_map=Path("static/army-symbols.js"),
         unit_map=Path("static/unit-symbol-map.js"),
         status="passed",
+        changes={
+            "addedAssetCount": 0,
+            "removedAssetCount": 0,
+            "changedAssetCount": 0,
+            "unchangedAssetCount": 0,
+        },
+        removed_backup=None,
         summary={
             "sourceAssetCount": 0,
             "canonicalAssetCount": 0,

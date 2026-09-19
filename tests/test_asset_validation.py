@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
@@ -41,6 +41,10 @@ def test_tracked_symbol_mappings_define_a_nonempty_asset_contract() -> None:
     assert any(path.parts[0] == "armies" for path in expected)
     assert any(path.parts[0] == "units" for path in expected)
     assert any(path.parts[0] == "orders" for path in expected)
+    assert any(path.parts[0] == "characteristics" for path in expected)
+    assert PurePosixPath("orders/regular.svg") in expected
+    assert PurePosixPath("characteristics/cube.svg") in expected
+    assert PurePosixPath("orders/cube.svg") not in expected
 
 
 def test_asset_validation_distinguishes_absent_partial_complete_and_invalid(tmp_path: Path) -> None:

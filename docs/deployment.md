@@ -73,8 +73,9 @@ The verifier requires `/app/data/` to contain exactly `infinity.db` and
 and non-root image user, and starts Gunicorn with a read-only root filesystem,
 `/tmp` tmpfs, and `no-new-privileges`. It waits for the image health check and
 then exercises Army, rules-enriched Skill, and version API endpoints. In
-`--redistributable` mode it also rejects the ignored `armies/`, `orders/`, and
-`units/` Corvus Belli graphical-asset trees if they appear in either the copied
+`--redistributable` mode it also rejects the ignored `armies/`,
+`characteristics/`, `orders/`, and `units/` Corvus Belli graphical-asset trees if
+they appear in either the copied
 source tree or the installed Python package. This keeps CI/release validation
 separate from local asset publication.
 

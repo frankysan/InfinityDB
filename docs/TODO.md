@@ -271,8 +271,8 @@ consistency audit unless one becomes necessary to unblock that work.
     suffixes; distinct non-owner-army variants add `--army-<army-id>` before any
     profile suffix, while exact duplicate references share their canonical file. Faction
     assets use the parent-faction folder with `<faction-id>-<faction-slug>.svg`;
-    established `/static/orders/` names remain browser-compatible for static
-    symbols.
+    static symbols publish under their maintained categories: order icons under
+    `/static/orders/` and characteristic icons under `/static/characteristics/`.
   - [x] Permit several source/unit or faction references to map to one canonical
     physical SVG and persist a complete source/canonical-to-published mapping.
 
