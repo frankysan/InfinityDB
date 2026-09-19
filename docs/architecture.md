@@ -597,21 +597,24 @@ of a complete publication even before the browser consumes them. A detected
 partial/corrupt local asset tree is an error in `auto`/`required`, while a
 completely absent tree is valid for hermetic testing.
 
-The `Source checks` GitHub Actions workflow now runs the hermetic project check
-runner across clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts, with
+The `Source checks` GitHub Actions workflow is configured to run the hermetic
+project check runner across clean Windows, Ubuntu/Linux, and macOS Python 3.11
+checkouts, with
 an additional Linux Python 3.14 compatibility leg. It uses the tracked synthetic
 Army fixture for database construction and no live acquisition or third-party
-graphical assets. `Installed wheel smoke` separately installs the built wheel in
-a fresh virtual environment, verifies installed build CLIs and runtime startup,
+graphical assets. `Installed wheel smoke` is configured to separately install
+the built wheel in a fresh virtual environment, verify installed build CLIs and
+runtime startup,
 and consumes maintained build configuration from
 `<sys.prefix>/share/infinity-db/config/` rather than repository-relative paths.
-`Full-asset checks` provides a dispatch-only GitHub layer restricted to `main`.
-It stages a private checksum-pinned published-asset bundle through the
-`full-assets` environment and validates it before running the normal checks with
+`Full-asset checks` defines a dispatch-only GitHub layer restricted to `main`.
+Once its `full-assets` environment is configured, it stages a private
+checksum-pinned published-asset bundle and validates it before running the normal checks with
 `--assets required`; CI deliberately validates a private published bundle rather
 than rerunning the network/external-tool-sensitive symbol pipeline. The graphical
-asset tree is never uploaded as a workflow artifact. The existing container smoke
-test continues to validate deployment packaging separately. See `docs/ci.md`.
+asset tree is never uploaded as a workflow artifact. The configured container
+smoke test validates deployment packaging separately when hosted CI executes it.
+See `docs/ci.md`.
 
 ## Portability and filesystem policy
 
@@ -727,7 +730,7 @@ after a deployment or data refresh.
 
 ### `GET /api/version`
 
-Returns `{ "version": "0.5.1", "snapshot_revision": "..." }`. The browser uses
+Returns `{ "version": "0.6.0", "snapshot_revision": "..." }`. The browser uses
 it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`

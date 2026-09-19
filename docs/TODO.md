@@ -263,6 +263,11 @@ new correctness or reproducibility defect.
   - [ ] Configure GitHub repository rules/branch protection to require the
     `Source checks` result for protected merges when branch protection is enabled;
     workflow YAML alone does not enforce merge blocking.
+  - [ ] Establish and retain release evidence for the configured GitHub Actions
+    workflows. Before claiming a release has passed hosted CI, record successful
+    `Source checks`, `Installed wheel smoke`, and `Deployment smoke test` runs
+    for the release commit or tag. Local results and workflow definitions are not
+    substitutes for those hosted executions.
   - [x] Add an installed-wheel smoke job that builds/installs the wheel in a clean
     environment and validates supported imports, startup, CLI/resource packaging,
     and generated test databases without repository-relative assumptions.

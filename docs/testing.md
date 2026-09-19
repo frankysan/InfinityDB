@@ -101,7 +101,7 @@ failure is more useful.
 ## Deployment smoke test
 
 Docker deployment validation is intentionally separate from `run_checks.py`
-because it requires a Docker daemon. The GitHub Actions `Deployment smoke test`
+because it requires a Docker daemon. The configured GitHub Actions `Deployment smoke test`
 workflow builds the real application databases from a small synthetic Army
 fixture plus the tracked curated rules collection, builds the Docker image, and
 uses `scripts/verify-container-image.sh` to validate image contents and healthy
@@ -116,7 +116,7 @@ the exact container contract and the equivalent manual command.
 
 ## Continuous integration
 
-The `Source checks` GitHub Actions workflow runs the normal check runner on
+The `Source checks` GitHub Actions workflow is configured to run the normal check runner on
 clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests,
 pushes to `main`, and manual dispatch, plus a Linux Python 3.14 compatibility
 leg:
@@ -136,18 +136,18 @@ source checkouts intentionally contain no real raw Army snapshot. This workflow
 is hermetic: it does not acquire network data and does not require ignored
 Corvus Belli graphical assets.
 
-The separate `Installed wheel smoke` workflow also builds a real wheel, installs
+The separate configured `Installed wheel smoke` workflow builds a real wheel, installs
 it into a fresh virtual environment, and exercises installed build CLIs plus
 runtime startup from outside the source checkout.
 
-`Full-asset checks` is a manual-only workflow for the complete ignored symbol
-set. It runs only from `main`, uses the `full-assets` GitHub environment, stages a
+`Full-asset checks` is a configured manual-only workflow for the complete ignored
+symbol set. It is restricted to `main`, uses the `full-assets` GitHub environment, stages a
 private checksum-pinned ZIP whose root contains only `armies/`,
 `characteristics/`, `orders/`, and `units/` SVG trees, and then invokes the same
 project runner with
 `--assets required`. Configure `FULL_ASSET_BUNDLE_URL` and
-`FULL_ASSET_BUNDLE_SHA256` as environment secrets. The workflow does not upload
-the graphical tree as an artifact. See
+`FULL_ASSET_BUNDLE_SHA256` as environment secrets before it can run successfully.
+The workflow does not upload the graphical tree as an artifact. See
 [the continuous integration strategy](ci.md) for the security and redistribution
 boundary.
 

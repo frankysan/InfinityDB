@@ -33,9 +33,9 @@ asset set when one is legitimately available.
 
 ## Validation layers
 
-### Required source CI (current)
+### Required source CI (configured)
 
-The `Source checks` GitHub Actions workflow runs on pull requests, pushes to
+The `Source checks` GitHub Actions workflow is configured to run on pull requests, pushes to
 `main`, and manual dispatch. Its matrix covers clean Windows, Ubuntu/Linux, and
 macOS runners at Python 3.11, plus Linux at Python 3.14. Third-party graphical
 assets are absent, and each leg delegates the validation contract to
@@ -85,9 +85,9 @@ case handling, path separators, line endings, subprocess behavior, and Windows
 `spawn` semantics. External-tool tests may remain conditional where the
 required executable is intentionally optional.
 
-### Installed-package smoke (current)
+### Installed-package smoke (configured)
 
-The `Installed wheel smoke` GitHub Actions workflow builds the project wheel,
+The `Installed wheel smoke` GitHub Actions workflow is configured to build the project wheel,
 installs it into a fresh virtual environment, stages only controlled Army/rules
 fixtures outside the checkout, and exercises the supported installed-package
 surface from that clean working directory.
@@ -113,9 +113,9 @@ Build-time configuration and runtime query code remain separated: opening an
 already-built database does not load Army normalization policy, while installed
 build/ingestion commands intentionally consume the packaged maintained data.
 
-### Deployment smoke (current)
+### Deployment smoke (configured)
 
-The existing `Deployment smoke test` remains a distinct Linux/container layer.
+The configured `Deployment smoke test` is a distinct Linux/container layer.
 It builds synthetic `infinity.db` and tracked `rules.db`, builds the
 redistributable image, validates exact runtime database contents, starts the
 application under its production restrictions, and exercises representative API
@@ -130,7 +130,7 @@ separately by the installed-wheel smoke layer.
 This layer verifies deployment packaging; it is not a substitute for general
 source CI or installed-wheel validation.
 
-### Full-asset integration mode (current local and manual CI behavior)
+### Full-asset integration mode (current local behavior and configured manual CI)
 
 `tools/run_checks.py` has an explicit asset policy with three modes:
 
@@ -165,7 +165,7 @@ coverage uses project-owned temporary SVG fixtures for dynamic static serving,
 and version-display assertions consume the controlled application display
 version rather than relying on incidental `.git` state.
 
-The dispatch-only `Full-asset checks` workflow implements the optional GitHub
+The dispatch-only `Full-asset checks` workflow defines the optional GitHub
 layer on a GitHub-hosted Ubuntu/Python 3.11 runner. It is restricted to the
 `main` ref and uses the `full-assets` GitHub environment so access to the private
 bundle can be controlled independently from ordinary source CI. That environment
@@ -212,8 +212,9 @@ networked or long-running benchmark.
 The deployment-smoke runtime import boundary, local hermetic/full-asset test
 split, cross-platform source workflow, installed-wheel smoke, dispatch-only
 full-asset workflow, and focused standalone-tool regression coverage are
-implemented. These core validation layers supported Milestone 1 acceptance and
-remain the baseline for the Milestone 2 consistency audit.
+implemented or configured. Hosted workflow results and the private full-asset
+environment remain release-evidence and repository-administration work; see the
+backlog. These layers remain the baseline for the Milestone 2 consistency audit.
 
 Non-blocking CI follow-up remains in the backlog: validate checked-in snapshot
 notes routinely, configure repository rules/branch protection if required, and

@@ -5,7 +5,7 @@ and provides a browser for exploring it. It retains the existing merge and
 normalization pipeline, validates the imported data, and adds a read-only web
 interface and API on top of the resulting database.
 
-Current release: **0.5.1** (2026-09-14).
+Current release: **0.6.0** (2026-09-19).
 
 ## Guiding principles
 
@@ -72,7 +72,8 @@ Current release: **0.5.1** (2026-09-14).
   commands do not make network requests.
 - Includes dedicated regression coverage for the acquisition, symbol
   orchestration/reorganization, private asset staging, and shared path-safety
-  utilities; broader maintained-tool coverage remains tracked in the backlog.
+  utilities. The standard code-check runner lints the complete maintained
+  `tools/` tree; remaining validation hardening is tracked in the backlog.
 - Uses snapshot-aware API validators and release-fingerprinted static modules,
   so browsers refresh safely when either deployed application or data changes.
 - Includes server deployment, update, image-pruning, and migration guidance;
@@ -80,14 +81,14 @@ Current release: **0.5.1** (2026-09-14).
   and the [server migration guide](docs/server-migration.md) for the local state
   required to reproduce or transfer an installation.
 
-## Design direction
+## Current implementation and design direction
 
-Accepted architectural direction is documented separately from current
-features. Generated snapshot provenance under `data/manifests/snapshots/`, the
-separate human-authored snapshot-note contract, and the complete manifest-backed
-symbol pipeline through publication are implemented. Major remaining directions
-include exact migration of legacy wiki provenance and the canonical logical-unit
-payload/delta model; see [architecture](docs/architecture.md) and
+Generated snapshot provenance under `data/manifests/snapshots/`, the separate
+human-authored snapshot-note contract, and the complete manifest-backed symbol
+pipeline through publication are current implementation. Accepted but
+unimplemented architectural direction is documented separately. Major remaining
+directions include exact migration of legacy wiki provenance and the canonical
+logical-unit payload/delta model; see [architecture](docs/architecture.md) and
 [the backlog](docs/TODO.md).
 
 The current curated rules schema records wiki pages by snapshot-local path and

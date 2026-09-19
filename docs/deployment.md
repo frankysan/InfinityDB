@@ -121,11 +121,12 @@ redistribution boundary described above.
 
 ## Deployment smoke validation
 
-The `Deployment smoke test` GitHub Actions workflow exercises the distributable
-container path without committing or downloading real Army source data. It
+The configured `Deployment smoke test` GitHub Actions workflow exercises the
+distributable container path without committing or downloading real Army source data. It
 builds `infinity.db` from the synthetic source under
 `tests/fixtures/deployment-smoke/`, builds the tracked curated `rules.db`, then
-builds the Docker image and runs `scripts/verify-container-image.sh`.
+builds the Docker image and runs `scripts/verify-container-image.sh`. A successful
+hosted run is release evidence and remains a tracked release-validation task.
 
 The verifier requires `/app/data/` to contain exactly `infinity.db` and
 `rules.db`, validates both database formats, checks the configured runtime paths

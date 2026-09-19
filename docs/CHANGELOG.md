@@ -4,427 +4,121 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
-### Changed
-
-- Synchronize reference documentation with the completed manifest-backed symbol
-  pipeline and add a dedicated server-migration guide that distinguishes exact
-  runtime transfer from rebuild/source-provenance requirements.
-- Define symbol manifest stage transitions as forward-only. Failed-stage retry is
-  explicit; passed later states cannot be silently demoted by invoking an earlier
-  processing helper.
-- Reduce `tools/build_symbols.py` console noise to compact stage-level output
-  with a single updating progress line for the active interactive stage, while
-  retaining the complete verbose transcript in timestamped `data/logs/symbols/`
-  logs and supporting an explicit `--log` destination.
-- Add a separate normalized `display_army_id` derived from pinned curated
-  display-identity data. Canonical mercenary source identity remains distinct
-  from Non-Aligned ownership/playability, while the UI can use the curated
-  grouping identity for representative symbols and faction styling.
-- Bump the Army database schema to 11 and compatibility revision to 16; rebuild
-  generated databases after updating.
-- Complete Milestone 1 ingestion acceptance. The pinned Army/wiki/symbol path now
-  has exact provenance through runtime artifacts; the live symbol pipeline passed
-  every version-2-through-version-8 checkpoint, rollback injection, a repeated
-  same-snapshot zero-delta reproducibility run, and isolated host/image deployment
-  acceptance with missing assets rejected before Docker activation. Remaining
-  symbol-pipeline TODO items are follow-up refactoring, coverage, and optimization.
-
-### Fixed
-
-- Remove unresolved local raster-image references from temporary SVG conversion
-  copies before Inkscape and report the discarded references, preventing random
-  `svg-font-pipeline-*` paths from changing canonical and published symbol hashes.
-
-- Stream orchestrated compression progress through the pipeline console/logging
-  layer so the compression stage shows a monotonic running status indicator and
-  its full per-file transcript is retained in the symbol-build log.
-- Validate the complete published symbol inventory rather than treating only the
-  currently browser-referenced subset as the full asset set. New publications
-  SHA-bind `symbol-inventory.json`, while browser-only variants remain required
-  future-use assets.
-- Publish characteristic icons under `static/characteristics/` instead of the
-  legacy `static/orders/` location, with browser routes, packaging, asset checks,
-  and rollback handling using the same maintained classification.
-- Harden version-5 duplicate summary invariants and the v5-to-v8 promotion
-  boundaries so impossible counts, downstream manifest rollback, and terminal
-  republishing are rejected.
-- Preserve distinct unit profile-slot symbol artwork during publication by keeping
-  the first profile at the stable unit path and assigning deterministic
-  `--<group>-<profile>` suffixes to later distinct profile symbols and
-  `--army-<army-id>` namespacing to distinct non-owner-army variants, while
-  exact duplicates continue to share one canonical file.
-
-- Treat source-declared symbol URLs that return HTTP 404 as explicit unavailable
-  upstream assets instead of aborting the complete symbol acquisition. The
-  versioned build manifest retains their URL/reference provenance, downstream
-  processing operates on the acquired subset, publication omits unavailable
-  mappings, and non-404 network failures remain fatal.
-
-- Make `tools/svg_processor.py` clean under the project Ruff/Pylance expectations:
-  optional symbol dependencies are loaded without static unresolved-import noise,
-  classification results have explicit types, and remaining lint diagnostics are
-  corrected. Extend the default Ruff target set to the maintained symbol
-  toolchain so future symbol-processor regressions fail local/CI code checks.
-
-- Bring reference documentation and backlog status in line with the implemented
-  CI, snapshot-provenance, and asset-redistribution contracts. Remove stale
-  future-only wording for acquisition/provenance and clarify that remaining CI
-  hardening no longer blocks symbol-pipeline work.
-
-- Decouple read-only database/web runtime imports from the database exporter and
-  Army normalization policy. Installed runtime validation can now open generated
-  `infinity.db` and `rules.db` without repository-relative weapon configuration,
-  restoring the deployment-smoke package boundary.
-
-- Add the installed-font stage of the symbol pipeline. Infinity-specific legacy
-  font aliases now live in validated `config/symbols/font-aliases.json`; the
-  orchestrator resolves effective fonts and unused declarations against the local
-  font environment, writes a SHA-bound `font-audit.json`, and promotes successful
-  structural-preflight state from symbol manifest version 3 to version 4.
-
-- Add verified post-acquisition symbol materialization and structural SVG preflight.
-  `build_symbols.py` now revalidates the immutable symbol archive/provenance and
-  every member hash before replacing a derived `data/work/symbols/` tree, writes
-  a deterministic parse/text/font-declaration report under `data/reports/symbols/`,
-  and promotes acquisition-only symbol build state from version 2 to version 3.
-  Version-2 manifests remain valid cache inputs.
+## [0.6.0] - 2026-09-19
 
 ### Added
 
-- Add a deployment-focused artifact transfer helper that validates the local runtime
-  databases and manifest-bound symbol publication, selects only the ignored files
-  required by deployment, requires an exact clean remote Git commit match, stages the
-  transfer, and sends it over one SSH session.
-- Fail deployment closed when the local symbol publication is absent, partial,
-  stale, or not bound to terminal version-8 symbol-build state. Deployment now
-  verifies the manifest-bound host publication before Docker build, validates the
-  exact built image/package against `symbol-inventory.json`, exercises served
-  symbols from every namespace, and activates Compose without rebuilding only
-  after those checks pass.
-- Bind every balanced compression output SVG by SHA-256 in the version-7
-  compression report and verify those exact bytes before version-8 publication.
-  Publication also reconciles the incoming/previous asset inventories and
-  transactionally preserves removed prior SVGs under `data/backups/symbols/`.
-- Generate `symbol-inventory.json` as the authoritative complete publication
-  contract, distinct from the smaller subset currently referenced by browser
-  mappings/endpoints.
-- Add explicit symbol-pipeline checkpoints and SHA-bound resume support to
-  `tools/build_symbols.py`. Live acceptance can now stop after snapshot,
-  acquisition, materialization, preflight, font audit, deduplication, text
-  conversion, compression, or publication, then continue without reacquiring
-  immutable inputs. Resume verifies existing raw work instead of replacing a
-  later-stage work tree.
-
-- Integrate final non-destructive symbol publication into `build_symbols.py`.
-  Passed version-7 compression state now advances to version 8 after a temporary
-  publication tree, generated browser mappings, and the complete
-  source/canonical-to-published mapping validate. The publisher transactionally
-  replaces only generated `armies/`, `characteristics/`, `orders/`, `units/`,
-  `army-symbols.js`, and `unit-symbol-map.js` outputs, restores prior publication
-  on failure, and removes the legacy first-symbol-wins mapping behavior. Before
-  replacement it records added/removed/changed symbol differences against the
-  previous generated tree and preserves removed prior SVGs in timestamped local
-  backups under `data/backups/symbols/`.
-
-- Integrate display-aware canonical symbol compression into `build_symbols.py`.
-  Passed version-6 text-conversion state now advances to version 7 using the
-  reusable `svg_compress.py` engine with the balanced production profile and
-  SHA-bound compression reports; validated output atomically replaces the derived
-  compressed work tree while failures preserve the prior state/tree.
-
-- Integrate canonical text-to-path conversion into `build_symbols.py`. Version-5
-  duplicate state now advances to version 6 with SHA-bound conversion reports,
-  converter identity/settings, and a canonical work tree that converts only
-  active-text representatives while carrying no-text representatives forward
-  unchanged. Persistent `inkscape --shell` workers are the production default;
-  conversion failure records failed state without replacing existing canonical
-  output.
-
-- Expand the normal code-check contract with Pyright type checking, full `tools/`
-  Ruff coverage, and synthetic integration tests against the real symbol Python
-  dependency stack. Required source CI now installs `.[dev,symbols]` on every
-  platform/interpreter leg.
-
-- Integrate exact-first visual symbol deduplication into `build_symbols.py`.
-  Successful font-audited builds now produce version-5 symbol state with
-  duplicate reports, renderer settings, conservative render-error handling, a
-  complete portable raw-asset-to-canonical mapping, and total source/canonical
-  loose-SVG size accounting while retaining every original source reference.
-
-- Add a dispatch-only `Full-asset checks` GitHub Actions workflow. The job is
-  restricted to `main`, stages a checksum-pinned private SVG bundle supplied
-  through the dedicated `full-assets` environment, and runs the normal project
-  checks with `--assets required` without uploading third-party graphical assets
-  as workflow artifacts.
-
-- Expand `Source checks` into a hermetic operating-system matrix covering Windows,
-  Ubuntu/Linux, and macOS at Python 3.11, with an additional Linux Python 3.14
-  compatibility leg.
-
-- Add an `Installed wheel smoke` GitHub Actions workflow. Wheels now package the
-  maintained identity, weapon-catalog, and source-anomaly build configuration
-  under `share/infinity-db/config/`; the smoke job installs the wheel into a
-  fresh virtual environment and validates both installed build CLIs plus runtime
-  startup against generated fixture databases outside the source checkout.
-
-- Add a clean-checkout Linux `Source checks` GitHub Actions workflow that runs
-  the normal hermetic test/lint/build/rules contract on Python 3.11 using the
-  tracked synthetic Army fixture rather than live data or third-party assets.
-
-- Add explicit hermetic/full-asset test modes. `run_checks.py --assets
-  off|auto|required` validates the complete current published symbol set before
-  enabling `full_assets` pytest coverage; direct pytest is hermetic by default,
-  partial/corrupt local asset trees fail strict modes, and project-owned SVG
-  fixtures retain dynamic static-serving coverage without third-party artwork.
-- Make web version-display assertions independent of incidental Git-checkout
-  state by testing against the application's controlled display version.
-
-- Add `tools/build_symbols.py` as the explicit symbol-refresh orchestration
-  entrypoint. It pins one verified Army snapshot through raw symbol discovery
-  and acquisition, supports offline `--snapshot` and explicit online
-  `--fetch-snapshot` modes, and exposes reusable Army/symbol acquisition
-  results for later processing stages.
-- Add a validated source-anomaly regression baseline for the exact 2026-09-18
-  Army snapshot. InfinityDB application builds allow reviewed warning counts to
-  decrease but reject new warning categories or growth above the recorded
-  ceiling before database export.
-- Support an optional Git-ignored root `AGENTS.local.md` for user-specific agent
-  workflow and communication preferences while keeping tracked project
-  instructions authoritative.
-- Add a Docker deployment smoke workflow that builds `infinity.db` from a
-  synthetic Army fixture plus the tracked `rules.db`, validates the image's
-  runtime-data contract, rejects third-party symbol trees in redistributable
-  builds, and exercises healthy non-root/read-only Gunicorn startup.
-- Add project-level markdownlint configuration that keeps `MD024` duplicate-heading checks within sibling headings, allowing standard changelog headings such as `Added`, `Changed`, and `Fixed` to repeat under different releases.
-- Add `tools/run_checks.py` as the standard development-check orchestrator for
-  pytest, Ruff, Army build validation, and curated rules-database build
-  validation, with selectable stages/profiles,
-  targeted pytest/Ruff paths, fail-fast mode, deterministic exit codes, and
-  live console output that can be mirrored to a report file.
-- Add deterministic timestamped check reports under ignored `reports/` when
-  `--report` is used without an explicit path; the filename and report header
-  share the same local run-start timestamp, while an explicitly supplied path
-  remains authoritative.
-- Add normalization-time source semantics for optional mercenaries:
-  source-defined units expose `source_role` (`standard` or
-  `mercenary_variant`) and army occurrences expose `availability_kind`
-  (`standard` or `mercenary`). The classifier validates the observed
-  canonical/factions/slug contract and does not use the common 10,000-ID offset
-  as its semantic rule.
-- Add reduced raw Army-shaped mercenary regression fixtures based on the observed
-  Miranda Ashcroft, Yuan Yuan, and Valerya Gromoz source patterns. The fixtures
-  exercise merge-to-normalization classification, fail-closed contract drift,
-  mercenary-to-standard matching, and same-army standard/optional overlap.
-- Add dedicated regression tests for each standalone tool script in `tools/`,
-  covering the Army JSON downloader, wiki mirror downloader, asset symbol
-  downloader, symbol reorganizer, and shared file-path sanitizer.
-- Add project-local pytest temp/cache configuration so the suite runs reliably
-  from the repository `.venv` on Windows and does not depend on the system temp
-  directory.
-- Add the validated `config/identity/source-identities.json` configuration for
-  maintained unit, army, skill, equipment, weapon, and name-normalization
-  identity exceptions.
-- Pin the exact identity configuration and its deterministic SHA-256 into
-  `normalized.json` during InfinityDB normalization and propagate the same
-  validated policy into both generated Army database siblings.
-- Add versioned snapshot-provenance and snapshot-note contracts. Army, wiki,
-  and symbol acquisition now writes deterministic SHA-256-addressed provenance
-  under `data/manifests/snapshots/`, while human annotations remain separate
-  under `data/curated/snapshot-notes/`.
+- Add a separately versioned curated-rules pipeline and `rules.db` runtime database.
+  Cited N5 rules data now supplies skill declaration categories and parameter
+  semantics, trait identities and summaries, and exceptional weapon profiles while
+  Army-derived storage remains source-data-only.
+- Add validated source-identity and display-identity configuration. Normalization
+  pins the exact identity policy, records explicit standard/mercenary availability,
+  and persists generic, mercenary, and reinforcement matching evidence so frontend
+  databases can materialize stable logical-unit identities.
+- Add deterministic acquisition provenance for Army, wiki, and symbol snapshots.
+  Timestamped immutable archives are SHA-256-bound under `data/manifests/`, human
+  snapshot notes remain separate curated data, Army downloads are coherence-checked,
+  and reviewed source anomalies are enforced as a regression baseline.
+- Add the complete resumable symbol-build pipeline. A pinned Army snapshot now flows
+  through source discovery/acquisition, verified materialization, SVG preflight,
+  installed-font audit, exact-first visual deduplication, text-to-path conversion,
+  balanced compression, and transactional publication with SHA-bound reports,
+  checkpoints, backups, generated browser maps, and `symbol-inventory.json`.
+- Add a unified development/CI validation contract through `tools/run_checks.py`,
+  including deterministic reports, Ruff and Pyright coverage, hermetic and
+  full-asset modes, cross-platform source checks, installed-wheel smoke testing,
+  Docker deployment smoke testing, and a manually dispatched private full-asset
+  workflow.
+- Add deployment safeguards for locally published graphical assets. Deployment now
+  verifies the manifest-bound host publication before building, validates the exact
+  installed image and representative symbol routes before activation, and provides a
+  commit-bound one-SSH-session helper for transferring only ignored deployment
+  artifacts to a matching server checkout.
 
 ### Changed
 
-- Update the official checkout and Python setup actions used by GitHub workflows
-  to their current Node-24-compatible major versions.
+- Release metadata now identifies this version as 0.6.0. Documentation
+  distinguishes locally validated and configured CI behavior from hosted workflow
+  executions, which remain release evidence tracked in the backlog.
 
-- Resolve raw Army symbols through Git-ignored local overrides, a validated
-  prior immutable symbol snapshot/cache, then upstream network access. Add
-  `--image-overrides` and `--refresh-symbols`, report unused overrides and
-  filename collisions, validate cached archive/member hashes before reuse, and
-  record `override`, `cache`, or `network` as each asset's source method.
-- Migrate curated rules provenance to format v3. PDF sources now retain both the
-  reviewed local file and official Corvus Belli Resources URL; archived wiki
-  sources bind to exact timestamped ZIP/hash/acquisition provenance and use
-  archive-member citations, while pinned `oldid=` wiki revisions remain
-  URL-backed sources. Bump the independent rules database schema and compatibility revision to preserve
-  the richer provenance.
-- Make wiki snapshot acquisition fail closed for required content. Required
-  crawl failures publish neither the immutable `WIKI-<language> ...zip` archive
-  nor snapshot provenance and preserve partial work under `data/work/wiki/`.
-  Optional `/favicon.ico` and `Infinity:` MediaWiki project-namespace targets
-  are classified as ignored site chrome/project links rather than content
-  failures.
-- Scope wiki acquisition by language. English is now the default, Spanish can be
-  selected explicitly, cross-language page crawling is suppressed while directly
-  referenced assets remain eligible, localized special-page namespaces are skipped,
-  and both archive names and snapshot provenance record the selected language.
-- Make Army JSON acquisition coherence explicit: the downloader now verifies a
-  second complete metadata/list pass byte-for-byte before publishing a snapshot,
-  reports changed endpoints on instability, and prints accepted source-revision
-  counts without requiring one global Corvus Belli revision.
-- Clarify current asset-distribution language: Corvus Belli graphical symbols
-  may be published into a local installation but are not bundled with InfinityDB
-  source code or redistributable releases by default.
-- Replace first-logo-per-unit symbol acquisition with complete source-semantic
-  Army discovery. `download_army_symbols.py` now preserves every profile/faction
-  reference, includes maintained static symbols, audits `resume` and unknown SVG
-  source locations, downloads each authoritative URL once, and no longer
-  generates browser symbol mappings.
-- Upgrade the acquisition-only `army-symbol-build.json` generated state to
-  version 2. It now persists the verified Army source URL, language, acquisition
-  timestamp/document count, and observed source revisions alongside the Army
-  artifact identity, so later symbol stages consume the pin from build state
-  instead of CLI memory or filenames.
-- Move reinforcement-label prefixes (`REINF` / `REFUERZOS`) into the validated
-  identity policy and derive profile `display_name` values in the backend. The
-  browser now consumes `display_name` and `profile_identity` instead of carrying
-  a duplicate reinforcement-prefix regex. Because existing generated databases
-  pin an older identity-config contract, bump the identity-config schema to 2
-  and Army database compatibility revision to 15 while keeping SQLite schema 10.
-- Make skill-extra distance detection authoritative to imported Army
-  `extras.type` metadata instead of numeric-text heuristics. Numeric text such as
-  `+5 CC` no longer needs an application exception. Move the remaining
-  Super-Jump and Forward Deployment sign-display conventions into cited curated
-  skill parameter semantics consumed through `SkillCatalog`, removing duplicate
-  skill-name branches from backend and browser code.
-- Derive weapon range-table columns from imported profile distance endpoints
-  instead of maintaining a fixed global range-band list. Inch labels use the
-  existing 2.5 cm conversion and remain aligned across all profiles for a weapon.
-- Move Armed Turret non-display metadata-profile suppression out of the runtime
-  repository and into validated weapon source-correction configuration applied
-  during normalization.
-- Move maintained weapon-family taxonomy, regex classification policy, manual
-  category decisions, and Army-source weapon metadata corrections out of Python
-  into validated `config/catalogs/` configuration. Classification mechanics
-  remain code and game-rule facts stay outside source-correction configuration.
-- Move the Armed Turret special profile out of Python into a cited curated
-  `weapon` rules record linked to Army weapon ID 226. Weapon API responses now
-  compose that profile from `rules.db`, while the Army repository remains
-  source-data-only and degrades cleanly when curated rules are unavailable.
-- Move N5 skill declaration categories out of `skill_categories.py` into cited
-  curated `skill-declaration-category` records linked to Army skill IDs. Skill
-  list/detail APIs now compose declaration categories and ordinary skill rules
-  through `SkillCatalog`; the Army repository no longer embeds rule-derived
-  declaration knowledge.
-- Reconcile reference documentation with the completed logical-unit and army-role
-  refactors: source-unit identity is now distinguished from materialized
-  application identity, repository-time identity discovery is no longer described
-  as current behavior, and completed refactor backlog history is removed.
-- Remove the obsolete repository-side logical-unit identity discovery path now
-  that frontend databases materialize complete identity. Legacy duplicate
-  compatibility behavior remains build-time only, with its regression coverage
-  moved to the logical-unit resolver/audit tests.
-- Materialize application logical-unit identity during frontend database
-  creation. The exporter resolves configured aliases plus persisted generic,
-  mercenary, and reinforcement evidence into frontend-only `logical_units` and
-  `logical_unit_sources` tables while retaining all source rows and occurrence
-  provenance. Repository reads now consume that materialized mapping; schema
-  version is 10.
-- Audit unambiguous reinforcement-only source-unit identity during database
-  creation and persist `reinforcementUnitMatches` alongside the pinned identity
-  policy. The audit now feeds materialized logical-unit identity instead of
-  repository-time name/ISC matching; an empty audit remains authoritative.
-- Persist generic standard-unit duplicate matches as `genericUnitMatches` during
-  normalization. The database builder consumes that audit when materializing
-  logical-unit identity; an explicitly empty audit disables arithmetic
-  rediscovery, while older normalized inputs without the metadata retain the
-  legacy build-time fallback.
-- Derive normalized unit `main_army_id` from imported Army metadata faction
-  parents instead of the `xx01` Army-ID convention for current InfinityDB
-  builds. Explicit maintained canonical-faction overrides still take
-  precedence; the arithmetic rule remains only as a standalone/legacy fallback
-  when metadata cannot resolve the canonical faction.
-- Derive army role/playability from authoritative imported relationships
-  instead of Army-ID ranges. `/api/armies` now exposes explicit roles,
-  playability, grouping metadata, and reinforcement parents for main armies,
-  sectorials, Non-Aligned forces, reinforcement lists, and grouping
-  identities. Non-Aligned grouping identity `901` is surfaced as non-playable,
-  direct unit filtering by it is rejected, and the browser army selector
-  consumes the backend role contract.
-- Remove the runtime `901` Non-Aligned grouping special case. Role derivation is
-  now structural: self-parented imported parents remain main armies, while
-  ordinary imported parents that are not self-parented (and referenced
-  metadata-only parents) become grouping nodes. Current source list `901` has
-  metadata parent `900`, parents the NA2 child lists, retains its real source
-  roster, and is still exposed as non-playable without any numeric-ID special case.
-- Document the observed `901` roster shape separately from playability: one
-  standard Rumbler Spec-Ops source entry plus the complete 49-variant optional-
-  mercenary pool in the analyzed snapshot. Keep that non-playable roster as
-  preserved source provenance without adding a dedicated application roster
-  query; unit availability is consumed through the playable child NA2 lists.
-  Record a future design direction to canonicalize invariant logical-unit data
-  while preserving explicit army, loadout, availability, and raw-source deltas.
-- Remove the legacy canonical-faction `1` -> `901` identity override now that
-  mercenary logical pairing and army-occurrence availability are explicit.
-  Canonical source ID `1` remains mercenary source/origin provenance with no
-  application `main_army_id`; `901` remains the separate Non-Aligned Armies
-  grouping identity. That change bumped the Army database compatibility
-  revision to 12 and required existing generated databases to be rebuilt.
-- Make repository mercenary filtering consume explicit
-  `army_units.availability_kind` provenance. Current normalized snapshots no
-  longer use canonical faction `1` plus faction membership to decide whether an
-  army occurrence requires the `mercs` filter; that inference remains only as a
-  fallback for legacy rows without availability provenance.
-- Make `units.source_role` and `army_units.availability_kind` explicit frontend
-  SQLite schema fields instead of incidental dynamic columns. Existing generated
-  Army databases must be rebuilt when the cumulative schema/compatibility
-  revision changes.
-- Document `tools/run_checks.py` as the standard local/agent check entry point,
-  with its detailed stage, target, reporting, and exit-code contract in
-  `docs/testing.md`.
-- Standardize tool-script validation around one regression file per script so
-  failures are easier to trace and maintain.
-- Standardize Army, wiki, and symbol acquisition on one timestamped ZIP snapshot
-  convention. Wiki and symbol downloads now stage loose files temporarily and
-  persist complete `WIKI YYYYMMDD-HHMMSS.zip` and
-  `SYMBOLS YYYYMMDD-HHMMSS.zip` archives instead of long-lived loose download
-  trees; Army acquisition continues to emit `JSON YYYYMMDD-HHMMSS.zip`.
-- Implement the accepted snapshot-metadata design as generated provenance under
-  `data/manifests/snapshots/` plus separate human annotations under
-  `data/curated/snapshot-notes/`. Generated manifests are SHA-256-bound,
-  validated, deterministic, ignored by Git, excluded from Docker packaging, and
-  never overwrite curated notes.
-- Scope rules-database ingestion to `data/curated/rules/`; `infinity-db
-  build-rules` now defaults to that subtree so other curated data categories are
-  not implicitly treated as rules collections.
-- Clarify documentation status throughout the corpus so current behavior,
-  accepted design direction, and planned/unimplemented work are not presented as
-  equivalent. Legacy wiki provenance remains documented as legacy until the
-  downloader/packager and curated provenance contract are migrated together.
-- Document the source-data finding that canonical-faction ID `1` represents a
-  mercenary source/origin concept distinct from Non-Aligned Armies grouping ID
-  `901`; the former ownership override has since been removed in Unreleased.
-- Document the decision to keep PDF/wiki-derived rules references in a
-  separately versioned SQLite database from Army JSON-derived data.
-- Harden the file-path sanitization and wiki mirror logic for cross-platform
-  safety while preserving compatible local URLs and asset-file naming.
-- Document the MIT licensing boundary for original project material, external
-  data and assets, and deployment dependencies in a third-party notices file
-  and related user documentation.
-- Move explicit logical-unit, army-list, catalog, and exceptional canonical-
-  faction identity knowledge out of implementation code and into validated
-  source-identity configuration. Generic duplicate, name-normalization, and
-  whole-army `xx01` derivation algorithms remain implementation behavior.
-- Make database export revalidate identity provenance pinned into normalized
-  data, reject incomplete or conflicting policies, and preserve that exact
-  policy in the immutable database snapshot used by runtime queries.
-- Derive unit profile grouping identities in the backend from the identity
-  policy pinned into the database and expose them through unit-detail API
-  records, so browser code no longer maintains duplicate profile alias and
-  ignored-word tables.
-- Derive reinforcement classification from imported army-list `kind` metadata
-  and faction grouping, names, and slugs from Army metadata parent relationships,
-  exposing the derived faction metadata through unit API records so browser code
-  no longer interprets Army ID suffixes or maintains faction lookup tables.
-- Move trait canonical identities, aliases/misspellings, parameterized source
-  matching, concise summaries, and citations into curated `trait` records in
-  `rules.db`. Army storage now preserves raw trait labels/usage only, while the
-  application composes curated references at read time and falls back to raw
-  labels when the rules database is unavailable.
-- Consolidate the standalone Army/symbol pipeline plan into the maintained
-  backlog and durable AI context, preserving its pinned-snapshot, complete SVG
-  discovery, reference/asset identity, override/cache/network resolution,
-  processing, publishing, cross-platform, failure-policy, and testing decisions.
+- Rework unit and army identity around authoritative imported relationships and
+  pinned policy rather than runtime heuristics. Army roles, playability, grouping,
+  reinforcement parents, faction presentation, main-army identity, profile identity,
+  and optional-mercenary semantics are now derived or materialized explicitly;
+  Non-Aligned grouping identity `901` remains non-playable and distinct from
+  canonical mercenary source identity `1`.
+- Move maintained game/domain knowledge out of browser and repository code into
+  validated configuration or curated rules data. This includes reinforcement label
+  policy, weapon taxonomy and source corrections, skill declaration categories and
+  distance semantics, trait canonicalization, special weapon profiles, and curated
+  display-army identity.
+- Standardize Army, wiki, and symbol acquisition on timestamped ZIP snapshots with
+  generated provenance. Wiki acquisition is language-scoped and fail-closed for
+  required content, while symbol acquisition resolves each authoritative reference
+  through explicit local overrides, validated immutable cache, then network access.
+- Treat Corvus Belli graphical symbols as local generated deployment artifacts rather
+  than redistributable source assets. Complete published assets are inventory-bound
+  and may be materialized for a local installation, but are not bundled in source or
+  redistributable release images by default.
+- Make `tools/build_symbols.py` the maintained symbol orchestration entrypoint with
+  forward-only manifest transitions, explicit failed-stage retry, resumable
+  checkpoints, compact interactive stage progress, and complete timestamped logs.
+- Require production deployments to include both validated `infinity.db` and
+  `rules.db`, and package the maintained build configuration needed by installed
+  build/runtime tools. Read-only runtime imports are independent of exporter-only
+  normalization policy.
+- Derive browser-facing data from backend/source contracts instead of duplicated UI
+  assumptions, including profile display names/identity, faction metadata, army
+  roles, and weapon range columns.
+- Bump the Army frontend database to schema version 11 and compatibility revision 16,
+  the identity configuration to schema version 2, and the rules database to schema
+  and compatibility version 2. Existing generated databases must be rebuilt.
+- Complete Milestone 1 ingestion acceptance: the pinned Army/wiki/symbol path has
+  exact provenance through runtime artifacts, the live version-2-through-version-8
+  symbol pipeline passed rollback and repeated-build reproducibility acceptance, and
+  deployment acceptance proved missing assets are rejected before activation.
+
+### Fixed
+
+- Preserve complete symbol semantics through publication: distinct profile-slot and
+  non-owner-army artwork receive deterministic published variants, characteristic
+  icons use their own namespace, unavailable upstream HTTP 404 assets remain explicit
+  provenance instead of aborting acquisition, and validation covers the complete
+  publication rather than only browser-referenced assets.
+- Harden symbol manifest and publication transactions so invalid duplicate summaries,
+  backward stage transitions, stale compressed inputs, terminal republishing, and
+  publication failures cannot silently corrupt or demote accepted state; removed prior
+  assets are preserved in timestamped backups.
+- Remove unresolved local raster references from temporary conversion copies before
+  Inkscape so randomized `svg-font-pipeline-*` paths cannot leak into canonical or
+  published SVG bytes. Repeated same-snapshot builds now produce zero publication
+  delta.
+- Restore installed-package/runtime validation by separating read-only database
+  imports from repository-relative build configuration and by packaging the validated
+  configuration required by installed build tools.
+- Make the symbol-processing toolchain clean under the maintained Ruff/Pyright
+  contract and stream compression progress through the shared console/logging layer
+  without losing the full per-file transcript.
+
+## [0.5.1a] - 2026-09-15
+
+### Added
+
+- Add the initial curated-rules data structure and supporting documentation for
+  separating PDF/wiki-derived rules knowledge from Army JSON-derived data.
+- Add a wiki snapshot downloader plus focused regression coverage for the standalone
+  tools and project-local pytest temp/cache configuration for reliable Windows runs.
+- Add third-party notices and clarify the licensing boundary between InfinityDB's
+  original code, external game data/assets, and deployment dependencies.
+
+### Changed
+
+- Remove Corvus Belli graphical SVGs from the tracked source tree and ignore generated
+  army, order, and unit symbol directories so third-party graphical assets are no
+  longer redistributed with the repository by default.
+- Harden cross-platform path sanitization and wiki-mirror file handling while
+  preserving compatible local URLs and asset naming.
 
 ## [0.5.1] - 2026-09-14
 
