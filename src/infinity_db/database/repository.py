@@ -192,13 +192,39 @@ def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> Non
     if item not in items:
         items.append(item)
 
-def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
-    """Combine complementary metadata from duplicate source profiles."""
-    for key, value in duplicate.items():
-        if key in {"skills", "equipment", "weapons", "ava"}:
-            continue
-        if profile.get(key) in (None, "") and value not in (None, ""):
-            profile[key] = value
+def logical_source_profile_merge_key(
+    army_occurrence_key: tuple[int, tuple[str, ...]], profile: RowLike
+) -> tuple[Any, ...]:
+    """Return the context key used to merge one profile across logical-unit sources.
+
+    Canonical payload identity is intentionally not used here.  Two source
+    occurrences can represent the same visible profile while one contributes
+    nested relationships that another omits.  Their scalar profile facts,
+    source-local profile coordinates, effective army occurrence, and
+    classification must still agree before the occurrences may collapse.
+    """
+    return (
+        army_occurrence_key,
+        profile["group_id"],
+        profile["profile_id"],
+        profile["name"],
+        profile["move_1"],
+        profile["move_2"],
+        profile["cc"],
+        profile["bs"],
+        profile["ph"],
+        profile["wip"],
+        profile["arm"],
+        profile["bts"],
+        profile["vitality"],
+        profile["silhouette"],
+        profile["type"],
+        profile["classification"],
+    )
+
+
+def merge_profile_availability(profile: dict[str, Any], duplicate: Mapping[str, Any]) -> None:
+    """Merge only source-occurrence AVA after logical-source profile matching."""
     # Duplicate source records can disagree on AVA.  The lower non-negative
     # value is the restrictive availability and avoids advertising an option
     # that is not present in every source record for the same profile.
@@ -447,6 +473,91 @@ class Database:
                 raise ValueError(
                     "Database has invalid materialized logical-unit identity; rebuild the database"
                 )
+
+            source_profile_count = connection.execute(
+                "SELECT COUNT(*) FROM profiles"
+            ).fetchone()[0]
+            profile_occurrence_count = connection.execute(
+                "SELECT COUNT(*) FROM profile_payload_occurrences"
+            ).fetchone()[0]
+            unsupported_payload = connection.execute(
+                "SELECT 1 FROM profile_payloads AS pp "
+                "LEFT JOIN profile_payload_occurrences AS ppo "
+                "ON ppo.profile_payload_id = pp.id "
+                "WHERE ppo.profile_payload_id IS NULL "
+                "OR pp.payload_sha256 IS NULL "
+                "OR length(pp.payload_sha256) != 64 LIMIT 1"
+            ).fetchone()
+            invalid_profile_logical_unit = connection.execute(
+                "SELECT 1 FROM profile_payload_occurrences AS ppo "
+                "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = ppo.unit_id "
+                "WHERE pp.logical_unit_id != lus.logical_unit_id LIMIT 1"
+            ).fetchone()
+            invalid_profile_context = connection.execute(
+                "SELECT 1 FROM profile_payload_occurrences AS ppo "
+                "JOIN profiles AS p "
+                "ON p.army_id = ppo.army_id "
+                "AND p.unit_id = ppo.unit_id "
+                "AND p.group_id = ppo.group_id "
+                "AND p.profile_id = ppo.profile_id "
+                "WHERE NOT (ppo.position IS p.position) "
+                "OR NOT (ppo.ava IS p.ava) "
+                "OR NOT (ppo.logo IS p.logo) LIMIT 1"
+            ).fetchone()
+            if (
+                source_profile_count != profile_occurrence_count
+                or unsupported_payload is not None
+                or invalid_profile_logical_unit is not None
+                or invalid_profile_context is not None
+            ):
+                raise ValueError(
+                    "Database has invalid materialized canonical profile payloads; "
+                    "rebuild the database"
+                )
+
+            source_loadout_count = connection.execute(
+                "SELECT COUNT(*) FROM loadout_options"
+            ).fetchone()[0]
+            loadout_occurrence_count = connection.execute(
+                "SELECT COUNT(*) FROM loadout_payload_occurrences"
+            ).fetchone()[0]
+            unsupported_loadout_payload = connection.execute(
+                "SELECT 1 FROM loadout_payloads AS lp "
+                "LEFT JOIN loadout_payload_occurrences AS lpo "
+                "ON lpo.loadout_payload_id = lp.id "
+                "WHERE lpo.loadout_payload_id IS NULL "
+                "OR lp.payload_sha256 IS NULL "
+                "OR length(lp.payload_sha256) != 64 LIMIT 1"
+            ).fetchone()
+            invalid_loadout_logical_unit = connection.execute(
+                "SELECT 1 FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = lpo.unit_id "
+                "WHERE lp.logical_unit_id != lus.logical_unit_id LIMIT 1"
+            ).fetchone()
+            invalid_loadout_context = connection.execute(
+                "SELECT 1 FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_options AS o "
+                "ON o.army_id = lpo.army_id "
+                "AND o.unit_id = lpo.unit_id "
+                "AND o.group_id = lpo.group_id "
+                "AND o.option_id = lpo.option_id "
+                "WHERE NOT (lpo.position IS o.position) "
+                "OR NOT (lpo.points IS o.points) "
+                "OR NOT (lpo.swc IS o.swc) LIMIT 1"
+            ).fetchone()
+            if (
+                source_loadout_count != loadout_occurrence_count
+                or unsupported_loadout_payload is not None
+                or invalid_loadout_logical_unit is not None
+                or invalid_loadout_context is not None
+            ):
+                raise ValueError(
+                    "Database has invalid materialized canonical loadout payloads; "
+                    "rebuild the database"
+                )
+
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -1611,20 +1722,25 @@ class Database:
                 by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
             profile_rows = connection.execute(
-                "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, p.name, "
-                "t.name AS type, c.name AS classification, p.move_1, p.move_2, "
-                "p.cc, p.bs, p.ph, p.wip, p.arm, p.bts, p.vitality, p.silhouette, p.ava "
-                "FROM profiles AS p "
-                "LEFT JOIN troop_types AS t ON t.id = p.type_id "
-                "JOIN profile_groups AS pg ON pg.army_id = p.army_id "
-                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id "
+                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, pp.name, "
+                "t.name AS type, c.name AS classification, pp.move_1, pp.move_2, "
+                "pp.cc, pp.bs, pp.ph, pp.wip, pp.arm, pp.bts, pp.vitality, pp.silhouette, "
+                "ppo.ava "
+                "FROM profile_payload_occurrences AS ppo "
+                "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+                "LEFT JOIN troop_types AS t ON t.id = pp.type_id "
+                "JOIN profile_groups AS pg ON pg.army_id = ppo.army_id "
+                "AND pg.unit_id = ppo.unit_id AND pg.group_id = ppo.group_id "
                 "LEFT JOIN categories AS c ON c.id = pg.category_id "
-                f"WHERE p.unit_id IN ({placeholders}) "
-                "ORDER BY p.army_id, p.group_id, p.position, p.profile_id",
+                f"WHERE ppo.unit_id IN ({placeholders}) "
+                "ORDER BY ppo.army_id, ppo.group_id, ppo.position, ppo.profile_id, "
+                "ppo.unit_id",
                 source_ids,
             )
-            profile_items: dict[tuple[Any, ...], dict[str, Any]] = {}
-            profile_keys_by_source: dict[tuple[int, int, int, int], tuple[Any, ...]] = {}
+            merged_profiles: dict[tuple[Any, ...], dict[str, Any]] = {}
+            profile_merge_keys_by_source: dict[
+                tuple[int, int, int, int], tuple[Any, ...]
+            ] = {}
             for profile in profile_rows:
                 army = by_source_army.get((profile["unit_id"], profile["army_id"]))
                 if army is None:
@@ -1644,25 +1760,10 @@ class Database:
                 profile_item["equipment"] = []
                 profile_item["weapons"] = []
                 profile_item["characteristics"] = []
-                profile_key = (
-                    army["_occurrence_key"],
-                    profile["group_id"],
-                    profile["profile_id"],
-                    profile["name"],
-                    profile["move_1"],
-                    profile["move_2"],
-                    profile["cc"],
-                    profile["bs"],
-                    profile["ph"],
-                    profile["wip"],
-                    profile["arm"],
-                    profile["bts"],
-                    profile["vitality"],
-                    profile["silhouette"],
-                    profile["type"],
-                    profile["classification"],
+                profile_key = logical_source_profile_merge_key(
+                    army["_occurrence_key"], profile
                 )
-                profile_keys_by_source[
+                profile_merge_keys_by_source[
                     (
                         profile["unit_id"],
                         profile["army_id"],
@@ -1670,43 +1771,75 @@ class Database:
                         profile["profile_id"],
                     )
                 ] = profile_key
-                existing = profile_items.get(profile_key)
+                existing = merged_profiles.get(profile_key)
                 if existing is None:
                     army["profiles"].append(profile_item)
-                    profile_items[profile_key] = profile_item
+                    merged_profiles[profile_key] = profile_item
                 else:
-                    merge_profile(existing, profile_item)
+                    merge_profile_availability(existing, profile_item)
             for occurrence_table, catalog_table, property_name, extras_table in (
-                ("profile_skills", "skills", "skills", "profile_skill_extras"),
-                ("profile_equipment", "equipment", "equipment", "profile_equipment_extras"),
-                ("profile_weapons", "weapons", "weapons", "profile_weapon_extras"),
+                (
+                    "profile_payload_skills",
+                    "skills",
+                    "skills",
+                    "profile_payload_skill_extras",
+                ),
+                (
+                    "profile_payload_equipment",
+                    "equipment",
+                    "equipment",
+                    "profile_payload_equipment_extras",
+                ),
+                (
+                    "profile_payload_weapons",
+                    "weapons",
+                    "weapons",
+                    "profile_payload_weapon_extras",
+                ),
             ):
-                extras_by_occurrence: dict[Any, list[dict[str, Any]]] = {}
+                extras_by_occurrence: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
                 extra_rows = connection.execute(
-                    "SELECT e.occurrence_id, e.extra_id, x.name, x.type AS extra_type "
-                    f"FROM {extras_table} AS e "
-                    f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
+                    "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
+                    "o.position AS occurrence_position, e.extra_id, x.name, "
+                    "x.type AS extra_type "
+                    "FROM profile_payload_occurrences AS ppo "
+                    f"JOIN {occurrence_table} AS o "
+                    "ON o.profile_payload_id = ppo.profile_payload_id "
+                    f"JOIN {extras_table} AS e "
+                    "ON e.profile_payload_id = o.profile_payload_id "
+                    "AND e.occurrence_position = o.position "
                     "LEFT JOIN extras AS x ON x.id = e.extra_id "
-                    f"WHERE o.unit_id IN ({placeholders}) "
-                    "ORDER BY e.occurrence_id, e.position",
+                    f"WHERE ppo.unit_id IN ({placeholders}) "
+                    "ORDER BY ppo.army_id, ppo.group_id, ppo.profile_id, o.position, "
+                    "ppo.unit_id, e.position",
                     source_ids,
                 )
                 for extra in extra_rows:
                     extra_item = {"id": extra["extra_id"], "name": extra["name"]}
                     if property_name == "skills" and extra["extra_type"] == "DISTANCE":
                         extra_item["is_distance"] = True
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
+                    occurrence_key = (
+                        extra["unit_id"],
+                        extra["army_id"],
+                        extra["group_id"],
+                        extra["profile_id"],
+                        extra["occurrence_position"],
+                    )
+                    extras_by_occurrence.setdefault(occurrence_key, []).append(extra_item)
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, "
+                    "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
                     "o.item_id, o.quantity, o.position, c.name "
-                    f"FROM {occurrence_table} AS o "
+                    "FROM profile_payload_occurrences AS ppo "
+                    f"JOIN {occurrence_table} AS o "
+                    "ON o.profile_payload_id = ppo.profile_payload_id "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
-                    f"WHERE o.unit_id IN ({placeholders}) "
-                    "ORDER BY o.army_id, o.group_id, o.profile_id, o.position, o.occurrence_id",
+                    f"WHERE ppo.unit_id IN ({placeholders}) "
+                    "ORDER BY ppo.army_id, ppo.group_id, ppo.profile_id, o.position, "
+                    "ppo.unit_id",
                     source_ids,
                 )
                 for occurrence in occurrence_rows:
-                    profile_key = profile_keys_by_source.get(
+                    profile_key = profile_merge_keys_by_source.get(
                         (
                             occurrence["unit_id"],
                             occurrence["army_id"],
@@ -1715,28 +1848,38 @@ class Database:
                         )
                     )
                     profile_item = (
-                        profile_items.get(profile_key) if profile_key is not None else None
+                        merged_profiles.get(profile_key) if profile_key is not None else None
                     )
                     if profile_item is not None:
+                        occurrence_key = (
+                            occurrence["unit_id"],
+                            occurrence["army_id"],
+                            occurrence["group_id"],
+                            occurrence["profile_id"],
+                            occurrence["position"],
+                        )
                         append_unique_item(
                             profile_item[property_name],
                             {
                                 "id": occurrence["item_id"],
                                 "name": occurrence["name"],
                                 "quantity": occurrence["quantity"],
-                                "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
+                                "extras": extras_by_occurrence.get(occurrence_key, []),
                             },
                         )
             characteristic_rows = connection.execute(
-                "SELECT o.unit_id, o.army_id, o.group_id, o.profile_id, c.name "
-                "FROM profile_characteristics AS o "
+                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, c.name "
+                "FROM profile_payload_occurrences AS ppo "
+                "JOIN profile_payload_characteristics AS o "
+                "ON o.profile_payload_id = ppo.profile_payload_id "
                 "JOIN characteristics AS c ON c.id = o.characteristic_id "
-                f"WHERE o.unit_id IN ({placeholders}) "
-                "ORDER BY o.army_id, o.group_id, o.profile_id, o.position",
+                f"WHERE ppo.unit_id IN ({placeholders}) "
+                "ORDER BY ppo.army_id, ppo.group_id, ppo.profile_id, o.position, "
+                "ppo.unit_id",
                 source_ids,
             )
             for characteristic in characteristic_rows:
-                profile_key = profile_keys_by_source.get(
+                profile_key = profile_merge_keys_by_source.get(
                     (
                         characteristic["unit_id"],
                         characteristic["army_id"],
@@ -1744,7 +1887,7 @@ class Database:
                         characteristic["profile_id"],
                     )
                 )
-                profile_item = profile_items.get(profile_key) if profile_key is not None else None
+                profile_item = merged_profiles.get(profile_key) if profile_key is not None else None
                 if profile_item is not None:
                     profile_item["characteristics"].append({"name": characteristic["name"]})
             loadout_rows = connection.execute(

@@ -218,7 +218,7 @@ logical_unit_sources
   logical_unit_id         owning application logical unit
 ```
 
-For schema version 11, `logical_units.id` equals `representative_unit_id`,
+Since schema version 11, `logical_units.id` equals `representative_unit_id`,
 preserving existing unit URLs and API identifiers. Keeping both fields explicit
 allows a future application-owned logical ID without rewriting the source model.
 
@@ -457,6 +457,706 @@ particular counts.
 They demonstrate that useful semantic deduplication can begin with exact
 equality rather than heuristic matching.
 
+#### Current baseline audit
+
+`tools/audit_semantic_deduplication.py` is the read-only development audit for
+this first exact-equality stage. It operates on an already-built frontend
+`infinity.db`; it does not modify the database or participate in normal runtime
+queries.
+
+A normal summary can be generated with:
+
+```text
+python tools/audit_semantic_deduplication.py data/generated/infinity.db \
+  --output reports/semantic-deduplication.json
+```
+
+Add `--details` when investigating duplicate groups. Detailed output adds every
+repeated payload fingerprint and its source occurrence keys; the normal report
+keeps the same deterministic summary and field contract without the much larger
+group listing.
+
+The baseline comparison deliberately defines its payload fields explicitly.
+Schema drift in any audited table fails the audit until the new field is
+classified rather than being silently ignored or silently changing equality.
+
+For profile payloads, the top-level semantic fields are:
+
+- `name`, `logo`, `type_id`;
+- `move_1`, `move_2`, `cc`, `bs`, `ph`, `wip`, `arm`, `bts`, `vitality`,
+  `silhouette`, `ava`, `is_structure`, and `notes`.
+
+The profile payload also includes the ordered nested content from:
+
+- `profile_characteristics`;
+- `profile_skills` and `profile_skill_extras`;
+- `profile_equipment` and `profile_equipment_extras`;
+- `profile_weapons` and `profile_weapon_extras`;
+- `profile_includes`;
+- `profile_peripherals`.
+
+For loadout payloads, the top-level semantic fields are `name`, `points`, `swc`,
+`minis`, and `disabled`. The payload also includes the ordered nested content
+from:
+
+- `option_characteristics`;
+- `option_orders`;
+- `option_skills` and `option_skill_extras`;
+- `option_equipment` and `option_equipment_extras`;
+- `option_weapons`, resolved through `option_weapon_templates`, together with
+  `option_weapon_extras`;
+- `option_includes`;
+- `option_peripherals`.
+
+Parent identity and occurrence/provenance fields are not payload identity:
+`army_id`, `unit_id`, `group_id`, `profile_id` / `option_id`, occurrence IDs,
+template IDs, and literal `position` values are excluded. Nested rows and extras
+are still read in `position` order, so changing their relative order changes the
+payload even though the absolute position numbers do not.
+
+Valid JSON in `raw` fields is parsed before hashing so whitespace and object-key
+order do not manufacture false differences. Unknown/unmodeled `raw` content
+remains part of the payload, preserving conservative equality.
+
+The first pass intentionally retains referenced catalog IDs and
+`target_group_id` / `target_option_id` values as semantic content. Those
+relationships may later become canonical references, but the baseline does not
+guess equivalence before the referenced identities are audited.
+
+`profile_groups` and wider unit/army context are outside the profile/loadout
+payload itself. They remain contextual data for subsequent classification rather
+than being silently folded into this equality definition.
+
+The audit reports both:
+
+- distinct payloads within each source unit; and
+- distinct payloads within each materialized logical unit.
+
+The second view measures the additional exact repetition exposed by the existing
+logical-unit identity relation. Both are diagnostics for the selected snapshot,
+not compatibility requirements or expected constants.
+
+#### Profile semantic classification audit
+
+`tools/audit_profile_semantics.py` performs the next read-only evidence pass for
+profile canonicalization. It compares repeated Army occurrences of the same
+source profile key:
+
+```text
+(unit_id, group_id, profile_id)
+```
+
+That key is an **observational comparison key**, not a proposed canonical
+application identity. It is useful because the source repeats the same
+unit/group/profile identifiers across army lists, allowing the audit to isolate
+which values actually change with army context before InfinityDB invents a new
+profile identity.
+
+The report is deterministic and can be written with:
+
+```text
+python tools/audit_profile_semantics.py data/generated/infinity.db \
+  --output reports/profile-semantics.json
+```
+
+The 2026-09-18 frontend database contains:
+
+- 5,020 profile occurrences;
+- 1,137 distinct source profile keys;
+- 698 source profile keys repeated in more than one army, covering 4,581
+  occurrences;
+- 306 repeated source profile keys whose complete baseline payload varies by
+  army context.
+
+The 306 varying keys separate into progressively clearer categories:
+
+- excluding AVA reduces the count from 306 to 26, so AVA is the sole difference
+  for 280 repeated source profile keys;
+- excluding the three observed army-specific logo variations reduces 26 to 23;
+- treating absolute `display_order` values as presentation context and treating
+  omitted quantity versus explicit quantity `1` as equivalent **for diagnostic
+  comparison only** reduces 23 to 16;
+- the remaining 16 consist of one genuine WIP variation, 11 genuine
+  characteristic-set variations, and four genuine skill-set variations.
+
+The diagnostic quantity normalization is evidence of source-representation
+duplication, not yet an application rule. InfinityDB still preserves the exact
+source distinction until the canonical-profile design explicitly decides how
+omitted and explicit default values are represented.
+
+##### Profile fields
+
+The current classification is:
+
+| Field | Classification | Current evidence / treatment |
+| --- | --- | --- |
+| `army_id` | source/provenance | Identifies the owning Army occurrence; never canonical profile identity. |
+| `unit_id` | source/provenance | Identifies the original source unit. |
+| `group_id` | source/provenance | Source-local profile-group identity. |
+| `profile_id` | source/provenance | Source-local profile identity. |
+| `position` | normalization-only | Generated from source array order; preserve relative order where needed, not the literal ordinal as profile identity. |
+| `name` | canonical fact candidate | No variation across repeated occurrences of the same source profile key. |
+| `logo` | contextual delta | Three source profile keys have army-specific logo values; this is presentation context, not gameplay identity. |
+| `type_id` | relationship | Relationship to the troop-type catalog; no same-source-key variation observed. |
+| `move_1` | canonical fact candidate | No same-source-key variation observed. |
+| `move_2` | canonical fact candidate | No same-source-key variation observed. |
+| `cc` | canonical fact candidate | No same-source-key variation observed. |
+| `bs` | canonical fact candidate | No same-source-key variation observed. |
+| `ph` | canonical fact candidate | No same-source-key variation observed. |
+| `wip` | contextual delta | One source profile key varies by army context, affecting four occurrences. |
+| `arm` | canonical fact candidate | No same-source-key variation observed. |
+| `bts` | canonical fact candidate | No same-source-key variation observed. |
+| `vitality` | canonical fact candidate | No same-source-key variation observed. |
+| `silhouette` | canonical fact candidate | No same-source-key variation observed. |
+| `ava` | contextual delta | 297 source profile keys vary by army context, affecting 909 occurrences. |
+| `is_structure` | canonical fact candidate | Determines Wounds-versus-Structure interpretation; no same-source-key variation observed. |
+| `notes` | canonical fact candidate, unproven | Present in the source model but unpopulated in this snapshot; retain until populated evidence exists. |
+
+“Canonical fact candidate” means the current snapshot supplies evidence that the
+field can be shared for one source-profile concept. It does **not** mean the
+schema may assume permanent invariance. A later snapshot may introduce a
+contextual variation in any source-provided field, and canonicalization must
+fail visibly or preserve a delta rather than discard it.
+
+##### Profile groups
+
+`profile_groups` remains context outside the profile payload. Across repeated
+source group keys `(unit_id, group_id)`, the current snapshot shows no variation
+in `position`, `category_id`, `isc`, or `notes`; `notes` is entirely unpopulated.
+
+The fields are classified as follows:
+
+- `army_id`, `unit_id`, and `group_id` are source/provenance;
+- `position` is normalization-only array ordering;
+- `category_id` is a relationship to the category/classification catalog;
+- `isc` is a profile-group display fact;
+- `notes` is a retained but currently unpopulated group fact.
+
+This observed stability does not move profile-group context into canonical
+profile identity. Group membership and grouping remain explicit occurrence
+context until their own identity is designed.
+
+##### Nested profile relationships
+
+The normalized occurrence tables contain both meaningful relationships and
+source/normalization mechanics. Common fields are treated as follows:
+
+- parent `army_id` / `unit_id` / `group_id` / `profile_id` columns are
+  source/provenance;
+- `occurrence_id` is a normalization-only surrogate;
+- `position` is a normalization-only ordinal preserving source array order;
+- catalog `item_id`, `characteristic_id`, and `extra_id` values are semantic
+  relationships;
+- `display_order` is source presentation context. In the current profile data it
+  never changes relative item ordering, although its absolute number can differ;
+- `quantity` is a semantic relationship attribute. Current profile skill and
+  equipment data only uses explicit quantity `1`; omission versus explicit `1`
+  accounts for several otherwise-identical source representations;
+- `raw` is source/provenance fallback for malformed or unmodeled content. It is
+  currently null throughout the populated profile reference/include tables, but
+  any future non-null value must block destructive canonicalization until the
+  unmodeled content is understood;
+- extra-row `position` is normalization-only ordering while `extra_id` is the
+  semantic relationship.
+
+Observed relationship behavior is:
+
+| Relationship | Rows | Raw same-source variants | Variants after diagnostic representation normalization | Interpretation |
+| --- | ---: | ---: | ---: | --- |
+| characteristics | 15,011 | 11 | 11 | Genuine contextual relationship differences. |
+| skills | 26,823 | 10 | 4 | Four genuine contextual skill-set differences; six are representation-only. |
+| equipment | 2,629 | 1 | 0 | The only difference is representation-only. |
+| weapons | 10 | 0 | 0 | No same-source-profile variation observed. |
+| includes | 2 | 0 | 0 | Relationship is rare but must remain explicit. |
+| peripherals | 0 | 0 | 0 | Supported by the model but absent from profile-level data in this snapshot. |
+
+The diagnostic normalized relationship view removes absolute `display_order`
+values and treats omitted quantity and explicit `1` as equivalent while
+preserving relative row/extras ordering. It exists to identify source-encoding
+duplication; it does not rewrite normalized data.
+
+##### Design consequence
+
+A canonical profile model must therefore separate at least three concerns:
+
+1. a reusable profile payload containing invariant profile facts and stable
+   relationships;
+2. an occurrence/context layer retaining Army membership, source keys,
+   profile-group membership, AVA, presentation context, and genuine contextual
+   gameplay differences;
+3. source provenance sufficient to reconstruct and audit every original
+   occurrence.
+
+The 16 residual contextual variants demonstrate why canonicalization cannot be
+implemented as “pick one representative profile row and discard the rest.”
+Conversely, the large AVA-only and representation-only populations demonstrate
+that preserving every full source payload in the application model is also
+unnecessary.
+
+##### Current profile-payload materialization
+
+Schema version 12 materializes reusable **profile payloads** as derived frontend
+structure while retaining every normalized/source profile row unchanged. This
+does not introduce a new global semantic profile identity. A payload remains
+scoped to one existing `logical_unit`; two unrelated units are not merged merely
+because their profile data happens to be identical.
+
+The implementation deliberately stops at exact application-payload equality. It
+does not factor every army-specific gameplay difference into fine-grained field
+deltas. This keeps the first migration mechanically provable and leaves broader
+semantic equivalence for later evidence-driven work.
+
+For the 2026-09-18 database, the audited payload boundary gives:
+
+- 5,020 source profile occurrences;
+- 1,163 distinct candidate payloads when scoped by source unit;
+- 1,108 distinct candidate payloads when scoped by materialized logical unit;
+- 55 additional duplicate payloads exposed by existing logical-unit identity;
+- 3,912 repeated occurrences represented by those 1,108 logical-unit payloads,
+  approximately 77.93% of stored profile occurrences.
+
+`tools/audit_profile_semantics.py` reports these values under `candidateModel`.
+They remain snapshot diagnostics, not schema constants.
+
+###### Payload boundary
+
+The initial reusable payload contains the exact current values of:
+
+- `name`, `type_id`, `move_1`, `move_2`, `cc`, `bs`, `ph`, `wip`, `arm`, `bts`,
+  `vitality`, `silhouette`, `is_structure`, and `notes`;
+- characteristics, preserving their relative order;
+- skills plus extras;
+- equipment plus extras;
+- weapons plus extras.
+
+Skill/equipment/weapon payloads initially preserve exact `display_order`,
+`quantity`, `raw`, and relative ordering. The audit has shown some
+`display_order` and omitted-versus-`1` quantity differences to be
+representation-only in the current snapshot, but that diagnostic normalization
+is **not** promoted into the first storage contract. Those records remain
+separate payloads until application behavior and source meaning justify a
+normalization rule explicitly.
+
+The following stay outside the reusable payload:
+
+- `army_id`, `unit_id`, `group_id`, and `profile_id` — source/provenance keys;
+- profile `position` — occurrence ordering/context;
+- `ava` — army-contextual gameplay data;
+- `logo` — observed army-contextual presentation data;
+- profile-group `category_id`, `isc`, `notes`, and group ordering — profile-group
+  context;
+- `profile_includes` — references to army/unit-local loadout identities;
+- `profile_peripherals` — references to army-local peripheral identities.
+
+Includes and peripherals are intentionally deferred because their numeric target
+identities are contextual. They remain losslessly available through the current
+source tables until the related entities have canonical identities of their own.
+They must not be dropped merely because they are outside the first reusable
+payload.
+
+The 16 residual contextual variants identified by the classification audit are
+therefore handled conservatively: WIP, characteristic, or skill differences
+produce **different payloads**. Only AVA, logo, source identity, ordering, and
+the deferred context-local relationships are separated from the payload in this
+first model. A later layer may group multiple payload variants under a stronger
+semantic profile identity, but that is not required for the first migration.
+
+###### Derived application tables
+
+The materialized application-side shape is:
+
+```text
+profile_payloads
+  id                  internal deterministic payload row ID
+  logical_unit_id     owning application logical unit
+  payload_sha256      SHA-256 of versioned canonical payload serialization
+  name
+  type_id
+  move_1 / move_2
+  cc / bs / ph / wip / arm / bts
+  vitality / silhouette / is_structure
+  notes
+
+profile_payload_occurrences
+  army_id
+  unit_id
+  group_id
+  profile_id
+  profile_payload_id
+  position
+  ava
+  logo
+
+profile_payload_characteristics
+profile_payload_skills
+profile_payload_skill_extras
+profile_payload_equipment
+profile_payload_equipment_extras
+profile_payload_weapons
+profile_payload_weapon_extras
+```
+
+`profile_payload_occurrences` is one-to-one with the current source `profiles`
+rows. Its composite source key remains `(army_id, unit_id, group_id,
+profile_id)` and references exactly one reusable payload. The source `profiles`
+and nested source tables remain unchanged for provenance and lossless auditing.
+
+The nested payload tables use payload-relative ordering rather than copying the
+source `occurrence_id` surrogate into the canonical layer. Extras remain linked
+to the specific payload relationship occurrence. This keeps normalization-only
+source identifiers out of application identity while preserving ordered
+relationship meaning.
+
+`payload_sha256` is a deterministic fingerprint of a versioned canonical JSON
+serialization of the reusable payload. Payload equality is still scoped by
+`logical_unit_id`; the hash does not authorize merging identical payload bytes
+across unrelated logical units. Materialization compares the serialized payload
+when coalescing rows and rejects an in-scope hash collision rather than treating
+the hash as independent semantic evidence. Structured `raw` fallback JSON is
+stored canonically in the derived layer; the source/raw layers retain its exact
+original representation.
+
+The integer `profile_payloads.id` is an internal database key, assigned
+deterministically from the sorted `(logical_unit_id, payload_sha256)` set for a
+build. It is not a public API identifier and is not promised stable across
+snapshots when source payloads change.
+
+###### Build and read-path invariants
+
+The materializer and database validation enforce all of the following:
+
+- every source profile occurrence maps to exactly one `profile_payload`;
+- every payload has at least one supporting source occurrence;
+- the occurrence's source unit maps to the same `logical_unit` that owns the
+  payload;
+- identical candidate payloads inside one logical unit reuse one payload row;
+- WIP, characteristics, skills, equipment, weapons, extras, `raw`, and exact
+  representation values remain distinct whenever they differ;
+- AVA and logo retain their source occurrence values rather than being selected
+  from a representative row;
+- profile-group context remains attached through the source occurrence key;
+- includes and peripherals remain available through their existing contextual
+  source relationships until their own canonicalization stage;
+- current source and raw tables are not rewritten or made lossy;
+- non-null `raw` fallback content participates in payload equality and can never
+  be silently discarded;
+- canonical-profile IDs remain internal and must not leak into public URLs or
+  API contracts during this migration.
+
+Repository unit-detail profile assembly now consumes
+`profile_payload_occurrences -> profile_payloads` and the nested payload tables
+while retaining army/profile-group context from the occurrence/source side. The
+public profile object shape, ordering, AVA handling, display-name normalization,
+and merged logical-source behavior are intentionally unchanged.
+
+The lossless `profiles` and nested `profile_*` source tables remain in the
+frontend database for provenance, validation, contextual relationships that have
+not yet been canonicalized, and repository paths such as catalog reverse
+lookups. `get_unit()` no longer uses those source payload rows to assemble its
+profile objects. This is a staged read-path migration rather than permission to
+remove the source representation.
+
+Behavioral regression coverage preserves the existing unit/API expectations and
+also verifies that mutating the legacy source profile payload rows after
+materialization does not change unit-detail profile output. The migration was
+accepted only after representative and production-scale before/after comparison
+showed identical serialized `get_unit()` results.
+
+The remaining query-time profile merge is now explicitly an **occurrence merge**,
+not payload deduplication. A logical unit can contain overlapping source records
+for the same effective army occurrence and source-local group/profile coordinates
+where one source contributes nested relationships that another omits. Canonical
+`profile_payload_id` is therefore deliberately too strict to serve as that
+occurrence identity.
+
+`get_unit()` collapses such source occurrences only when their effective army
+occurrence, group/profile IDs, scalar profile facts, troop type, and
+profile-group classification agree. Nested skills, equipment, weapons, and
+characteristics are then accumulated without repeated visible items. The only
+direct source-context value merged after a match is AVA: when comparable
+non-negative numeric values disagree, the more restrictive value is retained.
+Different availability-category occurrences remain separate, and scalar
+profile/stat/classification differences remain separate.
+
+This source-occurrence merge remains necessary until InfinityDB has stronger
+explicit identity evidence for those overlapping source profile occurrences. It
+must not be replaced merely by canonical payload identity or by source-local
+profile IDs.
+
+#### Loadout semantic classification audit
+
+`tools/audit_loadout_semantics.py` performs the corresponding read-only evidence
+pass for loadout canonicalization. It compares repeated Army occurrences of the
+same source loadout key:
+
+```text
+(unit_id, group_id, option_id)
+```
+
+As with the profile audit, that key is an **observational comparison key**, not
+a proposed application identity. It lets InfinityDB inspect which values really
+change between Army contexts before a canonical loadout model is designed.
+
+Run the audit with:
+
+```text
+python tools/audit_loadout_semantics.py data/generated/infinity.db \
+  --output reports/loadout-semantics.json
+```
+
+For the 2026-09-18 frontend database, the audit reports:
+
+- 12,993 loadout occurrences;
+- 3,593 distinct source loadout keys;
+- 2,162 source loadout keys repeated in more than one Army, covering 11,562
+  occurrences;
+- 130 repeated keys whose complete conservative payload varies by Army context;
+- 125 varying keys after diagnostic normalization of absolute `display_order`
+  and omitted-versus-explicit quantity `1`;
+- 26 varying keys when army-local peripheral IDs are compared through their
+  referenced peripheral definition (`name` + `mercs`) instead of raw local IDs;
+- 21 varying keys when both diagnostic normalizations are applied.
+
+Those final 21 variations are disjoint in the current snapshot: two points
+variations, one SWC variation, one order-generation variation, two skill
+variations, eight weapon variations, and seven peripheral-context variations.
+This is evidence for the next design step, not permission to normalize those
+remaining differences away.
+
+The peripheral result is particularly important. Peripheral IDs are army-local,
+so direct cross-army comparison exaggerates semantic variation: 111 repeated
+source loadout keys differ when raw peripheral IDs are compared, but only seven
+still differ after resolving each ID to the referenced peripheral definition.
+The 104 collapsed cases are therefore local-identity/provenance differences,
+not evidence of different peripheral names or roles. The remaining seven all
+involve the same `TURTLEMEK` name with an Army-context difference in the
+peripheral definition's `mercs` value. Canonical peripheral identity remains a
+later relationship task; the audit resolution is diagnostic only.
+
+##### Loadout fields
+
+The current classification is:
+
+| Field | Classification | Current evidence / treatment |
+| --- | --- | --- |
+| `army_id` | source/provenance | Identifies the owning Army occurrence. |
+| `unit_id` | source/provenance | Identifies the original source unit. |
+| `group_id` | source/provenance | Source-local profile-group identity. |
+| `option_id` | source/provenance | Source-local loadout identity. |
+| `position` | normalization-only | Generated from source option-array order; 67 repeated source keys change literal position. |
+| `name` | canonical fact candidate | No variation across repeated source loadout keys. |
+| `points` | contextual delta | Two repeated source keys vary by Army context, affecting 16 occurrences. |
+| `swc` | contextual delta | One repeated source key varies by Army context, affecting two occurrences. |
+| `minis` | canonical fact candidate | No same-source-key variation observed. |
+| `disabled` | canonical fact candidate | No same-source-key variation observed. |
+
+“Canonical fact candidate” has the same conservative meaning as in the profile
+audit: the current snapshot supports reuse, but later source variation must fail
+visibly or become explicit context rather than being discarded.
+
+##### Nested loadout relationships
+
+Normalized relationship rows mix gameplay meaning with source and
+normalization mechanics. Their common field semantics are:
+
+- parent `army_id` / `unit_id` / `group_id` / `option_id` columns are source
+  provenance;
+- `occurrence_id`, weapon `template_id`, and literal `position` values are
+  normalization-only identities/order bookkeeping;
+- catalog `item_id`, `characteristic_id`, and `extra_id` values are semantic
+  relationships, except that peripheral `item_id` is only army-local;
+- `display_order` is presentation context, not entity identity;
+- `quantity` is a relationship attribute. The audit treats omitted quantity and
+  explicit `1` as equivalent only in its diagnostic normalized view;
+- `order_type`, `list_count`, and `total_count` are order-generation relationship
+  attributes;
+- `target_group_id` / `target_option_id` identify a source-local include
+  relationship;
+- `raw` is source/provenance fallback for malformed or unmodeled content and
+  must continue to block destructive canonicalization until understood.
+
+Observed relationship behavior is:
+
+| Relationship | Rows | Extras | Raw same-source variants | After representation normalization | Interpretation |
+| --- | ---: | ---: | ---: | ---: | --- |
+| characteristics | 0 | — | 0 | 0 | Supported by the model but absent from loadouts in this snapshot. |
+| orders | 15,195 | — | 1 | 1 | One genuine Army-context order-generation difference. |
+| skills | 6,330 | 1,594 | 2 | 2 | Two genuine contextual skill/extra differences. |
+| equipment | 2,798 | 457 | 1 | 0 | The only same-source variation is representation-only. |
+| weapons | 52,554 | 11,526 | 12 | 8 | Four differences are representation-only; eight retain source-shape/content differences for later classification. |
+| includes | 949 | — | 0 | 0 | Stable for repeated source loadout keys, but the target remains source-local. |
+| peripherals | 818 | — | 111 | 111 | Raw army-local IDs differ widely; resolving the target definition reduces this to seven contextual variants. |
+
+The weapon source also contains one non-null raw fallback template (`{}`),
+referenced by 95 normalized weapon occurrences. The conservative comparison
+retains that fallback exactly; the loadout canonicalizer must not infer that an
+anonymous/empty source object is safely discardable merely because nearby
+weapon rows look redundant.
+
+This evidence pass intentionally stops before selecting the canonical loadout
+payload boundary. In particular, it does not yet decide whether points/SWC,
+order-generation differences, includes, or peripheral relationships belong in
+the reusable payload or in an occurrence/context layer. That decision belongs
+to the next TODO item and must preserve every observed player-relevant variant.
+
+#### Canonical loadout payload materialization
+
+The accepted first loadout migration boundary mirrors the conservative profile
+model: deduplicate exact reusable application payloads **within an existing
+`logical_unit`**, while keeping source/Army occurrence context explicit. It does
+not introduce a new global semantic loadout identity, and identical payload
+bytes from unrelated logical units do not authorize a merge.
+
+The first model deliberately stops at exact payload equality. It does not turn
+the diagnostic display-order or omitted-versus-`1` quantity normalization into
+an application rule, and it does not attempt to factor every nested gameplay
+difference into sparse deltas. Genuine or representational differences inside
+the selected payload boundary therefore continue to produce separate payload
+variants.
+
+For the 2026-09-18 database, this boundary gives:
+
+- 12,993 source loadout occurrences;
+- 3,574 distinct candidate payloads when scoped by source unit;
+- 3,448 distinct candidate payloads when scoped by materialized logical unit;
+- 126 additional duplicate payloads exposed by existing logical-unit identity;
+- 9,545 repeated occurrences represented by those 3,448 logical-unit payloads,
+  approximately 73.46% of stored loadout occurrences;
+- 16 repeated source-loadout identities still split into more than one candidate
+  payload because their selected nested payload content differs exactly.
+
+`tools/audit_loadout_semantics.py` reports these values under `candidateModel`.
+They are snapshot diagnostics, not schema constants.
+
+##### Payload boundary
+
+The initial reusable loadout payload contains the exact current values of:
+
+- `name`, `minis`, and `disabled`;
+- characteristics, preserving their relative order;
+- generated orders, including `order_type`, `list_count`, `total_count`, and
+  retained `raw` fallback content;
+- skills plus extras;
+- equipment plus extras;
+- weapons plus extras.
+
+Skill/equipment/weapon payloads initially preserve exact `display_order`,
+`quantity`, `raw`, and relative ordering. The classification audit has shown
+some of those differences to be representation-only, but, as with canonical
+profiles, that diagnostic normalization is **not** promoted into the first
+storage contract. The one equipment representation variant and four weapon
+representation variants therefore remain distinct payloads in this first model.
+
+The following stay outside the reusable payload:
+
+- `army_id`, `unit_id`, `group_id`, and `option_id` — source/provenance keys;
+- loadout `position` — source occurrence ordering/context;
+- `points` and `swc` — Army-contextual player-facing costs with observed
+  same-source variation;
+- profile-group membership/classification — context inherited from the source
+  occurrence;
+- `option_includes` — references to source-local loadout coordinates;
+- `option_peripherals` — references to army-local peripheral identities.
+
+Points and SWC are separated explicitly rather than forcing their three observed
+Army-specific cost differences to create otherwise duplicate payloads. By
+contrast, orders, skills, equipment, and weapons remain in the reusable payload:
+when those gameplay relationships differ, the first canonical model represents
+that as a distinct payload variant rather than inventing a finer-grained delta
+system prematurely.
+
+Includes and peripherals remain losslessly available through the source tables
+until their target entities have stronger canonical identities. In particular,
+the diagnostic peripheral comparison by `name + mercs` is evidence that raw
+army-local IDs overstate variation; it is **not** yet sufficient to define a
+canonical peripheral key. The seven remaining peripheral-context variations,
+including `TURTLEMEK` `mercs` differences, must therefore remain explicit source
+context.
+
+The 16 candidate-payload variants among repeated source-loadout keys are retained
+conservatively: one exact equipment representation variant, one order-generation
+variant, two skill/extra variants, and twelve weapon variants. No one of those
+is discarded or rewritten merely because most occurrences agree.
+
+##### Derived application tables
+
+The materialized application-side shape is:
+
+```text
+loadout_payloads
+  id                  internal deterministic payload row ID
+  logical_unit_id     owning application logical unit
+  payload_sha256      SHA-256 of versioned canonical payload serialization
+  name
+  minis
+  disabled
+
+loadout_payload_occurrences
+  army_id
+  unit_id
+  group_id
+  option_id
+  loadout_payload_id
+  position
+  points
+  swc
+
+loadout_payload_characteristics
+loadout_payload_orders
+loadout_payload_skills
+loadout_payload_skill_extras
+loadout_payload_equipment
+loadout_payload_equipment_extras
+loadout_payload_weapons
+loadout_payload_weapon_extras
+```
+
+`loadout_payload_occurrences` is one-to-one with the current source
+`loadout_options` rows. Its composite source key stays `(army_id, unit_id,
+group_id, option_id)` and references exactly one reusable payload. The
+source `loadout_options` and nested `option_*` tables remain unchanged for
+provenance, lossless auditing, deferred relationships, and migration comparison.
+
+Nested payload tables use payload-relative ordering instead of carrying
+normalization-only source `occurrence_id` or weapon `template_id` identities into
+the canonical application layer. Extras remain attached to their specific
+payload relationship occurrence. The one currently non-null weapon raw fallback
+(`{}`), referenced by 95 source occurrences, remains part of exact payload
+equality and must not be silently inferred away.
+
+As with profiles, `payload_sha256` fingerprints a versioned canonical JSON
+serialization while equality remains scoped by `logical_unit_id`. Materialization
+compares serialized payload content before coalescing hash matches and fails
+visibly on an in-scope collision. Internal integer payload IDs are assigned
+deterministically from the sorted logical-unit/fingerprint set and must not become
+public API or URL identities.
+
+##### Build and read-path invariants
+
+The materializer and database validation enforce the storage/provenance portion
+of the following contract. Repository/API assembly still reads the source loadout
+tables and will migrate in a separate behavior-preserving step:
+
+- every source loadout occurrence maps to exactly one reusable loadout payload;
+- every payload has at least one supporting source occurrence;
+- the source unit and payload belong to the same materialized logical unit;
+- exact candidate payloads within one logical unit reuse one payload row;
+- points and SWC remain attached to their exact source occurrence;
+- order, skill, equipment, weapon, extra, `raw`, and exact representation
+  differences continue to split payloads;
+- profile-group context, includes, and peripherals remain recoverable from the
+  occurrence/source side;
+- source `loadout_options` and nested `option_*` rows remain lossless and
+  reconstructable;
+- no army-local peripheral ID is promoted to cross-Army canonical identity by
+  this migration;
+- the current repository/API/web loadout read path remains unchanged until a
+  dedicated before/after migration proves behavioral equivalence.
+
+This materialization intentionally leaves repository read-path migration,
+source-occurrence merge behavior, canonical include/peripheral identities, and
+any future representation normalization as separate evidence-driven decisions.
+
 #### First implementation targets
 
 ### 1. Profile payloads
@@ -636,8 +1336,8 @@ registry remains separate from these derived frontend tables so generated
 application structure cannot be supplied as normalized source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 11 and the application
-compatibility revision is 16. Imports build temporary sibling files, check
+records its schema version. The current schema version is 13 and the application
+compatibility revision is 18. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

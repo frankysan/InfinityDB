@@ -206,38 +206,41 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-- [ ] **Establish the semantic-deduplication baseline.**
-  - [ ] Add a reproducible development audit that reports repeated profile and
+- [x] **Establish the semantic-deduplication baseline.**
+  - [x] Add a reproducible development audit that reports repeated profile and
     loadout payloads without modifying the database.
-  - [ ] Define the exact payload components included in equality comparisons.
-  - [ ] Separate semantic fields from source identity, context, ordering, and
+  - [x] Define the exact payload components included in equality comparisons.
+  - [x] Separate semantic fields from source identity, context, ordering, and
     provenance fields explicitly rather than by undocumented exclusion.
-  - [ ] Record representative equality and difference cases as regression
+  - [x] Record representative equality and difference cases as regression
     fixtures/tests.
-  - [ ] Treat current snapshot counts as diagnostics, not expected constants.
+  - [x] Treat current snapshot counts as diagnostics, not expected constants.
 
-- [ ] **Canonicalize profile payloads conservatively.**
-  - [ ] Inventory every current profile field and nested relationship.
-  - [ ] Classify each as canonical fact, contextual fact/delta, relationship,
+- [x] **Canonicalize profile payloads conservatively.**
+  - [x] Inventory every current profile field and nested relationship.
+  - [x] Classify each as canonical fact, contextual fact/delta, relationship,
     source/provenance, or normalization-only structure.
-  - [ ] Prove exact-equality groups before changing storage.
-  - [ ] Design canonical profile payload + source/context occurrence relations.
-  - [ ] Preserve genuine AVA, profile-group, army, and source differences
+  - [x] Prove exact-equality groups before changing storage.
+  - [x] Design canonical profile payload + source/context occurrence relations.
+  - [x] Preserve genuine AVA, profile-group, army, and source differences
     explicitly.
-  - [ ] Preserve characteristics, skills, equipment, weapons, extras, includes,
+  - [x] Preserve characteristics, skills, equipment, weapons, extras, includes,
     peripherals, and other gameplay-bearing nested information.
-  - [ ] Update repository/API assembly to consume the canonical model without
+  - [x] Update repository/API assembly to consume the canonical model without
     changing player-visible semantics unintentionally.
-  - [ ] Add reconstruction/provenance and behavioral regression tests.
+  - [x] Add reconstruction/provenance and behavioral regression tests.
+  - [x] Re-evaluate and simplify the remaining query-time logical-source profile
+    merge/deduplication only where occurrence and availability semantics remain
+    unchanged.
 
 - [ ] **Canonicalize loadout payloads conservatively.**
-  - [ ] Inventory every loadout field and nested relationship.
-  - [ ] Classify canonical facts versus contextual/source differences.
-  - [ ] Compare complete loadout meaning, including points, SWC, minis,
+  - [x] Inventory every loadout field and nested relationship.
+  - [x] Classify canonical facts versus contextual/source differences.
+  - [x] Compare complete loadout meaning, including points, SWC, minis,
     disabled state, skills, equipment, weapons, extras, orders,
     characteristics, includes, and peripherals.
-  - [ ] Design canonical loadout payload + source/context occurrence relations.
-  - [ ] Preserve every genuine army/loadout variation explicitly.
+  - [x] Design canonical loadout payload + source/context occurrence relations.
+  - [x] Preserve every genuine army/loadout variation explicitly.
   - [ ] Update repository/API assembly and regression coverage.
   - [ ] Measure database size and query behavior as secondary outcomes, without
     using storage savings as the semantic acceptance criterion.
@@ -268,6 +271,28 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
     metadata, and gameplay contexts.
   - [ ] Identify player-relevant metadata currently stored but not represented
     through the application.
+
+- [ ] **Separate lossless source storage from the application database after
+  canonicalization.**
+  - [ ] Treat `infinity.raw.db` as the complete lossless normalized Army source/
+    provenance store, including source-local identities, source ordering,
+    raw fallbacks, and acquisition/audit metadata required to reconstruct
+    the imported source.
+  - [ ] Inventory every remaining `infinity.db` table and repository/API query and
+    classify it as canonical application data, explicit contextual application
+    data, or source/provenance-only data.
+  - [ ] Move source/provenance-only normalized tables out of `infinity.db` only
+    after canonical unit/profile/loadout/relationship/catalog replacements are
+    proven complete and reconstruction/provenance tests cover the transition.
+  - [ ] Make normal repository/API/web serving independent of `infinity.raw.db`;
+    production runtime should require the self-contained canonical `infinity.db`
+    plus the existing rules database/assets, while `infinity.raw.db` remains
+    a build/audit artifact.
+  - [ ] Preserve traceability from every canonical fact and contextual occurrence
+    back to supporting raw/source records after the physical database split.
+  - [ ] Document the rebuild/migration boundary and verify that removing the
+    duplicated source representation reduces physical application-database size
+    without using storage savings as the semantic acceptance criterion.
 
 - [ ] **Maintain a source-to-presentation completeness inventory while
   canonicalizing.**

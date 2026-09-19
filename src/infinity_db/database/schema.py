@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 11
+SCHEMA_VERSION = 13
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 16
+DATABASE_COMPATIBILITY_VERSION = 18
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -250,6 +250,143 @@ DERIVED_TABLES = {
         ref("source_unit_id", "units", "id"),
         ref("logical_unit_id", "logical_units", "id"),
     ),
+    "profile_payloads": table(
+        "id",
+        "logical_unit_id payload_sha256 name type_id move_1 move_2 cc bs ph wip arm bts vitality "
+        "silhouette is_structure notes",
+        ref("logical_unit_id", "logical_units", "id"),
+        ref("type_id", "troop_types", "id"),
+    ),
+    "profile_payload_occurrences": table(
+        "army_id unit_id group_id profile_id",
+        "profile_payload_id position ava logo",
+        ref("army_id unit_id group_id profile_id", "profiles"),
+        ref("profile_payload_id", "profile_payloads", "id"),
+    ),
+    "profile_payload_characteristics": table(
+        "profile_payload_id position",
+        "characteristic_id",
+        ref("profile_payload_id", "profile_payloads", "id"),
+        ref("characteristic_id", "characteristics", "id"),
+    ),
+    "profile_payload_skills": table(
+        "profile_payload_id position",
+        "item_id display_order quantity raw",
+        ref("profile_payload_id", "profile_payloads", "id"),
+        ref("item_id", "skills", "id"),
+    ),
+    "profile_payload_skill_extras": table(
+        "profile_payload_id occurrence_position position",
+        "extra_id",
+        ref(
+            "profile_payload_id occurrence_position",
+            "profile_payload_skills",
+            "profile_payload_id position",
+        ),
+        ref("extra_id", "extras", "id"),
+    ),
+    "profile_payload_equipment": table(
+        "profile_payload_id position",
+        "item_id display_order quantity raw",
+        ref("profile_payload_id", "profile_payloads", "id"),
+        ref("item_id", "equipment", "id"),
+    ),
+    "profile_payload_equipment_extras": table(
+        "profile_payload_id occurrence_position position",
+        "extra_id",
+        ref(
+            "profile_payload_id occurrence_position",
+            "profile_payload_equipment",
+            "profile_payload_id position",
+        ),
+        ref("extra_id", "extras", "id"),
+    ),
+    "profile_payload_weapons": table(
+        "profile_payload_id position",
+        "item_id display_order quantity raw",
+        ref("profile_payload_id", "profile_payloads", "id"),
+        ref("item_id", "weapons", "id"),
+    ),
+    "profile_payload_weapon_extras": table(
+        "profile_payload_id occurrence_position position",
+        "extra_id",
+        ref(
+            "profile_payload_id occurrence_position",
+            "profile_payload_weapons",
+            "profile_payload_id position",
+        ),
+        ref("extra_id", "extras", "id"),
+    ),
+    "loadout_payloads": table(
+        "id",
+        "logical_unit_id payload_sha256 name minis disabled",
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "loadout_payload_occurrences": table(
+        "army_id unit_id group_id option_id",
+        "loadout_payload_id position points swc",
+        ref("army_id unit_id group_id option_id", "loadout_options"),
+        ref("loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "loadout_payload_characteristics": table(
+        "loadout_payload_id position",
+        "characteristic_id",
+        ref("loadout_payload_id", "loadout_payloads", "id"),
+        ref("characteristic_id", "characteristics", "id"),
+    ),
+    "loadout_payload_orders": table(
+        "loadout_payload_id position",
+        "order_type list_count total_count raw",
+        ref("loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "loadout_payload_skills": table(
+        "loadout_payload_id position",
+        "item_id display_order quantity raw",
+        ref("loadout_payload_id", "loadout_payloads", "id"),
+        ref("item_id", "skills", "id"),
+    ),
+    "loadout_payload_skill_extras": table(
+        "loadout_payload_id occurrence_position position",
+        "extra_id",
+        ref(
+            "loadout_payload_id occurrence_position",
+            "loadout_payload_skills",
+            "loadout_payload_id position",
+        ),
+        ref("extra_id", "extras", "id"),
+    ),
+    "loadout_payload_equipment": table(
+        "loadout_payload_id position",
+        "item_id display_order quantity raw",
+        ref("loadout_payload_id", "loadout_payloads", "id"),
+        ref("item_id", "equipment", "id"),
+    ),
+    "loadout_payload_equipment_extras": table(
+        "loadout_payload_id occurrence_position position",
+        "extra_id",
+        ref(
+            "loadout_payload_id occurrence_position",
+            "loadout_payload_equipment",
+            "loadout_payload_id position",
+        ),
+        ref("extra_id", "extras", "id"),
+    ),
+    "loadout_payload_weapons": table(
+        "loadout_payload_id position",
+        "item_id display_order quantity raw",
+        ref("loadout_payload_id", "loadout_payloads", "id"),
+        ref("item_id", "weapons", "id"),
+    ),
+    "loadout_payload_weapon_extras": table(
+        "loadout_payload_id occurrence_position position",
+        "extra_id",
+        ref(
+            "loadout_payload_id occurrence_position",
+            "loadout_payload_weapons",
+            "loadout_payload_id position",
+        ),
+        ref("extra_id", "extras", "id"),
+    ),
 }
 
 DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
@@ -359,6 +496,22 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     connection.execute(
         "CREATE INDEX logical_unit_sources_logical "
         "ON logical_unit_sources(logical_unit_id, source_unit_id)"
+    )
+    connection.execute(
+        "CREATE UNIQUE INDEX profile_payloads_identity "
+        "ON profile_payloads(logical_unit_id, payload_sha256)"
+    )
+    connection.execute(
+        "CREATE INDEX profile_payload_occurrences_payload "
+        "ON profile_payload_occurrences(profile_payload_id)"
+    )
+    connection.execute(
+        "CREATE UNIQUE INDEX loadout_payloads_identity "
+        "ON loadout_payloads(logical_unit_id, payload_sha256)"
+    )
+    connection.execute(
+        "CREATE INDEX loadout_payload_occurrences_payload "
+        "ON loadout_payload_occurrences(loadout_payload_id)"
     )
     for index_name, table_name, columns in INDEXES:
         connection.execute(f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})")

@@ -391,7 +391,7 @@ units. Older normalized inputs that lack the persisted generic/mercenary audits
 retain the legacy duplicate fallback inside the builder; repository reads do
 not rediscover logical identity.
 
-For schema version 11, the logical-unit ID equals the representative source-unit
+Since schema version 11, the logical-unit ID equals the representative source-unit
 ID so existing API IDs and URLs remain stable. `representative_unit_id` is still
 stored explicitly, leaving room to decouple application identity from source
 identity later without changing provenance. Repository aggregation follows the
@@ -400,6 +400,14 @@ terms, and other source-backed data. It does not pre-aggregate those source
 tables into logical copies, because normal and optional-mercenary occurrences
 can belong to the same logical unit and army while retaining different
 `availability_kind` semantics.
+
+Schema version 12 adds a derived canonical-profile layer beside those lossless
+source tables. Build-time materialization scopes reusable profile payloads to an
+existing `logical_unit`, stores AVA/logo/source keys/group context on a
+one-to-one occurrence relation, and keeps context-local includes/peripherals in
+their source relationships. The repository has not switched to this layer yet;
+the current read path continues to use source profile tables until equivalence
+coverage is complete.
 
 ## Snapshot acquisition and provenance
 
@@ -725,7 +733,7 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 11 and database compatibility revision of 16; it
+schema has a schema version of 13 and database compatibility revision of 18; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

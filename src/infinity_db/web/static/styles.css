@@ -986,6 +986,7 @@ h1>span {
 
 .about-principles {
   margin-top: 38px;
+  padding: 30px 32px;
 }
 
 .about-principles>h2 {
@@ -2718,6 +2719,7 @@ tbody tr:hover {
 
   .about-principles {
     margin-top: 30px;
+    padding: 24px 22px;
   }
 
   .about-principles>h2 {
