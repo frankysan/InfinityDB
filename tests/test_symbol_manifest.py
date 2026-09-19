@@ -59,6 +59,36 @@ def assert_svg_preflight_rejects_later_state(
         )
 
 
+def assert_text_conversion_rejects_later_state(
+    document: dict[str, object],
+    *,
+    report: Path,
+    summary_report: Path,
+    project_root: Path,
+) -> None:
+    with pytest.raises(
+        SymbolManifestError,
+        match="Text conversion requires version-5 duplicate-detected state",
+    ):
+        add_text_conversion(
+            document,
+            status="passed",
+            summary={
+                "canonicalAssetCount": 0,
+                "conversionCandidateCount": 0,
+                "convertedAssetCount": 0,
+                "carriedForwardAssetCount": 0,
+                "failedAssetCount": 0,
+            },
+            report=report,
+            summary_report=summary_report,
+            converter="inkscape-shell",
+            converter_version="test",
+            jobs=4,
+            project_root=project_root,
+        )
+
+
 def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -> None:
     army = artifact(tmp_path / "army.zip", b"army")
     symbols = artifact(tmp_path / "symbols.zip", b"symbols")
@@ -715,6 +745,12 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         jobs=4,
         project_root=tmp_path,
     )
+    assert_text_conversion_rejects_later_state(
+        document,
+        report=conversion_report,
+        summary_report=conversion_summary,
+        project_root=tmp_path,
+    )
     assert_svg_preflight_rejects_later_state(
         document, report=preflight_report, project_root=tmp_path
     )
@@ -744,6 +780,12 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         project_root=tmp_path,
     )
     assert document["formatVersion"] == 7
+    assert_text_conversion_rejects_later_state(
+        document,
+        report=conversion_report,
+        summary_report=conversion_summary,
+        project_root=tmp_path,
+    )
     assert_svg_preflight_rejects_later_state(
         document, report=preflight_report, project_root=tmp_path
     )
@@ -767,6 +809,12 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
 
     assert published["formatVersion"] == 8
     assert published["processing"]["publication"]["status"] == "passed"
+    assert_text_conversion_rejects_later_state(
+        published,
+        report=conversion_report,
+        summary_report=conversion_summary,
+        project_root=tmp_path,
+    )
     assert_svg_preflight_rejects_later_state(
         published, report=preflight_report, project_root=tmp_path
     )

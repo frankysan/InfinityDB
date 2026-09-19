@@ -668,6 +668,17 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
         "jobs": 4,
     }
 
+    with pytest.raises(ValueError, match="rerun requires a failed version-6"):
+        convert_symbol_text(
+            materialized,
+            archive=archive,
+            build_manifest_path=manifest_path,
+            font_report=font_report,
+            reports_base=tmp_path / "data" / "reports" / "symbols",
+            project_root=tmp_path,
+        )
+    assert load_symbol_manifest(manifest_path)["formatVersion"] == 6
+
     def fake_compress(
         input_root: Path, output_root: Path, **kwargs
     ) -> SimpleNamespace:
@@ -813,18 +824,19 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
     } == prior_bytes
     assert load_symbol_manifest(manifest_path)["formatVersion"] == 7
 
-    reconverted = convert_symbol_text(
-        materialized,
-        archive=archive,
-        build_manifest_path=manifest_path,
-        font_report=font_report,
-        reports_base=tmp_path / "data" / "reports" / "symbols",
-        project_root=tmp_path,
-    )
-    assert reconverted.status == "passed"
-    reconverted_manifest = load_symbol_manifest(manifest_path)
-    assert reconverted_manifest["formatVersion"] == 6
-    assert "compression" not in reconverted_manifest["processing"]
+    with pytest.raises(ValueError, match="version-5 duplicate-detection state"):
+        convert_symbol_text(
+            materialized,
+            archive=archive,
+            build_manifest_path=manifest_path,
+            font_report=font_report,
+            reports_base=tmp_path / "data" / "reports" / "symbols",
+            project_root=tmp_path,
+        )
+    preserved_manifest = load_symbol_manifest(manifest_path)
+    assert preserved_manifest["formatVersion"] == 7
+    assert preserved_manifest["processing"]["compression"] == compression
+
 
 def test_text_conversion_failure_preserves_existing_canonical_tree(
     tmp_path: Path, monkeypatch
@@ -990,3 +1002,60 @@ def test_text_conversion_failure_preserves_existing_canonical_tree(
     assert updated["formatVersion"] == 6
     assert updated["processing"]["textConversion"]["status"] == "failed"
     assert updated["processing"]["textConversion"]["summary"]["failedAssetCount"] == 1
+
+    def fake_retry_success(output_root, _exact, _compact, **_kwargs):
+        converted = output_root / "text_as_paths" / "units" / "text.svg"
+        converted.parent.mkdir(parents=True, exist_ok=True)
+        converted.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
+            encoding="utf-8",
+        )
+        reports = output_root / "reports"
+        reports.mkdir(parents=True, exist_ok=True)
+        report = reports / "svg-text-to-path-report.csv"
+        summary_report = reports / "text-conversion-summary.csv"
+        report.write_text(
+            "file,status,error\nunits/text.svg,CONVERTED,\n",
+            encoding="utf-8",
+        )
+        summary_report.write_text("converted,failed\n1,0\n", encoding="utf-8")
+        return {
+            "converted": 1,
+            "skipped": 0,
+            "skipped_duplicates": 0,
+            "failed": 0,
+            "report_path": report,
+            "summary_path": summary_report,
+            "elapsed_seconds": 0.1,
+            "converter": "inkscape-shell",
+            "converter_version": "Inkscape test",
+        }
+
+    monkeypatch.setattr(
+        symbol_work,
+        "_font_tools",
+        lambda: type(
+            "FakeConversionRetryTools",
+            (),
+            {
+                "load_font_index": staticmethod(lambda: ({}, {}, 0, 0)),
+                "convert_available_svgs": staticmethod(fake_retry_success),
+            },
+        ),
+    )
+
+    retried = convert_symbol_text(
+        materialized,
+        archive=archive,
+        build_manifest_path=manifest_path,
+        font_report=font_report,
+        reports_base=tmp_path / "data" / "reports" / "symbols",
+        project_root=tmp_path,
+    )
+
+    assert retried.status == "passed"
+    assert not marker.exists()
+    retried_manifest = load_symbol_manifest(manifest_path)
+    assert retried_manifest["formatVersion"] == 6
+    assert retried_manifest["processing"]["textConversion"]["status"] == "passed"
+    assert retried_manifest["processing"]["textConversion"]["summary"]["failedAssetCount"] == 0

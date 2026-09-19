@@ -217,17 +217,10 @@ def add_text_conversion(
 ) -> dict[str, Any]:
     """Promote duplicate-detected state to version 6 with text conversion state."""
     validate_symbol_manifest(document)
-    if document.get("formatVersion") not in {
-        SYMBOL_BUILD_DUPLICATE_VERSION,
-        SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
-        SYMBOL_BUILD_COMPRESSION_VERSION,
-        SYMBOL_BUILD_VERSION,
-    }:
+    if document.get("formatVersion") != SYMBOL_BUILD_DUPLICATE_VERSION:
         raise SymbolManifestError(
             "Text conversion requires version-"
-            f"{SYMBOL_BUILD_DUPLICATE_VERSION}, version-"
-            f"{SYMBOL_BUILD_TEXT_CONVERSION_VERSION}, or version-{SYMBOL_BUILD_VERSION} "
-            "duplicate-detected state"
+            f"{SYMBOL_BUILD_DUPLICATE_VERSION} duplicate-detected state"
         )
     if document["processing"]["duplicateDetection"]["status"] != "passed":
         raise SymbolManifestError("Text conversion requires passed duplicate detection")
@@ -242,8 +235,6 @@ def add_text_conversion(
 
     promoted = json.loads(json.dumps(document))
     promoted["formatVersion"] = SYMBOL_BUILD_TEXT_CONVERSION_VERSION
-    promoted["processing"].pop("compression", None)
-    promoted["processing"].pop("publication", None)
     promoted["processing"]["textConversion"] = {
         "status": status,
         "summary": dict(sorted(summary.items())),

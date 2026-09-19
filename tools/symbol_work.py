@@ -869,14 +869,24 @@ def convert_symbol_text(
     """Convert active text on canonical assets and build the canonical work tree."""
     manifest = load_symbol_manifest(build_manifest_path)
     processing = manifest.get("processing", {})
+    conversion_state = processing.get("textConversion")
+    if manifest.get("formatVersion") == SYMBOL_BUILD_TEXT_CONVERSION_VERSION:
+        if (
+            not isinstance(conversion_state, dict)
+            or conversion_state.get("status") != "failed"
+        ):
+            raise ValueError(
+                "Text conversion rerun requires a failed "
+                f"version-{SYMBOL_BUILD_TEXT_CONVERSION_VERSION} text conversion state"
+            )
+        manifest = json.loads(json.dumps(manifest))
+        manifest["formatVersion"] = SYMBOL_BUILD_DUPLICATE_VERSION
+        del manifest["processing"]["textConversion"]
+        processing = manifest["processing"]
+
     duplicate = processing.get("duplicateDetection", {})
     if (
-        manifest.get("formatVersion") not in {
-            SYMBOL_BUILD_DUPLICATE_VERSION,
-            SYMBOL_BUILD_TEXT_CONVERSION_VERSION,
-            SYMBOL_BUILD_COMPRESSION_VERSION,
-            SYMBOL_BUILD_VERSION,
-        }
+        manifest.get("formatVersion") != SYMBOL_BUILD_DUPLICATE_VERSION
         or duplicate.get("status") != "passed"
     ):
         raise ValueError(
