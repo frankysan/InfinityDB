@@ -49,6 +49,9 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "share/infinity-db/config/validation" = [
   "config/validation/source-anomalies.json",
 ]
+"share/infinity-db/data/curated/identities" = [
+  "data/curated/identities/army-display.json",
+]
 
 [tool.setuptools.package-data]
 "infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg", "static/armies/**/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]

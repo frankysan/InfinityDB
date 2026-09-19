@@ -352,6 +352,26 @@ class Database:
                 groups[canonical_id] = groups[source_id]
         return groups
 
+    @instance_lru_cache(maxsize=1)
+    def _faction_identities(self) -> dict[int, dict[str, Any]]:
+        """Return exact metadata/list identities keyed by source army ID."""
+        with self._connect() as connection:
+            identities = {
+                row["id"]: {"id": row["id"], "name": row["name"], "slug": row["slug"]}
+                for row in connection.execute(
+                    "SELECT id, name, slug FROM metadata_factions ORDER BY id"
+                )
+            }
+            for row in connection.execute("SELECT id, name, slug FROM army_lists ORDER BY id"):
+                identity = identities.setdefault(
+                    row["id"], {"id": row["id"], "name": row["name"], "slug": row["slug"]}
+                )
+                if not identity.get("name"):
+                    identity["name"] = army_name(row)
+                if not identity.get("slug"):
+                    identity["slug"] = row["slug"]
+        return identities
+
     def validate(self) -> None:
         """Reject missing, unrelated, unsupported, incomplete, or corrupt databases."""
         with self._connect() as connection:
@@ -451,7 +471,7 @@ class Database:
         with self._connect() as connection:
             rows = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id, u.canonical_faction_id, u.source_role "
+                "u.main_army_id, u.display_army_id, u.canonical_faction_id, u.source_role "
                 "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
             ).fetchall()
             rows_by_id = {row["id"]: row for row in rows}
@@ -517,6 +537,7 @@ class Database:
                 "slug": representative["slug"],
                 "canonical_faction_id": representative["canonical_faction_id"],
                 "main_army_id": representative["main_army_id"],
+                "display_army_id": representative["display_army_id"],
                 "source_ids": source_ids,
                 "names": [rows_by_id[source_id]["name"] for source_id in source_ids],
                 "armies": {},
@@ -566,6 +587,7 @@ class Database:
         """Map every visible source unit to its logical-unit list item."""
         graph = self._unit_graph()
         faction_groups = self._faction_groups()
+        faction_identities = self._faction_identities()
         canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
         normal_armies_by_unit = graph["normal_armies_by_unit"]
         items_by_source: dict[int, dict[str, Any]] = {}
@@ -583,6 +605,12 @@ class Database:
                 "main_army_id": group["main_army_id"],
                 "main_army_name": graph["army_names"].get(group["main_army_id"]),
                 "main_faction": faction_groups.get(group["main_army_id"]),
+                "display_army_id": group["display_army_id"],
+                "display_army_name": (
+                    faction_identities.get(group["display_army_id"], {}).get("name")
+                    or graph["army_names"].get(group["display_army_id"])
+                ),
+                "display_faction": faction_identities.get(group["display_army_id"]),
                 "source_ids": group["source_ids"],
                 "army_ids": list(visible_armies),
                 "armies": [
@@ -1437,6 +1465,7 @@ class Database:
                     }
         graph = self._unit_graph()
         faction_groups = self._faction_groups()
+        faction_identities = self._faction_identities()
         army_names = graph["army_names"]
         groups = graph["groups"]
         canonical_factions = {
@@ -1488,6 +1517,12 @@ class Database:
                 "main_army_id": group["main_army_id"],
                 "main_army_name": army_names.get(group["main_army_id"]),
                 "main_faction": faction_groups.get(group["main_army_id"]),
+                "display_army_id": group["display_army_id"],
+                "display_army_name": (
+                    faction_identities.get(group["display_army_id"], {}).get("name")
+                    or army_names.get(group["display_army_id"])
+                ),
+                "display_faction": faction_identities.get(group["display_army_id"]),
                 "source_ids": group["source_ids"],
                 "army_ids": list(group["armies"]),
                 "armies": [
@@ -1527,7 +1562,7 @@ class Database:
         with self._connect() as connection:
             selected = connection.execute(
                 f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id "
+                "u.main_army_id, u.display_army_id "
                 "FROM units AS u WHERE u.id = ? AND u.source_defined = 1",
                 (unit_id,),
             ).fetchone()
@@ -1535,6 +1570,7 @@ class Database:
                 return None
             graph = self._unit_graph()
             faction_groups = self._faction_groups()
+            faction_identities = self._faction_identities()
             siblings = graph["rows"]
             army_names = graph["army_names"]
             group = graph["groups_by_source"][selected["id"]]
@@ -1845,6 +1881,7 @@ class Database:
                             },
                         )
             main_faction = faction_groups.get(group["main_army_id"])
+            display_faction = faction_identities.get(group["display_army_id"])
             for army in armies:
                 del army["_occurrence_key"]
         return {
@@ -1857,6 +1894,13 @@ class Database:
             "main_army_id": group["main_army_id"],
             "main_army_name": army_names.get(group["main_army_id"]),
             "main_faction": main_faction,
+            "display_army_id": group["display_army_id"],
+            "display_army_name": (
+                display_faction.get("name")
+                if display_faction
+                else army_names.get(group["display_army_id"])
+            ),
+            "display_faction": display_faction,
             "source_ids": source_ids,
             "armies": armies,
         }

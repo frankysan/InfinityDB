@@ -11,7 +11,7 @@ export function renderUnitRows(container, units) {
   for (const unit of units) {
     const row = document.createElement("tr");
     row.className = "unit-row";
-    const faction = unit.main_faction?.slug;
+    const faction = unit.display_faction?.slug;
     if (faction) row.classList.add(`unit-row--faction-${faction}`);
     row.addEventListener("click", (event) => {
       if (!event.target.closest("a")) {
@@ -27,7 +27,7 @@ export function renderUnitRows(container, units) {
     nameLink.textContent = unit.name;
     const nameContent = document.createElement("span");
     nameContent.className = "unit-name-content";
-    const mainArmySymbol = armySymbolPath(unit.main_army_id);
+    const mainArmySymbol = armySymbolPath(unit.display_army_id);
     if (mainArmySymbol) {
       const icon = document.createElement("img");
       icon.className = "army-symbol main-army-symbol";
@@ -37,8 +37,8 @@ export function renderUnitRows(container, units) {
       icon.height = 28;
       icon.loading = "lazy";
       icon.decoding = "async";
-      icon.title = unit.main_army_name
-        || unit.armies.find((army) => army.id === unit.main_army_id)?.name
+      icon.title = unit.display_army_name
+        || unit.armies.find((army) => army.id === unit.display_army_id)?.name
         || "Main army";
       nameContent.append(icon);
     }

@@ -53,7 +53,10 @@ raw Army JSON
   normalization fallback when no usable metadata row exists for that canonical
   faction. Source canonical-faction ID `1` remains mercenary source/origin
   provenance with `main_army_id = null`, while `901` remains the distinct
-  Non-Aligned Armies grouping identity.
+  Non-Aligned Armies grouping identity. Presentation is modeled separately:
+  normalization derives `display_army_id` from reviewed relationships in
+  `data/curated/identities/army-display.json`; the current curated relationship
+  displays canonical-1 units with the 901 grouping identity.
 - InfinityDB normalization pins the exact validated identity configuration and
   its canonical SHA-256 into `normalized.json`. Database export revalidates that
   provenance and propagates the same policy into both database siblings.
@@ -128,9 +131,10 @@ non-playable in the army selector/API filter contract.
 Source canonical-faction ID `1` is materially different from 901. In the
 investigated source snapshot, ID `1` has no army list, is used as the canonical
 identity for mercenary-related unit records, and is not used as a normal unit
-membership faction. InfinityDB no longer maps source ID `1` to `901`: normalization preserves
-canonical source identity `1` while explicitly leaving its application
-`main_army_id` unset.
+membership faction. InfinityDB does not map source ID `1` to `901` as ownership: normalization
+preserves canonical source identity `1` while explicitly leaving its application
+`main_army_id` unset. A separate curated display relationship derives
+`display_army_id = 901` for presentation only.
 
 Normal unit availability and optional mercenary availability are also distinct
 source concepts. Ordinary unit records declare normal faction availability in
@@ -191,11 +195,14 @@ numeric ID patterns.
 
 ### Current logical-unit materialization
 
-Source ID `1` and grouping identity `901` are now kept distinct in current
+Source ID `1` and grouping identity `901` are kept distinct in current
 normalization. ID `1` remains source-side mercenary identity/provenance with no
 application `main_army_id`, while Non-Aligned Army grouping is derived from the
 metadata hierarchy generically; current source data happens to use metadata
-identity `901` for that grouping node.
+identity `901` for that grouping node. The persisted `display_army_id` is a
+separate presentation field derived from pinned curated display-identity data;
+for the current reviewed relationship canonical source identity `1` displays as
+army `901`.
 
 Logical-unit identity is now materialized during frontend SQLite creation while
 normalized/source records remain unchanged for provenance. The frontend relation
@@ -211,7 +218,7 @@ logical_unit_sources
   logical_unit_id         owning application logical unit
 ```
 
-For schema version 10, `logical_units.id` equals `representative_unit_id`,
+For schema version 11, `logical_units.id` equals `representative_unit_id`,
 preserving existing unit URLs and API identifiers. Keeping both fields explicit
 allows a future application-owned logical ID without rewriting the source model.
 
@@ -314,8 +321,8 @@ registry remains separate from these derived frontend tables so generated
 application structure cannot be supplied as normalized source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 10 and the application
-compatibility revision is 15. Imports build temporary sibling files, check
+records its schema version. The current schema version is 11 and the application
+compatibility revision is 16. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

@@ -1,0 +1,22 @@
+{
+  "format": "InfinityDB curated display identities",
+  "formatVersion": 1,
+  "sources": [
+    {
+      "id": "army-json-20260918-204434",
+      "kind": "army-snapshot",
+      "artifact": "JSON 20260918-204434.zip",
+      "sha256": "858309ea44b6a07f0aadb7bf2856d6c0dfdcb75dbe587b85997ed46c4780e3a3",
+      "acquiredAt": "2026-09-18T20:44:34+02:00",
+      "authority": "primary"
+    }
+  ],
+  "mappings": [
+    {
+      "canonicalFactionId": 1,
+      "displayArmyId": 901,
+      "sourceId": "army-json-20260918-204434",
+      "reason": "Mercenary source identity 1 is displayed using the Non-Aligned Armies grouping identity while ownership and playability remain separate."
+    }
+  ]
+}

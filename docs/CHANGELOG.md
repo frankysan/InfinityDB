@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- Add a separate normalized `display_army_id` derived from pinned curated
+  display-identity data. Canonical mercenary source identity remains distinct
+  from Non-Aligned ownership/playability, while the UI can use the curated
+  grouping identity for representative symbols and faction styling.
+- Bump the Army database schema to 11 and compatibility revision to 16; rebuild
+  generated databases after updating.
+
 ### Fixed
 
 - Preserve distinct unit profile-slot symbol artwork during publication by keeping

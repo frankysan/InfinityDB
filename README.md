@@ -256,9 +256,11 @@ When no input source is supplied, `infinity-db build` imports the newest ZIP in
 database build requires `metadata.json`: keep it beside the source directory or
 ZIP, include one copy in the ZIP, or supply `--metadata PATH`. It supplies
 official faction names, faction-parent relationships, and the ammunition,
-weapon, skill, equipment, and rules catalogs. Current builds use those parent
-relationships to derive unit `main_army_id`; Army-list JSON remains
-authoritative for unit availability.
+weapon, skill, equipment, and rules catalogs. Current builds use those parent relationships to derive unit `main_army_id`;
+Army-list JSON remains authoritative for unit availability. Presentation identity
+is separate: reviewed source-derived mappings under `data/curated/identities/`
+derive `display_army_id`, which the UI uses for the representative army symbol
+and faction styling without changing ownership or playability.
 
 Reference PDFs and local wiki snapshots are developer and agent research inputs
 only. They are never read by the application or the Army build. Curate concise,

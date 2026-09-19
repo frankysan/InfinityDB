@@ -7,9 +7,11 @@ provenance under `data/manifests/`.
 
 ## Current curated data
 
-`rules/` contains validated rules-reference collections and is the only curated
-subtree currently consumed by application build tooling. `infinity-db
-build-rules` defaults to `data/curated/rules/`.
+`rules/` contains validated rules-reference collections consumed by
+`infinity-db build-rules`. `identities/` contains reviewed source-derived
+presentation relationships consumed during Army normalization. These categories
+have separate schemas and loaders; neither loader treats arbitrary JSON from the
+other curated categories as valid input.
 
 The sections below document the implemented `curated/rules/` contract.
 
@@ -21,6 +23,20 @@ notes associated with immutable snapshots by SHA-256. Those notes remain
 separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
+
+
+### Curated display identities
+
+`identities/army-display.json` records source-derived presentation relationships
+that must remain distinct from ownership and playability. Each mapping relates a
+source canonical faction identity to the army/grouping identity whose symbol and
+faction styling should represent that unit in the UI. The current reviewed
+relationship maps canonical source identity `1` to display army `901`.
+
+`infinity-db normalize` and `infinity-db build` validate this document, derive
+`display_army_id`, and pin the exact document plus canonical SHA-256 into
+`normalized.json`. Database export revalidates that pinned relationship. Runtime
+code consumes the persisted field and does not reload this curated file.
 
 ## Curated rules reference data
 

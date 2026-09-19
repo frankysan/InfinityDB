@@ -14,6 +14,7 @@ from infinity_army_data.cli import cmd_normalize as normalize_dataset
 
 from . import __version__
 from .curated import load_curated_directory, load_curated_document
+from .display_identities import display_identity_metadata, load_display_identity_curated
 from .database import export_database, raw_database_path
 from .identities import identity_metadata, load_identity_config
 from .rules_database import export_rules_database
@@ -53,10 +54,15 @@ def _export(source: Path, destination: Path) -> None:
 
 def cmd_normalize(args: argparse.Namespace) -> int:
     config = load_identity_config()
+    display_identities = load_display_identity_curated()
     result = normalize_dataset(
         args,
         canonical_faction_overrides=config.canonical_faction_overrides,
-        normalized_metadata=identity_metadata(config),
+        display_army_overrides=display_identities.canonical_faction_display_armies,
+        normalized_metadata={
+            **identity_metadata(config),
+            **display_identity_metadata(display_identities),
+        },
     )
     _validate_source_anomaly_baseline(args.output)
     return result
@@ -64,10 +70,15 @@ def cmd_normalize(args: argparse.Namespace) -> int:
 
 def cmd_build(args: argparse.Namespace) -> int:
     config = load_identity_config()
+    display_identities = load_display_identity_curated()
     build_dataset(
         args,
         canonical_faction_overrides=config.canonical_faction_overrides,
-        normalized_metadata=identity_metadata(config),
+        display_army_overrides=display_identities.canonical_faction_display_armies,
+        normalized_metadata={
+            **identity_metadata(config),
+            **display_identity_metadata(display_identities),
+        },
     )
     normalized = args.output_dir / "normalized.json"
     _validate_source_anomaly_baseline(normalized)

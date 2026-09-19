@@ -11,6 +11,11 @@ import pytest
 import infinity_db.cli as app_cli
 from infinity_army_data.merge import reconstruct_source
 from infinity_db.cli import build_parser, main
+from infinity_db.display_identities import (
+    DISPLAY_IDENTITY_METADATA_KEY,
+    DISPLAY_IDENTITY_SHA256_METADATA_KEY,
+    load_display_identity_curated,
+)
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -97,6 +102,12 @@ def test_separate_merge_normalize_export_commands(
     identity_config = load_identity_config()
     assert normalized[IDENTITY_CONFIG_METADATA_KEY] == identity_config.document
     assert normalized[IDENTITY_CONFIG_SHA256_METADATA_KEY] == identity_config.content_sha256
+    display_identities = load_display_identity_curated()
+    assert normalized[DISPLAY_IDENTITY_METADATA_KEY] == display_identities.document
+    assert (
+        normalized[DISPLAY_IDENTITY_SHA256_METADATA_KEY]
+        == display_identities.content_sha256
+    )
     assert main(["export", "data/generated/normalized.json"]) == 0
     default_database = tmp_path / "data/generated/infinity.db"
     assert default_database.is_file()
@@ -106,7 +117,11 @@ def test_separate_merge_normalize_export_commands(
         assert connection.execute("SELECT COUNT(*) FROM units").fetchone()[0] == 1
 
 
-def test_normalize_keeps_mercenary_source_identity_separate_from_na2(tmp_path: Path) -> None:
+def test_normalize_derives_mercenary_display_identity_from_curated_data(tmp_path: Path) -> None:
+    curated = load_display_identity_curated()
+    canonical_faction_id, display_army_id = next(
+        iter(curated.canonical_faction_display_armies.items())
+    )
     master_path = tmp_path / "master.json"
     normalized_path = tmp_path / "normalized.json"
     master_path.write_text(
@@ -114,8 +129,8 @@ def test_normalize_keeps_mercenary_source_identity_separate_from_na2(tmp_path: P
             {
                 "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
                 "armyLists": {
-                    "901": {
-                        "_meta": {"slug": "non-aligned", "kind": "faction"},
+                    str(display_army_id): {
+                        "_meta": {"slug": "display-group", "kind": "faction"},
                         "unitIds": [1],
                     }
                 },
@@ -123,11 +138,11 @@ def test_normalize_keeps_mercenary_source_identity_separate_from_na2(tmp_path: P
                     "1": {
                         "shared": {
                             "id": 1,
-                            "name": "Mercenary",
-                            "canonical": 1,
-                            "factions": [901],
+                            "name": "Curated display identity test",
+                            "canonical": canonical_faction_id,
+                            "factions": [display_army_id],
                         },
-                        "byArmy": {"901": {}},
+                        "byArmy": {str(display_army_id): {}},
                     }
                 },
             }
@@ -139,8 +154,11 @@ def test_normalize_keeps_mercenary_source_identity_separate_from_na2(tmp_path: P
 
     normalized = json.loads(normalized_path.read_text(encoding="utf-8"))
     unit = normalized["tables"]["units"][0]
-    assert unit["canonical_faction_id"] == 1
+    assert unit["canonical_faction_id"] == canonical_faction_id
     assert unit["main_army_id"] is None
+    assert unit["display_army_id"] == curated.canonical_faction_display_armies[
+        unit["canonical_faction_id"]
+    ]
 
 
 def test_invalid_source_reports_error_without_database(

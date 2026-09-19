@@ -116,11 +116,13 @@ def _normalize(
     *,
     compact: bool,
     canonical_faction_overrides: Mapping[int, int] | None = None,
+    display_army_overrides: Mapping[int, int] | None = None,
     normalized_metadata: Mapping[str, object] | None = None,
 ) -> dict:
     normalized = normalize_master(
         master,
         canonical_faction_overrides=canonical_faction_overrides,
+        display_army_overrides=display_army_overrides,
     )
     annotate_availability_semantics(normalized)
     audit_generic_logical_matches(normalized)
@@ -176,6 +178,7 @@ def cmd_normalize(
     args: argparse.Namespace,
     *,
     canonical_faction_overrides: Mapping[int, int] | None = None,
+    display_army_overrides: Mapping[int, int] | None = None,
     normalized_metadata: Mapping[str, object] | None = None,
 ) -> int:
     from .normalize import load_master
@@ -188,6 +191,7 @@ def cmd_normalize(
         report,
         compact=args.compact,
         canonical_faction_overrides=canonical_faction_overrides,
+        display_army_overrides=display_army_overrides,
         normalized_metadata=normalized_metadata,
     )
     return 0
@@ -197,6 +201,7 @@ def cmd_build(
     args: argparse.Namespace,
     *,
     canonical_faction_overrides: Mapping[int, int] | None = None,
+    display_army_overrides: Mapping[int, int] | None = None,
     normalized_metadata: Mapping[str, object] | None = None,
 ) -> int:
     if args.source is None:
@@ -227,6 +232,7 @@ def cmd_build(
         report_path,
         compact=args.compact,
         canonical_faction_overrides=canonical_faction_overrides,
+        display_army_overrides=display_army_overrides,
         normalized_metadata=normalized_metadata,
     )
     print(f"Build complete: {output_dir}")

@@ -87,12 +87,19 @@ def _validate_source(source: dict[str, Any], context: str) -> None:
 
 
 def discover_curated_documents(directory: Path) -> list[Path]:
-    """Return curated collection files, excluding the non-ingested example template."""
+    """Return curated rules collections, excluding non-rule curated categories.
+
+    Passing the common ``data/curated`` parent remains supported, but once a
+    dedicated ``rules/`` subtree exists only that subtree is an input to this
+    rules-reference loader.
+    """
     if not directory.is_dir():
         raise ValueError(f"Curated source directory does not exist: {directory}")
+    rules_directory = directory / "rules"
+    search_root = rules_directory if rules_directory.is_dir() else directory
     return sorted(
         path
-        for path in directory.rglob("*.json")
+        for path in search_root.rglob("*.json")
         if path.is_file() and path.name.casefold() not in EXCLUDED_CURATED_FILENAMES
     )
 

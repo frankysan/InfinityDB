@@ -188,6 +188,30 @@ def main_army_id(
     return candidate if isinstance(candidate, int) and candidate in faction_ids else None
 
 
+def display_army_id(
+    canonical_faction_id: Any,
+    resolved_main_army_id: int | None,
+    faction_ids: set[int],
+    display_army_overrides: Mapping[int, int] | None = None,
+) -> int | None:
+    """Resolve the presentation identity for one canonical source faction.
+
+    Curated source-derived display relationships take precedence. Units without
+    an explicit relationship display their normal main-army identity.
+    """
+    overrides = display_army_overrides or {}
+    if isinstance(canonical_faction_id, int) and canonical_faction_id in overrides:
+        candidate = overrides[canonical_faction_id]
+        if candidate not in faction_ids:
+            raise NormalizationError(
+                "Curated display army "
+                f"{candidate} for canonical faction {canonical_faction_id} "
+                "is not present in the normalized faction namespace"
+            )
+        return candidate
+    return resolved_main_army_id
+
+
 def build_catalogs(master: dict[str, Any], b: Builder) -> dict[str, set[Any]]:
     identities: dict[str, dict[Any, dict[str, Any]]] = {
         source_name: {} for source_name in GLOBAL_CATALOGS
@@ -604,6 +628,7 @@ def normalize_master(
     master: dict[str, Any],
     *,
     canonical_faction_overrides: Mapping[int, int] | None = None,
+    display_army_overrides: Mapping[int, int] | None = None,
 ) -> dict[str, Any]:
     b = Builder()
     army_lists = master["armyLists"]
@@ -708,16 +733,24 @@ def normalize_master(
             raise NormalizationError(
                 f"Unit dictionary key {unit_id} disagrees with shared.id={shared.get('id')!r}"
             )
+        canonical_faction_id = shared.get("canonical")
+        resolved_main_army_id = main_army_id(
+            canonical_faction_id,
+            faction_ids,
+            canonical_faction_overrides,
+            metadata_faction_parents,
+        )
         b.add(
             "units",
             id=unit_id,
             id_army=shared.get("idArmy"),
-            canonical_faction_id=shared.get("canonical"),
-            main_army_id=main_army_id(
-                shared.get("canonical"),
+            canonical_faction_id=canonical_faction_id,
+            main_army_id=resolved_main_army_id,
+            display_army_id=display_army_id(
+                canonical_faction_id,
+                resolved_main_army_id,
                 faction_ids,
-                canonical_faction_overrides,
-                metadata_faction_parents,
+                display_army_overrides,
             ),
             isc=shared.get("isc"),
             isc_abbr=shared.get("iscAbbr"),
@@ -798,6 +831,7 @@ def normalize_master(
             id_army=None,
             canonical_faction_id=None,
             main_army_id=None,
+            display_army_id=None,
             isc=None,
             isc_abbr=None,
             name=None,
@@ -1324,6 +1358,15 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
             for row in t.get("units", [])
         ),
         "all main-army references resolve to faction identities",
+    )
+    check(
+        "unit display army -> faction",
+        all(
+            row.get("display_army_id") is None
+            or row["display_army_id"] in faction_ids_scalar
+            for row in t.get("units", [])
+        ),
+        "all display-army references resolve to faction identities",
     )
     check(
         "unit_factions -> unit/faction",

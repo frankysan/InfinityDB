@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 15
+DATABASE_COMPATIBILITY_VERSION = 16
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -53,11 +53,12 @@ TABLES = {
     ),
     "units": table(
         "id",
-        "id_army canonical_faction_id main_army_id isc isc_abbr name slug notes spectables "
-        "source_defined source_role "
+        "id_army canonical_faction_id main_army_id display_army_id isc isc_abbr name slug notes "
+        "spectables source_defined source_role "
         "relation_reference_count",
         ref("canonical_faction_id", "factions", "id"),
         ref("main_army_id", "factions", "id"),
+        ref("display_army_id", "factions", "id"),
     ),
     "unit_factions": table(
         "unit_id faction_id",

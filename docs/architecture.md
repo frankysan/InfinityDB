@@ -96,9 +96,10 @@ code that interprets them.
 
 `data/curated/` is different from configuration: it contains human-reviewed
 information derived from identified external sources and retains source
-provenance. `data/curated/rules/` is the only curated subtree currently consumed
-by the rules-database build; `data/curated/snapshot-notes/` is a separate
-human-annotation contract and is not an application input.
+provenance. `data/curated/rules/` is consumed by the rules-database build, while
+`data/curated/identities/` contains reviewed source-derived presentation
+relationships consumed during Army normalization. `data/curated/snapshot-notes/`
+is a separate human-annotation contract and is not an application input.
 
 This is not a requirement to make every constant configurable. Values that
 define implementation behavior remain in code. Configuration is for maintained
@@ -125,11 +126,15 @@ standalone/legacy normalization fallback when no usable metadata row exists for
 the canonical faction.
 
 Source canonical-faction ID `1` and Non-Aligned Armies grouping ID `901` are
-now kept distinct in normalization. ID `1` remains mercenary source/origin
+kept distinct in ownership normalization. ID `1` remains mercenary source/origin
 provenance with no application `main_army_id`; the generic whole-army `xx01`
 derivation is explicitly suppressed for that source identity. ID `901` remains
 the metadata grouping identity for Non-Aligned armies. The former legacy
-`1` -> `901` identity-config override has been removed.
+`1` -> `901` ownership override remains removed. Separately,
+`data/curated/identities/army-display.json` records the reviewed display
+relationship from canonical source identity `1` to display army `901`;
+normalization derives `display_army_id` from that curated fact without changing
+ownership, availability, or playability semantics.
 
 The authored identity configuration is a build input, not a deployed runtime
 file. InfinityDB normalization validates it, supplies normalization-time
@@ -314,10 +319,13 @@ mercenary-to-standard source-unit matches and explicit army-occurrence
 availability provenance are persisted and consumed by repository queries. The
 10,000-ID offset is supporting matching evidence only, not the semantic rule.
 
-The legacy `1` -> `901` canonical-faction override has now been removed. ID `1`
-remains source provenance for mercenary identity and does not receive an
+The legacy `1` -> `901` canonical-faction ownership override remains removed.
+ID `1` stays source provenance for mercenary identity and does not receive an
 application `main_army_id`; 901 remains a separate Non-Aligned Army grouping
-identity. Generic duplicate matching is persisted during normalization and
+identity. A distinct curated display relationship derives `display_army_id=901`
+for canonical-1 units so presentation can use the grouping symbol without
+conflating it with ownership or playability. Generic duplicate matching is
+persisted during normalization and
 reinforcement-to-standard matching is audited during database creation; both
 feed the materialized logical-unit identity consumed by repositories.
 
@@ -344,7 +352,7 @@ units. Older normalized inputs that lack the persisted generic/mercenary audits
 retain the legacy duplicate fallback inside the builder; repository reads do
 not rediscover logical identity.
 
-For schema version 10, the logical-unit ID equals the representative source-unit
+For schema version 11, the logical-unit ID equals the representative source-unit
 ID so existing API IDs and URLs remain stable. `representative_unit_id` is still
 stored explicitly, leaving room to decouple application identity from source
 identity later without changing provenance. Repository aggregation follows the
@@ -639,7 +647,7 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 10 and database compatibility revision of 15; it
+schema has a schema version of 11 and database compatibility revision of 16; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of
@@ -704,9 +712,10 @@ classification does not special-case that ID. Grouping items expose
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
 Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each
-item has `id`, `name`, `main_army_id`, `main_faction`, `army_ids`, and `armies`
-(`id` and `name` per membership). `main_faction` is either null or an object
-with `id`, `name`, and `slug`, derived from imported Army metadata. The zero
+item has `id`, `name`, `main_army_id`, `main_faction`, `display_army_id`,
+`display_faction`, `army_ids`, and `armies` (`id` and `name` per membership).
+`main_faction` represents ownership grouping, while `display_faction` is the
+presentation identity derived from normalized `display_army_id`. The zero
 total above illustrates the response shape.
 
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
@@ -719,8 +728,10 @@ total above illustrates the response shape.
   Canonical source ID `1` is explicitly excluded from application main-army
   ownership and remains mercenary source provenance; Non-Aligned grouping uses
   the separate metadata identity `901`.
-- `main_faction` is derived from the matching metadata-faction parent record;
-  browser code consumes it directly instead of deriving a faction from Army IDs.
+- `main_faction` is derived from the matching metadata-faction parent record.
+- `display_army_id` normally mirrors `main_army_id`, but reviewed source-derived
+  exceptions come from curated identity data. Browser symbol/styling code uses
+  `display_army_id`/`display_faction` and contains no special-case Army IDs.
 - Search matches accent- and punctuation-insensitive, case-folded name
   substrings, including Unicode.
 - Results sort by display name after case-folding, removing diacritics, and

@@ -360,6 +360,8 @@ def test_unit_details_use_metadata_parent_for_faction_group(tmp_path: Path) -> N
         "slug": "official-first",
     }
     assert details["main_faction"] == faction
+    assert details["display_army_id"] == details["main_army_id"]
+    assert details["display_faction"] == faction
     armies = {army["id"]: army for army in details["armies"]}
     assert armies[101]["faction"] == faction
     assert armies[777]["faction"] == faction

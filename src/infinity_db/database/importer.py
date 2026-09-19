@@ -15,6 +15,12 @@ from infinity_army_data.metadata import MetadataError, validate_metadata_envelop
 from infinity_army_data.normalize import validate_normalized
 from infinity_army_data.normalized_format import FORMAT_NAME, FORMAT_VERSION
 
+from ..display_identities import (
+    DISPLAY_IDENTITY_METADATA_KEY,
+    DISPLAY_IDENTITY_SHA256_METADATA_KEY,
+    DisplayIdentityError,
+    parse_display_identity_metadata,
+)
 from ..identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -93,6 +99,30 @@ def validate_input(data: dict[str, Any]) -> dict[str, tuple[str, ...]]:
                         raise ValueError(f"army_lists.{field} must be a string or null")
             if name == "units" and type(row.get("source_defined")) is not bool:
                 raise ValueError("units.source_defined must be a boolean")
+
+    has_display_document = DISPLAY_IDENTITY_METADATA_KEY in data
+    has_display_hash = DISPLAY_IDENTITY_SHA256_METADATA_KEY in data
+    if has_display_document != has_display_hash:
+        raise ValueError("Normalized data has incomplete display-identity curated metadata")
+    if has_display_document:
+        try:
+            display_identities = parse_display_identity_metadata(
+                data[DISPLAY_IDENTITY_METADATA_KEY],
+                data[DISPLAY_IDENTITY_SHA256_METADATA_KEY],
+            )
+        except DisplayIdentityError as exc:
+            raise ValueError(
+                "Normalized data has invalid display-identity curated metadata"
+            ) from exc
+        for row in tables.get("units", []):
+            expected_display_army_id = display_identities.canonical_faction_display_armies.get(
+                row.get("canonical_faction_id"), row.get("main_army_id")
+            )
+            if row.get("display_army_id") != expected_display_army_id:
+                raise ValueError(
+                    "Normalized unit display identity does not match pinned curated data: "
+                    f"unit {row.get('id')!r}"
+                )
     try:
         json_text(data)
         validate_normalized(data)
