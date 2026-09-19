@@ -9,16 +9,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # The application has no runtime dependency beyond Gunicorn. Copy its package
-# sources plus the maintained config needed while building the installed wheel;
-# source snapshots and development artifacts stay out of the image. Runtime
+# sources plus the maintained config and curated data needed while building
+# the installed wheel; source snapshots and development artifacts stay out. Runtime
 # databases are copied separately as versioned release data.
 COPY pyproject.toml README.md /app/
 COPY src /app/src
 COPY config/catalogs /app/config/catalogs
 COPY config/identity /app/config/identity
 COPY config/validation /app/config/validation
+COPY data/curated/identities /app/data/curated/identities
 RUN pip install --no-cache-dir ".[server]" \
-    && rm -rf /app/config \
+    && rm -rf /app/config /app/data/curated \
     && useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app
 
