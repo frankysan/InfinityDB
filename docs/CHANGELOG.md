@@ -85,6 +85,10 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Add a deployment-focused artifact transfer helper that validates the local runtime
+  databases and manifest-bound symbol publication, selects only the ignored files
+  required by deployment, requires an exact clean remote Git commit match, stages the
+  transfer, and sends it over one SSH session.
 - Fail deployment closed when the local symbol publication is absent, partial,
   stale, or not bound to terminal version-8 symbol-build state. Deployment now
   verifies the manifest-bound host publication before Docker build, validates the

@@ -91,6 +91,28 @@ On a validation checkout with the development dependencies installed,
 the deployment guard is narrower and specifically binds deployment to one promoted
 publication.
 
+For routine deployment from a development checkout, `tools/send_deployment_artifacts.py`
+transfers only the ignored runtime databases, terminal symbol manifest, published
+symbol inventory, and four published SVG trees. It validates the local databases and
+manifest-bound symbol publication first, requires the remote checkout to be at the
+exact same Git commit with no tracked edits, stages the incoming files, and uses one
+SSH session so password authentication prompts only once. Run a dry-run first to
+inspect the exact transfer set:
+
+```powershell
+.\.venv\Scripts\python.exe tools\send_deployment_artifacts.py `
+  root@docker-infinitydb --remote-root /srv/infinitydb --dry-run
+
+.\.venv\Scripts\python.exe tools\send_deployment_artifacts.py `
+  root@docker-infinitydb --remote-root /srv/infinitydb
+```
+
+SSH public-key authentication can be selected with `--identity-file` to make the same
+transfer non-interactive. The helper deliberately excludes raw snapshots, work trees,
+logs, reports, backups, caches, and other ignored development state. After transfer,
+run the guarded `scripts/deploy.sh` path on the server; `install-or-update.sh` still
+requires its own raw Army snapshot because it rebuilds the runtime databases.
+
 For an exact server replacement, copy the already-published local asset set rather
 than relying on cross-machine SVG regeneration. See
 [server migration](server-migration.md) for the full transfer checklist and the

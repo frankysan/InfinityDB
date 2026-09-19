@@ -596,3 +596,9 @@ application-level identities.
   then validates the exact built image in `--published-assets` mode before Compose
   activation. Redistributable-image verification remains the inverse contract and
   rejects third-party graphical trees.
+- 2026-09-19: Deployment artifact transfer is also commit-bound.
+  `tools/send_deployment_artifacts.py` sends only the ignored runtime databases,
+  terminal symbol manifest/inventory, and published SVG trees over one staged SSH
+  session, and refuses a remote checkout whose commit or tracked state differs from
+  the clean local checkout. Tracked browser maps travel through Git, not the artifact
+  transfer, so exact commit identity is part of the transfer contract.
