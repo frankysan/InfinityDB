@@ -310,6 +310,7 @@ def add_publication(
     *,
     summary: dict[str, int],
     mapping_report: Path,
+    inventory: Path,
     army_map: Path,
     unit_map: Path,
     project_root: Path,
@@ -330,6 +331,7 @@ def add_publication(
         "status": "passed",
         "summary": dict(sorted(summary.items())),
         "mappingReport": artifact_record(mapping_report, project_root=project_root),
+        "inventory": artifact_record(inventory, project_root=project_root),
         "armyMap": artifact_record(army_map, project_root=project_root),
         "unitMap": artifact_record(unit_map, project_root=project_root),
     }
@@ -967,7 +969,7 @@ def _publication(
     record = _object(value, context)
     _only_keys(
         record,
-        {"status", "summary", "mappingReport", "armyMap", "unitMap"},
+        {"status", "summary", "mappingReport", "inventory", "armyMap", "unitMap"},
         context,
     )
     status = _string(record.get("status"), f"{context}.status")
@@ -1013,6 +1015,8 @@ def _publication(
             f"{context}.summary.publishedBytes must equal compression outputBytes"
         )
     _artifact(record.get("mappingReport"), f"{context}.mappingReport")
+    if "inventory" in record:
+        _artifact(record["inventory"], f"{context}.inventory")
     _artifact(record.get("armyMap"), f"{context}.armyMap")
     _artifact(record.get("unitMap"), f"{context}.unitMap")
 

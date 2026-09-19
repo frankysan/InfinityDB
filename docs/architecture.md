@@ -563,11 +563,15 @@ separate, intentional operations.
 ## Validation and CI policy
 
 Local test execution now separates hermetic and full-asset coverage explicitly.
-`run_checks.py --assets off|auto|required` validates the current published
-army/unit/order symbol contract before enabling `full_assets` tests; direct
-pytest excludes those tests by default. A detected partial/corrupt local asset
-tree is an error in `auto`/`required`, while a completely absent tree is valid
-for hermetic testing.
+`run_checks.py --assets off|auto|required` validates the complete published
+symbol inventory before enabling `full_assets` tests; direct pytest excludes
+those tests by default. Publication writes a generated `symbol-inventory.json`
+that binds every published SVG path to its SHA-256. Validation separately derives
+the currently browser-referenced subset from the army/unit maps and static
+endpoints, so intentionally preserved future-use variants remain required parts
+of a complete publication even before the browser consumes them. A detected
+partial/corrupt local asset tree is an error in `auto`/`required`, while a
+completely absent tree is valid for hermetic testing.
 
 The `Source checks` GitHub Actions workflow now runs the hermetic project check
 runner across clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts, with

@@ -227,6 +227,8 @@ def stub_post_acquisition(
             "unchangedAssetCount": 0,
         },
         removed_backup=None,
+        browser_referenced_asset_count=0,
+        unreferenced_published_asset_count=0,
         summary={
             "sourceAssetCount": 0,
             "canonicalAssetCount": 0,

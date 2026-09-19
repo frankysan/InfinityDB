@@ -47,11 +47,15 @@ present, `auto` requires the set to be complete and valid rather than silently
 ignoring a partial/corrupt installation. `required` always requires the complete
 set. The report header records the requested/effective asset mode.
 
-Completeness is checked against the current tracked publication contract:
-every army SVG referenced by `army-symbols.js`, every unit SVG referenced by
-`unit-symbol-map.js`, and every current order/characteristic symbol endpoint must
-exist and parse as SVG. Extra local files do not make an otherwise valid set
-incomplete.
+Completeness is checked against the generated `symbol-inventory.json` written
+by final symbol publication. Every inventoried SVG must exist, parse as SVG, and
+match its published SHA-256, and unlisted SVGs inside the generated asset
+categories are rejected. The validator separately derives the currently
+browser-referenced subset from `army-symbols.js`, `unit-symbol-map.js`, and the
+order/characteristic endpoints. This distinction is intentional: published
+profile/army variants that the browser does not yet consume remain part of the
+complete asset set. Check output therefore reports both the full published count
+and the browser-referenced count.
 
 Asset-dependent tests carry the `full_assets` pytest marker. Direct pytest runs
 exclude that marker by default, so a clean checkout is green:

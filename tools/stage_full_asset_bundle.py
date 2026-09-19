@@ -18,12 +18,14 @@ from urllib.request import Request, urlopen
 
 try:
     from tools.asset_validation import (
+        PUBLICATION_INVENTORY,
         PUBLISHED_ASSET_CATEGORIES,
         AssetSetValidation,
         validate_asset_set,
     )
 except ModuleNotFoundError:  # Direct execution as tools/stage_full_asset_bundle.py.
     from asset_validation import (  # type: ignore[no-redef]
+        PUBLICATION_INVENTORY,
         PUBLISHED_ASSET_CATEGORIES,
         AssetSetValidation,
         validate_asset_set,
@@ -131,14 +133,15 @@ def _validated_members(
             raise AssetBundleError(f"Bundle member escapes the asset root: {name!r}")
         if not relative.parts:
             continue
-        if relative.parts[0] not in categories:
+        is_inventory = relative == PurePosixPath(PUBLICATION_INVENTORY)
+        if not is_inventory and relative.parts[0] not in categories:
             raise AssetBundleError(
-                "Bundle member is outside published asset categories "
+                "Bundle member is outside published asset categories/inventory "
                 f"{sorted(categories)!r}: {name!r}"
             )
         if info.is_dir():
             continue
-        if len(relative.parts) < 2 or relative.suffix.lower() != ".svg":
+        if not is_inventory and (len(relative.parts) < 2 or relative.suffix.lower() != ".svg"):
             raise AssetBundleError(f"Bundle contains a non-SVG asset member: {name!r}")
         if info.flag_bits & 0x1:
             raise AssetBundleError(f"Bundle contains an encrypted member: {name!r}")
@@ -202,27 +205,30 @@ def _validate_staging(staging_root: Path, static_root: Path) -> AssetSetValidati
 
 
 def _install_staging(staging_root: Path, static_root: Path, backup_root: Path) -> None:
+    names = (*PUBLISHED_ASSET_CATEGORIES, PUBLICATION_INVENTORY)
     moved_existing: list[str] = []
     installed: list[str] = []
     try:
-        for category in PUBLISHED_ASSET_CATEGORIES:
-            staged = staging_root / category
-            target = static_root / category
-            backup = backup_root / category
+        for name in names:
+            staged = staging_root / name
+            target = static_root / name
+            backup = backup_root / name
             if target.exists():
                 backup.parent.mkdir(parents=True, exist_ok=True)
                 os.replace(target, backup)
-                moved_existing.append(category)
+                moved_existing.append(name)
             os.replace(staged, target)
-            installed.append(category)
+            installed.append(name)
     except OSError as exc:
-        for category in reversed(installed):
-            target = static_root / category
-            if target.exists():
+        for name in reversed(installed):
+            target = static_root / name
+            if target.is_dir():
                 shutil.rmtree(target)
-        for category in reversed(moved_existing):
-            backup = backup_root / category
-            target = static_root / category
+            elif target.exists():
+                target.unlink()
+        for name in reversed(moved_existing):
+            backup = backup_root / name
+            target = static_root / name
             if backup.exists():
                 os.replace(backup, target)
         raise AssetBundleError(f"Could not install full-asset bundle: {exc}") from exc
@@ -302,7 +308,10 @@ def main(argv: list[str] | None = None) -> int:
 
     print(
         "Full-asset bundle staged: "
-        f"{validation.present_count}/{validation.expected_count} required SVGs"
+        f"{validation.present_count}/{validation.expected_count} published SVGs; "
+        f"{validation.browser_present_count}/{validation.browser_expected_count} "
+        "browser-referenced; "
+        f"{validation.unreferenced_published_count} published not yet browser-referenced"
     )
     return 0
 

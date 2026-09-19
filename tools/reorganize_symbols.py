@@ -38,6 +38,9 @@ except ImportError:  # pragma: no cover - direct script execution fallback
 
 SYMBOL_MAP = "unit-symbol-map.js"
 ARMY_MAP = "army-symbols.js"
+PUBLICATION_INVENTORY = "symbol-inventory.json"
+PUBLICATION_INVENTORY_FORMAT = "InfinityDB published symbol inventory"
+PUBLICATION_INVENTORY_VERSION = 1
 PUBLICATION_MAPPING_FORMAT = "InfinityDB symbol publication mapping"
 PUBLICATION_MAPPING_VERSION = 2
 REMOVED_SYMBOL_BACKUP_FORMAT = "InfinityDB removed symbol backup"
@@ -64,9 +67,12 @@ class SnapshotIndex(NamedTuple):
 class PublicationResult(NamedTuple):
     static_root: Path
     mapping_report: Path
+    inventory: Path
     army_map: Path
     unit_map: Path
     summary: dict[str, int]
+    browser_referenced_asset_count: int
+    unreferenced_published_asset_count: int
     changes: dict[str, int]
     removed_backup: Path | None
     status: str
@@ -502,8 +508,36 @@ def _build_publication(
 
     army_map = staging_static / ARMY_MAP
     unit_map = staging_static / SYMBOL_MAP
+    inventory_path = staging_static / PUBLICATION_INVENTORY
     army_map.write_text(_render_army_map(army_mapping), encoding="utf-8", newline="\n")
     unit_map.write_text(_render_unit_map(unit_mapping), encoding="utf-8", newline="\n")
+    browser_referenced_paths = {
+        *(f"armies/{value}" for value in army_mapping.values()),
+        *(f"units/{value}.svg" for value in unit_mapping.values()),
+        *static_mapping.values(),
+    }
+    unreferenced_published_paths = set(published_sha256) - browser_referenced_paths
+    inventory_path.write_text(
+        json.dumps(
+            {
+                "format": PUBLICATION_INVENTORY_FORMAT,
+                "formatVersion": PUBLICATION_INVENTORY_VERSION,
+                "summary": {
+                    "publishedAssetCount": len(published_sha256),
+                    "browserReferencedAssetCount": len(browser_referenced_paths),
+                    "unreferencedPublishedAssetCount": len(unreferenced_published_paths),
+                    "publishedBytes": published_bytes,
+                },
+                "publishedSha256ByPath": dict(sorted(published_sha256.items())),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
     actual_published = {
         path.relative_to(staging_static).as_posix()
@@ -537,6 +571,10 @@ def _build_publication(
         },
         "staticKeyToPublishedPath": dict(sorted(static_mapping.items())),
         "publishedSha256ByPath": dict(sorted(published_sha256.items())),
+        "browserUsageSummary": {
+            "browserReferencedAssetCount": len(browser_referenced_paths),
+            "unreferencedPublishedAssetCount": len(unreferenced_published_paths),
+        },
         "unavailableSourceAssets": manifest.get("unavailableAssets", []),
     }
     return report, summary
@@ -833,11 +871,13 @@ def publish_symbols(
 
         destinations = [
             *(static_root / category for category in GENERATED_CATEGORIES),
+            static_root / PUBLICATION_INVENTORY,
             static_root / ARMY_MAP,
             static_root / SYMBOL_MAP,
         ]
         staged_paths = [
             *(staging_static / category for category in GENERATED_CATEGORIES),
+            staging_static / PUBLICATION_INVENTORY,
             staging_static / ARMY_MAP,
             staging_static / SYMBOL_MAP,
         ]
@@ -869,6 +909,7 @@ def publish_symbols(
                 manifest,
                 summary=summary,
                 mapping_report=report_destination,
+                inventory=static_root / PUBLICATION_INVENTORY,
                 army_map=static_root / ARMY_MAP,
                 unit_map=static_root / SYMBOL_MAP,
                 project_root=project_root,
@@ -887,9 +928,16 @@ def publish_symbols(
         return PublicationResult(
             static_root=static_root,
             mapping_report=report_destination,
+            inventory=static_root / PUBLICATION_INVENTORY,
             army_map=static_root / ARMY_MAP,
             unit_map=static_root / SYMBOL_MAP,
             summary=summary,
+            browser_referenced_asset_count=report_document["browserUsageSummary"][
+                "browserReferencedAssetCount"
+            ],
+            unreferenced_published_asset_count=report_document["browserUsageSummary"][
+                "unreferencedPublishedAssetCount"
+            ],
             changes=change_summary,
             removed_backup=removed_backup,
             status="passed",

@@ -793,7 +793,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(
                 "Publication -> "
-                f"{publication.summary['publishedAssetCount']} canonical SVGs | "
+                f"{publication.summary['publishedAssetCount']} published SVGs | "
+                f"{publication.browser_referenced_asset_count} browser-referenced | "
+                f"{publication.unreferenced_published_asset_count} preserved for future use | "
                 f"{publication.summary['unitMappingCount']} unit mappings | "
                 f"{publication.summary['factionMappingCount']} faction mappings | "
                 f"{publication.summary['staticMappingCount']} static mappings"

@@ -62,10 +62,12 @@ and serves a read-only browser and same-origin HTTP API.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
 - Local tests separate hermetic and full-asset coverage explicitly.
-  `run_checks.py --assets off|auto|required` validates the complete current
-  published symbol contract before enabling `full_assets`; direct pytest is
-  hermetic by default. `auto` may fall back only when the asset tree is entirely
-  absent, never when it is partial/corrupt.
+  `run_checks.py --assets off|auto|required` validates the complete generated
+  publication inventory (`symbol-inventory.json`, path + SHA-256 for every
+  published SVG) before enabling `full_assets`; it separately reports the
+  browser-referenced subset derived from current mappings/endpoints. Direct
+  pytest is hermetic by default. `auto` may fall back only when the asset tree
+  is entirely absent, never when it is partial/corrupt.
 - GitHub `Source checks` runs the hermetic project checks on clean Windows,
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It

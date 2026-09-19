@@ -149,12 +149,16 @@ The implemented local semantics are:
 | `auto` | Use full-asset tests when a validated complete asset set is available. With no asset set, run hermetically. A detected partial/corrupt asset set is an error rather than a reason to silently downgrade. |
 | `required` | Require a validated complete asset set and run full-asset integration tests. Missing, partial, or invalid assets fail the check run. |
 
-A "complete asset set" is established by the current tracked browser
-publication/mapping contract, not inferred from the presence of a few SVG files.
-The validator requires every mapped army/unit SVG plus every current
-order/characteristic symbol endpoint to exist and parse as SVG. The exact
-validator may evolve with the symbol publisher, but the caller-visible semantics
-above should remain stable.
+A "complete asset set" is established by the generated publication inventory,
+not by the smaller set currently referenced by the browser and not by the mere
+presence of SVG files. Final symbol publication writes `symbol-inventory.json`
+with every published SVG path and SHA-256. The validator requires that complete
+inventory to be present, parseable, hash-correct, and free of unexpected SVGs.
+It then independently derives the browser-referenced subset from
+`army-symbols.js`, `unit-symbol-map.js`, and the current order/characteristic
+endpoints and verifies that subset is contained in the publication. Published
+variants that are not yet browser-referenced remain valid and required parts of
+the full asset set.
 
 Asset-dependent pytest coverage is marked `full_assets` and separated from the
 hermetic suite. Direct pytest excludes `full_assets` by default. Hermetic web
@@ -173,10 +177,11 @@ by the run.
 `tools/stage_full_asset_bundle.py` downloads the bundle without printing its
 URL, enforces download/expanded-size limits, rejects path traversal, symlinks,
 encrypted members, case-colliding names, and files outside the
-`armies/`, `characteristics/`, `orders/`, and `units/` SVG trees, then validates
-the staged tree
-against the tracked browser mappings before replacing the ignored local asset
-directories. The workflow then runs:
+`armies/`, `characteristics/`, `orders/`, and `units/` SVG trees plus the exact
+root `symbol-inventory.json`, then validates the complete publication inventory
+and the browser-referenced subset before replacing the ignored local asset
+directories/inventory. The private bundle therefore carries the same generated
+publication inventory as the local published tree. The workflow then runs:
 
 ```text
 python tools/run_checks.py --all --assets required \

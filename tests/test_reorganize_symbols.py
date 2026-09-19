@@ -283,6 +283,16 @@ def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> 
     assert source_map["units/u1-alternate.svg"] == alternate_path
     assert report["unitSlugToPublishedPath"]["mech-engineer"] == primary_path
     assert summary["publishedAssetCount"] == 5
+    assert report["browserUsageSummary"] == {
+        "browserReferencedAssetCount": 4,
+        "unreferencedPublishedAssetCount": 1,
+    }
+    inventory = json.loads(
+        (staging / "symbol-inventory.json").read_text(encoding="utf-8")
+    )
+    assert inventory["summary"]["publishedAssetCount"] == 5
+    assert inventory["summary"]["browserReferencedAssetCount"] == 4
+    assert inventory["summary"]["unreferencedPublishedAssetCount"] == 1
     assert (staging / primary_path).is_file()
     assert (staging / alternate_path).is_file()
 
@@ -541,6 +551,10 @@ def test_publication_records_changes_and_backs_up_removed_symbols(
     ]
 
     report = json.loads(result.mapping_report.read_text(encoding="utf-8"))
+    inventory = json.loads(result.inventory.read_text(encoding="utf-8"))
+    assert inventory["summary"]["publishedAssetCount"] == result.summary["publishedAssetCount"]
+    assert inventory["summary"]["publishedBytes"] == result.summary["publishedBytes"]
+    assert inventory["publishedSha256ByPath"] == report["publishedSha256ByPath"]
     comparison = report["previousPublicationComparison"]
     assert comparison["summary"] == result.changes
     assert [row["path"] for row in comparison["added"]] == [
@@ -622,6 +636,7 @@ def test_publication_failure_restores_previous_generated_tree(
     old_units = static / "units" / "old.svg"
     old_units.parent.mkdir(parents=True)
     old_units.write_bytes(b"old unit")
+    (static / "symbol-inventory.json").write_text("old inventory\n", encoding="utf-8")
     (static / "army-symbols.js").write_text("old army map\n", encoding="utf-8")
     (static / "unit-symbol-map.js").write_text("old unit map\n", encoding="utf-8")
 
@@ -650,6 +665,7 @@ def test_publication_failure_restores_previous_generated_tree(
     assert old_characteristics.read_bytes() == b"old characteristic"
     assert old_orders.read_bytes() == b"old order"
     assert old_units.read_bytes() == b"old unit"
+    assert (static / "symbol-inventory.json").read_text(encoding="utf-8") == "old inventory\n"
     assert (static / "army-symbols.js").read_text(encoding="utf-8") == "old army map\n"
     assert (static / "unit-symbol-map.js").read_text(encoding="utf-8") == "old unit map\n"
     assert report.read_text(encoding="utf-8") == "old report\n"

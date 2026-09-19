@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -674,6 +675,7 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
     compression_candidates = artifact(tmp_path / "compression-candidates.csv", b"x")
     compression_run = artifact(tmp_path / "compression-run.json", b"{}")
     publication_report = artifact(tmp_path / "publication-map.json", b"{}")
+    inventory = artifact(tmp_path / "symbol-inventory.json", b"{}")
     army_map = artifact(tmp_path / "army-symbols.js", b"map")
     unit_map = artifact(tmp_path / "unit-symbol-map.js", b"map")
 
@@ -848,6 +850,7 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
             "publishedBytes": 0,
         },
         mapping_report=publication_report,
+        inventory=inventory,
         army_map=army_map,
         unit_map=unit_map,
         project_root=tmp_path,
@@ -855,11 +858,13 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
 
     assert published["formatVersion"] == 8
     assert published["processing"]["publication"]["status"] == "passed"
+    assert published["processing"]["publication"]["inventory"]["path"] == "symbol-inventory.json"
     with pytest.raises(SymbolManifestError, match="version-7 compressed state"):
         add_publication(
             published,
             summary=published["processing"]["publication"]["summary"],
             mapping_report=publication_report,
+            inventory=inventory,
             army_map=army_map,
             unit_map=unit_map,
             project_root=tmp_path,
@@ -870,6 +875,9 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
     ):
         validate_symbol_manifest(published)
     published["processing"]["publication"]["summary"]["publishedBytes"] = 0
+    legacy_published = json.loads(json.dumps(published))
+    legacy_published["processing"]["publication"].pop("inventory")
+    validate_symbol_manifest(legacy_published)
     assert_compression_rejects_later_state(
         published,
         report=compression_report,
