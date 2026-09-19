@@ -87,6 +87,14 @@ def _fixture_database(tmp_path: Path) -> Path:
             ),
         )
 
+        for unit_id in range(1, 9):
+            _insert(
+                connection,
+                "logical_unit_sources",
+                source_unit_id=unit_id,
+                logical_unit_id=unit_id,
+            )
+
         loadouts: dict[tuple[int, int], dict[str, object]] = {}
         for unit_id in range(1, 9):
             for army_id in (101, 102):
@@ -237,6 +245,27 @@ def test_loadout_semantics_stages_representation_and_peripheral_identity(
         "resolvedPeripheralIdentityAndNormalizedRepresentationVariantIdentityCount": 5,
     }
 
+    candidate = report["candidateModel"]
+    assert candidate["scope"] == "logical_unit"
+    assert candidate["loadoutOccurrenceCount"] == 16
+    assert candidate["sourceUnitDistinctPayloadCount"] == 12
+    assert candidate["logicalUnitDistinctPayloadCount"] == 12
+    assert candidate["repeatedOccurrenceCount"] == 4
+    assert candidate["sameSourceVariantIdentityCount"] == 4
+    assert candidate["payloadFields"] == ["name", "minis", "disabled"]
+    assert candidate["payloadRelationships"] == [
+        "characteristics",
+        "orders",
+        "skills",
+        "equipment",
+        "weapons",
+    ]
+    assert candidate["deferredContextRelationships"] == [
+        "includes",
+        "peripherals",
+        "profile_groups",
+    ]
+
     equipment = report["relationships"]["equipment"]
     assert equipment["sameSourceRawVariantIdentityCount"] == 1
     assert equipment["sameSourceNormalizedVariantIdentityCount"] == 0
@@ -266,6 +295,47 @@ def test_loadout_semantics_records_field_and_relationship_classification(
     assert report["nestedFieldClassification"]["raw"]["classification"] == (
         "source_provenance"
     )
+
+
+def test_candidate_payloads_reuse_exact_payload_across_one_logical_unit(
+    tmp_path: Path,
+) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "UPDATE logical_unit_sources SET logical_unit_id = 1 WHERE source_unit_id = 2"
+        )
+        connection.execute(
+            "UPDATE loadout_options SET name = 'Loadout 1' WHERE unit_id = 2"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    candidate = audit_database(database)["candidateModel"]
+
+    assert candidate["sourceUnitDistinctPayloadCount"] == 12
+    assert candidate["logicalUnitDistinctPayloadCount"] == 11
+    assert candidate["additionalDistinctPayloadReductionFromLogicalIdentity"] == 1
+
+
+def test_loadout_semantics_requires_complete_logical_unit_mapping(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "DELETE FROM logical_unit_sources WHERE source_unit_id = 8"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(
+        LoadoutSemanticsAuditError,
+        match="Source unit 8 has no logical-unit mapping",
+    ):
+        audit_database(database)
 
 
 def test_loadout_semantics_rejects_unclassified_schema_drift(tmp_path: Path) -> None:
@@ -299,9 +369,10 @@ def test_loadout_semantics_is_read_only_and_json_is_deterministic(
     assert first.read_bytes() == second.read_bytes()
 
     report = json.loads(first.read_text(encoding="utf-8"))
-    assert report["formatVersion"] == 1
+    assert report["formatVersion"] == 2
     assert report["sourceLoadoutKey"] == ["unit_id", "group_id", "option_id"]
     assert "not a proposed canonical" in report["sourceLoadoutKeyCaveat"]
     output = capsys.readouterr().out
     assert "Loadouts: 16 occurrences" in output
     assert "8 baseline" in output
+    assert "12 logical-unit payloads from 16 occurrences" in output

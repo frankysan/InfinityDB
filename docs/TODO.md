@@ -239,7 +239,7 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
   - [x] Compare complete loadout meaning, including points, SWC, minis,
     disabled state, skills, equipment, weapons, extras, orders,
     characteristics, includes, and peripherals.
-  - [ ] Design canonical loadout payload + source/context occurrence relations.
+  - [x] Design canonical loadout payload + source/context occurrence relations.
   - [ ] Preserve every genuine army/loadout variation explicitly.
   - [ ] Update repository/API assembly and regression coverage.
   - [ ] Measure database size and query behavior as secondary outcomes, without

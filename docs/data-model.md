@@ -999,6 +999,163 @@ order-generation differences, includes, or peripheral relationships belong in
 the reusable payload or in an occurrence/context layer. That decision belongs
 to the next TODO item and must preserve every observed player-relevant variant.
 
+#### Canonical loadout payload design (design direction)
+
+The accepted first loadout migration boundary mirrors the conservative profile
+model: deduplicate exact reusable application payloads **within an existing
+`logical_unit`**, while keeping source/Army occurrence context explicit. It does
+not introduce a new global semantic loadout identity, and identical payload
+bytes from unrelated logical units do not authorize a merge.
+
+The first model deliberately stops at exact payload equality. It does not turn
+the diagnostic display-order or omitted-versus-`1` quantity normalization into
+an application rule, and it does not attempt to factor every nested gameplay
+difference into sparse deltas. Genuine or representational differences inside
+the selected payload boundary therefore continue to produce separate payload
+variants.
+
+For the 2026-09-18 database, this boundary gives:
+
+- 12,993 source loadout occurrences;
+- 3,574 distinct candidate payloads when scoped by source unit;
+- 3,448 distinct candidate payloads when scoped by materialized logical unit;
+- 126 additional duplicate payloads exposed by existing logical-unit identity;
+- 9,545 repeated occurrences represented by those 3,448 logical-unit payloads,
+  approximately 73.46% of stored loadout occurrences;
+- 16 repeated source-loadout identities still split into more than one candidate
+  payload because their selected nested payload content differs exactly.
+
+`tools/audit_loadout_semantics.py` reports these values under `candidateModel`.
+They are snapshot diagnostics, not schema constants.
+
+##### Payload boundary
+
+The initial reusable loadout payload contains the exact current values of:
+
+- `name`, `minis`, and `disabled`;
+- characteristics, preserving their relative order;
+- generated orders, including `order_type`, `list_count`, `total_count`, and
+  retained `raw` fallback content;
+- skills plus extras;
+- equipment plus extras;
+- weapons plus extras.
+
+Skill/equipment/weapon payloads initially preserve exact `display_order`,
+`quantity`, `raw`, and relative ordering. The classification audit has shown
+some of those differences to be representation-only, but, as with canonical
+profiles, that diagnostic normalization is **not** promoted into the first
+storage contract. The one equipment representation variant and four weapon
+representation variants therefore remain distinct payloads in this first model.
+
+The following stay outside the reusable payload:
+
+- `army_id`, `unit_id`, `group_id`, and `option_id` — source/provenance keys;
+- loadout `position` — source occurrence ordering/context;
+- `points` and `swc` — Army-contextual player-facing costs with observed
+  same-source variation;
+- profile-group membership/classification — context inherited from the source
+  occurrence;
+- `option_includes` — references to source-local loadout coordinates;
+- `option_peripherals` — references to army-local peripheral identities.
+
+Points and SWC are separated explicitly rather than forcing their three observed
+Army-specific cost differences to create otherwise duplicate payloads. By
+contrast, orders, skills, equipment, and weapons remain in the reusable payload:
+when those gameplay relationships differ, the first canonical model represents
+that as a distinct payload variant rather than inventing a finer-grained delta
+system prematurely.
+
+Includes and peripherals remain losslessly available through the source tables
+until their target entities have stronger canonical identities. In particular,
+the diagnostic peripheral comparison by `name + mercs` is evidence that raw
+army-local IDs overstate variation; it is **not** yet sufficient to define a
+canonical peripheral key. The seven remaining peripheral-context variations,
+including `TURTLEMEK` `mercs` differences, must therefore remain explicit source
+context.
+
+The 16 candidate-payload variants among repeated source-loadout keys are retained
+conservatively: one exact equipment representation variant, one order-generation
+variant, two skill/extra variants, and twelve weapon variants. No one of those
+is discarded or rewritten merely because most occurrences agree.
+
+##### Planned derived application tables
+
+The first materialized application-side shape should be:
+
+```text
+loadout_payloads
+  id                  internal deterministic payload row ID
+  logical_unit_id     owning application logical unit
+  payload_sha256      SHA-256 of versioned canonical payload serialization
+  name
+  minis
+  disabled
+
+loadout_payload_occurrences
+  army_id
+  unit_id
+  group_id
+  option_id
+  loadout_payload_id
+  position
+  points
+  swc
+
+loadout_payload_characteristics
+loadout_payload_orders
+loadout_payload_skills
+loadout_payload_skill_extras
+loadout_payload_equipment
+loadout_payload_equipment_extras
+loadout_payload_weapons
+loadout_payload_weapon_extras
+```
+
+`loadout_payload_occurrences` should remain one-to-one with the current source
+`loadout_options` rows. Its composite source key stays `(army_id, unit_id,
+group_id, option_id)` and should reference exactly one reusable payload. The
+source `loadout_options` and nested `option_*` tables remain unchanged for
+provenance, lossless auditing, deferred relationships, and migration comparison.
+
+Nested payload tables should use payload-relative ordering instead of carrying
+normalization-only source `occurrence_id` or weapon `template_id` identities into
+the canonical application layer. Extras remain attached to their specific
+payload relationship occurrence. The one currently non-null weapon raw fallback
+(`{}`), referenced by 95 source occurrences, remains part of exact payload
+equality and must not be silently inferred away.
+
+As with profiles, `payload_sha256` should fingerprint a versioned canonical JSON
+serialization while equality remains scoped by `logical_unit_id`. Materialization
+should compare serialized payload content before coalescing hash matches and fail
+visibly on an in-scope collision. Internal integer payload IDs should be assigned
+deterministically from the sorted logical-unit/fingerprint set and must not become
+public API or URL identities.
+
+##### Planned build/read-path invariants
+
+The implementation must prove all of the following before the source read path
+can be retired for unit-detail loadout assembly:
+
+- every source loadout occurrence maps to exactly one reusable loadout payload;
+- every payload has at least one supporting source occurrence;
+- the source unit and payload belong to the same materialized logical unit;
+- exact candidate payloads within one logical unit reuse one payload row;
+- points and SWC remain attached to their exact source occurrence;
+- order, skill, equipment, weapon, extra, `raw`, and exact representation
+  differences continue to split payloads;
+- profile-group context, includes, and peripherals remain recoverable from the
+  occurrence/source side;
+- source `loadout_options` and nested `option_*` rows remain lossless and
+  reconstructable;
+- no army-local peripheral ID is promoted to cross-Army canonical identity by
+  this migration;
+- public repository/API/web loadout behavior is unchanged when assembly moves to
+  the canonical layer.
+
+This design intentionally leaves source-occurrence merge behavior, canonical
+include/peripheral identities, and any future representation normalization as
+separate evidence-driven decisions.
+
 #### First implementation targets
 
 ### 1. Profile payloads

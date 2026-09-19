@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB loadout semantics audit"
-REPORT_FORMAT_VERSION = 1
+REPORT_FORMAT_VERSION = 2
 
 LOADOUT_KEY = ("army_id", "unit_id", "group_id", "option_id")
 SOURCE_LOADOUT_KEY = ("unit_id", "group_id", "option_id")
@@ -52,6 +52,7 @@ EXPECTED_COLUMNS: dict[str, tuple[str, ...]] = {
     "option_includes": (*LOADOUT_KEY, "position", *INCLUDE_FIELDS),
     "option_peripherals": ("occurrence_id", *LOADOUT_KEY, "position", *ITEM_FIELDS),
     "peripherals": PERIPHERAL_FIELDS,
+    "logical_unit_sources": ("source_unit_id", "logical_unit_id"),
     "__infinity_metadata": ("key", "value"),
 }
 
@@ -233,6 +234,16 @@ NESTED_FIELD_CLASSIFICATION: dict[str, dict[str, str]] = {
     },
 }
 
+
+CANDIDATE_PAYLOAD_FIELDS = ("name", "minis", "disabled")
+CANDIDATE_PAYLOAD_RELATIONSHIPS = (
+    "characteristics",
+    "orders",
+    "skills",
+    "equipment",
+    "weapons",
+)
+CANDIDATE_CONTEXT_RELATIONSHIPS = ("includes", "peripherals", "profile_groups")
 
 class LoadoutSemanticsAuditError(ValueError):
     """Raised when a database cannot be classified safely."""
@@ -662,6 +673,101 @@ def _variant_identity_count(
     return count
 
 
+def _candidate_payload(
+    loadout: Mapping[str, Any],
+    relationship_rows: Mapping[str, Mapping[tuple[Any, ...], list[dict[str, Any]]]],
+    extras: Mapping[str, Mapping[Any, list[dict[str, Any]]]],
+    peripheral_definitions: Mapping[tuple[Any, Any], Mapping[str, Any]],
+) -> dict[str, Any]:
+    parent = _row_key(loadout, LOADOUT_KEY)
+    payload = {field: loadout[field] for field in CANDIDATE_PAYLOAD_FIELDS}
+    for name in CANDIDATE_PAYLOAD_RELATIONSHIPS:
+        payload[name] = _relationship_payload(
+            name,
+            relationship_rows[name].get(parent, []),
+            extras=extras.get(name),
+            normalize_representation=False,
+            resolve_peripheral_identity=False,
+            peripheral_definitions=peripheral_definitions,
+        )
+    return payload
+
+
+def _candidate_model_evidence(
+    connection: sqlite3.Connection,
+    loadouts: list[dict[str, Any]],
+    relationship_rows: Mapping[str, Mapping[tuple[Any, ...], list[dict[str, Any]]]],
+    extras: Mapping[str, Mapping[Any, list[dict[str, Any]]]],
+    peripheral_definitions: Mapping[tuple[Any, Any], Mapping[str, Any]],
+) -> dict[str, Any]:
+    logical_units = {
+        row["source_unit_id"]: row["logical_unit_id"]
+        for row in connection.execute(
+            "SELECT source_unit_id, logical_unit_id "
+            "FROM logical_unit_sources ORDER BY source_unit_id"
+        )
+    }
+    source_payloads: set[tuple[int, str]] = set()
+    logical_payloads: set[tuple[int, str]] = set()
+    payloads_by_source_key: dict[tuple[Any, ...], set[str]] = defaultdict(set)
+    for loadout in loadouts:
+        source_unit_id = loadout["unit_id"]
+        try:
+            logical_unit_id = logical_units[source_unit_id]
+        except KeyError as exc:
+            raise LoadoutSemanticsAuditError(
+                f"Source unit {source_unit_id} has no logical-unit mapping"
+            ) from exc
+        payload = _candidate_payload(
+            loadout, relationship_rows, extras, peripheral_definitions
+        )
+        fingerprint = hashlib.sha256(
+            _canonical_json(payload).encode("utf-8")
+        ).hexdigest()
+        source_payloads.add((source_unit_id, fingerprint))
+        logical_payloads.add((logical_unit_id, fingerprint))
+        payloads_by_source_key[_row_key(loadout, SOURCE_LOADOUT_KEY)].add(fingerprint)
+
+    occurrence_count = len(loadouts)
+    logical_count = len(logical_payloads)
+    repeated = occurrence_count - logical_count
+    return {
+        "status": "design_candidate",
+        "scope": "logical_unit",
+        "payloadFields": list(CANDIDATE_PAYLOAD_FIELDS),
+        "payloadRelationships": list(CANDIDATE_PAYLOAD_RELATIONSHIPS),
+        "occurrenceContextFields": [
+            "army_id",
+            "unit_id",
+            "group_id",
+            "option_id",
+            "position",
+            "points",
+            "swc",
+        ],
+        "deferredContextRelationships": list(CANDIDATE_CONTEXT_RELATIONSHIPS),
+        "representationPolicy": (
+            "Preserve exact display_order, quantity, raw, and relative ordering in the "
+            "first canonical payload model; diagnostic representation normalization is not "
+            "yet an application rule."
+        ),
+        "loadoutOccurrenceCount": occurrence_count,
+        "sourceUnitDistinctPayloadCount": len(source_payloads),
+        "logicalUnitDistinctPayloadCount": logical_count,
+        "additionalDistinctPayloadReductionFromLogicalIdentity": (
+            len(source_payloads) - logical_count
+        ),
+        "repeatedOccurrenceCount": repeated,
+        "sameSourceVariantIdentityCount": sum(
+            len(payloads) > 1 for payloads in payloads_by_source_key.values()
+        ),
+        "repeatPercent": round(
+            (repeated / occurrence_count * 100) if occurrence_count else 0.0,
+            2,
+        ),
+    }
+
+
 def audit_database(path: Path) -> dict[str, Any]:
     """Return deterministic evidence for classifying loadout canonicalization fields."""
     path = path.resolve()
@@ -748,6 +854,13 @@ def audit_database(path: Path) -> dict[str, Any]:
             "fields": _field_evidence(loadouts),
             "nestedFieldClassification": NESTED_FIELD_CLASSIFICATION,
             "relationships": relationships,
+            "candidateModel": _candidate_model_evidence(
+                connection,
+                loadouts,
+                relationship_rows,
+                extras,
+                peripheral_definitions,
+            ),
             "diagnosticNormalization": {
                 "representation": (
                     "Treat omitted quantity and explicit quantity 1 as equivalent and ignore "
@@ -796,6 +909,13 @@ def main(argv: list[str] | None = None) -> int:
         f"{summary['resolvedPeripheralIdentityVariantIdentityCount']} peripheral-resolved -> "
         f"{summary['resolvedPeripheralIdentityAndNormalizedRepresentationVariantIdentityCount']} "
         "both"
+    )
+    candidate = report["candidateModel"]
+    print(
+        "Candidate model: "
+        f"{candidate['logicalUnitDistinctPayloadCount']} logical-unit payloads from "
+        f"{candidate['loadoutOccurrenceCount']} occurrences "
+        f"({candidate['repeatPercent']:.2f}% repeated)"
     )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)

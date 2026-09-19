@@ -189,7 +189,14 @@ and serves a read-only browser and same-origin HTTP API.
   source-local group/profile coordinates, scalar profile facts, type, and
   classification agree; complementary nested items are accumulated and
   restrictive numeric AVA is retained. A canonical payload ID must not be used
-  as source-occurrence identity. Canonical loadout/unit payload work remains
+  as source-occurrence identity. The accepted loadout design direction follows
+  the same logical-unit-scoped, exact-payload approach: `name`, `minis`,
+  `disabled`, characteristics, orders, skills, equipment, weapons, extras, and
+  exact representation values belong to the reusable payload; points, SWC,
+  source/group/option keys, source position, includes, and peripherals remain
+  occurrence/source context. Includes and peripherals are deferred because their
+  targets are source-local/army-local. This loadout layer is a design direction,
+  not yet materialized current behavior. Canonical unit-payload work remains
   staged behind the same field-level invariance and provenance requirements.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
