@@ -218,7 +218,7 @@ logical_unit_sources
   logical_unit_id         owning application logical unit
 ```
 
-For schema version 11, `logical_units.id` equals `representative_unit_id`,
+Since schema version 11, `logical_units.id` equals `representative_unit_id`,
 preserving existing unit URLs and API identifiers. Keeping both fields explicit
 allows a future application-owned logical ID without rewriting the source model.
 
@@ -693,20 +693,20 @@ Conversely, the large AVA-only and representation-only populations demonstrate
 that preserving every full source payload in the application model is also
 unnecessary.
 
-##### Accepted initial profile-payload design
+##### Current profile-payload materialization
 
-**Design direction — not yet implemented.** The first storage refactor will
-canonicalize reusable **profile payloads**, not introduce a new global semantic
-profile identity. A payload remains scoped to one existing `logical_unit`; two
-unrelated units are not merged merely because their profile data happens to be
-identical.
+Schema version 12 materializes reusable **profile payloads** as derived frontend
+structure while retaining every normalized/source profile row unchanged. This
+does not introduce a new global semantic profile identity. A payload remains
+scoped to one existing `logical_unit`; two unrelated units are not merged merely
+because their profile data happens to be identical.
 
-The design deliberately stops at exact application-payload equality. It does
-not yet try to factor every army-specific gameplay difference into fine-grained
-field deltas. This keeps the first migration mechanically provable and leaves
-broader semantic equivalence for later evidence-driven work.
+The implementation deliberately stops at exact application-payload equality. It
+does not factor every army-specific gameplay difference into fine-grained field
+deltas. This keeps the first migration mechanically provable and leaves broader
+semantic equivalence for later evidence-driven work.
 
-For the 2026-09-18 database, the proposed first boundary gives:
+For the 2026-09-18 database, the audited payload boundary gives:
 
 - 5,020 source profile occurrences;
 - 1,163 distinct candidate payloads when scoped by source unit;
@@ -763,7 +763,7 @@ semantic profile identity, but that is not required for the first migration.
 
 ###### Derived application tables
 
-The intended application-side shape is:
+The materialized application-side shape is:
 
 ```text
 profile_payloads
@@ -810,9 +810,11 @@ relationship meaning.
 `payload_sha256` is a deterministic fingerprint of a versioned canonical JSON
 serialization of the reusable payload. Payload equality is still scoped by
 `logical_unit_id`; the hash does not authorize merging identical payload bytes
-across unrelated logical units. Implementations must compare/validate the
-serialized payload when coalescing rows rather than treating a hash match as
-independent semantic evidence.
+across unrelated logical units. Materialization compares the serialized payload
+when coalescing rows and rejects an in-scope hash collision rather than treating
+the hash as independent semantic evidence. Structured `raw` fallback JSON is
+stored canonically in the derived layer; the source/raw layers retain its exact
+original representation.
 
 The integer `profile_payloads.id` is an internal database key, assigned
 deterministically from the sorted `(logical_unit_id, payload_sha256)` set for a
@@ -821,7 +823,7 @@ snapshots when source payloads change.
 
 ###### Build and read-path invariants
 
-The first implementation must enforce all of the following:
+The materializer and database validation enforce all of the following:
 
 - every source profile occurrence maps to exactly one `profile_payload`;
 - every payload has at least one supporting source occurrence;
@@ -1032,8 +1034,8 @@ registry remains separate from these derived frontend tables so generated
 application structure cannot be supplied as normalized source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 11 and the application
-compatibility revision is 16. Imports build temporary sibling files, check
+records its schema version. The current schema version is 12 and the application
+compatibility revision is 17. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

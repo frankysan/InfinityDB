@@ -33,6 +33,7 @@ from ..identities import (
     parse_identity_metadata,
 )
 from .paths import raw_database_path
+from .profile_payloads import materialize_profile_payloads
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -318,6 +319,7 @@ def export_database(
                         for row in logical_identity.logical_unit_sources
                     ),
                 )
+                materialize_profile_payloads(connection)
                 create_indexes(connection)
                 # The frontend database is an immutable snapshot. Persist planner
                 # statistics at build time so read-only connections make informed

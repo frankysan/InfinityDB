@@ -447,6 +447,49 @@ class Database:
                 raise ValueError(
                     "Database has invalid materialized logical-unit identity; rebuild the database"
                 )
+
+            source_profile_count = connection.execute(
+                "SELECT COUNT(*) FROM profiles"
+            ).fetchone()[0]
+            profile_occurrence_count = connection.execute(
+                "SELECT COUNT(*) FROM profile_payload_occurrences"
+            ).fetchone()[0]
+            unsupported_payload = connection.execute(
+                "SELECT 1 FROM profile_payloads AS pp "
+                "LEFT JOIN profile_payload_occurrences AS ppo "
+                "ON ppo.profile_payload_id = pp.id "
+                "WHERE ppo.profile_payload_id IS NULL "
+                "OR pp.payload_sha256 IS NULL "
+                "OR length(pp.payload_sha256) != 64 LIMIT 1"
+            ).fetchone()
+            invalid_profile_logical_unit = connection.execute(
+                "SELECT 1 FROM profile_payload_occurrences AS ppo "
+                "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = ppo.unit_id "
+                "WHERE pp.logical_unit_id != lus.logical_unit_id LIMIT 1"
+            ).fetchone()
+            invalid_profile_context = connection.execute(
+                "SELECT 1 FROM profile_payload_occurrences AS ppo "
+                "JOIN profiles AS p "
+                "ON p.army_id = ppo.army_id "
+                "AND p.unit_id = ppo.unit_id "
+                "AND p.group_id = ppo.group_id "
+                "AND p.profile_id = ppo.profile_id "
+                "WHERE NOT (ppo.position IS p.position) "
+                "OR NOT (ppo.ava IS p.ava) "
+                "OR NOT (ppo.logo IS p.logo) LIMIT 1"
+            ).fetchone()
+            if (
+                source_profile_count != profile_occurrence_count
+                or unsupported_payload is not None
+                or invalid_profile_logical_unit is not None
+                or invalid_profile_context is not None
+            ):
+                raise ValueError(
+                    "Database has invalid materialized canonical profile payloads; "
+                    "rebuild the database"
+                )
+
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:

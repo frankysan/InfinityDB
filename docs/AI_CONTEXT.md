@@ -175,11 +175,16 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. A future refactor may materialize one canonical application
-  payload per logical unit and store only explicit army/loadout/source deltas,
-  but only after field-level invariance and provenance requirements are audited.
-  Legacy rediscovery remains only as a database-build compatibility path for
-  older normalized inputs.
+  dynamically. Schema version 12 additionally materializes reusable canonical
+  profile payloads scoped to each logical unit plus one occurrence row per
+  source profile. AVA, logo, source/profile-group keys, includes, and
+  peripherals remain occurrence/source context; WIP, characteristics, skills,
+  equipment, weapons, extras, and exact representation values remain in the
+  payload and therefore split payload variants when they differ. The repository
+  still reads source profile tables until behavioral-equivalence coverage is
+  complete. Canonical loadout/unit payload work remains staged behind the same
+  field-level invariance and provenance requirements. Legacy rediscovery remains
+  only as a database-build compatibility path for older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

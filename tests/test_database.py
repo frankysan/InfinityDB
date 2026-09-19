@@ -206,6 +206,43 @@ def test_database_preserves_every_normalized_table_and_field(
             "SELECT source_unit_id, logical_unit_id FROM logical_unit_sources "
             "ORDER BY source_unit_id"
         ).fetchall() == [(1, 1), (2, 2), (3, 3)]
+        assert connection.execute(
+            "SELECT id, logical_unit_id, name, ava "
+            "FROM ("
+            "SELECT pp.id, pp.logical_unit_id, pp.name, ppo.ava "
+            "FROM profile_payloads AS pp "
+            "JOIN profile_payload_occurrences AS ppo ON ppo.profile_payload_id = pp.id"
+            ") ORDER BY ava"
+        ).fetchall() == [(1, 1, "Trooper", 1), (1, 1, "Trooper", "T")]
+        assert connection.execute(
+            "SELECT army_id, unit_id, group_id, profile_id, profile_payload_id, ava, logo "
+            "FROM profile_payload_occurrences ORDER BY army_id"
+        ).fetchall() == [
+            (101, 1, 1, 1, 1, "T", None),
+            (201, 1, 1, 1, 1, 1, None),
+        ]
+        assert connection.execute(
+            "SELECT COUNT(*) FROM profile_payloads"
+        ).fetchone()[0] == 1
+        for table in (
+            "profile_payload_characteristics",
+            "profile_payload_skills",
+            "profile_payload_skill_extras",
+            "profile_payload_equipment",
+            "profile_payload_equipment_extras",
+            "profile_payload_weapons",
+            "profile_payload_weapon_extras",
+        ):
+            assert connection.execute(
+                f"SELECT COUNT(*) FROM {quote(table)}"
+            ).fetchone()[0] == 1
+        source_skill_raw = connection.execute(
+            "SELECT raw FROM profile_skills WHERE army_id = 101"
+        ).fetchone()[0]
+        payload_skill_raw = connection.execute(
+            "SELECT raw FROM profile_payload_skills"
+        ).fetchone()[0]
+        assert json.loads(payload_skill_raw) == json.loads(source_skill_raw)
         assert any(
             row[1] == "logical_unit_sources_logical"
             for row in connection.execute("PRAGMA index_list(logical_unit_sources)")
@@ -1487,6 +1524,151 @@ def test_database_validation_rejects_incomplete_logical_unit_mapping(
         connection.close()
 
     with pytest.raises(ValueError, match="materialized logical-unit identity"):
+        Database(path).validate()
+
+
+def test_profile_payload_materialization_preserves_context_and_payload_variants(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    profiles = data["tables"]["profiles"]
+    first = next(row for row in profiles if row["army_id"] == 101)
+    second = next(row for row in profiles if row["army_id"] == 201)
+    first["logo"] = "main-logo"
+    second["logo"] = "sectorial-logo"
+
+    path = tmp_path / "shared.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM profile_payloads"
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT army_id, ava, logo FROM profile_payload_occurrences ORDER BY army_id"
+        ).fetchall() == [
+            (101, "T", "main-logo"),
+            (201, 1, "sectorial-logo"),
+        ]
+    finally:
+        connection.close()
+
+    data = copy.deepcopy(normalized)
+    next(row for row in data["tables"]["profiles"] if row["army_id"] == 201)["wip"] = 14
+    variant_path = tmp_path / "variant.sqlite3"
+    export_database(data, variant_path)
+    variant = sqlite3.connect(variant_path)
+    try:
+        assert variant.execute(
+            "SELECT COUNT(*) FROM profile_payloads"
+        ).fetchone()[0] == 2
+        assert variant.execute(
+            "SELECT DISTINCT profile_payload_id FROM profile_payload_occurrences"
+        ).fetchall() == [(1,), (2,)]
+    finally:
+        variant.close()
+
+
+def test_profile_payloads_do_not_merge_across_logical_units(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    for table in (
+        "profile_characteristics",
+        "profile_skills",
+        "profile_skill_extras",
+        "profile_equipment",
+        "profile_equipment_extras",
+        "profile_weapons",
+        "profile_weapon_extras",
+    ):
+        data["tables"][table] = []
+
+    group = copy.deepcopy(
+        next(
+            row
+            for row in data["tables"]["profile_groups"]
+            if row["army_id"] == 201 and row["unit_id"] == 1
+        )
+    )
+    group["unit_id"] = 2
+    data["tables"]["profile_groups"].append(group)
+
+    profile = copy.deepcopy(
+        next(
+            row
+            for row in data["tables"]["profiles"]
+            if row["army_id"] == 201 and row["unit_id"] == 1
+        )
+    )
+    profile["unit_id"] = 2
+    data["tables"]["profiles"].append(profile)
+
+    path = tmp_path / "scoped.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM profile_payloads"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT logical_unit_id, COUNT(*) FROM profile_payloads "
+            "GROUP BY logical_unit_id ORDER BY logical_unit_id"
+        ).fetchall() == [(1, 1), (2, 1)]
+    finally:
+        connection.close()
+
+
+def test_profile_payload_materialization_is_deterministic(
+    tmp_path: Path, normalized: dict
+) -> None:
+    first = tmp_path / "first.sqlite3"
+    second = tmp_path / "second.sqlite3"
+    export_database(normalized, first)
+    export_database(normalized, second)
+
+    first_connection = sqlite3.connect(first)
+    second_connection = sqlite3.connect(second)
+    try:
+        tables = (
+            "profile_payloads",
+            "profile_payload_occurrences",
+            "profile_payload_characteristics",
+            "profile_payload_skills",
+            "profile_payload_skill_extras",
+            "profile_payload_equipment",
+            "profile_payload_equipment_extras",
+            "profile_payload_weapons",
+            "profile_payload_weapon_extras",
+        )
+        for table in tables:
+            left = first_connection.execute(
+                f"SELECT * FROM {quote(table)} ORDER BY rowid"
+            ).fetchall()
+            right = second_connection.execute(
+                f"SELECT * FROM {quote(table)} ORDER BY rowid"
+            ).fetchall()
+            assert left == right
+    finally:
+        first_connection.close()
+        second_connection.close()
+
+
+def test_database_validation_rejects_invalid_profile_payload_context(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            "UPDATE profile_payload_occurrences SET ava = 'corrupt' WHERE army_id = 101"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(ValueError, match="canonical profile payloads"):
         Database(path).validate()
 
 

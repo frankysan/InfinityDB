@@ -222,9 +222,9 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
     source/provenance, or normalization-only structure.
   - [x] Prove exact-equality groups before changing storage.
   - [x] Design canonical profile payload + source/context occurrence relations.
-  - [ ] Preserve genuine AVA, profile-group, army, and source differences
+  - [x] Preserve genuine AVA, profile-group, army, and source differences
     explicitly.
-  - [ ] Preserve characteristics, skills, equipment, weapons, extras, includes,
+  - [x] Preserve characteristics, skills, equipment, weapons, extras, includes,
     peripherals, and other gameplay-bearing nested information.
   - [ ] Update repository/API assembly to consume the canonical model without
     changing player-visible semantics unintentionally.
