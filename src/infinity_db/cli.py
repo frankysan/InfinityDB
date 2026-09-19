@@ -14,8 +14,8 @@ from infinity_army_data.cli import cmd_normalize as normalize_dataset
 
 from . import __version__
 from .curated import load_curated_directory, load_curated_document
-from .display_identities import display_identity_metadata, load_display_identity_curated
 from .database import export_database, raw_database_path
+from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
 from .rules_database import export_rules_database
 from .source_anomalies import (
