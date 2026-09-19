@@ -23,6 +23,9 @@ provenance/state, and build outputs.
 - `reports/symbols/` — generated symbol-processing reports. The current
   `svg-preflight.json` records parse/text/font-declaration findings and is bound
   back into `army-symbol-build.json` by SHA-256. Ignored by Git.
+- `logs/symbols/` — complete verbose transcripts from `tools/build_symbols.py`.
+  Interactive console output is intentionally compact; these timestamped logs
+  retain detailed per-stage and per-asset diagnostics. Ignored by Git.
 - `manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
   record is labeled from the archive filename, bound to its immutable SHA-256,
   and records the snapshot type, archive label/path when project-relative,

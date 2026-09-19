@@ -268,10 +268,13 @@ Army archive with generated provenance or `--fetch-snapshot` for an intentional
 network refresh when starting a new build. It verifies the selected Army
 archive/provenance and keeps that same artifact pinned through the complete
 pipeline; normal application/database builds never invoke it or acquire network
-data. `--stop-after` exposes snapshot, acquisition, materialization, preflight,
-font-audit, deduplication, text-conversion, compression, and publication
-checkpoints. After acquisition, `--resume` loads the SHA-bound current build
-manifest and immutable snapshots without rediscovery/reacquisition. Resume
+data. The orchestrator keeps interactive output compact: the active stage owns
+one updating console line while existing verbose stage output is captured
+verbatim in a timestamped local log under `data/logs/symbols/` (or an explicit
+`--log` path). `--stop-after` exposes snapshot, acquisition, materialization,
+preflight, font-audit, deduplication, text-conversion, compression, and
+publication checkpoints. After acquisition, `--resume` loads the SHA-bound
+current build manifest and immutable snapshots without rediscovery/reacquisition. Resume
 verifies an existing raw work tree rather than replacing it; a missing work tree
 may be reconstructed only while the manifest is still version 2.
 

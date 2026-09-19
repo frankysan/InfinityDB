@@ -262,7 +262,10 @@ authoritative URL is downloaded only once.
 refreshes. A new build requires either an explicit immutable Army ZIP
 (`--snapshot`) with matching generated snapshot provenance or an explicit
 network refresh (`--fetch-snapshot`); it never selects a newest snapshot
-implicitly. `--stop-after` exposes every verified stage checkpoint from snapshot
+implicitly. Normal console output is compact and stage-oriented: an interactive
+active stage updates one progress line, while the complete verbose transcript is
+retained in a timestamped `data/logs/symbols/` log (or an explicit `--log`
+path). `--stop-after` exposes every verified stage checkpoint from snapshot
 through publication. Once acquisition has created version-2 build state,
 `--resume` continues from that exact SHA-bound Army/SYMBOLS pair without
 rediscovery or reacquisition. Resume validates the existing raw work tree instead

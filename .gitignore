@@ -34,6 +34,7 @@ data/pdf/**/*
 data/wiki/**/*
 data/work/
 data/reports/
+data/logs/
 data/backups/
 src/infinity_db/web/static/armies/**/*
 src/infinity_db/web/static/characteristics/**/*

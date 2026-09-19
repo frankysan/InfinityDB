@@ -15,4 +15,5 @@ data/generated/*
 data/manifests/
 data/work/
 data/reports/
+data/logs/
 data/backups/

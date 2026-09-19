@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Reduce `tools/build_symbols.py` console noise to compact stage-level output
+  with a single updating progress line for the active interactive stage, while
+  retaining the complete verbose transcript in timestamped `data/logs/symbols/`
+  logs and supporting an explicit `--log` destination.
 - Add a separate normalized `display_army_id` derived from pinned curated
   display-identity data. Canonical mercenary source identity remains distinct
   from Non-Aligned ownership/playability, while the UI can use the curated

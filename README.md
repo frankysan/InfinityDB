@@ -222,8 +222,13 @@ python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip" --r
 
 For staged live validation, `--stop-after` exposes every verified checkpoint:
 `snapshot`, `acquisition`, `materialization`, `preflight`, `font-audit`,
-`deduplication`, `text-conversion`, `compression`, and `publication`. After raw
-symbol acquisition has created `army-symbol-build.json`, `--resume` reuses the
+`deduplication`, `text-conversion`, `compression`, and `publication`. Normal
+console output is intentionally stage-oriented: an interactive run keeps one
+updating progress line for the active stage and prints one compact result when
+that stage finishes. The complete verbose transcript is always written to a
+timestamped `data/logs/symbols/SYMBOL BUILD YYYYMMDD-HHMMSS.log`; use `--log`
+to choose an explicit log path. After raw symbol acquisition has created
+`army-symbol-build.json`, `--resume` reuses the
 exact Army/SYMBOLS artifacts recorded there instead of rediscovering or
 reacquiring them. Resume verifies the existing raw work tree byte-for-byte and
 never rematerializes a later-stage build, so canonical/compressed outputs cannot

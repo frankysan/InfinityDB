@@ -35,6 +35,7 @@ try:
         discover_symbol_source,
         print_discovery_summary,
     )
+    from tools.pipeline_console import PipelineConsole
     from tools.reorganize_symbols import publish_symbols
     from tools.symbol_work import (
         audit_symbol_fonts,
@@ -59,6 +60,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
         discover_symbol_source,
         print_discovery_summary,
     )
+    from pipeline_console import PipelineConsole
     from reorganize_symbols import publish_symbols
     from symbol_work import (
         audit_symbol_fonts,
@@ -101,6 +103,18 @@ STAGES = (
     "compression",
     "publication",
 )
+STAGE_LABELS = {
+    "snapshot": "Snapshot",
+    "acquisition": "Symbol acquisition",
+    "materialization": "Materialization",
+    "preflight": "SVG preflight",
+    "font-audit": "Font audit",
+    "deduplication": "Duplicate detection",
+    "text-conversion": "Text conversion",
+    "compression": "Compression",
+    "publication": "Publication",
+}
+
 STAGE_VERSIONS = {
     "acquisition": 2,
     "materialization": 2,
@@ -390,6 +404,14 @@ def main(argv: list[str] | None = None) -> int:
         help="Renderer for compression validation (default: resvg)",
     )
     parser.add_argument(
+        "--log",
+        type=Path,
+        help=(
+            "Complete verbose pipeline log path "
+            "(default: <data-root>/logs/symbols/SYMBOL BUILD <timestamp>.log)"
+        ),
+    )
+    parser.add_argument(
         "--static-root",
         type=Path,
         default=Path("src/infinity_db/web/static"),
@@ -415,6 +437,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--snapshot-only cannot be combined with --resume")
     if not args.resume and args.snapshot is None and not args.fetch_snapshot:
         parser.error("a new build requires --snapshot or --fetch-snapshot")
+    if args.log is not None and args.log.exists():
+        parser.error(f"--log path already exists: {args.log}")
 
     stop_after = "snapshot" if args.snapshot_only else args.stop_after
     if args.resume and stop_after == "snapshot":
@@ -427,104 +451,150 @@ def main(argv: list[str] | None = None) -> int:
     symbol_work = args.data_root / "work" / "symbols"
     symbol_reports = args.data_root / "reports" / "symbols"
     project_root = Path.cwd()
+    log_path = args.log or PipelineConsole.default_log_path(args.data_root)
 
-    try:
-        if args.resume:
-            pinned, symbols, document = _resume_state(
-                build_manifest=build_manifest,
-                manifest_directory=manifest_directory,
-                army_destination=army_destination,
-                symbol_destination=symbol_destination,
-                snapshot=args.snapshot,
-                snapshot_manifest=args.snapshot_manifest,
-                expected_language=args.language,
-                project_root=project_root,
-            )
-            print_pinned_snapshot(pinned)
-            print(
-                f"Resuming symbol build -> version {document['formatVersion']} | "
-                f"{symbols.build_manifest}"
-            )
-            print(f"Pinned symbol snapshot -> {symbols.archive}")
-            print(f"Symbol snapshot provenance -> {symbols.snapshot_manifest}")
-            current = document
-            current_version = document["formatVersion"]
-            if _stop_after("acquisition", stop_after):
-                _print_checkpoint("acquisition", build_manifest=symbols.build_manifest)
-                return 0
-        else:
-            if args.fetch_snapshot:
-                language = args.language or "en"
-                acquired = acquire_army_snapshot(
-                    army_destination,
-                    manifest_directory,
-                    language=language,
-                    api_base_url=API_BASE_URL,
-                )
-                pinned = resolve_army_snapshot(
-                    acquired.archive,
+    with PipelineConsole(
+        log_path=log_path,
+        stage_labels=STAGE_LABELS,
+        stage_order=STAGES,
+    ) as console:
+        invocation = argv if argv is not None else sys.argv[1:]
+        print("Arguments -> " + " ".join(repr(item) for item in invocation))
+        print(f"Working directory -> {project_root}")
+        console.header(mode="resume" if args.resume else "new build")
+        try:
+            if args.resume:
+                console.stage_start("snapshot", detail="verifying pinned resume inputs")
+                pinned, symbols, document = _resume_state(
+                    build_manifest=build_manifest,
                     manifest_directory=manifest_directory,
-                    manifest=acquired.manifest,
-                    expected_language=language,
-                )
-            else:
-                assert args.snapshot is not None
-                pinned = resolve_army_snapshot(
-                    args.snapshot,
-                    manifest_directory=manifest_directory,
-                    manifest=args.snapshot_manifest,
+                    army_destination=army_destination,
+                    symbol_destination=symbol_destination,
+                    snapshot=args.snapshot,
+                    snapshot_manifest=args.snapshot_manifest,
                     expected_language=args.language,
+                    project_root=project_root,
                 )
-
-            print_pinned_snapshot(pinned)
-            if _stop_after("snapshot", stop_after):
-                _print_checkpoint("snapshot")
-                return 0
-
-            discovery = discover_symbol_source(
-                pinned.archive,
-                static_symbols_path=args.static_symbols,
-            )
-            if discovery.source_document_count != pinned.document_count:
-                raise ValueError(
-                    "Symbol discovery source-document count does not match pinned Army "
-                    f"provenance: {discovery.source_document_count} != {pinned.document_count}"
+                print_pinned_snapshot(pinned)
+                print(
+                    f"Resuming symbol build -> version {document['formatVersion']} | "
+                    f"{symbols.build_manifest}"
                 )
-            print_discovery_summary(discovery)
-
-            symbols = acquire_symbol_snapshot(
-                pinned.archive,
-                symbol_destination,
-                manifest_directory,
-                build_manifest,
-                static_symbols_path=args.static_symbols,
-                delay=args.delay,
-                discovery=discovery,
-                progress=print,
-                army_snapshot=pinned,
-                override_root=args.image_overrides,
-                refresh_symbols=args.refresh_symbols,
-            )
-            if _stop_after("acquisition", stop_after):
-                _print_checkpoint("acquisition", build_manifest=symbols.build_manifest)
-                print(f"Resolved {symbols.asset_count} symbols -> {symbols.archive}")
+                print(f"Pinned symbol snapshot -> {symbols.archive}")
                 print(f"Symbol snapshot provenance -> {symbols.snapshot_manifest}")
-                return 0
-            current = {}
-            current_version = 2
-
-        if args.resume:
-            try:
-                materialized = load_materialized_symbol_work(
-                    symbols.archive,
-                    symbols.snapshot_manifest,
-                    symbols.build_manifest,
-                    symbol_work,
+                current = document
+                current_version = document["formatVersion"]
+                console.stage_success(
+                    f"{pinned.archive.name} | manifest v{current_version}"
                 )
-                print(f"Verified materialized symbol work -> {materialized.raw_root}")
-            except ValueError:
-                if current_version > STAGE_VERSIONS["materialization"]:
-                    raise
+
+                console.stage_start("acquisition", detail="verifying existing symbol snapshot")
+                console.stage_success(
+                    f"{symbols.asset_count} assets | {symbols.archive.name}", existing=True
+                )
+                if _stop_after("acquisition", stop_after):
+                    _print_checkpoint("acquisition", build_manifest=symbols.build_manifest)
+                    console.checkpoint("acquisition")
+                    return 0
+            else:
+                console.stage_start(
+                    "snapshot",
+                    detail=(
+                        "fetching Army snapshot"
+                        if args.fetch_snapshot
+                        else "pinning Army snapshot"
+                    ),
+                )
+                if args.fetch_snapshot:
+                    language = args.language or "en"
+                    acquired = acquire_army_snapshot(
+                        army_destination,
+                        manifest_directory,
+                        language=language,
+                        api_base_url=API_BASE_URL,
+                    )
+                    pinned = resolve_army_snapshot(
+                        acquired.archive,
+                        manifest_directory=manifest_directory,
+                        manifest=acquired.manifest,
+                        expected_language=language,
+                    )
+                else:
+                    assert args.snapshot is not None
+                    pinned = resolve_army_snapshot(
+                        args.snapshot,
+                        manifest_directory=manifest_directory,
+                        manifest=args.snapshot_manifest,
+                        expected_language=args.language,
+                    )
+
+                print_pinned_snapshot(pinned)
+                console.stage_success(
+                    f"{pinned.archive.name} | {pinned.document_count} documents"
+                )
+                if _stop_after("snapshot", stop_after):
+                    _print_checkpoint("snapshot")
+                    console.checkpoint("snapshot")
+                    return 0
+
+                console.stage_start("acquisition", detail="discovering and resolving symbols")
+                discovery = discover_symbol_source(
+                    pinned.archive,
+                    static_symbols_path=args.static_symbols,
+                )
+                if discovery.source_document_count != pinned.document_count:
+                    raise ValueError(
+                        "Symbol discovery source-document count does not match pinned Army "
+                        f"provenance: {discovery.source_document_count} != {pinned.document_count}"
+                    )
+                print_discovery_summary(discovery)
+
+                symbols = acquire_symbol_snapshot(
+                    pinned.archive,
+                    symbol_destination,
+                    manifest_directory,
+                    build_manifest,
+                    static_symbols_path=args.static_symbols,
+                    delay=args.delay,
+                    discovery=discovery,
+                    progress=print,
+                    army_snapshot=pinned,
+                    override_root=args.image_overrides,
+                    refresh_symbols=args.refresh_symbols,
+                )
+                console.stage_success(f"{symbols.asset_count} assets | {symbols.archive.name}")
+                if _stop_after("acquisition", stop_after):
+                    _print_checkpoint("acquisition", build_manifest=symbols.build_manifest)
+                    print(f"Resolved {symbols.asset_count} symbols -> {symbols.archive}")
+                    print(f"Symbol snapshot provenance -> {symbols.snapshot_manifest}")
+                    console.checkpoint("acquisition")
+                    return 0
+                current = {}
+                current_version = 2
+
+            console.stage_start("materialization", detail=f"{symbols.asset_count} source assets")
+            if args.resume:
+                try:
+                    materialized = load_materialized_symbol_work(
+                        symbols.archive,
+                        symbols.snapshot_manifest,
+                        symbols.build_manifest,
+                        symbol_work,
+                    )
+                    print(f"Verified materialized symbol work -> {materialized.raw_root}")
+                    materialization_existing = True
+                except ValueError:
+                    if current_version > STAGE_VERSIONS["materialization"]:
+                        raise
+                    materialized = materialize_symbol_archive(
+                        symbols.archive,
+                        symbols.snapshot_manifest,
+                        symbols.build_manifest,
+                        symbol_work,
+                    )
+                    print(f"Materialized symbol work -> {materialized.raw_root}")
+                    materialization_existing = False
+            else:
                 materialized = materialize_symbol_archive(
                     symbols.archive,
                     symbols.snapshot_manifest,
@@ -532,304 +602,332 @@ def main(argv: list[str] | None = None) -> int:
                     symbol_work,
                 )
                 print(f"Materialized symbol work -> {materialized.raw_root}")
-        else:
-            materialized = materialize_symbol_archive(
-                symbols.archive,
-                symbols.snapshot_manifest,
-                symbols.build_manifest,
-                symbol_work,
+                materialization_existing = False
+            console.stage_success(
+                f"{materialized.asset_count} assets",
+                existing=materialization_existing,
             )
-            print(f"Materialized symbol work -> {materialized.raw_root}")
 
-        if _stop_after("materialization", stop_after):
-            _print_checkpoint(
-                "materialization",
-                build_manifest=symbols.build_manifest,
-                work_root=materialized.work_root,
-            )
-            return 0
-
-        preflight_status = _existing_stage_status(current, "svgPreflight")
-        if current_version < 3 or (current_version == 3 and preflight_status != "passed"):
-            preflight = audit_symbol_work(
-                materialized,
-                archive=symbols.archive,
-                build_manifest_path=symbols.build_manifest,
-                reports_base=symbol_reports,
-                project_root=project_root,
-            )
-            print(
-                "SVG preflight -> "
-                f"{preflight.summary['svgCount']} SVGs | "
-                f"parse errors {preflight.summary['parseErrorCount']} | "
-                f"active text {preflight.summary['activeTextAssetCount']} | "
-                f"declared fonts {preflight.summary['uniqueDeclaredFontCount']}"
-            )
-            print(f"SVG preflight report -> {preflight.report}")
-            if preflight.status != "passed":
-                raise ValueError(
-                    "SVG preflight failed; inspect the generated report before processing"
+            if _stop_after("materialization", stop_after):
+                _print_checkpoint(
+                    "materialization",
+                    build_manifest=symbols.build_manifest,
+                    work_root=materialized.work_root,
                 )
-            current_version = 3
-            preflight_status = "passed"
-        elif preflight_status == "passed":
-            print("SVG preflight -> existing passed state verified")
-        else:
-            raise ValueError("Existing SVG preflight state is not passed")
-        if _stop_after("preflight", stop_after):
-            _print_checkpoint(
-                "preflight",
-                build_manifest=symbols.build_manifest,
-                work_root=materialized.work_root,
-            )
-            return 0
+                console.checkpoint("materialization")
+                return 0
 
-        symbol_sha = (
-            current["snapshot"]["symbolArtifact"]["sha256"]
-            if current
-            else ""
-        )
-        report_root = symbol_reports / (
-            f"{symbols.archive.stem}--{symbol_sha[:12]}"
-        )
-        font_status = _existing_stage_status(current, "fontAudit")
-        if current_version == 3 or (
-            current_version == 4 and font_status == "failed"
-        ):
-            font_audit = audit_symbol_fonts(
-                materialized,
-                archive=symbols.archive,
-                build_manifest_path=symbols.build_manifest,
-                reports_base=symbol_reports,
-                project_root=project_root,
-            )
-            print(
-                "Font audit -> "
-                f"available assets {font_audit.summary['fontAvailableAssetCount']} | "
-                f"missing assets {font_audit.summary['fontMissingAssetCount']} | "
-                f"aliases {font_audit.summary['normalizedAliasReferenceCount']} | "
-                f"unused declarations {font_audit.summary['unusedDeclarationCount']}"
-            )
-            print(f"Font audit report -> {font_audit.report}")
-            if font_audit.status != "passed":
-                raise ValueError(
-                    "Font audit failed; install/resolve required fonts before processing"
+            console.stage_start("preflight", detail=f"{materialized.asset_count} SVGs")
+            preflight_status = _existing_stage_status(current, "svgPreflight")
+            if current_version < 3 or (current_version == 3 and preflight_status != "passed"):
+                preflight = audit_symbol_work(
+                    materialized,
+                    archive=symbols.archive,
+                    build_manifest_path=symbols.build_manifest,
+                    reports_base=symbol_reports,
+                    project_root=project_root,
                 )
-            font_report = font_audit.report
-            current_version = 4
-            font_status = "passed"
-        elif current_version >= 4 and font_status == "passed":
-            font_record = current["processing"]["fontAudit"]["report"]
-            font_report = _resolve_report_path(
-                font_record,
-                project_root=project_root,
-                report_root=report_root,
-            )
-            print(f"Font audit -> existing passed state verified | {font_report}")
-        else:
-            raise ValueError(
-                "Existing font-audit state is not resumable; rerun from a clean "
-                "version-3 checkpoint after resolving the reported fonts"
-            )
-        if _stop_after("font-audit", stop_after):
-            _print_checkpoint(
-                "font-audit",
-                build_manifest=symbols.build_manifest,
-                work_root=materialized.work_root,
-            )
-            return 0
-
-        duplicate_status = _existing_stage_status(current, "duplicateDetection")
-        if current_version == 4:
-            duplicates = detect_symbol_duplicates(
-                materialized,
-                archive=symbols.archive,
-                build_manifest_path=symbols.build_manifest,
-                font_report=font_report,
-                reports_base=symbol_reports,
-                project_root=project_root,
-                render_size=args.duplicate_render_size,
-                jobs=args.jobs,
-                renderer=args.duplicate_renderer,
-            )
-            print(
-                "Duplicate detection -> "
-                f"canonical {duplicates.summary['canonicalAssetCount']} | "
-                f"redundant {duplicates.summary['redundantAssetCount']} | "
-                f"exact groups {duplicates.summary['exactGroupCount']} | "
-                f"visual groups {duplicates.summary['visualGroupCount']} | "
-                f"render errors {duplicates.summary['renderErrorCount']}"
-            )
-            source_bytes = duplicates.summary["sourceAssetBytes"]
-            canonical_bytes = duplicates.summary["canonicalAssetBytes"]
-            reclaimed_bytes = duplicates.summary["reclaimedAssetBytes"]
-            reduction_percent = (
-                reclaimed_bytes * 100.0 / source_bytes if source_bytes else 0.0
-            )
-            print(
-                "Symbol set size -> "
-                f"{source_bytes:,} bytes before | "
-                f"{canonical_bytes:,} bytes after | "
-                f"{reclaimed_bytes:,} bytes saved ({reduction_percent:.2f}%)"
-            )
-            print(f"Duplicate report -> {duplicates.groups_report}")
-            current_version = 5
-            duplicate_status = "passed"
-        elif current_version >= 5 and duplicate_status == "passed":
-            print("Duplicate detection -> existing passed state verified")
-        else:
-            raise ValueError("Existing duplicate-detection state is not passed")
-        if _stop_after("deduplication", stop_after):
-            _print_checkpoint(
-                "deduplication",
-                build_manifest=symbols.build_manifest,
-                work_root=materialized.work_root,
-            )
-            return 0
-
-        conversion_status = _existing_stage_status(current, "textConversion")
-        if current_version == 5 or (current_version == 6 and conversion_status != "passed"):
-            conversion = convert_symbol_text(
-                materialized,
-                archive=symbols.archive,
-                build_manifest_path=symbols.build_manifest,
-                font_report=font_report,
-                reports_base=symbol_reports,
-                project_root=project_root,
-                jobs=args.jobs,
-                text_converter=args.text_converter,
-            )
-            version_suffix = (
-                f" ({conversion.converter_version})"
-                if conversion.converter_version
-                else ""
-            )
-            print(
-                "Text conversion -> "
-                f"{conversion.summary['convertedAssetCount']} converted | "
-                f"{conversion.summary['carriedForwardAssetCount']} unchanged | "
-                f"{conversion.summary['failedAssetCount']} failed"
-            )
-            print(f"Text converter -> {conversion.converter}{version_suffix}")
-            print(f"Text conversion report -> {conversion.report}")
-            if conversion.status != "passed":
-                raise ValueError(
-                    "Text conversion failed; verified source assets remain available "
-                    "and canonical output was not replaced"
+                print(
+                    "SVG preflight -> "
+                    f"{preflight.summary['svgCount']} SVGs | "
+                    f"parse errors {preflight.summary['parseErrorCount']} | "
+                    f"active text {preflight.summary['activeTextAssetCount']} | "
+                    f"declared fonts {preflight.summary['uniqueDeclaredFontCount']}"
                 )
-            print(f"Canonical symbol work -> {conversion.canonical_root}")
-            current_version = 6
-            conversion_status = "passed"
-        elif current_version >= 6 and conversion_status == "passed":
-            print("Text conversion -> existing passed state verified")
-        else:
-            raise ValueError("Existing text-conversion state is not passed")
-        if _stop_after("text-conversion", stop_after):
+                print(f"SVG preflight report -> {preflight.report}")
+                if preflight.status != "passed":
+                    raise ValueError(
+                        "SVG preflight failed; inspect the generated report before processing"
+                    )
+                current_version = 3
+                preflight_status = "passed"
+                console.stage_success(
+                    f"{preflight.summary['svgCount']} SVGs | "
+                    f"{preflight.summary['parseErrorCount']} parse errors"
+                )
+            elif preflight_status == "passed":
+                print("SVG preflight -> existing passed state verified")
+                console.stage_success("passed checkpoint", existing=True)
+            else:
+                raise ValueError("Existing SVG preflight state is not passed")
+            if _stop_after("preflight", stop_after):
+                _print_checkpoint(
+                    "preflight",
+                    build_manifest=symbols.build_manifest,
+                    work_root=materialized.work_root,
+                )
+                console.checkpoint("preflight")
+                return 0
+
+            symbol_sha = current["snapshot"]["symbolArtifact"]["sha256"] if current else ""
+            report_root = symbol_reports / f"{symbols.archive.stem}--{symbol_sha[:12]}"
+            console.stage_start("font-audit", detail=f"{materialized.asset_count} SVGs")
+            font_status = _existing_stage_status(current, "fontAudit")
+            if current_version == 3 or (current_version == 4 and font_status == "failed"):
+                font_audit = audit_symbol_fonts(
+                    materialized,
+                    archive=symbols.archive,
+                    build_manifest_path=symbols.build_manifest,
+                    reports_base=symbol_reports,
+                    project_root=project_root,
+                )
+                print(
+                    "Font audit -> "
+                    f"available assets {font_audit.summary['fontAvailableAssetCount']} | "
+                    f"missing assets {font_audit.summary['fontMissingAssetCount']} | "
+                    f"aliases {font_audit.summary['normalizedAliasReferenceCount']} | "
+                    f"unused declarations {font_audit.summary['unusedDeclarationCount']}"
+                )
+                print(f"Font audit report -> {font_audit.report}")
+                if font_audit.status != "passed":
+                    raise ValueError(
+                        "Font audit failed; install/resolve required fonts before processing"
+                    )
+                font_report = font_audit.report
+                current_version = 4
+                font_status = "passed"
+                console.stage_success(
+                    f"{font_audit.summary['fontAvailableAssetCount']} available | "
+                    f"{font_audit.summary['fontMissingAssetCount']} missing"
+                )
+            elif current_version >= 4 and font_status == "passed":
+                font_record = current["processing"]["fontAudit"]["report"]
+                font_report = _resolve_report_path(
+                    font_record,
+                    project_root=project_root,
+                    report_root=report_root,
+                )
+                print(f"Font audit -> existing passed state verified | {font_report}")
+                console.stage_success("passed checkpoint", existing=True)
+            else:
+                raise ValueError(
+                    "Existing font-audit state is not resumable; rerun from a clean "
+                    "version-3 checkpoint after resolving the reported fonts"
+                )
+            if _stop_after("font-audit", stop_after):
+                _print_checkpoint(
+                    "font-audit",
+                    build_manifest=symbols.build_manifest,
+                    work_root=materialized.work_root,
+                )
+                console.checkpoint("font-audit")
+                return 0
+
+            console.stage_start("deduplication", detail=f"{materialized.asset_count} SVGs")
+            duplicate_status = _existing_stage_status(current, "duplicateDetection")
+            if current_version == 4:
+                duplicates = detect_symbol_duplicates(
+                    materialized,
+                    archive=symbols.archive,
+                    build_manifest_path=symbols.build_manifest,
+                    font_report=font_report,
+                    reports_base=symbol_reports,
+                    project_root=project_root,
+                    render_size=args.duplicate_render_size,
+                    jobs=args.jobs,
+                    renderer=args.duplicate_renderer,
+                )
+                print(
+                    "Duplicate detection -> "
+                    f"canonical {duplicates.summary['canonicalAssetCount']} | "
+                    f"redundant {duplicates.summary['redundantAssetCount']} | "
+                    f"exact groups {duplicates.summary['exactGroupCount']} | "
+                    f"visual groups {duplicates.summary['visualGroupCount']} | "
+                    f"render errors {duplicates.summary['renderErrorCount']}"
+                )
+                source_bytes = duplicates.summary["sourceAssetBytes"]
+                canonical_bytes = duplicates.summary["canonicalAssetBytes"]
+                reclaimed_bytes = duplicates.summary["reclaimedAssetBytes"]
+                reduction_percent = reclaimed_bytes * 100.0 / source_bytes if source_bytes else 0.0
+                print(
+                    "Symbol set size -> "
+                    f"{source_bytes:,} bytes before | "
+                    f"{canonical_bytes:,} bytes after | "
+                    f"{reclaimed_bytes:,} bytes saved ({reduction_percent:.2f}%)"
+                )
+                print(f"Duplicate report -> {duplicates.groups_report}")
+                current_version = 5
+                duplicate_status = "passed"
+                console.stage_success(
+                    f"{duplicates.summary['canonicalAssetCount']} canonical | "
+                    f"{duplicates.summary['redundantAssetCount']} redundant"
+                )
+            elif current_version >= 5 and duplicate_status == "passed":
+                print("Duplicate detection -> existing passed state verified")
+                console.stage_success("passed checkpoint", existing=True)
+            else:
+                raise ValueError("Existing duplicate-detection state is not passed")
+            if _stop_after("deduplication", stop_after):
+                _print_checkpoint(
+                    "deduplication",
+                    build_manifest=symbols.build_manifest,
+                    work_root=materialized.work_root,
+                )
+                console.checkpoint("deduplication")
+                return 0
+
+            console.stage_start("text-conversion", detail="canonical SVGs")
+            conversion_status = _existing_stage_status(current, "textConversion")
+            if current_version == 5 or (current_version == 6 and conversion_status != "passed"):
+                conversion = convert_symbol_text(
+                    materialized,
+                    archive=symbols.archive,
+                    build_manifest_path=symbols.build_manifest,
+                    font_report=font_report,
+                    reports_base=symbol_reports,
+                    project_root=project_root,
+                    jobs=args.jobs,
+                    text_converter=args.text_converter,
+                )
+                version_suffix = (
+                    f" ({conversion.converter_version})" if conversion.converter_version else ""
+                )
+                print(
+                    "Text conversion -> "
+                    f"{conversion.summary['convertedAssetCount']} converted | "
+                    f"{conversion.summary['carriedForwardAssetCount']} unchanged | "
+                    f"{conversion.summary['failedAssetCount']} failed"
+                )
+                print(f"Text converter -> {conversion.converter}{version_suffix}")
+                print(f"Text conversion report -> {conversion.report}")
+                if conversion.status != "passed":
+                    raise ValueError(
+                        "Text conversion failed; verified source assets remain available "
+                        "and canonical output was not replaced"
+                    )
+                print(f"Canonical symbol work -> {conversion.canonical_root}")
+                current_version = 6
+                conversion_status = "passed"
+                console.stage_success(
+                    f"{conversion.summary['convertedAssetCount']} converted | "
+                    f"{conversion.summary['carriedForwardAssetCount']} unchanged"
+                )
+            elif current_version >= 6 and conversion_status == "passed":
+                print("Text conversion -> existing passed state verified")
+                console.stage_success("passed checkpoint", existing=True)
+            else:
+                raise ValueError("Existing text-conversion state is not passed")
+            if _stop_after("text-conversion", stop_after):
+                _print_checkpoint(
+                    "text-conversion",
+                    build_manifest=symbols.build_manifest,
+                    work_root=materialized.work_root,
+                )
+                console.checkpoint("text-conversion")
+                return 0
+
+            console.stage_start("compression", detail="canonical SVGs")
+            compression_status = _existing_stage_status(current, "compression")
+            if current_version == 6:
+                compression = compress_symbol_work(
+                    materialized,
+                    archive=symbols.archive,
+                    build_manifest_path=symbols.build_manifest,
+                    reports_base=symbol_reports,
+                    project_root=project_root,
+                    jobs=args.jobs,
+                    renderer=args.compression_renderer,
+                )
+                compression_source = compression.summary["sourceBytes"]
+                compression_output = compression.summary["outputBytes"]
+                compression_saved = compression.summary["reclaimedBytes"]
+                compression_percent = (
+                    compression_saved * 100.0 / compression_source if compression_source else 0.0
+                )
+                renderer_suffix = (
+                    f" ({compression.renderer_version})" if compression.renderer_version else ""
+                )
+                print(
+                    "Compression -> "
+                    f"{compression.summary['compressedAssetCount']} smaller | "
+                    f"{compression.summary['retainedAssetCount']} retained | "
+                    f"{compression_source:,} -> {compression_output:,} bytes "
+                    f"({compression_percent:.2f}% saved)"
+                )
+                print(f"Compression renderer -> {compression.renderer}{renderer_suffix}")
+                print(f"Compression report -> {compression.report}")
+                print(f"Compressed symbol work -> {compression.compressed_root}")
+                current_version = 7
+                compression_status = "passed"
+                console.stage_success(
+                    f"{compression_source:,} -> {compression_output:,} bytes | "
+                    f"{compression_percent:.2f}% saved"
+                )
+            elif current_version >= 7 and compression_status == "passed":
+                print("Compression -> existing passed state verified")
+                console.stage_success("passed checkpoint", existing=True)
+            else:
+                raise ValueError("Existing compression state is not passed")
+            if _stop_after("compression", stop_after):
+                _print_checkpoint(
+                    "compression",
+                    build_manifest=symbols.build_manifest,
+                    work_root=materialized.work_root,
+                )
+                console.checkpoint("compression")
+                return 0
+
+            console.stage_start("publication", detail="reconciling generated symbol tree")
+            publication_status = _existing_stage_status(current, "publication")
+            if current_version == 7:
+                publication = publish_symbols(
+                    army_snapshot=pinned.archive,
+                    build_manifest_path=symbols.build_manifest,
+                    work_root=materialized.work_root,
+                    reports_base=symbol_reports,
+                    static_root=args.static_root,
+                    project_root=project_root,
+                    backup_base=args.data_root / "backups" / "symbols",
+                )
+                print(
+                    "Publication -> "
+                    f"{publication.summary['publishedAssetCount']} published SVGs | "
+                    f"{publication.browser_referenced_asset_count} browser-referenced | "
+                    f"{publication.unreferenced_published_asset_count} preserved for future use | "
+                    f"{publication.summary['unitMappingCount']} unit mappings | "
+                    f"{publication.summary['factionMappingCount']} faction mappings | "
+                    f"{publication.summary['staticMappingCount']} static mappings"
+                )
+                print(
+                    "Publication changes -> "
+                    f"+{publication.changes['addedAssetCount']} added | "
+                    f"~{publication.changes['changedAssetCount']} changed | "
+                    f"-{publication.changes['removedAssetCount']} removed"
+                )
+                if publication.removed_backup is not None:
+                    print(f"Removed symbol backup -> {publication.removed_backup}")
+                print(f"Published symbol root -> {publication.static_root}")
+                print(f"Publication mapping -> {publication.mapping_report}")
+                current_version = 8
+                publication_status = "passed"
+                console.stage_success(
+                    f"{publication.summary['publishedAssetCount']} published | "
+                    f"{publication.browser_referenced_asset_count} browser-referenced | "
+                    f"{publication.unreferenced_published_asset_count} future-use"
+                )
+            elif current_version == 8 and publication_status == "passed":
+                print("Publication -> existing passed state verified")
+                console.stage_success("passed checkpoint", existing=True)
+            else:
+                raise ValueError("Existing publication state is not passed")
+
             _print_checkpoint(
-                "text-conversion",
+                "publication",
                 build_manifest=symbols.build_manifest,
                 work_root=materialized.work_root,
             )
-            return 0
+            console.checkpoint("publication")
+        except (OSError, ValueError) as exc:
+            console.stage_failed(str(exc))
+            console.line(f"See complete log: {console.log_path}", error=True)
+            return 1
 
-        compression_status = _existing_stage_status(current, "compression")
-        if current_version == 6:
-            compression = compress_symbol_work(
-                materialized,
-                archive=symbols.archive,
-                build_manifest_path=symbols.build_manifest,
-                reports_base=symbol_reports,
-                project_root=project_root,
-                jobs=args.jobs,
-                renderer=args.compression_renderer,
-            )
-            compression_source = compression.summary["sourceBytes"]
-            compression_output = compression.summary["outputBytes"]
-            compression_saved = compression.summary["reclaimedBytes"]
-            compression_percent = (
-                compression_saved * 100.0 / compression_source
-                if compression_source
-                else 0.0
-            )
-            renderer_suffix = (
-                f" ({compression.renderer_version})"
-                if compression.renderer_version
-                else ""
-            )
-            print(
-                "Compression -> "
-                f"{compression.summary['compressedAssetCount']} smaller | "
-                f"{compression.summary['retainedAssetCount']} retained | "
-                f"{compression_source:,} -> {compression_output:,} bytes "
-                f"({compression_percent:.2f}% saved)"
-            )
-            print(f"Compression renderer -> {compression.renderer}{renderer_suffix}")
-            print(f"Compression report -> {compression.report}")
-            print(f"Compressed symbol work -> {compression.compressed_root}")
-            current_version = 7
-            compression_status = "passed"
-        elif current_version >= 7 and compression_status == "passed":
-            print("Compression -> existing passed state verified")
-        else:
-            raise ValueError("Existing compression state is not passed")
-        if _stop_after("compression", stop_after):
-            _print_checkpoint(
-                "compression",
-                build_manifest=symbols.build_manifest,
-                work_root=materialized.work_root,
-            )
-            return 0
-
-        publication_status = _existing_stage_status(current, "publication")
-        if current_version == 7:
-            publication = publish_symbols(
-                army_snapshot=pinned.archive,
-                build_manifest_path=symbols.build_manifest,
-                work_root=materialized.work_root,
-                reports_base=symbol_reports,
-                static_root=args.static_root,
-                project_root=project_root,
-                backup_base=args.data_root / "backups" / "symbols",
-            )
-            print(
-                "Publication -> "
-                f"{publication.summary['publishedAssetCount']} published SVGs | "
-                f"{publication.browser_referenced_asset_count} browser-referenced | "
-                f"{publication.unreferenced_published_asset_count} preserved for future use | "
-                f"{publication.summary['unitMappingCount']} unit mappings | "
-                f"{publication.summary['factionMappingCount']} faction mappings | "
-                f"{publication.summary['staticMappingCount']} static mappings"
-            )
-            print(
-                "Publication changes -> "
-                f"+{publication.changes['addedAssetCount']} added | "
-                f"~{publication.changes['changedAssetCount']} changed | "
-                f"-{publication.changes['removedAssetCount']} removed"
-            )
-            if publication.removed_backup is not None:
-                print(f"Removed symbol backup -> {publication.removed_backup}")
-            print(f"Published symbol root -> {publication.static_root}")
-            print(f"Publication mapping -> {publication.mapping_report}")
-            current_version = 8
-            publication_status = "passed"
-        elif current_version == 8 and publication_status == "passed":
-            print("Publication -> existing passed state verified")
-        else:
-            raise ValueError("Existing publication state is not passed")
-
-        _print_checkpoint(
-            "publication",
-            build_manifest=symbols.build_manifest,
-            work_root=materialized.work_root,
-        )
-    except (OSError, ValueError) as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return 1
-
-    print(f"Resolved {symbols.asset_count} symbols -> {symbols.archive}")
-    print(f"Symbol snapshot provenance -> {symbols.snapshot_manifest}")
-    print(f"Symbol build manifest -> {symbols.build_manifest}")
-    return 0
+        print(f"Resolved {symbols.asset_count} symbols -> {symbols.archive}")
+        print(f"Symbol snapshot provenance -> {symbols.snapshot_manifest}")
+        print(f"Symbol build manifest -> {symbols.build_manifest}")
+        console.line("Symbol pipeline: PASS")
+        console.line(f"Build manifest: {symbols.build_manifest}")
+        return 0
 
 
 if __name__ == "__main__":

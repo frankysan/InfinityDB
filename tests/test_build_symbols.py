@@ -115,6 +115,12 @@ def resumable_symbol_build(tmp_path: Path) -> tuple[Path, Path, Path]:
     return data_root, army, build_manifest
 
 
+def symbol_log(data_root: Path) -> Path:
+    logs = list((data_root / "logs" / "symbols").glob("SYMBOL BUILD *.log"))
+    assert logs
+    return max(logs, key=lambda path: path.stat().st_mtime_ns)
+
+
 def stub_post_acquisition(
     module,
     monkeypatch,
@@ -294,8 +300,12 @@ def test_snapshot_only_uses_exact_offline_snapshot(tmp_path: Path, capsys) -> No
     )
 
     output = capsys.readouterr().out
-    assert f"Pinned Army snapshot -> {archive}" in output
-    assert "Army source revisions -> 7.26246.158: 1" in output
+    assert "[1/9] Snapshot" in output
+    assert "Checkpoint: snapshot" in output
+    assert "Pinned Army snapshot ->" not in output
+    log = symbol_log(data_root).read_text(encoding="utf-8")
+    assert f"Pinned Army snapshot -> {archive}" in log
+    assert "Army source revisions -> 7.26246.158: 1" in log
     assert not (data_root / "raw" / "symbols").exists()
 
 
@@ -555,7 +565,12 @@ def test_stop_after_acquisition_does_not_materialize(
         )
         == 0
     )
-    assert "Checkpoint reached -> acquisition" in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert "[2/9] Symbol acquisition" in output
+    assert "Checkpoint: acquisition" in output
+    assert "Checkpoint reached -> acquisition" in symbol_log(data_root).read_text(
+        encoding="utf-8"
+    )
 
 
 def test_resume_from_v2_materializes_and_runs_preflight_without_reacquisition(
@@ -590,8 +605,12 @@ def test_resume_from_v2_materializes_and_runs_preflight_without_reacquisition(
     )
     assert load_symbol_manifest(build_manifest)["formatVersion"] == 3
     output = capsys.readouterr().out
-    assert "Resuming symbol build -> version 2" in output
-    assert "Checkpoint reached -> preflight" in output
+    assert "Mode: resume" in output
+    assert "[4/9] SVG preflight" in output
+    assert "Checkpoint: preflight" in output
+    log = symbol_log(data_root).read_text(encoding="utf-8")
+    assert "Resuming symbol build -> version 2" in log
+    assert "Checkpoint reached -> preflight" in log
 
 
 def test_resume_verifies_existing_work_without_rematerializing(
@@ -726,6 +745,10 @@ def test_resume_retries_failed_v4_font_audit(
         == 0
     )
     output = capsys.readouterr().out
-    assert "Resuming symbol build -> version 4" in output
-    assert "Checkpoint reached -> font-audit" in output
+    assert "Mode: resume" in output
+    assert "[5/9] Font audit" in output
+    assert "Checkpoint: font-audit" in output
+    log = symbol_log(data_root).read_text(encoding="utf-8")
+    assert "Resuming symbol build -> version 4" in log
+    assert "Checkpoint reached -> font-audit" in log
     assert load_symbol_manifest(build_manifest)["processing"]["fontAudit"]["status"] == "passed"
