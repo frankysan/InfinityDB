@@ -17,6 +17,98 @@ complete, remove it after any durable outcome is recorded in `CHANGELOG.md`,
 architecture/data-model documentation, or another appropriate reference. Git
 history retains implementation detail.
 
+## Version 1.0.0 release requirements
+
+Version 1.0.0 represents the point where InfinityDB is **data-complete for normal Infinity gameplay**.
+
+The defining requirement is that every data point available from the supported Infinity sources that can reasonably be useful to a player is represented by InfinityDB and can be presented in some usable way through the web application.
+
+This does **not** mean that every planned feature, visualization, workflow, or UI refinement must be complete before 1.0.0. A data type may satisfy the 1.0.0 requirement through a basic but functional presentation, provided that the information is accessible, understandable, and correctly connected to the rest of the database.
+
+**ITS-specific content is deliberately outside the scope of version 1.0.0.**
+
+### 1. Player-relevant data completeness
+
+- [ ] Inventory all player-relevant data available from the supported source material and identify any information not currently represented in InfinityDB.
+- [ ] Every identified in-scope data point has a maintained representation in the database or another explicitly defined structured data layer.
+- [ ] Every represented in-scope data point can be accessed through the web application in some usable form.
+- [ ] No player-relevant source information is omitted merely because the final specialized UI for it has not yet been implemented.
+- [ ] Data relationships needed to understand or navigate the information are represented explicitly rather than requiring knowledge of source-specific IDs or conventions.
+
+In-scope information includes, where applicable:
+
+- [ ] armies, sectorials, grouping identities, and their relationships
+- [ ] units and canonical unit identities
+- [ ] troop profiles and profile variants
+- [ ] availability and army-specific unit relationships
+- [ ] attributes and statistics
+- [ ] weapons and ammunition
+- [ ] skills
+- [ ] equipment
+- [ ] hacking programs and related hacking data
+- [ ] deployables, peripherals, companions, and other associated game entities
+- [ ] Fireteam-related data
+- [ ] special army/unit relationships and exceptions represented by curated data
+- [ ] other structured gameplay information exposed by Infinity Army
+- [ ] rules information needed to understand the above data
+- [ ] other player-relevant information discovered during the completeness audit
+
+### 2. Rules knowledge
+
+- [ ] Import or curate the relevant rules content from the supported official PDFs and Infinity Wiki.
+- [ ] Every rule, skill, equipment item, weapon trait, state, terminology entry, or other gameplay concept referenced by database content has useful explanatory information available in InfinityDB.
+- [ ] Provide concise player-oriented descriptions or summaries where reproducing source text directly is inappropriate or unnecessary.
+- [ ] Preserve source/provenance information so users can identify the official material from which a rule summary or interpretation was derived.
+- [ ] Rules relationships are represented sufficiently to allow relevant rules information to be surfaced alongside units, profiles, weapons, equipment, skills, and other database entities.
+- [ ] Resolve duplicate, renamed, superseded, or differently structured rule concepts from the PDFs and Wiki into a coherent maintained representation.
+- [ ] Clearly distinguish InfinityDB summaries or normalized descriptions from verbatim official rules text where applicable.
+
+### 3. Web presentation completeness
+
+For 1.0.0, **availability of the information is mandatory; a specialized or final-form interface is not**.
+
+- [ ] Every in-scope data category has at least one functional presentation in the web application.
+- [ ] Users can navigate from the major player-facing entities to their relevant related data.
+- [ ] Important data is not accessible only through raw JSON, development tools, database inspection, or undocumented URLs.
+- [ ] Generic tables, sections, or detail views are acceptable for 1.0.0 where a richer dedicated interface is planned later.
+- [ ] Information needed to interpret another displayed value is either shown directly or reachable through clear navigation.
+- [ ] Empty, unavailable, or not-applicable values are represented deliberately rather than silently omitted in ways that could mislead the user.
+
+### 4. Data correctness and provenance
+
+- [ ] Complete a consistency audit across source snapshots, normalized databases, APIs, and browser presentation.
+- [ ] Known source quirks and domain-specific corrections are represented explicitly in maintained curated data or documented derivation rules.
+- [ ] Derived facts used by the application are reproducible from their documented inputs.
+- [ ] Player-facing data can be traced to the source snapshot, curated rule, or derivation responsible for it.
+- [ ] Known material discrepancies between Infinity Army, official PDFs, and the Infinity Wiki are documented and handled deliberately.
+- [ ] No known defect remains that materially misrepresents a player's unit, profile, weapon, skill, equipment, army relationship, or rule information.
+
+### 5. Explicitly out of scope for 1.0.0
+
+The following do not block version 1.0.0 unless they become necessary to satisfy one of the requirements above:
+
+- ITS-specific rules, missions, season material, classifications, or tournament content
+- final-form or specialized UI for every data type
+- every planned search, filter, comparison, or visualization feature
+- exhaustive performance optimization
+- architectural refactors that do not affect correctness or data completeness
+- optional cosmetic improvements and additional themes
+- speculative future data-model simplification
+- features whose sole purpose is administration, development convenience, or deployment ergonomics
+
+These may remain in the general backlog for post-1.0 development.
+
+### 6. Final 1.0.0 completeness audit
+
+Before releasing 1.0.0:
+
+- [ ] Perform a source-by-source inventory of Infinity Army, the supported official rules PDFs, and the Infinity Wiki.
+- [ ] For every discovered player-relevant information type, record where and how InfinityDB represents it.
+- [ ] Verify that every in-scope type has a usable web presentation.
+- [ ] Verify that referenced rules and game concepts have accessible descriptions or summaries.
+- [ ] Review all deliberately omitted source data and confirm that each omission is either non-player-relevant or explicitly outside the 1.0.0 scope.
+- [ ] Confirm that remaining TODO items do not represent missing player-relevant data required by this definition of database completeness.
+
 ## Milestone sequence
 
 **Milestone 1 — data/wiki/symbol ingestion — completed 2026-09-19.** Army,
@@ -505,6 +597,7 @@ new correctness or reproducibility defect.
 - [ ] Add a benchmark/health-check command that validates the frontend database,
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
+  
 ## Potential product features
 
 - [ ] Expand the existing versioned curated rules-reference infrastructure with
