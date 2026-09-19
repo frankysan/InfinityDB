@@ -489,7 +489,12 @@ the percentage size reduction. Canonical text conversion then consumes exactly
 that version-5 mapping: only canonical `fonts_available` assets are converted,
 canonical `no_active_text` assets are copied forward unchanged, and persistent
 `inkscape --shell` workers are the production default. One-shot Inkscape remains
-an explicit fallback/debug backend and `usvg` remains experimental. Converted
+an explicit fallback/debug backend and `usvg` remains experimental.
+Temporary conversion copies remove unresolved local `<image>` references before
+Inkscape and report every discarded reference while leaving immutable raw inputs
+unchanged. This prevents Inkscape from rebasing already-broken raster links
+through randomized temporary directories and leaking host-specific paths into
+canonical SVG bytes. Converted
 outputs are revalidated for parseability and remaining active text before a
 version-6 manifest is written. A failed conversion records failed state and
 reports but does not replace the prior canonical work tree. Compression then

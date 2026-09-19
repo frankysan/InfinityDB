@@ -103,3 +103,53 @@ def test_convert_available_svgs_with_no_candidates_does_not_require_converter(
     assert result["failed"] == 0
     assert result["converter"] == "inkscape-shell"
     assert result["converter_version"] == ""
+
+
+def test_normalize_svg_removes_only_unresolved_local_images(tmp_path: Path) -> None:
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    (source_dir / "present.png").write_bytes(b"present")
+    source = source_dir / "symbol.svg"
+    source.write_text(
+        (
+            '<svg xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink">'
+            '<image id="missing-href" href="missing.png"/>'
+            '<image id="missing-xlink" xlink:href="missing-xlink.png"/>'
+            '<image id="present" href="present.png"/>'
+            '<image id="embedded" href="data:image/png;base64,AAAA"/>'
+            '<image id="fragment" href="#paint"/>'
+            '<image id="remote" href="https://example.com/image.png"/>'
+            '</svg>'
+        ),
+        encoding="utf-8",
+    )
+
+    targets = [
+        tmp_path / "temp-a" / "symbol.svg",
+        tmp_path / "temp-b" / "symbol.svg",
+    ]
+    results = [
+        svg_processor.normalize_svg_for_conversion(source, target, {}, {})
+        for target in targets
+    ]
+
+    for target in targets:
+        text = target.read_text(encoding="utf-8")
+        assert "missing.png" not in text
+        assert "missing-xlink.png" not in text
+        assert "present.png" in text
+        assert "data:image/png;base64,AAAA" in text
+        assert "#paint" in text
+        assert "https://example.com/image.png" in text
+
+    expected_warning = (
+        "Removed 2 unresolved external image reference(s): "
+        "missing.png, missing-xlink.png"
+    )
+    assert [result["warnings"] for result in results] == [
+        expected_warning,
+        expected_warning,
+    ]
+    assert targets[0].read_bytes() == targets[1].read_bytes()
+    assert "missing.png" in source.read_text(encoding="utf-8")

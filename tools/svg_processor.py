@@ -55,6 +55,7 @@ from dataclasses import dataclass
 from importlib import import_module
 from pathlib import Path
 from typing import Any, TypedDict
+from urllib.parse import unquote, urlparse
 
 
 def optional_import(module_name: str) -> Any:
@@ -1116,6 +1117,58 @@ def build_parent_map(root):
     return {child: parent for parent in root.iter() for child in parent}
 
 
+def _local_image_reference_path(href: str, source_svg: Path) -> Path | None:
+    """Resolve a local SVG image reference without treating URLs as files."""
+    value = href.strip()
+    if not value or value.startswith("#") or value.casefold().startswith("data:"):
+        return None
+
+    # urlparse() interprets a Windows drive letter as a URI scheme, so detect
+    # native absolute paths first.
+    if re.match(r"^[A-Za-z]:[\\/]", value):
+        return Path(value)
+
+    parsed = urlparse(value)
+    if parsed.scheme == "file":
+        raw_path = unquote(parsed.path)
+        if parsed.netloc:
+            raw_path = f"//{parsed.netloc}{raw_path}"
+        elif os.name == "nt" and re.match(r"^/[A-Za-z]:/", raw_path):
+            raw_path = raw_path[1:]
+        return Path(raw_path)
+    if parsed.scheme or parsed.netloc:
+        return None
+
+    path = Path(unquote(parsed.path))
+    if not path.is_absolute():
+        path = source_svg.parent / path
+    return path
+
+
+def _remove_unresolved_external_images(root, source_svg: Path) -> list[str]:
+    """Remove broken local image links from a temporary conversion copy."""
+    parents = build_parent_map(root)
+    removed = []
+    xlink_href = "{http://www.w3.org/1999/xlink}href"
+
+    for elem in list(root.iter()):
+        if local_name(elem.tag) != "image":
+            continue
+        href = elem.attrib.get("href") or elem.attrib.get(xlink_href)
+        if not href:
+            continue
+        referenced = _local_image_reference_path(href, source_svg)
+        if referenced is None or referenced.exists():
+            continue
+        parent = parents.get(elem)
+        if parent is None:
+            continue
+        parent.remove(elem)
+        removed.append(href)
+
+    return removed
+
+
 def parse_style_attribute(style_value: str) -> dict[str, str]:
     result = {}
     for name, value, _important in parse_declarations(style_value):
@@ -1166,6 +1219,13 @@ def normalize_svg_for_conversion(source_svg: Path, target_svg: Path, exact_index
     warnings = []
     alias_descriptions = []
     changed = 0
+
+    removed_image_references = _remove_unresolved_external_images(root, source_svg)
+    if removed_image_references:
+        warnings.append(
+            f"Removed {len(removed_image_references)} unresolved external image "
+            "reference(s): " + ", ".join(removed_image_references)
+        )
 
     def normalize_font_value(value: str):
         nonlocal changed

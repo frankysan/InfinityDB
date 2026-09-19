@@ -307,7 +307,12 @@ promotes state to version 6: only canonical `fonts_available` SVGs are converted
 canonical no-text SVGs are carried forward unchanged, persistent
 `inkscape --shell` is the production default, one-shot Inkscape remains an
 explicit fallback/debug backend, and `usvg` remains experimental. Conversion
-reports and converter identity are SHA-bound into build state. Failed conversion
+reports and converter identity are SHA-bound into build state.
+Normalization removes unresolved local `<image>` references only from temporary
+conversion copies and reports those removals; raw snapshot SVGs remain
+unchanged. This is a reproducibility invariant: missing raster references must
+not be rebased through randomized temporary directories into canonical or
+published SVG bytes. Failed conversion
 state is recorded without replacing the prior canonical work tree. Compression
 then promotes passed version-6 state to version 7 using the reusable standalone
 compressor: balanced profile, resvg validation, p2-first/p3-rescue precision,

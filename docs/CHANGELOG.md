@@ -25,6 +25,10 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Remove unresolved local raster-image references from temporary SVG conversion
+  copies before Inkscape and report the discarded references, preventing random
+  `svg-font-pipeline-*` paths from changing canonical and published symbol hashes.
+
 - Stream orchestrated compression progress through the pipeline console/logging
   layer so the compression stage shows a monotonic running status indicator and
   its full per-file transcript is retained in the symbol-build log.
