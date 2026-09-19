@@ -1100,6 +1100,8 @@ def test_merged_source_profiles_do_not_repeat_identical_items(
     for table in ("army_units", "profile_groups", "profiles", "loadout_options"):
         for row in list(normalized["tables"][table]):
             if row.get("unit_id") == 1 and row.get("army_id") == 101:
+                if table == "profiles":
+                    row["ava"] = 2
                 duplicate = copy.deepcopy(row)
                 duplicate["unit_id"] = duplicate_id
                 if table == "profiles":
@@ -1137,12 +1139,42 @@ def test_merged_source_profiles_do_not_repeat_identical_items(
     assert details is not None
     first_army = next(army for army in details["armies"] if army["id"] == 101)
     assert len(first_army["profiles"]) == 1
+    assert first_army["profiles"][0]["ava"] == 1
     assert [item["id"] for item in first_army["profiles"][0]["skills"]] == [1]
     assert [item["id"] for item in first_army["profiles"][0]["equipment"]] == [1]
     assert [item["id"] for item in first_army["profiles"][0]["weapons"]] == [1]
     assert [item["id"] for item in first_army["loadouts"][0]["skills"]] == [1]
     assert [item["id"] for item in first_army["loadouts"][0]["equipment"]] == [1]
     assert [item["id"] for item in first_army["loadouts"][0]["weapons"]] == [1]
+
+
+def test_logical_source_profile_merge_keeps_scalar_variants_separate(
+    tmp_path: Path, normalized: dict
+) -> None:
+    duplicate_id = 10_001
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    duplicate = copy.deepcopy(original)
+    duplicate["id"] = duplicate_id
+    normalized["tables"]["units"].append(duplicate)
+
+    for table in ("army_units", "profile_groups", "profiles"):
+        for row in list(normalized["tables"][table]):
+            if row.get("unit_id") == 1 and row.get("army_id") == 101:
+                if table == "profiles":
+                    row["wip"] = 13
+                duplicate = copy.deepcopy(row)
+                duplicate["unit_id"] = duplicate_id
+                if table == "profiles":
+                    duplicate["wip"] = 14
+                normalized["tables"][table].append(duplicate)
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    details = Database(path).get_unit(1)
+
+    assert details is not None
+    first_army = next(army for army in details["armies"] if army["id"] == 101)
+    assert sorted(profile["wip"] for profile in first_army["profiles"]) == [13, 14]
 
 
 def test_details_keep_normal_and_mercenary_army_occurrences_separate(

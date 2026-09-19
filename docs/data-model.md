@@ -860,10 +860,28 @@ Behavioral regression coverage preserves the existing unit/API expectations and
 also verifies that mutating the legacy source profile payload rows after
 materialization does not change unit-detail profile output. The migration was
 accepted only after representative and production-scale before/after comparison
-showed identical serialized `get_unit()` results. Remaining query-time
-logical-source profile merging may now be reviewed separately; any simplification
-must preserve its occurrence/availability semantics rather than assuming that
-payload identity replaces source-context identity.
+showed identical serialized `get_unit()` results.
+
+The remaining query-time profile merge is now explicitly an **occurrence merge**,
+not payload deduplication. A logical unit can contain overlapping source records
+for the same effective army occurrence and source-local group/profile coordinates
+where one source contributes nested relationships that another omits. Canonical
+`profile_payload_id` is therefore deliberately too strict to serve as that
+occurrence identity.
+
+`get_unit()` collapses such source occurrences only when their effective army
+occurrence, group/profile IDs, scalar profile facts, troop type, and
+profile-group classification agree. Nested skills, equipment, weapons, and
+characteristics are then accumulated without repeated visible items. The only
+direct source-context value merged after a match is AVA: when comparable
+non-negative numeric values disagree, the more restrictive value is retained.
+Different availability-category occurrences remain separate, and scalar
+profile/stat/classification differences remain separate.
+
+This source-occurrence merge remains necessary until InfinityDB has stronger
+explicit identity evidence for those overlapping source profile occurrences. It
+must not be replaced merely by canonical payload identity or by source-local
+profile IDs.
 
 #### First implementation targets
 

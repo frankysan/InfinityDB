@@ -183,10 +183,16 @@ and serves a read-only browser and same-origin HTTP API.
   payload and therefore split payload variants when they differ. Unit-detail
   profile assembly now reads the canonical profile payload/occurrence layer;
   source profile tables remain lossless provenance/context and are still used by
-  other repository paths such as catalog reverse lookups. Canonical loadout/unit
-  payload work remains staged behind the same field-level invariance and
-  provenance requirements. Legacy rediscovery remains
-  only as a database-build compatibility path for older normalized inputs.
+  other repository paths such as catalog reverse lookups. Logical-source profile
+  occurrence merging remains separate from canonical payload identity:
+  occurrences may collapse only when their effective army occurrence,
+  source-local group/profile coordinates, scalar profile facts, type, and
+  classification agree; complementary nested items are accumulated and
+  restrictive numeric AVA is retained. A canonical payload ID must not be used
+  as source-occurrence identity. Canonical loadout/unit payload work remains
+  staged behind the same field-level invariance and provenance requirements.
+  Legacy rediscovery remains only as a database-build compatibility path for
+  older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

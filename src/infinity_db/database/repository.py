@@ -192,13 +192,39 @@ def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> Non
     if item not in items:
         items.append(item)
 
-def merge_profile(profile: dict[str, Any], duplicate: dict[str, Any]) -> None:
-    """Combine complementary metadata from duplicate source profiles."""
-    for key, value in duplicate.items():
-        if key in {"skills", "equipment", "weapons", "ava"}:
-            continue
-        if profile.get(key) in (None, "") and value not in (None, ""):
-            profile[key] = value
+def logical_source_profile_merge_key(
+    army_occurrence_key: tuple[int, tuple[str, ...]], profile: RowLike
+) -> tuple[Any, ...]:
+    """Return the context key used to merge one profile across logical-unit sources.
+
+    Canonical payload identity is intentionally not used here.  Two source
+    occurrences can represent the same visible profile while one contributes
+    nested relationships that another omits.  Their scalar profile facts,
+    source-local profile coordinates, effective army occurrence, and
+    classification must still agree before the occurrences may collapse.
+    """
+    return (
+        army_occurrence_key,
+        profile["group_id"],
+        profile["profile_id"],
+        profile["name"],
+        profile["move_1"],
+        profile["move_2"],
+        profile["cc"],
+        profile["bs"],
+        profile["ph"],
+        profile["wip"],
+        profile["arm"],
+        profile["bts"],
+        profile["vitality"],
+        profile["silhouette"],
+        profile["type"],
+        profile["classification"],
+    )
+
+
+def merge_profile_availability(profile: dict[str, Any], duplicate: Mapping[str, Any]) -> None:
+    """Merge only source-occurrence AVA after logical-source profile matching."""
     # Duplicate source records can disagree on AVA.  The lower non-negative
     # value is the restrictive availability and avoids advertising an option
     # that is not present in every source record for the same profile.
@@ -1669,8 +1695,10 @@ class Database:
                 "ppo.unit_id",
                 source_ids,
             )
-            profile_items: dict[tuple[Any, ...], dict[str, Any]] = {}
-            profile_keys_by_source: dict[tuple[int, int, int, int], tuple[Any, ...]] = {}
+            merged_profiles: dict[tuple[Any, ...], dict[str, Any]] = {}
+            profile_merge_keys_by_source: dict[
+                tuple[int, int, int, int], tuple[Any, ...]
+            ] = {}
             for profile in profile_rows:
                 army = by_source_army.get((profile["unit_id"], profile["army_id"]))
                 if army is None:
@@ -1690,25 +1718,10 @@ class Database:
                 profile_item["equipment"] = []
                 profile_item["weapons"] = []
                 profile_item["characteristics"] = []
-                profile_key = (
-                    army["_occurrence_key"],
-                    profile["group_id"],
-                    profile["profile_id"],
-                    profile["name"],
-                    profile["move_1"],
-                    profile["move_2"],
-                    profile["cc"],
-                    profile["bs"],
-                    profile["ph"],
-                    profile["wip"],
-                    profile["arm"],
-                    profile["bts"],
-                    profile["vitality"],
-                    profile["silhouette"],
-                    profile["type"],
-                    profile["classification"],
+                profile_key = logical_source_profile_merge_key(
+                    army["_occurrence_key"], profile
                 )
-                profile_keys_by_source[
+                profile_merge_keys_by_source[
                     (
                         profile["unit_id"],
                         profile["army_id"],
@@ -1716,12 +1729,12 @@ class Database:
                         profile["profile_id"],
                     )
                 ] = profile_key
-                existing = profile_items.get(profile_key)
+                existing = merged_profiles.get(profile_key)
                 if existing is None:
                     army["profiles"].append(profile_item)
-                    profile_items[profile_key] = profile_item
+                    merged_profiles[profile_key] = profile_item
                 else:
-                    merge_profile(existing, profile_item)
+                    merge_profile_availability(existing, profile_item)
             for occurrence_table, catalog_table, property_name, extras_table in (
                 (
                     "profile_payload_skills",
@@ -1784,7 +1797,7 @@ class Database:
                     source_ids,
                 )
                 for occurrence in occurrence_rows:
-                    profile_key = profile_keys_by_source.get(
+                    profile_key = profile_merge_keys_by_source.get(
                         (
                             occurrence["unit_id"],
                             occurrence["army_id"],
@@ -1793,7 +1806,7 @@ class Database:
                         )
                     )
                     profile_item = (
-                        profile_items.get(profile_key) if profile_key is not None else None
+                        merged_profiles.get(profile_key) if profile_key is not None else None
                     )
                     if profile_item is not None:
                         occurrence_key = (
@@ -1824,7 +1837,7 @@ class Database:
                 source_ids,
             )
             for characteristic in characteristic_rows:
-                profile_key = profile_keys_by_source.get(
+                profile_key = profile_merge_keys_by_source.get(
                     (
                         characteristic["unit_id"],
                         characteristic["army_id"],
@@ -1832,7 +1845,7 @@ class Database:
                         characteristic["profile_id"],
                     )
                 )
-                profile_item = profile_items.get(profile_key) if profile_key is not None else None
+                profile_item = merged_profiles.get(profile_key) if profile_key is not None else None
                 if profile_item is not None:
                     profile_item["characteristics"].append({"name": characteristic["name"]})
             loadout_rows = connection.execute(

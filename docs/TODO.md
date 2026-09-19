@@ -216,7 +216,7 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
     fixtures/tests.
   - [x] Treat current snapshot counts as diagnostics, not expected constants.
 
-- [ ] **Canonicalize profile payloads conservatively.**
+- [x] **Canonicalize profile payloads conservatively.**
   - [x] Inventory every current profile field and nested relationship.
   - [x] Classify each as canonical fact, contextual fact/delta, relationship,
     source/provenance, or normalization-only structure.
@@ -229,7 +229,7 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
   - [x] Update repository/API assembly to consume the canonical model without
     changing player-visible semantics unintentionally.
   - [x] Add reconstruction/provenance and behavioral regression tests.
-  - [ ] Re-evaluate and simplify the remaining query-time logical-source profile
+  - [x] Re-evaluate and simplify the remaining query-time logical-source profile
     merge/deduplication only where occurrence and availability semantics remain
     unchanged.
 
