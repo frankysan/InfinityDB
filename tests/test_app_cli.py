@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import socket
 import sqlite3
@@ -80,6 +81,10 @@ def test_build_creates_verified_json_and_queryable_database(
     assert normalized["_meta"]["validationPassed"] is True
     assert normalized[IDENTITY_CONFIG_METADATA_KEY] == identity_config.document
     assert normalized[IDENTITY_CONFIG_SHA256_METADATA_KEY] == identity_config.content_sha256
+    if archive:
+        assert normalized["_meta"]["snapshotArchiveSha256"] == hashlib.sha256(
+            source.read_bytes()
+        ).hexdigest()
     for path in source_directory.glob("*.json"):
         if path.name == "metadata.json":
             continue

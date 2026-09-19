@@ -12,7 +12,6 @@ from collections.abc import Iterable
 from pathlib import Path, PurePosixPath
 from typing import BinaryIO, cast
 
-from infinity_db.database import Database
 from infinity_db.rules_database import RulesDatabase
 
 try:
@@ -132,7 +131,6 @@ def _validate_local_artifacts(project_root: Path) -> None:
         project_root / "src" / "infinity_db" / "web" / "static",
         project_root=project_root,
     )
-    Database(project_root / "data" / "generated" / "infinity.db").validate()
     RulesDatabase(project_root / "data" / "generated" / "rules.db").validate()
 
 

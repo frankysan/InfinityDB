@@ -146,6 +146,20 @@ for relative, digest in sorted(expected.items()):
 if summary.get("publishedBytes") != published_bytes:
     raise SystemExit("Installed symbol inventory byte total does not match installed files")
 '
+  # The manifest is an ignored deployment artifact, not image content. Bind it
+  # while validating the exact image so its embedded database is proven to be
+  # from the same Army ZIP as the published symbols.
+  docker run --rm \
+    -v "$(pwd)/data/manifests/army-symbol-build.json:/tmp/army-symbol-build.json:ro" \
+    --entrypoint python "$image" -c '
+from pathlib import Path
+
+from infinity_db.deployment_provenance import validate_database_symbol_provenance
+from infinity_db.symbol_manifest import load_symbol_manifest
+
+manifest = load_symbol_manifest(Path("/tmp/army-symbol-build.json"))
+validate_database_symbol_provenance(Path("/app/data/infinity.db"), manifest)
+'
 fi
 
 container="infinitydb-deployment-smoke-$$"

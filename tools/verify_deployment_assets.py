@@ -8,6 +8,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from infinity_db.deployment_provenance import (
+    DeploymentProvenanceError,
+    validate_database_symbol_provenance,
+)
 from infinity_db.snapshot_provenance import sha256_file
 from infinity_db.symbol_manifest import (
     SYMBOL_BUILD_VERSION,
@@ -23,6 +27,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "army-symbol-build.json"
 DEFAULT_STATIC_ROOT = PROJECT_ROOT / "src" / "infinity_db" / "web" / "static"
+DEFAULT_DATABASE = PROJECT_ROOT / "data" / "generated" / "infinity.db"
 
 
 class DeploymentAssetError(ValueError):
@@ -96,6 +101,7 @@ def verify_deployment_assets(
     static_root: Path = DEFAULT_STATIC_ROOT,
     *,
     project_root: Path = PROJECT_ROOT,
+    database_path: Path | None = None,
 ) -> AssetSetValidation:
     """Validate local symbols against the terminal v8 build manifest and publication inventory."""
 
@@ -154,6 +160,10 @@ def verify_deployment_assets(
                 f"Published symbol manifest summary.{field} does not match symbol-inventory.json"
             )
 
+    validate_database_symbol_provenance(
+        database_path or project_root / "data" / "generated" / "infinity.db", manifest
+    )
+
     return validation
 
 
@@ -171,14 +181,19 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_STATIC_ROOT,
         help="Published browser static root (default: repository web/static directory)",
     )
+    parser.add_argument(
+        "--database", type=Path, default=DEFAULT_DATABASE, help="Runtime infinity.db to bind"
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        validation = verify_deployment_assets(args.manifest, args.static_root)
-    except (DeploymentAssetError, AssetValidationError) as exc:
+        validation = verify_deployment_assets(
+            args.manifest, args.static_root, database_path=args.database
+        )
+    except (DeploymentAssetError, DeploymentProvenanceError, AssetValidationError) as exc:
         print(f"ERROR: {exc}")
         return 1
 

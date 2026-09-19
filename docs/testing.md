@@ -22,7 +22,9 @@ python tools/run_checks.py --all
 The available stages are `test`, `lint`, `type`, `build`, and `rules`. The `type`
 stage runs Pyright over the maintained `src/` and `tools/` trees. The `build`
 stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
-`rules.db` from the tracked curated rules collections. The named profiles are
+`rules.db` from the tracked curated rules collections. Both use isolated system
+temporary output directories: check execution never writes `data/generated/`.
+The named profiles are
 `code` (`test` + `lint` + `type`), `data` (`build` + `rules`), and `all`.
 
 ## Graphical asset test modes
@@ -110,6 +112,8 @@ graphical-asset trees. Local production deployment uses the complementary
 `--published-assets` mode after `tools/verify_deployment_assets.py` has bound the
 host publication to terminal symbol-build manifest state; it revalidates the
 installed inventory/hashes and live symbol routes before Compose activation.
+The workflow stages its fixture databases and Docker context under the runner
+temporary directory; it never writes fixture data into checkout deployment paths.
 
 See [the Linux deployment guide](deployment.md#deployment-smoke-validation) for
 the exact container contract and the equivalent manual command.

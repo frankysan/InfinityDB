@@ -7,6 +7,7 @@ import argparse
 import shlex
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -186,9 +187,18 @@ def stage_definitions(
             command = [python, "-m", "infinity_db", "build"]
             if build_source is not None:
                 command.append(str(build_source))
-            command.append("--compact")
+            command.extend(
+                ("--output-dir", tempfile.mkdtemp(prefix="infinitydb-check-build-"), "--compact")
+            )
         elif name == "rules":
-            command = [python, "-m", "infinity_db", "build-rules"]
+            command = [
+                python,
+                "-m",
+                "infinity_db",
+                "build-rules",
+                "--output",
+                str(Path(tempfile.mkdtemp(prefix="infinitydb-check-rules-")) / "rules.db"),
+            ]
         else:  # pragma: no cover - guarded by argparse/selected_stage_names
             raise ValueError(f"Unknown stage: {name}")
         stages.append(Stage(name=name, command=tuple(command)))

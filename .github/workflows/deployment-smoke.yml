@@ -27,11 +27,17 @@ jobs:
 
       - name: Build deployment fixture databases
         run: |
-          infinity-db build tests/fixtures/deployment-smoke --output-dir data/generated --compact
-          infinity-db build-rules --output data/generated/rules.db
+          mkdir -p "$RUNNER_TEMP/deployment-smoke/generated"
+          infinity-db build tests/fixtures/deployment-smoke --output-dir "$RUNNER_TEMP/deployment-smoke/generated" --compact
+          infinity-db build-rules --output "$RUNNER_TEMP/deployment-smoke/generated/rules.db"
 
       - name: Build redistributable application image
-        run: docker build --tag infinity-db:deployment-smoke .
+        run: |
+          cp -R . "$RUNNER_TEMP/deployment-smoke/context"
+          mkdir -p "$RUNNER_TEMP/deployment-smoke/context/data/generated"
+          cp "$RUNNER_TEMP/deployment-smoke/generated/infinity.db" "$RUNNER_TEMP/deployment-smoke/context/data/generated/infinity.db"
+          cp "$RUNNER_TEMP/deployment-smoke/generated/rules.db" "$RUNNER_TEMP/deployment-smoke/context/data/generated/rules.db"
+          docker build --tag infinity-db:deployment-smoke "$RUNNER_TEMP/deployment-smoke/context"
 
       - name: Validate image and production startup
         run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --redistributable

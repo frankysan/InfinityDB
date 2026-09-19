@@ -76,14 +76,20 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "infinity_db",
         "build",
         str(Path("data/raw/example.zip")),
+        "--output-dir",
+        stages[3].command[6],
         "--compact",
     )
+    assert Path(stages[3].command[6]).parent != Path("data/generated")
     assert stages[4].command == (
         sys.executable,
         "-m",
         "infinity_db",
         "build-rules",
+        "--output",
+        stages[4].command[5],
     )
+    assert Path(stages[4].command[5]).parent != Path("data/generated")
 
 
 def test_test_stage_can_include_full_asset_tests() -> None:
@@ -201,3 +207,16 @@ def test_build_source_without_build_stage_is_configuration_error(
 
     assert result == run_checks.EXIT_RUNNER_ERROR
     assert "--build-source requires the build stage" in capsys.readouterr().err
+
+
+def test_fixture_build_stage_never_replaces_runtime_database(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runtime_database = tmp_path / "data" / "generated" / "infinity.db"
+    runtime_database.parent.mkdir(parents=True)
+    runtime_database.write_bytes(b"real-production-database")
+    fixture = Path(__file__).resolve().parent / "fixtures" / "deployment-smoke"
+    monkeypatch.setattr(run_checks, "REPO_ROOT", tmp_path)
+
+    assert run_checks.main(["--stage", "build", "--build-source", str(fixture)]) == 0
+    assert runtime_database.read_bytes() == b"real-production-database"

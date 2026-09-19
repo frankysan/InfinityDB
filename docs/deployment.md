@@ -86,6 +86,14 @@ therefore the image that is deployed. A missing manifest, partial publication,
 stale browser map, package-data omission, or symbol hash mismatch fails before the
 running service is replaced.
 
+The runtime Army database must also carry the SHA-256 of the exact Army ZIP
+snapshot used by the terminal symbol manifest. The deployment guard,
+artifact-transfer helper, and installed-image check compare this generated
+provenance directly; raw source archives are not needed on the server. A missing
+or different identity fails closed. Rebuild the database from the symbol
+publication's Army ZIP, or republish symbols from the database snapshot's source
+before retrying.
+
 On a validation checkout with the development dependencies installed,
 `tools/run_checks.py --assets required` remains useful for full project testing;
 the deployment guard is narrower and specifically binds deployment to one promoted
@@ -93,8 +101,9 @@ publication.
 
 For routine deployment from a development checkout, `tools/send_deployment_artifacts.py`
 transfers only the ignored runtime databases, terminal symbol manifest, published
-symbol inventory, and four published SVG trees. It validates the local databases and
-manifest-bound symbol publication first, requires the remote checkout to be at the
+symbol inventory, and four published SVG trees. It validates the local databases,
+database-to-symbol snapshot provenance, and manifest-bound symbol publication first,
+requires the remote checkout to be at the
 exact same Git commit with no tracked edits, stages the incoming files, and uses one
 SSH session so password authentication prompts only once. Run a dry-run first to
 inspect the exact transfer set:
@@ -125,7 +134,8 @@ The configured `Deployment smoke test` GitHub Actions workflow exercises the
 distributable container path without committing or downloading real Army source data. It
 builds `infinity.db` from the synthetic source under
 `tests/fixtures/deployment-smoke/`, builds the tracked curated `rules.db`, then
-builds the Docker image and runs `scripts/verify-container-image.sh`. A successful
+builds an isolated temporary Docker context and runs `scripts/verify-container-image.sh`.
+It never writes fixture data to `data/generated/`. A successful
 hosted run is release evidence and remains a tracked release-validation task.
 
 The verifier requires `/app/data/` to contain exactly `infinity.db` and

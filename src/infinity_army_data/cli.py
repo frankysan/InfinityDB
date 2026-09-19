@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 import zipfile
@@ -32,6 +33,18 @@ def snapshot_downloaded_on(source: Path) -> str | None:
         return datetime.strptime(match.group(1), "%Y%m%d").date().isoformat()
     except ValueError:
         return None
+
+
+def snapshot_archive_sha256(source: Path) -> str | None:
+    """Return the immutable archive identity when a build consumes a ZIP snapshot."""
+
+    if not source.is_file() or not zipfile.is_zipfile(source):
+        return None
+    digest = hashlib.sha256()
+    with source.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def latest_snapshot(directory: Path = DEFAULT_RAW_DIRECTORY) -> Path:
@@ -89,6 +102,8 @@ def _merge(
     master = merge_sources(sources)
     if downloaded_on := snapshot_downloaded_on(source):
         master["_meta"]["snapshotDownloadedOn"] = downloaded_on
+    if archive_sha256 := snapshot_archive_sha256(source):
+        master["_meta"]["snapshotArchiveSha256"] = archive_sha256
     if metadata is not None:
         master["armyMetadata"] = metadata
     if verify:

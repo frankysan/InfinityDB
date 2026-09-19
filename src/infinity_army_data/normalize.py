@@ -1242,6 +1242,7 @@ def normalize_master(
             "sourceFileCount": master["_meta"].get("sourceFileCount"),
             "sourceVersions": master["_meta"].get("sourceVersions"),
             "snapshotDownloadedOn": master["_meta"].get("snapshotDownloadedOn"),
+            "snapshotArchiveSha256": master["_meta"].get("snapshotArchiveSha256"),
             "tableCounts": {name: len(rows) for name, rows in tables.items()},
             "warningCount": len(b.warnings),
             "warningCounts": dict(

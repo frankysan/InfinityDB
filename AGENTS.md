@@ -115,6 +115,38 @@ normal local working tree:
 
 ## Documentation and project tracking
 
+### Changelog discipline
+
+`docs/CHANGELOG.md` is the canonical release history and should be written so it can also serve as the source for a user-facing **Changes** page.
+
+Record **meaningful release outcomes**, not a detailed implementation history. Prefer describing what was added, what behaves differently, what was fixed, or what an operator must do when upgrading.
+
+When adding or consolidating changelog entries:
+
+- Write from the perspective of a user or operator of InfinityDB.
+- Describe the resulting capability, behavior, correctness improvement, or upgrade consequence rather than the implementation steps that produced it.
+- Consolidate related engineering changes into a single outcome-oriented entry where they form one coherent improvement.
+- Keep `Added`, `Changed`, and `Fixed` as the normal categories. Use an `Upgrade notes` section when a release requires an explicit action such as rebuilding generated databases.
+- Keep wording understandable without requiring knowledge of InfinityDB's internal architecture, build pipeline, CI setup, or implementation tools.
+- Retain technical terminology only when it identifies a meaningful user-visible concept or is necessary for an operator to act on the change.
+- Prefer concise entries. A release should communicate its important changes without becoming an inventory of commits.
+
+Normally omit standalone changelog entries for:
+
+- version-number or release-metadata updates;
+- schema or compatibility revision numbers when the only important consequence is that generated data must be rebuilt;
+- linting, formatting, type-checking, or test-coverage work;
+- internal refactors with no externally meaningful behavioral change;
+- query plans, indexes, batching strategies, or other implementation-level performance work when these can instead be summarized as a performance improvement;
+- cache-busting, asset fingerprints, or similar implementation details unless they directly fix a user-visible problem;
+- CI workflow details, validation mechanics, acceptance-test milestones, or individual regression tests;
+- exact tool or script names unless users or operators interact with them directly;
+- project-management milestones whose durable outcome is already described elsewhere in the release notes.
+
+Detailed implementation history should remain available through Git history, architecture and data-model documentation, deployment documentation, manifests, generated reports, and tests rather than being duplicated in the changelog.
+
+Before finalizing a release, review the complete `Unreleased` section as a whole rather than only promoting individual accumulated entries. Merge overlapping entries, remove implementation-only details, and ensure the resulting release notes tell a concise and coherent story of the release.
+
 - Update `docs/architecture.md` when changing architectural boundaries,
   engineering principles, or lasting design decisions.
 - Update `docs/data-model.md` when changing documented data semantics or

@@ -306,6 +306,12 @@ the identity policy part of the immutable database snapshot and allowing
 tampering, incomplete provenance, or conflicting explicit export policy to fail
 validation.
 
+When an Army database is built from a ZIP snapshot, normalized `_meta` and both
+database siblings retain `snapshotArchiveSha256`: the SHA-256 of that exact ZIP.
+Deployment compares it with the terminal symbol manifest's
+`snapshot.armyArtifact.sha256`, binding the runtime data and symbol publication
+without needing the raw archive at deployment time.
+
 `units.source_role` and `army_units.availability_kind` are explicit frontend
 schema fields rather than incidental dynamic columns. This makes the
 normalization-time availability classification part of the generated database

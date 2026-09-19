@@ -1,8 +1,17 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
+All notable user- or operator-relevant changes to InfinityDB are documented here.
+Entries describe meaningful release outcomes rather than detailed implementation history.
 
 ## Unreleased
+
+### Fixed
+
+- Prevent check, CI, and deployment-smoke fixture builds from writing to
+  `data/generated/`, so synthetic test data cannot replace deployment artifacts.
+- Bind production `infinity.db` to the terminal symbol publication's exact Army
+  ZIP SHA-256 and reject mismatched or missing provenance during deployment,
+  transfer, and published-image validation without requiring raw archives on the server.
 
 ## [0.6.0] - 2026-09-19
 
