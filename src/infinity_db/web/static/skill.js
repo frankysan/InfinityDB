@@ -1,5 +1,5 @@
-import { cacheBustedUrl, formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
-import { visibleUnitIds } from "./api.js";
+import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
@@ -164,11 +164,7 @@ if (!/^\d+$/.test(skillId || "")) {
   name.firstChild.textContent = "Skill unavailable";
   status.textContent = "The requested skill address is invalid.";
 } else {
-  fetch(cacheBustedUrl(`/api/skills/${encodeURIComponent(skillId)}`), { cache: "no-store" }).then(async (response) => {
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "Could not load this skill.");
-    return payload;
-  }).then((skill) => {
+  getCatalogItem("skills", skillId).then((skill) => {
     currentSkill = skill;
     render(skill);
     return visibleUnitIds().then((ids) => render(withVisibleUnits(skill, ids)));

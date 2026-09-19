@@ -302,41 +302,73 @@ new correctness or reproducibility defect.
 ## Milestone 2: web-app consistency audit
 
 - [ ] Perform a systematic end-to-end consistency audit after the ingestion
-  milestone is complete.
-  - [ ] Build the audit against one representative current production snapshot
-    with its matching `rules.db` and locally published symbol set, and record the
-    exact source/runtime artifact provenance used for the audit.
-  - [ ] Trace maintained domain concepts from normalized/database storage through
-    backend query results and API payloads to frontend rendering. Verify IDs,
-    canonical/logical identities, army hierarchy/roles, names, availability,
-    profile/loadout relationships, and source/rules provenance are interpreted
-    consistently at every layer.
-  - [ ] Audit the principal catalog and detail surfaces for parity and coverage:
-    armies, units, profiles/loadouts, Skills, Equipment, Weapons, Traits, rules
-    enrichment, Fireteams, symbols, and wiki/rules links. Confirm the browser is
-    not silently dropping backend data or synthesizing conflicting domain
-    meaning.
-  - [ ] Verify navigation, filtering, searching, ordering, labels, counts, and
-    deep links use consistent semantics across list/detail pages and API results.
-  - [ ] Exercise missing, optional, empty, stale, and error states deliberately,
-    including unavailable rules data, absent locally published symbols, unknown
-    references, empty collections, invalid/deep-link identifiers, and generated
-    artifact mismatches.
-  - [ ] Identify duplicated domain interpretation between Python and browser code.
-    Where duplication can disagree, make the backend/API semantic contract the
-    authoritative source and keep presentation-specific decisions in the
-    frontend.
-  - [ ] Verify runtime-artifact assumptions across a clean source checkout, local
-    development/deployment, and the redistributable container path, including the
-    deliberate distinction between locally acquired Corvus Belli graphics and
-    distributable project artifacts.
-  - [ ] Turn every consistency defect fixed during the audit into focused
-    regression coverage where practical, and retain a concise audit record that
-    identifies any intentionally deferred inconsistencies.
-  - [ ] Keep visual redesign, theme implementation, and broader UI restructuring
-    separate from this audit unless a consistency defect requires a minimal UI
-    correction. Begin the larger visual-design/theming milestone only after the
-    semantic audit is complete.
+  milestone is complete. This is an audit and bounded correctness-fix milestone,
+  not a Fireteam feature, canonical-payload refactor, visual redesign, or broader
+  frontend restructuring effort.
+  - [ ] Establish one pinned production audit baseline before inspecting behavior:
+    the Git commit, Army snapshot/provenance, generated `infinity.db` and
+    `rules.db`, terminal symbol manifest/inventory, and locally published symbol
+    set. Verify that the runtime database and symbol publication derive from the
+    same Army snapshot. Record the evidence and audit results in a durable audit
+    document (for example, `docs/audits/web-consistency-YYYY-MM.md`); do not mix
+    production observations with synthetic test fixtures.
+  - [ ] Create and maintain an explicit audit matrix for each concept, recording
+    its storage representation, repository/application interpretation, API
+    representation, browser consumers, existing coverage, and audit result. Cover
+    logical/source unit identity; army hierarchy, role, and playability;
+    faction/display identity; optional availability; names/slugs; profiles and
+    loadouts; catalog/rules enrichment; distance/range semantics; symbols;
+    source/wiki/rules provenance; filtering/search/sorting/counts; and deep-link
+    identifiers.
+  - [ ] Begin with the army/unit identity and availability vertical slice. Trace
+    `main_army_id` and `display_army_id`, faction grouping, role/playability,
+    mercenary and reinforcement availability, logical identity, and their unit
+    explorer/detail consumers from storage through the API to the browser.
+  - [ ] Audit the backend and API contracts before browser presentation. Trace
+    generated database rows through repository queries and application-level
+    composition (including `SkillCatalog`, `TraitCatalog`, and `CatalogRules`) to
+    the JSON API. Add focused contract coverage wherever intentional behavior is
+    not sufficiently pinned; do not combine this work with database optimization
+    or canonical-payload refactoring.
+  - [ ] Audit browser semantic ownership. Inventory domain interpretation in
+    browser modules, beginning with `unit.js`, the army selector, catalog detail
+    modules, symbol lookup, rules links, and optional-unit filtering. Keep display
+    formatting in JavaScript, but expose game/data semantics through the backend
+    API when duplicate interpretation could disagree. Route JSON API access
+    through `api.js` to match the documented boundary; static/HTML fetches are not
+    part of that API-transport requirement.
+  - [ ] Perform route-by-route parity checks for the Unit explorer and details;
+    Skill Modifiers; Skills, Equipment, Weapons, and Traits list/detail pages;
+    shared navigation/settings; and version refresh. Compare API output with
+    rendered behavior, including filtering, result counts, ordering, labels,
+    deep-link state, cross-links, optional-unit behavior, source/rules links,
+    catalog-item unit usage, and symbol identity. Use a deliberate manual browser
+    pass unless lightweight browser automation is added for a concrete audit need.
+  - [ ] Treat Fireteams as storage preservation and deferred-UI scope during this
+    milestone. Verify their imported data is retained and record that no Fireteam
+    repository query, HTTP API, or browser surface currently exists; keep the
+    separately planned rule-aware Fireteams feature as the implementation path.
+  - [ ] Exercise degraded states deliberately: rules database available versus
+    unavailable; clean redistributable source checkout without graphical assets;
+    complete local published assets; unknown unit/catalog/trait IDs; empty search
+    or filter results; invalid query parameters; missing catalog enrichment;
+    stale version/snapshot detection; and database/symbol snapshot mismatch.
+  - [ ] Verify the three supported runtime contexts independently: a clean source
+    checkout without redistributed Corvus Belli graphics, local development with
+    explicitly supplied generated artifacts, and production deployment that fails
+    closed for incomplete or mismatched databases/assets. Passing one context does
+    not establish the others.
+  - [ ] Fix discovered inconsistencies incrementally and add focused regression
+    coverage where practical. Record intentional deferrals in the audit document
+    and TODO rather than silently leaving them unresolved. Keep CI hardening,
+    storage experiments, database optimization, canonical logical-unit payload
+    work, the Changes page, visual theming, and broader UI restructuring outside
+    this milestone unless required for a minimal correctness fix.
+  - [ ] Close with a second storage-to-browser matrix pass, complete normal project
+    checks, and full-asset validation against the pinned production publication
+    when it is available. Update canonical documentation, `TODO.md`, and
+    `CHANGELOG.md` for material findings before starting the later visual-design,
+    frontend-architecture, or theming work.
 
 ## Visual design, frontend architecture, and theming
 

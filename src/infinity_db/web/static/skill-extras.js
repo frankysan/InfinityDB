@@ -1,4 +1,5 @@
-import { cacheBustedUrl, formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { getSkillExtras } from "./api.js";
+import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -44,9 +45,7 @@ function renderItems(items) {
 async function load() {
   show(elements.loading);
   try {
-    const response = await fetch(cacheBustedUrl("/api/skill-extras"), { cache: "no-store" });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "Could not load skill modifiers.");
+    const payload = await getSkillExtras();
     items = payload.items;
     elements.count.textContent = `${items.length} combinations`;
     if (!items.length) return show(elements.empty);

@@ -8,7 +8,14 @@ async function get(path, signal) {
     headers: { Accept: "application/json" },
   });
   if (!response.ok) {
-    throw new Error(`The database returned an error (${response.status}). Please try again.`);
+    let message = `The database returned an error (${response.status}). Please try again.`;
+    try {
+      const payload = await response.json();
+      message = payload.error || message;
+    } catch {
+      // Preserve the status-based message when an intermediary returns non-JSON.
+    }
+    throw new Error(message);
   }
   return response.json();
 }
@@ -29,6 +36,18 @@ export function getArmies(signal) {
 
 export function getCatalogItems(catalog, signal) {
   return get(`/api/${encodeURIComponent(catalog)}`, signal);
+}
+
+export function getCatalogItem(catalog, itemId, signal) {
+  return get(`/api/${encodeURIComponent(catalog)}/${encodeURIComponent(itemId)}`, signal);
+}
+
+export function getSkillExtras(signal) {
+  return get("/api/skill-extras", signal);
+}
+
+export function getVersion(signal) {
+  return get("/api/version", signal);
 }
 
 export function getUnits({ armyId, search, skillId, equipmentId, weaponId, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {

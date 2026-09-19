@@ -584,12 +584,28 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
 
     status, _, script = request(app, "/static/version-check.js")
     assert status == 200
-    assert b'fetch("/api/version", { cache: "no-store" })' in script
+    assert b'from "./api.js"' in script
+    assert b"getVersion()" in script
     assert b"snapshot_revision: snapshotRevision" in script
     assert b"currentSnapshotRevision" in script
     assert b'freshUrl.searchParams.set("app-version", version || currentVersion)' in script
     assert b'freshUrl.searchParams.set("snapshot-revision", snapshotRevision)' in script
     assert b"window.location.replace(freshUrl)" in script
+
+
+def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> None:
+    for asset, helper in (
+        ("catalog-list.js", b"getCatalogItems(page)"),
+        ("catalog-detail.js", b"getCatalogItem(catalog, itemId)"),
+        ("skill.js", b'getCatalogItem("skills", skillId)'),
+        ("skill-extras.js", b"getSkillExtras()"),
+        ("version-check.js", b"getVersion()"),
+    ):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b'from "./api.js"' in body
+        assert helper in body
+        assert b"fetch(" not in body
 
 
 @pytest.mark.parametrize(
@@ -1324,6 +1340,9 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
 
     status, _, body = request(app, "/static/catalog-list.js")
     assert status == 200
+    assert b'from "./api.js"' in body
+    assert b"getCatalogItems(page)" in body
+    assert b"fetch(" not in body
     assert b'["skills", "equipment", "weapons", "traits"].includes(page)' in body
     assert b"link.href = `/${page}/${encodeURIComponent(item.id)}`;" in body
 

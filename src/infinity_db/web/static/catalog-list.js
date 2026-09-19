@@ -1,4 +1,5 @@
-import { cacheBustedUrl, initializeDistanceUnitToggle } from "./preferences.js";
+import { getCatalogItems } from "./api.js";
+import { initializeDistanceUnitToggle } from "./preferences.js";
 
 const page = document.body.dataset.catalog;
 const title = page === "traits" ? "traits" : page;
@@ -74,9 +75,7 @@ function render() {
 async function load() {
   show(elements.loading);
   try {
-    const response = await fetch(cacheBustedUrl(`/api/${page}`), { cache: "no-store" });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || `Could not load ${title}.`);
+    const payload = await getCatalogItems(page);
     items = payload.items.map(searchableItem).sort((left, right) => (
       `${left.categoryName}\u0000${left.name}`.localeCompare(
         `${right.categoryName}\u0000${right.name}`, undefined, { numeric: true },

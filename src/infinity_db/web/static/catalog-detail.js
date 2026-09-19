@@ -1,5 +1,5 @@
-import { cacheBustedUrl, distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
-import { visibleUnitIds } from "./api.js";
+import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
+import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 
 const catalog = document.body.dataset.catalog;
@@ -329,11 +329,7 @@ initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
 });
-fetch(cacheBustedUrl(`/api/${catalog}/${encodeURIComponent(itemId)}`), { cache: "no-store" }).then(async (response) => {
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "Could not load this item.");
-  return payload;
-}).then((item) => {
+getCatalogItem(catalog, itemId).then((item) => {
   currentItem = item;
   render(item);
   return visibleUnitIds().then((ids) => render(withVisibleUnits(item, ids)));
