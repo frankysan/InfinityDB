@@ -843,17 +843,27 @@ The materializer and database validation enforce all of the following:
 - canonical-profile IDs remain internal and must not leak into public URLs or
   API contracts during this migration.
 
-Repository migration should then be mechanical: assemble the same public profile
-objects through `profile_payload_occurrences -> profile_payloads` and the nested
-payload tables while retaining existing army/profile-group context. The current
-HTTP/browser result is the behavioral acceptance criterion; canonicalization
-must not intentionally change player-visible profile semantics as part of the
-storage refactor.
+Repository unit-detail profile assembly now consumes
+`profile_payload_occurrences -> profile_payloads` and the nested payload tables
+while retaining army/profile-group context from the occurrence/source side. The
+public profile object shape, ordering, AVA handling, display-name normalization,
+and merged logical-source behavior are intentionally unchanged.
 
-Before switching the read path, regression coverage must prove source-to-payload
-traceability and compare representative repository/API results before and after
-the migration. Only after that equivalence is established should the existing
-query-time profile deduplication logic be simplified or removed.
+The lossless `profiles` and nested `profile_*` source tables remain in the
+frontend database for provenance, validation, contextual relationships that have
+not yet been canonicalized, and repository paths such as catalog reverse
+lookups. `get_unit()` no longer uses those source payload rows to assemble its
+profile objects. This is a staged read-path migration rather than permission to
+remove the source representation.
+
+Behavioral regression coverage preserves the existing unit/API expectations and
+also verifies that mutating the legacy source profile payload rows after
+materialization does not change unit-detail profile output. The migration was
+accepted only after representative and production-scale before/after comparison
+showed identical serialized `get_unit()` results. Remaining query-time
+logical-source profile merging may now be reviewed separately; any simplification
+must preserve its occurrence/availability semantics rather than assuming that
+payload identity replaces source-context identity.
 
 #### First implementation targets
 

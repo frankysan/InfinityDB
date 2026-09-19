@@ -1672,6 +1672,52 @@ def test_database_validation_rejects_invalid_profile_payload_context(
         Database(path).validate()
 
 
+def test_unit_profile_read_path_uses_materialized_canonical_payloads(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    expected = Database(path).get_unit(1)
+    assert expected is not None
+
+    connection = sqlite3.connect(path)
+    try:
+        profile_occurrence_ids = [
+            row[0]
+            for row in connection.execute(
+                "SELECT occurrence_id FROM profile_skills WHERE unit_id = 1 "
+                "UNION SELECT occurrence_id FROM profile_equipment WHERE unit_id = 1 "
+                "UNION SELECT occurrence_id FROM profile_weapons WHERE unit_id = 1"
+            )
+        ]
+        if profile_occurrence_ids:
+            placeholders = ", ".join("?" for _ in profile_occurrence_ids)
+            for table in (
+                "profile_skill_extras",
+                "profile_equipment_extras",
+                "profile_weapon_extras",
+            ):
+                connection.execute(
+                    f"DELETE FROM {quote(table)} WHERE occurrence_id IN ({placeholders})",
+                    profile_occurrence_ids,
+                )
+        for table in (
+            "profile_characteristics",
+            "profile_skills",
+            "profile_equipment",
+            "profile_weapons",
+        ):
+            connection.execute(f"DELETE FROM {quote(table)} WHERE unit_id = 1")
+        connection.execute(
+            "UPDATE profiles SET name = 'source-only mutation', wip = 99, ava = 99 "
+            "WHERE unit_id = 1"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    assert Database(path).get_unit(1) == expected
+
 def test_database_with_different_compatibility_revision_requires_rebuild(
     tmp_path: Path, normalized: dict
 ) -> None:

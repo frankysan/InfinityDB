@@ -226,9 +226,12 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
     explicitly.
   - [x] Preserve characteristics, skills, equipment, weapons, extras, includes,
     peripherals, and other gameplay-bearing nested information.
-  - [ ] Update repository/API assembly to consume the canonical model without
+  - [x] Update repository/API assembly to consume the canonical model without
     changing player-visible semantics unintentionally.
-  - [ ] Add reconstruction/provenance and behavioral regression tests.
+  - [x] Add reconstruction/provenance and behavioral regression tests.
+  - [ ] Re-evaluate and simplify the remaining query-time logical-source profile
+    merge/deduplication only where occurrence and availability semantics remain
+    unchanged.
 
 - [ ] **Canonicalize loadout payloads conservatively.**
   - [ ] Inventory every loadout field and nested relationship.

@@ -180,10 +180,12 @@ and serves a read-only browser and same-origin HTTP API.
   source profile. AVA, logo, source/profile-group keys, includes, and
   peripherals remain occurrence/source context; WIP, characteristics, skills,
   equipment, weapons, extras, and exact representation values remain in the
-  payload and therefore split payload variants when they differ. The repository
-  still reads source profile tables until behavioral-equivalence coverage is
-  complete. Canonical loadout/unit payload work remains staged behind the same
-  field-level invariance and provenance requirements. Legacy rediscovery remains
+  payload and therefore split payload variants when they differ. Unit-detail
+  profile assembly now reads the canonical profile payload/occurrence layer;
+  source profile tables remain lossless provenance/context and are still used by
+  other repository paths such as catalog reverse lookups. Canonical loadout/unit
+  payload work remains staged behind the same field-level invariance and
+  provenance requirements. Legacy rediscovery remains
   only as a database-build compatibility path for older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.

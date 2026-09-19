@@ -1654,16 +1654,19 @@ class Database:
                 by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
             profile_rows = connection.execute(
-                "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, p.name, "
-                "t.name AS type, c.name AS classification, p.move_1, p.move_2, "
-                "p.cc, p.bs, p.ph, p.wip, p.arm, p.bts, p.vitality, p.silhouette, p.ava "
-                "FROM profiles AS p "
-                "LEFT JOIN troop_types AS t ON t.id = p.type_id "
-                "JOIN profile_groups AS pg ON pg.army_id = p.army_id "
-                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id "
+                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, pp.name, "
+                "t.name AS type, c.name AS classification, pp.move_1, pp.move_2, "
+                "pp.cc, pp.bs, pp.ph, pp.wip, pp.arm, pp.bts, pp.vitality, pp.silhouette, "
+                "ppo.ava "
+                "FROM profile_payload_occurrences AS ppo "
+                "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+                "LEFT JOIN troop_types AS t ON t.id = pp.type_id "
+                "JOIN profile_groups AS pg ON pg.army_id = ppo.army_id "
+                "AND pg.unit_id = ppo.unit_id AND pg.group_id = ppo.group_id "
                 "LEFT JOIN categories AS c ON c.id = pg.category_id "
-                f"WHERE p.unit_id IN ({placeholders}) "
-                "ORDER BY p.army_id, p.group_id, p.position, p.profile_id",
+                f"WHERE ppo.unit_id IN ({placeholders}) "
+                "ORDER BY ppo.army_id, ppo.group_id, ppo.position, ppo.profile_id, "
+                "ppo.unit_id",
                 source_ids,
             )
             profile_items: dict[tuple[Any, ...], dict[str, Any]] = {}
@@ -1720,32 +1723,64 @@ class Database:
                 else:
                     merge_profile(existing, profile_item)
             for occurrence_table, catalog_table, property_name, extras_table in (
-                ("profile_skills", "skills", "skills", "profile_skill_extras"),
-                ("profile_equipment", "equipment", "equipment", "profile_equipment_extras"),
-                ("profile_weapons", "weapons", "weapons", "profile_weapon_extras"),
+                (
+                    "profile_payload_skills",
+                    "skills",
+                    "skills",
+                    "profile_payload_skill_extras",
+                ),
+                (
+                    "profile_payload_equipment",
+                    "equipment",
+                    "equipment",
+                    "profile_payload_equipment_extras",
+                ),
+                (
+                    "profile_payload_weapons",
+                    "weapons",
+                    "weapons",
+                    "profile_payload_weapon_extras",
+                ),
             ):
-                extras_by_occurrence: dict[Any, list[dict[str, Any]]] = {}
+                extras_by_occurrence: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
                 extra_rows = connection.execute(
-                    "SELECT e.occurrence_id, e.extra_id, x.name, x.type AS extra_type "
-                    f"FROM {extras_table} AS e "
-                    f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
+                    "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
+                    "o.position AS occurrence_position, e.extra_id, x.name, "
+                    "x.type AS extra_type "
+                    "FROM profile_payload_occurrences AS ppo "
+                    f"JOIN {occurrence_table} AS o "
+                    "ON o.profile_payload_id = ppo.profile_payload_id "
+                    f"JOIN {extras_table} AS e "
+                    "ON e.profile_payload_id = o.profile_payload_id "
+                    "AND e.occurrence_position = o.position "
                     "LEFT JOIN extras AS x ON x.id = e.extra_id "
-                    f"WHERE o.unit_id IN ({placeholders}) "
-                    "ORDER BY e.occurrence_id, e.position",
+                    f"WHERE ppo.unit_id IN ({placeholders}) "
+                    "ORDER BY ppo.army_id, ppo.group_id, ppo.profile_id, o.position, "
+                    "ppo.unit_id, e.position",
                     source_ids,
                 )
                 for extra in extra_rows:
                     extra_item = {"id": extra["extra_id"], "name": extra["name"]}
                     if property_name == "skills" and extra["extra_type"] == "DISTANCE":
                         extra_item["is_distance"] = True
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
+                    occurrence_key = (
+                        extra["unit_id"],
+                        extra["army_id"],
+                        extra["group_id"],
+                        extra["profile_id"],
+                        extra["occurrence_position"],
+                    )
+                    extras_by_occurrence.setdefault(occurrence_key, []).append(extra_item)
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.profile_id, "
+                    "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
                     "o.item_id, o.quantity, o.position, c.name "
-                    f"FROM {occurrence_table} AS o "
+                    "FROM profile_payload_occurrences AS ppo "
+                    f"JOIN {occurrence_table} AS o "
+                    "ON o.profile_payload_id = ppo.profile_payload_id "
                     f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
-                    f"WHERE o.unit_id IN ({placeholders}) "
-                    "ORDER BY o.army_id, o.group_id, o.profile_id, o.position, o.occurrence_id",
+                    f"WHERE ppo.unit_id IN ({placeholders}) "
+                    "ORDER BY ppo.army_id, ppo.group_id, ppo.profile_id, o.position, "
+                    "ppo.unit_id",
                     source_ids,
                 )
                 for occurrence in occurrence_rows:
@@ -1761,21 +1796,31 @@ class Database:
                         profile_items.get(profile_key) if profile_key is not None else None
                     )
                     if profile_item is not None:
+                        occurrence_key = (
+                            occurrence["unit_id"],
+                            occurrence["army_id"],
+                            occurrence["group_id"],
+                            occurrence["profile_id"],
+                            occurrence["position"],
+                        )
                         append_unique_item(
                             profile_item[property_name],
                             {
                                 "id": occurrence["item_id"],
                                 "name": occurrence["name"],
                                 "quantity": occurrence["quantity"],
-                                "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
+                                "extras": extras_by_occurrence.get(occurrence_key, []),
                             },
                         )
             characteristic_rows = connection.execute(
-                "SELECT o.unit_id, o.army_id, o.group_id, o.profile_id, c.name "
-                "FROM profile_characteristics AS o "
+                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, c.name "
+                "FROM profile_payload_occurrences AS ppo "
+                "JOIN profile_payload_characteristics AS o "
+                "ON o.profile_payload_id = ppo.profile_payload_id "
                 "JOIN characteristics AS c ON c.id = o.characteristic_id "
-                f"WHERE o.unit_id IN ({placeholders}) "
-                "ORDER BY o.army_id, o.group_id, o.profile_id, o.position",
+                f"WHERE ppo.unit_id IN ({placeholders}) "
+                "ORDER BY ppo.army_id, ppo.group_id, ppo.profile_id, o.position, "
+                "ppo.unit_id",
                 source_ids,
             )
             for characteristic in characteristic_rows:
