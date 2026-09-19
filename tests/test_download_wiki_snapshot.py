@@ -4,12 +4,13 @@ import os
 import zipfile
 from datetime import datetime
 from pathlib import Path, PureWindowsPath
+from typing import Any
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "tools" / "download_wiki_snapshot.py"
 
 spec = importlib.util.spec_from_file_location("download_wiki_snapshot", MODULE_PATH)
-module = importlib.util.module_from_spec(spec)
 assert spec is not None and spec.loader is not None
+module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
@@ -292,7 +293,7 @@ def test_main_rejects_incomplete_snapshot_before_archive_creation(
         *,
         language: str = "en",
         progress=None,
-    ) -> module.WikiDownloadResult:
+    ) -> Any:
         assert language == "en"
         page = staging / "index.html"
         page.write_text("<html></html>", encoding="utf-8")
@@ -344,7 +345,7 @@ def test_main_writes_snapshot_provenance(tmp_path: Path, monkeypatch) -> None:
         *,
         language: str = "en",
         progress=None,
-    ) -> module.WikiDownloadResult:
+    ) -> Any:
         assert language == "en"
         page = staging / "index.html"
         page.write_text("<html></html>", encoding="utf-8")
@@ -389,7 +390,7 @@ def test_download_wiki_reports_progress_before_fetching(
     }
 
     monkeypatch.setattr(module, "fetch_bytes", lambda url, *, language="en": pages[url])
-    updates: list[module.WikiCrawlProgress] = []
+    updates: list[Any] = []
 
     result = module.download_wiki(module.ROOT_URL, tmp_path, progress=updates.append)
 
@@ -556,7 +557,7 @@ def test_main_spanish_snapshot_records_language_and_root(
         *,
         language: str = "en",
         progress=None,
-    ) -> module.WikiDownloadResult:
+    ) -> Any:
         assert root_url == module.LANGUAGE_ROOT_URLS["es"]
         assert language == "es"
         page = staging / "es" / "index.html"

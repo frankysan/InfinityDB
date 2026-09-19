@@ -57,8 +57,9 @@ def request(
     try:
         body = b"".join(result)
     finally:
-        if hasattr(result, "close"):
-            result.close()
+        close = getattr(result, "close", None)
+        if close is not None:
+            close()
     return response["status"], response["headers"], body
 
 
