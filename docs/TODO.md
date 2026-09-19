@@ -19,24 +19,22 @@ history retains implementation detail.
 
 ## Milestone sequence
 
-- [ ] **Milestone 1 — complete the data/wiki/symbol ingestion pipeline.**
-  Treat ingestion as complete when Army data, wiki-derived curated/rules data,
-  and symbols can all be acquired from pinned external sources, validated,
-  transformed reproducibly, and published into their runtime artifacts with
-  explicit provenance. No undocumented manual transformation should remain
-  between a pinned source and a runtime artifact; intentional human curation
-  remains an explicit, reviewed input. Work through the remaining ingestion
-  tasks in this order: wiki curated-provenance cleanup, live symbol-pipeline
-  acceptance, then ingestion-specific reliability and reproducibility gaps.
+**Milestone 1 — data/wiki/symbol ingestion — completed 2026-09-19.** Army,
+wiki-derived curated/rules data, and symbols now have pinned-source acquisition,
+explicit provenance, reproducible transformation/publication, live
+stage-by-stage acceptance, rollback/reproducibility validation, and guarded
+local deployment packaging. Remaining pipeline items below are follow-up
+refactoring, coverage, and optimization work rather than Milestone 1 blockers.
+
 - [ ] **Milestone 2 — perform a thorough web-app consistency audit.**
-  Start this after Milestone 1 is complete. Trace the application from generated
-  storage through backend queries/API contracts to browser presentation, and
-  resolve semantic or behavioral inconsistencies before beginning the larger
-  visual-design/theming work. The detailed audit checklist is maintained below.
+  Trace the application from generated storage through backend queries/API
+  contracts to browser presentation, and resolve semantic or behavioral
+  inconsistencies before beginning the larger visual-design/theming work. The
+  detailed audit checklist is maintained below.
 
 Database optimization, canonical-payload refactors, general performance work,
-and product expansion are not Milestone 1 blockers unless a concrete ingestion
-requirement makes them necessary.
+and product expansion remain deferred until after the consistency audit unless a
+concrete requirement makes them necessary.
 
 ## Deferred performance and storage experiments
 
@@ -116,25 +114,14 @@ consistency audit unless one becomes necessary to unblock that work.
 
 ## Army snapshot and symbol pipeline
 
+Milestone 1 acceptance for the integrated pipeline is complete. The remaining
+items in this section are post-milestone maintenance, refactoring, coverage, or
+incremental-performance work; they do not block Milestone 2 unless they expose a
+new correctness or reproducibility defect.
+
 - [ ] Let future snapshot-comparison tooling write structured generated diff
   data/reports under manifest/report paths while curated snapshot notes remain
   the human interpretation of those results.
-
-- [x] Complete one live stage-by-stage acceptance run on a real pinned Army
-  snapshot before declaring the symbol pipeline complete.
-  - [x] Snapshot pin/provenance checkpoint.
-  - [x] Raw symbol acquisition/version-2 checkpoint.
-  - [x] Verified materialization checkpoint.
-  - [x] SVG preflight/version-3 checkpoint.
-  - [x] Installed-font audit/version-4 checkpoint.
-  - [x] Exact/visual deduplication/version-5 checkpoint with size review.
-  - [x] Canonical text-to-path/version-6 checkpoint with visual spot checks.
-  - [x] Balanced compression/version-7 checkpoint with visual/size review.
-  - [x] Transactional publication/version-8 checkpoint and application smoke test.
-  - [x] Deliberately trigger safe downstream failure/rollback checks after the
-    successful live run.
-  - [x] Repeat a clean build from the same pinned Army snapshot and confirm zero
-    publication changes, proving stable canonical/compressed/published output.
 
 - [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
   small shared symbol-pipeline utility layer.
@@ -181,7 +168,7 @@ consistency audit unless one becomes necessary to unblock that work.
   - [ ] Changes to an override SHA-256 invalidate downstream processing for that
     asset. Removing an override falls back to validated symbol archives/cache or
     network by the normal resolution rules.
-  - [ ] Reuse validated archived downloads and rebuild work deterministically.
+  - [x] Reuse validated archived downloads and rebuild work deterministically.
   - [ ] After the integrated build is stable, consider cache keys based on snapshot
     SHA-256, source SVG SHA-256, processor/tool versions, font-alias config,
     duplicate renderer/settings, conversion backend/settings, and compression
@@ -235,8 +222,8 @@ consistency audit unless one becomes necessary to unblock that work.
 ## Continuous integration and validation
 
 - [ ] Finish non-blocking CI hardening documented in `docs/ci.md`. The core
-  validation layers are implemented, so later symbol-processing stages may
-  proceed while these follow-up items remain open.
+  validation layers are implemented; these remaining follow-up items are
+  post-Milestone-1 hardening and do not block the Milestone 2 consistency audit.
   - [x] Repair the deployment-smoke runtime import boundary. Read-only runtime
     database/web imports no longer pull the database exporter, Army normalizer,
     or weapon-policy configuration from source-checkout-relative paths.
@@ -265,8 +252,8 @@ consistency audit unless one becomes necessary to unblock that work.
     `src/` and `tools/` code so editor-visible type regressions fail required CI.
   - [x] Install the real `symbols` Python dependency set in required source CI and
     exercise fontTools, tinycss2/cssselect2, and Pillow with synthetic fixtures.
-  - [ ] Add focused regression tests for currently uncovered standalone tools,
-    allowing conditional external-tool integration where appropriate.
+  - [x] Add focused regression tests for standalone tools, allowing conditional
+    external-tool integration where appropriate.
   - [ ] Integrate curated snapshot-note validation into routine project checks so
     every checked-in file under `data/curated/snapshot-notes/` is validated even
     when no downloader or comparison workflow happens to load it.
@@ -481,21 +468,6 @@ consistency audit unless one becomes necessary to unblock that work.
 - [ ] Add a benchmark/health-check command that validates the frontend database,
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
-- [ ] Complete deployment validation coverage.
-  - [x] Build and package `rules.db` alongside `infinity.db` for the Docker
-    deployment. The image explicitly configures the rules path, so a missing or
-    invalid `rules.db` now fails worker startup instead of silently shipping a
-    reduced feature set; local/development auto-discovery remains optional.
-  - [x] Test a full synthetic Army/rules build and production container startup
-    in CI. The deployment smoke workflow validates both runtime databases,
-    requires `/app/data/` to contain only those intended database artifacts,
-    exercises the read-only/non-root Gunicorn startup and health check, and
-    rejects ignored Corvus Belli graphical-asset trees in redistributable
-    images.
-  - [ ] Test local asset publication separately from distributable-image
-    construction so a local installation can exercise acquired symbols without
-    weakening the release-image redistribution boundary.
-
 ## Potential product features
 
 - [ ] Expand the existing versioned curated rules-reference infrastructure with

@@ -22,6 +22,12 @@ All notable changes to this project are documented in this file.
   grouping identity for representative symbols and faction styling.
 - Bump the Army database schema to 11 and compatibility revision to 16; rebuild
   generated databases after updating.
+- Complete Milestone 1 ingestion acceptance. The pinned Army/wiki/symbol path now
+  has exact provenance through runtime artifacts; the live symbol pipeline passed
+  every version-2-through-version-8 checkpoint, rollback injection, a repeated
+  same-snapshot zero-delta reproducibility run, and isolated host/image deployment
+  acceptance with missing assets rejected before Docker activation. Remaining
+  symbol-pipeline TODO items are follow-up refactoring, coverage, and optimization.
 
 ### Fixed
 

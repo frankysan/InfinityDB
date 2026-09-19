@@ -58,11 +58,10 @@ real `data/raw/` snapshot. Every matrix leg installs `.[dev,symbols]` and covers
 - `infinity.db` / `infinity.raw.db` construction from the controlled fixture;
 - `rules.db` construction from tracked curated rules data.
 
-Snapshot-note validation and focused regression coverage for the remaining
-standalone tools join this same runner when their backlog items are implemented.
-A clean source archive is expected to be genuinely green; absent ignored
-graphical assets are not a
-known-failing state.
+Focused regression coverage for the maintained standalone tools is included in
+the hermetic suite. Routine validation of checked-in snapshot notes remains a
+follow-up item. A clean source archive is expected to be genuinely green; absent
+ignored graphical assets are not a known-failing state.
 
 The workflow defines InfinityDB's required source-validation contract, but GitHub
 merge blocking is a repository rules/branch-protection setting rather than a YAML
@@ -211,14 +210,14 @@ networked or long-running benchmark.
 ## Remaining follow-up work
 
 The deployment-smoke runtime import boundary, local hermetic/full-asset test
-split, cross-platform source workflow, installed-wheel smoke, and dispatch-only
-full-asset workflow are implemented. These core validation layers are sufficient
-for symbol-pipeline feature work to continue with automatic clean-environment and
-cross-platform coverage.
+split, cross-platform source workflow, installed-wheel smoke, dispatch-only
+full-asset workflow, and focused standalone-tool regression coverage are
+implemented. These core validation layers supported Milestone 1 acceptance and
+remain the baseline for the Milestone 2 consistency audit.
 
-Non-blocking CI follow-up remains in the backlog: add focused regression coverage
-for still-under-tested standalone tools, validate checked-in snapshot notes routinely, configure
-repository rules/branch protection if required, and configure the `full-assets`
-environment with an authorized checksum-pinned bundle plus one successful manual
-run. Scheduled/manual acquisition, performance, or other extended workflows
-should be added only where they provide a useful independent signal.
+Non-blocking CI follow-up remains in the backlog: validate checked-in snapshot
+notes routinely, configure repository rules/branch protection if required, and
+configure the `full-assets` environment with an authorized checksum-pinned bundle
+plus one successful manual run. Scheduled/manual acquisition, performance, or
+other extended workflows should be added only where they provide a useful
+independent signal.

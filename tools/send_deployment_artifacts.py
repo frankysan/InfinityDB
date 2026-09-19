@@ -10,7 +10,7 @@ import sys
 import tarfile
 from collections.abc import Iterable
 from pathlib import Path, PurePosixPath
-from typing import BinaryIO
+from typing import BinaryIO, cast
 
 from infinity_db.database import Database
 from infinity_db.rules_database import RulesDatabase
@@ -253,7 +253,7 @@ def transfer(
         raise DeploymentTransferError("ssh executable was not found") from exc
     assert process.stdin is not None
     try:
-        write_archive(project_root, files, process.stdin)
+        write_archive(project_root, files, cast(BinaryIO, process.stdin))
     except BrokenPipeError:
         pass
     finally:
