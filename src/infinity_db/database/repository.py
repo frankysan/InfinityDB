@@ -1891,10 +1891,12 @@ class Database:
                 if profile_item is not None:
                     profile_item["characteristics"].append({"name": characteristic["name"]})
             loadout_rows = connection.execute(
-                "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.name, o.points, o.swc, "
-                "o.minis, o.disabled "
-                f"FROM loadout_options AS o WHERE o.unit_id IN ({placeholders}) "
-                "ORDER BY o.army_id, o.group_id, o.position, o.option_id",
+                "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, lp.name, "
+                "lpo.points, lpo.swc, lp.minis, lp.disabled "
+                "FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
+                f"WHERE lpo.unit_id IN ({placeholders}) "
+                "ORDER BY lpo.army_id, lpo.group_id, lpo.position, lpo.option_id, lpo.unit_id",
                 source_ids,
             )
             loadout_items: dict[tuple[Any, ...], dict[str, Any]] = {}
@@ -1934,10 +1936,13 @@ class Database:
                     army["loadouts"].append(loadout_item)
                     loadout_items[loadout_key] = loadout_item
             order_rows = connection.execute(
-                "SELECT o.unit_id, o.army_id, o.group_id, o.option_id, o.order_type, "
+                "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, o.order_type, "
                 "o.list_count, o.total_count "
-                f"FROM option_orders AS o WHERE o.unit_id IN ({placeholders}) "
-                "ORDER BY o.army_id, o.group_id, o.option_id, o.position",
+                "FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_payload_orders AS o "
+                "ON o.loadout_payload_id = lpo.loadout_payload_id "
+                f"WHERE lpo.unit_id IN ({placeholders}) "
+                "ORDER BY lpo.army_id, lpo.group_id, lpo.option_id, o.position, lpo.unit_id",
                 source_ids,
             )
             for order in order_rows:
@@ -1964,41 +1969,64 @@ class Database:
                         }
                     )
             for occurrence_table, catalog_table, property_name, extras_table in (
-                ("option_skills", "skills", "skills", "option_skill_extras"),
-                ("option_equipment", "equipment", "equipment", "option_equipment_extras"),
-                ("option_weapons", "weapons", "weapons", "option_weapon_extras"),
+                (
+                    "loadout_payload_skills",
+                    "skills",
+                    "skills",
+                    "loadout_payload_skill_extras",
+                ),
+                (
+                    "loadout_payload_equipment",
+                    "equipment",
+                    "equipment",
+                    "loadout_payload_equipment_extras",
+                ),
+                (
+                    "loadout_payload_weapons",
+                    "weapons",
+                    "weapons",
+                    "loadout_payload_weapon_extras",
+                ),
             ):
-                extras_by_occurrence = {}
+                extras_by_occurrence: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
                 extra_rows = connection.execute(
-                    "SELECT e.occurrence_id, e.extra_id, x.name, x.type AS extra_type "
-                    f"FROM {extras_table} AS e "
-                    f"JOIN {occurrence_table} AS o ON o.occurrence_id = e.occurrence_id "
+                    "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, "
+                    "o.position AS occurrence_position, e.extra_id, x.name, "
+                    "x.type AS extra_type "
+                    "FROM loadout_payload_occurrences AS lpo "
+                    f"JOIN {occurrence_table} AS o "
+                    "ON o.loadout_payload_id = lpo.loadout_payload_id "
+                    f"JOIN {extras_table} AS e "
+                    "ON e.loadout_payload_id = o.loadout_payload_id "
+                    "AND e.occurrence_position = o.position "
                     "LEFT JOIN extras AS x ON x.id = e.extra_id "
-                    f"WHERE o.unit_id IN ({placeholders}) "
-                    "ORDER BY e.occurrence_id, e.position",
+                    f"WHERE lpo.unit_id IN ({placeholders}) "
+                    "ORDER BY lpo.army_id, lpo.group_id, lpo.option_id, o.position, "
+                    "lpo.unit_id, e.position",
                     source_ids,
                 )
                 for extra in extra_rows:
                     extra_item = {"id": extra["extra_id"], "name": extra["name"]}
                     if property_name == "skills" and extra["extra_type"] == "DISTANCE":
                         extra_item["is_distance"] = True
-                    extras_by_occurrence.setdefault(extra["occurrence_id"], []).append(extra_item)
-                item_column = "o.item_id"
-                quantity_column = "o.quantity"
-                occurrence_source = f"FROM {occurrence_table} AS o"
-                if occurrence_table == "option_weapons":
-                    item_column = "t.item_id"
-                    quantity_column = "t.quantity"
-                    occurrence_source += (
-                        " JOIN option_weapon_templates AS t ON t.id = o.template_id"
+                    occurrence_key = (
+                        extra["unit_id"],
+                        extra["army_id"],
+                        extra["group_id"],
+                        extra["option_id"],
+                        extra["occurrence_position"],
                     )
+                    extras_by_occurrence.setdefault(occurrence_key, []).append(extra_item)
                 occurrence_rows = connection.execute(
-                    "SELECT o.occurrence_id, o.unit_id, o.army_id, o.group_id, o.option_id, "
-                    f"{item_column} AS item_id, {quantity_column} AS quantity, o.position, c.name "
-                    f"{occurrence_source} "
-                    f"LEFT JOIN {catalog_table} AS c ON c.id = {item_column} "
-                    f"WHERE o.unit_id IN ({placeholders}) "
-                    "ORDER BY o.army_id, o.group_id, o.option_id, o.position, o.occurrence_id",
+                    "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, "
+                    "o.item_id, o.quantity, o.position, c.name "
+                    "FROM loadout_payload_occurrences AS lpo "
+                    f"JOIN {occurrence_table} AS o "
+                    "ON o.loadout_payload_id = lpo.loadout_payload_id "
+                    f"LEFT JOIN {catalog_table} AS c ON c.id = o.item_id "
+                    f"WHERE lpo.unit_id IN ({placeholders}) "
+                    "ORDER BY lpo.army_id, lpo.group_id, lpo.option_id, o.position, "
+                    "lpo.unit_id",
                     source_ids,
                 )
                 for occurrence in occurrence_rows:
@@ -2014,13 +2042,20 @@ class Database:
                         loadout_items.get(loadout_key) if loadout_key is not None else None
                     )
                     if loadout_item is not None:
+                        occurrence_key = (
+                            occurrence["unit_id"],
+                            occurrence["army_id"],
+                            occurrence["group_id"],
+                            occurrence["option_id"],
+                            occurrence["position"],
+                        )
                         append_unique_item(
                             loadout_item[property_name],
                             {
                                 "id": occurrence["item_id"],
                                 "name": occurrence["name"],
                                 "quantity": occurrence["quantity"],
-                                "extras": extras_by_occurrence.get(occurrence["occurrence_id"], []),
+                                "extras": extras_by_occurrence.get(occurrence_key, []),
                             },
                         )
             main_faction = faction_groups.get(group["main_army_id"])

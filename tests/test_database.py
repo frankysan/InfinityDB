@@ -1928,6 +1928,54 @@ def test_unit_profile_read_path_uses_materialized_canonical_payloads(
 
     assert Database(path).get_unit(1) == expected
 
+def test_unit_loadout_read_path_uses_materialized_canonical_payloads(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    expected = Database(path).get_unit(1)
+    assert expected is not None
+
+    connection = sqlite3.connect(path)
+    try:
+        loadout_occurrence_ids = [
+            row[0]
+            for row in connection.execute(
+                "SELECT occurrence_id FROM option_skills WHERE unit_id = 1 "
+                "UNION SELECT occurrence_id FROM option_equipment WHERE unit_id = 1 "
+                "UNION SELECT occurrence_id FROM option_weapons WHERE unit_id = 1"
+            )
+        ]
+        if loadout_occurrence_ids:
+            placeholders = ", ".join("?" for _ in loadout_occurrence_ids)
+            for table in (
+                "option_skill_extras",
+                "option_equipment_extras",
+                "option_weapon_extras",
+            ):
+                connection.execute(
+                    f"DELETE FROM {quote(table)} WHERE occurrence_id IN ({placeholders})",
+                    loadout_occurrence_ids,
+                )
+        for table in (
+            "option_characteristics",
+            "option_orders",
+            "option_skills",
+            "option_equipment",
+            "option_weapons",
+        ):
+            connection.execute(f"DELETE FROM {quote(table)} WHERE unit_id = 1")
+        connection.execute(
+            "UPDATE loadout_options SET name = 'source-only mutation', points = 999, "
+            "swc = '99', minis = 99, disabled = 1 WHERE unit_id = 1"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    assert Database(path).get_unit(1) == expected
+
+
 def test_database_with_different_compatibility_revision_requires_rebuild(
     tmp_path: Path, normalized: dict
 ) -> None:

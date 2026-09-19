@@ -241,7 +241,7 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
     characteristics, includes, and peripherals.
   - [x] Design canonical loadout payload + source/context occurrence relations.
   - [x] Preserve every genuine army/loadout variation explicitly.
-  - [ ] Update repository/API assembly and regression coverage.
+  - [x] Update repository/API assembly and regression coverage.
   - [ ] Measure database size and query behavior as secondary outcomes, without
     using storage savings as the semantic acceptance criterion.
 

@@ -196,10 +196,15 @@ and serves a read-only browser and same-origin HTTP API.
   representation values belong to the reusable payload; points, SWC,
   source/group/option keys, source position, includes, and peripherals remain
   occurrence/source context. Includes and peripherals are deferred because their
-  targets are source-local/army-local. Repository loadout assembly still reads
-  the source tables until a dedicated equivalence migration. Canonical unit-payload
-  work remains
-  staged behind the same field-level invariance and provenance requirements.
+  targets are source-local/army-local. Unit-detail loadout assembly now reads
+  the canonical loadout payload/occurrence layer while retaining the existing
+  logical-source occurrence merge semantics; source loadout tables remain
+  lossless provenance/context and continue to support repository paths such as
+  catalog reverse lookups. Canonical payload identity is deliberately not used
+  as logical-source occurrence identity because overlapping source records can
+  contribute complementary nested loadout relationships. Canonical unit-payload
+  work remains staged behind the same field-level invariance and provenance
+  requirements.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data

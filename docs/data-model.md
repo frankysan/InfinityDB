@@ -1134,8 +1134,9 @@ public API or URL identities.
 ##### Build and read-path invariants
 
 The materializer and database validation enforce the storage/provenance portion
-of the following contract. Repository/API assembly still reads the source loadout
-tables and will migrate in a separate behavior-preserving step:
+of the following contract. Repository unit-detail loadout assembly now consumes
+the canonical payload/occurrence layer while preserving the existing visible
+shape and logical-source merge behavior:
 
 - every source loadout occurrence maps to exactly one reusable loadout payload;
 - every payload has at least one supporting source occurrence;
@@ -1150,12 +1151,28 @@ tables and will migrate in a separate behavior-preserving step:
   reconstructable;
 - no army-local peripheral ID is promoted to cross-Army canonical identity by
   this migration;
-- the current repository/API/web loadout read path remains unchanged until a
-  dedicated before/after migration proves behavioral equivalence.
+- `get_unit()` loadout assembly reads `loadout_payload_occurrences`,
+  `loadout_payloads`, canonical orders, and canonical skill/equipment/weapon
+  relationships rather than the corresponding source payload rows;
+- logical-source occurrence merging remains separate from canonical payload
+  identity, so overlapping source records with the same visible occurrence can
+  still contribute complementary nested relationships;
+- source `loadout_options` and `option_*` tables remain available for
+  provenance, deferred relationships, validation, and repository paths such as
+  catalog reverse lookups.
 
-This materialization intentionally leaves repository read-path migration,
-source-occurrence merge behavior, canonical include/peripheral identities, and
-any future representation normalization as separate evidence-driven decisions.
+The read-path migration preserves the existing public loadout object shape,
+ordering, points/SWC context, order formatting, nested item accumulation, and
+logical-source merge behavior. Regression coverage also mutates/removes the old
+source loadout payload rows after materialization and verifies that unit-detail
+output remains unchanged. The migration was accepted only after serialized
+`get_unit()` output for all 920 source-defined unit IDs in the audited production
+database was byte-for-byte identical before and after the read-path switch.
+
+Canonical include/peripheral identities, any later simplification of
+logical-source loadout occurrence merging, representation normalization, and
+eventual movement of lossless source-only tables to `infinity.raw.db` remain
+separate evidence-driven decisions.
 
 #### First implementation targets
 
