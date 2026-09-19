@@ -120,19 +120,21 @@ consistency audit unless one becomes necessary to unblock that work.
   data/reports under manifest/report paths while curated snapshot notes remain
   the human interpretation of those results.
 
-- [ ] Complete one live stage-by-stage acceptance run on a real pinned Army
+- [x] Complete one live stage-by-stage acceptance run on a real pinned Army
   snapshot before declaring the symbol pipeline complete.
-  - [ ] Snapshot pin/provenance checkpoint.
-  - [ ] Raw symbol acquisition/version-2 checkpoint.
-  - [ ] Verified materialization checkpoint.
-  - [ ] SVG preflight/version-3 checkpoint.
-  - [ ] Installed-font audit/version-4 checkpoint.
-  - [ ] Exact/visual deduplication/version-5 checkpoint with size review.
-  - [ ] Canonical text-to-path/version-6 checkpoint with visual spot checks.
-  - [ ] Balanced compression/version-7 checkpoint with visual/size review.
-  - [ ] Transactional publication/version-8 checkpoint and application smoke test.
-  - [ ] Deliberately trigger safe downstream failure/rollback checks after the
+  - [x] Snapshot pin/provenance checkpoint.
+  - [x] Raw symbol acquisition/version-2 checkpoint.
+  - [x] Verified materialization checkpoint.
+  - [x] SVG preflight/version-3 checkpoint.
+  - [x] Installed-font audit/version-4 checkpoint.
+  - [x] Exact/visual deduplication/version-5 checkpoint with size review.
+  - [x] Canonical text-to-path/version-6 checkpoint with visual spot checks.
+  - [x] Balanced compression/version-7 checkpoint with visual/size review.
+  - [x] Transactional publication/version-8 checkpoint and application smoke test.
+  - [x] Deliberately trigger safe downstream failure/rollback checks after the
     successful live run.
+  - [x] Repeat a clean build from the same pinned Army snapshot and confirm zero
+    publication changes, proving stable canonical/compressed/published output.
 
 - [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
   small shared symbol-pipeline utility layer.
