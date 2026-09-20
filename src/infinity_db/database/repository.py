@@ -509,6 +509,84 @@ def army_required_flags(
         required.update(flag for flag in AVAILABILITY_FLAGS if filters.get(flag))
     return required
 
+
+def minimal_availability_requirements(
+    group: Mapping[str, Any],
+    canonical_factions: Mapping[int, int | None],
+    declared_faction_ids_by_unit: Mapping[int, Collection[int]],
+    army_id: int | None = None,
+) -> tuple[frozenset[str], ...]:
+    """Return non-redundant optional-mode requirements for one logical unit.
+
+    Requirements are scoped to one application Army when ``army_id`` is supplied.
+    If one path is a strict superset of another, the superset cannot affect
+    visibility and is omitted from the summary.
+    """
+    requirements: set[frozenset[str]] = set()
+    for occurrence in group["army_occurrences"]:
+        if army_id is not None and occurrence["id"] != army_id:
+            continue
+        source_id = occurrence["source_id"]
+        requirements.add(
+            frozenset(
+                army_required_flags(
+                    occurrence,
+                    group,
+                    canonical_factions[source_id],
+                    declared_faction_ids_by_unit[source_id],
+                )
+            )
+        )
+
+    if not requirements and army_id is None and not group["armies"]:
+        requirements.add(frozenset())
+
+    minimal = [
+        required
+        for required in requirements
+        if not any(other < required for other in requirements)
+    ]
+    return tuple(sorted(minimal, key=lambda required: (len(required), sorted(required))))
+
+
+def availability_summary(
+    requirements_by_group: Iterable[tuple[frozenset[str], ...]],
+    selected_flags: set[str],
+) -> dict[str, Any]:
+    """Summarize current and potential logical-unit visibility."""
+    categories = {
+        "standard": {"shown": 0, "filtered": 0},
+        **{flag: {"shown": 0, "filtered": 0} for flag in AVAILABILITY_FLAGS},
+    }
+    shown = 0
+    available = 0
+
+    for requirements in requirements_by_group:
+        if not requirements:
+            continue
+        available += 1
+        satisfied = [required for required in requirements if required <= selected_flags]
+        is_shown = bool(satisfied)
+        if is_shown:
+            shown += 1
+            if any(not required for required in satisfied):
+                categories["standard"]["shown"] += 1
+            for flag in AVAILABILITY_FLAGS:
+                if any(flag in required for required in satisfied):
+                    categories[flag]["shown"] += 1
+        else:
+            for flag in AVAILABILITY_FLAGS:
+                if any(flag in required for required in requirements):
+                    categories[flag]["filtered"] += 1
+
+    return {
+        "shown": shown,
+        "available": available,
+        "filtered": available - shown,
+        "categories": categories,
+    }
+
+
 def visible_armies_for_group(
     group: Mapping[str, Any],
     selected_flags: set[str],
@@ -1756,21 +1834,12 @@ class Database:
         declared_faction_ids_by_unit = graph["declared_faction_ids_by_unit"]
         search_key = accent_insensitive_key(search)
         grouped = []
+        matching_requirements: list[tuple[frozenset[str], ...]] = []
         for group in groups:
             if any(
                 not set(group["source_ids"]).intersection(source_ids)
                 for source_ids in matching_sources_by_rule.values()
             ):
-                continue
-            visible_armies = visible_armies_for_group(
-                group,
-                selected_flags,
-                canonical_factions,
-                declared_faction_ids_by_unit,
-            )
-            if group["armies"] and not visible_armies:
-                continue
-            if army_id is not None and army_id not in visible_armies:
                 continue
             if search:
                 if search_key:
@@ -1787,6 +1856,25 @@ class Database:
                     )
                 if not matches_search:
                     continue
+
+            requirements = minimal_availability_requirements(
+                group,
+                canonical_factions,
+                declared_faction_ids_by_unit,
+                army_id,
+            )
+            if not requirements:
+                continue
+            matching_requirements.append(requirements)
+            if not any(required <= selected_flags for required in requirements):
+                continue
+
+            visible_armies = visible_armies_for_group(
+                group,
+                selected_flags,
+                canonical_factions,
+                declared_faction_ids_by_unit,
+            )
             grouped.append({**group, "armies": visible_armies})
         grouped.sort(
             key=lambda group: (unit_sort_key(group["name"]), group["id"]),
@@ -1817,7 +1905,14 @@ class Database:
             }
             for group in grouped[offset : offset + limit]
         ]
-        return {"items": items, "total": total, "limit": limit, "offset": offset}
+        summary = availability_summary(matching_requirements, selected_flags)
+        return {
+            "items": items,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "availability": summary,
+        }
 
     @instance_lru_cache(maxsize=32)
     def visible_unit_ids(

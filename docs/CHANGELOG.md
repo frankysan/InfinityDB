@@ -12,6 +12,12 @@ Entries describe meaningful release outcomes rather than detailed implementation
   isolated loopback-only test deployment with an explicit teardown command that cannot
   expose its Caddy port to the LAN, target production, or prune production rollback images.
 
+### Changed
+
+- Make the Unit explorer's matching-unit statistic show the currently visible unique
+  units alongside the total available under the same Army/search/catalog filters, with
+  an expandable availability breakdown for standard and optional unit categories.
+
 ### Fixed
 
 - Preserve the `+dev` browser display version in containerized development/test

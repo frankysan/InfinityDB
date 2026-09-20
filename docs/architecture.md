@@ -895,8 +895,16 @@ player-facing count.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
-Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each
-item has `id`, `name`, `main_army_id`, `main_faction`, `display_army_id`,
+Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0,
+"availability": {...} }`, where `total` is the number of unique logical units visible
+under the currently enabled optional-unit modes. `availability.shown` matches `total`;
+`availability.available` counts the same Army/search/catalog query with every valid
+availability path considered; and `availability.filtered` is their unique-unit
+difference. `availability.categories` reports `shown`/`filtered` explanatory counts for
+`standard`, `mercs`, `specops`, `teamops`, and `reinforcement`. Category figures are
+derived from non-redundant minimal availability requirements and may overlap, so they
+are explanatory rather than additive. Each item has `id`, `name`, `main_army_id`,
+`main_faction`, `display_army_id`,
 `display_faction`, `army_ids`, and `armies` (`id` and `name` per currently
 visible Army availability).
 `main_faction` is the source-derived main/grouping context resolved through the

@@ -367,7 +367,20 @@ def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
 
     status, _, body = request(app, "/api/units", query="army_id=101&specops=1")
     assert status == 200
-    assert {item["id"] for item in json.loads(body)["items"]} == {1, 4}
+    payload = json.loads(body)
+    assert {item["id"] for item in payload["items"]} == {1, 4}
+    assert payload["availability"] == {
+        "shown": 2,
+        "available": 4,
+        "filtered": 2,
+        "categories": {
+            "standard": {"shown": 1, "filtered": 0},
+            "mercs": {"shown": 0, "filtered": 1},
+            "specops": {"shown": 1, "filtered": 0},
+            "teamops": {"shown": 0, "filtered": 1},
+            "reinforcement": {"shown": 0, "filtered": 0},
+        },
+    }
 
     status, _, body = request(app, "/api/units", query="army_id=101&teamops=1")
     assert status == 200
@@ -567,10 +580,17 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/units" aria-current="page"' in body
     assert body.index(b'id="pagination-top"') < body.index(b'id="results"')
     assert body.index(b'id="results"') < body.index(b'id="pagination-bottom"')
+    assert b'id="unit-count-details"' in body
+    assert b'id="unit-count-shown-breakdown"' in body
+    assert b'id="unit-count-filtered-breakdown"' in body
+    assert b"Optional availability categories may overlap" in body
 
     status, _, script = request(app, "/static/app.js")
     assert status == 200
     assert b'className = "page-results-summary"' in script
+    assert b"renderAvailabilitySummary(data)" in script
+    assert b"summary.shown" in script
+    assert b"summary.available" in script
 
 
 def test_browser_version_check_uses_an_uncached_server_version(app: Callable) -> None:

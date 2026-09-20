@@ -11,6 +11,9 @@ const elements = {
   mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
   reinforcement: byId("reinforcement-filter"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
+  unitCountShown: byId("unit-count-shown-breakdown"),
+  unitCountFiltered: byId("unit-count-filtered-breakdown"),
+  unitCountFilteredTotal: byId("unit-count-filtered-total"),
   summary: byId("results-summary"), results: byId("results"), loading: byId("loading-state"),
   error: byId("error-state"), errorMessage: byId("error-message"), empty: byId("empty-state"),
   emptyTitle: byId("empty-title"), emptyMessage: byId("empty-message"), emptyClear: byId("empty-clear"),
@@ -149,9 +152,40 @@ function populateCatalogFilter(element, items, label) {
   element.disabled = false;
 }
 
+const availabilityLabels = {
+  standard: "Standard units", mercs: "Mercenaries", specops: "Spec-Ops",
+  teamops: "Team Operations", reinforcement: "Reinforcements",
+};
+
+function renderAvailabilityRows(element, categories, field, { includeStandard = false } = {}) {
+  element.replaceChildren();
+  for (const [key, label] of Object.entries(availabilityLabels)) {
+    if (!includeStandard && key === "standard") continue;
+    const count = categories[key]?.[field] || 0;
+    if (!count) continue;
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const value = document.createElement("dd");
+    value.textContent = number.format(count);
+    element.append(term, value);
+  }
+}
+
+function renderAvailabilitySummary(data) {
+  const summary = data.availability || {
+    shown: data.total, available: data.total, filtered: 0, categories: {},
+  };
+  elements.unitCount.textContent = `${number.format(summary.shown)} / ${number.format(summary.available)}`;
+  renderAvailabilityRows(elements.unitCountShown, summary.categories, "shown", { includeStandard: true });
+  renderAvailabilityRows(elements.unitCountFiltered, summary.categories, "filtered");
+  elements.unitCountFilteredTotal.textContent = summary.filtered
+    ? `${number.format(summary.filtered)} unique ${summary.filtered === 1 ? "unit is" : "units are"} currently filtered out.`
+    : "No matching units are currently filtered out by availability.";
+}
+
 function renderUnits(data) {
   renderUnitRows(elements.list, data.items);
-  elements.unitCount.textContent = number.format(data.total);
+  renderAvailabilitySummary(data);
   const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {
     elements.summary.textContent = "0 units found";
@@ -187,6 +221,9 @@ async function load() {
   const currentRequest = ++requestNumber;
   showPanel(elements.loading);
   elements.unitCount.textContent = "—";
+  elements.unitCountShown.replaceChildren();
+  elements.unitCountFiltered.replaceChildren();
+  elements.unitCountFilteredTotal.textContent = "";
   elements.summary.textContent = "Loading units…";
   try {
     if (!armiesLoaded) {

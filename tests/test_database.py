@@ -15,11 +15,13 @@ from infinity_db.database import Database, export_database, raw_database_path
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
 from infinity_db.database.repository import (
     army_required_flags,
+    availability_summary,
     canonical_skill_id,
     catalog_merge_key,
     logical_source_loadout_merge_key,
     merged_catalog_name,
     merged_skill_name,
+    minimal_availability_requirements,
     skill_merge_key,
     visible_armies_for_group,
 )
@@ -706,6 +708,18 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
         "total": 3,
         "limit": 1,
         "offset": 1,
+        "availability": {
+            "shown": 3,
+            "available": 3,
+            "filtered": 0,
+            "categories": {
+                "standard": {"shown": 3, "filtered": 0},
+                "mercs": {"shown": 0, "filtered": 0},
+                "specops": {"shown": 0, "filtered": 0},
+                "teamops": {"shown": 0, "filtered": 0},
+                "reinforcement": {"shown": 0, "filtered": 0},
+            },
+        },
     }
 
 
@@ -1480,6 +1494,65 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
     assert all(len(army["profiles"]) == 1 for army in first_army_occurrences)
 
 
+def test_minimal_availability_requirements_drop_redundant_optional_paths() -> None:
+    group = {
+        "names": ["Example Unit"],
+        "slug": "example-unit",
+        "armies": {101: {}},
+        "army_occurrences": [
+            {
+                "id": 101,
+                "source_id": 1,
+                "availability_kind": "standard",
+                "role": "main",
+                "kind": "army",
+                "filters": {},
+            },
+            {
+                "id": 101,
+                "source_id": 2,
+                "availability_kind": "standard",
+                "role": "main",
+                "kind": "army",
+                "filters": {"reinforcement": True},
+            },
+        ],
+    }
+
+    requirements = minimal_availability_requirements(
+        group,
+        {1: 101, 2: 101},
+        {1: {101}, 2: {101}},
+        101,
+    )
+
+    assert requirements == (frozenset(),)
+
+
+def test_availability_summary_uses_unique_units_and_reports_overlapping_categories() -> None:
+    requirements = [
+        (frozenset(),),
+        (frozenset({"specops"}),),
+        (frozenset({"mercs"}), frozenset({"reinforcement"})),
+        (frozenset({"mercs", "reinforcement"}),),
+    ]
+
+    summary = availability_summary(requirements, {"specops"})
+
+    assert summary == {
+        "shown": 2,
+        "available": 4,
+        "filtered": 2,
+        "categories": {
+            "standard": {"shown": 1, "filtered": 0},
+            "mercs": {"shown": 0, "filtered": 2},
+            "specops": {"shown": 1, "filtered": 0},
+            "teamops": {"shown": 0, "filtered": 0},
+            "reinforcement": {"shown": 0, "filtered": 2},
+        },
+    }
+
+
 def test_reinforcement_classification_uses_application_role_with_source_fallback() -> None:
     group = {
         "canonical_faction_id": 301,
@@ -1707,7 +1780,24 @@ def test_empty_import_replaces_previous_database(tmp_path: Path, normalized: dic
     database = Database(path)
     database.validate()
     assert database.list_armies() == []
-    assert database.list_units() == {"items": [], "total": 0, "limit": 50, "offset": 0}
+    assert database.list_units() == {
+        "items": [],
+        "total": 0,
+        "limit": 50,
+        "offset": 0,
+        "availability": {
+            "shown": 0,
+            "available": 0,
+            "filtered": 0,
+            "categories": {
+                "standard": {"shown": 0, "filtered": 0},
+                "mercs": {"shown": 0, "filtered": 0},
+                "specops": {"shown": 0, "filtered": 0},
+                "teamops": {"shown": 0, "filtered": 0},
+                "reinforcement": {"shown": 0, "filtered": 0},
+            },
+        },
+    }
 
 
 def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
@@ -1779,6 +1869,18 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
         "total": 2,
         "limit": 1,
         "offset": 1,
+        "availability": {
+            "shown": 2,
+            "available": 2,
+            "filtered": 0,
+            "categories": {
+                "standard": {"shown": 2, "filtered": 0},
+                "mercs": {"shown": 0, "filtered": 0},
+                "specops": {"shown": 0, "filtered": 0},
+                "teamops": {"shown": 0, "filtered": 0},
+                "reinforcement": {"shown": 0, "filtered": 0},
+            },
+        },
     }
 
 
