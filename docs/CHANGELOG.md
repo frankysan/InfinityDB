@@ -14,6 +14,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Materialize and serve canonical application identity layers for Armies plus
   Skills, Equipment, and Weapons while preserving source projections, source-
   specific labels, and richer weapon/equipment profile metadata.
+- Add a reproducible cold/warm repository benchmark for the 0.6.1
+  canonicalization release gate.
 
 ### Upgrade notes
 
@@ -28,6 +30,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Reject deployments whose database and published graphical assets do not originate
   from the same verified Army snapshot before they can be activated.
 - Count Army unit totals by logical units rather than duplicate source representations.
+- Avoid redundant catalog-graph reads when resolving Traits through the
+  materialized application catalogs.
 
 ## [0.6.0] - 2026-09-19
 

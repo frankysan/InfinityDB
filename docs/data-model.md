@@ -1512,12 +1512,12 @@ fields still equal the representative source and that the alias, note, and
 
 #### Next implementation targets
 
-Canonical unit/profile/loadout payloads, their context mappings, and their
-current unit-list/search/detail/filter/catalog-usage migrations are complete. The
-remaining semantic work for the 0.6.1 runtime pass is now limited to the live
-army/faction boundary and the skill/equipment/weapon catalog-versus-metadata
-boundary. Broader relationship structures remain post-0.6.1 unless a correctness
-dependency is discovered.
+Canonical unit/profile/loadout payloads, their context mappings, application Army
+identity/hierarchy, application catalog identity, and the current runtime read
+migrations are complete for the 0.6.1 serving surface. The remaining release-gate
+work is benchmark/release acceptance rather than unresolved runtime semantics.
+Broader relationship structures remain post-0.6.1 unless a correctness dependency
+is discovered.
 
 ### 0.6.1 runtime serving-surface inventory
 
@@ -1535,15 +1535,18 @@ The initial compatibility-21 trace of the reviewed 2026-09-18 snapshot covered
 baseline identified 43 replaceable fields across 16 source tables in addition to
 the genuine semantic-overlap work.
 
-After migrating the replaceable source reads and then moving Army/faction serving
-onto the materialized application Army layer, the compatibility-23 trace covers
-**49 tables / 192 distinct table-field pairs**. All **43 replaceable source fields
-across 16 tables remain absent from normal serving**: unit search labels come from
-the canonical logical-unit/profile/loadout layers; skill/equipment/weapon filters
-and reverse catalog usage expand canonical payload rows back through their
-occurrence maps; source-specific unit display names are reconstructed from canonical
-logical-unit fields plus explicit name aliases. Top-level `unit_option_*` occurrences
-stay source-contextual by design.
+After migrating the replaceable source reads and moving Army/faction serving onto
+the materialized application Army layer, the compatibility-23 trace covered
+**49 tables / 192 distinct table-field pairs**. The subsequent catalog-identity
+migration in compatibility revision 24 keeps the same 25 serving probes and 49
+runtime tables while reading **196 distinct table-field pairs** because the
+materialized catalog identity/provenance rows are now explicit runtime inputs. All
+**43 replaceable source fields across 16 tables remain absent from normal serving**:
+unit search labels come from the canonical logical-unit/profile/loadout layers;
+skill/equipment/weapon filters and reverse catalog usage expand canonical payload
+rows back through their occurrence maps; source-specific unit display names are
+reconstructed from canonical logical-unit fields plus explicit name aliases.
+Top-level `unit_option_*` occurrences stay source-contextual by design.
 
 The current role totals are **111 canonical-application fields**, **62 explicit
 contextual-application fields**, and **23 intentional-source fields**. The
@@ -1690,12 +1693,43 @@ The audit must distinguish:
 A relationship is not automatically redundant merely because both endpoint
 entities are already visible in the UI.
 
-### 3. Catalog and metadata overlap
+### 3. Application catalog identity and metadata context
 
-Examine overlapping information between Army catalogs, occurrence tables, and
-`metadata_*` collections. Canonicalize only where the sources demonstrably
-describe the same application concept. Preserve source-specific metadata and
-alternate modes where they carry distinct gameplay meaning.
+`application_catalog_items` and `application_catalog_sources` are InfinityDB
+abstractions. Infinity Army does not provide one upstream object that corresponds
+to an InfinityDB application catalog item after reviewed aliases and equivalent
+numeric/parameterized source labels have been combined.
+
+The materializer currently uses these source inputs:
+
+- normalized `skills`, `equipment`, and `weapons` catalog rows;
+- `metadata_skills`, `metadata_equipment`, and `metadata_weapons` enrichment;
+- reviewed catalog alias groups from `config/identity/source-identities.json`.
+
+For each public catalog, explicit reviewed alias groups take precedence. Remaining
+source rows are grouped only by the existing deterministic label rules used by the
+application: numeric skill variants share the label with the numeric component
+removed, while Equipment/Weapon labels additionally allow the text before a
+colon to define the shared identity. The configured canonical ID is retained for
+reviewed groups; otherwise the lowest source ID in the proven-equivalent group is
+used as the current internal application key. The player-facing name is derived
+from the representative source label using the corresponding merge rule.
+
+This derivation creates application identity; it does **not** erase source
+context. `application_catalog_sources` retains every contributing source ID and
+source label plus whether matching metadata existed. Skill/Equipment wiki fields
+and Weapon category are representative-backed application fields. Detailed
+Weapon modes, ammunition, ranges, traits, Equipment-style weapon profiles, and
+other mode-specific values remain in `metadata_weapons` and are joined as
+contextual detail rather than flattened into catalog identity.
+
+The abstraction is deliberately limited to Skills, Equipment, and Weapons used
+by the current runtime. It does not claim that two source records are globally
+identical outside the documented grouping rule, does not canonicalize curated
+rules knowledge, and does not turn source metadata modes into one invariant fact.
+Numeric application IDs remain implementation keys; the planned public slug
+routing layer is responsible for hiding them from ordinary user-facing URLs and
+API lookup.
 
 #### Relationship to version 1.0.0 completeness
 

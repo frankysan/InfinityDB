@@ -1306,15 +1306,22 @@ class Database:
     @instance_lru_cache(maxsize=1)
     def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
         """Return raw Army trait labels mapped to the catalog items that carry them."""
-        source_maps = {
-            catalog: self._application_catalog_graph(catalog)["source_to_item"]
-            for catalog in ("skills", "equipment", "weapons")
-        }
         with self._connect() as connection:
+            source_rows = connection.execute(
+                "SELECT catalog, source_item_id, application_item_id "
+                "FROM application_catalog_sources"
+            ).fetchall()
             rows = connection.execute(
                 "SELECT DISTINCT m.id AS item_id, m.type, m.properties "
                 "FROM metadata_weapons AS m"
             ).fetchall()
+        source_maps: dict[str, dict[int, int]] = {
+            "skills": {},
+            "equipment": {},
+            "weapons": {},
+        }
+        for row in source_rows:
+            source_maps[row["catalog"]][row["source_item_id"]] = row["application_item_id"]
         items_by_trait: dict[str, set[tuple[str, int]]] = {}
         for row in rows:
             try:

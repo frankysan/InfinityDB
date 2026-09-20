@@ -190,3 +190,20 @@ and duration, followed by an overall summary.
 Direct pytest, Ruff, or Pyright commands remain useful when debugging one tool in
 isolation, but normal development and handoff checks should prefer this runner
 so the command set and reporting format stay consistent.
+
+## Runtime repository benchmark
+
+The canonicalization release gate uses a local repository-read benchmark rather
+than a CI timing threshold. Run it against an already-built production-like Army
+database:
+
+```powershell
+python tools/benchmark_runtime.py data\generated\infinity.db
+```
+
+Use `--json` when results need to be archived or compared mechanically. For a
+before/after comparison, use the same Army source snapshot, machine, Python
+environment, and iteration counts. The command reports cold and warm median/p95
+latencies for representative Army, unit, catalog, and Trait read paths plus the
+database size. CI does not assert timing because shared-runner variance would make
+that evidence misleading.

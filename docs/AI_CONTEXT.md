@@ -305,6 +305,14 @@ and serves a read-only browser and same-origin HTTP API.
   layers for application identity/hierarchy, alias resolution, playability,
   faction/group presentation, and catalog detail/list serving without
   collapsing those contexts.
+- Skills, Equipment, and Weapons application identities are InfinityDB
+  abstractions materialized from normalized catalog rows, reviewed catalog alias
+  groups, and metadata enrichment. `application_catalog_sources` preserves each
+  contributing source ID/label; detailed `metadata_weapons` modes and profiles
+  remain contextual rather than being promoted to invariant catalog facts.
+- `tools/benchmark_runtime.py` is the canonical repository-read benchmark for the
+  0.6.1 performance gate. Compare revisions only on the same source snapshot and
+  host; record cold and warm median/p95 results and database size.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

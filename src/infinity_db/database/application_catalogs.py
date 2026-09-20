@@ -110,7 +110,9 @@ def derive_application_catalogs(
         merge_key_for = _skill_merge_key if catalog == "skills" else _catalog_merge_key
         merged_name_for = _merged_skill_name if catalog == "skills" else _merged_catalog_name
         for row in rows:
-            configured = _configured_catalog_group(identity_config, catalog, row["id"], available_ids)
+            configured = _configured_catalog_group(
+                identity_config, catalog, row["id"], available_ids
+            )
             if configured is not None:
                 key = ("alias", configured[0])
                 explicit_groups[key] = configured
@@ -121,9 +123,17 @@ def derive_application_catalogs(
         for key in sorted(groups, key=lambda item: (item[0], str(item[1]))):
             group = sorted(groups[key], key=lambda row: row["id"])
             configured = explicit_groups.get(key)
-            canonical_id = configured[0] if configured is not None else min(row["id"] for row in group)
+            canonical_id = (
+                configured[0]
+                if configured is not None
+                else min(row["id"] for row in group)
+            )
             representative = next((row for row in group if row["id"] == canonical_id), group[0])
-            name = merged_name_for(representative["name"]) if len(group) > 1 else representative["name"]
+            name = (
+                merged_name_for(representative["name"])
+                if len(group) > 1
+                else representative["name"]
+            )
             items.append(
                 {
                     "catalog": catalog,

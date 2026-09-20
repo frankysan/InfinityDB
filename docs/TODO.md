@@ -223,19 +223,20 @@ block this interim release.
 - [x] Inventory every Army-database table/field/relationship read by the current
   runtime surfaces: armies, unit visibility/list/search/detail, availability and
   faction context, filters, and the current skill/equipment/weapon/trait catalog
-  paths. After the Army read migration, the compatibility-23 trace covers 25
-  serving probes, 49 tables, and 192 distinct table-field reads.
-- [ ] Document semantic provenance for every non-source-native runtime concept
+  paths. After the catalog read migration, the compatibility-24 trace covers 25
+  serving probes, 49 tables, and 196 distinct table-field reads.
+- [x] Document semantic provenance for every non-source-native runtime concept
   relied on or changed by the 0.6.1 pass, including logical/canonical payload
   abstractions, army role/playability and `main_army_id`, display identity, and
   the browser `General profile` abstraction. Keep source inputs, derivation,
   assumptions/fallbacks, and semantic limits explicit.
-- [ ] Resolve the open classifications from that runtime inventory.
+- [x] Resolve the open classifications from that runtime inventory.
   - [x] Record every observed field as canonical application data, explicit
-    contextual application data, or intentional source representation; 166 / 192
-    current field reads have no open semantic issue. Army/faction identity and
-    hierarchy now serve through the materialized application layer, leaving 26
-    open fields across the 6 skill/equipment/weapon catalog and metadata tables.
+    contextual application data, or intentional source representation; all
+    196 / 196 current field reads now have no open semantic issue. Army/faction
+    identity/hierarchy and skill/equipment/weapon catalog identity serve through
+    materialized application layers while source metadata with distinct context
+    remains separate.
   - [x] Replace the 43 duplicate source reads across 16 profile/loadout/unit
     source tables with their already-materialized canonical equivalents. Search
     labels, unit skill/equipment/weapon filters, skill extras, and catalog reverse
@@ -267,19 +268,26 @@ block this interim release.
     - [x] Preserve `unit_factions` and the broader `factions` identity registry as
       game-wide relationship/context data; neither is reduced to currently
       selectable Army lists by the read migration.
-  - [ ] Audit the live skill/equipment/weapon catalog boundary against
-    `metadata_skills`, `metadata_equipment`, and `metadata_weapons`; preserve
-    source metadata/modes that are not duplicate catalog identity.
+  - [x] Audit the live skill/equipment/weapon catalog boundary against
+    `metadata_skills`, `metadata_equipment`, and `metadata_weapons`; canonical
+    application identity now lives in `application_catalog_items` with explicit
+    source mappings, while source-specific labels and weapon/equipment metadata
+    profiles remain contextual and lossless.
   - [x] Keep top-level `unit_options` and their nested catalog occurrences as
     intentional source-context data for this pass; their dedicated semantic
     audit remains Milestone 2B unless a current-runtime correctness issue is
     found.
-- [ ] Complete any relationship or catalog/metadata canonicalization that the
+- [x] Complete any relationship or catalog/metadata canonicalization that the
   runtime inventory shows is still required for the current application. Broader
-  unused/source-only relationship and metadata work may remain for Milestone 2B.
+  unused/source-only relationship and metadata work remains for Milestone 2B.
 - [ ] Run representative before/after runtime benchmarks for the canonical pass
   and record the result. Treat performance gains as release evidence, not as a
   substitute for semantic correctness or losslessness.
+  - [x] Add a reproducible repository-read benchmark covering cold and warm Army,
+    unit list/search/detail, Skills/Equipment/Weapons catalog/detail, and Traits
+    paths against any supplied `infinity.db` snapshot.
+  - [ ] Run the benchmark on the same production-like snapshot and host before
+    and after the canonical pass, then record median/p95 timings and database size.
 - [ ] Run the complete local/CI/rebuild acceptance set, review `Unreleased` as a
   coherent 0.6.1 release note, document required database rebuild/upgrade steps,
   and cut version 0.6.1.

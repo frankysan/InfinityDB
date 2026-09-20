@@ -108,10 +108,11 @@ contain canonical facts, contextual deltas, and relationships while still being
 an InfinityDB-defined concept rather than a source-native one.
 
 Current examples include source-derived army role/playability and
-`main_army_id`; the materialized application Army identity/hierarchy, the
-materialized logical unit, and the browser's `General profile` are InfinityDB
-abstractions; and `display_army_id` / `display_faction` are presentation
-conveniences. For the Army data model, these categories refer
+`main_army_id`; the materialized application Army identity/hierarchy,
+materialized Skills/Equipment/Weapons catalog identity, the materialized logical
+unit, and the browser's `General profile` are InfinityDB abstractions; and
+`display_army_id` / `display_faction` are presentation conveniences. For the Army
+data model, these categories refer
 to Army/metadata provenance; curated rules knowledge retains its own cited
 external-source provenance.
 
@@ -439,6 +440,14 @@ deduplication** to **semantic payload deduplication** for unit-detail data.
 Application Army identities and application catalog identities extend the model
 further into Army/faction presentation and rule-reference catalog serving.
 Canonicalizing wider relationships remains the next semantic stage.
+
+Runtime-performance evidence for this work is collected separately from semantic
+acceptance. `tools/benchmark_runtime.py` measures representative repository read
+paths against an already-built `infinity.db`, reporting cold and warm median/p95
+timings. Before/after comparisons are meaningful only when both revisions use the
+same database source snapshot and run on the same host under comparable load; the
+benchmark is release evidence, never a substitute for equivalence or provenance
+checks.
 
 Semantic deduplication must be evidence-driven and lossless:
 
