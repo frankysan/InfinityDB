@@ -327,8 +327,15 @@ completed implementation checklists have been removed from this active backlog.
   - [x] Add a read-only include/peripheral relationship audit that resolves source-local
     include targets through canonical loadout payload occurrences and measures army-local
     peripheral identity repetition/context variation without promoting a heuristic identity.
+  - [x] Add a dedicated read-only peripheral semantics audit that separates army-local
+    definitions, explicit profile/loadout attachments, definition-only availability,
+    canonical-parent attachment stability, and unresolved global-option peripheral
+    references. Do not infer controller eligibility from Army source data; any rules-derived
+    eligibility must enter through reviewed `data/curated/` data.
   - [ ] Revisit includes and peripherals and distinguish visible endpoint data
-    from the independently meaningful relationship between those endpoints.
+    from the independently meaningful relationship between those endpoints. Use the
+    dedicated peripheral audit before choosing canonical peripheral identity, availability,
+    attachment, or controller-eligibility structures.
   - [ ] Audit relation/dependency structures.
   - [ ] Audit Fireteam structures.
   - [ ] Identify normalization-only link structures that do not constitute
