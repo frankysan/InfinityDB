@@ -201,23 +201,29 @@ this active backlog.
     source-variant meaning. The 2026-09-18 production snapshot contains 920
     source units resolving to 737 logical units; 167 logical units have multiple
     source representations.
-  - [ ] Define the canonical unit payload around the existing deterministic
-    representative-source rule without treating representative selection as
-    permission to discard source-specific facts.
-  - [ ] Preserve alternate source names, ISC values, abbreviations, and slugs as
-    explicit searchable/traceable context. All 167 multi-source logical units
-    currently contribute at least one alternate general label.
-  - [ ] Model source-specific unit notes explicitly. Six logical units currently
-    have note variation, including four where a player-facing note exists only
-    on a non-representative reinforcement source row.
-  - [ ] Decide the canonical/presentation treatment of `spectables` and top-level
-    `unit_options` before migrating unit reads. `spectables` is populated only
-    on singleton logical units in the audited snapshot, while unit options
-    include both exact repeats and a genuine source-specific points delta.
-  - [ ] Keep army membership, availability, source variants, and genuine
-    profile/loadout differences as explicit context.
+  - [x] Define the canonical payload/context boundary around the existing
+    deterministic representative-source rule. The accepted design keeps
+    representative-backed display/general fields on `logical_units`; alternate
+    labels, source notes, and `spectables` remain explicit source-attributed
+    context, while top-level `unit_options` stay separate source payloads.
+  - [ ] Materialize representative-backed canonical unit fields without treating
+    representative selection as permission to discard source-specific facts.
+  - [ ] Materialize alternate source names, ISC values, abbreviations, and slugs
+    as explicit searchable/traceable aliases. The audited snapshot projects 472
+    source-attributed alias occurrences / 467 distinct logical-unit alias values.
+  - [ ] Materialize source-specific unit notes. The audited snapshot has 30
+    non-empty source-note occurrences across 28 logical units, including four
+    player-facing notes that exist only on non-representative reinforcement rows.
+  - [ ] Preserve the 30 current `spectables` payloads as exact opaque
+    source-context data until their internal schema/presentation semantics have
+    enough evidence for a stronger canonical model.
+  - [ ] Keep top-level `unit_options`, army membership, availability, source
+    variants, and genuine profile/loadout differences as explicit context.
   - [ ] Preserve source IDs and full traceability from canonical facts back to
     supporting source occurrences.
+  - [ ] Migrate unit list/search/detail reads to the canonical logical-unit layer
+    and prove current output/search equivalence before removing source-unit
+    runtime dependencies.
 
 - [ ] **Audit relationships after entity canonicalization.**
   - [ ] Revisit includes and peripherals and distinguish visible endpoint data

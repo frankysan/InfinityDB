@@ -1323,6 +1323,101 @@ The audit establishes the following design constraints for the next step:
 - `relation_reference_count` is not a canonical fact; the underlying
   relationships, not the summary count, are the semantic object to audit.
 
+### Canonical logical-unit payload/context design
+
+**Design direction.** The canonical unit layer should materialize one
+application-owned row per existing logical unit without copying the complete
+source `units` row. The canonical row is representative-backed, while source
+labels and player-facing source deltas remain explicit context.
+
+The proposed application boundary is:
+
+```text
+logical_units
+  id
+  representative_unit_id
+  name
+  isc
+  isc_abbr
+  slug
+  canonical_faction_id
+  main_army_id
+  display_army_id
+
+logical_unit_sources
+  source_unit_id
+  logical_unit_id
+
+logical_unit_aliases
+  logical_unit_id
+  source_unit_id
+  field                  name | isc | isc_abbr | slug
+  value
+
+logical_unit_notes
+  logical_unit_id
+  source_unit_id
+  note
+
+logical_unit_spectables
+  logical_unit_id
+  source_unit_id
+  spectables
+```
+
+`logical_units` therefore owns only the general display/application values that
+already follow the deterministic representative-source rule. The representative
+source remains explicit provenance; its selection does not turn the
+representative's entire source row into canonical truth.
+
+Alternate labels are stored only when a non-representative source value differs
+from the corresponding canonical field. The source ID and field name remain on
+the alias row rather than collapsing aliases into an unattributed search-term
+set. On the audited production snapshot this projects to 472 alias occurrences
+across all 167 multi-source logical units, representing 467 distinct
+`(logical_unit, value)` search terms.
+
+Notes do not belong on the canonical logical-unit row. Every non-empty source
+note remains attached to the source occurrence that supplied it. The production
+snapshot contains 30 note occurrences across 28 logical units and 28 distinct
+`(logical_unit, note)` facts. This preserves both exact duplicate source
+evidence and the four currently hidden non-representative-only notes without
+asserting that a source-specific restriction applies universally.
+
+`spectables` is likewise kept off the canonical row for the first
+implementation. The 30 current payloads are preserved exactly with
+logical/source attribution. Because all 30 occur only on singleton logical
+units, there is no evidence yet for either canonical promotion or cross-source
+deduplication. Treat the payload as opaque until its schema and presentation
+semantics are audited.
+
+Top-level `unit_options` and their nested relationships also remain separate
+source-context payloads. The first logical-unit materialization must not infer
+cross-source option identity from `option_id`, and the observed `60` versus
+`51` points difference for EQUIPE MIRAGE-5 must remain representable. A later
+dedicated audit may canonicalize repeated option payloads if there is enough
+evidence, but that is not part of the canonical logical-unit row.
+
+Source-specific faction/main/display derivations, `unit_factions`, and
+`army_units` remain deferred relationship context. The canonical row carries
+the representative-backed values needed by current list/detail presentation,
+while the subsequent relationship audit owns the lossless model for the
+source-specific relationships.
+
+The version-2 unit semantics audit emits this candidate model directly. On the
+2026-09-18 production snapshot it projects:
+
+- 737 canonical logical-unit rows;
+- 920 source links;
+- 472 alternate-label occurrences / 467 distinct logical-unit alias values;
+- 30 source-note occurrences across 28 logical units;
+- 30 exact source-context `spectables` occurrences; and
+- 18 top-level `unit_options` rows left as source-context payloads.
+
+These counts are design evidence for the audited snapshot, not permanent schema
+cardinalities. Future source variation must be represented explicitly rather
+than forced into the current counts.
+
 #### Next implementation targets
 
 Canonical profile and loadout payloads, their occurrence mappings, and the
@@ -1330,12 +1425,13 @@ unit-detail read-path migrations are complete. The remaining semantic work is:
 
 ### 1. Canonical unit payload
 
-The field audit is complete. Define the canonical unit payload around the
-existing representative-source rule, add explicit source-context structures for
-alternate search labels and note deltas, and decide how `spectables` and
-top-level `unit_options` are represented before migrating repository reads. Army
-memberships, availability occurrences, source-specific relationships, and
-genuine differences remain separate.
+The field audit and payload/context design are complete. Materialize the
+representative-backed canonical fields on `logical_units`, add the explicit
+alias/note/`spectables` context structures above, and then migrate unit
+list/search/detail reads away from source `units` fields. Prove output/search
+equivalence before removing any source-only runtime dependency. Top-level
+`unit_options`, Army memberships, availability occurrences, source-specific
+relationships, and genuine differences remain separate context.
 
 ### 2. Relationships
 

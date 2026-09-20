@@ -20,7 +20,7 @@ from infinity_db.identities import (
 )
 
 REPORT_FORMAT = "InfinityDB logical-unit semantics audit"
-REPORT_FORMAT_VERSION = 1
+REPORT_FORMAT_VERSION = 2
 
 UNIT_FIELDS = (
     "id",
@@ -871,6 +871,126 @@ def _unit_option_evidence(
     }
 
 
+
+def _candidate_model_evidence(
+    units: Mapping[int, Mapping[str, Any]],
+    representatives: Mapping[int, int],
+    groups: Mapping[int, list[int]],
+    unit_options: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Describe the accepted logical-unit payload/context boundary from audited evidence."""
+    canonical_fields = (
+        "name",
+        "isc",
+        "isc_abbr",
+        "slug",
+        "canonical_faction_id",
+        "main_army_id",
+        "display_army_id",
+    )
+    alias_fields = ("name", "isc", "isc_abbr", "slug")
+
+    aliases: list[tuple[int, int, str, Any]] = []
+    note_occurrences: list[tuple[int, int, Any]] = []
+    spectable_occurrences: list[tuple[int, int, Any]] = []
+    for logical_id, source_ids in sorted(groups.items()):
+        representative_id = representatives[logical_id]
+        representative = units[representative_id]
+        for source_id in source_ids:
+            source = units[source_id]
+            if source_id != representative_id:
+                for field in alias_fields:
+                    value = source[field]
+                    if value and value != representative[field]:
+                        aliases.append((logical_id, source_id, field, value))
+            if source["notes"]:
+                note_occurrences.append((logical_id, source_id, source["notes"]))
+            if source["spectables"]:
+                spectable_occurrences.append(
+                    (logical_id, source_id, source["spectables"])
+                )
+
+    return {
+        "canonicalLogicalUnit": {
+            "table": "logical_units",
+            "rowCount": len(groups),
+            "fields": list(canonical_fields),
+            "sourcePolicy": (
+                "Copy canonical display/general values from the existing deterministic "
+                "representative source. Representative selection governs the application "
+                "value but does not erase other source occurrences."
+            ),
+            "notesExcluded": True,
+            "spectablesExcluded": True,
+        },
+        "sourceLinks": {
+            "table": "logical_unit_sources",
+            "rowCount": sum(len(source_ids) for source_ids in groups.values()),
+            "policy": (
+                "Retain every source-unit mapping as the provenance and source-occurrence "
+                "bridge. Canonical logical-unit identity is not source occurrence identity."
+            ),
+        },
+        "aliases": {
+            "table": "logical_unit_aliases",
+            "fields": ["logical_unit_id", "source_unit_id", "field", "value"],
+            "sourceFields": list(alias_fields),
+            "occurrenceCount": len(aliases),
+            "distinctLogicalValueCount": len(
+                {(logical_id, value) for logical_id, _source_id, _field, value in aliases}
+            ),
+            "logicalUnitCount": len({logical_id for logical_id, *_rest in aliases}),
+            "policy": (
+                "Store only non-representative values that differ from the canonical field. "
+                "Keep field and source attribution so search aliases remain traceable."
+            ),
+        },
+        "notes": {
+            "table": "logical_unit_notes",
+            "fields": ["logical_unit_id", "source_unit_id", "note"],
+            "occurrenceCount": len(note_occurrences),
+            "logicalUnitCount": len(
+                {logical_id for logical_id, _source_id, _note in note_occurrences}
+            ),
+            "distinctLogicalValueCount": len(
+                {(logical_id, note) for logical_id, _source_id, note in note_occurrences}
+            ),
+            "policy": (
+                "Keep every non-empty source note attached to its source occurrence. Do not "
+                "promote one representative note to a universal logical-unit fact."
+            ),
+        },
+        "spectables": {
+            "table": "logical_unit_spectables",
+            "fields": ["logical_unit_id", "source_unit_id", "spectables"],
+            "occurrenceCount": len(spectable_occurrences),
+            "logicalUnitCount": len(
+                {logical_id for logical_id, _source_id, _payload in spectable_occurrences}
+            ),
+            "policy": (
+                "Preserve exact source payloads as opaque source-context data. Current "
+                "singleton-only evidence is insufficient to declare spectables canonical."
+            ),
+        },
+        "unitOptions": {
+            "currentTable": "unit_options",
+            "rowCount": unit_options["rowCount"],
+            "sourceUnitCount": unit_options["sourceUnitCount"],
+            "logicalUnitCount": unit_options["logicalUnitCount"],
+            "policy": (
+                "Keep top-level unit options and nested relationships as source-context "
+                "payloads. Do not fold them into the canonical logical-unit row or infer "
+                "cross-source option identity from source-local option_id."
+            ),
+        },
+        "deferredRelationshipContext": [
+            "source canonical/main/display faction relationships",
+            "unit_factions",
+            "army_units including filters and availability_kind",
+        ],
+    }
+
+
 def _army_unit_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
     row = connection.execute(
         "SELECT COUNT(*) AS row_count, COUNT(DISTINCT unit_id) AS unit_count FROM army_units"
@@ -914,6 +1034,7 @@ def audit_database(path: Path) -> dict[str, Any]:
         metadata = _snapshot_metadata(connection)
         group_sizes = Counter(len(source_ids) for source_ids in groups.values())
 
+        unit_options = _unit_option_evidence(connection, groups)
         report = {
             "format": REPORT_FORMAT,
             "formatVersion": REPORT_FORMAT_VERSION,
@@ -952,8 +1073,14 @@ def audit_database(path: Path) -> dict[str, Any]:
             "relationships": {
                 "unit_factions": _faction_evidence(connection, groups),
                 "army_units": _army_unit_evidence(connection),
-                "unit_options": _unit_option_evidence(connection, groups),
+                "unit_options": unit_options,
             },
+            "candidateModel": _candidate_model_evidence(
+                units,
+                representatives,
+                groups,
+                unit_options,
+            ),
             "promotionConstraints": {
                 "representativeBackedDisplayFields": [
                     "name",
@@ -1031,6 +1158,14 @@ def main(argv: list[str] | None = None) -> int:
         f"{options['rowCount']} rows across {options['logicalUnitCount']} logical units | "
         f"{options['variantRepeatedLogicalUnitCollectionCount']} repeated logical unit "
         "collection(s) vary"
+    )
+    candidate = report["candidateModel"]
+    print(
+        "Candidate model: "
+        f"{candidate['canonicalLogicalUnit']['rowCount']} canonical rows | "
+        f"{candidate['aliases']['occurrenceCount']} alias occurrences | "
+        f"{candidate['notes']['occurrenceCount']} note occurrences | "
+        f"{candidate['spectables']['occurrenceCount']} spectables occurrences"
     )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)

@@ -222,8 +222,20 @@ and serves a read-only browser and same-origin HTTP API.
   top-level unit options remain contextual. `spectables` is populated on 30
   source units but only singleton logical units in this snapshot, so it must be
   preserved while its canonical/presentation treatment remains unresolved.
-  Canonical unit-payload work remains staged behind explicit modeling of these
-  aliases/deltas and the same provenance requirements.
+  **Design direction:** materialize representative-backed `name`, `isc`,
+  `isc_abbr`, `slug`, `canonical_faction_id`, `main_army_id`, and
+  `display_army_id` on the canonical logical-unit row. Keep every source mapping
+  explicit; store non-representative differing labels as source-attributed
+  aliases; keep every non-empty source note in source-attributed note context;
+  and preserve `spectables` as exact opaque source context rather than promoting
+  it from singleton-only evidence. Top-level `unit_options` remain separate
+  source-context payloads and source-local `option_id` must not be treated as
+  canonical option identity. The 2026-09-18 snapshot projects 737 canonical
+  rows, 920 source links, 472 alias occurrences (467 distinct logical-unit
+  values), 30 note occurrences, 30 `spectables` occurrences, and 18 top-level
+  unit-option rows left contextual. Unit list/search/detail migration must prove
+  existing output and search equivalence before source-unit runtime reads are
+  removed.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data

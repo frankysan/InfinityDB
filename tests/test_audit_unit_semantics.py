@@ -355,6 +355,18 @@ def test_unit_semantics_audit_classifies_representative_and_contextual_data(
         "variantRepeatedObservationalKeyCount"
     ] == 0
 
+    candidate = report["candidateModel"]
+    assert candidate["canonicalLogicalUnit"]["rowCount"] == 6
+    assert candidate["sourceLinks"]["rowCount"] == 11
+    assert candidate["aliases"]["occurrenceCount"] == 11
+    assert candidate["aliases"]["distinctLogicalValueCount"] == 11
+    assert candidate["aliases"]["logicalUnitCount"] == 5
+    assert candidate["notes"]["occurrenceCount"] == 1
+    assert candidate["notes"]["logicalUnitCount"] == 1
+    assert candidate["spectables"]["occurrenceCount"] == 1
+    assert candidate["spectables"]["logicalUnitCount"] == 1
+    assert candidate["unitOptions"]["rowCount"] == 4
+
 
 def test_unit_semantics_audit_is_deterministic_and_read_only(tmp_path: Path) -> None:
     database = _fixture_database(tmp_path)
@@ -387,5 +399,5 @@ def test_unit_semantics_audit_cli_writes_report(tmp_path: Path, capsys) -> None:
     assert main([str(database), "--output", str(output)]) == 0
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["format"] == "InfinityDB logical-unit semantics audit"
-    assert report["formatVersion"] == 1
+    assert report["formatVersion"] == 2
     assert "920 source" not in capsys.readouterr().out
