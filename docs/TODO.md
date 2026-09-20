@@ -285,9 +285,11 @@ block this interim release.
   substitute for semantic correctness or losslessness.
   - [x] Add a reproducible repository-read benchmark covering cold and warm Army,
     unit list/search/detail, Skills/Equipment/Weapons catalog/detail, and Traits
-    paths against any supplied `infinity.db` snapshot.
+    paths against any supplied `infinity.db` snapshot, plus a deterministic
+    report-comparison tool for database-size and median/p95 deltas.
   - [ ] Run the benchmark on the same production-like snapshot and host before
-    and after the canonical pass, then record median/p95 timings and database size.
+    and after the canonical pass, compare the archived JSON reports, then record
+    median/p95 timings and database size.
 - [ ] Run the complete local/CI/rebuild acceptance set, review `Unreleased` as a
   coherent 0.6.1 release note, document required database rebuild/upgrade steps,
   and cut version 0.6.1.

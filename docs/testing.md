@@ -207,3 +207,31 @@ environment, and iteration counts. The command reports cold and warm median/p95
 latencies for representative Army, unit, catalog, and Trait read paths plus the
 database size. CI does not assert timing because shared-runner variance would make
 that evidence misleading.
+
+The **before** benchmark must execute with the pre-change implementation. Do not
+open an older-schema database with the current repository merely to obtain a
+number: runtime validation intentionally rejects incompatible databases. Build
+the same Army snapshot in the pre-change checkout and run the same
+`benchmark_runtime.py` script with that checkout's `src` directory first on
+`PYTHONPATH`. On PowerShell, one reproducible approach is:
+
+```powershell
+$env:PYTHONPATH = "C:\path	oefore-checkout\src"
+python C:\path	o\current-checkout	oolsenchmark_runtime.py C:\path	oefore-checkout\data\generated\infinity.db --json > reports\BENCHMARK-before.json
+Remove-Item Env:PYTHONPATH
+```
+
+Generate the after report normally from the current checkout, then compare the
+two reports:
+
+```powershell
+python toolsenchmark_runtime.py data\generated\infinity.db --json > reports\BENCHMARK-after.json
+python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json
+python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json --json > reports\BENCHMARK-comparison.json
+```
+
+The comparison requires the same case set and cold/warm iteration counts. It
+reports database-size change and per-case median/p95 percentage deltas; negative
+timing deltas are faster and positive deltas are slower. It deliberately does
+not impose a pass/fail performance threshold: release review should interpret
+the measured tradeoffs alongside semantic correctness and losslessness.
