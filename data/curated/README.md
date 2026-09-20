@@ -11,7 +11,9 @@ provenance under `data/manifests/`.
 `infinity-db build-rules`. `identities/` contains reviewed source-derived
 presentation relationships consumed during Army normalization. These categories
 have separate schemas and loaders; neither loader treats arbitrary JSON from the
-other curated categories as valid input.
+other curated categories as valid input. Curated identifiers are stable
+project/domain identities; numeric IDs in `armyLinks` or source mappings remain
+external-source references and must not become the curated record identity.
 
 The sections below document the implemented `curated/rules/` contract.
 
@@ -23,7 +25,6 @@ notes associated with immutable snapshots by SHA-256. Those notes remain
 separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
-
 
 ### Curated display identities
 
@@ -158,7 +159,6 @@ Supported record kinds include `rule`, `skill`, `skill-declaration-category`,
 `equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
 `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
-
 
 Weapon records may use `facts.specialProfile` for rulebook-defined deployable
 profiles that are not fully represented by Army weapon metadata. The special

@@ -79,8 +79,9 @@ and serves a read-only browser and same-origin HTTP API.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
 - Server migration distinguishes exact runtime transfer from rebuildability.
-  Exact runtime preservation copies the generated databases and complete local
-  published symbol inventory on the same Git revision; reproducible rebuilds
+  Exact runtime preservation copies the generated databases, terminal symbol
+  build manifest, and complete local published symbol inventory on the same Git
+  revision; reproducible rebuilds
   additionally preserve immutable Army/SYMBOLS snapshots, generated provenance,
   `army-symbol-build.json`, and local overrides. Cross-machine SVG regeneration
   is not promised byte-identical because fonts and external processor versions
@@ -198,8 +199,9 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. Schema version 14 / compatibility revision 22 materializes
-  representative-backed canonical logical-unit fields plus source-attributed
+  dynamically. Introduced in schema version 14 / compatibility revision 22, the
+  canonical layer materializes representative-backed logical-unit fields plus
+  source-attributed
   alias/note/`spectables` context, as well as reusable canonical profile and
   loadout payloads scoped to each logical unit plus one occurrence row per
   source profile/loadout. Profile AVA/logo and loadout points/SWC remain
@@ -756,3 +758,20 @@ application-level identities.
   build as `INFINITY_DB_DISPLAY_VERSION`; installed/containerized code prefers that
   value when rendering the browser footer. The package/API `__version__` remains the
   released semantic version and is not changed by this deployment metadata.
+- 2026-09-20: Public identity direction is domain-unique slugs rather than
+  user-facing numeric database IDs. Source numeric IDs remain provenance/foreign
+  references; typed InfinityDB identities such as `skill:doctor` may namespace
+  curated/application concepts internally, while public domain routes can use
+  forms such as `/skills/doctor`. Slug stability/collision policy is defined per
+  domain before migrating existing numeric routes.
+- 2026-09-20: Peripheral rule semantics belong in the existing curated v3
+  `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
+  rules authority, the pinned Wiki archive as discovery/secondary provenance,
+  and FAQ rulings kept as dated clarification records. Reviewed Army-local
+  Peripheral-to-canonical-entity/profile mappings are a separate future curated
+  identity contract; Wiki/rules knowledge is never written into Army source
+  tables. The current 2026-09-18 Army audit finds 279 army-local definitions, 56
+  names, 818 resolved loadout attachments, no profile attachments, all 279
+  definitions attached somewhere, 41 names with multiple raw identities, three
+  names with `mercs` variation, and 22 canonical loadout payloads with differing
+  semantic attachment signatures.

@@ -51,7 +51,9 @@ proved that the singular value is the correct game-wide fact.
 - Profile group, profile and loadout option IDs are local to their army/unit
   hierarchy and use composite keys in normalized data.
 - Skills, weapons, equipment, ammunition, characteristics, troop types,
-  categories and extras use stable global lookup IDs.
+  categories and extras use source-native numeric lookup IDs within their source
+  catalogs. Those IDs remain source references; they are not the long-term public
+  identity contract for InfinityDB resources.
 - Skill, equipment, and weapon occurrences retain their owning profile,
   loadout, or unit option, display order, quantity, and linked extras. This
   supports both unit details and reverse lookup from the rules-reference
@@ -933,9 +935,10 @@ public profile object shape, ordering, AVA handling, display-name normalization,
 and merged logical-source behavior are intentionally unchanged.
 
 The lossless `profiles` and nested `profile_*` source tables remain in the
-frontend database for provenance, validation, contextual relationships that have
-not yet been canonicalized, and repository paths such as catalog reverse
-lookups. `get_unit()` no longer uses those source payload rows to assemble its
+frontend database for provenance, validation, and contextual relationships that
+have not yet been canonicalized. Normal catalog reverse usage now expands the
+canonical profile/loadout occurrence layers instead. `get_unit()` no longer uses
+those source payload rows to assemble its
 profile objects. This is a staged read-path migration rather than permission to
 remove the source representation.
 
@@ -1015,8 +1018,10 @@ still differ after resolving each ID to the referenced peripheral definition.
 The 104 collapsed cases are therefore local-identity/provenance differences,
 not evidence of different peripheral names or roles. The remaining seven all
 involve the same `TURTLEMEK` name with an Army-context difference in the
-peripheral definition's `mercs` value. Canonical peripheral identity remains a
-later relationship task; the audit resolution is diagnostic only.
+peripheral definition's `mercs` value. This was a diagnostic comparison, not an
+identity rule. The later dedicated Peripheral audit separates `mercs` as source
+context and treats name only as a grouping candidate pending reviewed entity
+mapping.
 
 ##### Loadout fields
 
@@ -1410,7 +1415,7 @@ The audit establishes the following design constraints for the next step:
 
 ### Canonical logical-unit payload/context design
 
-**Current materialization.** Schema version 14 materializes one
+**Current materialization.** Introduced in schema version 14, InfinityDB materializes one
 application-owned row per existing logical unit without copying the complete
 source `units` row. The canonical row is representative-backed, while source
 labels and player-facing source deltas remain explicit context.
@@ -1513,12 +1518,11 @@ fields still equal the representative source and that the alias, note, and
 #### Next implementation targets
 
 Canonical unit/profile/loadout payloads, their context mappings, application Army
-identity/hierarchy, application catalog identity, and the current runtime read
-migrations are complete for the 0.6.1 serving surface. The representative runtime
-benchmark is also complete; the remaining release-gate work is final local/hosted
-acceptance and release execution rather than unresolved runtime semantics. Broader
-relationship structures remain post-0.6.1 unless a correctness dependency is
-identified.
+identity/hierarchy, application catalog identity, and the audited runtime read
+migrations were completed and released in 0.6.1 on 2026-09-20. The representative
+runtime benchmark, local/hosted acceptance, release tag, deployment, and deployed
+update verification are complete. Milestone 2B now covers broader relationships,
+source-only structures, the eventual `infinity.raw.db` split, and 1.0 completeness.
 
 ### 0.6.1 runtime benchmark evidence
 
@@ -1614,7 +1618,7 @@ membership.
 In semantic-provenance terms, the source list/metadata projections and their
 membership/occurrence relationships are source-native evidence; current
 role/playability and `main_army_id` are source-derived InfinityDB semantics; the
-planned canonical application army identity/hierarchy is an InfinityDB
+materialized canonical application army identity/hierarchy is an InfinityDB
 abstraction; and display-army selection remains a presentation convenience.
 Those categories must remain visible even when several concepts share IDs or
 names.
@@ -1658,8 +1662,8 @@ canonical/origin context and can point to identities without an Army list (IDs 1
 and 903 in this snapshot). It is not sufficient evidence for playability, Army
 membership, or application ownership.
 
-Schema version 15 / compatibility revision 23 materializes that reviewed
-application Army abstraction without rewriting either source projection:
+The reviewed application Army abstraction was introduced in schema version 15 /
+compatibility revision 23 without rewriting either source projection:
 
 ```text
 application_armies
@@ -1698,7 +1702,7 @@ the application layer. `army_units` still supplies concrete list availability an
 legacy `army_lists.kind` source-shape field remains exposed for compatibility and
 as a reinforcement fallback where an explicit parent relationship is unavailable.
 
-### 1. Relationships
+### Relationship audit after entity canonicalization
 
 Re-evaluate includes, peripherals, dependencies, relations, Fireteams, and
 similar structures after the entities they reference have stable canonical
@@ -1714,7 +1718,33 @@ The audit must distinguish:
 A relationship is not automatically redundant merely because both endpoint
 entities are already visible in the UI.
 
-### 3. Application catalog identity and metadata context
+#### Current Milestone 2B relationship evidence
+
+The read-only audits against the 2026-09-18 Army snapshot establish a clean
+starting point without yet changing runtime schema. Include targets resolve
+completely through the canonical loadout/profile occurrence layer: 2/2 profile
+includes, 949/949 loadout includes, and 35/35 shared unit-option includes resolve
+with no missing targets, raw fallbacks, cross-logical-unit targets, or ambiguous
+shared targets. The resolved profile/loadout includes point to 1 and 101 distinct
+canonical target payloads respectively. This is sufficient evidence to design
+canonical include relationships without inventing target identity.
+
+Peripherals require a separate boundary. The same snapshot has 279 army-local
+definitions / 56 names and 818 resolved loadout attachments, with no profile
+attachments and no definition-only rows. All 279 definitions are referenced by at
+least one loadout attachment. Forty-one names span multiple raw identities and
+three names vary in source `mercs` context. Most importantly, 22 repeated
+canonical loadout payloads have different semantic Peripheral attachment
+signatures (32 differ when representation/context fields are included). Therefore
+Peripheral attachment cannot yet be moved blindly onto the canonical loadout
+payload, and name remains only a diagnostic grouping candidate until the separate
+reviewed source-to-Peripheral identity/profile mapping is defined.
+
+Controller eligibility is not represented by these Army relationships and must
+enter through reviewed curated rules data. The current design for that rules side
+is documented in `docs/peripheral-curated-data-design.md`.
+
+### Application catalog identity and metadata context
 
 `application_catalog_items` and `application_catalog_sources` are InfinityDB
 abstractions. Infinity Army does not provide one upstream object that corresponds
@@ -1748,9 +1778,13 @@ The abstraction is deliberately limited to Skills, Equipment, and Weapons used
 by the current runtime. It does not claim that two source records are globally
 identical outside the documented grouping rule, does not canonicalize curated
 rules knowledge, and does not turn source metadata modes into one invariant fact.
-Numeric application IDs remain implementation keys; the planned public slug
-routing layer is responsible for hiding them from ordinary user-facing URLs and
-API lookup.
+Numeric application IDs remain implementation keys. The accepted public-identity
+direction is to use stable slugs unique within each resource domain for ordinary
+API lookup and web routes, while retaining typed internal identities such as
+`skill:doctor` where curated/application concepts need an explicit namespace.
+Source numeric IDs remain provenance/foreign references rather than public
+identity. Numeric application IDs may remain visible through developer diagnostics
+or explicit compatibility paths during migration.
 
 #### Relationship to version 1.0.0 completeness
 
@@ -1856,15 +1890,16 @@ normalized source facts, and therefore do not rewrite the source tables.
 Repository unit queries map a requested source or representative ID through
 `logical_unit_sources`; list/search/detail general
 fields and unit-label search aliases come from the canonical logical-unit layer,
-while source-backed Army/relationship context and the two explicitly unresolved
-metadata-overlap boundaries continue to use their reviewed source/context tables. The
-normalized-input table registry remains separate from these derived frontend
-tables so generated application structure cannot be supplied as normalized
+while source-backed Army/relationship context that has not yet been canonicalized
+continues to use its reviewed source/context tables. The normal Army/faction and
+Skill/Equipment/Weapon metadata-overlap boundaries were resolved by the 0.6.1 read
+migrations. The normalized-input table registry remains separate from these
+derived frontend tables so generated application structure cannot be supplied as normalized
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 15 and the application
-compatibility revision is 23. Imports build temporary sibling files, check
+records its schema version. The current schema version is 16 and the application
+compatibility revision is 24. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
@@ -2068,7 +2103,8 @@ checked-in v5.3 collection is bound to the English 2026-09-18 wiki snapshot
 curated facts in a separate SQLite database rather than either Army-derived
 database. Directory ingestion skips `example.json`. Other curated subtrees are
 not rules-database inputs. The rules database has an independent schema,
-application ID, compatibility version, and replaceable snapshot lifecycle.
+application ID, compatibility version, and replaceable snapshot lifecycle; its
+current schema and compatibility versions are both 2.
 
 A curated rule fact may reference stable application-level identities, but
 neither database is an import source for the other; any combined view is

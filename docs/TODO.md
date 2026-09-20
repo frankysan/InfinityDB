@@ -130,14 +130,15 @@ refactoring, coverage, and optimization work rather than Milestone 1 blockers.
   player-visible behavior through equivalence testing and record representative
   before/after performance evidence. Any InfinityDB-specific abstraction touched
   by the pass must document its source inputs, derivation, assumptions, and limits.
-  This interim release does not require unused
-  source structures, the physical `infinity.raw.db` split, or the full 1.0 completeness
-  inventory to be finished. The release gate is detailed below.
+  This interim release did not require unused source structures, the physical
+  `infinity.raw.db` split, or the full 1.0 completeness inventory to be finished.
+  Its durable acceptance evidence is recorded in `docs/data-model.md` and the
+  dated changelog.
 
 - [ ] **Milestone 2B — continue the canonical application model and advance
   1.0 completeness.**
   After 0.6.1, continue semantic coverage beyond the currently consumed runtime
-  surface: broader relationship and catalog/metadata overlap, source-only data,
+  surface: broader relationships and source-only catalog/metadata structures,
   the `infinity.raw.db` separation, and the source-to-presentation completeness inventory.
   Use that inventory as groundwork for the broader web-app consistency audit.
   The detailed checklist is maintained below.
@@ -204,124 +205,16 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-### Interim release gate: 0.6.1
+### Active Milestone 2B work
 
-Version 0.6.1 is the delivery point for the performance and model-quality gains
-from the current canonicalization pass. It is ready when the **currently consumed
-Army-database runtime surface** has been semantically analyzed end to end. For
-this gate, "currently consumed" means data read during normal repository/API/web
-serving and the player-facing catalog helpers built on those queries; build-only,
-validation-only, provenance-only, and otherwise unused source structures do not
-block this interim release.
+The 0.6.1 runtime canonicalization/release gate is complete. Durable evidence,
+benchmarks, semantic classifications, and upgrade requirements are recorded in
+`docs/data-model.md` and `docs/CHANGELOG.md`; completed release checklists are not
+kept in this active backlog.
 
-- [x] Canonicalize profile and loadout payloads, migrate their unit-detail read
-  paths, prove output equivalence, and measure the resulting query/storage
-  behavior.
-- [x] Complete the logical-unit canonical payload/context layer, migrate unit
-  list/search/detail general fields and aliases to it, and prove output/search
-  equivalence.
-- [x] Inventory every Army-database table/field/relationship read by the current
-  runtime surfaces: armies, unit visibility/list/search/detail, availability and
-  faction context, filters, and the current skill/equipment/weapon/trait catalog
-  paths. After the catalog read migration, the compatibility-24 trace covers 25
-  serving probes, 49 tables, and 196 distinct table-field reads.
-- [x] Document semantic provenance for every non-source-native runtime concept
-  relied on or changed by the 0.6.1 pass, including logical/canonical payload
-  abstractions, army role/playability and `main_army_id`, display identity, and
-  the browser `General profile` abstraction. Keep source inputs, derivation,
-  assumptions/fallbacks, and semantic limits explicit.
-- [x] Resolve the open classifications from that runtime inventory.
-  - [x] Record every observed field as canonical application data, explicit
-    contextual application data, or intentional source representation; all
-    196 / 196 current field reads now have no open semantic issue. Army/faction
-    identity/hierarchy and skill/equipment/weapon catalog identity serve through
-    materialized application layers while source metadata with distinct context
-    remains separate.
-  - [x] Replace the 43 duplicate source reads across 16 profile/loadout/unit
-    source tables with their already-materialized canonical equivalents. Search
-    labels, unit skill/equipment/weapon filters, skill extras, and catalog reverse
-    lookups now use canonical logical-unit/profile/loadout data; top-level
-    `unit_options` remain contextual source data by design.
-  - [x] Audit the live army/faction boundary around `army_lists`,
-    `metadata_factions`, `army_units`, `unit_factions`, and source-specific
-    `units.canonical_faction_id`. The 2026-09-18 snapshot has 58 overlapping
-    Army-list/metadata identities with identical name/slug values, 57 canonical
-    application army identities after the 998 -> 999 alias, and a broader
-    63-identity faction registry. `army_units` remains list-local availability;
-    `unit_factions` is a distinct game-wide membership relation and contains 99
-    membership references not represented by current standard Army-list
-    occurrences.
-    - [x] Harden the Army/InfinityDB semantic boundary in current runtime code and
-      audits: treat representative faction/main/display copies on `logical_units`
-      as contextual/presentation values, name `unit_factions`-derived helpers as
-      declared-faction data, and count `/api/armies.unit_count` by distinct logical
-      units rather than source representations.
-    - [x] Design/materialize the canonical application army identity/hierarchy
-      layer explicitly as an InfinityDB abstraction: schema version 15 stores
-      canonical name/slug, role/playability/grouping, reviewed source-alias
-      mappings, preferred source provenance, and explicit reinforcement-parent
-      relationships while retaining both source projections unchanged.
-    - [x] Move normal Army/faction serving onto that canonical layer and prove
-      `/api/armies`, unit list/detail faction presentation, Army filtering, and
-      optional availability behavior remain equivalent. Runtime identity is checked
-      against both persisted application rows and their source-derived evidence.
-    - [x] Preserve `unit_factions` and the broader `factions` identity registry as
-      game-wide relationship/context data; neither is reduced to currently
-      selectable Army lists by the read migration.
-  - [x] Audit the live skill/equipment/weapon catalog boundary against
-    `metadata_skills`, `metadata_equipment`, and `metadata_weapons`; canonical
-    application identity now lives in `application_catalog_items` with explicit
-    source mappings, while source-specific labels and weapon/equipment metadata
-    profiles remain contextual and lossless.
-  - [x] Keep top-level `unit_options` and their nested catalog occurrences as
-    intentional source-context data for this pass; their dedicated semantic
-    audit remains Milestone 2B unless a current-runtime correctness issue is
-    found.
-- [x] Complete any relationship or catalog/metadata canonicalization that the
-  runtime inventory shows is still required for the current application. Broader
-  unused/source-only relationship and metadata work remains for Milestone 2B.
-- [x] Run representative before/after runtime benchmarks for the canonical pass
-  and record the result. Treat performance gains as release evidence, not as a
-  substitute for semantic correctness or losslessness.
-  - [x] Add a reproducible repository-read benchmark covering cold and warm Army,
-    unit list/search/detail, Skills/Equipment/Weapons catalog/detail, and Traits
-    paths against any supplied `infinity.db` snapshot, plus a deterministic
-    report-comparison tool for database-size and median/p95 deltas.
-  - [x] Run the benchmark on the same production-like snapshot and host before
-    and after the canonical pass. Against the 0.6.0 baseline, the geometric mean
-    of cold medians improved by 2.33%; Army listing improved by 43.94% and
-    Army-filtered unit listing by 11.68%. Cold p95 geometric mean was effectively
-    flat (+0.52%). The audited `infinity.db` grew from 13,557,760 to 18,108,416
-    bytes (+33.56%) because materialized application layers currently coexist
-    with retained source/context representations.
-- [x] Complete the 0.6.1 release after the validated release-state commit is
-  tagged and deployed.
-  - [x] Run the local full acceptance command with the production-like Army
-    snapshot and required published assets; retain the timestamped check report.
-  - [x] Confirm the hosted `Source checks`, `Installed wheel smoke`, and
-    `Deployment smoke test` are green before the release-state version bump.
-  - [x] Review the 0.6.1 upgrade boundary: schema 16 / compatibility revision 24
-    requires rebuilding generated Army databases; no in-place migration is
-    supported.
-  - [x] Bump the package/release version, convert the accumulated release notes
-    into the dated 0.6.1 section, and update the README current-release marker.
-  - [x] Re-run local/hosted checks on the release-state commit, create tag
-    `v0.6.1`, deploy it, and verify the deployed update path.
-
-The eventual physical separation of source-only tables into `infinity.raw.db`,
-the complete inventory of unused player-relevant source data, and 1.0 web/rules
-completeness explicitly remain post-0.6.1 work unless the runtime audit exposes
-one of them as necessary for correctness.
-
-Profile/loadout/logical-unit canonicalization groundwork is complete: semantic
-classification, canonical materialization, current unit list/search/detail read
-paths, provenance/context retention, equivalence checks, and the profile/loadout
-secondary storage/query measurements are implemented. The production logical-unit
-layer contains 737 canonical rows / 920 source links and preserves 473
-source-attributed alias occurrences representing 468 distinct logical-unit search
-values, including the derived fallback name for the one unnamed non-representative
-source row. Durable contracts and evidence are recorded in `docs/data-model.md`;
-completed implementation checklists have been removed from this active backlog.
+Milestone 2A canonicalization groundwork is complete; this section now contains
+only active Milestone 2B work. Durable counts, equivalence evidence, and benchmark
+results remain in `docs/data-model.md` rather than the backlog.
 
 - [ ] **Audit relationships after entity canonicalization.**
   - [x] Add a read-only include/peripheral relationship audit that resolves source-local
@@ -340,8 +233,11 @@ completed implementation checklists have been removed from this active backlog.
     - [ ] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
       Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; do not
       create a parallel Peripheral rules loader/database.
-    - [ ] Run and review the dedicated Army Peripheral semantics audit on the current
-      generated database before accepting any canonical Peripheral entity/profile mapping.
+    - [x] Run and review the dedicated Army Peripheral semantics audit on the current
+      2026-09-18 database before accepting any canonical Peripheral entity/profile mapping.
+      It finds 279 definitions / 56 names, 818 loadout attachments, zero profile or
+      definition-only attachments, 41 repeated-name raw identities, three `mercs`
+      variants, and 22 canonical loadout payloads with semantic attachment variants.
     - [ ] Design a separate reviewed source-to-Peripheral identity/mapping contract; do not
       overload the current display-identity contract or write Wiki/rules knowledge into Army
       source tables.
@@ -802,16 +698,22 @@ new correctness or reproducibility defect.
 - [ ] Add a benchmark/health-check command that validates the frontend database,
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
-  
+- [ ] Split the growing pytest stage into marker-based local sections (for example
+  data/model, web/API, build/ingestion, operations/tooling, and assets) so
+  developers can run the relevant slice during iteration. Keep the complete suite
+  as the authoritative final gate; the 2026-09-20 local full run is 606 tests and
+  takes roughly 73 seconds on the primary development machine.
+
+## Architecture follow-up
+
+- [ ] Implement the accepted domain-unique public-ID design across API lookup and
+  web routes. Define per-domain slug normalization, uniqueness, stability, collision,
+  and migration rules for armies, units, catalogs, and rules/traits as applicable;
+  keep source numeric IDs as provenance references and application numeric IDs as
+  developer/compatibility details rather than the long-term user-facing contract.
+
 ## Potential product features
 
-- [ ] Make domain-unique slugs the public identifiers for API lookup and web
-  routes, so normal user-facing URLs and navigation do not depend on database ID
-  numbers. Define uniqueness/stability rules within each public domain (armies,
-  units, catalogs, rules/traits as applicable), allow API resources to be
-  addressed by slug, and treat underlying numeric database IDs as an
-  implementation detail exposed only through developer-oriented diagnostics or
-  explicit compatibility paths during migration.
 - [ ] Expand the existing versioned curated rules-reference infrastructure with
   substantially broader N5 v5.3 coverage from
   `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10).

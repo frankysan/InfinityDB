@@ -190,6 +190,19 @@ identify both the source occurrence and the curated rule record/citation used to
 produce the result. Missing or ambiguous mappings remain unresolved; they are
 never inferred false or true by name heuristics.
 
+### Stable IDs and the domain-unique slug policy
+
+Peripheral work follows the project-wide public-identity direction rather than
+introducing a one-off naming scheme. Curated/application concepts use stable typed
+IDs such as `skill:doctor` and `rule:peripheral-type:servant`; source numeric IDs remain
+foreign/provenance references. A future public resource route may use the local
+domain slug, for example `/skills/doctor`, because the route itself supplies the
+namespace.
+
+Do not assign `peripheral:*` or `peripheral-profile:*` identities merely from an
+Army label. Those domains become valid only after the reviewed source-to-entity
+mapping phase establishes the corresponding canonical entity/profile boundary.
+
 ## FAQ treatment
 
 Peripheral FAQ rulings belong in the existing planned dated FAQ layer, for
@@ -319,8 +332,9 @@ constraints, profile-mode existence, and durable relationships.
 ## Open questions requiring evidence
 
 1. The rules do not map every Army Peripheral label to a Peripheral type/entity.
-2. The dedicated Army audit still needs to drive the source/entity mapping phase;
-   repeated names alone are insufficient.
+2. The dedicated Army audit confirms that repeated names alone are insufficient:
+   all 279 definitions are attached somewhere, but 22 repeated canonical loadout
+   payloads have different semantic attachment signatures across source contexts.
 3. Synchronized, Control, and Ancillary do not state a generic Controller-
    eligibility predicate in the reviewed base rule.
 4. Connected/Autonomous proves distinct operating profiles for Cyberplug but does
@@ -347,10 +361,13 @@ constraints, profile-mode existence, and durable relationships.
 4. **Keep FAQ clarifications separate.** When the dated FAQ layer is implemented,
    add relevant Peripheral rulings as `faq-ruling` records linked to the base
    rules; retain scenario scope on scenario-specific rulings.
-5. **Run and review the dedicated Army Peripheral semantics audit on the current
-   generated database.** Use definition-only availability, attachment stability,
-   name repetition, `mercs` variation, and unresolved global-option warnings as
-   evidence for the identity/mapping design.
+5. **Review the dedicated Army Peripheral semantics audit — complete for the
+   2026-09-18 snapshot.** The audit finds 279 army-local definitions / 56 names,
+   818 resolved loadout attachments, no profile attachments, zero definition-only
+   definitions, 41 names with multiple raw identities, three names with `mercs`
+   variation, zero global-option Peripheral warnings, and 22 canonical loadout
+   payloads with differing semantic attachment signatures. These are snapshot
+   evidence, not permanent cardinalities or a canonical identity rule.
 6. **Design the separate reviewed Peripheral identity/mapping contract.** Decide
    canonical entity/profile boundaries and explicit source mappings only after
    combining the Army audit evidence with the curated rules vocabulary.

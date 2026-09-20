@@ -88,7 +88,6 @@ The stop helper always targets the `infinitydb-test` Compose project and leaves 
 named volumes intact for the next test run. It does not target the production Compose
 project or run the production image-pruning policy.
 
-
 ## Local graphical symbols
 
 The deployment scripts do not acquire Corvus Belli graphical assets. When a local

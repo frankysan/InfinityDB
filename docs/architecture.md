@@ -130,6 +130,7 @@ config/                      = maintained project/domain knowledge
 raw source data              = immutable external input
 data/manifests/snapshots/    = generated acquisition provenance
 data/curated/rules/          = source-controlled human-reviewed rules data
+data/curated/identities/     = source-controlled reviewed identity relationships
 data/curated/snapshot-notes/ = source-controlled human snapshot annotations
 data/generated/              = reproducible database/JSON build output
 ```
@@ -247,8 +248,8 @@ Infinity Army presents one concrete Army list at a time, while InfinityDB presen
 the whole game and must preserve cross-Army identities and relationships alongside
 those list-local occurrences. A source Army list is therefore an occurrence/context
 container, not the complete application ontology for faction identity or unit
-membership. Database schema version 15 materializes an explicit application Army
-identity/hierarchy from reviewed Army aliases plus the overlapping
+membership. The explicit application Army identity/hierarchy was introduced in
+database schema version 15 from reviewed Army aliases plus the overlapping
 `army_lists`/`metadata_factions` evidence. That derived layer owns the canonical
 application name/slug, role/playability/grouping, source-ID provenance mapping,
 and explicit reinforcement-parent relationships without replacing either source
@@ -492,18 +493,42 @@ version 13 added the corresponding canonical-loadout layer beside the lossless
 source tables. Build-time materialization scopes reusable payloads to an existing
 `logical_unit` and keeps source/Army context on one-to-one occurrence relations:
 profile AVA/logo and loadout points/SWC remain contextual, while source-local
-includes/peripherals remain in their lossless source relationships pending their
-own identity audit.
+includes/peripherals remain in their lossless source relationships while
+Milestone 2B applies the completed relationship/Peripheral audits to choose their
+canonical relationship and identity boundaries.
 
 Unit-detail repository reads now consume both canonical payload layers. Source
-profile/loadout tables remain available for provenance, deferred relationships,
-validation, and source-oriented repository paths such as catalog reverse
-lookups. Compatibility revision 19 also requires unit-oriented indexes on both
-canonical occurrence tables so this read-path split does not regress unit-detail
+profile/loadout tables remain available for provenance, validation, and deferred
+source-local/contextual relationships. Normal search/filter/catalog reverse reads
+now expand canonical payload occurrences rather than traversing those legacy
+payload tables. Compatibility revision 19 also requires unit-oriented indexes on
+both canonical occurrence tables so this read-path split does not regress unit-detail
 query behavior. The physical removal of source-only tables from `infinity.db`
 remains a later design step after canonical unit, relationship, and catalog
 coverage is complete; `infinity.raw.db` is the intended long-term home for that
 lossless source representation.
+
+### Design direction: domain-unique public identities
+
+Source identity, internal application identity, and public navigation identity are
+separate layers. Corvus Belli numeric IDs remain source/provenance references, and
+current numeric application IDs remain implementation keys while migration is in
+progress. InfinityDB-curated concepts use stable typed IDs such as `skill:doctor`
+or `rule:peripheral-type:servant`; the prefix identifies the domain and is not a claim
+that one slug must be globally unique across unrelated domains.
+
+Public API lookup and web routes should ultimately use stable slugs that are unique
+within their resource domain, for example `/skills/doctor`. The route/resource
+domain supplies the namespace, so the public value can remain `doctor` while the
+internal curated identity remains `skill:doctor`. Underlying numeric IDs may remain
+available through developer diagnostics or explicit compatibility paths, but must
+not be the long-term user-facing identity contract. Slug normalization, stability,
+collision handling, and migration must be defined per domain before replacing an
+existing numeric route.
+
+The Peripheral rules/identity work is the first new Milestone 2B design expected
+to apply this policy directly. It must not infer a canonical Peripheral entity slug
+until the reviewed Army-definition-to-entity mapping proves that entity boundary.
 
 ## Snapshot acquisition and provenance
 
@@ -828,17 +853,19 @@ the InfinityDB-generated acquisition provenance written under
 ## SQLite persistence
 
 SQLite is the initial backend because it runs locally without a separate
-service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 14 and database compatibility revision of 22; it
-rejects incompatible databases with a rebuild instruction. The importer builds
+service. Schema definitions are separate from ingestion code. The current Army
+application database has schema version 16 and database compatibility revision
+24; it rejects incompatible databases with a rebuild
+instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of
 persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 
 Rules-reference data uses a distinct SQLite database with its own schema,
-compatibility/versioning, importer, and atomic replacement policy. This database
-is not an extension of `infinity.db` or `infinity.raw.db`.
+compatibility/versioning, importer, and atomic replacement policy. The current
+`rules.db` schema and compatibility versions are both 2. This database is not an
+extension of `infinity.db` or `infinity.raw.db`.
 
 The source-controlled `data/curated/rules/` JSON layer is the only
 application-facing representation of facts researched from PDFs or the wiki.

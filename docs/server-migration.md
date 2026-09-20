@@ -39,6 +39,7 @@ revision:
 ```text
 data/generated/infinity.db
 data/generated/rules.db
+data/manifests/army-symbol-build.json
 ```
 
 If the installation uses locally published Corvus Belli graphical assets, also
@@ -52,8 +53,11 @@ src/infinity_db/web/static/units/
 src/infinity_db/web/static/symbol-inventory.json
 ```
 
-`symbol-inventory.json` is required: it records every published SVG path and
-SHA-256. The tracked `army-symbols.js` and `unit-symbol-map.js` files come from
+The terminal `army-symbol-build.json` and `symbol-inventory.json` are both
+required for a guarded graphical deployment: the manifest binds the published set
+to its Army snapshot and processing state, while the inventory records every
+published SVG path and SHA-256. The tracked `army-symbols.js` and
+`unit-symbol-map.js` files come from
 the Git revision and must correspond to that publication. If those files contain
 uncommitted local changes on the old server, preserve those changes explicitly
 rather than assuming a clean checkout will reproduce them.
@@ -70,9 +74,10 @@ inputs, but copy or back them up when their runtime state matters. Configuration
 accounts, or certificates owned by an external TLS reverse proxy are outside this
 repository and must be migrated through that system separately.
 
-After restoring the files, build/deploy from the recorded revision. Do not run a
-fresh data or symbol build first if the purpose of the migration is to preserve
-the exact existing runtime artifacts.
+After restoring the files, use the no-rebuild deployment path from the recorded
+revision (`sh ./scripts/deploy-transferred.sh`). Do not run `install-or-update.sh`,
+a fresh data build, or a symbol build first when the purpose of the migration is
+to preserve the exact existing runtime artifacts.
 
 ## Reproducible database rebuild inputs
 
@@ -203,5 +208,7 @@ including published variants that the browser does not yet reference. A partial
 or hash-mismatched transferred symbol set fails rather than silently downgrading
 to asset-free testing.
 
-For deployment-specific startup and rollback operations, continue with the
+For an exact transferred-runtime migration, deploy with
+`sh ./scripts/deploy-transferred.sh` after the validation above. For rebuild-mode
+deployment, startup, and rollback operations, continue with the
 [Linux deployment guide](deployment.md).

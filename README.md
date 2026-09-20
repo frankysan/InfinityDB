@@ -111,7 +111,7 @@ local graphical deployment. Use the symbol orchestrator with an existing pinned
 Army snapshot:
 
 ```powershell
-python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip"
+python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-204434.zip"
 ```
 
 Or intentionally fetch a fresh Army snapshot first:
@@ -138,7 +138,7 @@ python tools/download_wiki_snapshot.py --language es
 
 ```powershell
 # Run individual Army-data stages
-infinity-db merge "data/raw/JSON 20260910-204106.zip" data/generated/master.json --compact
+infinity-db merge "data/raw/JSON 20260918-204434.zip" data/generated/master.json --compact
 infinity-db normalize data/generated/master.json data/generated/normalized.json --compact
 infinity-db export data/generated/normalized.json data/generated/infinity.db
 
@@ -209,12 +209,15 @@ scripts/                    # Linux deployment and maintenance scripts
 data/
   raw/                      # Immutable Army/source snapshots, ignored by Git
   wiki/                     # Wiki research snapshots, ignored by Git
-  curated/                  # Source-controlled reviewed rules and annotations
+  pdf/                      # Local rules/FAQ/ITS research documents, ignored by Git
+  curated/                  # Source-controlled reviewed rules, identities, and annotations
   manifests/                # Generated provenance/build state, ignored by Git
   work/                     # Rebuildable processing work, ignored by Git
   reports/                  # Generated processing reports, ignored by Git
   logs/                     # Verbose pipeline logs, ignored by Git
+  backups/                  # Local retained processing/publication history, ignored by Git
   generated/                # Databases and normalized build artifacts, ignored by Git
+image_overrides/            # Local authoritative symbol overrides, ignored by Git
 ```
 
 ## Development checks
@@ -249,6 +252,8 @@ profile definitions, asset modes, reports, and exit codes.
   boundaries, current architecture, and accepted design direction.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
+- [Peripheral curated-data design](docs/peripheral-curated-data-design.md) —
+  active Milestone 2B rules, identity, and relationship design.
 - [Data storage and provenance](data/README.md) — raw, curated, generated, and
   local processing artifacts.
 - [Development checks](docs/testing.md) — local and CI validation.
