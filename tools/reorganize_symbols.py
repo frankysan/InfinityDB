@@ -61,7 +61,7 @@ class FactionInfo(NamedTuple):
 
 class SnapshotIndex(NamedTuple):
     factions: dict[int, FactionInfo]
-    unit_owner_by_reference: dict[tuple[str, int, str], int | None]
+    unit_canonical_faction_by_reference: dict[tuple[str, int, str], int | None]
 
 
 class PublicationResult(NamedTuple):
@@ -97,9 +97,9 @@ def _portable_member(value: str) -> PurePosixPath:
 
 
 def _load_snapshot_index(path: Path) -> SnapshotIndex:
-    """Load faction hierarchy and per-source unit canonical ownership."""
+    """Load faction hierarchy and per-source unit canonical-faction context."""
     factions: dict[int, FactionInfo] = {}
-    owners: dict[tuple[str, int, str], int | None] = {}
+    canonical_factions: dict[tuple[str, int, str], int | None] = {}
     with zipfile.ZipFile(path) as archive:
         try:
             metadata = json.loads(archive.read("metadata.json"))
@@ -141,9 +141,12 @@ def _load_snapshot_index(path: Path) -> SnapshotIndex:
                 if not isinstance(raw_slug, str) or not raw_slug.strip():
                     continue
                 canonical = unit.get("canonical")
-                owner = canonical if type(canonical) is int else None
-                owners[(name, unit["id"], slugify(raw_slug))] = owner
-    return SnapshotIndex(factions=factions, unit_owner_by_reference=owners)
+                canonical_faction_id = canonical if type(canonical) is int else None
+                canonical_factions[(name, unit["id"], slugify(raw_slug))] = canonical_faction_id
+    return SnapshotIndex(
+        factions=factions,
+        unit_canonical_faction_by_reference=canonical_factions,
+    )
 
 
 def _faction_public_path(reference: dict[str, Any], index: SnapshotIndex) -> str:
@@ -173,7 +176,7 @@ def _unit_profile_slot(reference: dict[str, Any]) -> tuple[int, int] | None:
     return int(match.group(1)), int(match.group(2))
 
 
-def _unit_reference_owner(
+def _unit_reference_canonical_faction(
     reference: dict[str, Any], index: SnapshotIndex
 ) -> int | None:
     unit_id = reference.get("unitId")
@@ -186,7 +189,7 @@ def _unit_reference_owner(
         or not isinstance(source_document, str)
     ):
         return None
-    return index.unit_owner_by_reference.get(
+    return index.unit_canonical_faction_by_reference.get(
         (source_document, unit_id, slugify(raw_slug))
     )
 
@@ -197,14 +200,22 @@ def _unit_public_path(reference: dict[str, Any], index: SnapshotIndex) -> str:
     if type(unit_id) is not int or not isinstance(raw_slug, str) or not raw_slug.strip():
         raise ValueError("Authoritative unit reference requires unitId and unitSlug")
     unit_slug = slugify(raw_slug)
-    owner = _unit_reference_owner(reference, index)
-    owner_info = index.factions.get(owner) if owner is not None else None
-    folder = owner_info.slug if owner_info is not None else "unassigned"
+    canonical_faction_id = _unit_reference_canonical_faction(reference, index)
+    faction_info = (
+        index.factions.get(canonical_faction_id)
+        if canonical_faction_id is not None
+        else None
+    )
+    folder = faction_info.slug if faction_info is not None else "unassigned"
     stem = f"units/{folder}/{unit_id}-{unit_slug}"
 
     suffix_parts: list[str] = []
     army_id = reference.get("armyId")
-    if type(owner) is int and type(army_id) is int and army_id != owner:
+    if (
+        type(canonical_faction_id) is int
+        and type(army_id) is int
+        and army_id != canonical_faction_id
+    ):
         suffix_parts.extend(("army", str(army_id)))
 
     slot = _unit_profile_slot(reference)
@@ -262,11 +273,13 @@ def _reference_rank(
     if kind == "unit-profile":
         identifier = reference.get("unitId")
         slug = reference.get("unitSlug")
-        owner = _unit_reference_owner(reference, index)
+        canonical_faction_id = _unit_reference_canonical_faction(reference, index)
         army_id = reference.get("armyId")
-        owner_rank = (
+        canonical_faction_rank = (
             0
-            if type(owner) is not int or type(army_id) is not int or army_id == owner
+            if type(canonical_faction_id) is not int
+            or type(army_id) is not int
+            or army_id == canonical_faction_id
             else 1
         )
         slot = _unit_profile_slot(reference)
@@ -274,7 +287,7 @@ def _reference_rank(
         primary_rank = 0 if slot is None or slot == (0, 0) else 1
         return (
             1,
-            owner_rank,
+            canonical_faction_rank,
             primary_rank,
             identifier if type(identifier) is int else 2**31,
             group_index,

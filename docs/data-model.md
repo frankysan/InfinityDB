@@ -1369,7 +1369,7 @@ Unit relationships remain contextual rather than being folded into the canonical
 unit row:
 
 - source `unit_factions` membership sets differ in all 167 multi-source logical
-  units; the logical-unit normal-army view is an aggregate over those source
+  units; the logical-unit declared-faction view is an aggregate over those source
   relationships, not a replacement for them;
 - `army_units` rows remain source/Army occurrences carrying position, filters,
   and `availability_kind`;
@@ -1543,8 +1543,11 @@ maps; source-specific unit display names are reconstructed from canonical logica
 unit fields plus explicit name aliases. Top-level `unit_option_*` occurrences stay
 source-contextual by design.
 
-The current role totals are **105 canonical-application fields**, **60 explicit
-contextual-application fields**, and **22 intentional-source fields**. The remaining
+The current role totals are **102 canonical-application fields**, **63 explicit
+contextual-application fields**, and **22 intentional-source fields**. The three-field
+shift reflects the explicit classification of representative `canonical_faction_id`,
+`main_army_id`, and `display_army_id` copies on `logical_units` as context/presentation
+rather than canonical logical-unit facts. The remaining
 **35 fields across 8 tables** are all genuine semantic overlap rather
 than mechanical duplication. Current army presentation combines `army_lists` with
 `metadata_factions`, while skill/equipment/weapon catalogs combine normalized
@@ -1553,9 +1556,12 @@ occurrence catalogs with `metadata_skills`, `metadata_equipment`, and
 deciding whether to materialize a new canonical catalog/army layer or retain
 contextual metadata.
 
-`army_units`, `unit_factions`, `profile_groups`, profile/loadout occurrence maps,
-logical-unit aliases/notes/source links, and `metadata_ammunitions` are recorded
-as explicit contextual application data. Top-level `unit_options` and their
+`army_units`, `profile_groups`, profile/loadout occurrence maps, logical-unit
+aliases/notes/source links, and `metadata_ammunitions` are recorded as explicit
+contextual application data. `unit_factions` is classified in the same runtime
+role because it remains source-backed relationship data, but semantically it is
+the broader game-wide declared-membership relation rather than Army-local
+availability. Top-level `unit_options` and their
 skill/equipment/weapon occurrences remain intentional source-context data under
 the previously accepted logical-unit design; they are not assumed redundant
 with profile/loadout payloads.

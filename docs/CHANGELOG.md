@@ -22,6 +22,7 @@ Entries describe meaningful release outcomes rather than detailed implementation
   checks use synthetic fixture data.
 - Reject deployments whose database and published graphical assets do not originate
   from the same verified Army snapshot before they can be activated.
+- Count Army unit totals by logical units rather than duplicate source representations.
 
 ## [0.6.0] - 2026-09-19
 

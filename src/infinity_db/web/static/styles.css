@@ -2162,13 +2162,13 @@ tbody tr:hover {
   vertical-align: -6px;
 }
 
-.army-symbol.main-army-symbol {
+.army-symbol.display-army-symbol {
   width: 28px;
   height: 28px;
   flex: 0 0 auto;
 }
 
-.army-symbol.main-army-symbol-detail {
+.army-symbol.display-army-symbol-detail {
   width: 48px;
   height: 48px;
   margin-right: 10px;
@@ -2862,12 +2862,12 @@ tbody tr:hover {
     margin-right: 9px;
   }
 
-  .army-symbol.main-army-symbol {
+  .army-symbol.display-army-symbol {
     width: 25px;
     height: 25px;
   }
 
-  .army-symbol.main-army-symbol-detail {
+  .army-symbol.display-army-symbol-detail {
     width: 39px;
     height: 39px;
     margin-right: 7px;

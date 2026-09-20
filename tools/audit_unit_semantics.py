@@ -162,17 +162,19 @@ UNIT_FIELD_CLASSIFICATION: dict[str, dict[str, str]] = {
         "reason": "Source idArmy value; it varies across matched source-unit representations.",
     },
     "canonical_faction_id": {
-        "classification": "relationship",
+        "classification": "source_origin_context",
         "reason": (
-            "Source-unit relationship to canonical faction identity. Reinforcement and "
-            "mercenary representations can legitimately differ inside one logical unit."
+            "Source-specific canonical faction/origin context. Reinforcement and "
+            "mercenary representations can legitimately differ inside one logical unit, "
+            "so it is not a game-wide ownership or availability claim."
         ),
     },
     "main_army_id": {
         "classification": "relationship",
         "reason": (
-            "Derived source-unit ownership relationship. A logical-unit display value may "
-            "follow the representative rule, but source-specific derivations remain context."
+            "Derived source-unit grouping/application context. A logical-unit compatibility "
+            "value may follow the representative rule, but source-specific derivations remain "
+            "context and do not establish ownership or membership."
         ),
     },
     "display_army_id": {
@@ -249,15 +251,16 @@ RELATIONSHIP_CLASSIFICATION: dict[str, dict[str, str]] = {
     "unit_factions": {
         "classification": "relationship",
         "reason": (
-            "Source-declared faction memberships vary for every repeated logical unit and "
-            "must remain attached to source identity/context."
+            "Source-declared faction memberships form a broader game-wide relationship. "
+            "Source occurrences remain traceable because their declarations can differ, while "
+            "the combined relation must not be reduced to current Army-list availability."
         ),
     },
     "army_units": {
         "classification": "contextual_relationship",
         "reason": (
-            "Army membership, filters, position, and availability kind describe source/Army "
-            "occurrences and remain contextual after logical identity resolution."
+            "Army availability, filters, position, and availability kind describe concrete "
+            "source/Army occurrences and remain contextual after logical identity resolution."
         ),
     },
     "unit_options": {

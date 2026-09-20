@@ -32,7 +32,7 @@ from infinity_db.identities import (
     strip_reinforcement_prefix,
 )
 
-from .logical_unit_payloads import ALIAS_FIELDS, CANONICAL_UNIT_FIELDS
+from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -78,11 +78,14 @@ class RowLike(Protocol):
 
 
 def _validate_logical_unit_payloads(connection: sqlite3.Connection) -> None:
-    canonical_mismatch = connection.execute(
+    representative_mismatch = connection.execute(
         "SELECT 1 FROM logical_units AS lu "
         "JOIN units AS r ON r.id = lu.representative_unit_id "
         "WHERE "
-        + " OR ".join(f"NOT (lu.{field} IS r.{field})" for field in CANONICAL_UNIT_FIELDS)
+        + " OR ".join(
+            f"NOT (lu.{field} IS r.{field})"
+            for field in MATERIALIZED_LOGICAL_UNIT_FIELDS
+        )
         + " LIMIT 1"
     ).fetchone()
 
@@ -170,7 +173,7 @@ def _validate_logical_unit_payloads(connection: sqlite3.Connection) -> None:
     ).fetchone()
 
     if (
-        canonical_mismatch is not None
+        representative_mismatch is not None
         or alias_count != expected_alias_count
         or invalid_alias is not None
         or note_count != expected_note_count
@@ -471,7 +474,7 @@ def army_required_flags(
     army: Mapping[str, Any],
     group: Mapping[str, Any],
     canonical_faction_id: int | None = None,
-    normal_army_ids: Collection[int] | None = None,
+    declared_faction_ids: Collection[int] | None = None,
 ) -> set[str]:
     """Return the optional availability categories required by an occurrence."""
     required = unit_optional_modes(group)
@@ -482,14 +485,18 @@ def army_required_flags(
         pass
     elif availability_kind is None:
         # Legacy database rows created before normalized availability provenance
-        # was persisted still need the previous canonical/faction inference.
+        # was persisted still need the previous canonical/declaration inference.
         faction_id = (
             group["canonical_faction_id"]
             if canonical_faction_id is None
             else canonical_faction_id
         )
-        normal_armies = group["normal_army_ids"] if normal_army_ids is None else normal_army_ids
-        if faction_id == 1 and army["id"] not in normal_armies:
+        declared_factions = (
+            group["declared_faction_ids"]
+            if declared_faction_ids is None
+            else declared_faction_ids
+        )
+        if faction_id == 1 and army["id"] not in declared_factions:
             required.add("mercs")
     else:
         raise ValueError(f"Unknown army availability kind: {availability_kind!r}")
@@ -504,7 +511,7 @@ def visible_armies_for_group(
     group: Mapping[str, Any],
     selected_flags: set[str],
     canonical_factions: Mapping[int, int | None],
-    normal_armies_by_unit: Mapping[int, Collection[int]],
+    declared_faction_ids_by_unit: Mapping[int, Collection[int]],
 ) -> dict[int, dict[str, Any]]:
     """Collect armies that have at least one visible source occurrence.
 
@@ -519,7 +526,7 @@ def visible_armies_for_group(
             occurrence,
             group,
             canonical_factions[source_id],
-            normal_armies_by_unit[source_id],
+            declared_faction_ids_by_unit[source_id],
         )
         if flags <= selected_flags:
             visible.setdefault(occurrence["id"], occurrence)
@@ -867,12 +874,14 @@ class Database:
                         "availability_kind": army["availability_kind"],
                     }
                 )
-            normal_armies_by_unit: dict[int, set[int]] = {
+            declared_faction_ids_by_unit: dict[int, set[int]] = {
                 row["id"]: set() for row in source_rows
             }
             for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
-                if faction["unit_id"] in normal_armies_by_unit:
-                    normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
+                if faction["unit_id"] in declared_faction_ids_by_unit:
+                    declared_faction_ids_by_unit[faction["unit_id"]].add(
+                        faction["faction_id"]
+                    )
 
         groups: list[dict[str, Any]] = []
         for logical in logical_rows:
@@ -910,8 +919,8 @@ class Database:
                             "source_army_id": source_army_id,
                         }
                     )
-            group["normal_army_ids"] = set().union(
-                *(normal_armies_by_unit[source_id] for source_id in source_ids)
+            group["declared_faction_ids"] = set().union(
+                *(declared_faction_ids_by_unit[source_id] for source_id in source_ids)
             )
             group["search_terms"] = search_terms_by_logical[logical_id]
             groups.append(group)
@@ -922,7 +931,7 @@ class Database:
         return {
             "rows": source_rows,
             "army_names": army_names,
-            "normal_armies_by_unit": normal_armies_by_unit,
+            "declared_faction_ids_by_unit": declared_faction_ids_by_unit,
             "groups": groups,
             "groups_by_source": groups_by_source,
         }
@@ -936,11 +945,14 @@ class Database:
         faction_groups = self._faction_groups()
         faction_identities = self._faction_identities()
         canonical_factions = {row["id"]: row["canonical_faction_id"] for row in graph["rows"]}
-        normal_armies_by_unit = graph["normal_armies_by_unit"]
+        declared_faction_ids_by_unit = graph["declared_faction_ids_by_unit"]
         items_by_source: dict[int, dict[str, Any]] = {}
         for group in graph["groups"]:
             visible_armies = visible_armies_for_group(
-                group, set(selected_flags), canonical_factions, normal_armies_by_unit
+                group,
+                set(selected_flags),
+                canonical_factions,
+                declared_faction_ids_by_unit,
             )
             if group["armies"] and not visible_armies:
                 continue
@@ -974,10 +986,12 @@ class Database:
         identity_config = self._identity_config()
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT a.id, a.name, a.slug, a.kind, a.reinforcement_id, u.id AS unit_id "
+                "SELECT a.id, a.name, a.slug, a.kind, a.reinforcement_id, "
+                "lus.logical_unit_id "
                 "FROM army_lists AS a "
                 "LEFT JOIN army_units AS au ON au.army_id = a.id "
                 "LEFT JOIN units AS u ON u.id = au.unit_id AND u.source_defined = 1 "
+                "LEFT JOIN logical_unit_sources AS lus ON lus.source_unit_id = u.id "
                 "ORDER BY a.id"
             ).fetchall()
             metadata = {
@@ -1007,10 +1021,14 @@ class Database:
                         "name": army_name(row),
                         "slug": row["slug"],
                         "kind": row["kind"],
-                        "unit_ids": armies.get(preferred_army_id, {}).get("unit_ids", set()),
+                        "logical_unit_ids": armies.get(preferred_army_id, {}).get(
+                            "logical_unit_ids", set()
+                        ),
                     }
-                if row["unit_id"] is not None:
-                    armies[preferred_army_id]["unit_ids"].add(row["unit_id"])
+                if row["logical_unit_id"] is not None:
+                    armies[preferred_army_id]["logical_unit_ids"].add(
+                        row["logical_unit_id"]
+                    )
 
             canonical_metadata: dict[int, dict[str, Any]] = {}
             for metadata_row in metadata.values():
@@ -1111,7 +1129,7 @@ class Database:
                     "name": group.get("name") or f"Army {grouping_id}",
                     "slug": group.get("slug"),
                     "kind": "grouping",
-                    "unit_ids": set(),
+                    "logical_unit_ids": set(),
                     "role": ARMY_ROLE_GROUPING,
                     "playable": False,
                     "group_id": None,
@@ -1132,7 +1150,7 @@ class Database:
                     "group_name": army["group_name"],
                     "group_slug": army["group_slug"],
                     "parent_army_ids": army["parent_army_ids"],
-                    "unit_count": len(army["unit_ids"]),
+                    "unit_count": len(army["logical_unit_ids"]),
                 }
                 for army in sorted(armies.values(), key=lambda army: army["id"])
             ]
@@ -1796,7 +1814,7 @@ class Database:
         canonical_factions = {
             row["id"]: row["canonical_faction_id"] for row in graph["rows"]
         }
-        normal_armies_by_unit = graph["normal_armies_by_unit"]
+        declared_faction_ids_by_unit = graph["declared_faction_ids_by_unit"]
         search_key = accent_insensitive_key(search)
         grouped = []
         for group in groups:
@@ -1806,7 +1824,10 @@ class Database:
             ):
                 continue
             visible_armies = visible_armies_for_group(
-                group, selected_flags, canonical_factions, normal_armies_by_unit
+                group,
+                selected_flags,
+                canonical_factions,
+                declared_faction_ids_by_unit,
             )
             if group["armies"] and not visible_armies:
                 continue
@@ -1897,7 +1918,7 @@ class Database:
             army_names = graph["army_names"]
             group = graph["groups_by_source"][unit_id]
             source_ids = group["source_ids"]
-            normal_army_ids = graph["normal_armies_by_unit"]
+            declared_faction_ids = graph["declared_faction_ids_by_unit"]
             canonical_factions = {
                 row["id"]: row["canonical_faction_id"] for row in graph["rows"]
             }
@@ -1912,7 +1933,7 @@ class Database:
                             occurrence,
                             group,
                             canonical_factions[source_id],
-                            normal_army_ids[source_id],
+                            declared_faction_ids[source_id],
                         )
                     )
                 )

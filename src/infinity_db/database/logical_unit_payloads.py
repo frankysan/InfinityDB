@@ -1,4 +1,4 @@
-"""Materialize canonical logical-unit fields and source-attributed unit context."""
+"""Materialize representative-backed logical-unit values and source-attributed context."""
 
 from __future__ import annotations
 
@@ -6,16 +6,14 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any
 
-CANONICAL_UNIT_FIELDS = (
-    "name",
-    "isc",
-    "isc_abbr",
-    "slug",
+REPRESENTATIVE_UNIT_FIELDS = ("name", "isc", "isc_abbr", "slug")
+REPRESENTATIVE_CONTEXT_FIELDS = (
     "canonical_faction_id",
     "main_army_id",
     "display_army_id",
 )
-ALIAS_FIELDS = ("name", "isc", "isc_abbr", "slug")
+MATERIALIZED_LOGICAL_UNIT_FIELDS = REPRESENTATIVE_UNIT_FIELDS + REPRESENTATIVE_CONTEXT_FIELDS
+ALIAS_FIELDS = REPRESENTATIVE_UNIT_FIELDS
 
 
 def _display_name(unit: dict[str, Any]) -> str:
@@ -25,7 +23,7 @@ def _display_name(unit: dict[str, Any]) -> str:
 
 @dataclass(frozen=True)
 class LogicalUnitPayloadMaterialization:
-    """Summary of one canonical logical-unit/context materialization."""
+    """Summary of one logical-unit/context materialization."""
 
     logical_unit_count: int
     source_link_count: int
@@ -67,7 +65,7 @@ def _materialize_logical_unit_payloads(
         representatives[logical_unit_id] = row["representative_unit_id"]
         sources_by_logical.setdefault(logical_unit_id, []).append(row["source_unit_id"])
 
-    canonical_rows: list[tuple[Any, ...]] = []
+    materialized_rows: list[tuple[Any, ...]] = []
     alias_rows: list[tuple[Any, ...]] = []
     note_rows: list[tuple[Any, ...]] = []
     spectables_rows: list[tuple[Any, ...]] = []
@@ -81,9 +79,9 @@ def _materialize_logical_unit_payloads(
                 f"Logical unit {logical_unit_id} has no source-defined representative"
             ) from exc
 
-        canonical_rows.append(
+        materialized_rows.append(
             (
-                *(representative[field] for field in CANONICAL_UNIT_FIELDS),
+                *(representative[field] for field in MATERIALIZED_LOGICAL_UNIT_FIELDS),
                 logical_unit_id,
             )
         )
@@ -116,10 +114,12 @@ def _materialize_logical_unit_payloads(
                     (logical_unit_id, source_id, source["spectables"])
                 )
 
-    assignments = ", ".join(f"{field} = ?" for field in CANONICAL_UNIT_FIELDS)
+    assignments = ", ".join(
+        f"{field} = ?" for field in MATERIALIZED_LOGICAL_UNIT_FIELDS
+    )
     connection.executemany(
         f"UPDATE logical_units SET {assignments} WHERE id = ?",
-        canonical_rows,
+        materialized_rows,
     )
     connection.executemany(
         "INSERT INTO logical_unit_aliases "
@@ -138,7 +138,7 @@ def _materialize_logical_unit_payloads(
     )
 
     return LogicalUnitPayloadMaterialization(
-        logical_unit_count=len(canonical_rows),
+        logical_unit_count=len(materialized_rows),
         source_link_count=sum(len(source_ids) for source_ids in sources_by_logical.values()),
         alias_count=len(alias_rows),
         note_count=len(note_rows),

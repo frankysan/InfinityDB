@@ -81,7 +81,7 @@ FIELD_CLASSIFICATION: dict[str, dict[str, dict[str, str]]] = {
             "role": "hierarchy_context",
             "reason": (
                 "Useful for ordinary main/sectorial/Non-Aligned grouping. Reinforcement metadata "
-                "parents are not the application reinforcement ownership relationship."
+                "parents are not the application reinforcement association."
             ),
         },
         "name": {
@@ -137,7 +137,7 @@ FIELD_CLASSIFICATION: dict[str, dict[str, dict[str, str]]] = {
             "role": "source_origin_context",
             "reason": (
                 "Source-specific canonical faction/origin relationship. It is not list membership, "
-                "playability, or application ownership; IDs can exist without Army lists."
+                "playability, or application Army membership; IDs can exist without Army lists."
             ),
         },
     },
@@ -359,9 +359,8 @@ def audit_database(path: Path) -> dict[str, Any]:
                 "list rosters."
             ),
             (
-                "units.canonical_faction_id is source origin/context, not ownership, "
-                "playability, or "
-                "availability."
+                "units.canonical_faction_id is source origin/context, not Army membership, "
+                "playability, or availability."
             ),
             (
                 "Application role/playability is a derived whole-game view: current source "

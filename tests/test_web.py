@@ -156,7 +156,7 @@ def app(tmp_path: Path) -> Callable:
             }
         ],
     }
-    # Declared factions and canonical ownership deliberately differ from actual occurrences.
+    # Declared factions and source-origin context deliberately differ from actual occurrences.
     blue_only = {
         "id": 3,
         "name": "100%_Guard",
@@ -1005,7 +1005,7 @@ def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> N
     assert b"const factionSlugs" not in body
     assert b"Math.floor(Number(armyId) / 100)" not in body
     assert b"const faction = army.faction;" in body
-    assert b"const mainFaction = unit.display_faction?.slug;" in body
+    assert b"const displayFaction = unit.display_faction?.slug;" in body
 
 
 def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:

@@ -251,6 +251,11 @@ block this interim release.
     `unit_factions` is a distinct game-wide membership relation and contains 99
     membership references not represented by current standard Army-list
     occurrences.
+    - [x] Harden the Army/InfinityDB semantic boundary in current runtime code and
+      audits: treat representative faction/main/display copies on `logical_units`
+      as contextual/presentation values, name `unit_factions`-derived helpers as
+      declared-faction data, and count `/api/armies.unit_count` by distinct logical
+      units rather than source representations.
     - [ ] Design/materialize the canonical application army identity/hierarchy
       layer explicitly as an InfinityDB abstraction: canonical name/slug,
       role/playability/grouping, reviewed source aliases, and explicit

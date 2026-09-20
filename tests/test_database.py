@@ -709,6 +709,37 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     }
 
 
+def test_army_unit_count_uses_distinct_logical_units(
+    tmp_path: Path, normalized: dict
+) -> None:
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    original["source_role"] = "standard"
+    duplicate_id = 10_001
+    duplicate = copy.deepcopy(original)
+    duplicate["id"] = duplicate_id
+    duplicate["source_role"] = "standard"
+    normalized["tables"]["units"].append(duplicate)
+    normalized["genericUnitMatches"] = [
+        {
+            "sourceUnitId": duplicate_id,
+            "representativeUnitId": 1,
+            "method": "generic_duplicate_key",
+        }
+    ]
+    for row in list(normalized["tables"]["army_units"]):
+        if row.get("unit_id") == 1 and row.get("army_id") == 101:
+            occurrence = copy.deepcopy(row)
+            occurrence["unit_id"] = duplicate_id
+            normalized["tables"]["army_units"].append(occurrence)
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    army = next(item for item in database.list_armies() if item["id"] == 101)
+    assert army["unit_count"] == database.list_units(army_id=101)["total"] == 2
+
+
 def test_list_skill_extras_returns_distinct_sorted_pairs(tmp_path: Path, normalized: dict) -> None:
     normalized["tables"]["extras"].extend(
         [
@@ -1452,7 +1483,7 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
 def test_reinforcement_classification_uses_army_kind_not_id_suffix() -> None:
     group = {
         "canonical_faction_id": 301,
-        "normal_army_ids": {399},
+        "declared_faction_ids": {399},
         "names": ["TEST"],
         "slug": "test",
     }
@@ -1467,7 +1498,7 @@ def test_reinforcement_classification_uses_army_kind_not_id_suffix() -> None:
 def test_explicit_availability_kind_is_authoritative_for_mercenary_flags() -> None:
     group = {
         "canonical_faction_id": 1,
-        "normal_army_ids": set(),
+        "declared_faction_ids": set(),
         "names": ["TEST"],
         "slug": "test",
     }
@@ -1478,14 +1509,14 @@ def test_explicit_availability_kind_is_authoritative_for_mercenary_flags() -> No
     ) == set()
     assert army_required_flags(
         {"id": 101, "availability_kind": "mercenary"},
-        {**group, "canonical_faction_id": 301, "normal_army_ids": {101}},
+        {**group, "canonical_faction_id": 301, "declared_faction_ids": {101}},
     ) == {"mercs"}
 
 
 def test_list_availability_uses_source_specific_occurrences() -> None:
     group = {
         "canonical_faction_id": 301,
-        "normal_army_ids": {303},
+        "declared_faction_ids": {303},
         "names": ["WOLFGANG"],
         "slug": "wolfgang",
         "army_occurrences": [

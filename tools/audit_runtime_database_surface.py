@@ -67,7 +67,6 @@ _register(
 )
 _register(
     [
-        "logical_units",
         "profile_payloads",
         "profile_payload_characteristics",
         "profile_payload_skills",
@@ -93,6 +92,34 @@ _register(
     reason="Current application identity/payload or unambiguous lookup catalog.",
 )
 _register(
+    ["logical_units"],
+    CANONICAL,
+    reason="Representative-backed logical-unit application values.",
+)
+TABLE_POLICY["logical_units"]["fields"].update(
+    {
+        "canonical_faction_id": (
+            CONTEXTUAL,
+            NO_ISSUE,
+            "Compatibility copy of representative source-origin context; not a game-wide "
+            "logical-unit ownership or membership fact.",
+        ),
+        "main_army_id": (
+            CONTEXTUAL,
+            NO_ISSUE,
+            "Compatibility copy of representative source-derived grouping context; not "
+            "logical-unit ownership or availability.",
+        ),
+        "display_army_id": (
+            CONTEXTUAL,
+            NO_ISSUE,
+            "Compatibility copy of a representative presentation identity with no independent "
+            "domain semantics.",
+        ),
+    }
+)
+
+_register(
     [
         "logical_unit_sources",
         "logical_unit_aliases",
@@ -101,12 +128,20 @@ _register(
         "loadout_payload_occurrences",
         "profile_groups",
         "army_units",
-        "unit_factions",
         "metadata_ammunitions",
     ],
     CONTEXTUAL,
     reason="Explicit occurrence, relationship, presentation, or metadata context.",
 )
+_register(
+    ["unit_factions"],
+    CONTEXTUAL,
+    reason=(
+        "Source-declared faction memberships are preserved as a broader game-wide "
+        "relationship distinct from concrete Army-list availability."
+    ),
+)
+
 _register(
     [
         "unit_options",

@@ -691,19 +691,19 @@ function render(unit) {
   name.textContent = unit.name;
   const icon = unitSymbol(unit.slug || unit.isc || unit.name, "unit-symbol-detail");
   name.prepend(icon);
-  const mainArmySymbol = armySymbolPath(unit.display_army_id);
-  if (mainArmySymbol) {
-    const mainIcon = document.createElement("img");
-    mainIcon.className = "army-symbol main-army-symbol main-army-symbol-detail";
-    mainIcon.src = mainArmySymbol;
-    mainIcon.alt = "";
-    mainIcon.width = 48;
-    mainIcon.height = 48;
-    mainIcon.decoding = "async";
-    mainIcon.title = unit.display_army_name
+  const displayArmySymbol = armySymbolPath(unit.display_army_id);
+  if (displayArmySymbol) {
+    const displayIcon = document.createElement("img");
+    displayIcon.className = "army-symbol display-army-symbol display-army-symbol-detail";
+    displayIcon.src = displayArmySymbol;
+    displayIcon.alt = "";
+    displayIcon.width = 48;
+    displayIcon.height = 48;
+    displayIcon.decoding = "async";
+    displayIcon.title = unit.display_army_name
       || unit.armies.find((army) => army.id === unit.display_army_id)?.name
-      || "Main army";
-    name.prepend(mainIcon);
+      || "Army symbol";
+    name.prepend(displayIcon);
   }
   const unitMetadata = [
     unit.isc,
@@ -728,8 +728,10 @@ function render(unit) {
   const displayedGeneralProfiles = visibleGeneralProfiles(generalProfileRows);
   const generalProfilesSection = document.createElement("section");
   generalProfilesSection.className = "detail-group general-profile-group";
-  const mainFaction = unit.display_faction?.slug;
-  if (mainFaction) generalProfilesSection.classList.add(`general-profile-group--faction-${mainFaction}`);
+  const displayFaction = unit.display_faction?.slug;
+  if (displayFaction) {
+    generalProfilesSection.classList.add(`general-profile-group--faction-${displayFaction}`);
+  }
   const generalHeading = heading(
     displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",
   );

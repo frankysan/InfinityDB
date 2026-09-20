@@ -269,8 +269,8 @@ and serves a read-only browser and same-origin HTTP API.
 - The 0.6.1 runtime-surface audit uses SQLite authorizer tracing plus static
   direct-method coverage of the web/catalog helpers. After replacing redundant
   profile/loadout/unit source reads, the compatibility-22 production database
-  serves the same 25 probes from 47 tables / 187 distinct fields: 105 canonical-
-  application fields, 60 contextual-application fields, and 22 intentional-source
+  serves the same 25 probes from 47 tables / 187 distinct fields: 102 canonical-
+  application fields, 63 contextual-application fields, and 22 intentional-source
   fields. No replaceable-source issue remains. The only open runtime semantic
   work is the 35 fields across 8 army/faction and skill/equipment/weapon metadata
   overlap tables. Fireteams, relation/dependency tables, includes/peripherals,
@@ -281,7 +281,9 @@ and serves a read-only browser and same-origin HTTP API.
   overlapping `army_lists` / `metadata_factions` IDs with identical name/slug
   values, but their semantics differ; reviewed Army aliases produce 57 canonical
   application army identities. `army_units` is concrete list availability, while
-  `unit_factions` is a broader declared cross-Army membership relation. The latter
+  `unit_factions` is a broader declared cross-Army membership relation. Representative
+  faction/main/display copies on `logical_units` remain contextual/presentation values
+  despite residing on an application-owned row. The latter
   preserves 99 references across 89 source units to faction IDs 203/903/906/907
   that have no current Army list. Source `canonical_faction_id` is origin/context,
   not ownership or availability. Canonical Army modeling must therefore preserve

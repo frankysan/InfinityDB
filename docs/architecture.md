@@ -869,14 +869,17 @@ when it is an imported ordinary list whose own metadata parent is different from
 itself. Current source data uses imported list `901` for the Non-Aligned Armies
 group, with metadata parent `900` and its own source roster; runtime role
 classification does not special-case that ID. Grouping items expose
-`playable: false`, and unit counts still reflect preserved source-defined
-`army_units`.
+`playable: false`. `unit_count` counts distinct application logical units with
+concrete `army_units` availability after reviewed Army aliases are applied;
+multiple source representations of one logical unit do not inflate the
+player-facing count.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
 Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each
 item has `id`, `name`, `main_army_id`, `main_faction`, `display_army_id`,
-`display_faction`, `army_ids`, and `armies` (`id` and `name` per membership).
+`display_faction`, `army_ids`, and `armies` (`id` and `name` per currently
+visible Army availability).
 `main_faction` is the current source-derived main/grouping context, while
 `display_faction` is the presentation identity derived from normalized
 `display_army_id`. Neither field replaces the unit's game-wide membership
@@ -884,10 +887,11 @@ relationships. The zero
 total above illustrates the response shape.
 
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
-- Concrete Army-list membership and availability come from `army_units`;
-  `unit_factions` separately preserves broader declared game-wide faction
-  membership. Canonical/source-origin and main/display fields do not replace
-  either relationship.
+- Concrete Army-list availability comes from `army_units`; the response's
+  `army_ids` / `armies` fields report that availability after optional-mode
+  filtering. `unit_factions` separately preserves broader declared game-wide
+  faction membership. Canonical/source-origin and main/display fields do not
+  replace either relationship.
 - `main_army_id` is a source-derived application grouping field. Current
   InfinityDB builds derive it from imported metadata faction parents, with
   explicit maintained overrides taking precedence. It is not authoritative for

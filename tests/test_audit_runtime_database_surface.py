@@ -6,6 +6,7 @@ from pathlib import Path
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.database import export_database
 from tools.audit_runtime_database_surface import (
+    CANONICAL,
     CONTEXTUAL,
     NO_ISSUE,
     OVERLAP,
@@ -120,8 +121,8 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
         "semanticOverlapTableCount": 8,
         "issue:none:fieldCount": 152,
         "issue:semantic_overlap:fieldCount": 35,
-        "role:canonical_application:fieldCount": 105,
-        "role:contextual_application:fieldCount": 60,
+        "role:canonical_application:fieldCount": 102,
+        "role:contextual_application:fieldCount": 63,
         "role:intentional_source_representation:fieldCount": 22,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
@@ -155,6 +156,10 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
         "option_weapon_extras",
     }.isdisjoint(observed_tables)
     assert _field(report, "units", "canonical_faction_id")["role"] == CONTEXTUAL
+    assert _field(report, "logical_units", "canonical_faction_id")["role"] == CONTEXTUAL
+    assert _field(report, "logical_units", "main_army_id")["role"] == CONTEXTUAL
+    assert _field(report, "logical_units", "display_army_id")["role"] == CONTEXTUAL
+    assert _field(report, "logical_units", "name")["role"] == CANONICAL
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE
     assert _field(report, "metadata_skills", "name")["issue"] == OVERLAP
