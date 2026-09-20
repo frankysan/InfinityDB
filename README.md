@@ -125,8 +125,7 @@ requires SVGO v4+ and `resvg`; text conversion normally requires Inkscape.
 
 The symbol pipeline is resumable and records detailed local logs, reports,
 provenance, and publication state. See [architecture](docs/architecture.md) and
-[data storage and provenance](data/README.md) for its full contract rather than
-relying on the README as an operations reference.
+[data storage and provenance](data/README.md) for its full contract.
 
 The wiki snapshot downloader is also available independently:
 
@@ -162,8 +161,7 @@ adds SQLite export and web-server commands.
 
 A normal Army build writes generated artifacts under `data/generated/`,
 including the application database `infinity.db`, the lossless development
-archive `infinity.raw.db`, and intermediate normalized JSON. Generated data is
-ignored by Git.
+archive `infinity.raw.db`, and intermediate normalized JSON.
 
 Database replacement is fail-safe: a failed import leaves the previous database
 available. On Windows, stop the server before rebuilding if an active reader
@@ -181,9 +179,8 @@ infinity-db build-rules
 DOMAIN=infinity.example.com IMAGE_TAG=app-local sh ./scripts/deploy.sh
 ```
 
-Place the supplied Caddy service behind the public TLS reverse proxy. Deployment
-validation fails closed when required databases or graphical assets are missing
-or inconsistent.
+Place the supplied Caddy service behind a public TLS reverse proxy. Deployment
+validation fails if required databases or graphical assets are missing or inconsistent.
 
 See the [Linux deployment guide](docs/deployment.md) for prerequisites, updates,
 rollback, and operational commands. Use the
@@ -201,14 +198,14 @@ tests/                      # Pipeline, database, API, web, and tool regression 
 tools/                      # Acquisition, processing, auditing, and check utilities
 scripts/                    # Linux deployment and maintenance scripts
 data/
-  raw/                      # Ignored immutable Army/source snapshots
-  wiki/                     # Ignored wiki research snapshots
+  raw/                      # Immutable Army/source snapshots, ignored by Git
+  wiki/                     # Wiki research snapshots, ignored by Git
   curated/                  # Source-controlled reviewed rules and annotations
-  manifests/                # Ignored generated provenance/build state
-  work/                     # Ignored rebuildable processing work
-  reports/                  # Ignored generated processing reports
-  logs/                     # Ignored verbose pipeline logs
-  generated/                # Ignored databases and normalized build artifacts
+  manifests/                # Generated provenance/build state, ignored by Git
+  work/                     # Rebuildable processing work, ignored by Git
+  reports/                  # Generated processing reports, ignored by Git
+  logs/                     # Verbose pipeline logs, ignored by Git
+  generated/                # Databases and normalized build artifacts, ignored by Git
 ```
 
 ## Development checks
