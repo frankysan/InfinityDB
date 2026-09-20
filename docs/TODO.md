@@ -280,19 +280,34 @@ block this interim release.
 - [x] Complete any relationship or catalog/metadata canonicalization that the
   runtime inventory shows is still required for the current application. Broader
   unused/source-only relationship and metadata work remains for Milestone 2B.
-- [ ] Run representative before/after runtime benchmarks for the canonical pass
+- [x] Run representative before/after runtime benchmarks for the canonical pass
   and record the result. Treat performance gains as release evidence, not as a
   substitute for semantic correctness or losslessness.
   - [x] Add a reproducible repository-read benchmark covering cold and warm Army,
     unit list/search/detail, Skills/Equipment/Weapons catalog/detail, and Traits
     paths against any supplied `infinity.db` snapshot, plus a deterministic
     report-comparison tool for database-size and median/p95 deltas.
-  - [ ] Run the benchmark on the same production-like snapshot and host before
-    and after the canonical pass, compare the archived JSON reports, then record
-    median/p95 timings and database size.
+  - [x] Run the benchmark on the same production-like snapshot and host before
+    and after the canonical pass. Against the 0.6.0 baseline, the geometric mean
+    of cold medians improved by 2.33%; Army listing improved by 43.94% and
+    Army-filtered unit listing by 11.68%. Cold p95 geometric mean was effectively
+    flat (+0.52%). The audited `infinity.db` grew from 13,557,760 to 18,108,416
+    bytes (+33.56%) because materialized application layers currently coexist
+    with retained source/context representations.
 - [ ] Run the complete local/CI/rebuild acceptance set, review `Unreleased` as a
   coherent 0.6.1 release note, document required database rebuild/upgrade steps,
   and cut version 0.6.1.
+  - [ ] Run the local full acceptance command with the production-like Army
+    snapshot and required published assets; retain the timestamped check report.
+  - [ ] Confirm hosted `Source checks`, `Installed wheel smoke`, and `Deployment
+    smoke test` are green for the release commit/tag and retain those run links as
+    release evidence.
+  - [x] Review the 0.6.1 upgrade boundary: schema 16 / compatibility revision 24
+    requires rebuilding generated Army databases; no in-place migration is
+    supported.
+  - [ ] Bump the package/release version, convert `Unreleased` into the dated
+    0.6.1 section, update the README current-release marker, tag the release, and
+    verify the deployed update path.
 
 The eventual physical separation of source-only tables into `infinity.raw.db`,
 the complete inventory of unused player-relevant source data, and 1.0 web/rules

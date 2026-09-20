@@ -311,8 +311,12 @@ and serves a read-only browser and same-origin HTTP API.
   contributing source ID/label; detailed `metadata_weapons` modes and profiles
   remain contextual rather than being promoted to invariant catalog facts.
 - `tools/benchmark_runtime.py` is the canonical repository-read benchmark for the
-  0.6.1 performance gate. Compare revisions only on the same source snapshot and
-  host; record cold and warm median/p95 results and database size.
+  0.6.1 performance gate; `tools/compare_runtime_benchmarks.py` compares archived
+  reports. The same-host/same-snapshot 0.6.0-to-0.6.1 release run improved the
+  geometric mean of cold medians by 2.33% (Army listing -43.94%, Army-filtered
+  units -11.68%) while the cold-p95 geometric mean was effectively flat (+0.52%).
+  The audited application database grew 13,557,760 -> 18,108,416 bytes (+33.56%)
+  while materialized application layers and retained source/context rows coexist.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

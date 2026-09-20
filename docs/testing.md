@@ -216,8 +216,9 @@ the same Army snapshot in the pre-change checkout and run the same
 `PYTHONPATH`. On PowerShell, one reproducible approach is:
 
 ```powershell
-$env:PYTHONPATH = "C:\path	oefore-checkout\src"
-python C:\path	o\current-checkout	oolsenchmark_runtime.py C:\path	oefore-checkout\data\generated\infinity.db --json > reports\BENCHMARK-before.json
+$before = (Resolve-Path "..\InfinityDB-before").Path
+$env:PYTHONPATH = (Join-Path $before "src")
+python .\tools\benchmark_runtime.py (Join-Path $before "data\benchmark-before\infinity.db") --json > .\reports\BENCHMARK-before.json
 Remove-Item Env:PYTHONPATH
 ```
 
@@ -225,7 +226,7 @@ Generate the after report normally from the current checkout, then compare the
 two reports:
 
 ```powershell
-python toolsenchmark_runtime.py data\generated\infinity.db --json > reports\BENCHMARK-after.json
+python tools\benchmark_runtime.py data\generated\infinity.db --json > reports\BENCHMARK-after.json
 python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json
 python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json --json > reports\BENCHMARK-comparison.json
 ```

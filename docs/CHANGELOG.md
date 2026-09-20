@@ -14,12 +14,21 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Materialize and serve canonical application identity layers for Armies plus
   Skills, Equipment, and Weapons while preserving source projections, source-
   specific labels, and richer weapon/equipment profile metadata.
-- Add a reproducible cold/warm repository benchmark for the 0.6.1
-  canonicalization release gate.
+- Add reproducible cold/warm repository benchmarking and report comparison for
+  the 0.6.1 canonicalization release gate. On the same-host, same-snapshot
+  0.6.0-to-0.6.1 comparison, the geometric mean of cold medians improved by
+  2.33%, including 43.94% faster Army listing and 11.68% faster Army-filtered
+  unit listing; aggregate cold p95 remained effectively flat (+0.52%).
 
 ### Upgrade notes
 
 - Rebuild existing generated Army databases before deploying this version.
+  Schema 16 / compatibility revision 24 is intentionally incompatible with older
+  generated Army databases; there is no in-place database migration.
+- The audited production-like `infinity.db` grew from 13,557,760 to 18,108,416
+  bytes (+33.56%) because the new materialized application layers coexist with
+  retained source/context representations. Physical source-only separation into
+  `infinity.raw.db` remains later work.
 
 ### Fixed
 

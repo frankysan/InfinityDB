@@ -1514,10 +1514,31 @@ fields still equal the representative source and that the alias, note, and
 
 Canonical unit/profile/loadout payloads, their context mappings, application Army
 identity/hierarchy, application catalog identity, and the current runtime read
-migrations are complete for the 0.6.1 serving surface. The remaining release-gate
-work is benchmark/release acceptance rather than unresolved runtime semantics.
-Broader relationship structures remain post-0.6.1 unless a correctness dependency
-is discovered.
+migrations are complete for the 0.6.1 serving surface. The representative runtime
+benchmark is also complete; the remaining release-gate work is final local/hosted
+acceptance and release execution rather than unresolved runtime semantics. Broader
+relationship structures remain post-0.6.1 unless a correctness dependency is
+identified.
+
+### 0.6.1 runtime benchmark evidence
+
+The release benchmark compares the 0.6.0 implementation with the 0.6.1 canonical
+runtime pass on the same production-like Army snapshot, host, benchmark cases, and
+iteration counts (20 cold / 200 warm per case). Across the 13 representative read
+paths, the geometric mean of cold medians improved by **2.33%**. Army listing
+improved by **43.94%**, Army-filtered unit listing by **11.68%**, plain unit listing
+by **3.57%**, and Trait detail by **4.67%**. The geometric mean of cold p95 timings
+was effectively flat at **+0.52%**. The small Traits-list path increased from a
+1.92 ms to 2.87 ms cold median, so its large percentage change is not treated as a
+standalone release blocker.
+
+The same benchmark records `infinity.db` growing from **13,557,760 bytes** to
+**18,108,416 bytes** (**+33.56%**). That is an accepted interim tradeoff for 0.6.1:
+canonical application layers are now materialized while the source/context rows
+required for provenance and still-unmigrated semantics are retained. The later
+physical `infinity.raw.db` separation owns removal of source-only duplication; the
+0.6.1 semantic acceptance criterion remains correctness and losslessness, not
+storage reduction.
 
 ### 0.6.1 runtime serving-surface inventory
 
