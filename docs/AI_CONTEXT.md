@@ -254,6 +254,17 @@ and serves a read-only browser and same-origin HTTP API.
   overlap tables. Fireteams, relation/dependency tables, includes/peripherals,
   and other currently unserved source structures are outside the 0.6.1 gate
   unless later runtime work introduces a dependency.
+- The 0.6.1 army/faction audit makes the scope boundary explicit: Infinity Army
+  is list-local, whereas InfinityDB is game-wide. The reviewed snapshot has 58
+  overlapping `army_lists` / `metadata_factions` IDs with identical name/slug
+  values, but their semantics differ; reviewed Army aliases produce 57 canonical
+  application army identities. `army_units` is concrete list availability, while
+  `unit_factions` is a broader declared cross-Army membership relation. The latter
+  preserves 99 references across 89 source units to faction IDs 203/903/906/907
+  that have no current Army list. Source `canonical_faction_id` is origin/context,
+  not ownership or availability. Canonical Army modeling must therefore preserve
+  the broader 63-ID faction registry and both source projections rather than
+  collapsing the game-wide model to currently selectable Army lists.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

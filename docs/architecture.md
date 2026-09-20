@@ -197,7 +197,12 @@ unit API payloads, and browser code formats distances without recognizing skill
 names.
 
 Army presentation and classification currently combine imported relationships
-with merger-derived fields. Faction grouping, display names, and slugs come from
+with merger-derived fields. The source/application scope distinction is important:
+Infinity Army presents one concrete Army list at a time, while InfinityDB presents
+the whole game and must preserve cross-Army identities and relationships alongside
+those list-local occurrences. A source Army list is therefore an occurrence/context
+container, not the complete application ontology for faction identity or unit
+membership. Faction grouping, display names, and slugs come from
 `metadata_factions.parent`, `name`, and `slug`; repository responses expose this
 as `main_faction` for unit summaries/details and `faction` for each army
 occurrence. The merger sets `army_lists.kind` to `army` for source documents

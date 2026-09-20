@@ -224,17 +224,34 @@ block this interim release.
 - [ ] Resolve the open classifications from that runtime inventory.
   - [x] Record every observed field as canonical application data, explicit
     contextual application data, or intentional source representation; 152 / 187
-    current field reads have no open semantic issue and the remaining 35 are the
-    two explicit semantic-overlap audits below.
+    current field reads have no open semantic issue. The remaining 35 belong to
+    two semantic-overlap workstreams: Army/faction semantics are now audited but
+    still need canonical materialization/read migration, while catalog/metadata
+    semantics still need their audit below.
   - [x] Replace the 43 duplicate source reads across 16 profile/loadout/unit
     source tables with their already-materialized canonical equivalents. Search
     labels, unit skill/equipment/weapon filters, skill extras, and catalog reverse
     lookups now use canonical logical-unit/profile/loadout data; top-level
     `unit_options` remain contextual source data by design.
-  - [ ] Audit the live army/faction boundary around `army_lists`,
+  - [x] Audit the live army/faction boundary around `army_lists`,
     `metadata_factions`, `army_units`, `unit_factions`, and source-specific
-    `units.canonical_faction_id`; preserve hierarchy, playability, availability,
-    and provenance as distinct semantics.
+    `units.canonical_faction_id`. The 2026-09-18 snapshot has 58 overlapping
+    Army-list/metadata identities with identical name/slug values, 57 canonical
+    application army identities after the 998 -> 999 alias, and a broader
+    63-identity faction registry. `army_units` remains list-local availability;
+    `unit_factions` is a distinct game-wide membership relation and contains 99
+    membership references not represented by current standard Army-list
+    occurrences.
+    - [ ] Design/materialize the canonical application army identity/hierarchy
+      layer: canonical name/slug, role/playability/grouping, reviewed source
+      aliases, and explicit reinforcement relationships. Preserve both source
+      projections and provenance.
+    - [ ] Move normal Army/faction serving onto that canonical layer and prove
+      `/api/armies`, unit list/detail faction presentation, Army filtering, and
+      optional availability behavior remain equivalent.
+    - [ ] Preserve `unit_factions` and the broader `factions` identity registry as
+      game-wide relationship/context data; do not reduce them to currently
+      selectable Army lists.
   - [ ] Audit the live skill/equipment/weapon catalog boundary against
     `metadata_skills`, `metadata_equipment`, and `metadata_weapons`; preserve
     source metadata/modes that are not duplicate catalog identity.

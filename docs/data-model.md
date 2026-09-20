@@ -1516,6 +1516,62 @@ permanent table-count contract. The audit fails on an unclassified newly-read
 table or an unprobed direct repository method so future runtime expansion becomes
 an explicit semantic decision.
 
+### Army/faction semantic boundary audit
+
+The 0.6.1 army/faction audit treats Infinity Army and InfinityDB as different
+scopes. Infinity Army exposes one concrete army/list at a time. InfinityDB must
+retain those list-local occurrences while also representing identities and
+relationships across the whole game. A source list is therefore not the same
+thing as a game-wide faction identity, ownership relation, or declared unit
+membership.
+
+On the reviewed 2026-09-18 snapshot, `army_lists` and `metadata_factions` each
+contain 58 source IDs. Their ID sets are identical and every matching `name` /
+`slug` pair is equal. That overlap is real, but the source constructs still carry
+different semantics: `army_lists` owns roster/list context and the explicit
+ordinary-list `reinforcement_id` relationship, while `metadata_factions` owns
+hierarchy plus metadata such as `discontinued` and `logo`. The configured Army
+alias `998 -> 999` reduces those 58 source list identities to **57 application
+army identities**. The current derived application roles are **10 main, 30
+sectorial, 5 non-aligned, 1 grouping, and 11 reinforcement** identities; 56 are
+selectable and grouping identity 901 is not.
+
+Reinforcement ownership must not be inferred from `metadata_factions.parent`.
+All 12 reinforcement metadata rows point at parent IDs that are not themselves
+metadata identities in this snapshot. By contrast, all 46 ordinary source lists
+carry an explicit reinforcement link, resolving to 11 canonical reinforcement
+identities after the 998/999 alias. The ordinary-list reinforcement relationship
+is therefore the stronger source evidence for application semantics.
+
+The normalized `factions` table is a broader game-wide identity registry than
+the Army-list set. It contains 63 identities: the 58 list identities plus source
+IDs `1`, `203`, `903`, `906`, and `907`, which are referenced by canonical-faction
+or declared-membership data without a current Army list. This distinction is
+material rather than theoretical. `unit_factions` contains 2,094 declared
+memberships, while `army_units` contains 4,137 concrete list occurrences. For
+89 source units, declared faction membership is a strict superset of current
+standard Army-list availability: 99 extra membership references point to IDs
+203, 903, 906, or 907, and there are **zero** standard Army occurrences missing
+from the corresponding declared membership sets. Reducing `unit_factions` to
+`army_units` would therefore erase cross-army/historical relationships that are
+useful specifically because InfinityDB has a game-wide scope.
+
+`army_units` remains explicit list-local availability context, including
+`availability_kind`; current production data has no null availability-kind rows.
+`unit_factions` remains a separate game-wide declared-membership relation. Source
+`units.canonical_faction_id` is likewise separate: it represents source
+canonical/origin context and can point to identities without an Army list (IDs 1
+and 903 in this snapshot). It is not sufficient evidence for playability, Army
+membership, or application ownership.
+
+The next implementation step should therefore materialize one canonical
+application army identity/hierarchy layer from the reviewed Army aliases and the
+two overlapping source projections, while preserving source list rows, metadata
+rows, `army_units`, `unit_factions`, and source canonical-faction values as
+traceable context. The canonical layer may own player-facing name/slug, derived
+role/playability/grouping, and explicit reinforcement relationships; it must not
+collapse the broader faction registry into only currently selectable armies.
+
 ### 1. Relationships
 
 Re-evaluate includes, peripherals, dependencies, relations, Fireteams, and
