@@ -108,9 +108,10 @@ contain canonical facts, contextual deltas, and relationships while still being
 an InfinityDB-defined concept rather than a source-native one.
 
 Current examples include source-derived army role/playability and
-`main_army_id`; the materialized logical unit and the browser's `General
-profile` are InfinityDB abstractions; and `display_army_id` / `display_faction`
-are presentation conveniences. For the Army data model, these categories refer
+`main_army_id`; the materialized application Army identity/hierarchy, the
+materialized logical unit, and the browser's `General profile` are InfinityDB
+abstractions; and `display_army_id` / `display_faction` are presentation
+conveniences. For the Army data model, these categories refer
 to Army/metadata provenance; curated rules knowledge retains its own cited
 external-source provenance.
 
@@ -245,8 +246,15 @@ Infinity Army presents one concrete Army list at a time, while InfinityDB presen
 the whole game and must preserve cross-Army identities and relationships alongside
 those list-local occurrences. A source Army list is therefore an occurrence/context
 container, not the complete application ontology for faction identity or unit
-membership. Faction grouping, display names, and slugs come from
-`metadata_factions.parent`, `name`, and `slug`; repository responses expose this
+membership. Database schema version 15 materializes an explicit application Army
+identity/hierarchy from reviewed Army aliases plus the overlapping
+`army_lists`/`metadata_factions` evidence. That derived layer owns the canonical
+application name/slug, role/playability/grouping, source-ID provenance mapping,
+and explicit reinforcement-parent relationships without replacing either source
+projection or the broader faction registry. Normal repository serving is being
+migrated to that layer incrementally. Faction grouping, display names, and slugs
+currently come from `metadata_factions.parent`, `name`, and `slug`; repository
+responses expose this
 as `main_faction` for unit summaries/details and `faction` for each army
 occurrence. The merger sets `army_lists.kind` to `army` for source documents
 that contain a top-level `reinforcements` field and to `reinforcement` for those

@@ -1634,13 +1634,40 @@ canonical/origin context and can point to identities without an Army list (IDs 1
 and 903 in this snapshot). It is not sufficient evidence for playability, Army
 membership, or application ownership.
 
-The next implementation step should therefore materialize one canonical
-application army identity/hierarchy layer from the reviewed Army aliases and the
-two overlapping source projections, while preserving source list rows, metadata
-rows, `army_units`, `unit_factions`, and source canonical-faction values as
-traceable context. The canonical layer may own player-facing name/slug, derived
-role/playability/grouping, and explicit reinforcement relationships; it must not
-collapse the broader faction registry into only currently selectable armies.
+Schema version 15 / compatibility revision 23 materializes that reviewed
+application Army abstraction without rewriting either source projection:
+
+```text
+application_armies
+  id                     canonical application Army ID
+  name                   player-facing canonical name
+  slug                   player-facing canonical slug
+  role                   derived main/sectorial/non-aligned/grouping/reinforcement role
+  playable               derived application selectability
+  group_id               canonical application grouping/main parent where applicable
+  preferred_source_id    source identity preferred for name/slug provenance
+
+application_army_sources
+  application_army_id    owning canonical application Army
+  source_army_id         source identity reconciled into that Army
+  has_army_list          whether the source identity has an `army_lists` projection
+  has_metadata           whether it has a `metadata_factions` projection
+
+application_army_reinforcement_parents
+  reinforcement_army_id  canonical reinforcement Army
+  parent_army_id         canonical ordinary Army that explicitly links to it
+```
+
+The layer is an InfinityDB abstraction, not a new upstream object. Name/slug
+selection uses deterministic preferred-source provenance after reviewed Army
+aliases are applied. Role, playability, grouping, and reinforcement-parent
+relations are source-derived from the overlapping Army-list/metadata evidence
+described above. Source list rows, metadata rows, `army_units`, `unit_factions`,
+and source canonical-faction values remain unchanged and traceable; the broader
+63-ID faction registry is not collapsed into application Army identities.
+
+The next step is to move normal Army/faction serving onto these materialized
+rows and prove equivalence before removing the previous query-time derivation.
 
 ### 1. Relationships
 
@@ -1762,11 +1789,12 @@ normalization-time availability classification part of the generated database
 contract; repository mercenary filtering consumes `availability_kind` directly
 for current snapshots.
 
-Frontend-only `logical_units`, `logical_unit_sources`, logical-unit alias/note/
-`spectables` context, and canonical profile/loadout payload tables are derived
-application structure, not normalized source facts, and therefore do not rewrite
-the source tables. Repository unit queries map a requested source or
-representative ID through `logical_unit_sources`; list/search/detail general
+Frontend-only application-Army identity/provenance tables, `logical_units`,
+`logical_unit_sources`, logical-unit alias/note/`spectables` context, and
+canonical profile/loadout payload tables are derived application structure, not
+normalized source facts, and therefore do not rewrite the source tables.
+Repository unit queries map a requested source or representative ID through
+`logical_unit_sources`; list/search/detail general
 fields and unit-label search aliases come from the canonical logical-unit layer,
 while source-backed Army/relationship context and the two explicitly unresolved
 metadata-overlap boundaries continue to use their reviewed source/context tables. The
@@ -1775,8 +1803,8 @@ tables so generated application structure cannot be supplied as normalized
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 14 and the application
-compatibility revision is 22. Imports build temporary sibling files, check
+records its schema version. The current schema version is 15 and the application
+compatibility revision is 23. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

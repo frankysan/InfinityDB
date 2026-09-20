@@ -255,6 +255,35 @@ def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Pat
     path = tmp_path / "infinity.db"
     export_database(normalized, path)
     armies = {army["id"]: army for army in Database(path).list_armies()}
+    with sqlite3.connect(path) as connection:
+        connection.row_factory = sqlite3.Row
+        materialized = {
+            row["id"]: dict(row)
+            for row in connection.execute(
+                "SELECT id, name, slug, role, playable, group_id, preferred_source_id "
+                "FROM application_armies ORDER BY id"
+            )
+        }
+        reinforcement_parents = {
+            (row["reinforcement_army_id"], row["parent_army_id"])
+            for row in connection.execute(
+                "SELECT reinforcement_army_id, parent_army_id "
+                "FROM application_army_reinforcement_parents"
+            )
+        }
+
+    assert set(materialized) == set(armies)
+    for army_id, army in armies.items():
+        assert materialized[army_id] == {
+            "id": army_id,
+            "name": army["name"],
+            "slug": army["slug"],
+            "role": army["role"],
+            "playable": int(army["playable"]),
+            "group_id": army["group_id"],
+            "preferred_source_id": army_id,
+        }
+    assert reinforcement_parents == {(198, 101)}
 
     assert armies[101]["role"] == "main"
     assert armies[101]["playable"] is True

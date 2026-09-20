@@ -76,6 +76,9 @@ def test_army_faction_audit_distinguishes_list_occurrence_from_game_wide_members
         "sharedArmyMetadataIdentityCount": 2,
         "armyMetadataNameSlugMismatchCount": 0,
         "applicationArmyIdentityCount": 2,
+        "materializedApplicationArmyIdentityCount": 2,
+        "applicationArmySourceMappingCount": 2,
+        "applicationReinforcementParentCount": 0,
         "canonicalizedSourceArmyIdentityCount": 2,
         "ordinarySourceListCount": 2,
         "reinforcementSourceListCount": 0,
@@ -99,6 +102,9 @@ def test_army_faction_audit_distinguishes_list_occurrence_from_game_wide_members
         "reinforcement": 0,
         "unknown": 0,
     }
+    assert report["applicationModel"]["runtimeIdentityEquivalent"] is True
+    assert [army["id"] for army in report["applicationModel"]["armies"]] == [101, 102]
+    assert report["applicationModel"]["reinforcementParents"] == []
     assert report["gameWideFactionContext"]["identityRegistryWithoutArmyList"] == [203]
     assert report["gameWideFactionContext"]["declaredMembershipFactionIdsWithoutArmyList"] == [203]
     assert report["gameWideFactionContext"]["declaredMembershipExtrasByFaction"] == [

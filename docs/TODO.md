@@ -256,11 +256,11 @@ block this interim release.
       as contextual/presentation values, name `unit_factions`-derived helpers as
       declared-faction data, and count `/api/armies.unit_count` by distinct logical
       units rather than source representations.
-    - [ ] Design/materialize the canonical application army identity/hierarchy
-      layer explicitly as an InfinityDB abstraction: canonical name/slug,
-      role/playability/grouping, reviewed source aliases, and explicit
-      reinforcement relationships. Preserve both source projections and
-      provenance and document which inputs are source-native versus derived.
+    - [x] Design/materialize the canonical application army identity/hierarchy
+      layer explicitly as an InfinityDB abstraction: schema version 15 stores
+      canonical name/slug, role/playability/grouping, reviewed source-alias
+      mappings, preferred source provenance, and explicit reinforcement-parent
+      relationships while retaining both source projections unchanged.
     - [ ] Move normal Army/faction serving onto that canonical layer and prove
       `/api/armies`, unit list/detail faction presentation, Army filtering, and
       optional availability behavior remain equivalent.
@@ -762,6 +762,13 @@ new correctness or reproducibility defect.
   
 ## Potential product features
 
+- [ ] Make domain-unique slugs the public identifiers for API lookup and web
+  routes, so normal user-facing URLs and navigation do not depend on database ID
+  numbers. Define uniqueness/stability rules within each public domain (armies,
+  units, catalogs, rules/traits as applicable), allow API resources to be
+  addressed by slug, and treat underlying numeric database IDs as an
+  implementation detail exposed only through developer-oriented diagnostics or
+  explicit compatibility paths during migration.
 - [ ] Expand the existing versioned curated rules-reference infrastructure with
   substantially broader N5 v5.3 coverage from
   `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10).

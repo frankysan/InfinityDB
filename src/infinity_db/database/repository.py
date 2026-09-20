@@ -32,6 +32,15 @@ from infinity_db.identities import (
     strip_reinforcement_prefix,
 )
 
+from .application_armies import (
+    ARMY_ROLE_GROUPING,
+    ARMY_ROLE_MAIN,
+    ARMY_ROLE_NON_ALIGNED,
+    ARMY_ROLE_REINFORCEMENT,
+    ARMY_ROLE_SECTORIAL,
+    ARMY_ROLE_UNKNOWN,
+    validate_application_armies,
+)
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .schema import (
     APPLICATION_ID,
@@ -57,12 +66,6 @@ SOURCE_UNIT_NAMES_CTE = (
     ")"
 )
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
-ARMY_ROLE_MAIN = "main"
-ARMY_ROLE_SECTORIAL = "sectorial"
-ARMY_ROLE_NON_ALIGNED = "non_aligned"
-ARMY_ROLE_REINFORCEMENT = "reinforcement"
-ARMY_ROLE_GROUPING = "grouping"
-ARMY_ROLE_UNKNOWN = "unknown"
 
 
 class ArmySelectionError(ValueError):
@@ -642,7 +645,8 @@ class Database:
                     "Database compatibility revision does not match this application; "
                     "rebuild the database"
                 )
-            identity_config_from_connection(connection)
+            identity_config = identity_config_from_connection(connection)
+            validate_application_armies(connection, identity_config)
             source_unit_count = connection.execute(
                 "SELECT COUNT(*) FROM units WHERE source_defined = 1"
             ).fetchone()[0]

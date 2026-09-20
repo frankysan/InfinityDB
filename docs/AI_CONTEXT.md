@@ -286,9 +286,15 @@ and serves a read-only browser and same-origin HTTP API.
   despite residing on an application-owned row. The latter
   preserves 99 references across 89 source units to faction IDs 203/903/906/907
   that have no current Army list. Source `canonical_faction_id` is origin/context,
-  not ownership or availability. Canonical Army modeling must therefore preserve
-  the broader 63-ID faction registry and both source projections rather than
-  collapsing the game-wide model to currently selectable Army lists.
+  not ownership or availability. Schema version 15 / compatibility revision 23
+  now materializes the canonical application Army identity/hierarchy as an
+  InfinityDB abstraction in `application_armies`, `application_army_sources`,
+  and `application_army_reinforcement_parents`. It stores canonical name/slug,
+  role/playability/grouping, reviewed source-ID mappings and preferred-source
+  provenance, plus explicit reinforcement-parent relationships. The broader
+  63-ID faction registry, `army_units`, `unit_factions`, and both source
+  projections remain separate; normal serving must migrate to the materialized
+  Army layer without collapsing those contexts.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

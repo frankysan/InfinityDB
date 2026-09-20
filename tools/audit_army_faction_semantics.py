@@ -26,6 +26,25 @@ REQUIRED_FIELDS: dict[str, set[str]] = {
     "army_units": {"army_id", "unit_id", "availability_kind"},
     "unit_factions": {"unit_id", "faction_id"},
     "units": {"id", "canonical_faction_id", "source_defined", "source_role"},
+    "application_armies": {
+        "id",
+        "name",
+        "slug",
+        "role",
+        "playable",
+        "group_id",
+        "preferred_source_id",
+    },
+    "application_army_sources": {
+        "application_army_id",
+        "source_army_id",
+        "has_army_list",
+        "has_metadata",
+    },
+    "application_army_reinforcement_parents": {
+        "reinforcement_army_id",
+        "parent_army_id",
+    },
 }
 
 FIELD_CLASSIFICATION: dict[str, dict[str, dict[str, str]]] = {
@@ -191,6 +210,11 @@ def audit_database(path: Path) -> dict[str, Any]:
         army_units = _rows(connection, "army_units")
         unit_factions = _rows(connection, "unit_factions")
         units = [row for row in _rows(connection, "units") if row["source_defined"] == 1]
+        materialized_armies = _rows(connection, "application_armies")
+        materialized_sources = _rows(connection, "application_army_sources")
+        materialized_reinforcement_parents = _rows(
+            connection, "application_army_reinforcement_parents"
+        )
 
     army_ids = set(army_lists)
     metadata_ids = set(metadata)
@@ -219,8 +243,40 @@ def audit_database(path: Path) -> dict[str, Any]:
     }
 
     application_armies = Database(path).list_armies()
-    role_counts = Counter(army["role"] for army in application_armies)
-    playable_counts = Counter(bool(army["playable"]) for army in application_armies)
+    materialized_by_id = {row["id"]: row for row in materialized_armies}
+    materialized_parent_ids: dict[int, list[int]] = defaultdict(list)
+    for row in materialized_reinforcement_parents:
+        materialized_parent_ids[row["reinforcement_army_id"]].append(row["parent_army_id"])
+    runtime_identity = [
+        {
+            "id": army["id"],
+            "name": army["name"],
+            "slug": army["slug"],
+            "role": army["role"],
+            "playable": int(bool(army["playable"])),
+            "group_id": army["group_id"],
+            "parent_army_ids": army["parent_army_ids"],
+        }
+        for army in application_armies
+    ]
+    materialized_identity = [
+        {
+            "id": army_id,
+            "name": row["name"],
+            "slug": row["slug"],
+            "role": row["role"],
+            "playable": row["playable"],
+            "group_id": row["group_id"],
+            "parent_army_ids": sorted(materialized_parent_ids.get(army_id, [])),
+        }
+        for army_id, row in sorted(materialized_by_id.items())
+    ]
+    if runtime_identity != materialized_identity:
+        raise ArmyFactionAuditError(
+            "Materialized application Army identity differs from runtime derivation"
+        )
+    role_counts = Counter(army["role"] for army in materialized_armies)
+    playable_counts = Counter(bool(army["playable"]) for army in materialized_armies)
 
     reinforcement_rows = [row for row in army_lists.values() if row["kind"] == "reinforcement"]
     reinforcement_parent_missing = [
@@ -279,6 +335,11 @@ def audit_database(path: Path) -> dict[str, Any]:
             "sharedArmyMetadataIdentityCount": len(shared_ids),
             "armyMetadataNameSlugMismatchCount": len(identity_mismatches),
             "applicationArmyIdentityCount": len(application_armies),
+            "materializedApplicationArmyIdentityCount": len(materialized_armies),
+            "applicationArmySourceMappingCount": len(materialized_sources),
+            "applicationReinforcementParentCount": len(
+                materialized_reinforcement_parents
+            ),
             "canonicalizedSourceArmyIdentityCount": len(canonical_source_ids),
             "ordinarySourceListCount": sum(row["kind"] == "army" for row in army_lists.values()),
             "reinforcementSourceListCount": len(reinforcement_rows),
@@ -299,6 +360,12 @@ def audit_database(path: Path) -> dict[str, Any]:
         "applicationRoles": {
             role: role_counts[role]
             for role in ("main", "sectorial", "non_aligned", "grouping", "reinforcement", "unknown")
+        },
+        "applicationModel": {
+            "runtimeIdentityEquivalent": True,
+            "armies": materialized_identity,
+            "sourceMappings": materialized_sources,
+            "reinforcementParents": materialized_reinforcement_parents,
         },
         "sourceIdentityOverlap": {
             "armyOnlyIds": sorted(army_ids - metadata_ids),
