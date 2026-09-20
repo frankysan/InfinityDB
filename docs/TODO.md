@@ -223,8 +223,8 @@ block this interim release.
 - [x] Inventory every Army-database table/field/relationship read by the current
   runtime surfaces: armies, unit visibility/list/search/detail, availability and
   faction context, filters, and the current skill/equipment/weapon/trait catalog
-  paths. The compatibility-22 production trace covers 25 serving probes, 47
-  tables, and 187 distinct table-field reads.
+  paths. After the Army read migration, the compatibility-23 trace covers 25
+  serving probes, 49 tables, and 192 distinct table-field reads.
 - [ ] Document semantic provenance for every non-source-native runtime concept
   relied on or changed by the 0.6.1 pass, including logical/canonical payload
   abstractions, army role/playability and `main_army_id`, display identity, and
@@ -232,11 +232,10 @@ block this interim release.
   assumptions/fallbacks, and semantic limits explicit.
 - [ ] Resolve the open classifications from that runtime inventory.
   - [x] Record every observed field as canonical application data, explicit
-    contextual application data, or intentional source representation; 152 / 187
-    current field reads have no open semantic issue. The remaining 35 belong to
-    two semantic-overlap workstreams: Army/faction semantics are now audited but
-    still need canonical materialization/read migration, while catalog/metadata
-    semantics still need their audit below.
+    contextual application data, or intentional source representation; 166 / 192
+    current field reads have no open semantic issue. Army/faction identity and
+    hierarchy now serve through the materialized application layer, leaving 26
+    open fields across the 6 skill/equipment/weapon catalog and metadata tables.
   - [x] Replace the 43 duplicate source reads across 16 profile/loadout/unit
     source tables with their already-materialized canonical equivalents. Search
     labels, unit skill/equipment/weapon filters, skill extras, and catalog reverse
@@ -261,12 +260,13 @@ block this interim release.
       canonical name/slug, role/playability/grouping, reviewed source-alias
       mappings, preferred source provenance, and explicit reinforcement-parent
       relationships while retaining both source projections unchanged.
-    - [ ] Move normal Army/faction serving onto that canonical layer and prove
+    - [x] Move normal Army/faction serving onto that canonical layer and prove
       `/api/armies`, unit list/detail faction presentation, Army filtering, and
-      optional availability behavior remain equivalent.
-    - [ ] Preserve `unit_factions` and the broader `factions` identity registry as
-      game-wide relationship/context data; do not reduce them to currently
-      selectable Army lists.
+      optional availability behavior remain equivalent. Runtime identity is checked
+      against both persisted application rows and their source-derived evidence.
+    - [x] Preserve `unit_factions` and the broader `factions` identity registry as
+      game-wide relationship/context data; neither is reduced to currently
+      selectable Army lists by the read migration.
   - [ ] Audit the live skill/equipment/weapon catalog boundary against
     `metadata_skills`, `metadata_equipment`, and `metadata_weapons`; preserve
     source metadata/modes that are not duplicate catalog identity.

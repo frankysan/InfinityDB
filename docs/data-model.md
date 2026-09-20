@@ -336,9 +336,10 @@ Canonical profile and loadout layers now additionally answer, conservatively:
 Unit-detail repository/API assembly consumes those canonical profile/loadout
 payloads while retaining source occurrence context. Normal unit search,
 skill/equipment/weapon filters, skill extras, and catalog reverse usage likewise
-expand canonical payloads through their occurrence mappings. Source-local
-relationships and the unresolved army/faction plus catalog/metadata overlap remain
-partly source-backed, so the application model is intentionally only partially
+expand canonical payloads through their occurrence mappings. Source-local relationships remain source-backed, while Army/faction identity and
+hierarchy now serve through their materialized application layer. The remaining
+normal-serving semantic overlap is the skill/equipment/weapon catalog versus
+metadata boundary, so the application model is intentionally only partially
 canonicalized at this stage.
 
 InfinityDB is progressively introducing the remaining canonical application
@@ -1534,27 +1535,25 @@ The initial compatibility-21 trace of the reviewed 2026-09-18 snapshot covered
 baseline identified 43 replaceable fields across 16 source tables in addition to
 the genuine semantic-overlap work.
 
-After migrating those replaceable runtime reads, the compatibility-22 trace covers
-**47 tables / 187 distinct table-field pairs**. All **43 replaceable source fields
-across 16 tables are gone from normal serving**: unit search labels come from the
-canonical logical-unit/profile/loadout layers; skill/equipment/weapon filters and
-reverse catalog usage expand canonical payload rows back through their occurrence
-maps; source-specific unit display names are reconstructed from canonical logical
-unit fields plus explicit name aliases. Top-level `unit_option_*` occurrences stay
-source-contextual by design.
+After migrating the replaceable source reads and then moving Army/faction serving
+onto the materialized application Army layer, the compatibility-23 trace covers
+**49 tables / 192 distinct table-field pairs**. All **43 replaceable source fields
+across 16 tables remain absent from normal serving**: unit search labels come from
+the canonical logical-unit/profile/loadout layers; skill/equipment/weapon filters
+and reverse catalog usage expand canonical payload rows back through their
+occurrence maps; source-specific unit display names are reconstructed from canonical
+logical-unit fields plus explicit name aliases. Top-level `unit_option_*` occurrences
+stay source-contextual by design.
 
-The current role totals are **102 canonical-application fields**, **63 explicit
-contextual-application fields**, and **22 intentional-source fields**. The three-field
-shift reflects the explicit classification of representative `canonical_faction_id`,
-`main_army_id`, and `display_army_id` copies on `logical_units` as context/presentation
-rather than canonical logical-unit facts. The remaining
-**35 fields across 8 tables** are all genuine semantic overlap rather
-than mechanical duplication. Current army presentation combines `army_lists` with
-`metadata_factions`, while skill/equipment/weapon catalogs combine normalized
-occurrence catalogs with `metadata_skills`, `metadata_equipment`, and
-`metadata_weapons`. Those boundaries require explicit semantic audits before
-deciding whether to materialize a new canonical catalog/army layer or retain
-contextual metadata.
+The current role totals are **106 canonical-application fields**, **63 explicit
+contextual-application fields**, and **23 intentional-source fields**. The application
+Army tables now provide canonical identity/hierarchy and reviewed source mappings;
+`army_lists.id`/`kind` remain intentional source representation only for the legacy
+API shape and reinforcement fallback. `metadata_factions` is no longer read by
+normal serving. **166 / 192 observed fields have no open semantic issue**. The
+remaining **26 fields across 6 tables** are the skill/equipment/weapon catalog and
+metadata overlap (`skills`, `equipment`, `weapons`, and their `metadata_*`
+counterparts), which still requires its dedicated semantic audit.
 
 `army_units`, `profile_groups`, profile/loadout occurrence maps, logical-unit
 aliases/notes/source links, and `metadata_ammunitions` are recorded as explicit
@@ -1666,8 +1665,13 @@ described above. Source list rows, metadata rows, `army_units`, `unit_factions`,
 and source canonical-faction values remain unchanged and traceable; the broader
 63-ID faction registry is not collapsed into application Army identities.
 
-The next step is to move normal Army/faction serving onto these materialized
-rows and prove equivalence before removing the previous query-time derivation.
+Normal Army/faction serving now consumes these materialized rows. `/api/armies`,
+Army filtering, unit list/detail Army names and faction/group presentation, reviewed
+source aliases, playability, and reinforcement-parent grouping all resolve through
+the application layer. `army_units` still supplies concrete list availability and
+`unit_factions` remains the broader game-wide declared-membership relation. The
+legacy `army_lists.kind` source-shape field remains exposed for compatibility and
+as a reinforcement fallback where an explicit parent relationship is unavailable.
 
 ### 1. Relationships
 
@@ -2038,10 +2042,13 @@ it is not copied into the Army database.
 
 ## Application query model
 
-The unit browser queries `units`, `army_units`, and `army_lists`. It excludes
-source-undefined placeholder units and uses actual army occurrences for
-filtering, preserving the distinction between list membership and canonical
-identity.
+The unit browser queries canonical logical-unit data together with `army_units`,
+`application_armies`, and `application_army_sources`. It excludes source-undefined
+placeholder units and uses actual Army occurrences for filtering, preserving the
+distinction between list availability and canonical application identity.
+`army_lists.kind` remains a narrow source-context read for the legacy API field and
+reinforcement fallback; `metadata_factions` is no longer required by normal unit
+serving.
 
 The rules-reference browsers query the global `skills`, `equipment`, and
 `weapons` catalogs together with their `profile_*`, `option_*`, and

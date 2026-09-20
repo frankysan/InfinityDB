@@ -268,14 +268,16 @@ and serves a read-only browser and same-origin HTTP API.
   older normalized inputs.
 - The 0.6.1 runtime-surface audit uses SQLite authorizer tracing plus static
   direct-method coverage of the web/catalog helpers. After replacing redundant
-  profile/loadout/unit source reads, the compatibility-22 production database
-  serves the same 25 probes from 47 tables / 187 distinct fields: 102 canonical-
-  application fields, 63 contextual-application fields, and 22 intentional-source
-  fields. No replaceable-source issue remains. The only open runtime semantic
-  work is the 35 fields across 8 army/faction and skill/equipment/weapon metadata
-  overlap tables. Fireteams, relation/dependency tables, includes/peripherals,
-  and other currently unserved source structures are outside the 0.6.1 gate
-  unless later runtime work introduces a dependency.
+  profile/loadout/unit source reads and migrating Army/faction serving to the
+  compatibility-23 application Army layer, the same 25 probes read 49 tables /
+  192 distinct fields: 106 canonical-application fields, 63 contextual-application
+  fields, and 23 intentional-source fields. No replaceable-source issue remains;
+  166 fields have no open issue. The only open runtime semantic work is the 26
+  fields across 6 skill/equipment/weapon catalog and metadata tables. Normal
+  serving no longer reads `metadata_factions`; `army_lists` remains only for its
+  source-shape `id`/`kind` compatibility semantics. Fireteams, relation/dependency
+  tables, includes/peripherals, and other currently unserved source structures
+  are outside the 0.6.1 gate unless later runtime work introduces a dependency.
 - The 0.6.1 army/faction audit makes the scope boundary explicit: Infinity Army
   is list-local, whereas InfinityDB is game-wide. The reviewed snapshot has 58
   overlapping `army_lists` / `metadata_factions` IDs with identical name/slug
@@ -293,8 +295,9 @@ and serves a read-only browser and same-origin HTTP API.
   role/playability/grouping, reviewed source-ID mappings and preferred-source
   provenance, plus explicit reinforcement-parent relationships. The broader
   63-ID faction registry, `army_units`, `unit_factions`, and both source
-  projections remain separate; normal serving must migrate to the materialized
-  Army layer without collapsing those contexts.
+  projections remain separate. Normal serving now consumes the materialized Army
+  layer for application identity/hierarchy, alias resolution, playability, and
+  faction/group presentation without collapsing those contexts.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

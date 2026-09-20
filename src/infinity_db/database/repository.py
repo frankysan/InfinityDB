@@ -33,12 +33,7 @@ from infinity_db.identities import (
 )
 
 from .application_armies import (
-    ARMY_ROLE_GROUPING,
-    ARMY_ROLE_MAIN,
-    ARMY_ROLE_NON_ALIGNED,
     ARMY_ROLE_REINFORCEMENT,
-    ARMY_ROLE_SECTORIAL,
-    ARMY_ROLE_UNKNOWN,
     validate_application_armies,
 )
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
@@ -503,7 +498,10 @@ def army_required_flags(
             required.add("mercs")
     else:
         raise ValueError(f"Unknown army availability kind: {availability_kind!r}")
-    if army.get("kind") == "reinforcement":
+    if (
+        army.get("role") == ARMY_ROLE_REINFORCEMENT
+        or army.get("kind") == "reinforcement"
+    ):
         required.add("reinforcement")
     filters = army.get("filters")
     if isinstance(filters, dict):
@@ -560,48 +558,115 @@ class Database:
             return identity_config_from_connection(connection)
 
     @instance_lru_cache(maxsize=1)
-    def _faction_groups(self) -> dict[int, dict[str, Any]]:
-        """Return Army metadata faction groups keyed by source army ID."""
+    def _application_army_graph(self) -> dict[str, Any]:
+        """Return the materialized application Army model and source mappings."""
         with self._connect() as connection:
-            rows = connection.execute(
-                "SELECT child.id AS army_id, "
-                "COALESCE(child.parent, child.id) AS faction_id, "
-                "parent.name AS faction_name, parent.slug AS faction_slug "
-                "FROM metadata_factions AS child "
-                "LEFT JOIN metadata_factions AS parent "
-                "ON parent.id = COALESCE(child.parent, child.id)"
-            ).fetchall()
-        groups = {
-            row["army_id"]: {
-                "id": row["faction_id"],
-                "name": row["faction_name"],
-                "slug": row["faction_slug"],
+            army_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT id, name, slug, role, playable, group_id, preferred_source_id "
+                    "FROM application_armies ORDER BY id"
+                )
+            ]
+            source_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT application_army_id, source_army_id, has_army_list, "
+                    "has_metadata FROM application_army_sources ORDER BY source_army_id"
+                )
+            ]
+            reinforcement_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT reinforcement_army_id, parent_army_id "
+                    "FROM application_army_reinforcement_parents "
+                    "ORDER BY reinforcement_army_id, parent_army_id"
+                )
+            ]
+            source_kinds = {
+                row["id"]: row["kind"]
+                for row in connection.execute("SELECT id, kind FROM army_lists ORDER BY id")
             }
-            for row in rows
+
+        armies = {row["id"]: row for row in army_rows}
+        identities = {
+            army_id: {"id": army_id, "name": row["name"], "slug": row["slug"]}
+            for army_id, row in armies.items()
         }
-        for source_id, canonical_id in self._identity_config().army_aliases.items():
-            if canonical_id not in groups and source_id in groups:
-                groups[canonical_id] = groups[source_id]
+        source_to_application = {
+            row["source_army_id"]: row["application_army_id"] for row in source_rows
+        }
+        list_sources_by_application: dict[int, list[int]] = {}
+        for row in source_rows:
+            if row["has_army_list"]:
+                list_sources_by_application.setdefault(row["application_army_id"], []).append(
+                    row["source_army_id"]
+                )
+
+        reinforcement_parents: dict[int, list[int]] = {}
+        for row in reinforcement_rows:
+            reinforcement_parents.setdefault(row["reinforcement_army_id"], []).append(
+                row["parent_army_id"]
+            )
+
+        def faction_id_for(army_id: int) -> int | None:
+            army = armies.get(army_id)
+            if army is None:
+                return None
+            group_id = army.get("group_id")
+            if isinstance(group_id, int) and group_id in armies:
+                return group_id
+            if army.get("role") == ARMY_ROLE_REINFORCEMENT:
+                roots = {
+                    parent["group_id"] if isinstance(parent.get("group_id"), int) else parent_id
+                    for parent_id in reinforcement_parents.get(army_id, [])
+                    if (parent := armies.get(parent_id)) is not None
+                }
+                roots = {root for root in roots if root in armies}
+                return next(iter(roots)) if len(roots) == 1 else None
+            return army_id
+
+        faction_identities = {
+            army_id: identities.get(faction_id)
+            for army_id in armies
+            if (faction_id := faction_id_for(army_id)) is not None
+        }
+        source_list_ids: dict[int, int] = {}
+        for application_id, source_ids in list_sources_by_application.items():
+            source_list_ids[application_id] = (
+                application_id if application_id in source_ids else min(source_ids)
+            )
+
+        return {
+            "armies": armies,
+            "identities": identities,
+            "faction_identities": faction_identities,
+            "source_to_application": source_to_application,
+            "source_list_ids": source_list_ids,
+            "source_kinds": source_kinds,
+            "reinforcement_parents": reinforcement_parents,
+        }
+
+    @instance_lru_cache(maxsize=1)
+    def _faction_groups(self) -> dict[int, dict[str, Any]]:
+        """Return application faction/group identities keyed by source or application Army ID."""
+        graph = self._application_army_graph()
+        groups = dict(graph["faction_identities"])
+        for source_id, application_id in graph["source_to_application"].items():
+            faction = graph["faction_identities"].get(application_id)
+            if faction is not None:
+                groups[source_id] = faction
         return groups
 
     @instance_lru_cache(maxsize=1)
     def _faction_identities(self) -> dict[int, dict[str, Any]]:
-        """Return exact metadata/list identities keyed by source army ID."""
-        with self._connect() as connection:
-            identities = {
-                row["id"]: {"id": row["id"], "name": row["name"], "slug": row["slug"]}
-                for row in connection.execute(
-                    "SELECT id, name, slug FROM metadata_factions ORDER BY id"
-                )
-            }
-            for row in connection.execute("SELECT id, name, slug FROM army_lists ORDER BY id"):
-                identity = identities.setdefault(
-                    row["id"], {"id": row["id"], "name": row["name"], "slug": row["slug"]}
-                )
-                if not identity.get("name"):
-                    identity["name"] = army_name(row)
-                if not identity.get("slug"):
-                    identity["slug"] = row["slug"]
+        """Return exact application Army identities keyed by source or application Army ID."""
+        graph = self._application_army_graph()
+        identities = dict(graph["identities"])
+        for source_id, application_id in graph["source_to_application"].items():
+            identity = graph["identities"].get(application_id)
+            if identity is not None:
+                identities[source_id] = identity
         return identities
 
     def validate(self) -> None:
@@ -786,7 +851,7 @@ class Database:
     @instance_lru_cache(maxsize=1)
     def _unit_graph(self) -> dict[str, Any]:
         """Load canonical logical-unit fields plus source-specific relationships."""
-        identity_config = self._identity_config()
+        application_armies = self._application_army_graph()
         with self._connect() as connection:
             source_rows = connection.execute(
                 "SELECT lus.source_unit_id AS id, lus.logical_unit_id, u.canonical_faction_id "
@@ -854,14 +919,23 @@ class Database:
                 row["id"]: [] for row in source_rows
             }
             army_names = {
-                row["id"]: army_name(row)
-                for row in connection.execute("SELECT id, name, slug FROM army_lists")
+                army_id: row["name"]
+                for army_id, row in application_armies["armies"].items()
             }
+            for source_id, application_id in application_armies[
+                "source_to_application"
+            ].items():
+                identity = application_armies["armies"].get(application_id)
+                if identity is not None:
+                    army_names[source_id] = identity["name"]
             for army in connection.execute(
-                "SELECT au.unit_id, au.filters, au.availability_kind, "
-                "a.id, a.name, a.slug, a.kind "
+                "SELECT au.unit_id, au.army_id AS source_army_id, au.filters, "
+                "au.availability_kind, aa.id, aa.name, aa.role "
                 "FROM army_units AS au "
-                "JOIN army_lists AS a ON a.id = au.army_id ORDER BY a.id"
+                "JOIN application_army_sources AS aas "
+                "ON aas.source_army_id = au.army_id AND aas.has_army_list = 1 "
+                "JOIN application_armies AS aa ON aa.id = aas.application_army_id "
+                "ORDER BY aa.id, au.army_id"
             ):
                 if army["unit_id"] not in memberships:
                     continue
@@ -872,8 +946,12 @@ class Database:
                 memberships[army["unit_id"]].append(
                     {
                         "id": army["id"],
-                        "name": army_name(army),
-                        "kind": army["kind"],
+                        "source_army_id": army["source_army_id"],
+                        "name": army["name"],
+                        "role": army["role"],
+                        "kind": application_armies["source_kinds"].get(
+                            army["source_army_id"]
+                        ),
                         "filters": filters,
                         "availability_kind": army["availability_kind"],
                     }
@@ -908,19 +986,17 @@ class Database:
             }
             for source_id in source_ids:
                 for army in memberships[source_id]:
-                    source_army_id = army["id"]
-                    preferred_army_id = identity_config.canonical_army_id(source_army_id)
-                    preferred_army = {**army, "id": preferred_army_id}
+                    source_army_id = army["source_army_id"]
+                    application_army_id = army["id"]
                     if (
-                        preferred_army_id not in group["armies"]
-                        or source_army_id == preferred_army_id
+                        application_army_id not in group["armies"]
+                        or source_army_id == application_army_id
                     ):
-                        group["armies"][preferred_army_id] = preferred_army
+                        group["armies"][application_army_id] = army
                     group["army_occurrences"].append(
                         {
-                            **preferred_army,
+                            **army,
                             "source_id": source_id,
-                            "source_army_id": source_army_id,
                         }
                     )
             group["declared_faction_ids"] = set().union(
@@ -986,178 +1062,49 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
-        """Return imported force lists with explicit source-derived role semantics."""
-        identity_config = self._identity_config()
+        """Return canonical application Armies with current logical-unit counts."""
+        graph = self._application_army_graph()
+        logical_unit_ids: dict[int, set[int]] = {
+            army_id: set() for army_id in graph["armies"]
+        }
         with self._connect() as connection:
-            rows = connection.execute(
-                "SELECT a.id, a.name, a.slug, a.kind, a.reinforcement_id, "
-                "lus.logical_unit_id "
-                "FROM army_lists AS a "
-                "LEFT JOIN army_units AS au ON au.army_id = a.id "
-                "LEFT JOIN units AS u ON u.id = au.unit_id AND u.source_defined = 1 "
-                "LEFT JOIN logical_unit_sources AS lus ON lus.source_unit_id = u.id "
-                "ORDER BY a.id"
-            ).fetchall()
-            metadata = {
-                row["id"]: dict(row)
-                for row in connection.execute(
-                    "SELECT id, parent, name, slug FROM metadata_factions ORDER BY id"
-                )
-            }
-
-            reinforcement_parents: dict[int, set[int]] = {}
             for row in connection.execute(
-                "SELECT id, reinforcement_id FROM army_lists "
-                "WHERE reinforcement_id IS NOT NULL ORDER BY id"
+                "SELECT aas.application_army_id, lus.logical_unit_id "
+                "FROM army_units AS au "
+                "JOIN application_army_sources AS aas "
+                "ON aas.source_army_id = au.army_id AND aas.has_army_list = 1 "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = au.unit_id "
+                "ORDER BY aas.application_army_id, lus.logical_unit_id"
             ):
-                reinforcement_id = identity_config.canonical_army_id(row["reinforcement_id"])
-                parent_id = identity_config.canonical_army_id(row["id"])
-                reinforcement_parents.setdefault(reinforcement_id, set()).add(parent_id)
-
-            armies: dict[int, dict[str, Any]] = {}
-            for row in rows:
-                source_army_id = row["id"]
-                preferred_army_id = identity_config.canonical_army_id(source_army_id)
-                if preferred_army_id not in armies or source_army_id == preferred_army_id:
-                    armies[preferred_army_id] = {
-                        "id": preferred_army_id,
-                        "source_army_id": source_army_id,
-                        "name": army_name(row),
-                        "slug": row["slug"],
-                        "kind": row["kind"],
-                        "logical_unit_ids": armies.get(preferred_army_id, {}).get(
-                            "logical_unit_ids", set()
-                        ),
-                    }
-                if row["logical_unit_id"] is not None:
-                    armies[preferred_army_id]["logical_unit_ids"].add(
-                        row["logical_unit_id"]
-                    )
-
-            canonical_metadata: dict[int, dict[str, Any]] = {}
-            for metadata_row in metadata.values():
-                metadata_id = identity_config.canonical_army_id(metadata_row["id"])
-                if metadata_id not in canonical_metadata or metadata_row["id"] == metadata_id:
-                    canonical_metadata[metadata_id] = metadata_row
-
-            ordinary_army_ids = {
-                army_id
-                for army_id, army in armies.items()
-                if army_id not in reinforcement_parents and army["kind"] != "reinforcement"
-            }
-            parent_ids: set[int] = set()
-            for army_id in ordinary_army_ids:
-                army = armies[army_id]
-                source_army_id = army["source_army_id"]
-                metadata_row = metadata.get(source_army_id) or metadata.get(army_id)
-                parent_id = metadata_row.get("parent") if metadata_row is not None else None
-                if not isinstance(parent_id, int):
-                    continue
-                canonical_parent_id = identity_config.canonical_army_id(parent_id)
-                if canonical_parent_id != army_id:
-                    parent_ids.add(canonical_parent_id)
-
-            grouping_ids: set[int] = set()
-            for candidate_id in parent_ids:
-                candidate_metadata = canonical_metadata.get(candidate_id)
-                if candidate_metadata is None:
-                    continue
-                if candidate_id not in ordinary_army_ids:
-                    grouping_ids.add(candidate_id)
-                    continue
-                candidate_parent_id = candidate_metadata.get("parent")
-                canonical_candidate_parent_id = (
-                    identity_config.canonical_army_id(candidate_parent_id)
-                    if isinstance(candidate_parent_id, int)
-                    else None
-                )
-                if canonical_candidate_parent_id != candidate_id:
-                    grouping_ids.add(candidate_id)
-
-            for army in armies.values():
-                army_id = army["id"]
-                source_army_id = army["source_army_id"]
-                metadata_row = metadata.get(source_army_id) or metadata.get(army_id)
-                parent_id = metadata_row.get("parent") if metadata_row is not None else None
-                canonical_parent_id = (
-                    identity_config.canonical_army_id(parent_id)
-                    if isinstance(parent_id, int)
-                    else None
-                )
-                parent_army_ids = sorted(reinforcement_parents.get(army_id, ()))
-
-                if parent_army_ids:
-                    role = ARMY_ROLE_REINFORCEMENT
-                    playable = True
-                    group_id = None
-                elif army_id in grouping_ids:
-                    role = ARMY_ROLE_GROUPING
-                    playable = False
-                    group_id = None
-                elif canonical_parent_id == army_id:
-                    role = ARMY_ROLE_MAIN
-                    playable = True
-                    group_id = None
-                elif canonical_parent_id in grouping_ids:
-                    role = ARMY_ROLE_NON_ALIGNED
-                    playable = True
-                    group_id = canonical_parent_id
-                elif canonical_parent_id is not None:
-                    role = ARMY_ROLE_SECTORIAL
-                    playable = True
-                    group_id = canonical_parent_id
-                else:
-                    role = ARMY_ROLE_UNKNOWN
-                    playable = True
-                    group_id = None
-
-                group = canonical_metadata.get(group_id) if group_id is not None else None
-                army.update(
-                    role=role,
-                    playable=playable,
-                    group_id=group_id,
-                    group_name=group.get("name") if group is not None else None,
-                    group_slug=group.get("slug") if group is not None else None,
-                    parent_army_ids=parent_army_ids,
+                logical_unit_ids.setdefault(row["application_army_id"], set()).add(
+                    row["logical_unit_id"]
                 )
 
-            for grouping_id in sorted(grouping_ids):
-                if grouping_id in armies:
-                    continue
-                group = canonical_metadata.get(grouping_id)
-                if group is None:
-                    continue
-                armies[grouping_id] = {
-                    "id": grouping_id,
-                    "source_army_id": grouping_id,
-                    "name": group.get("name") or f"Army {grouping_id}",
-                    "slug": group.get("slug"),
-                    "kind": "grouping",
-                    "logical_unit_ids": set(),
-                    "role": ARMY_ROLE_GROUPING,
-                    "playable": False,
-                    "group_id": None,
-                    "group_name": None,
-                    "group_slug": None,
-                    "parent_army_ids": [],
-                }
-
-            return [
+        items = []
+        for army_id, army in sorted(graph["armies"].items()):
+            group = graph["identities"].get(army["group_id"])
+            source_list_id = graph["source_list_ids"].get(army_id)
+            kind = (
+                graph["source_kinds"].get(source_list_id)
+                if source_list_id is not None
+                else "grouping"
+            )
+            items.append(
                 {
-                    "id": army["id"],
+                    "id": army_id,
                     "name": army["name"],
                     "slug": army["slug"],
-                    "kind": army["kind"],
+                    "kind": kind,
                     "role": army["role"],
-                    "playable": army["playable"],
+                    "playable": bool(army["playable"]),
                     "group_id": army["group_id"],
-                    "group_name": army["group_name"],
-                    "group_slug": army["group_slug"],
-                    "parent_army_ids": army["parent_army_ids"],
-                    "unit_count": len(army["logical_unit_ids"]),
+                    "group_name": group.get("name") if group is not None else None,
+                    "group_slug": group.get("slug") if group is not None else None,
+                    "parent_army_ids": list(graph["reinforcement_parents"].get(army_id, [])),
+                    "unit_count": len(logical_unit_ids.get(army_id, set())),
                 }
-                for army in sorted(armies.values(), key=lambda army: army["id"])
-            ]
+            )
+        return items
 
     @instance_lru_cache(maxsize=1)
     def list_skill_extras(self) -> list[dict[str, Any]]:
@@ -1755,8 +1702,9 @@ class Database:
         ):
             raise ValueError("army_id must be an integer within SQLite's signed 64-bit range")
         if army_id is not None:
-            army_id = self._identity_config().canonical_army_id(army_id)
-            army = next((item for item in self.list_armies() if item["id"] == army_id), None)
+            application_armies = self._application_army_graph()
+            army_id = application_armies["source_to_application"].get(army_id, army_id)
+            army = application_armies["armies"].get(army_id)
             if army is not None and not army["playable"]:
                 raise ArmySelectionError(
                     f"army_id {army_id} is a grouping-only identity, not a selectable army"
@@ -1947,7 +1895,7 @@ class Database:
                     {
                         "id": occurrence["id"],
                         "name": occurrence["name"],
-                        "faction": faction_groups.get(occurrence["source_army_id"]),
+                        "faction": faction_groups.get(occurrence["id"]),
                         "availability_flags": list(flags),
                         "profiles": [],
                         "loadouts": [],

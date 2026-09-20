@@ -251,17 +251,16 @@ identity/hierarchy from reviewed Army aliases plus the overlapping
 `army_lists`/`metadata_factions` evidence. That derived layer owns the canonical
 application name/slug, role/playability/grouping, source-ID provenance mapping,
 and explicit reinforcement-parent relationships without replacing either source
-projection or the broader faction registry. Normal repository serving is being
-migrated to that layer incrementally. Faction grouping, display names, and slugs
-currently come from `metadata_factions.parent`, `name`, and `slug`; repository
-responses expose this
-as `main_faction` for unit summaries/details and `faction` for each army
-occurrence. The merger sets `army_lists.kind` to `army` for source documents
-that contain a top-level `reinforcements` field and to `reinforcement` for those
-that do not. That field therefore captures the current ordinary-list versus
-reinforcement-file shape, but it is not an upstream main-army/sectorial
-classification. Browser code consumes these backend fields and must not infer
-faction or reinforcement semantics from Army ID prefixes or suffixes.
+projection or the broader faction registry. Normal repository serving now reads
+that layer for Army identity, source-alias resolution, hierarchy, playability,
+unit faction/group presentation, and reinforcement relationships. Concrete
+availability still comes from `army_units`; `unit_factions` remains the separate
+game-wide declared-membership relation. The only normal-serving dependency on
+`army_lists` is the legacy source-shape `kind` value, retained for API compatibility
+and as a reinforcement fallback for incomplete/legacy source relationships.
+`metadata_factions` is no longer a normal-serving dependency. Browser code
+consumes these backend fields and must not infer faction or reinforcement semantics
+from Army ID prefixes or suffixes.
 
 Mercenary units and Non-Aligned Armies are also separate source concepts.
 Ordinary unit records declare their normal faction availability through
@@ -888,10 +887,10 @@ Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each
 item has `id`, `name`, `main_army_id`, `main_faction`, `display_army_id`,
 `display_faction`, `army_ids`, and `armies` (`id` and `name` per currently
 visible Army availability).
-`main_faction` is the current source-derived main/grouping context, while
-`display_faction` is the presentation identity derived from normalized
-`display_army_id`. Neither field replaces the unit's game-wide membership
-relationships. The zero
+`main_faction` is the source-derived main/grouping context resolved through the
+materialized application Army hierarchy, while `display_faction` is the exact
+application presentation identity selected by normalized `display_army_id`.
+Neither field replaces the unit's game-wide membership relationships. The zero
 total above illustrates the response shape.
 
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
@@ -909,10 +908,13 @@ total above illustrates the response shape.
   Canonical source ID `1` remains mercenary source provenance and therefore has
   no application `main_army_id`; Non-Aligned grouping uses the separate metadata
   identity `901`.
-- `main_faction` is derived from the matching metadata-faction parent record.
+- `main_faction` and each army occurrence's `faction` are resolved from the
+  materialized application Army hierarchy. Sectorial/non-aligned Armies use their
+  canonical group; reinforcement Armies use the common canonical group implied by
+  their explicit parent relationships when that group is unambiguous.
 - `display_army_id` normally mirrors `main_army_id`, but reviewed source-derived
-  exceptions come from curated identity data. Browser symbol/styling code uses
-  `display_army_id`/`display_faction` and contains no special-case Army IDs.
+  exceptions come from curated identity data. Browser symbol/styling code resolves
+  that ID through the application Army mapping and contains no special-case Army IDs.
 - Search matches accent- and punctuation-insensitive, case-folded name
   substrings, including Unicode.
 - Results sort by display name after case-folding, removing diacritics, and

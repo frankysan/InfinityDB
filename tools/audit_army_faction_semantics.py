@@ -9,10 +9,11 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+from infinity_db.database.application_armies import derive_application_armies
 from infinity_db.database.repository import Database, identity_config_from_connection
 
 FORMAT = "InfinityDB army/faction semantic audit"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 
 REQUIRED_FIELDS: dict[str, set[str]] = {
     "factions": {
@@ -215,6 +216,7 @@ def audit_database(path: Path) -> dict[str, Any]:
         materialized_reinforcement_parents = _rows(
             connection, "application_army_reinforcement_parents"
         )
+        source_derived_model = derive_application_armies(connection, identity_config)
 
     army_ids = set(army_lists)
     metadata_ids = set(metadata)
@@ -271,9 +273,28 @@ def audit_database(path: Path) -> dict[str, Any]:
         }
         for army_id, row in sorted(materialized_by_id.items())
     ]
+    source_derived_parent_ids: dict[int, list[int]] = defaultdict(list)
+    for row in source_derived_model.reinforcement_parents:
+        source_derived_parent_ids[row["reinforcement_army_id"]].append(row["parent_army_id"])
+    source_derived_identity = [
+        {
+            "id": row["id"],
+            "name": row["name"],
+            "slug": row["slug"],
+            "role": row["role"],
+            "playable": row["playable"],
+            "group_id": row["group_id"],
+            "parent_army_ids": sorted(source_derived_parent_ids.get(row["id"], [])),
+        }
+        for row in source_derived_model.armies
+    ]
+    if materialized_identity != source_derived_identity:
+        raise ArmyFactionAuditError(
+            "Materialized application Army identity differs from source-derived evidence"
+        )
     if runtime_identity != materialized_identity:
         raise ArmyFactionAuditError(
-            "Materialized application Army identity differs from runtime derivation"
+            "Runtime application Army identity differs from materialized identity"
         )
     role_counts = Counter(army["role"] for army in materialized_armies)
     playable_counts = Counter(bool(army["playable"]) for army in materialized_armies)
@@ -362,6 +383,7 @@ def audit_database(path: Path) -> dict[str, Any]:
             for role in ("main", "sectorial", "non_aligned", "grouping", "reinforcement", "unknown")
         },
         "applicationModel": {
+            "sourceDerivedIdentityEquivalent": True,
             "runtimeIdentityEquivalent": True,
             "armies": materialized_identity,
             "sourceMappings": materialized_sources,

@@ -1480,7 +1480,7 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
     assert all(len(army["profiles"]) == 1 for army in first_army_occurrences)
 
 
-def test_reinforcement_classification_uses_army_kind_not_id_suffix() -> None:
+def test_reinforcement_classification_uses_application_role_with_source_fallback() -> None:
     group = {
         "canonical_faction_id": 301,
         "declared_faction_ids": {399},
@@ -1488,9 +1488,13 @@ def test_reinforcement_classification_uses_army_kind_not_id_suffix() -> None:
         "slug": "test",
     }
 
-    assert army_required_flags({"id": 399, "kind": "army"}, group) == set()
+    assert army_required_flags({"id": 399, "role": "main", "kind": "army"}, group) == set()
     assert army_required_flags(
-        {"id": 350, "kind": "reinforcement"},
+        {"id": 350, "role": "reinforcement", "kind": "army"},
+        group,
+    ) == {"reinforcement"}
+    assert army_required_flags(
+        {"id": 350, "role": "unknown", "kind": "reinforcement"},
         group,
     ) == {"reinforcement"}
 

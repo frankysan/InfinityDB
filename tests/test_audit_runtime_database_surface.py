@@ -114,23 +114,21 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
 
     assert report["summary"] == {
         "surfaceCount": 25,
-        "runtimeTableCount": 47,
-        "runtimeFieldCount": 187,
-        "tableWithOpenIssueCount": 8,
+        "runtimeTableCount": 49,
+        "runtimeFieldCount": 192,
+        "tableWithOpenIssueCount": 6,
         "replaceableSourceTableCount": 0,
-        "semanticOverlapTableCount": 8,
-        "issue:none:fieldCount": 152,
-        "issue:semantic_overlap:fieldCount": 35,
-        "role:canonical_application:fieldCount": 102,
+        "semanticOverlapTableCount": 6,
+        "issue:none:fieldCount": 166,
+        "issue:semantic_overlap:fieldCount": 26,
+        "role:canonical_application:fieldCount": 106,
         "role:contextual_application:fieldCount": 63,
-        "role:intentional_source_representation:fieldCount": 22,
+        "role:intentional_source_representation:fieldCount": 23,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
     assert report["openIssues"]["semanticOverlapTables"] == [
-        "army_lists",
         "equipment",
         "metadata_equipment",
-        "metadata_factions",
         "metadata_skills",
         "metadata_weapons",
         "skills",
@@ -160,6 +158,10 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "logical_units", "main_army_id")["role"] == CONTEXTUAL
     assert _field(report, "logical_units", "display_army_id")["role"] == CONTEXTUAL
     assert _field(report, "logical_units", "name")["role"] == CANONICAL
+    assert _field(report, "application_armies", "name")["role"] == CANONICAL
+    assert _field(report, "application_army_sources", "source_army_id")["role"] == CONTEXTUAL
+    assert _field(report, "army_lists", "kind")["role"] == SOURCE
+    assert "metadata_factions" not in observed_tables
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE
     assert _field(report, "metadata_skills", "name")["issue"] == OVERLAP

@@ -294,6 +294,15 @@ def test_application_army_materialization_resolves_reviewed_source_aliases(
         },
     ]
 
+    database = Database(path)
+    assert [army["id"] for army in database.list_armies()] == [999]
+    alias_page = database.list_units(army_id=998)
+    canonical_page = database.list_units(army_id=999)
+    assert alias_page == canonical_page
+    assert alias_page["total"] == 1
+    assert alias_page["items"][0]["army_ids"] == [999]
+    assert alias_page["items"][0]["armies"] == [{"id": 999, "name": "Canonical Army"}]
+
 
 def test_database_validation_rejects_tampered_application_army_materialization(
     tmp_path: Path,

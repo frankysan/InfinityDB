@@ -11,9 +11,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Improve unit browsing/query performance and move profile, loadout, and
   logical-unit display, search, filtering, and catalog-usage reads to the
   canonical application model while preserving player-visible meaning.
-- Materialize a canonical application Army identity/hierarchy from reviewed
-  source aliases and Army/metadata relationships while preserving the original
-  source projections and broader faction relationships.
+- Materialize and serve a canonical application Army identity/hierarchy from
+  reviewed source aliases and Army/metadata relationships while preserving the
+  original source projections, concrete Army availability, and broader faction
+  relationships.
 
 ### Upgrade notes
 

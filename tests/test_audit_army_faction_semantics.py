@@ -70,6 +70,7 @@ def test_army_faction_audit_distinguishes_list_occurrence_from_game_wide_members
 ) -> None:
     report = audit_database(_army_database(tmp_path))
 
+    assert report["formatVersion"] == 2
     assert report["summary"] == {
         "sourceArmyListCount": 2,
         "metadataFactionCount": 2,
@@ -102,6 +103,7 @@ def test_army_faction_audit_distinguishes_list_occurrence_from_game_wide_members
         "reinforcement": 0,
         "unknown": 0,
     }
+    assert report["applicationModel"]["sourceDerivedIdentityEquivalent"] is True
     assert report["applicationModel"]["runtimeIdentityEquivalent"] is True
     assert [army["id"] for army in report["applicationModel"]["armies"]] == [101, 102]
     assert report["applicationModel"]["reinforcementParents"] == []

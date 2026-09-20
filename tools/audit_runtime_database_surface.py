@@ -92,6 +92,22 @@ _register(
     reason="Current application identity/payload or unambiguous lookup catalog.",
 )
 _register(
+    ["application_armies", "application_army_reinforcement_parents"],
+    CANONICAL,
+    reason=(
+        "Materialized InfinityDB Army identity/hierarchy and explicit application "
+        "relationships used by normal serving."
+    ),
+)
+_register(
+    ["application_army_sources"],
+    CONTEXTUAL,
+    reason=(
+        "Reviewed source-to-application Army provenance mapping used to reconcile "
+        "source occurrences without erasing source IDs."
+    ),
+)
+_register(
     ["logical_units"],
     CANONICAL,
     reason="Representative-backed logical-unit application values.",
@@ -185,11 +201,11 @@ _register(
 )
 _register(
     ["army_lists"],
-    CANONICAL,
-    issue=OVERLAP,
+    SOURCE,
     reason=(
-        "Army-list identity is application-facing, but current hierarchy/display logic "
-        "also consumes overlapping metadata_factions records."
+        "Normal serving retains only the legacy source-list shape needed for the "
+        "compatibility `kind` field and reinforcement fallback; canonical Army identity "
+        "and hierarchy come from application_armies."
     ),
 )
 _register(
