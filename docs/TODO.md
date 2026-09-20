@@ -294,20 +294,19 @@ block this interim release.
     flat (+0.52%). The audited `infinity.db` grew from 13,557,760 to 18,108,416
     bytes (+33.56%) because materialized application layers currently coexist
     with retained source/context representations.
-- [ ] Run the complete local/CI/rebuild acceptance set, review `Unreleased` as a
-  coherent 0.6.1 release note, document required database rebuild/upgrade steps,
-  and cut version 0.6.1.
-  - [ ] Run the local full acceptance command with the production-like Army
+- [ ] Complete the 0.6.1 release after the validated release-state commit is
+  tagged and deployed.
+  - [x] Run the local full acceptance command with the production-like Army
     snapshot and required published assets; retain the timestamped check report.
-  - [ ] Confirm hosted `Source checks`, `Installed wheel smoke`, and `Deployment
-    smoke test` are green for the release commit/tag and retain those run links as
-    release evidence.
+  - [x] Confirm the hosted `Source checks`, `Installed wheel smoke`, and
+    `Deployment smoke test` are green before the release-state version bump.
   - [x] Review the 0.6.1 upgrade boundary: schema 16 / compatibility revision 24
     requires rebuilding generated Army databases; no in-place migration is
     supported.
-  - [ ] Bump the package/release version, convert `Unreleased` into the dated
-    0.6.1 section, update the README current-release marker, tag the release, and
-    verify the deployed update path.
+  - [x] Bump the package/release version, convert the accumulated release notes
+    into the dated 0.6.1 section, and update the README current-release marker.
+  - [ ] Re-run local/hosted checks on the release-state commit, create tag
+    `v0.6.1`, deploy it, and verify the deployed update path.
 
 The eventual physical separation of source-only tables into `infinity.raw.db`,
 the complete inventory of unused player-relevant source data, and 1.0 web/rules
