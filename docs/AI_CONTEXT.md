@@ -241,6 +241,17 @@ and serves a read-only browser and same-origin HTTP API.
   relationships and other runtime paths that have not yet been canonicalized.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
+- The 0.6.1 runtime-surface audit uses SQLite authorizer tracing plus static
+  direct-method coverage of the web/catalog helpers. On the compatibility-21
+  production database, 25 serving probes read 62 tables / 230 distinct fields:
+  105 canonical-application fields, 60 contextual-application fields, and 65
+  intentional-source fields. 152 reads have no open issue. The remaining 43
+  fields across 16 source tables are replaceable legacy reads of profile/loadout/
+  unit meaning already available canonically; another 35 fields across 8 tables
+  are genuine semantic overlap in army/faction and skill/equipment/weapon
+  catalog metadata. Fireteams, relation/dependency tables, includes/peripherals,
+  and other currently unserved source structures are outside the 0.6.1 gate
+  unless later runtime work introduces a dependency.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

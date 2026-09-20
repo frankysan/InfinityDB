@@ -216,14 +216,30 @@ block this interim release.
 - [x] Complete the logical-unit canonical payload/context layer, migrate unit
   list/search/detail general fields and aliases to it, and prove output/search
   equivalence.
-- [ ] Inventory every Army-database table/field/relationship read by the current
+- [x] Inventory every Army-database table/field/relationship read by the current
   runtime surfaces: armies, unit visibility/list/search/detail, availability and
   faction context, filters, and the current skill/equipment/weapon/trait catalog
-  paths.
-- [ ] For every construct in that runtime inventory, record whether it is
-  canonical application data, explicit contextual application data, or an
-  intentional source representation; resolve any remaining ambiguous duplicate
-  meaning that affects current application reads.
+  paths. The compatibility-21 production trace covers 25 serving probes, 62
+  tables, and 230 distinct table-field reads.
+- [ ] Resolve the open classifications from that runtime inventory.
+  - [x] Record every observed field as canonical application data, explicit
+    contextual application data, or intentional source representation; 152 / 230
+    current field reads have no open semantic issue.
+  - [ ] Replace the 43 duplicate source reads across 16 profile/loadout/unit
+    source tables with their already-materialized canonical equivalents. This
+    includes search labels, unit skill/equipment/weapon filters, and catalog
+    reverse lookups.
+  - [ ] Audit the live army/faction boundary around `army_lists`,
+    `metadata_factions`, `army_units`, `unit_factions`, and source-specific
+    `units.canonical_faction_id`; preserve hierarchy, playability, availability,
+    and provenance as distinct semantics.
+  - [ ] Audit the live skill/equipment/weapon catalog boundary against
+    `metadata_skills`, `metadata_equipment`, and `metadata_weapons`; preserve
+    source metadata/modes that are not duplicate catalog identity.
+  - [x] Keep top-level `unit_options` and their nested catalog occurrences as
+    intentional source-context data for this pass; their dedicated semantic
+    audit remains Milestone 2B unless a current-runtime correctness issue is
+    found.
 - [ ] Complete any relationship or catalog/metadata canonicalization that the
   runtime inventory shows is still required for the current application. Broader
   unused/source-only relationship and metadata work may remain for Milestone 2B.

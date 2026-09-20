@@ -1458,6 +1458,63 @@ current unit-list/search/detail read-path migrations are complete. The remaining
 semantic work for the 0.6.1 runtime pass begins with relationships and catalog
 paths that still consume source-oriented tables.
 
+### 0.6.1 runtime serving-surface inventory
+
+`tools/audit_runtime_database_surface.py` traces SQLite column reads with
+SQLite's authorizer API while exercising every Army-database method called
+directly by the web application, `SkillCatalog`, or `TraitCatalog`. Each probe
+uses a fresh repository instance so method caches cannot hide dependencies.
+`Database.validate()` is deliberately excluded: validation may inspect retained
+lossless source tables without making them normal serving dependencies. The tool
+also scans the runtime Python modules for direct `Database` calls and fails if a
+new serving method is not represented by the probe plan.
+
+Against the compatibility-21 production database derived from the reviewed
+2026-09-18 snapshot, 25 serving probes read **62 tables / 230 distinct table-field
+pairs**. The maintained semantic classification assigns every observed field one
+of three runtime roles:
+
+- **canonical application data** — 105 fields;
+- **explicit contextual application data** — 60 fields; and
+- **intentional source representation** — 65 fields.
+
+Of those 230 fields, 152 have no open 0.6.1 semantic issue. The remaining 78
+identify two concrete follow-up classes rather than an undifferentiated request
+to canonicalize more tables:
+
+1. **43 fields across 16 tables are replaceable source reads.** Profile/loadout
+   canonicalization is complete, but unit search still reads `profiles.name` and
+   `loadout_options.name`, unit skill/equipment/weapon filters still read the
+   source `profile_*` / `option_*` occurrence tables, and catalog reverse lookups
+   still read those same occurrence tables plus `units.name`. These paths should
+   move to the already-materialized canonical profile/loadout/logical-unit layer;
+   no new gameplay identity decision is required.
+2. **35 fields across 8 tables have genuine semantic overlap.** Current army
+   presentation combines `army_lists` with `metadata_factions`, while the
+   skill/equipment/weapon catalogs combine normalized occurrence catalogs with
+   `metadata_skills`, `metadata_equipment`, and `metadata_weapons`. Those
+   boundaries require explicit semantic audits before deciding whether to
+   materialize a new canonical catalog/army layer or retain contextual metadata.
+
+`army_units`, `unit_factions`, `profile_groups`, profile/loadout occurrence maps,
+logical-unit aliases/notes/source links, and `metadata_ammunitions` are recorded
+as explicit contextual application data. Top-level `unit_options` and their
+skill/equipment/weapon occurrences remain intentional source-context data under
+the previously accepted logical-unit design; they are not assumed redundant
+with profile/loadout payloads.
+
+The trace is equally useful for scope control. Normal serving currently does
+**not** read Fireteam tables, relation/dependency tables, profile/loadout
+includes or peripherals, `logical_unit_spectables`, or the other source-only
+collections outside the traced surface. Those structures remain important to
+Milestone 2B / 1.0 completeness, but they do not block 0.6.1 unless later work
+introduces a runtime dependency on them.
+
+The production counts above are evidence for this code/snapshot pair, not a
+permanent table-count contract. The audit fails on an unclassified newly-read
+table or an unprobed direct repository method so future runtime expansion becomes
+an explicit semantic decision.
+
 ### 1. Relationships
 
 Re-evaluate includes, peripherals, dependencies, relations, Fireteams, and
