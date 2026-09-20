@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sqlite3
 import statistics
+import sys
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -164,11 +166,15 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.cold_iterations < 1 or args.warm_iterations < 1:
         raise SystemExit("iteration counts must be positive")
-    report = benchmark_database(
-        args.database,
-        cold_iterations=args.cold_iterations,
-        warm_iterations=args.warm_iterations,
-    )
+    try:
+        report = benchmark_database(
+            args.database,
+            cold_iterations=args.cold_iterations,
+            warm_iterations=args.warm_iterations,
+        )
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0

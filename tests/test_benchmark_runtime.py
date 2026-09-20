@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import sqlite3
+from pathlib import Path
 from typing import cast
 
 from infinity_db.database import Database
-from tools.benchmark_runtime import _summary, discover_cases
+from infinity_db.database.schema import APPLICATION_ID, SCHEMA_VERSION
+from tools.benchmark_runtime import _summary, discover_cases, main
 
 
 class FakeDatabase:
@@ -62,3 +65,20 @@ def test_discover_cases_covers_representative_runtime_paths() -> None:
         "weapons-detail",
         "trait-detail",
     ]
+
+def test_main_reports_outdated_database_without_traceback(
+    tmp_path: Path, capsys
+) -> None:
+    path = tmp_path / "outdated.db"
+    with sqlite3.connect(path) as connection:
+        connection.execute(f"PRAGMA application_id = {APPLICATION_ID}")
+        connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION - 1}")
+
+    assert main([str(path), "--cold-iterations", "1", "--warm-iterations", "1"]) == 1
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == (
+        "ERROR: Unsupported InfinityDB database; rebuild it from normalized JSON\n"
+    )
+    assert "Traceback" not in captured.err
