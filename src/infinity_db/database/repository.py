@@ -1601,7 +1601,7 @@ class Database:
             )
             if row["extra_id"] is not None:
                 occurrence["extras"].append({"id": row["extra_id"], "name": row["extra_name"]})
-        units_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
+        units_by_source = self._visible_unit_items_by_source(frozenset(AVAILABILITY_FLAGS))
         item_names = graph["source_names_by_item"][application_item_id]
         variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
         for occurrence in occurrences.values():
@@ -1771,7 +1771,7 @@ class Database:
             )
             if occurrence["unit"] not in variant["units"]:
                 variant["units"].append(occurrence["unit"])
-        unit_items_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
+        unit_items_by_source = self._visible_unit_items_by_source(frozenset(AVAILABILITY_FLAGS))
         for variant in variants.values():
             items = {
                 item["id"]: item

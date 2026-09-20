@@ -28,11 +28,28 @@ function removeCookie(name) {
   document.cookie = `${encodeURIComponent(name)}=; Path=/; Max-Age=0; SameSite=Lax`;
 }
 
+function sessionValue(name) {
+  try {
+    return window.sessionStorage.getItem(name) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function setSessionValue(name, value) {
+  try {
+    window.sessionStorage.setItem(name, value);
+  } catch {
+    // Keep settings usable for the current page if session storage is unavailable.
+  }
+}
+
 function savedSetting(name) {
-  return isRememberingSettings() ? cookieValue(name) : undefined;
+  return isRememberingSettings() ? cookieValue(name) : sessionValue(name);
 }
 
 function saveSetting(name, value) {
+  setSessionValue(name, value);
   if (isRememberingSettings()) setCookie(name, value);
 }
 

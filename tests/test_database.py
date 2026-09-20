@@ -931,12 +931,12 @@ def test_catalog_use_count_matches_detail_variant_unit_totals(
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
-def test_catalog_details_omit_variants_without_visible_units(
+def test_catalog_details_include_optional_units_for_client_filtering(
     tmp_path: Path, normalized: dict, catalog: str
 ) -> None:
     for membership in normalized["tables"]["army_units"]:
         if membership["unit_id"] == 1:
-            membership["filters"] = {"mercs": True}
+            membership["filters"] = {"teamops": True}
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
 
@@ -944,7 +944,8 @@ def test_catalog_details_omit_variants_without_visible_units(
     detail = database.get_skill(1) if catalog == "skills" else database.get_catalog_item(catalog, 1)
 
     assert detail is not None
-    assert detail["variants"] == []
+    assert detail["variants"]
+    assert detail["variants"][0]["units"][0]["id"] == 1
 
 
 def test_unit_details_expose_backend_profile_display_name(

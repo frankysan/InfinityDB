@@ -786,6 +786,12 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'getElementById("distance-unit-toggle")?.checked ? "in" : "cm"' in preferences
     assert b'getElementById("developer-mode-toggle")?.checked' in preferences
     assert b"window.localStorage" not in preferences
+    assert b"window.sessionStorage.getItem(name)" in preferences
+    assert b"window.sessionStorage.setItem(name, value)" in preferences
+    assert (
+        b"return isRememberingSettings() ? cookieValue(name) : sessionValue(name);"
+        in preferences
+    )
     assert b'new CustomEvent("developermodechange"' in preferences
 
 

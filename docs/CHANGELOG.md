@@ -31,6 +31,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Fixed
 
+- Keep settings for the current browser session when persistent settings are
+  disabled, and show Team Operations-only units on Skill detail pages when that
+  optional-unit category is enabled.
 - Preserve the `+dev` browser display version in containerized development/test
   deployments without embedding Git metadata in the image. The API/package release
   version remains unchanged.
