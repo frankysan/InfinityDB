@@ -9,7 +9,6 @@ from tools.audit_runtime_database_surface import (
     CANONICAL,
     CONTEXTUAL,
     NO_ISSUE,
-    OVERLAP,
     SOURCE,
     audit_database,
     discover_runtime_database_methods,
@@ -115,25 +114,17 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert report["summary"] == {
         "surfaceCount": 25,
         "runtimeTableCount": 49,
-        "runtimeFieldCount": 192,
-        "tableWithOpenIssueCount": 6,
+        "runtimeFieldCount": 196,
+        "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
-        "semanticOverlapTableCount": 6,
-        "issue:none:fieldCount": 166,
-        "issue:semantic_overlap:fieldCount": 26,
-        "role:canonical_application:fieldCount": 106,
-        "role:contextual_application:fieldCount": 63,
+        "semanticOverlapTableCount": 0,
+        "issue:none:fieldCount": 196,
+        "role:canonical_application:fieldCount": 111,
+        "role:contextual_application:fieldCount": 62,
         "role:intentional_source_representation:fieldCount": 23,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
-    assert report["openIssues"]["semanticOverlapTables"] == [
-        "equipment",
-        "metadata_equipment",
-        "metadata_skills",
-        "metadata_weapons",
-        "skills",
-        "weapons",
-    ]
+    assert report["openIssues"]["semanticOverlapTables"] == []
 
     observed_tables = {item["table"] for item in report["inventory"]}
     assert {
@@ -160,11 +151,16 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "logical_units", "name")["role"] == CANONICAL
     assert _field(report, "application_armies", "name")["role"] == CANONICAL
     assert _field(report, "application_army_sources", "source_army_id")["role"] == CONTEXTUAL
+    assert _field(report, "application_catalog_items", "name")["role"] == CANONICAL
+    assert _field(report, "application_catalog_sources", "source_item_id")["role"] == CONTEXTUAL
     assert _field(report, "army_lists", "kind")["role"] == SOURCE
     assert "metadata_factions" not in observed_tables
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE
-    assert _field(report, "metadata_skills", "name")["issue"] == OVERLAP
+    assert "metadata_skills" not in observed_tables
+    assert "metadata_equipment" not in observed_tables
+    assert _field(report, "metadata_weapons", "name")["role"] == CONTEXTUAL
+    assert _field(report, "metadata_weapons", "name")["issue"] == NO_ISSUE
 
 
 def test_runtime_surface_audit_is_deterministic_and_read_only(tmp_path: Path) -> None:

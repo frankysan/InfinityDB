@@ -268,16 +268,18 @@ and serves a read-only browser and same-origin HTTP API.
   older normalized inputs.
 - The 0.6.1 runtime-surface audit uses SQLite authorizer tracing plus static
   direct-method coverage of the web/catalog helpers. After replacing redundant
-  profile/loadout/unit source reads and migrating Army/faction serving to the
-  compatibility-23 application Army layer, the same 25 probes read 49 tables /
-  192 distinct fields: 106 canonical-application fields, 63 contextual-application
-  fields, and 23 intentional-source fields. No replaceable-source issue remains;
-  166 fields have no open issue. The only open runtime semantic work is the 26
-  fields across 6 skill/equipment/weapon catalog and metadata tables. Normal
-  serving no longer reads `metadata_factions`; `army_lists` remains only for its
-  source-shape `id`/`kind` compatibility semantics. Fireteams, relation/dependency
-  tables, includes/peripherals, and other currently unserved source structures
-  are outside the 0.6.1 gate unless later runtime work introduces a dependency.
+  profile/loadout/unit source reads, migrating Army/faction serving to the
+  materialized application Army layer, and materializing canonical application
+  catalog identities for skills/equipment/weapons, the same 25 probes read 49
+  tables / 196 distinct fields: 111 canonical-application fields, 62
+  contextual-application fields, and 23 intentional-source fields. No
+  replaceable-source or semantic-overlap issue remains in the normal runtime
+  surface. Normal serving no longer reads `metadata_factions`,
+  `metadata_skills`, or `metadata_equipment`; `army_lists` remains only for its
+  source-shape `id`/`kind` compatibility semantics. Fireteams,
+  relation/dependency tables, includes/peripherals, and other currently unserved
+  source structures are outside the 0.6.1 gate unless later runtime work
+  introduces a dependency.
 - The 0.6.1 army/faction audit makes the scope boundary explicit: Infinity Army
   is list-local, whereas InfinityDB is game-wide. The reviewed snapshot has 58
   overlapping `army_lists` / `metadata_factions` IDs with identical name/slug
@@ -288,16 +290,21 @@ and serves a read-only browser and same-origin HTTP API.
   despite residing on an application-owned row. The latter
   preserves 99 references across 89 source units to faction IDs 203/903/906/907
   that have no current Army list. Source `canonical_faction_id` is origin/context,
-  not ownership or availability. Schema version 15 / compatibility revision 23
+  not ownership or availability. Schema version 16 / compatibility revision 24
   now materializes the canonical application Army identity/hierarchy as an
   InfinityDB abstraction in `application_armies`, `application_army_sources`,
   and `application_army_reinforcement_parents`. It stores canonical name/slug,
   role/playability/grouping, reviewed source-ID mappings and preferred-source
-  provenance, plus explicit reinforcement-parent relationships. The broader
-  63-ID faction registry, `army_units`, `unit_factions`, and both source
-  projections remain separate. Normal serving now consumes the materialized Army
-  layer for application identity/hierarchy, alias resolution, playability, and
-  faction/group presentation without collapsing those contexts.
+  provenance, plus explicit reinforcement-parent relationships. Skills,
+  Equipment, and Weapons now likewise materialize canonical application catalog
+  identities and source mappings in `application_catalog_items` and
+  `application_catalog_sources`, while preserving source-specific labels and
+  weapon/equipment profile metadata as contextual data. The broader 63-ID
+  faction registry, `army_units`, `unit_factions`, and both source projections
+  remain separate. Normal serving now consumes the materialized Army and catalog
+  layers for application identity/hierarchy, alias resolution, playability,
+  faction/group presentation, and catalog detail/list serving without
+  collapsing those contexts.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized

@@ -412,8 +412,10 @@ canonicalized.
 InfinityDB is progressively separating its **lossless source model** from a
 **canonical application model**. Profile and loadout payloads are already
 materialized and consumed by unit-detail reads; canonical logical-unit fields
-and aliases are materialized and consumed by unit list/search/detail reads.
-Relationship and catalog canonicalization remains in progress.
+and aliases are materialized and consumed by unit list/search/detail reads; and
+canonical application catalog identities for Skills/Equipment/Weapons are now
+materialized and consumed by normal catalog/detail reads. Wider relationship
+canonicalization remains in progress.
 
 The merged and normalized source layers remain source-oriented and lossless.
 Repeated records in those layers are not inherently defects: repetition may
@@ -434,8 +436,9 @@ representative-backed logical-unit fields plus source-attributed alias/note/
 `spectables` context are now materialized beside that identity layer. Canonical
 profile and loadout payload layers extend the same principle from **identity
 deduplication** to **semantic payload deduplication** for unit-detail data.
-Migrating unit list/search/detail reads to the canonical unit layer and then
-canonicalizing wider relationships/catalog overlap remain the next semantic stages.
+Application Army identities and application catalog identities extend the model
+further into Army/faction presentation and rule-reference catalog serving.
+Canonicalizing wider relationships remains the next semantic stage.
 
 Semantic deduplication must be evidence-driven and lossless:
 

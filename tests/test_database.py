@@ -2251,6 +2251,11 @@ def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
         connection.execute("UPDATE units SET name = 'source-only unit mutation'")
         connection.execute("UPDATE profiles SET name = 'source-only profile mutation'")
         connection.execute("UPDATE loadout_options SET name = 'source-only loadout mutation'")
+        connection.execute("UPDATE skills SET name = 'source-only skill mutation'")
+        connection.execute("UPDATE equipment SET name = 'source-only equipment mutation'")
+        connection.execute("UPDATE weapons SET name = 'source-only weapon mutation', category = 'source-only category'")
+        connection.execute("UPDATE metadata_skills SET name = 'source-only skill metadata mutation', wiki = 'source-only-skill-wiki'")
+        connection.execute("UPDATE metadata_equipment SET name = 'source-only equipment metadata mutation', wiki = 'source-only-equipment-wiki'")
         for table in (
             "profile_skill_extras",
             "profile_equipment_extras",

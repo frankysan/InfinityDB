@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 15
+SCHEMA_VERSION = 16
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 23
+DATABASE_COMPATIBILITY_VERSION = 24
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -254,6 +254,15 @@ DERIVED_TABLES = {
         "",
         ref("reinforcement_army_id", "application_armies", "id"),
         ref("parent_army_id", "application_armies", "id"),
+    ),
+    "application_catalog_items": table(
+        "catalog id",
+        "name wiki category preferred_source_id",
+    ),
+    "application_catalog_sources": table(
+        "catalog application_item_id source_item_id",
+        "source_name has_metadata",
+        ref("catalog application_item_id", "application_catalog_items", "catalog id"),
     ),
     "logical_units": table(
         "id",
@@ -582,6 +591,14 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     connection.execute(
         "CREATE INDEX application_armies_slug "
         "ON application_armies(slug COLLATE NOCASE, id)"
+    )
+    connection.execute(
+        "CREATE UNIQUE INDEX application_catalog_sources_source "
+        "ON application_catalog_sources(catalog, source_item_id)"
+    )
+    connection.execute(
+        "CREATE INDEX application_catalog_items_name "
+        "ON application_catalog_items(catalog, name COLLATE NOCASE, id)"
     )
     connection.execute(
         "CREATE INDEX logical_units_name "

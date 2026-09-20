@@ -336,11 +336,11 @@ Canonical profile and loadout layers now additionally answer, conservatively:
 Unit-detail repository/API assembly consumes those canonical profile/loadout
 payloads while retaining source occurrence context. Normal unit search,
 skill/equipment/weapon filters, skill extras, and catalog reverse usage likewise
-expand canonical payloads through their occurrence mappings. Source-local relationships remain source-backed, while Army/faction identity and
-hierarchy now serve through their materialized application layer. The remaining
-normal-serving semantic overlap is the skill/equipment/weapon catalog versus
-metadata boundary, so the application model is intentionally only partially
-canonicalized at this stage.
+expand canonical payloads through their occurrence mappings. Source-local
+relationships remain source-backed, while Army/faction identity/hierarchy and
+skill/equipment/weapon catalog identity now serve through materialized
+application layers. The application model remains progressively canonicalized,
+but the normal-serving catalog/metadata overlap has been resolved.
 
 InfinityDB is progressively introducing the remaining canonical application
 model between the normalized source model and repository/API presentation.
@@ -1545,19 +1545,20 @@ occurrence maps; source-specific unit display names are reconstructed from canon
 logical-unit fields plus explicit name aliases. Top-level `unit_option_*` occurrences
 stay source-contextual by design.
 
-The current role totals are **106 canonical-application fields**, **63 explicit
-contextual-application fields**, and **23 intentional-source fields**. The application
-Army tables now provide canonical identity/hierarchy and reviewed source mappings;
-`army_lists.id`/`kind` remain intentional source representation only for the legacy
-API shape and reinforcement fallback. `metadata_factions` is no longer read by
-normal serving. **166 / 192 observed fields have no open semantic issue**. The
-remaining **26 fields across 6 tables** are the skill/equipment/weapon catalog and
-metadata overlap (`skills`, `equipment`, `weapons`, and their `metadata_*`
-counterparts), which still requires its dedicated semantic audit.
+The current role totals are **111 canonical-application fields**, **62 explicit
+contextual-application fields**, and **23 intentional-source fields**. The
+application Army tables now provide canonical identity/hierarchy and reviewed
+source mappings, while `application_catalog_items` /
+`application_catalog_sources` provide canonical application catalog identity and
+source-label provenance for Skills, Equipment, and Weapons.
+`army_lists.id`/`kind` remain intentional source representation only for the
+legacy API shape and reinforcement fallback. `metadata_factions`,
+`metadata_skills`, and `metadata_equipment` are no longer read by normal
+serving. **196 / 196 observed fields have no open semantic issue**.
 
 `army_units`, `profile_groups`, profile/loadout occurrence maps, logical-unit
-aliases/notes/source links, and `metadata_ammunitions` are recorded as explicit
-contextual application data. `unit_factions` is classified in the same runtime
+aliases/notes/source links, `metadata_ammunitions`, and `metadata_weapons` are
+recorded as explicit contextual application data. `unit_factions` is classified in the same runtime
 role because it remains source-backed relationship data, but semantically it is
 the broader game-wide declared-membership relation rather than Army-local
 availability. Top-level `unit_options` and their

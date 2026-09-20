@@ -92,15 +92,15 @@ _register(
     reason="Current application identity/payload or unambiguous lookup catalog.",
 )
 _register(
-    ["application_armies", "application_army_reinforcement_parents"],
+    ["application_armies", "application_army_reinforcement_parents", "application_catalog_items"],
     CANONICAL,
     reason=(
-        "Materialized InfinityDB Army identity/hierarchy and explicit application "
-        "relationships used by normal serving."
+        "Materialized InfinityDB application identity/hierarchy or catalog identity "
+        "used by normal serving."
     ),
 )
 _register(
-    ["application_army_sources"],
+    ["application_army_sources", "application_catalog_sources"],
     CONTEXTUAL,
     reason=(
         "Reviewed source-to-application Army provenance mapping used to reconcile "
@@ -220,19 +220,17 @@ _register(
 _register(
     ["skills", "equipment", "weapons"],
     CANONICAL,
-    issue=OVERLAP,
     reason=(
-        "Application catalog identity currently combines this catalog with metadata_* "
-        "records and configured merge identities."
+        "Source catalog references back the canonical payload occurrences and unit-detail "
+        "labels; player-facing catalog identity is materialized separately."
     ),
 )
 _register(
     ["metadata_skills", "metadata_equipment", "metadata_weapons"],
     CONTEXTUAL,
-    issue=OVERLAP,
     reason=(
-        "Source metadata enriches a player-facing catalog whose identity also comes from "
-        "the normalized occurrence catalogs."
+        "Source metadata enriches or profiles catalog items without defining the materialized "
+        "application catalog identity."
     ),
 )
 TABLE_POLICY["units"] = _policy(

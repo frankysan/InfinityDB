@@ -11,8 +11,8 @@ def test_availability_semantics_are_explicit_schema_fields() -> None:
     assert "source_role" in TABLES["units"].fields
     assert "display_army_id" in TABLES["units"].fields
     assert "availability_kind" in TABLES["army_units"].fields
-    assert SCHEMA_VERSION == 15
-    assert DATABASE_COMPATIBILITY_VERSION == 23
+    assert SCHEMA_VERSION == 16
+    assert DATABASE_COMPATIBILITY_VERSION == 24
 
 
 def test_logical_unit_identity_is_frontend_derived_schema() -> None:
@@ -22,6 +22,8 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
         "application_armies",
         "application_army_sources",
         "application_army_reinforcement_parents",
+        "application_catalog_items",
+        "application_catalog_sources",
         "logical_units",
         "logical_unit_sources",
         "logical_unit_aliases",
@@ -56,6 +58,12 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
     assert DERIVED_TABLES["application_army_reinforcement_parents"].key == (
         "reinforcement_army_id",
         "parent_army_id",
+    )
+    assert DERIVED_TABLES["application_catalog_items"].key == ("catalog", "id")
+    assert DERIVED_TABLES["application_catalog_sources"].key == (
+        "catalog",
+        "application_item_id",
+        "source_item_id",
     )
     assert DERIVED_TABLES["logical_units"].key == ("id",)
     assert DERIVED_TABLES["logical_unit_sources"].key == ("source_unit_id",)

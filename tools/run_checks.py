@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shlex
 import subprocess
 import sys
@@ -45,6 +46,7 @@ EXIT_RUNNER_ERROR = 2
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIRECTORY = REPO_ROOT / "reports"
 STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
+MODULE_ROOT = Path(__file__).resolve().parents[1] / "src"
 
 
 @dataclass(frozen=True)
@@ -244,6 +246,13 @@ def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
     reporter.write()
 
     started = time.perf_counter()
+    env = dict(os.environ)
+    pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        str(MODULE_ROOT)
+        if not pythonpath
+        else str(MODULE_ROOT) + (os.pathsep + pythonpath)
+    )
     try:
         process = subprocess.Popen(
             stage.command,
@@ -253,6 +262,7 @@ def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
             errors="replace",
             bufsize=1,
             cwd=REPO_ROOT,
+            env=env,
         )
     except OSError as exc:
         duration = time.perf_counter() - started

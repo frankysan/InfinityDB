@@ -309,14 +309,6 @@ completed implementation checklists have been removed from this active backlog.
   - [ ] Record any distinct player-relevant relationship not currently
     presentable by the application as a 1.0 completeness gap.
 
-- [ ] **Audit catalog and metadata overlap.**
-  - [ ] Compare Army catalogs, occurrence data, and `metadata_*` collections by
-    semantic concept rather than table identity.
-  - [ ] Preserve genuinely distinct weapon modes, profile variants, source
-    metadata, and gameplay contexts.
-  - [ ] Identify player-relevant metadata currently stored but not represented
-    through the application.
-
 - [ ] **Separate lossless source storage from the application database after
   canonicalization.**
   This milestone refers to the existing `infinity.raw.db`; no additional
@@ -718,6 +710,12 @@ new correctness or reproducibility defect.
     regression screenshots at compact and desktop widths once the theme tokens
     stabilize.
 
+- [ ] Add a project favicon derived from `infinitydb-logo.svg`.
+  - [ ] Generate browser-appropriate favicon assets from the SVG source and wire
+    them into the shared page shell / site metadata.
+  - [ ] Keep the favicon legible in both light and dark browser chrome where
+    practical.
+
 - [ ] Refactor the frontend design-system structure after the principles and
   theme contract are agreed.
   - [ ] Review the current monolithic `styles.css` and separate foundational tokens,
@@ -854,6 +852,11 @@ new correctness or reproducibility defect.
   - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
     changes how profile data should be read.
+- [ ] Improve General profile versus Army-profile stat-difference signposting.
+  - [ ] Keep the existing indicator on an Army-profile stat when it differs from
+    the General profile.
+  - [ ] Also mark the General profile stat with a small superscript `*` and a
+    descriptive tooltip whenever one or more Army profiles differ from it.
 - [ ] Build a rule-aware Fireteams feature covering both unit eligibility and
   army Fireteam list/detail views.
   - [ ] The imported schema already retains `fireteams`, types, members, and

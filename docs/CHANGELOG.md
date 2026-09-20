@@ -11,10 +11,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Improve unit browsing/query performance and move profile, loadout, and
   logical-unit display, search, filtering, and catalog-usage reads to the
   canonical application model while preserving player-visible meaning.
-- Materialize and serve a canonical application Army identity/hierarchy from
-  reviewed source aliases and Army/metadata relationships while preserving the
-  original source projections, concrete Army availability, and broader faction
-  relationships.
+- Materialize and serve canonical application identity layers for Armies plus
+  Skills, Equipment, and Weapons while preserving source projections, source-
+  specific labels, and richer weapon/equipment profile metadata.
 
 ### Upgrade notes
 
@@ -24,6 +23,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 - Keep generated deployment artifacts safe when development, CI, and deployment
   checks use synthetic fixture data.
+- Keep the unified check runner able to execute database-build stages outside the
+  repository root without losing access to the current code package.
 - Reject deployments whose database and published graphical assets do not originate
   from the same verified Army snapshot before they can be activated.
 - Count Army unit totals by logical units rather than duplicate source representations.
