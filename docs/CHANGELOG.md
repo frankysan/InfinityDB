@@ -5,9 +5,30 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+## [0.6.1] - 2026-09-20
+
 ### Changed
 
-- Consolidated legacy release notes around user and operator outcomes.
+- Improve unit browsing and Army-oriented query performance while moving profile,
+  loadout, logical-unit, Army, Skill, Equipment, and Weapon reads onto canonical
+  application data without losing source-specific context. In the same-host,
+  same-snapshot 0.6.0-to-0.6.1 benchmark, the geometric mean of cold
+  medians improved by 2.33%, including 43.94% faster Army listing and 11.68% faster
+  Army-filtered unit listing; aggregate cold p95 remained effectively flat
+  (+0.52%).
+- Preserve richer source projections and weapon/equipment profile metadata behind
+  the canonical application identities so cross-Army relationships remain
+  available without treating one Army view as the complete game model.
+
+### Upgrade notes
+
+- Rebuild existing generated Army databases before deploying 0.6.1. Schema 16 /
+  compatibility revision 24 is intentionally incompatible with older generated
+  Army databases; there is no in-place database migration.
+- The audited production-like `infinity.db` grew from 13,557,760 to 18,108,416
+  bytes (+33.56%) because the new materialized application layers coexist with
+  retained source/context representations. Physical source-only separation into
+  `infinity.raw.db` remains later work.
 
 ### Fixed
 
@@ -15,6 +36,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
   checks use synthetic fixture data.
 - Reject deployments whose database and published graphical assets do not originate
   from the same verified Army snapshot before they can be activated.
+- Count Army unit totals by logical units rather than duplicate source
+  representations.
+- Avoid redundant catalog-graph reads when resolving Traits through the
+  materialized application catalogs.
 
 ## [0.6.0] - 2026-09-19
 

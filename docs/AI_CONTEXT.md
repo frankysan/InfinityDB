@@ -33,6 +33,23 @@ marked **Design direction**. The decision log may record an accepted decision
 before implementation, but the current sections and `TODO.md` remain
 responsible for implementation status.
 
+## Semantic provenance rule
+
+Army source material is army/list-local; InfinityDB combines those contexts into
+a game-wide model. Never silently promote a representative Army occurrence into
+a global fact. Distinguish source-native facts, source-derived facts, InfinityDB
+abstractions, and presentation conveniences as defined in `docs/architecture.md`;
+`docs/data-model.md` owns their concrete data semantics.
+
+`logical_unit` and the browser's `General profile` are InfinityDB abstractions,
+not upstream Army objects. `General profile` is currently synthesized in the
+browser from enabled source-backed profile/loadout contexts. `main_army_id` is a
+source-derived grouping/application field, while `display_army_id` /
+`display_faction` are presentation conveniences. None of those fields may by
+itself establish game-wide ownership, army membership, availability, playability,
+or canonical equality. Any new or changed InfinityDB abstraction must document
+its source inputs, derivation, assumptions/fallbacks, and limits.
+
 ## Purpose and subsystem boundaries
 
 InfinityDB builds validated local reference databases from Infinity source data
@@ -80,21 +97,24 @@ and serves a read-only browser and same-origin HTTP API.
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
   uses the tracked synthetic Army fixture rather than live acquisition or ignored
   graphical assets. Each leg installs the symbol Python dependencies and runs
-  pytest, full-tree Ruff linting, and Pyright through `run_checks.py`. Repository
-  rules/branch-protection settings, not workflow YAML, determine whether GitHub
-  blocks a merge on those checks.
+  pytest, full-tree Ruff linting, and Pyright across `src/`, `tools/`, and
+  `tests/` through `run_checks.py`; VS Code is configured for workspace-wide
+  diagnostics. GitHub's active `Protect main` ruleset requires pull requests,
+  resolved review threads, the four source-check matrix jobs,
+  `deployment-smoke`, and `installed-wheel` to be current and passing before
+  `main` can advance; it also blocks deletion/non-fast-forward updates and has no
+  bypass actors.
 - `Installed wheel smoke` is configured to build and install the wheel in a fresh virtual
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases
   through the runtime application outside the checkout.
 - `Full-asset checks` is configured as dispatch-only, restricted to `main`, and stages a private
-  checksum-pinned published-asset ZIP from the `full-assets` GitHub environment
-  before running `run_checks.py --assets required` once that environment is
-  configured. It does not upload the
-  graphical tree as an artifact, and it intentionally does not rerun the
-  network/external-tool-sensitive symbol pipeline from raw inputs.
-  Repository environment secrets must be configured before the manual job can
-  succeed. See `docs/ci.md`.
+  checksum-pinned published-asset ZIP from the existing `full-assets` GitHub
+  environment before running `run_checks.py --assets required`. It does not
+  upload the graphical tree as an artifact, and it intentionally does not rerun
+  the network/external-tool-sensitive symbol pipeline from raw inputs. The
+  environment exists, but its authorized bundle URL/digest secrets still must be
+  configured before the manual job can succeed. See `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 
@@ -108,9 +128,10 @@ and serves a read-only browser and same-origin HTTP API.
 - Valid Army API `metadata.json` is required for database creation. It enriches
   catalogs, names, and faction hierarchy but must not create army membership or
   alter source-derived availability.
-- Army-list occurrences are authoritative for unit membership and availability.
-  List presence, grouping, list kind, canonical ownership, optional availability
-  category, and playability are separate semantics.
+- Army-list occurrences are authoritative for concrete list membership and
+  availability. List presence, grouping, list kind, source canonical/origin
+  context, broader declared faction membership, optional availability category,
+  and playability are separate semantics.
 - The identity configuration does not map canonical-faction source ID `1` to
   `901` as ownership. Normalization preserves ID `1` as mercenary source/origin
   provenance and explicitly leaves `main_army_id` unset for canonical-1 units;
@@ -140,7 +161,8 @@ and serves a read-only browser and same-origin HTTP API.
   metadata has `901.parent = 900`; playability must not be inferred from source-list
   existence or roster presence. InfinityDB intentionally has no separate 901
   roster-query surface: preserve that roster as source provenance and consume unit
-  availability through the playable child NA2 lists.
+  availability through the playable child NA2 lists. This endpoint policy does
+  not remove 901 or its relationships from the game-wide model.
 - The analyzed snapshot gives source list 901 one standard unit (Rumbler
   Spec-Ops) plus the complete 49-variant optional-mercenary pool. Child NA2 lists
   have their own standard rosters plus subsets of that pool.
@@ -156,7 +178,8 @@ and serves a read-only browser and same-origin HTTP API.
   to derive unit `main_army_id`. Explicit maintained canonical-faction overrides
   take precedence; the old `xx01` calculation is retained only for standalone or
   legacy normalization inputs without a usable metadata row for that canonical
-  faction.
+  faction. `main_army_id` is derived grouping/application context, not an
+  authoritative game-wide ownership or membership relation.
 - The backend/API exposes explicit army role/playability semantics derived from
   metadata parent relationships and ordinary-list `reinforcements` links.
   `/api/armies` distinguishes main armies, sectorials, Non-Aligned forces,
@@ -175,11 +198,125 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. A future refactor may materialize one canonical application
-  payload per logical unit and store only explicit army/loadout/source deltas,
-  but only after field-level invariance and provenance requirements are audited.
+  dynamically. Schema version 14 / compatibility revision 22 materializes
+  representative-backed canonical logical-unit fields plus source-attributed
+  alias/note/`spectables` context, as well as reusable canonical profile and
+  loadout payloads scoped to each logical unit plus one occurrence row per
+  source profile/loadout. Profile AVA/logo and loadout points/SWC remain
+  occurrence context; source/profile-group keys, includes, and peripherals
+  remain occurrence/source context; WIP, characteristics, skills,
+  equipment, weapons, extras, and exact representation values remain in the
+  payload and therefore split payload variants when they differ. Unit-detail
+  profile assembly and normal skill/equipment/weapon search/filter/catalog usage
+  now read the canonical profile payload/occurrence layer. Source profile tables
+  remain lossless provenance/context for build validation and audit, not normal
+  serving. Logical-source profile
+  occurrence merging remains separate from canonical payload identity:
+  occurrences may collapse only when their effective army occurrence,
+  source-local group/profile coordinates, scalar profile facts, type, and
+  classification agree; complementary nested items are accumulated and
+  restrictive numeric AVA is retained. A canonical payload ID must not be used
+  as source-occurrence identity. The loadout materializer follows the same
+  logical-unit-scoped, exact-payload approach: `name`, `minis`, `disabled`,
+  characteristics, orders, skills, equipment, weapons, extras, and exact
+  representation values belong to the reusable payload; points, SWC,
+  source/group/option keys, source position, includes, and peripherals remain
+  occurrence/source context. Includes and peripherals are deferred because their
+  targets are source-local/army-local. Unit-detail loadout assembly now reads
+  the canonical loadout payload/occurrence layer while retaining the existing
+  logical-source occurrence merge semantics. Normal loadout-name search and
+  skill/equipment/weapon search/filter/catalog usage also read the canonical
+  payload/occurrence layer; source loadout tables remain lossless provenance/context
+  for build validation and audit, not normal serving. Canonical payload identity is
+  deliberately not used
+  as logical-source occurrence identity because overlapping source records can
+  contribute complementary nested loadout relationships. Current production
+  evidence shows 31 logical-source loadout occurrence merges and all pairs already
+  share one canonical loadout payload; the merge remains occurrence reconciliation,
+  not payload identity. Canonical profile/loadout occurrence tables require
+  unit-oriented indexes because unit-detail assembly filters them by source unit.
+  The logical-unit field audit on the 2026-09-18 production snapshot maps 920
+  source-defined units to 737 logical units, including 167 multi-source logical
+  units. All 737 representatives are ordinary standard source units; none is a
+  reinforcement-only or mercenary-variant row. That representative rule may
+  govern canonical display/general fields, but it does not erase source context:
+  every multi-source logical unit contributes alternate searchable labels, six
+  have source-note variation, and four have a player-facing note only on a
+  non-representative reinforcement row. Source faction/Army relationships and
+  top-level unit options remain contextual. `spectables` is populated on 30
+  source units but only singleton logical units in this snapshot, so it must be
+  preserved while its canonical/presentation treatment remains unresolved.
+  Schema version 14 materializes representative-backed `name`, `isc`,
+  `isc_abbr`, `slug`, `canonical_faction_id`, `main_army_id`, and
+  `display_army_id` on the application-owned logical-unit row. The three faction/
+  army fields retain contextual/derived/presentation semantics; their placement
+  does not make them canonical game-wide relationships. Every source mapping stays
+  explicit; non-representative differing labels are source-attributed aliases;
+  every non-empty source note remains source-attributed context; and `spectables`
+  is preserved as exact opaque source context rather than promoted from
+  singleton-only evidence. Top-level `unit_options` remain separate source-context
+  payloads and source-local `option_id` is not canonical option identity. A clean
+  rebuild of the 2026-09-18 normalized source materializes 737 canonical rows,
+  920 source links, 473 alias occurrences (468 distinct logical-unit values), 30
+  note occurrences, 30 `spectables` occurrences, and leaves 18 top-level
+  unit-option rows contextual. The extra alias preserves the existing derived
+  `Unit <source id>` search name for the one non-representative source row whose
+  raw name is absent. Unit list/search/detail general fields and unit-label
+  search now read the canonical logical-unit layer; source unit rows remain for
+  relationships and other runtime paths that have not yet been canonicalized.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
+- The 0.6.1 runtime-surface audit uses SQLite authorizer tracing plus static
+  direct-method coverage of the web/catalog helpers. After replacing redundant
+  profile/loadout/unit source reads, migrating Army/faction serving to the
+  materialized application Army layer, and materializing canonical application
+  catalog identities for skills/equipment/weapons, the same 25 probes read 49
+  tables / 196 distinct fields: 111 canonical-application fields, 62
+  contextual-application fields, and 23 intentional-source fields. No
+  replaceable-source or semantic-overlap issue remains in the normal runtime
+  surface. Normal serving no longer reads `metadata_factions`,
+  `metadata_skills`, or `metadata_equipment`; `army_lists` remains only for its
+  source-shape `id`/`kind` compatibility semantics. Fireteams,
+  relation/dependency tables, includes/peripherals, and other currently unserved
+  source structures are outside the 0.6.1 gate unless later runtime work
+  introduces a dependency.
+- The 0.6.1 army/faction audit makes the scope boundary explicit: Infinity Army
+  is list-local, whereas InfinityDB is game-wide. The reviewed snapshot has 58
+  overlapping `army_lists` / `metadata_factions` IDs with identical name/slug
+  values, but their semantics differ; reviewed Army aliases produce 57 canonical
+  application army identities. `army_units` is concrete list availability, while
+  `unit_factions` is a broader declared cross-Army membership relation. Representative
+  faction/main/display copies on `logical_units` remain contextual/presentation values
+  despite residing on an application-owned row. The latter
+  preserves 99 references across 89 source units to faction IDs 203/903/906/907
+  that have no current Army list. Source `canonical_faction_id` is origin/context,
+  not ownership or availability. Schema version 16 / compatibility revision 24
+  now materializes the canonical application Army identity/hierarchy as an
+  InfinityDB abstraction in `application_armies`, `application_army_sources`,
+  and `application_army_reinforcement_parents`. It stores canonical name/slug,
+  role/playability/grouping, reviewed source-ID mappings and preferred-source
+  provenance, plus explicit reinforcement-parent relationships. Skills,
+  Equipment, and Weapons now likewise materialize canonical application catalog
+  identities and source mappings in `application_catalog_items` and
+  `application_catalog_sources`, while preserving source-specific labels and
+  weapon/equipment profile metadata as contextual data. The broader 63-ID
+  faction registry, `army_units`, `unit_factions`, and both source projections
+  remain separate. Normal serving now consumes the materialized Army and catalog
+  layers for application identity/hierarchy, alias resolution, playability,
+  faction/group presentation, and catalog detail/list serving without
+  collapsing those contexts.
+- Skills, Equipment, and Weapons application identities are InfinityDB
+  abstractions materialized from normalized catalog rows, reviewed catalog alias
+  groups, and metadata enrichment. `application_catalog_sources` preserves each
+  contributing source ID/label; detailed `metadata_weapons` modes and profiles
+  remain contextual rather than being promoted to invariant catalog facts.
+- `tools/benchmark_runtime.py` is the canonical repository-read benchmark for the
+  0.6.1 performance gate; `tools/compare_runtime_benchmarks.py` compares archived
+  reports. The same-host/same-snapshot 0.6.0-to-0.6.1 release run improved the
+  geometric mean of cold medians by 2.33% (Army listing -43.94%, Army-filtered
+  units -11.68%) while the cold-p95 geometric mean was effectively flat (+0.52%).
+  The audited application database grew 13,557,760 -> 18,108,416 bytes (+33.56%)
+  while materialized application layers and retained source/context rows coexist.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
 - Nested queryable values may remain JSON in the frontend DB; exact normalized
@@ -571,7 +708,7 @@ application-level identities.
 - 2026-09-17: Non-playable grouping rosters do not get a dedicated application
   query surface. The 901 source roster remains preserved for provenance, while
   application unit availability is reached through the playable child NA2 army
-  occurrences. This is separate from the future canonical logical-unit/delta model.
+  occurrences. This remains separate from canonical logical-unit payload/context modeling.
 - 2026-09-18: Unit presentation identity is separate from ownership. Reviewed
   source-derived mappings live under `data/curated/identities/`; normalization
   pins that curated document/hash and derives `display_army_id`. The current

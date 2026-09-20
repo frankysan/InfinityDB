@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "0.6.0"
+version = "0.6.1"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -66,7 +66,7 @@ markers = [
 cache_dir = ".cache/pytest"
 
 [tool.pyright]
-include = ["src", "tools"]
+include = ["src", "tools", "tests"]
 extraPaths = ["src", "tools"]
 pythonVersion = "3.11"
 typeCheckingMode = "basic"

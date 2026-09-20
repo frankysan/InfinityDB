@@ -20,8 +20,8 @@ python tools/run_checks.py --all
 ```
 
 The available stages are `test`, `lint`, `type`, `build`, and `rules`. The `type`
-stage runs Pyright over the maintained `src/` and `tools/` trees. The `build`
-stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
+stage runs Pyright over the maintained `src/`, `tools/`, and `tests/` trees. The
+`build` stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
 `rules.db` from the tracked curated rules collections. Both use isolated system
 temporary output directories: check execution never writes `data/generated/`.
 The named profiles are
@@ -190,3 +190,49 @@ and duration, followed by an overall summary.
 Direct pytest, Ruff, or Pyright commands remain useful when debugging one tool in
 isolation, but normal development and handoff checks should prefer this runner
 so the command set and reporting format stay consistent.
+
+## Runtime repository benchmark
+
+The canonicalization release gate uses a local repository-read benchmark rather
+than a CI timing threshold. Run it against an already-built production-like Army
+database:
+
+```powershell
+python tools/benchmark_runtime.py data\generated\infinity.db
+```
+
+Use `--json` when results need to be archived or compared mechanically. For a
+before/after comparison, use the same Army source snapshot, machine, Python
+environment, and iteration counts. The command reports cold and warm median/p95
+latencies for representative Army, unit, catalog, and Trait read paths plus the
+database size. CI does not assert timing because shared-runner variance would make
+that evidence misleading.
+
+The **before** benchmark must execute with the pre-change implementation. Do not
+open an older-schema database with the current repository merely to obtain a
+number: runtime validation intentionally rejects incompatible databases. Build
+the same Army snapshot in the pre-change checkout and run the same
+`benchmark_runtime.py` script with that checkout's `src` directory first on
+`PYTHONPATH`. On PowerShell, one reproducible approach is:
+
+```powershell
+$before = (Resolve-Path "..\InfinityDB-before").Path
+$env:PYTHONPATH = (Join-Path $before "src")
+python .\tools\benchmark_runtime.py (Join-Path $before "data\benchmark-before\infinity.db") --json > .\reports\BENCHMARK-before.json
+Remove-Item Env:PYTHONPATH
+```
+
+Generate the after report normally from the current checkout, then compare the
+two reports:
+
+```powershell
+python tools\benchmark_runtime.py data\generated\infinity.db --json > reports\BENCHMARK-after.json
+python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json
+python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json --json > reports\BENCHMARK-comparison.json
+```
+
+The comparison requires the same case set and cold/warm iteration counts. It
+reports database-size change and per-case median/p95 percentage deltas; negative
+timing deltas are faster and positive deltas are slower. It deliberately does
+not impose a pass/fail performance threshold: release review should interpret
+the measured tradeoffs alongside semantic correctness and losslessness.

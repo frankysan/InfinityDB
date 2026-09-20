@@ -1,6 +1,7 @@
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TypedDict
 
 import pytest
 
@@ -23,7 +24,15 @@ def artifact(path: Path, body: bytes) -> Path:
     return path
 
 
-def army_source_kwargs(source_document_count: int) -> dict[str, object]:
+class ArmySourceKwargs(TypedDict):
+    army_acquired_at: datetime
+    army_language: str
+    army_source_url: str
+    source_document_count: int
+    source_revisions: dict[str, int]
+
+
+def army_source_kwargs(source_document_count: int) -> ArmySourceKwargs:
     revisions = {} if source_document_count == 1 else {"7.26246.158": source_document_count - 1}
     return {
         "army_acquired_at": datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),

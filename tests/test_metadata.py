@@ -255,6 +255,35 @@ def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Pat
     path = tmp_path / "infinity.db"
     export_database(normalized, path)
     armies = {army["id"]: army for army in Database(path).list_armies()}
+    with sqlite3.connect(path) as connection:
+        connection.row_factory = sqlite3.Row
+        materialized = {
+            row["id"]: dict(row)
+            for row in connection.execute(
+                "SELECT id, name, slug, role, playable, group_id, preferred_source_id "
+                "FROM application_armies ORDER BY id"
+            )
+        }
+        reinforcement_parents = {
+            (row["reinforcement_army_id"], row["parent_army_id"])
+            for row in connection.execute(
+                "SELECT reinforcement_army_id, parent_army_id "
+                "FROM application_army_reinforcement_parents"
+            )
+        }
+
+    assert set(materialized) == set(armies)
+    for army_id, army in armies.items():
+        assert materialized[army_id] == {
+            "id": army_id,
+            "name": army["name"],
+            "slug": army["slug"],
+            "role": army["role"],
+            "playable": int(army["playable"]),
+            "group_id": army["group_id"],
+            "preferred_source_id": army_id,
+        }
+    assert reinforcement_parents == {(198, 101)}
 
     assert armies[101]["role"] == "main"
     assert armies[101]["playable"] is True
@@ -281,6 +310,25 @@ def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Pat
     }
     with pytest.raises(ValueError, match="grouping-only identity"):
         Database(path).list_units(army_id=901)
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    detail_armies = {army["id"]: army for army in details["armies"]}
+    assert detail_armies[198]["faction"] == {
+        "id": 101,
+        "name": "Official First",
+        "slug": "source-slug",
+    }
+    assert detail_armies[901]["faction"] == {
+        "id": 901,
+        "name": "Non-Aligned Armies",
+        "slug": "source-na2-group",
+    }
+    assert detail_armies[902]["faction"] == {
+        "id": 901,
+        "name": "Non-Aligned Armies",
+        "slug": "source-na2-group",
+    }
 
 
 def test_grouping_role_is_derived_from_metadata_without_known_group_id(tmp_path: Path) -> None:
@@ -329,7 +377,7 @@ def test_grouping_role_is_derived_from_metadata_without_known_group_id(tmp_path:
         database.list_units(army_id=7700)
 
 
-def test_unit_details_use_metadata_parent_for_faction_group(tmp_path: Path) -> None:
+def test_unit_details_use_application_army_identity_for_faction_group(tmp_path: Path) -> None:
     source = metadata_source()
     source["factions"].append(
         {
@@ -357,7 +405,7 @@ def test_unit_details_use_metadata_parent_for_faction_group(tmp_path: Path) -> N
     faction = {
         "id": 101,
         "name": "Official First",
-        "slug": "official-first",
+        "slug": "source-slug",
     }
     assert details["main_faction"] == faction
     assert details["display_army_id"] == details["main_army_id"]

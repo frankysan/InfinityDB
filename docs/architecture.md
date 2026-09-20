@@ -37,13 +37,17 @@
 5. **Prefer explicit relationships over assumptions.** Model what the source
    actually represents, including many-to-many and source-specific
    relationships, rather than flattening data for implementation convenience.
-6. **Build conservatively.** When validation or interpretation is uncertain,
+6. **Make semantic provenance explicit.** Distinguish source-native concepts from
+   source-derived facts, InfinityDB-specific abstractions, and presentation-only
+   conveniences. When InfinityDB introduces a concept that does not exist in the
+   source, document its evidence, derivation, assumptions, and intended scope.
+7. **Build conservatively.** When validation or interpretation is uncertain,
    preserve source or existing valid data rather than guessing or
    destructively correcting it.
-7. **Separate stages and responsibilities.** Acquisition, validation,
+8. **Separate stages and responsibilities.** Acquisition, validation,
    normalization, processing, publishing, and deployment should remain
    independently understandable and testable.
-8. **Be deterministic and portable.** Given the same inputs and configuration,
+9. **Be deterministic and portable.** Given the same inputs and configuration,
    the project should produce the same logical result on Windows, Linux, and
    macOS.
 
@@ -70,6 +74,47 @@ direction, but those are not interchangeable:
 
 Unless a paragraph is explicitly marked as design direction or future work,
 architectural statements describe the current implementation.
+
+## Semantic provenance and InfinityDB abstractions
+
+Infinity Army and InfinityDB intentionally operate at different scopes. Army
+source documents describe one army/list context at a time. InfinityDB combines
+those local views into a game-wide reference, so cross-army identities and
+relationships are first-class application information. A value selected from one
+representative source context must not become a global ownership, identity, or
+canonical-value claim merely because it is convenient to display.
+
+Documentation and semantic audits use four provenance categories:
+
+1. **Source-native fact:** an object, value, relationship, or taxonomy represented
+   directly by the Army/metadata source. Normalization may change its storage
+   shape but not its source meaning.
+2. **Source-derived fact:** an interpretation calculated from source-native
+   evidence. The derived name or classification belongs to InfinityDB unless an
+   upstream contract defines it; inputs, derivation, fallbacks, and assumptions
+   must be documented and testable.
+3. **InfinityDB abstraction:** an application-level concept introduced to make
+   source material comparable or useful across contexts. It may combine several
+   source constructs and has no implied upstream object. Its purpose, source
+   inputs, derivation, assumptions, and limits must be explicit.
+4. **Presentation convenience:** a derived choice used only to render, label,
+   navigate, or style information. It has no independent domain meaning and must
+   not be reused as evidence for ownership, membership, playability, availability,
+   or semantic equivalence.
+
+These provenance categories are separate from the canonicalization categories
+defined in `docs/data-model.md`. For example, an InfinityDB abstraction can
+contain canonical facts, contextual deltas, and relationships while still being
+an InfinityDB-defined concept rather than a source-native one.
+
+Current examples include source-derived army role/playability and
+`main_army_id`; the materialized application Army identity/hierarchy,
+materialized Skills/Equipment/Weapons catalog identity, the materialized logical
+unit, and the browser's `General profile` are InfinityDB abstractions; and
+`display_army_id` / `display_faction` are presentation conveniences. For the Army
+data model, these categories refer
+to Army/metadata provenance; curated rules knowledge retains its own cited
+external-source provenance.
 
 ## Configuration, curated data, manifests, and generated state
 
@@ -126,7 +171,7 @@ standalone/legacy normalization fallback when no usable metadata row exists for
 the canonical faction.
 
 Source canonical-faction ID `1` and Non-Aligned Armies grouping ID `901` are
-kept distinct in ownership normalization. ID `1` remains mercenary source/origin
+kept distinct in identity/grouping semantics. ID `1` remains mercenary source/origin
 provenance with no application `main_army_id`; the generic whole-army `xx01`
 derivation is explicitly suppressed for that source identity. ID `901` remains
 the metadata grouping identity for Non-Aligned armies. The former legacy
@@ -134,7 +179,7 @@ the metadata grouping identity for Non-Aligned armies. The former legacy
 `data/curated/identities/army-display.json` records the reviewed display
 relationship from canonical source identity `1` to display army `901`;
 normalization derives `display_army_id` from that curated fact without changing
-ownership, availability, or playability semantics.
+source membership, availability, or playability semantics.
 
 The authored identity configuration is a build input, not a deployed runtime
 file. InfinityDB normalization validates it, supplies normalization-time
@@ -197,15 +242,26 @@ unit API payloads, and browser code formats distances without recognizing skill
 names.
 
 Army presentation and classification currently combine imported relationships
-with merger-derived fields. Faction grouping, display names, and slugs come from
-`metadata_factions.parent`, `name`, and `slug`; repository responses expose this
-as `main_faction` for unit summaries/details and `faction` for each army
-occurrence. The merger sets `army_lists.kind` to `army` for source documents
-that contain a top-level `reinforcements` field and to `reinforcement` for those
-that do not. That field therefore captures the current ordinary-list versus
-reinforcement-file shape, but it is not an upstream main-army/sectorial
-classification. Browser code consumes these backend fields and must not infer
-faction or reinforcement semantics from Army ID prefixes or suffixes.
+with merger-derived fields. The source/application scope distinction is important:
+Infinity Army presents one concrete Army list at a time, while InfinityDB presents
+the whole game and must preserve cross-Army identities and relationships alongside
+those list-local occurrences. A source Army list is therefore an occurrence/context
+container, not the complete application ontology for faction identity or unit
+membership. Database schema version 15 materializes an explicit application Army
+identity/hierarchy from reviewed Army aliases plus the overlapping
+`army_lists`/`metadata_factions` evidence. That derived layer owns the canonical
+application name/slug, role/playability/grouping, source-ID provenance mapping,
+and explicit reinforcement-parent relationships without replacing either source
+projection or the broader faction registry. Normal repository serving now reads
+that layer for Army identity, source-alias resolution, hierarchy, playability,
+unit faction/group presentation, and reinforcement relationships. Concrete
+availability still comes from `army_units`; `unit_factions` remains the separate
+game-wide declared-membership relation. The only normal-serving dependency on
+`army_lists` is the legacy source-shape `kind` value, retained for API compatibility
+and as a reinforcement fallback for incomplete/legacy source relationships.
+`metadata_factions` is no longer a normal-serving dependency. Browser code
+consumes these backend fields and must not infer faction or reinforcement semantics
+from Army ID prefixes or suffixes.
 
 Mercenary units and Non-Aligned Armies are also separate source concepts.
 Ordinary unit records declare their normal faction availability through
@@ -298,8 +354,9 @@ application paths.
 
 ### Current: army roles and logical-unit identity
 
-Army role/playability is derived in the backend from source relationships
-rather than numeric ID patterns or known identity constants. Self-parented
+Army role/playability is an InfinityDB source-derived classification built from
+source relationships rather than an upstream role/playability taxonomy, numeric
+ID patterns, or known identity constants. Self-parented
 imported ordinary lists that parent other lists remain main armies. An ordinary
 imported list that itself parents ordinary lists but whose metadata parent is a
 different identity is a grouping node; metadata-only referenced parents can
@@ -311,9 +368,11 @@ explicit `reinforcements` field, and reinforcement lists do not participate in
 grouping-node discovery. `/api/armies` exposes role and playability separately
 from source-list existence; grouping identities are non-playable and cannot be
 used as selectable `army_id` values, while their source rows remain preserved.
-For current NA2 data, InfinityDB intentionally does not expose a separate roster
-query for `901`: its roster remains provenance, and application availability is
-consumed through the playable child army lists that share those units.
+For current NA2 data, InfinityDB intentionally does not expose a separate playable
+roster query for `901`: its roster remains preserved source provenance, and
+application availability is consumed through the playable child army lists that
+share those units. This endpoint policy does not erase `901` or its relationships
+from the game-wide model.
 
 Mercenary source variants are classified during normalization from their
 source-semantic contract (`canonical == 1`, empty declared `factions`,
@@ -332,18 +391,32 @@ persisted during normalization and
 reinforcement-to-standard matching is audited during database creation; both
 feed the materialized logical-unit identity consumed by repositories.
 
-Logical-unit identity is materialized during frontend database creation. This
-does **not** merge or rewrite source rows: source unit IDs, army occurrences,
-profiles, loadouts, options, and availability provenance remain attached to
-their original source unit. The exporter resolves configured unit aliases plus
-persisted generic and mercenary matches and the database-build reinforcement
-audit into frontend-only `logical_units` and `logical_unit_sources` tables.
-Every source-defined unit maps to exactly one logical unit.
+A logical unit is an InfinityDB application abstraction: Army supplies source-unit
+records but no separate upstream `logical_unit` object corresponding to this
+relation. Logical-unit identity and the first canonical unit payload layer are
+materialized during frontend database creation. This does **not** merge or rewrite source rows:
+source unit IDs, army occurrences, profiles, loadouts, options, and availability
+provenance remain attached to their original source unit. The exporter resolves
+configured unit aliases plus persisted generic and mercenary matches and the
+database-build reinforcement audit into `logical_units` / `logical_unit_sources`,
+then copies the representative-backed general fields onto `logical_units` while
+materializing source-attributed aliases, notes, and opaque `spectables` context.
+Every source-defined unit still maps to exactly one logical unit. Unit list,
+search, and detail general fields now read that canonical layer; alternate
+source labels, including the existing derived `Unit <source id>` fallback for a
+missing source name, are materialized as traceable search aliases. Source rows
+remain available for relationships and repository paths that have not yet been
+canonicalized.
 
 ### Canonical application data and semantic deduplication
 
-InfinityDB will progressively separate its **lossless source model** from a
-**canonical application model**.
+InfinityDB is progressively separating its **lossless source model** from a
+**canonical application model**. Profile and loadout payloads are already
+materialized and consumed by unit-detail reads; canonical logical-unit fields
+and aliases are materialized and consumed by unit list/search/detail reads; and
+canonical application catalog identities for Skills/Equipment/Weapons are now
+materialized and consumed by normal catalog/detail reads. Wider relationship
+canonicalization remains in progress.
 
 The merged and normalized source layers remain source-oriented and lossless.
 Repeated records in those layers are not inherently defects: repetition may
@@ -359,9 +432,22 @@ source documents.
 
 The existing `logical_units` and `logical_unit_sources` relation is the first
 application-level identity layer. It establishes which source unit records
-represent one logical unit while preserving every source occurrence. The next
-stage extends this principle from **identity deduplication** to **semantic
-payload deduplication**.
+represent one logical unit while preserving every source occurrence. Canonical
+representative-backed logical-unit fields plus source-attributed alias/note/
+`spectables` context are now materialized beside that identity layer. Canonical
+profile and loadout payload layers extend the same principle from **identity
+deduplication** to **semantic payload deduplication** for unit-detail data.
+Application Army identities and application catalog identities extend the model
+further into Army/faction presentation and rule-reference catalog serving.
+Canonicalizing wider relationships remains the next semantic stage.
+
+Runtime-performance evidence for this work is collected separately from semantic
+acceptance. `tools/benchmark_runtime.py` measures representative repository read
+paths against an already-built `infinity.db`, reporting cold and warm median/p95
+timings. Before/after comparisons are meaningful only when both revisions use the
+same database source snapshot and run on the same host under comparable load; the
+benchmark is release evidence, never a substitute for equivalence or provenance
+checks.
 
 Semantic deduplication must be evidence-driven and lossless:
 
@@ -391,7 +477,7 @@ units. Older normalized inputs that lack the persisted generic/mercenary audits
 retain the legacy duplicate fallback inside the builder; repository reads do
 not rediscover logical identity.
 
-For schema version 11, the logical-unit ID equals the representative source-unit
+Since schema version 11, the logical-unit ID equals the representative source-unit
 ID so existing API IDs and URLs remain stable. `representative_unit_id` is still
 stored explicitly, leaving room to decouple application identity from source
 identity later without changing provenance. Repository aggregation follows the
@@ -400,6 +486,24 @@ terms, and other source-backed data. It does not pre-aggregate those source
 tables into logical copies, because normal and optional-mercenary occurrences
 can belong to the same logical unit and army while retaining different
 `availability_kind` semantics.
+
+Schema version 12 introduced the derived canonical-profile layer, and schema
+version 13 added the corresponding canonical-loadout layer beside the lossless
+source tables. Build-time materialization scopes reusable payloads to an existing
+`logical_unit` and keeps source/Army context on one-to-one occurrence relations:
+profile AVA/logo and loadout points/SWC remain contextual, while source-local
+includes/peripherals remain in their lossless source relationships pending their
+own identity audit.
+
+Unit-detail repository reads now consume both canonical payload layers. Source
+profile/loadout tables remain available for provenance, deferred relationships,
+validation, and source-oriented repository paths such as catalog reverse
+lookups. Compatibility revision 19 also requires unit-oriented indexes on both
+canonical occurrence tables so this read-path split does not regress unit-detail
+query behavior. The physical removal of source-only tables from `infinity.db`
+remains a later design step after canonical unit, relationship, and catalog
+coverage is complete; `infinity.raw.db` is the intended long-term home for that
+lossless source representation.
 
 ## Snapshot acquisition and provenance
 
@@ -694,7 +798,7 @@ variants. Tables use the comfortable default or `.data-table--compact` for
 detail and usage data; retain those variants instead of adding page-specific
 cell padding or header type rules.
 
-Unit-list and general-profile surfaces may use the unit's named main-army
+Unit-list and general-profile surfaces may use the unit's derived display-faction
 colors as accents. Keep those accents within the shared token and gradient
 system so catalog-specific styling remains legible and consistent.
 
@@ -725,7 +829,7 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 11 and database compatibility revision of 16; it
+schema has a schema version of 14 and database compatibility revision of 22; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of
@@ -766,7 +870,7 @@ after a deployment or data refresh.
 
 ### `GET /api/version`
 
-Returns `{ "version": "0.6.0", "snapshot_revision": "..." }`. The browser uses
+Returns `{ "version": "0.6.1", "snapshot_revision": "..." }`. The browser uses
 it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`
@@ -784,32 +888,45 @@ when it is an imported ordinary list whose own metadata parent is different from
 itself. Current source data uses imported list `901` for the Non-Aligned Armies
 group, with metadata parent `900` and its own source roster; runtime role
 classification does not special-case that ID. Grouping items expose
-`playable: false`, and unit counts still reflect preserved source-defined
-`army_units`.
+`playable: false`. `unit_count` counts distinct application logical units with
+concrete `army_units` availability after reviewed Army aliases are applied;
+multiple source representations of one logical unit do not inflate the
+player-facing count.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
 Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each
 item has `id`, `name`, `main_army_id`, `main_faction`, `display_army_id`,
-`display_faction`, `army_ids`, and `armies` (`id` and `name` per membership).
-`main_faction` represents ownership grouping, while `display_faction` is the
-presentation identity derived from normalized `display_army_id`. The zero
+`display_faction`, `army_ids`, and `armies` (`id` and `name` per currently
+visible Army availability).
+`main_faction` is the source-derived main/grouping context resolved through the
+materialized application Army hierarchy, while `display_faction` is the exact
+application presentation identity selected by normalized `display_army_id`.
+Neither field replaces the unit's game-wide membership relationships. The zero
 total above illustrates the response shape.
 
 - Omit `army_id` to browse all source-defined units, deduplicated by global ID.
-- Army membership comes from `army_units`, not canonical faction or declared
-  faction references.
-- `main_army_id` represents canonical whole-army/group ownership. Current
+- Concrete Army-list availability comes from `army_units`; the response's
+  `army_ids` / `armies` fields report that availability after optional-mode
+  filtering. `unit_factions` separately preserves broader declared game-wide
+  faction membership. Canonical/source-origin and main/display fields do not
+  replace either relationship.
+- `main_army_id` is a source-derived application grouping field. Current
   InfinityDB builds derive it from imported metadata faction parents, with
-  explicit maintained overrides taking precedence. The `xx01` derivation is
+  explicit maintained overrides taking precedence. It is not authoritative for
+  army membership, availability, or game-wide ownership; the field name is a
+  compatibility term rather than a complete ontology. The `xx01` derivation is
   retained only for standalone/legacy normalization without usable metadata.
-  Canonical source ID `1` is explicitly excluded from application main-army
-  ownership and remains mercenary source provenance; Non-Aligned grouping uses
-  the separate metadata identity `901`.
-- `main_faction` is derived from the matching metadata-faction parent record.
+  Canonical source ID `1` remains mercenary source provenance and therefore has
+  no application `main_army_id`; Non-Aligned grouping uses the separate metadata
+  identity `901`.
+- `main_faction` and each army occurrence's `faction` are resolved from the
+  materialized application Army hierarchy. Sectorial/non-aligned Armies use their
+  canonical group; reinforcement Armies use the common canonical group implied by
+  their explicit parent relationships when that group is unambiguous.
 - `display_army_id` normally mirrors `main_army_id`, but reviewed source-derived
-  exceptions come from curated identity data. Browser symbol/styling code uses
-  `display_army_id`/`display_faction` and contains no special-case Army IDs.
+  exceptions come from curated identity data. Browser symbol/styling code resolves
+  that ID through the application Army mapping and contains no special-case Army IDs.
 - Search matches accent- and punctuation-insensitive, case-folded name
   substrings, including Unicode.
 - Results sort by display name after case-folding, removing diacritics, and

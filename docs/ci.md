@@ -54,7 +54,7 @@ real `data/raw/` snapshot. Every matrix leg installs `.[dev,symbols]` and covers
 - pytest hermetic tests, including synthetic integration against the real
   fontTools, tinycss2/cssselect2, and Pillow Python dependencies;
 - Ruff across the maintained `src/`, `tests/`, and complete `tools/` trees;
-- Pyright type checking across maintained `src/` and `tools/` code;
+- Pyright type checking across maintained `src/`, `tools/`, and `tests/` code;
 - `infinity.db` / `infinity.raw.db` construction from the controlled fixture;
 - `rules.db` construction from tracked curated rules data.
 
@@ -63,10 +63,14 @@ the hermetic suite. Routine validation of checked-in snapshot notes remains a
 follow-up item. A clean source archive is expected to be genuinely green; absent
 ignored graphical assets are not a known-failing state.
 
-The workflow defines InfinityDB's required source-validation contract, but GitHub
-merge blocking is a repository rules/branch-protection setting rather than a YAML
-property. Enabling that repository-side enforcement remains an administrative
-step when protected-branch policy is desired.
+The workflow defines InfinityDB's required source-validation contract, while
+merge blocking remains a repository setting rather than a workflow-YAML property.
+The repository currently has an active `Protect main` branch ruleset targeting
+`main`. It requires pull requests with resolved review threads and an up-to-date
+set of required checks: the four `Source checks` matrix jobs, `deployment-smoke`,
+and `installed-wheel`. The ruleset also blocks branch deletion and non-fast-forward
+updates and has no bypass actors. These settings live on GitHub and therefore must
+be reviewed there if repository administration changes.
 
 ### Cross-platform CI (current)
 
@@ -211,14 +215,15 @@ networked or long-running benchmark.
 
 The deployment-smoke runtime import boundary, local hermetic/full-asset test
 split, cross-platform source workflow, installed-wheel smoke, dispatch-only
-full-asset workflow, and focused standalone-tool regression coverage are
-implemented or configured. Hosted workflow results and the private full-asset
-environment remain release-evidence and repository-administration work; see the
-backlog. These layers remain the baseline for the Milestone 2 consistency audit.
+full-asset workflow, protected-`main` ruleset, and focused standalone-tool
+regression coverage are implemented or configured. Hosted workflow results and
+the private full-asset bundle remain release-evidence and repository-administration
+work; see the backlog. These layers remain the baseline for the Milestone 2
+consistency audit.
 
 Non-blocking CI follow-up remains in the backlog: validate checked-in snapshot
-notes routinely, configure repository rules/branch protection if required, and
-configure the `full-assets` environment with an authorized checksum-pinned bundle
-plus one successful manual run. Scheduled/manual acquisition, performance, or
-other extended workflows should be added only where they provide a useful
-independent signal.
+notes routinely, configure the `full-assets` environment secrets with an
+authorized checksum-pinned bundle and record one successful manual run, and
+retain release evidence for required hosted workflows. Scheduled/manual
+acquisition, performance, or other extended workflows should be added only where
+they provide a useful independent signal.

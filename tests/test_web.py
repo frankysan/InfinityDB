@@ -57,8 +57,9 @@ def request(
     try:
         body = b"".join(result)
     finally:
-        if hasattr(result, "close"):
-            result.close()
+        close = getattr(result, "close", None)
+        if close is not None:
+            close()
     return response["status"], response["headers"], body
 
 
@@ -155,7 +156,7 @@ def app(tmp_path: Path) -> Callable:
             }
         ],
     }
-    # Declared factions and canonical ownership deliberately differ from actual occurrences.
+    # Declared factions and source-origin context deliberately differ from actual occurrences.
     blue_only = {
         "id": 3,
         "name": "100%_Guard",
@@ -543,13 +544,13 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/traits"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
-    assert b'data-app-version="0.6.0"' in body
+    assert b'data-app-version="0.6.1"' in body
     assert b'data-snapshot-revision="' in body
-    assert b"/static/version-check.js?v=0.6.0" in body
+    assert b"/static/version-check.js?v=0.6.1" in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
-        assert asset.endswith("?v=0.6.0")
+        assert asset.endswith("?v=0.6.1")
         status, headers, body = request(app, asset)
         assert status == 200
         assert body
@@ -578,7 +579,7 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert status == 200
     assert headers["cache-control"] == "no-store"
     version = json.loads(body)
-    assert version["version"] == "0.6.0"
+    assert version["version"] == "0.6.1"
     assert len(version["snapshot_revision"]) == 64
     assert int(version["snapshot_revision"], 16) >= 0
 
@@ -772,8 +773,8 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     status, _, body = request(app, "/units")
 
     assert status == 200
-    assert b'<script type="module" src="/static/navigation.js?v=0.6.0"></script>' in body
-    assert b'<script type="module" src="/static/page-navigation.js?v=0.6.0"></script>' in body
+    assert b'<script type="module" src="/static/navigation.js?v=0.6.1"></script>' in body
+    assert b'<script type="module" src="/static/page-navigation.js?v=0.6.1"></script>' in body
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body
@@ -886,7 +887,7 @@ def test_army_symbol_is_served(app: Callable) -> None:
 
 
 def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -> None:
-    status, headers, _ = request(app, "/static/styles.css?v=0.6.0")
+    status, headers, _ = request(app, "/static/styles.css?v=0.6.1")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
 
@@ -901,7 +902,7 @@ def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> Non
     assert status == 200
     assert body
     etag = headers["etag"]
-    assert etag.startswith('"0.6.0-')
+    assert etag.startswith('"0.6.1-')
 
     status, conditional_headers, conditional_body = request(
         app,
@@ -932,6 +933,10 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
     shutil.copyfile(app.database.path, rebuilt_database)
     with sqlite3.connect(rebuilt_database) as connection:
         connection.execute("UPDATE units SET name = ? WHERE id = ?", ("Updated Ranger", 1))
+        connection.execute(
+            "UPDATE logical_units SET name = ? WHERE representative_unit_id = ?",
+            ("Updated Ranger", 1),
+        )
     rebuilt_app = create_app(rebuilt_database)
 
     rebuilt_status, rebuilt_headers, rebuilt_body = request(rebuilt_app, "/api/armies")
@@ -941,16 +946,16 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
-    status, headers, body = request(app, "/static/unit.js?v=0.6.0")
+    status, headers, body = request(app, "/static/unit.js?v=0.6.1")
 
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
-    assert b'from "./api.js?v=0.6.0"' in body
-    assert b'from "./preferences.js?v=0.6.0"' in body
+    assert b'from "./api.js?v=0.6.1"' in body
+    assert b'from "./preferences.js?v=0.6.1"' in body
 
-    status, _, body = request(app, "/static/api.js?v=0.6.0")
+    status, _, body = request(app, "/static/api.js?v=0.6.1")
     assert status == 200
-    assert b'import("./preferences.js?v=0.6.0")' in body
+    assert b'import("./preferences.js?v=0.6.1")' in body
     assert b'cache: "no-store"' in body
 
     status, headers, _ = request(app, "/api/armies")
@@ -1000,7 +1005,7 @@ def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> N
     assert b"const factionSlugs" not in body
     assert b"Math.floor(Number(armyId) / 100)" not in body
     assert b"const faction = army.faction;" in body
-    assert b"const mainFaction = unit.display_faction?.slug;" in body
+    assert b"const displayFaction = unit.display_faction?.slug;" in body
 
 
 def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:
@@ -1199,6 +1204,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     status, _, body = request(app, "/about")
     assert status == 200
     assert b"surface surface--highlighted about-callout" in body
+    assert b"surface about-principles" in body
     assert b"surface surface--subtle about-disclosure" in body
 
     assert_css_rule(

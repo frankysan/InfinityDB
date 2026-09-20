@@ -169,7 +169,7 @@ def main_army_id(
     canonical_faction_overrides: Mapping[int, int] | None = None,
     faction_parents: Mapping[int, int | None] | None = None,
 ) -> int | None:
-    """Resolve canonical ownership to an application main-army/group identity.
+    """Resolve source canonical-faction context to an application grouping identity.
 
     Explicit maintained overrides take precedence.  When Army metadata contains
     the canonical faction, its parent relationship is authoritative.  The old

@@ -4,12 +4,13 @@ import json
 import runpy
 import zipfile
 from datetime import datetime
+from http.client import HTTPMessage
 from pathlib import Path
 from urllib.error import HTTPError
 
 import pytest
 
-DOWNLOADER = runpy.run_path(Path("tools/download_army_json.py"))
+DOWNLOADER = runpy.run_path(str(Path("tools/download_army_json.py")))
 ApiDownloadError = DOWNLOADER["ApiDownloadError"]
 download_snapshot = DOWNLOADER["download_snapshot"]
 archive_snapshot = DOWNLOADER["archive_snapshot"]
@@ -124,7 +125,7 @@ def test_download_snapshot_rejects_bad_unit_response_without_overwriting_file(
 
 def test_download_snapshot_wraps_http_errors(tmp_path: Path) -> None:
     def opener(request, timeout):  # noqa: ANN001
-        raise HTTPError(request.full_url, 403, "Forbidden", {}, None)
+        raise HTTPError(request.full_url, 403, "Forbidden", HTTPMessage(), None)
 
     with pytest.raises(ApiDownloadError, match="Could not download"):
         download_snapshot(tmp_path, opener=opener)

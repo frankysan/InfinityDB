@@ -5,6 +5,7 @@ import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
@@ -318,7 +319,7 @@ def test_orchestrator_passes_pinned_snapshot_to_symbol_acquisition(
     expected_manifest = data_root / "manifests" / "snapshots" / manifest.name
     expected_manifest.parent.mkdir(parents=True)
     expected_manifest.write_bytes(manifest.read_bytes())
-    seen: dict[str, object] = {}
+    seen: dict[str, Any] = {}
     stub_post_acquisition(module, monkeypatch)
 
     discovery = SimpleNamespace(source_document_count=2)
@@ -381,7 +382,7 @@ def test_fetch_mode_pins_the_snapshot_returned_by_army_acquisition(
     archive, manifest = army_snapshot(tmp_path)
     data_root = tmp_path / "data"
     discovery = SimpleNamespace(source_document_count=2)
-    seen: dict[str, object] = {}
+    seen: dict[str, Any] = {}
     stub_post_acquisition(module, monkeypatch)
 
     def fake_army(destination, manifest_directory, **kwargs):

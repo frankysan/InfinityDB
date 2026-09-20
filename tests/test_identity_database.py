@@ -196,3 +196,126 @@ def test_repository_uses_identity_policy_pinned_into_database(tmp_path: Path) ->
     assert page["items"][0]["id"] == 1
     assert page["items"][0]["source_ids"] == [1, 2]
     assert page["items"][0]["army_ids"] == [101, 201]
+
+
+def test_application_army_materialization_resolves_reviewed_source_aliases(
+    tmp_path: Path,
+) -> None:
+    data = normalize_master(
+        {
+            "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
+            "armyMetadata": {
+                "sourceFile": "metadata.json",
+                "sourceSha256": "test-metadata",
+                "data": {
+                    "factions": [
+                        {
+                            "id": 998,
+                            "parent": 998,
+                            "name": "Source Alias",
+                            "slug": "source-alias",
+                        },
+                        {
+                            "id": 999,
+                            "parent": 999,
+                            "name": "Canonical Army",
+                            "slug": "canonical-army",
+                        },
+                    ]
+                },
+            },
+            "armyLists": {
+                "998": {
+                    "_meta": {"slug": "source-alias", "kind": "army"},
+                    "unitIds": [1],
+                },
+                "999": {
+                    "_meta": {"slug": "canonical-army", "kind": "army"},
+                    "unitIds": [1],
+                },
+            },
+            "units": {
+                "1": {
+                    "shared": {
+                        "id": 1,
+                        "name": "Alias Test Unit",
+                        "canonical": 999,
+                        "factions": [998, 999],
+                    },
+                    "byArmy": {"998": {}, "999": {}},
+                }
+            },
+        }
+    )
+    path = tmp_path / "infinity.db"
+
+    export_database(data, path)
+
+    with sqlite3.connect(path) as connection:
+        connection.row_factory = sqlite3.Row
+        armies = [
+            dict(row)
+            for row in connection.execute(
+                "SELECT id, name, slug, role, playable, group_id, preferred_source_id "
+                "FROM application_armies ORDER BY id"
+            )
+        ]
+        sources = [
+            dict(row)
+            for row in connection.execute(
+                "SELECT application_army_id, source_army_id, has_army_list, has_metadata "
+                "FROM application_army_sources ORDER BY source_army_id"
+            )
+        ]
+
+    assert armies == [
+        {
+            "id": 999,
+            "name": "Canonical Army",
+            "slug": "canonical-army",
+            "role": "main",
+            "playable": 1,
+            "group_id": None,
+            "preferred_source_id": 999,
+        }
+    ]
+    assert sources == [
+        {
+            "application_army_id": 999,
+            "source_army_id": 998,
+            "has_army_list": 1,
+            "has_metadata": 1,
+        },
+        {
+            "application_army_id": 999,
+            "source_army_id": 999,
+            "has_army_list": 1,
+            "has_metadata": 1,
+        },
+    ]
+
+    database = Database(path)
+    assert [army["id"] for army in database.list_armies()] == [999]
+    alias_page = database.list_units(army_id=998)
+    canonical_page = database.list_units(army_id=999)
+    assert alias_page == canonical_page
+    assert alias_page["total"] == 1
+    assert alias_page["items"][0]["army_ids"] == [999]
+    assert alias_page["items"][0]["armies"] == [{"id": 999, "name": "Canonical Army"}]
+
+
+def test_database_validation_rejects_tampered_application_army_materialization(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "infinity.db"
+    export_database(normalized_two_units(), path)
+
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            "UPDATE application_armies SET name = ? WHERE id = ?",
+            ("Tampered Army", 101),
+        )
+        connection.commit()
+
+    with pytest.raises(ValueError, match="materialized application Army identity"):
+        Database(path).validate()

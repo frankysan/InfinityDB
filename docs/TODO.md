@@ -118,14 +118,29 @@ stage-by-stage acceptance, rollback/reproducibility validation, and guarded
 local deployment packaging. Remaining pipeline items below are follow-up
 refactoring, coverage, and optimization work rather than Milestone 1 blockers.
 
-- [ ] **Milestone 2 — establish the canonical application model and advance
+- [ ] **Milestone 2A — complete the canonical runtime-data pass and release
+  0.6.1.**
+  Finish the current semantic audit/canonicalization pass across every Army-
+  database construct consumed by normal repository/API/web runtime paths. Each
+  consumed construct must be classified both by application role (canonical,
+  contextual, or intentionally retained source representation) and by semantic
+  provenance (source-native, source-derived, InfinityDB abstraction, or
+  presentation convenience); known canonical replacements must be used by the
+  corresponding read paths. Preserve
+  player-visible behavior through equivalence testing and record representative
+  before/after performance evidence. Any InfinityDB-specific abstraction touched
+  by the pass must document its source inputs, derivation, assumptions, and limits.
+  This interim release does not require unused
+  source structures, the physical `infinity.raw.db` split, or the full 1.0 completeness
+  inventory to be finished. The release gate is detailed below.
+
+- [ ] **Milestone 2B — continue the canonical application model and advance
   1.0 completeness.**
-  Begin with conservative semantic deduplication of data InfinityDB already
-  possesses. Use that work to distinguish canonical player-relevant facts,
-  contextual variation, relationships, provenance, redundant source
-  representation, and normalization-only structure. Then use the resulting
-  source-to-presentation inventory as groundwork for the broader web-app
-  consistency audit. The detailed checklist is maintained below.
+  After 0.6.1, continue semantic coverage beyond the currently consumed runtime
+  surface: broader relationship and catalog/metadata overlap, source-only data,
+  the `infinity.raw.db` separation, and the source-to-presentation completeness inventory.
+  Use that inventory as groundwork for the broader web-app consistency audit.
+  The detailed checklist is maintained below.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
@@ -166,20 +181,6 @@ consistency work unless one becomes necessary to unblock that work.
   so retaining `normalized.json` and `infinity.raw.db` duplicates the same
   lossless data. Decide whether post-export development workflows need both,
   or document one as a regenerable/transient artifact.
-- [ ] Prototype loadout payload templates, following the existing
-  `option_weapon_templates` design. In the current snapshot, 52,554
-  `option_weapons` links already share 490 payload templates; similarly,
-  12,993 loadout-option rows have only 3,045 distinct payloads when their
-  army/unit/group/option IDs and position are excluded. A template/link split
-  could reduce repeated `name`, points, SWC, mini, and disabled values, but
-  must be query-plan and database-size benchmarked before changing the
-  read-optimized schema. 2026-09-14 probe: isolating the table and its unit
-  index reduced 884,736 bytes to 819,200 bytes (64 KiB, 7.4%), while the
-  largest unit-detail loadout query (368 rows) retained indexed access but was
-  roughly 14% slower from the extra template primary-key lookup. The checked-in
-  `infinity.db` has 3,045 loadout rows whereas `normalized.json` has 12,993,
-  so regenerate aligned artifacts before treating this as a whole-database
-  decision.
 - [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
   list raw rows by normalized table, and verify that an archive matches its
   frontend sibling's metadata.
@@ -188,9 +189,6 @@ consistency work unless one becomes necessary to unblock that work.
   process stops between replacing either output.
 - [ ] Add database-size reporting to `infinity-db build` so snapshot growth is
   visible in build output and CI.
-- [ ] Decide whether dynamic, source-only columns should remain in the frontend
-  schema or move exclusively to the raw archive once no runtime query consumes
-  them.
 - [ ] Establish a migration policy for future persistent user-authored data;
   imported snapshots are intentionally replaced wholesale today.
 
@@ -206,50 +204,124 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-- [ ] **Establish the semantic-deduplication baseline.**
-  - [ ] Add a reproducible development audit that reports repeated profile and
-    loadout payloads without modifying the database.
-  - [ ] Define the exact payload components included in equality comparisons.
-  - [ ] Separate semantic fields from source identity, context, ordering, and
-    provenance fields explicitly rather than by undocumented exclusion.
-  - [ ] Record representative equality and difference cases as regression
-    fixtures/tests.
-  - [ ] Treat current snapshot counts as diagnostics, not expected constants.
+### Interim release gate: 0.6.1
 
-- [ ] **Canonicalize profile payloads conservatively.**
-  - [ ] Inventory every current profile field and nested relationship.
-  - [ ] Classify each as canonical fact, contextual fact/delta, relationship,
-    source/provenance, or normalization-only structure.
-  - [ ] Prove exact-equality groups before changing storage.
-  - [ ] Design canonical profile payload + source/context occurrence relations.
-  - [ ] Preserve genuine AVA, profile-group, army, and source differences
-    explicitly.
-  - [ ] Preserve characteristics, skills, equipment, weapons, extras, includes,
-    peripherals, and other gameplay-bearing nested information.
-  - [ ] Update repository/API assembly to consume the canonical model without
-    changing player-visible semantics unintentionally.
-  - [ ] Add reconstruction/provenance and behavioral regression tests.
+Version 0.6.1 is the delivery point for the performance and model-quality gains
+from the current canonicalization pass. It is ready when the **currently consumed
+Army-database runtime surface** has been semantically analyzed end to end. For
+this gate, "currently consumed" means data read during normal repository/API/web
+serving and the player-facing catalog helpers built on those queries; build-only,
+validation-only, provenance-only, and otherwise unused source structures do not
+block this interim release.
 
-- [ ] **Canonicalize loadout payloads conservatively.**
-  - [ ] Inventory every loadout field and nested relationship.
-  - [ ] Classify canonical facts versus contextual/source differences.
-  - [ ] Compare complete loadout meaning, including points, SWC, minis,
-    disabled state, skills, equipment, weapons, extras, orders,
-    characteristics, includes, and peripherals.
-  - [ ] Design canonical loadout payload + source/context occurrence relations.
-  - [ ] Preserve every genuine army/loadout variation explicitly.
-  - [ ] Update repository/API assembly and regression coverage.
-  - [ ] Measure database size and query behavior as secondary outcomes, without
-    using storage savings as the semantic acceptance criterion.
+- [x] Canonicalize profile and loadout payloads, migrate their unit-detail read
+  paths, prove output equivalence, and measure the resulting query/storage
+  behavior.
+- [x] Complete the logical-unit canonical payload/context layer, migrate unit
+  list/search/detail general fields and aliases to it, and prove output/search
+  equivalence.
+- [x] Inventory every Army-database table/field/relationship read by the current
+  runtime surfaces: armies, unit visibility/list/search/detail, availability and
+  faction context, filters, and the current skill/equipment/weapon/trait catalog
+  paths. After the catalog read migration, the compatibility-24 trace covers 25
+  serving probes, 49 tables, and 196 distinct table-field reads.
+- [x] Document semantic provenance for every non-source-native runtime concept
+  relied on or changed by the 0.6.1 pass, including logical/canonical payload
+  abstractions, army role/playability and `main_army_id`, display identity, and
+  the browser `General profile` abstraction. Keep source inputs, derivation,
+  assumptions/fallbacks, and semantic limits explicit.
+- [x] Resolve the open classifications from that runtime inventory.
+  - [x] Record every observed field as canonical application data, explicit
+    contextual application data, or intentional source representation; all
+    196 / 196 current field reads now have no open semantic issue. Army/faction
+    identity/hierarchy and skill/equipment/weapon catalog identity serve through
+    materialized application layers while source metadata with distinct context
+    remains separate.
+  - [x] Replace the 43 duplicate source reads across 16 profile/loadout/unit
+    source tables with their already-materialized canonical equivalents. Search
+    labels, unit skill/equipment/weapon filters, skill extras, and catalog reverse
+    lookups now use canonical logical-unit/profile/loadout data; top-level
+    `unit_options` remain contextual source data by design.
+  - [x] Audit the live army/faction boundary around `army_lists`,
+    `metadata_factions`, `army_units`, `unit_factions`, and source-specific
+    `units.canonical_faction_id`. The 2026-09-18 snapshot has 58 overlapping
+    Army-list/metadata identities with identical name/slug values, 57 canonical
+    application army identities after the 998 -> 999 alias, and a broader
+    63-identity faction registry. `army_units` remains list-local availability;
+    `unit_factions` is a distinct game-wide membership relation and contains 99
+    membership references not represented by current standard Army-list
+    occurrences.
+    - [x] Harden the Army/InfinityDB semantic boundary in current runtime code and
+      audits: treat representative faction/main/display copies on `logical_units`
+      as contextual/presentation values, name `unit_factions`-derived helpers as
+      declared-faction data, and count `/api/armies.unit_count` by distinct logical
+      units rather than source representations.
+    - [x] Design/materialize the canonical application army identity/hierarchy
+      layer explicitly as an InfinityDB abstraction: schema version 15 stores
+      canonical name/slug, role/playability/grouping, reviewed source-alias
+      mappings, preferred source provenance, and explicit reinforcement-parent
+      relationships while retaining both source projections unchanged.
+    - [x] Move normal Army/faction serving onto that canonical layer and prove
+      `/api/armies`, unit list/detail faction presentation, Army filtering, and
+      optional availability behavior remain equivalent. Runtime identity is checked
+      against both persisted application rows and their source-derived evidence.
+    - [x] Preserve `unit_factions` and the broader `factions` identity registry as
+      game-wide relationship/context data; neither is reduced to currently
+      selectable Army lists by the read migration.
+  - [x] Audit the live skill/equipment/weapon catalog boundary against
+    `metadata_skills`, `metadata_equipment`, and `metadata_weapons`; canonical
+    application identity now lives in `application_catalog_items` with explicit
+    source mappings, while source-specific labels and weapon/equipment metadata
+    profiles remain contextual and lossless.
+  - [x] Keep top-level `unit_options` and their nested catalog occurrences as
+    intentional source-context data for this pass; their dedicated semantic
+    audit remains Milestone 2B unless a current-runtime correctness issue is
+    found.
+- [x] Complete any relationship or catalog/metadata canonicalization that the
+  runtime inventory shows is still required for the current application. Broader
+  unused/source-only relationship and metadata work remains for Milestone 2B.
+- [x] Run representative before/after runtime benchmarks for the canonical pass
+  and record the result. Treat performance gains as release evidence, not as a
+  substitute for semantic correctness or losslessness.
+  - [x] Add a reproducible repository-read benchmark covering cold and warm Army,
+    unit list/search/detail, Skills/Equipment/Weapons catalog/detail, and Traits
+    paths against any supplied `infinity.db` snapshot, plus a deterministic
+    report-comparison tool for database-size and median/p95 deltas.
+  - [x] Run the benchmark on the same production-like snapshot and host before
+    and after the canonical pass. Against the 0.6.0 baseline, the geometric mean
+    of cold medians improved by 2.33%; Army listing improved by 43.94% and
+    Army-filtered unit listing by 11.68%. Cold p95 geometric mean was effectively
+    flat (+0.52%). The audited `infinity.db` grew from 13,557,760 to 18,108,416
+    bytes (+33.56%) because materialized application layers currently coexist
+    with retained source/context representations.
+- [ ] Complete the 0.6.1 release after the validated release-state commit is
+  tagged and deployed.
+  - [x] Run the local full acceptance command with the production-like Army
+    snapshot and required published assets; retain the timestamped check report.
+  - [x] Confirm the hosted `Source checks`, `Installed wheel smoke`, and
+    `Deployment smoke test` are green before the release-state version bump.
+  - [x] Review the 0.6.1 upgrade boundary: schema 16 / compatibility revision 24
+    requires rebuilding generated Army databases; no in-place migration is
+    supported.
+  - [x] Bump the package/release version, convert the accumulated release notes
+    into the dated 0.6.1 section, and update the README current-release marker.
+  - [ ] Re-run local/hosted checks on the release-state commit, create tag
+    `v0.6.1`, deploy it, and verify the deployed update path.
 
-- [ ] **Extend canonicalization to logical-unit payloads.**
-  - [ ] Audit fields across every existing `logical_unit` for invariance.
-  - [ ] Promote only facts proven invariant or governed by an explicit reviewed
-    semantic rule.
-  - [ ] Keep army membership, availability, source variants, and genuine
-    profile/loadout differences as explicit context.
-  - [ ] Preserve source IDs and full traceability from canonical facts back to
-    supporting source occurrences.
+The eventual physical separation of source-only tables into `infinity.raw.db`,
+the complete inventory of unused player-relevant source data, and 1.0 web/rules
+completeness explicitly remain post-0.6.1 work unless the runtime audit exposes
+one of them as necessary for correctness.
+
+Profile/loadout/logical-unit canonicalization groundwork is complete: semantic
+classification, canonical materialization, current unit list/search/detail read
+paths, provenance/context retention, equivalence checks, and the profile/loadout
+secondary storage/query measurements are implemented. The production logical-unit
+layer contains 737 canonical rows / 920 source links and preserves 473
+source-attributed alias occurrences representing 468 distinct logical-unit search
+values, including the derived fallback name for the one unnamed non-representative
+source row. Durable contracts and evidence are recorded in `docs/data-model.md`;
+completed implementation checklists have been removed from this active backlog.
 
 - [ ] **Audit relationships after entity canonicalization.**
   - [ ] Revisit includes and peripherals and distinguish visible endpoint data
@@ -261,19 +333,38 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
   - [ ] Record any distinct player-relevant relationship not currently
     presentable by the application as a 1.0 completeness gap.
 
-- [ ] **Audit catalog and metadata overlap.**
-  - [ ] Compare Army catalogs, occurrence data, and `metadata_*` collections by
-    semantic concept rather than table identity.
-  - [ ] Preserve genuinely distinct weapon modes, profile variants, source
-    metadata, and gameplay contexts.
-  - [ ] Identify player-relevant metadata currently stored but not represented
-    through the application.
+- [ ] **Separate lossless source storage from the application database after
+  canonicalization.**
+  This milestone refers to the existing `infinity.raw.db`; no additional
+  lossless database artifact is planned.
+  - [ ] Treat `infinity.raw.db` as the complete lossless normalized Army source/
+    provenance store, including source-local identities, source ordering,
+    raw fallbacks, and acquisition/audit metadata required to reconstruct
+    the imported source.
+  - [ ] Inventory every remaining `infinity.db` table and repository/API query and
+    classify it as canonical application data, explicit contextual application
+    data, or source/provenance-only data.
+  - [ ] Move source/provenance-only normalized tables out of `infinity.db` only
+    after canonical unit/profile/loadout/relationship/catalog replacements are
+    proven complete and reconstruction/provenance tests cover the transition.
+  - [ ] Make normal repository/API/web serving independent of `infinity.raw.db`;
+    production runtime should require the self-contained canonical `infinity.db`
+    plus the existing rules database/assets, while `infinity.raw.db` remains
+    a build/audit artifact.
+  - [ ] Preserve traceability from every canonical fact and contextual occurrence
+    back to supporting raw/source records after the physical database split.
+  - [ ] Document the rebuild/migration boundary and verify that removing the
+    duplicated source representation reduces physical application-database size
+    without using storage savings as the semantic acceptance criterion.
 
 - [ ] **Maintain a source-to-presentation completeness inventory while
   canonicalizing.**
   - [ ] Trace relevant original Army JSON constructs through normalization,
     canonical application meaning, repository/API representation, and web
     presentation.
+  - [ ] Record the semantic-provenance category and canonical documentation
+    location for every source-derived fact, InfinityDB abstraction, and
+    presentation convenience encountered by the inventory.
   - [ ] Classify each construct as explicitly presented, implicitly represented,
     operationally consumed, redundant source representation,
     normalization-only structure, or unrepresented player information.
@@ -424,7 +515,8 @@ new correctness or reproducibility defect.
   - [x] Make the normal Ruff stage cover the complete maintained `tools/` tree
     rather than a hand-maintained script allow-list.
   - [x] Add Pyright as a normal `run_checks.py` type stage over maintained
-    `src/` and `tools/` code so editor-visible type regressions fail required CI.
+    `src/`, `tools/`, and `tests/` code so editor-visible type regressions fail
+    required CI, and configure VS Code for workspace-wide diagnostics.
   - [x] Install the real `symbols` Python dependency set in required source CI and
     exercise fontTools, tinycss2/cssselect2, and Pillow with synthetic fixtures.
   - [x] Add focused regression tests for standalone tools, allowing conditional
@@ -435,9 +527,11 @@ new correctness or reproducibility defect.
   - [x] Add clean-checkout Linux source CI that drives the normal check runner in
     hermetic asset mode, using the tracked synthetic Army fixture for the Army
     database build and the tracked curated collections for `rules.db`.
-  - [ ] Configure GitHub repository rules/branch protection to require the
-    `Source checks` result for protected merges when branch protection is enabled;
-    workflow YAML alone does not enforce merge blocking.
+  - [x] Protect `main` with the active `Protect main` repository ruleset:
+    require pull requests, resolved review threads, an up-to-date required-check
+    set (four `Source checks` matrix jobs plus `deployment-smoke` and
+    `installed-wheel`), block deletion/non-fast-forward updates, and allow no
+    bypass actors.
   - [ ] Establish and retain release evidence for the configured GitHub Actions
     workflows. Before claiming a release has passed hosted CI, record successful
     `Source checks`, `Installed wheel smoke`, and `Deployment smoke test` runs
@@ -457,9 +551,9 @@ new correctness or reproducibility defect.
     - [x] Add safe private-bundle staging with HTTPS-only download, digest/size
       checks, traversal/symlink/case-collision guards, and published-contract
       validation before replacing ignored local assets.
-    - [ ] Configure the repository `full-assets` environment with an authorized
-      `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256`, then record one
-      successful manual run.
+    - [ ] Add authorized `FULL_ASSET_BUNDLE_URL` and
+      `FULL_ASSET_BUNDLE_SHA256` secrets to the existing repository
+      `full-assets` environment, then record one successful manual run.
   - [ ] Keep live Army/wiki/symbol acquisition and expensive performance/capacity
     checks explicit, manual, or scheduled rather than dependencies of required
     source CI.
@@ -488,9 +582,10 @@ new correctness or reproducibility defect.
     document (for example, `docs/audits/web-consistency-YYYY-MM.md`); do not mix
     production observations with synthetic test fixtures.
   - [ ] Create and maintain an explicit audit matrix for each concept, recording
-    its source meaning, storage representation, canonical/application
-    interpretation, API representation, browser consumers, existing coverage,
-    and audit result. Cover logical/source unit identity; army hierarchy, role,
+    its semantic-provenance category, source meaning/evidence, storage
+    representation, derivation or canonical/application interpretation, API
+    representation, browser consumers, canonical documentation location, existing
+    coverage, and audit result. Cover logical/source unit identity; army hierarchy, role,
     and playability; faction/display identity; optional availability;
     names/slugs; profiles and loadouts; catalog/rules enrichment; distance/range
     semantics; symbols; source/wiki/rules provenance;
@@ -639,6 +734,12 @@ new correctness or reproducibility defect.
     regression screenshots at compact and desktop widths once the theme tokens
     stabilize.
 
+- [ ] Add a project favicon derived from `infinitydb-logo.svg`.
+  - [ ] Generate browser-appropriate favicon assets from the SVG source and wire
+    them into the shared page shell / site metadata.
+  - [ ] Keep the favicon legible in both light and dark browser chrome where
+    practical.
+
 - [ ] Refactor the frontend design-system structure after the principles and
   theme contract are agreed.
   - [ ] Review the current monolithic `styles.css` and separate foundational tokens,
@@ -683,6 +784,13 @@ new correctness or reproducibility defect.
   
 ## Potential product features
 
+- [ ] Make domain-unique slugs the public identifiers for API lookup and web
+  routes, so normal user-facing URLs and navigation do not depend on database ID
+  numbers. Define uniqueness/stability rules within each public domain (armies,
+  units, catalogs, rules/traits as applicable), allow API resources to be
+  addressed by slug, and treat underlying numeric database IDs as an
+  implementation detail exposed only through developer-oriented diagnostics or
+  explicit compatibility paths during migration.
 - [ ] Expand the existing versioned curated rules-reference infrastructure with
   substantially broader N5 v5.3 coverage from
   `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10).
@@ -768,6 +876,11 @@ new correctness or reproducibility defect.
   - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
     changes how profile data should be read.
+- [ ] Improve General profile versus Army-profile stat-difference signposting.
+  - [ ] Keep the existing indicator on an Army-profile stat when it differs from
+    the General profile.
+  - [ ] Also mark the General profile stat with a small superscript `*` and a
+    descriptive tooltip whenever one or more Army profiles differ from it.
 - [ ] Build a rule-aware Fireteams feature covering both unit eligibility and
   army Fireteam list/detail views.
   - [ ] The imported schema already retains `fireteams`, types, members, and
