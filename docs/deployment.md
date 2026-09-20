@@ -78,6 +78,15 @@ This creates a separate `infinitydb-test` Compose project, binds Caddy only to
 rebuilding them, and disables production image pruning. Pass another port as the
 first argument when needed. From another machine, use an SSH tunnel such as
 `ssh -L 8080:127.0.0.1:8080 <server>` and browse to `http://localhost:8080`.
+Stop only this isolated stack with:
+
+```sh
+sh ./scripts/stop-local-test.sh
+```
+
+The stop helper always targets the `infinitydb-test` Compose project and leaves its
+named volumes intact for the next test run. It does not target the production Compose
+project or run the production image-pruning policy.
 
 
 ## Local graphical symbols
@@ -197,6 +206,8 @@ sh ./scripts/install-or-update.sh
 sh ./scripts/deploy-transferred.sh
 # Isolated loopback-only test stack (default port 8080):
 sh ./scripts/deploy-local-test.sh
+# Stop only the isolated test stack:
+sh ./scripts/stop-local-test.sh
 ```
 
 To update Army data, download or place the new raw snapshot and its required

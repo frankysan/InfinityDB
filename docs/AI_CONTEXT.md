@@ -747,6 +747,8 @@ application-level identities.
   `send_deployment_artifacts.py`; it must preserve that transferred database/symbol
   pairing. `deploy-local-test.sh` reuses the no-rebuild path under a separate Compose
   project, binds only to `127.0.0.1`, and disables production image pruning.
+  `stop-local-test.sh` is the matching teardown path: it always targets only the
+  `infinitydb-test` Compose project and retains its named volumes by default.
 
 - 2026-09-20: Containerized deployments preserve the checkout-derived browser display
   version explicitly instead of copying Git metadata into the image. `deploy.sh`

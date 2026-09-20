@@ -32,6 +32,14 @@ def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     assert "sh ./scripts/deploy-transferred.sh" in script
 
 
+def test_stop_local_test_targets_only_isolated_compose_project() -> None:
+    script = _read("scripts/stop-local-test.sh")
+    assert "COMPOSE_PROJECT_NAME=infinitydb-test docker compose down" in script
+    assert "docker compose down -v" not in script
+    assert "prune-app-images" not in script
+    assert "Production deployment was not targeted." in script
+
+
 def test_low_level_deploy_can_disable_image_pruning() -> None:
     script = _read("scripts/deploy.sh")
     assert ': "${PRUNE_APP_IMAGES:=1}"' in script

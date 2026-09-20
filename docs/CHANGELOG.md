@@ -9,8 +9,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 - Separate server-rebuild and transferred-artifact deployment paths so a validated
   database/symbol set cannot be accidentally replaced during deployment, and add an
-  isolated loopback-only test deployment that cannot expose its Caddy port to the LAN
-  or prune production rollback images.
+  isolated loopback-only test deployment with an explicit teardown command that cannot
+  expose its Caddy port to the LAN, target production, or prune production rollback images.
 
 ### Fixed
 
