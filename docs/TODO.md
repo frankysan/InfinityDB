@@ -118,14 +118,25 @@ stage-by-stage acceptance, rollback/reproducibility validation, and guarded
 local deployment packaging. Remaining pipeline items below are follow-up
 refactoring, coverage, and optimization work rather than Milestone 1 blockers.
 
-- [ ] **Milestone 2 — establish the canonical application model and advance
+- [ ] **Milestone 2A — complete the canonical runtime-data pass and release
+  0.6.1.**
+  Finish the current semantic audit/canonicalization pass across every Army-
+  database construct consumed by normal repository/API/web runtime paths. Each
+  consumed construct must be classified as canonical application data, explicit
+  contextual data, or intentionally retained source representation; known
+  canonical replacements must be used by the corresponding read paths. Preserve
+  player-visible behavior through equivalence testing and record representative
+  before/after performance evidence. This interim release does not require unused
+  source structures, the physical `raw.db` split, or the full 1.0 completeness
+  inventory to be finished. The release gate is detailed below.
+
+- [ ] **Milestone 2B — continue the canonical application model and advance
   1.0 completeness.**
-  Conservative semantic deduplication is underway. Canonical profile and loadout
-  payloads and their unit-detail read paths are complete; the next active
-  entity-level step is the logical-unit payload audit, followed by relationship
-  and catalog/metadata overlap. Use the resulting source-to-presentation
-  inventory as groundwork for the broader web-app consistency audit. The
-  detailed checklist is maintained below.
+  After 0.6.1, continue semantic coverage beyond the currently consumed runtime
+  surface: broader relationship and catalog/metadata overlap, source-only data,
+  the `raw.db` separation, and the source-to-presentation completeness inventory.
+  Use that inventory as groundwork for the broader web-app consistency audit.
+  The detailed checklist is maintained below.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
@@ -188,6 +199,45 @@ helps distinguish distinct player-relevant facts from repeated source
 representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
+
+### Interim release gate: 0.6.1
+
+Version 0.6.1 is the delivery point for the performance and model-quality gains
+from the current canonicalization pass. It is ready when the **currently consumed
+Army-database runtime surface** has been semantically analyzed end to end. For
+this gate, "currently consumed" means data read during normal repository/API/web
+serving and the player-facing catalog helpers built on those queries; build-only,
+validation-only, provenance-only, and otherwise unused source structures do not
+block this interim release.
+
+- [x] Canonicalize profile and loadout payloads, migrate their unit-detail read
+  paths, prove output equivalence, and measure the resulting query/storage
+  behavior.
+- [ ] Complete the logical-unit canonical payload/context layer, migrate unit
+  list/search/detail general fields and aliases to it, and prove output/search
+  equivalence.
+- [ ] Inventory every Army-database table/field/relationship read by the current
+  runtime surfaces: armies, unit visibility/list/search/detail, availability and
+  faction context, filters, and the current skill/equipment/weapon/trait catalog
+  paths.
+- [ ] For every construct in that runtime inventory, record whether it is
+  canonical application data, explicit contextual application data, or an
+  intentional source representation; resolve any remaining ambiguous duplicate
+  meaning that affects current application reads.
+- [ ] Complete any relationship or catalog/metadata canonicalization that the
+  runtime inventory shows is still required for the current application. Broader
+  unused/source-only relationship and metadata work may remain for Milestone 2B.
+- [ ] Run representative before/after runtime benchmarks for the canonical pass
+  and record the result. Treat performance gains as release evidence, not as a
+  substitute for semantic correctness or losslessness.
+- [ ] Run the complete local/CI/rebuild acceptance set, review `Unreleased` as a
+  coherent 0.6.1 release note, document required database rebuild/upgrade steps,
+  and cut version 0.6.1.
+
+The eventual physical separation of source-only tables into `infinity.raw.db`,
+the complete inventory of unused player-relevant source data, and 1.0 web/rules
+completeness explicitly remain post-0.6.1 work unless the runtime audit exposes
+one of them as necessary for correctness.
 
 Profile/loadout groundwork is complete: the semantic-deduplication baseline,
 field classification, canonical payload materialization, unit-detail read-path
