@@ -332,10 +332,21 @@ completed implementation checklists have been removed from this active backlog.
     canonical-parent attachment stability, and unresolved global-option peripheral
     references. Do not infer controller eligibility from Army source data; any rules-derived
     eligibility must enter through reviewed `data/curated/` data.
-  - [ ] Revisit includes and peripherals and distinguish visible endpoint data
-    from the independently meaningful relationship between those endpoints. Use the
-    dedicated peripheral audit before choosing canonical peripheral identity, availability,
-    attachment, or controller-eligibility structures.
+  - [ ] Revisit includes and distinguish visible endpoint data from the independently
+    meaningful relationship between those endpoints; use the clean target-resolution audit
+    as evidence before materializing canonical include relationships.
+  - [ ] Complete the Peripheral rules/identity work described in
+    `docs/peripheral-curated-data-design.md`.
+    - [ ] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
+      Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; do not
+      create a parallel Peripheral rules loader/database.
+    - [ ] Run and review the dedicated Army Peripheral semantics audit on the current
+      generated database before accepting any canonical Peripheral entity/profile mapping.
+    - [ ] Design a separate reviewed source-to-Peripheral identity/mapping contract; do not
+      overload the current display-identity contract or write Wiki/rules knowledge into Army
+      source tables.
+    - [ ] Materialize curated-derived controller-eligibility and cross-army Peripheral
+      relationships only after the source mapping and rules vocabulary are both validated.
   - [ ] Audit relation/dependency structures.
   - [ ] Audit Fireteam structures.
   - [ ] Identify normalization-only link structures that do not constitute
