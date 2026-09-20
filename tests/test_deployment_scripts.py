@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -38,3 +37,19 @@ def test_low_level_deploy_can_disable_image_pruning() -> None:
     assert ': "${PRUNE_APP_IMAGES:=1}"' in script
     assert '[ "$PRUNE_APP_IMAGES" = "1" ]' in script
     assert "Application image pruning skipped for this deployment." in script
+
+
+def test_deploy_bakes_display_version_into_container_image() -> None:
+    script = _read("scripts/deploy.sh")
+    dockerfile = _read("Dockerfile")
+    verifier = _read("scripts/verify-container-image.sh")
+
+    assert "infinity_db.__display_version__" in script
+    assert (
+        'docker compose build --build-arg "INFINITY_DB_DISPLAY_VERSION=$display_version" app'
+        in script
+    )
+    assert 'ARG INFINITY_DB_DISPLAY_VERSION=""' in dockerfile
+    assert "INFINITY_DB_DISPLAY_VERSION=${INFINITY_DB_DISPLAY_VERSION}" in dockerfile
+    assert 'os.environ.get("INFINITY_DB_DISPLAY_VERSION", "").strip()' in verifier
+    assert "Browser footer does not show built display version" in verifier

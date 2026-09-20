@@ -1,5 +1,6 @@
 """Tools for importing and normalizing Infinity Army JSON data."""
 
+from os import environ
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, TimeoutExpired, run
 
@@ -50,6 +51,9 @@ def _source_checkout_has_unreleased_changes() -> bool:
 
 
 def _display_version() -> str:
+    configured = environ.get("INFINITY_DB_DISPLAY_VERSION", "").strip()
+    if configured:
+        return configured
     return f"{__version__}+dev" if _source_checkout_has_unreleased_changes() else __version__
 
 

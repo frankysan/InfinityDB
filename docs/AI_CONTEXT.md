@@ -747,3 +747,10 @@ application-level identities.
   `send_deployment_artifacts.py`; it must preserve that transferred database/symbol
   pairing. `deploy-local-test.sh` reuses the no-rebuild path under a separate Compose
   project, binds only to `127.0.0.1`, and disables production image pruning.
+
+- 2026-09-20: Containerized deployments preserve the checkout-derived browser display
+  version explicitly instead of copying Git metadata into the image. `deploy.sh`
+  computes `__display_version__` in the source checkout and passes it into the Docker
+  build as `INFINITY_DB_DISPLAY_VERSION`; installed/containerized code prefers that
+  value when rendering the browser footer. The package/API `__version__` remains the
+  released semantic version and is not changed by this deployment metadata.

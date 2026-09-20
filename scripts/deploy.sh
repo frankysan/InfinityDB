@@ -47,8 +47,9 @@ fi
 echo "Validating manifest-bound published symbol set..."
 "$python" tools/verify_deployment_assets.py
 
-echo "Building application image infinity-db:$IMAGE_TAG..."
-docker compose build app
+display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"
+echo "Building application image infinity-db:$IMAGE_TAG (display $display_version)..."
+docker compose build --build-arg "INFINITY_DB_DISPLAY_VERSION=$display_version" app
 
 # Verify the exact image that Compose will deploy. The published-assets mode
 # checks that the locally validated symbol publication survived Docker/package
