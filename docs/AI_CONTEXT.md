@@ -33,6 +33,23 @@ marked **Design direction**. The decision log may record an accepted decision
 before implementation, but the current sections and `TODO.md` remain
 responsible for implementation status.
 
+## Semantic provenance rule
+
+Army source material is army/list-local; InfinityDB combines those contexts into
+a game-wide model. Never silently promote a representative Army occurrence into
+a global fact. Distinguish source-native facts, source-derived facts, InfinityDB
+abstractions, and presentation conveniences as defined in `docs/architecture.md`;
+`docs/data-model.md` owns their concrete data semantics.
+
+`logical_unit` and the browser's `General profile` are InfinityDB abstractions,
+not upstream Army objects. `General profile` is currently synthesized in the
+browser from enabled source-backed profile/loadout contexts. `main_army_id` is a
+source-derived grouping/application field, while `display_army_id` /
+`display_faction` are presentation conveniences. None of those fields may by
+itself establish game-wide ownership, army membership, availability, playability,
+or canonical equality. Any new or changed InfinityDB abstraction must document
+its source inputs, derivation, assumptions/fallbacks, and limits.
+
 ## Purpose and subsystem boundaries
 
 InfinityDB builds validated local reference databases from Infinity source data
@@ -111,9 +128,10 @@ and serves a read-only browser and same-origin HTTP API.
 - Valid Army API `metadata.json` is required for database creation. It enriches
   catalogs, names, and faction hierarchy but must not create army membership or
   alter source-derived availability.
-- Army-list occurrences are authoritative for unit membership and availability.
-  List presence, grouping, list kind, canonical ownership, optional availability
-  category, and playability are separate semantics.
+- Army-list occurrences are authoritative for concrete list membership and
+  availability. List presence, grouping, list kind, source canonical/origin
+  context, broader declared faction membership, optional availability category,
+  and playability are separate semantics.
 - The identity configuration does not map canonical-faction source ID `1` to
   `901` as ownership. Normalization preserves ID `1` as mercenary source/origin
   provenance and explicitly leaves `main_army_id` unset for canonical-1 units;
@@ -143,7 +161,8 @@ and serves a read-only browser and same-origin HTTP API.
   metadata has `901.parent = 900`; playability must not be inferred from source-list
   existence or roster presence. InfinityDB intentionally has no separate 901
   roster-query surface: preserve that roster as source provenance and consume unit
-  availability through the playable child NA2 lists.
+  availability through the playable child NA2 lists. This endpoint policy does
+  not remove 901 or its relationships from the game-wide model.
 - The analyzed snapshot gives source list 901 one standard unit (Rumbler
   Spec-Ops) plus the complete 49-variant optional-mercenary pool. Child NA2 lists
   have their own standard rosters plus subsets of that pool.
@@ -159,7 +178,8 @@ and serves a read-only browser and same-origin HTTP API.
   to derive unit `main_army_id`. Explicit maintained canonical-faction overrides
   take precedence; the old `xx01` calculation is retained only for standalone or
   legacy normalization inputs without a usable metadata row for that canonical
-  faction.
+  faction. `main_army_id` is derived grouping/application context, not an
+  authoritative game-wide ownership or membership relation.
 - The backend/API exposes explicit army role/playability semantics derived from
   metadata parent relationships and ordinary-list `reinforcements` links.
   `/api/armies` distinguishes main armies, sectorials, Non-Aligned forces,
@@ -228,7 +248,9 @@ and serves a read-only browser and same-origin HTTP API.
   preserved while its canonical/presentation treatment remains unresolved.
   Schema version 14 materializes representative-backed `name`, `isc`,
   `isc_abbr`, `slug`, `canonical_faction_id`, `main_army_id`, and
-  `display_army_id` on the canonical logical-unit row. Every source mapping stays
+  `display_army_id` on the application-owned logical-unit row. The three faction/
+  army fields retain contextual/derived/presentation semantics; their placement
+  does not make them canonical game-wide relationships. Every source mapping stays
   explicit; non-representative differing labels are source-attributed aliases;
   every non-empty source note remains source-attributed context; and `spectables`
   is preserved as exact opaque source context rather than promoted from

@@ -122,11 +122,15 @@ refactoring, coverage, and optimization work rather than Milestone 1 blockers.
   0.6.1.**
   Finish the current semantic audit/canonicalization pass across every Army-
   database construct consumed by normal repository/API/web runtime paths. Each
-  consumed construct must be classified as canonical application data, explicit
-  contextual data, or intentionally retained source representation; known
-  canonical replacements must be used by the corresponding read paths. Preserve
+  consumed construct must be classified both by application role (canonical,
+  contextual, or intentionally retained source representation) and by semantic
+  provenance (source-native, source-derived, InfinityDB abstraction, or
+  presentation convenience); known canonical replacements must be used by the
+  corresponding read paths. Preserve
   player-visible behavior through equivalence testing and record representative
-  before/after performance evidence. This interim release does not require unused
+  before/after performance evidence. Any InfinityDB-specific abstraction touched
+  by the pass must document its source inputs, derivation, assumptions, and limits.
+  This interim release does not require unused
   source structures, the physical `infinity.raw.db` split, or the full 1.0 completeness
   inventory to be finished. The release gate is detailed below.
 
@@ -221,6 +225,11 @@ block this interim release.
   faction context, filters, and the current skill/equipment/weapon/trait catalog
   paths. The compatibility-22 production trace covers 25 serving probes, 47
   tables, and 187 distinct table-field reads.
+- [ ] Document semantic provenance for every non-source-native runtime concept
+  relied on or changed by the 0.6.1 pass, including logical/canonical payload
+  abstractions, army role/playability and `main_army_id`, display identity, and
+  the browser `General profile` abstraction. Keep source inputs, derivation,
+  assumptions/fallbacks, and semantic limits explicit.
 - [ ] Resolve the open classifications from that runtime inventory.
   - [x] Record every observed field as canonical application data, explicit
     contextual application data, or intentional source representation; 152 / 187
@@ -243,9 +252,10 @@ block this interim release.
     membership references not represented by current standard Army-list
     occurrences.
     - [ ] Design/materialize the canonical application army identity/hierarchy
-      layer: canonical name/slug, role/playability/grouping, reviewed source
-      aliases, and explicit reinforcement relationships. Preserve both source
-      projections and provenance.
+      layer explicitly as an InfinityDB abstraction: canonical name/slug,
+      role/playability/grouping, reviewed source aliases, and explicit
+      reinforcement relationships. Preserve both source projections and
+      provenance and document which inputs are source-native versus derived.
     - [ ] Move normal Army/faction serving onto that canonical layer and prove
       `/api/armies`, unit list/detail faction presentation, Army filtering, and
       optional availability behavior remain equivalent.
@@ -331,6 +341,9 @@ completed implementation checklists have been removed from this active backlog.
   - [ ] Trace relevant original Army JSON constructs through normalization,
     canonical application meaning, repository/API representation, and web
     presentation.
+  - [ ] Record the semantic-provenance category and canonical documentation
+    location for every source-derived fact, InfinityDB abstraction, and
+    presentation convenience encountered by the inventory.
   - [ ] Classify each construct as explicitly presented, implicitly represented,
     operationally consumed, redundant source representation,
     normalization-only structure, or unrepresented player information.
@@ -548,9 +561,10 @@ new correctness or reproducibility defect.
     document (for example, `docs/audits/web-consistency-YYYY-MM.md`); do not mix
     production observations with synthetic test fixtures.
   - [ ] Create and maintain an explicit audit matrix for each concept, recording
-    its source meaning, storage representation, canonical/application
-    interpretation, API representation, browser consumers, existing coverage,
-    and audit result. Cover logical/source unit identity; army hierarchy, role,
+    its semantic-provenance category, source meaning/evidence, storage
+    representation, derivation or canonical/application interpretation, API
+    representation, browser consumers, canonical documentation location, existing
+    coverage, and audit result. Cover logical/source unit identity; army hierarchy, role,
     and playability; faction/display identity; optional availability;
     names/slugs; profiles and loadouts; catalog/rules enrichment; distance/range
     semantics; symbols; source/wiki/rules provenance;

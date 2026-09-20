@@ -1,9 +1,11 @@
 # InfinityDB
 
 InfinityDB builds a local SQLite database from Corvus Belli Infinity Army data
-and provides a browser for exploring it. It retains the existing merge and
-normalization pipeline, validates the imported data, and adds a read-only web
-interface and API on top of the resulting database.
+and provides a browser for exploring it. Infinity Army exposes data in individual
+army/list contexts; InfinityDB combines those contexts into a game-wide reference
+while preserving the source relationships and provenance behind them. It retains
+the existing merge and normalization pipeline, validates the imported data, and
+adds a read-only web interface and API on top of the resulting database.
 
 Current release: **0.6.0** (2026-09-19).
 
@@ -32,10 +34,12 @@ Current release: **0.6.0** (2026-09-19).
   weapon. Clicking a catalog row opens that unit's details.
 - Filters optional availability categories, including mercenaries, Spec-Ops,
   Team Operations, and reinforcements.
-- Shows a unit's general profile plus faction- and army-specific profiles,
-  loadouts, availability (including reinforcement profiles), skills, equipment,
-  and weapons. Army-specific tables are collapsible, with the first standard
-  army open initially.
+- Shows an InfinityDB-derived **General profile** summary across the currently
+  enabled army occurrences, plus faction- and army-specific profiles, loadouts,
+  availability (including reinforcement profiles), skills, equipment, and weapons.
+  "General profile" is an InfinityDB interpretation of source-backed profile data, not an
+  upstream Army object. Army-specific tables are collapsible, with the first
+  standard army open initially.
 - Matches reinforcement-only records to their corresponding standard unit when
   their source labels use equivalent wording, accents, or spelling variants.
 - Provides a Settings menu with a persistent centimetre/inch display preference
@@ -49,8 +53,8 @@ Current release: **0.6.0** (2026-09-19).
   values are defined as CSS design tokens, so new screens can reuse the same
   surfaces, controls, spacing, typography, focus treatment, and responsive
   behavior.
-- Accents unit-list and general-profile surfaces with the unit's main-army
-  colors while retaining the shared design-system contrast and spacing rules.
+- Accents unit-list and general-profile surfaces with colors from the unit's derived
+  display faction while retaining the shared design-system contrast and spacing rules.
 - Includes a Skill Modifiers page for browsing distance-related skill extras
   and the units that use them.
 - Includes searchable Skills, Equipment, Weapons, and Traits reference
@@ -277,11 +281,13 @@ When no input source is supplied, `infinity-db build` imports the newest ZIP in
 database build requires `metadata.json`: keep it beside the source directory or
 ZIP, include one copy in the ZIP, or supply `--metadata PATH`. It supplies
 official faction names, faction-parent relationships, and the ammunition,
-weapon, skill, equipment, and rules catalogs. Current builds use those parent relationships to derive unit `main_army_id`;
-Army-list JSON remains authoritative for unit availability. Presentation identity
+weapon, skill, equipment, and rules catalogs. Current builds use those parent
+relationships to derive unit `main_army_id`; Army-list JSON remains authoritative
+for unit availability. Presentation identity
 is separate: reviewed source-derived mappings under `data/curated/identities/`
 derive `display_army_id`, which the UI uses for the representative army symbol
-and faction styling without changing ownership or playability.
+and faction styling without changing source membership, availability, or
+playability.
 
 Reference PDFs and local wiki snapshots are developer and agent research inputs
 only. They are never read by the application or the Army build. Curate concise,

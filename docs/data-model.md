@@ -17,6 +17,31 @@ raw Army JSON
     -> read-only repository / HTTP API / web UI
 ```
 
+## Semantic provenance
+
+`docs/architecture.md` defines four provenance categories that must remain
+visible in this model: source-native facts, source-derived facts, InfinityDB
+abstractions, and presentation conveniences. Provenance answers **where a
+concept comes from**. It is independent of the canonicalization classification
+below, which answers **how a fact behaves in the application model**.
+
+Current examples are:
+
+- source-native: source unit/profile/loadout records, Army-list occurrences,
+  declared `factions`, metadata faction-parent relationships, and ordinary-list
+  `reinforcements` links;
+- source-derived: `army_lists.kind`, `units.source_role`,
+  `army_units.availability_kind`, `main_army_id`, and backend army
+  role/playability;
+- InfinityDB abstractions: materialized logical units, canonical application
+  payloads, and the browser's `General profile` summary; and
+- presentation conveniences: `display_army_id` and `display_faction`.
+
+A non-source-native concept must document its source inputs, derivation,
+assumptions/fallbacks, and semantic limits. A singular representative field must
+not replace a many-context relationship set unless the audit has independently
+proved that the singular value is the correct game-wide fact.
+
 ## Identities
 
 - `unit.id` is the stable source-unit identity. It is not necessarily the
@@ -56,7 +81,9 @@ raw Army JSON
   Non-Aligned Armies grouping identity. Presentation is modeled separately:
   normalization derives `display_army_id` from reviewed relationships in
   `data/curated/identities/army-display.json`; the current curated relationship
-  displays canonical-1 units with the 901 grouping identity.
+  displays canonical-1 units with the 901 grouping identity. `main_army_id` is
+  therefore a source-derived grouping/application field, not authority for a
+  unit's complete game-wide membership, availability, or ownership.
 - InfinityDB normalization pins the exact validated identity configuration and
   its canonical SHA-256 into `normalized.json`. Database export revalidates that
   provenance and propagates the same policy into both database siblings.
@@ -204,8 +231,10 @@ separate presentation field derived from pinned curated display-identity data;
 for the current reviewed relationship canonical source identity `1` displays as
 army `901`.
 
-Logical-unit identity is now materialized during frontend SQLite creation while
-normalized/source records remain unchanged for provenance. The frontend relation now contains both identity and the first canonical unit
+The logical unit is an InfinityDB application abstraction rather than an Army
+source object. Its identity is now materialized during frontend SQLite creation
+while normalized/source records remain unchanged for provenance. The frontend
+relation contains both identity and the first application-owned unit
 payload/context layer:
 
 ```text
@@ -243,8 +272,11 @@ logical_unit_spectables
 
 Since schema version 11, `logical_units.id` equals `representative_unit_id`,
 preserving existing unit URLs and API identifiers. Schema version 14 extends the
-same row with the representative-backed canonical fields and materializes the
-source-attributed context tables above. Keeping the representative field explicit
+same row with representative-backed application fields and materializes the
+source-attributed context tables above. The copied `canonical_faction_id`,
+`main_army_id`, and `display_army_id` retain their relationship/context or
+presentation semantics; residing on `logical_units` does not make them canonical
+game-wide facts. Keeping the representative field explicit
 allows a future application-owned logical ID without rewriting the source model.
 
 Database creation resolves the relation from configured unit aliases in the
@@ -269,6 +301,26 @@ The enforced invariants are:
   standard and mercenary occurrences resolve to the same logical unit and army;
 - repository reads consume the materialized relation and do not repeat generic,
   mercenary, reinforcement, or alias identity resolution.
+
+### Current `General profile` abstraction
+
+`General profile` is an InfinityDB term; Infinity Army does not provide a
+separate General-profile object. The current unit-detail browser synthesizes this
+summary from source-backed profile/loadout data after optional army occurrences
+have been enabled or disabled by the user's presentation settings.
+
+The browser groups profiles by backend-derived `profile_identity`, selects the
+most common stat, type, and classification values in each group, gathers shared
+equipment and weapons, gathers profile-shared skills plus the skills of a single
+matching loadout when exactly one exists, derives order/characteristic symbols,
+and suppresses lower-priority duplicate-looking summaries. The result can
+therefore change with the enabled army/availability contexts.
+
+This makes `General profile` an InfinityDB abstraction implemented in the
+presentation layer, not a source-native fact and not proof that any synthesized
+value is invariant across the game. Before any `General profile` value is moved
+into canonical storage or backend semantics, its supporting source facts and the
+summary/presentation rule must be audited separately.
 
 ### Canonical application model and semantic deduplication
 
@@ -1340,9 +1392,10 @@ catalog reverse lookup.
 
 The audit establishes the following design constraints for the next step:
 
-- a canonical unit payload may use representative-backed general display and
-  faction-display values because representative selection is already explicit,
-  deterministic semantic policy;
+- representative-backed general display values may be materialized under the
+  existing deterministic representative rule, but source canonical-faction,
+  `main_army_id`, and display-faction values remain contextual/derived or
+  presentation semantics rather than canonical game-wide relationships;
 - alternate source names/ISC/abbreviations/slugs must remain searchable and
   traceable;
 - source-specific notes remain explicit deltas rather than being silently
@@ -1396,10 +1449,13 @@ logical_unit_spectables
   spectables
 ```
 
-`logical_units` therefore owns only the general display/application values that
-already follow the deterministic representative-source rule. The representative
-source remains explicit provenance; its selection does not turn the
-representative's entire source row into canonical truth.
+`logical_units` therefore owns the current representative-backed general
+display/application values and carries compatibility copies of contextual or
+presentation faction fields used by existing reads. Those copied fields do not
+become canonical game-wide relationships merely because they reside on the
+application-owned row. The representative source remains explicit provenance;
+its selection does not turn the representative's entire source row into canonical
+truth.
 
 Alternate labels are stored when a non-representative search/display value
 differs from the corresponding canonical field. For `name`, this includes the
@@ -1524,6 +1580,14 @@ retain those list-local occurrences while also representing identities and
 relationships across the whole game. A source list is therefore not the same
 thing as a game-wide faction identity, ownership relation, or declared unit
 membership.
+
+In semantic-provenance terms, the source list/metadata projections and their
+membership/occurrence relationships are source-native evidence; current
+role/playability and `main_army_id` are source-derived InfinityDB semantics; the
+planned canonical application army identity/hierarchy is an InfinityDB
+abstraction; and display-army selection remains a presentation convenience.
+Those categories must remain visible even when several concepts share IDs or
+names.
 
 On the reviewed 2026-09-18 snapshot, `army_lists` and `metadata_factions` each
 contain 58 source IDs. Their ID sets are identical and every matching `name` /
