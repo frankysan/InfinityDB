@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from infinity_db.domain_slugs import validate_typed_domain_id
+
 CURATED_FORMAT = "InfinityDB curated reference"
 CURATED_FORMAT_VERSION = 3
 REQUIRED_COLLECTION_FIELDS = frozenset(
@@ -271,6 +273,9 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             raise ValueError(f"{context}: missing fields {sorted(missing)}")
         for field in ("id", "kind", "name", "summary"):
             _require_string(record[field], field, context)
+        validate_typed_domain_id(
+            record["id"], expected_domain=record["kind"], context=f"{context}.id"
+        )
         if not isinstance(record["citations"], list) or not record["citations"]:
             raise ValueError(f"{context}: 'citations' must be a non-empty array")
         for optional_list in ("aliases", "relatedRecords"):

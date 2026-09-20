@@ -34,6 +34,7 @@ from ..identities import (
 )
 from .application_armies import materialize_application_armies
 from .application_catalogs import materialize_application_catalogs
+from .application_domain_slugs import materialize_application_domain_slugs
 from .loadout_payloads import materialize_loadout_payloads
 from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
@@ -326,6 +327,7 @@ def export_database(
                 materialize_application_armies(connection, identity_config)
                 materialize_application_catalogs(connection, identity_config)
                 materialize_logical_unit_payloads(connection)
+                materialize_application_domain_slugs(connection)
                 materialize_profile_payloads(connection)
                 materialize_loadout_payloads(connection)
                 create_indexes(connection)

@@ -1286,6 +1286,8 @@ def test_database_empty_generic_audit_prevents_legacy_grouping(
     assert duplicate is not None
     assert duplicate["id"] == 10_001
     assert duplicate["source_ids"] == [10_001]
+    assert database.application_slug("units", 1) is None
+    assert database.application_slug("units", 10_001) is None
 
 
 def test_database_uses_persisted_mercenary_mapping_for_logical_unit(
@@ -1831,6 +1833,8 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
     ]
     assert database.list_units(search="sarko")["items"][0]["id"] == 1610
     assert database.list_units(search="sas")["items"][0]["id"] == 237
+    assert database.application_slug("units", 4) is None
+    assert database.application_slug("units", 5) is None
     assert database.list_units(search="UNIT 4")["items"] == [
         {
             "id": 4,
@@ -2563,3 +2567,36 @@ def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
     assert strategos["categories"] == [
         {"name": "Unclassified", "source": None, "page": None}
     ]
+
+
+def test_application_domain_slugs_are_separate_from_source_slugs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert database.list_armies()[0]["slug"] == "first_army"
+    assert database.application_slug("armies", 101) == "first-army"
+    assert database.application_id_for_slug("armies", "first-army") == 101
+    assert database.application_slug("units", 1) == "alpha"
+    assert database.application_id_for_slug("units", "alpha") == 1
+    assert database.application_slug("units", 3) == "100-guard"
+
+    skill = database.list_catalog_items("skills")[0]
+    skill_slug = database.application_slug("skills", skill["id"])
+    assert skill_slug is not None
+    assert database.application_id_for_slug("skills", skill_slug) == skill["id"]
+
+
+def test_application_domain_slug_lookup_rejects_unknown_domains(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    with pytest.raises(ValueError, match="Unknown slug domain"):
+        database.application_slug("profiles", 1)
+    with pytest.raises(ValueError, match="Unknown slug domain"):
+        database.application_id_for_slug("profiles", "trooper")

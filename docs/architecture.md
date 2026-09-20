@@ -508,27 +508,45 @@ remains a later design step after canonical unit, relationship, and catalog
 coverage is complete; `infinity.raw.db` is the intended long-term home for that
 lossless source representation.
 
-### Design direction: domain-unique public identities
+### Current: domain-unique application slug layer
 
 Source identity, internal application identity, and public navigation identity are
 separate layers. Corvus Belli numeric IDs remain source/provenance references, and
-current numeric application IDs remain implementation keys while migration is in
-progress. InfinityDB-curated concepts use stable typed IDs such as `skill:doctor`
+current numeric application IDs remain implementation keys while route migration is
+in progress. InfinityDB-curated concepts use stable typed IDs such as `skill:doctor`
 or `rule:peripheral-type:servant`; the prefix identifies the domain and is not a claim
 that one slug must be globally unique across unrelated domains.
 
-Public API lookup and web routes should ultimately use stable slugs that are unique
-within their resource domain, for example `/skills/doctor`. The route/resource
-domain supplies the namespace, so the public value can remain `doctor` while the
-internal curated identity remains `skill:doctor`. Underlying numeric IDs may remain
-available through developer diagnostics or explicit compatibility paths, but must
-not be the long-term user-facing identity contract. Slug normalization, stability,
-collision handling, and migration must be defined per domain before replacing an
-existing numeric route.
+Schema version 17 / compatibility revision 25 introduces the derived
+`application_domain_slugs` registry for the current application-owned `armies`,
+`units`, `skills`, `equipment`, and `weapons` domains. Each row retains the numeric
+application key, a deterministic normalized candidate, an optional resolved slug,
+and a `resolved`, `collision`, or `unavailable` status. Slugs are unique only within
+their domain. Candidate generation lowercases, removes Unicode combining marks,
+limits output to ASCII letters/numbers with single hyphen separators, and never
+invents order-dependent numeric suffixes. Duplicate candidates therefore fail
+closed as explicit collision records instead of silently becoming `foo-2`.
 
-The Peripheral rules/identity work is the first new Milestone 2B design expected
-to apply this policy directly. It must not infer a canonical Peripheral entity slug
-until the reviewed Army-definition-to-entity mapping proves that entity boundary.
+The registry is an application identity foundation, not yet the public routing
+contract. Existing Army/unit source/display slugs remain source/context data; they
+may seed application candidates but are not automatically promoted to permanent
+public identifiers. Repository helpers can resolve only `resolved` registry entries
+bidirectionally between a domain-local slug and its current numeric application key.
+Existing numeric API/web routes remain unchanged until a later compatibility phase
+defines slug freezing, aliases/redirects, and migration behavior for each domain.
+
+The current reviewed 2026-09-18 snapshot resolves all initial registry candidates:
+57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons
+(1,042 identities total), with no collisions or unavailable candidates. These counts
+are snapshot evidence rather than permanent invariants. Traits use the same
+normalizer and now reject collisions instead of generating positional suffixes, but
+they are not yet persisted in the application registry.
+
+The Peripheral rules/identity work must use this project-wide identity architecture
+rather than introduce a one-off slug scheme. It must not infer a canonical
+`peripheral:*` or `peripheral-profile:*` identity merely from an Army label; those
+domains become valid only after the reviewed Army-definition-to-entity mapping proves
+the corresponding entity/profile boundary.
 
 ## Snapshot acquisition and provenance
 
@@ -722,7 +740,9 @@ clean checkout from silently producing a symbol-less local deployment image.
 | Layer | Responsibility | Extension point |
 | --- | --- | --- |
 | `infinity_army_data` | Interpret and validate source data | Source-format changes and additional normalization |
+| `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
 | `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
+| `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
 | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
 | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
 | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
@@ -854,8 +874,8 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 16 and database compatibility revision
-24; it rejects incompatible databases with a rebuild
+application database has schema version 17 and database compatibility revision
+25; it rejects incompatible databases with a rebuild
 instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

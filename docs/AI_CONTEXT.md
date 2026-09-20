@@ -292,8 +292,8 @@ and serves a read-only browser and same-origin HTTP API.
   despite residing on an application-owned row. The latter
   preserves 99 references across 89 source units to faction IDs 203/903/906/907
   that have no current Army list. Source `canonical_faction_id` is origin/context,
-  not ownership or availability. Schema version 16 / compatibility revision 24
-  now materializes the canonical application Army identity/hierarchy as an
+  not ownership or availability. Schema version 17 / compatibility revision 25
+  now contains the canonical application Army identity/hierarchy as an
   InfinityDB abstraction in `application_armies`, `application_army_sources`,
   and `application_army_reinforcement_parents`. It stores canonical name/slug,
   role/playability/grouping, reviewed source-ID mappings and preferred-source
@@ -758,12 +758,15 @@ application-level identities.
   build as `INFINITY_DB_DISPLAY_VERSION`; installed/containerized code prefers that
   value when rendering the browser footer. The package/API `__version__` remains the
   released semantic version and is not changed by this deployment metadata.
-- 2026-09-20: Public identity direction is domain-unique slugs rather than
-  user-facing numeric database IDs. Source numeric IDs remain provenance/foreign
-  references; typed InfinityDB identities such as `skill:doctor` may namespace
-  curated/application concepts internally, while public domain routes can use
-  forms such as `/skills/doctor`. Slug stability/collision policy is defined per
-  domain before migrating existing numeric routes.
+- 2026-09-20: Domain-unique application slugs now have a derived persistence
+  layer. Schema version 17 / compatibility revision 25 materializes
+  `application_domain_slugs` for Armies, logical Units, Skills, Equipment, and
+  Weapons. Each identity retains a deterministic candidate plus `resolved`,
+  `collision`, or `unavailable` status; collisions never receive positional numeric
+  suffixes. The current 2026-09-18 snapshot resolves all 1,042 initial identities.
+  Source slugs/numeric IDs remain context/provenance, curated IDs such as
+  `skill:doctor` remain typed internal identities, and current numeric web/API
+  routes remain unchanged until a later slug-freezing/alias migration.
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
   rules authority, the pinned Wiki archive as discovery/secondary provenance,

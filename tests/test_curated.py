@@ -73,7 +73,7 @@ def valid_document() -> dict:
         ],
         "records": [
             {
-                "id": "skill-example",
+                "id": "skill:example",
                 "kind": "skill",
                 "name": "Example skill",
                 "summary": "A concise human-written summary.",

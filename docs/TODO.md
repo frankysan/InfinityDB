@@ -706,11 +706,15 @@ new correctness or reproducibility defect.
 
 ## Architecture follow-up
 
-- [ ] Implement the accepted domain-unique public-ID design across API lookup and
-  web routes. Define per-domain slug normalization, uniqueness, stability, collision,
-  and migration rules for armies, units, catalogs, and rules/traits as applicable;
-  keep source numeric IDs as provenance references and application numeric IDs as
-  developer/compatibility details rather than the long-term user-facing contract.
+- [ ] Complete the accepted domain-unique public-ID migration across API lookup and
+  web routes. The schema-17 application slug registry now defines shared candidate
+  normalization, domain-local uniqueness, and fail-closed collision/unavailable states
+  for Armies, Units, Skills, Equipment, and Weapons without changing public routes.
+  Before replacing numeric routes, define per-domain slug freezing, reviewed overrides,
+  aliases/redirects, and compatibility behavior; extend the registry only when a new
+  canonical domain boundary (for example Peripheral entities/profiles) has been proven.
+  Keep source numeric IDs/slugs as provenance/context references and application numeric
+  IDs as developer/compatibility details rather than the long-term user-facing contract.
 
 ## Potential product features
 

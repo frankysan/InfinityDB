@@ -1778,13 +1778,39 @@ The abstraction is deliberately limited to Skills, Equipment, and Weapons used
 by the current runtime. It does not claim that two source records are globally
 identical outside the documented grouping rule, does not canonicalize curated
 rules knowledge, and does not turn source metadata modes into one invariant fact.
-Numeric application IDs remain implementation keys. The accepted public-identity
-direction is to use stable slugs unique within each resource domain for ordinary
-API lookup and web routes, while retaining typed internal identities such as
-`skill:doctor` where curated/application concepts need an explicit namespace.
-Source numeric IDs remain provenance/foreign references rather than public
-identity. Numeric application IDs may remain visible through developer diagnostics
-or explicit compatibility paths during migration.
+
+#### Application domain slugs
+
+Schema version 17 / compatibility revision 25 adds a derived
+`application_domain_slugs` registry for `armies`, `units`, `skills`, `equipment`,
+and `weapons`. Numeric application IDs remain implementation keys, while each
+registry row records a normalized candidate and one of three states:
+
+- `resolved`: the candidate is non-empty and unique within the domain, so `slug`
+  receives that value;
+- `collision`: two or more application identities normalize to the same candidate,
+  so `slug` remains null and the conflict requires an explicit reviewed decision;
+- `unavailable`: no usable candidate can be derived, so `slug` remains null.
+
+Candidates are deterministic lowercase ASCII identifiers with single hyphen
+separators. Collision handling is deliberately fail-closed: the application does not
+generate positional `-2`/`-3` suffixes whose meaning could change with source order
+or a later snapshot. The registry is application-owned derived data and therefore
+does not replace Army/source slugs or provenance IDs. Source/application display
+slugs may seed a candidate where useful, but they are not thereby promoted to a
+permanent public identity.
+
+Repository lookup can translate a `resolved` slug to/from the current numeric
+application key. Existing public API/web routes remain numeric until a later
+migration defines per-domain slug freezing, aliases/redirects, and compatibility
+behavior. The current 2026-09-18 snapshot resolves all 1,042 initial identities
+(57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons)
+without collision or unavailable candidates; these counts are evidence only.
+
+Curated/application concepts that need an explicit namespace use typed IDs such as
+`skill:doctor`. Curated v3 records now validate that the prefix matches the record
+kind and that every colon-separated segment follows the same slug grammar. Source
+numeric IDs remain provenance/foreign references rather than public identity.
 
 #### Relationship to version 1.0.0 completeness
 
@@ -1898,8 +1924,8 @@ derived frontend tables so generated application structure cannot be supplied as
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 16 and the application
-compatibility revision is 24. Imports build temporary sibling files, check
+records its schema version. The current schema version is 17 and the application
+compatibility revision is 25. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

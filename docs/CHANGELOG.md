@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add a derived domain-local application slug registry for Armies, logical Units,
+  Skills, Equipment, and Weapons. The registry records deterministic candidates and
+  explicit resolved/collision/unavailable states without changing existing public
+  numeric routes or inventing order-dependent collision suffixes.
 - Separate server-rebuild and transferred-artifact deployment paths so a validated
   database/symbol set cannot be accidentally replaced during deployment, and add an
   isolated loopback-only test deployment with an explicit teardown command that cannot
@@ -14,9 +18,16 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Validate curated typed record IDs against the shared domain-slug grammar, and make
+  Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
 - Make the Unit explorer's matching-unit statistic show the currently visible unique
   units alongside the total available under the same Army/search/catalog filters, with
   an expandable availability breakdown for standard and optional unit categories.
+
+### Upgrade notes
+
+- Rebuild generated Army databases after this change. The development schema is now
+  17 / compatibility revision 25; older generated `infinity.db` files are rejected.
 
 ### Fixed
 

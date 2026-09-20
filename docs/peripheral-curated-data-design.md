@@ -192,16 +192,20 @@ never inferred false or true by name heuristics.
 
 ### Stable IDs and the domain-unique slug policy
 
-Peripheral work follows the project-wide public-identity direction rather than
-introducing a one-off naming scheme. Curated/application concepts use stable typed
-IDs such as `skill:doctor` and `rule:peripheral-type:servant`; source numeric IDs remain
-foreign/provenance references. A future public resource route may use the local
-domain slug, for example `/skills/doctor`, because the route itself supplies the
-namespace.
+Peripheral work follows the project-wide domain-identity layer rather than
+introducing a one-off naming scheme. Schema version 17 materializes provisional
+domain-local application slugs for the current Army/Unit/catalog domains, while
+curated/application concepts use stable typed IDs such as `skill:doctor` and
+`rule:peripheral-type:servant`. Source numeric IDs and source/display slugs remain
+foreign/provenance/context references. A future public resource route may use the
+resolved local domain slug, for example `/skills/doctor`, because the route itself
+supplies the namespace.
 
-Do not assign `peripheral:*` or `peripheral-profile:*` identities merely from an
-Army label. Those domains become valid only after the reviewed source-to-entity
-mapping phase establishes the corresponding canonical entity/profile boundary.
+Do not create a `peripherals` registry domain or assign `peripheral:*` /
+`peripheral-profile:*` identities merely from an Army label. Those domains become
+valid only after the reviewed source-to-entity mapping phase establishes the
+corresponding canonical entity/profile boundary; collisions or ambiguous mappings
+must remain unresolved rather than receiving generated suffixes.
 
 ## FAQ treatment
 

@@ -21,6 +21,12 @@ from infinity_army_data.availability import (
     STANDARD_AVAILABILITY,
 )
 from infinity_army_data.normalized_format import FORMAT_NAME, FORMAT_VERSION
+from infinity_db.domain_slugs import (
+    APPLICATION_SLUG_DOMAINS,
+    assign_domain_slugs,
+    normalize_domain_slug,
+    require_domain_slug,
+)
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -37,6 +43,7 @@ from .application_armies import (
     validate_application_armies,
 )
 from .application_catalogs import validate_application_catalogs
+from .application_domain_slugs import validate_application_domain_slugs
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .schema import (
     APPLICATION_ID,
@@ -290,8 +297,8 @@ def configured_catalog_group(
     return canonical_id, source_ids
 
 def trait_slug(name: object) -> str:
-    """Return a URL-safe identity for one raw Army trait label."""
-    return re.sub(r"[^a-z0-9]+", "-", str(name or "").casefold()).strip("-")
+    """Return the shared domain-slug candidate for one raw Army trait label."""
+    return normalize_domain_slug(name)
 
 def source_trait_name(value: object) -> str:
     """Return a visible Army trait label, excluding bracketed profile annotations."""
@@ -866,6 +873,7 @@ class Database:
             identity_config = identity_config_from_connection(connection)
             validate_application_armies(connection, identity_config)
             validate_application_catalogs(connection, identity_config)
+            validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(
                 "SELECT COUNT(*) FROM units WHERE source_defined = 1"
             ).fetchone()[0]
@@ -1214,6 +1222,40 @@ class Database:
                 items_by_source[source_id] = item
         return items_by_source
 
+    @instance_lru_cache(maxsize=512)
+    def application_id_for_slug(self, domain: str, slug: str) -> int | None:
+        """Resolve one domain-local slug to the current application numeric key."""
+
+        if domain not in APPLICATION_SLUG_DOMAINS:
+            raise ValueError(f"Unknown slug domain: {domain}")
+        slug = require_domain_slug(slug, context=f"{domain} slug")
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT application_id FROM application_domain_slugs "
+                "WHERE domain = ? AND status = 'resolved' "
+                "AND slug = ? COLLATE NOCASE",
+                (domain, slug),
+            ).fetchone()
+        return None if row is None else int(row["application_id"])
+
+    @instance_lru_cache(maxsize=512)
+    def application_slug(self, domain: str, application_id: int) -> str | None:
+        """Return the current domain-local slug for one application identity."""
+
+        if domain not in APPLICATION_SLUG_DOMAINS:
+            raise ValueError(f"Unknown slug domain: {domain}")
+        if type(application_id) is not int or not 0 <= application_id <= SQLITE_INTEGER_MAX:
+            raise ValueError(
+                "application_id must be an integer within SQLite's signed 64-bit range"
+            )
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT slug FROM application_domain_slugs "
+                "WHERE domain = ? AND application_id = ? AND status = 'resolved'",
+                (domain, application_id),
+            ).fetchone()
+        return None if row is None or row["slug"] is None else str(row["slug"])
+
     @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
         """Return canonical application Armies with current logical-unit counts."""
@@ -1429,13 +1471,14 @@ class Database:
     def list_traits(self) -> list[dict[str, Any]]:
         """Return distinct raw Army trait labels carried by catalogued profiles."""
         traits = []
-        slug_counts: dict[str, int] = {}
-        for name, items in self.trait_usage_index().items():
-            base_slug = trait_slug(name) or "trait"
-            slug_counts[base_slug] = slug_counts.get(base_slug, 0) + 1
-            slug = base_slug if slug_counts[base_slug] == 1 else f"{base_slug}-{slug_counts[base_slug]}"
+        usage = self.trait_usage_index()
+        slugs = assign_domain_slugs(
+            ((name, name) for name in usage),
+            domain="traits",
+        )
+        for name, items in usage.items():
             traits.append({
-                "id": slug,
+                "id": slugs[name],
                 "name": name,
                 "use_count": len(items),
                 "description": None,
