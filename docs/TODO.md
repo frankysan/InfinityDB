@@ -127,14 +127,14 @@ refactoring, coverage, and optimization work rather than Milestone 1 blockers.
   canonical replacements must be used by the corresponding read paths. Preserve
   player-visible behavior through equivalence testing and record representative
   before/after performance evidence. This interim release does not require unused
-  source structures, the physical `raw.db` split, or the full 1.0 completeness
+  source structures, the physical `infinity.raw.db` split, or the full 1.0 completeness
   inventory to be finished. The release gate is detailed below.
 
 - [ ] **Milestone 2B — continue the canonical application model and advance
   1.0 completeness.**
   After 0.6.1, continue semantic coverage beyond the currently consumed runtime
   surface: broader relationship and catalog/metadata overlap, source-only data,
-  the `raw.db` separation, and the source-to-presentation completeness inventory.
+  the `infinity.raw.db` separation, and the source-to-presentation completeness inventory.
   Use that inventory as groundwork for the broader web-app consistency audit.
   The detailed checklist is maintained below.
 
@@ -219,16 +219,18 @@ block this interim release.
 - [x] Inventory every Army-database table/field/relationship read by the current
   runtime surfaces: armies, unit visibility/list/search/detail, availability and
   faction context, filters, and the current skill/equipment/weapon/trait catalog
-  paths. The compatibility-21 production trace covers 25 serving probes, 62
-  tables, and 230 distinct table-field reads.
+  paths. The compatibility-22 production trace covers 25 serving probes, 47
+  tables, and 187 distinct table-field reads.
 - [ ] Resolve the open classifications from that runtime inventory.
   - [x] Record every observed field as canonical application data, explicit
-    contextual application data, or intentional source representation; 152 / 230
-    current field reads have no open semantic issue.
-  - [ ] Replace the 43 duplicate source reads across 16 profile/loadout/unit
-    source tables with their already-materialized canonical equivalents. This
-    includes search labels, unit skill/equipment/weapon filters, and catalog
-    reverse lookups.
+    contextual application data, or intentional source representation; 152 / 187
+    current field reads have no open semantic issue and the remaining 35 are the
+    two explicit semantic-overlap audits below.
+  - [x] Replace the 43 duplicate source reads across 16 profile/loadout/unit
+    source tables with their already-materialized canonical equivalents. Search
+    labels, unit skill/equipment/weapon filters, skill extras, and catalog reverse
+    lookups now use canonical logical-unit/profile/loadout data; top-level
+    `unit_options` remain contextual source data by design.
   - [ ] Audit the live army/faction boundary around `army_lists`,
     `metadata_factions`, `army_units`, `unit_factions`, and source-specific
     `units.canonical_faction_id`; preserve hierarchy, playability, availability,
@@ -285,6 +287,8 @@ completed implementation checklists have been removed from this active backlog.
 
 - [ ] **Separate lossless source storage from the application database after
   canonicalization.**
+  This milestone refers to the existing `infinity.raw.db`; no additional
+  lossless database artifact is planned.
   - [ ] Treat `infinity.raw.db` as the complete lossless normalized Army source/
     provenance store, including source-local identities, source ordering,
     raw fallbacks, and acquisition/audit metadata required to reconstruct

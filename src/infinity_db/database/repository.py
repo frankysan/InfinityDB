@@ -45,7 +45,17 @@ from .schema import (
 
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
-UNIT_NAME_SQL = "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id)"
+SOURCE_UNIT_NAMES_CTE = (
+    "source_unit_names AS ("
+    "SELECT lus.source_unit_id AS unit_id, "
+    "COALESCE(a.value, COALESCE(NULLIF(lu.name, ''), 'Unit ' || lu.id)) AS unit_name "
+    "FROM logical_unit_sources AS lus "
+    "JOIN logical_units AS lu ON lu.id = lus.logical_unit_id "
+    "LEFT JOIN logical_unit_aliases AS a "
+    "ON a.logical_unit_id = lus.logical_unit_id "
+    "AND a.source_unit_id = lus.source_unit_id AND a.field = 'name'"
+    ")"
+)
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
 ARMY_ROLE_MAIN = "main"
 ARMY_ROLE_SECTORIAL = "sectorial"
@@ -300,6 +310,61 @@ def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> Non
     """Add an item unless a merged source already contributed the same one."""
     if item not in items:
         items.append(item)
+
+def _canonical_usage_select(
+    payload_kind: str,
+    catalog: str,
+    *,
+    where: str = "",
+) -> str:
+    """Return one canonical profile/loadout catalog-usage SELECT fragment."""
+    if payload_kind == "profile":
+        occurrence_table = "profile_payload_occurrences"
+        occurrence_alias = "ppo"
+        payload_id = "profile_payload_id"
+        parent_id = "profile_id"
+        source_label = "profile"
+    elif payload_kind == "loadout":
+        occurrence_table = "loadout_payload_occurrences"
+        occurrence_alias = "lpo"
+        payload_id = "loadout_payload_id"
+        parent_id = "option_id"
+        source_label = "option"
+    else:
+        raise ValueError(f"Unknown payload kind: {payload_kind}")
+    extra_stem = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[
+        catalog
+    ]
+    payload_table = f"{payload_kind}_payload_{catalog}"
+    extras_table = f"{payload_kind}_payload_{extra_stem}_extras"
+    return (
+        f"SELECT '{source_label}' AS source, o.item_id, {occurrence_alias}.unit_id, "
+        f"printf('%d:%d:%d:%d:%d', {occurrence_alias}.army_id, "
+        f"{occurrence_alias}.unit_id, {occurrence_alias}.group_id, "
+        f"{occurrence_alias}.{parent_id}, o.position) AS occurrence_key, "
+        "e.position AS extra_position, e.extra_id "
+        f"FROM {occurrence_table} AS {occurrence_alias} "
+        f"JOIN {payload_table} AS o "
+        f"ON o.{payload_id} = {occurrence_alias}.{payload_id} "
+        f"LEFT JOIN {extras_table} AS e "
+        f"ON e.{payload_id} = o.{payload_id} "
+        "AND e.occurrence_position = o.position "
+        + where
+    )
+
+
+def _canonical_filter_query(catalog: str) -> str:
+    """Return source-unit matches for one canonical profile/loadout catalog item."""
+    return (
+        "SELECT ppo.unit_id FROM profile_payload_occurrences AS ppo "
+        f"JOIN profile_payload_{catalog} AS po "
+        "ON po.profile_payload_id = ppo.profile_payload_id WHERE po.item_id = ? "
+        "UNION SELECT lpo.unit_id FROM loadout_payload_occurrences AS lpo "
+        f"JOIN loadout_payload_{catalog} AS lo "
+        "ON lo.loadout_payload_id = lpo.loadout_payload_id WHERE lo.item_id = ? "
+        f"UNION SELECT unit_id FROM unit_option_{catalog} WHERE item_id = ?"
+    )
+
 
 def logical_source_profile_merge_key(
     army_occurrence_key: tuple[int, tuple[str, ...]], profile: RowLike
@@ -760,8 +825,16 @@ class Database:
                     if alias["value"] not in names:
                         names.append(alias["value"])
 
-            for table in ("profiles", "loadout_options", "unit_options"):
-                for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
+            for query in (
+                "SELECT ppo.unit_id, pp.name "
+                "FROM profile_payload_occurrences AS ppo "
+                "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id",
+                "SELECT lpo.unit_id, lp.name "
+                "FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id",
+                "SELECT unit_id, name FROM unit_options",
+            ):
+                for row in connection.execute(query):
                     logical_id = source_to_logical.get(row["unit_id"])
                     if logical_id is not None:
                         search_terms_by_logical[logical_id].add(row["name"])
@@ -1068,27 +1141,32 @@ class Database:
     def list_skill_extras(self) -> list[dict[str, Any]]:
         """Return candidate distance-related skill and extra pairings."""
         with self._connect() as connection:
+            profile_usage = _canonical_usage_select("profile", "skills")
+            loadout_usage = _canonical_usage_select("loadout", "skills")
             rows = connection.execute(
-                "SELECT combinations.skill_id, COALESCE(NULLIF(s.name, ''), "
-                "'Skill #' || combinations.skill_id) AS skill_name, combinations.extra_id, "
+                "WITH "
+                + SOURCE_UNIT_NAMES_CTE
+                + ", combinations AS ("
+                + profile_usage
+                + " UNION "
+                + loadout_usage
+                + " UNION SELECT 'unit_option' AS source, uos.item_id, uos.unit_id, "
+                "CAST(uos.occurrence_id AS TEXT) AS occurrence_key, "
+                "uose.position AS extra_position, uose.extra_id "
+                "FROM unit_option_skills AS uos "
+                "JOIN unit_option_skill_extras AS uose "
+                "ON uose.occurrence_id = uos.occurrence_id) "
+                "SELECT combinations.item_id AS skill_id, COALESCE(NULLIF(s.name, ''), "
+                "'Skill #' || combinations.item_id) AS skill_name, combinations.extra_id, "
                 "COALESCE(NULLIF(e.name, ''), 'Extra #' || combinations.extra_id) AS extra_name, "
-                "e.type AS extra_type, "
-                f"u.id AS unit_id, {UNIT_NAME_SQL} AS unit_name "
-                "FROM ("
-                "SELECT ps.item_id AS skill_id, pse.extra_id, ps.unit_id FROM profile_skills AS ps "
-                "JOIN profile_skill_extras AS pse ON pse.occurrence_id = ps.occurrence_id "
-                "UNION "
-                "SELECT os.item_id AS skill_id, ose.extra_id, os.unit_id FROM option_skills AS os "
-                "JOIN option_skill_extras AS ose ON ose.occurrence_id = os.occurrence_id "
-                "UNION "
-                "SELECT uos.item_id AS skill_id, uose.extra_id, uos.unit_id FROM unit_option_skills AS uos "
-                "JOIN unit_option_skill_extras AS uose ON uose.occurrence_id = uos.occurrence_id"
-                ") AS combinations "
-                "LEFT JOIN skills AS s ON s.id = combinations.skill_id "
+                "e.type AS extra_type, u.unit_id, u.unit_name "
+                "FROM combinations "
+                "LEFT JOIN skills AS s ON s.id = combinations.item_id "
                 "LEFT JOIN extras AS e ON e.id = combinations.extra_id "
-                "JOIN units AS u ON u.id = combinations.unit_id AND u.source_defined = 1 "
-                "ORDER BY casefold(skill_name), casefold(extra_name), combinations.skill_id, "
-                "combinations.extra_id, unit_sort_key(unit_name), u.id"
+                "JOIN source_unit_names AS u ON u.unit_id = combinations.unit_id "
+                "WHERE combinations.extra_id IS NOT NULL "
+                "ORDER BY casefold(skill_name), casefold(extra_name), combinations.item_id, "
+                "combinations.extra_id, unit_sort_key(unit_name), u.unit_id"
             ).fetchall()
             combinations: dict[tuple[Any, Any], dict[str, Any]] = {}
             for row in rows:
@@ -1147,35 +1225,26 @@ class Database:
                 ).fetchall()
             items = [dict(row) for row in rows]
             suffix = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[catalog]
-            option_usage = (
-                "SELECT 'option' AS source, t.item_id, o.occurrence_id, o.unit_id, "
-                "e.position AS extra_position, e.extra_id "
-                "FROM option_weapons AS o JOIN option_weapon_templates AS t "
-                "ON t.id = o.template_id "
-                "LEFT JOIN option_weapon_extras AS e ON e.occurrence_id = o.occurrence_id"
-                if catalog == "weapons"
-                else f"SELECT 'option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
-                f"e.position AS extra_position, e.extra_id FROM option_{catalog} AS o "
-                f"LEFT JOIN option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id"
-            )
+            profile_usage = _canonical_usage_select("profile", catalog)
+            loadout_usage = _canonical_usage_select("loadout", catalog)
             usage_rows = connection.execute(
-                "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, uses.extra_id "
-                "FROM units AS u JOIN ("
-                f"SELECT 'profile' AS source, o.item_id, o.occurrence_id, o.unit_id, "
-                f"e.position AS extra_position, e.extra_id FROM profile_{catalog} AS o "
-                f"LEFT JOIN profile_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"UNION ALL {option_usage} "
-                f"UNION ALL SELECT 'unit_option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                "WITH uses AS ("
+                + profile_usage
+                + " UNION ALL "
+                + loadout_usage
+                + f" UNION ALL SELECT 'unit_option' AS source, o.item_id, o.unit_id, "
+                "CAST(o.occurrence_id AS TEXT) AS occurrence_key, "
                 f"e.position AS extra_position, e.extra_id FROM unit_option_{catalog} AS o "
-                f"LEFT JOIN unit_option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id"
-                ") AS uses ON uses.unit_id = u.id "
-                "WHERE u.source_defined = 1 "
-                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position"
+                f"LEFT JOIN unit_option_{suffix}_extras AS e "
+                "ON e.occurrence_id = o.occurrence_id) "
+                "SELECT uses.source, uses.item_id, uses.occurrence_key, uses.unit_id, uses.extra_id "
+                "FROM uses "
+                "ORDER BY uses.source, uses.occurrence_key, uses.extra_position"
             ).fetchall()
-            occurrences: dict[tuple[str, int], dict[str, Any]] = {}
+            occurrences: dict[tuple[str, str], dict[str, Any]] = {}
             for row in usage_rows:
                 occurrence = occurrences.setdefault(
-                    (row["source"], row["occurrence_id"]),
+                    (row["source"], row["occurrence_key"]),
                     {"item_id": row["item_id"], "unit_id": row["unit_id"], "extras": []},
                 )
                 if row["extra_id"] is not None:
@@ -1355,44 +1424,37 @@ class Database:
                 "WHERE c.id = ?",
                 (canonical_id,),
             ).fetchone()
-            option_usage = (
-                "SELECT 'option' AS source, t.item_id, o.occurrence_id, o.unit_id, "
-                "e.position AS extra_position, e.extra_id "
-                "FROM option_weapons AS o JOIN option_weapon_templates AS t "
-                "ON t.id = o.template_id "
-                "LEFT JOIN option_weapon_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"WHERE t.item_id IN ({placeholders}) "
-                if catalog == "weapons"
-                else f"SELECT 'option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
-                f"e.position AS extra_position, e.extra_id FROM option_{catalog} AS o "
-                f"LEFT JOIN option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"WHERE o.item_id IN ({placeholders}) "
+            profile_usage = _canonical_usage_select(
+                "profile", catalog, where=f"WHERE o.item_id IN ({placeholders}) "
+            )
+            loadout_usage = _canonical_usage_select(
+                "loadout", catalog, where=f"WHERE o.item_id IN ({placeholders}) "
             )
             rows = connection.execute(
-                "SELECT uses.source, uses.item_id, uses.occurrence_id, uses.unit_id, "
-                + UNIT_NAME_SQL
-                + " AS unit_name, uses.extra_position, e.id AS extra_id, e.name AS extra_name "
-                "FROM units AS u JOIN ("
-                f"SELECT 'profile' AS source, o.item_id, o.occurrence_id, o.unit_id, "
-                f"e.position AS extra_position, e.extra_id FROM profile_{catalog} AS o "
-                f"LEFT JOIN profile_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"WHERE o.item_id IN ({placeholders}) "
-                f"UNION ALL {option_usage}"
-                f"UNION ALL SELECT 'unit_option' AS source, o.item_id, o.occurrence_id, o.unit_id, "
+                "WITH "
+                + SOURCE_UNIT_NAMES_CTE
+                + ", uses AS ("
+                + profile_usage
+                + " UNION ALL "
+                + loadout_usage
+                + f" UNION ALL SELECT 'unit_option' AS source, o.item_id, o.unit_id, "
+                "CAST(o.occurrence_id AS TEXT) AS occurrence_key, "
                 f"e.position AS extra_position, e.extra_id FROM unit_option_{catalog} AS o "
-                f"LEFT JOIN unit_option_{suffix}_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"WHERE o.item_id IN ({placeholders})"
-                ") AS uses ON uses.unit_id = u.id "
+                f"LEFT JOIN unit_option_{suffix}_extras AS e "
+                "ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders})) "
+                "SELECT uses.source, uses.item_id, uses.occurrence_key, uses.unit_id, "
+                "u.unit_name, uses.extra_position, e.id AS extra_id, e.name AS extra_name "
+                "FROM uses JOIN source_unit_names AS u ON u.unit_id = uses.unit_id "
                 "LEFT JOIN extras AS e ON e.id = uses.extra_id "
-                "WHERE u.source_defined = 1 "
-                "ORDER BY uses.source, uses.occurrence_id, uses.extra_position, "
-                "unit_sort_key(unit_name), u.id",
+                "ORDER BY uses.source, uses.occurrence_key, uses.extra_position, "
+                "unit_sort_key(u.unit_name), u.unit_id",
                 source_ids * 3,
             ).fetchall()
             occurrences: dict[tuple[str, Any], dict[str, Any]] = {}
             for row in rows:
                 occurrence = occurrences.setdefault(
-                    (row["source"], row["occurrence_id"]),
+                    (row["source"], row["occurrence_key"]),
                     {
                         "item_id": row["item_id"],
                         "unit": {"id": row["unit_id"], "name": row["unit_name"]},
@@ -1565,35 +1627,37 @@ class Database:
                 canonical_id = min(source_ids)
             representative = next(row for row in skills if row["id"] == canonical_id)
             placeholders = ", ".join("?" for _ in source_ids)
+            profile_usage = _canonical_usage_select(
+                "profile", "skills", where=f"WHERE o.item_id IN ({placeholders}) "
+            )
+            loadout_usage = _canonical_usage_select(
+                "loadout", "skills", where=f"WHERE o.item_id IN ({placeholders}) "
+            )
             rows = connection.execute(
-                "SELECT uses.source, uses.skill_id, uses.occurrence_id, uses.unit_id, "
-                + UNIT_NAME_SQL
-                + " AS unit_name, uses.extra_position, "
+                "WITH "
+                + SOURCE_UNIT_NAMES_CTE
+                + ", uses AS ("
+                + profile_usage
+                + " UNION ALL "
+                + loadout_usage
+                + " UNION ALL SELECT 'unit_option' AS source, o.item_id, o.unit_id, "
+                "CAST(o.occurrence_id AS TEXT) AS occurrence_key, "
+                "e.position AS extra_position, e.extra_id FROM unit_option_skills AS o "
+                "LEFT JOIN unit_option_skill_extras AS e "
+                "ON e.occurrence_id = o.occurrence_id "
+                f"WHERE o.item_id IN ({placeholders})) "
+                "SELECT uses.source, uses.item_id AS skill_id, uses.occurrence_key, "
+                "uses.unit_id, u.unit_name, uses.extra_position, "
                 "e.id AS extra_id, e.name AS extra_name, e.type AS extra_type "
-                "FROM units AS u JOIN ("
-                f"SELECT 'profile' AS source, o.item_id AS skill_id, o.occurrence_id, o.unit_id, "
-                "e.position AS extra_position, e.extra_id FROM profile_skills AS o "
-                "LEFT JOIN profile_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"WHERE o.item_id IN ({placeholders}) "
-                "UNION ALL SELECT 'option' AS source, o.item_id AS skill_id, o.occurrence_id, "
-                "o.unit_id, e.position AS extra_position, e.extra_id FROM option_skills AS o "
-                "LEFT JOIN option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"WHERE o.item_id IN ({placeholders}) "
-                "UNION ALL SELECT 'unit_option' AS source, o.item_id AS skill_id, "
-                "o.occurrence_id, o.unit_id, e.position AS extra_position, e.extra_id "
-                "FROM unit_option_skills AS o "
-                "LEFT JOIN unit_option_skill_extras AS e ON e.occurrence_id = o.occurrence_id "
-                f"WHERE o.item_id IN ({placeholders})"
-                ") AS uses ON uses.unit_id = u.id "
+                "FROM uses JOIN source_unit_names AS u ON u.unit_id = uses.unit_id "
                 "LEFT JOIN extras AS e ON e.id = uses.extra_id "
-                "WHERE u.source_defined = 1 "
-                "ORDER BY uses.skill_id, uses.source, uses.occurrence_id, uses.extra_position, "
-                "unit_sort_key(unit_name), u.id",
+                "ORDER BY uses.item_id, uses.source, uses.occurrence_key, "
+                "uses.extra_position, unit_sort_key(u.unit_name), u.unit_id",
                 source_ids * 3,
             ).fetchall()
             occurrences: dict[tuple[str, Any], dict[str, Any]] = {}
             for row in rows:
-                key = (row["source"], row["occurrence_id"])
+                key = (row["source"], row["occurrence_key"])
                 occurrence = occurrences.setdefault(
                     key,
                     {
@@ -1719,20 +1783,7 @@ class Database:
                 for catalog, item_id in rule_filters.items():
                     if item_id is None:
                         continue
-                    if catalog == "weapons":
-                        query = (
-                            "SELECT unit_id FROM profile_weapons WHERE item_id = ? "
-                            "UNION SELECT o.unit_id FROM option_weapons AS o "
-                            "JOIN option_weapon_templates AS t ON t.id = o.template_id "
-                            "WHERE t.item_id = ? "
-                            "UNION SELECT unit_id FROM unit_option_weapons WHERE item_id = ?"
-                        )
-                    else:
-                        query = (
-                            f"SELECT unit_id FROM profile_{catalog} WHERE item_id = ? "
-                            f"UNION SELECT unit_id FROM option_{catalog} WHERE item_id = ? "
-                            f"UNION SELECT unit_id FROM unit_option_{catalog} WHERE item_id = ?"
-                        )
+                    query = _canonical_filter_query(catalog)
                     matching_sources_by_rule[catalog] = {
                         row["unit_id"]
                         for row in connection.execute(query, (item_id, item_id, item_id))

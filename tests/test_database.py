@@ -2190,6 +2190,67 @@ def test_unit_loadout_read_path_uses_materialized_canonical_payloads(
     assert Database(path).get_unit(1) == expected
 
 
+def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+    expected = {
+        "profile_search": database.list_units(search="Trooper"),
+        "loadout_search": database.list_units(search="Rifle"),
+        "skill_filter": database.list_units(skill_id=1),
+        "equipment_filter": database.list_units(equipment_id=1),
+        "weapon_filter": database.list_units(weapon_id=1),
+        "skill_extras": database.list_skill_extras(),
+        "skills": database.list_catalog_items("skills"),
+        "equipment": database.list_catalog_items("equipment"),
+        "weapons": database.list_catalog_items("weapons"),
+        "skill": database.get_skill(1),
+        "equipment_detail": database.get_catalog_item("equipment", 1),
+        "weapon_detail": database.get_catalog_item("weapons", 1),
+    }
+
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute("UPDATE units SET name = 'source-only unit mutation'")
+        connection.execute("UPDATE profiles SET name = 'source-only profile mutation'")
+        connection.execute("UPDATE loadout_options SET name = 'source-only loadout mutation'")
+        for table in (
+            "profile_skill_extras",
+            "profile_equipment_extras",
+            "profile_weapon_extras",
+            "option_skill_extras",
+            "option_equipment_extras",
+            "option_weapon_extras",
+            "profile_skills",
+            "profile_equipment",
+            "profile_weapons",
+            "option_skills",
+            "option_equipment",
+            "option_weapons",
+            "option_weapon_templates",
+        ):
+            connection.execute(f"DELETE FROM {quote(table)}")
+        connection.commit()
+    finally:
+        connection.close()
+
+    database = Database(path)
+    assert database.list_units(search="Trooper") == expected["profile_search"]
+    assert database.list_units(search="Rifle") == expected["loadout_search"]
+    assert database.list_units(skill_id=1) == expected["skill_filter"]
+    assert database.list_units(equipment_id=1) == expected["equipment_filter"]
+    assert database.list_units(weapon_id=1) == expected["weapon_filter"]
+    assert database.list_skill_extras() == expected["skill_extras"]
+    assert database.list_catalog_items("skills") == expected["skills"]
+    assert database.list_catalog_items("equipment") == expected["equipment"]
+    assert database.list_catalog_items("weapons") == expected["weapons"]
+    assert database.get_skill(1) == expected["skill"]
+    assert database.get_catalog_item("equipment", 1) == expected["equipment_detail"]
+    assert database.get_catalog_item("weapons", 1) == expected["weapon_detail"]
+
+
 def test_database_with_different_compatibility_revision_requires_rebuild(
     tmp_path: Path, normalized: dict
 ) -> None:

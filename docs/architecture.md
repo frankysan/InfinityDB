@@ -757,7 +757,7 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 14 and database compatibility revision of 21; it
+schema has a schema version of 14 and database compatibility revision of 22; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

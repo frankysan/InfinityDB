@@ -178,7 +178,7 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. Schema version 14 / compatibility revision 21 materializes
+  dynamically. Schema version 14 / compatibility revision 22 materializes
   representative-backed canonical logical-unit fields plus source-attributed
   alias/note/`spectables` context, as well as reusable canonical profile and
   loadout payloads scoped to each logical unit plus one occurrence row per
@@ -187,9 +187,10 @@ and serves a read-only browser and same-origin HTTP API.
   remain occurrence/source context; WIP, characteristics, skills,
   equipment, weapons, extras, and exact representation values remain in the
   payload and therefore split payload variants when they differ. Unit-detail
-  profile assembly now reads the canonical profile payload/occurrence layer;
-  source profile tables remain lossless provenance/context and are still used by
-  other repository paths such as catalog reverse lookups. Logical-source profile
+  profile assembly and normal skill/equipment/weapon search/filter/catalog usage
+  now read the canonical profile payload/occurrence layer. Source profile tables
+  remain lossless provenance/context for build validation and audit, not normal
+  serving. Logical-source profile
   occurrence merging remains separate from canonical payload identity:
   occurrences may collapse only when their effective army occurrence,
   source-local group/profile coordinates, scalar profile facts, type, and
@@ -203,9 +204,11 @@ and serves a read-only browser and same-origin HTTP API.
   occurrence/source context. Includes and peripherals are deferred because their
   targets are source-local/army-local. Unit-detail loadout assembly now reads
   the canonical loadout payload/occurrence layer while retaining the existing
-  logical-source occurrence merge semantics; source loadout tables remain
-  lossless provenance/context and continue to support repository paths such as
-  catalog reverse lookups. Canonical payload identity is deliberately not used
+  logical-source occurrence merge semantics. Normal loadout-name search and
+  skill/equipment/weapon search/filter/catalog usage also read the canonical
+  payload/occurrence layer; source loadout tables remain lossless provenance/context
+  for build validation and audit, not normal serving. Canonical payload identity is
+  deliberately not used
   as logical-source occurrence identity because overlapping source records can
   contribute complementary nested loadout relationships. Current production
   evidence shows 31 logical-source loadout occurrence merges and all pairs already
@@ -242,14 +245,13 @@ and serves a read-only browser and same-origin HTTP API.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
 - The 0.6.1 runtime-surface audit uses SQLite authorizer tracing plus static
-  direct-method coverage of the web/catalog helpers. On the compatibility-21
-  production database, 25 serving probes read 62 tables / 230 distinct fields:
-  105 canonical-application fields, 60 contextual-application fields, and 65
-  intentional-source fields. 152 reads have no open issue. The remaining 43
-  fields across 16 source tables are replaceable legacy reads of profile/loadout/
-  unit meaning already available canonically; another 35 fields across 8 tables
-  are genuine semantic overlap in army/faction and skill/equipment/weapon
-  catalog metadata. Fireteams, relation/dependency tables, includes/peripherals,
+  direct-method coverage of the web/catalog helpers. After replacing redundant
+  profile/loadout/unit source reads, the compatibility-22 production database
+  serves the same 25 probes from 47 tables / 187 distinct fields: 105 canonical-
+  application fields, 60 contextual-application fields, and 22 intentional-source
+  fields. No replaceable-source issue remains. The only open runtime semantic
+  work is the 35 fields across 8 army/faction and skill/equipment/weapon metadata
+  overlap tables. Fireteams, relation/dependency tables, includes/peripherals,
   and other currently unserved source structures are outside the 0.6.1 gate
   unless later runtime work introduces a dependency.
 - SQLite Army imports replace a complete snapshot. Future user-authored data

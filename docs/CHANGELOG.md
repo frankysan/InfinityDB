@@ -9,8 +9,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 - Consolidated legacy release notes around user and operator outcomes.
 - Improve unit browsing/query performance and move profile, loadout, and
-  logical-unit display/search reads to the canonical application model without
-  changing their player-visible output.
+  logical-unit display, search, filtering, and catalog-usage reads to the
+  canonical application model while preserving player-visible meaning.
 
 ### Upgrade notes
 

@@ -10,7 +10,7 @@ SCHEMA_VERSION = 14
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 21
+DATABASE_COMPATIBILITY_VERSION = 22
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -429,6 +429,36 @@ INDEXES = (
         "loadout_payload_occurrences_unit",
         "loadout_payload_occurrences",
         "unit_id, army_id, group_id, position, option_id, loadout_payload_id",
+    ),
+    (
+        "profile_payload_skills_item",
+        "profile_payload_skills",
+        "item_id, profile_payload_id, position",
+    ),
+    (
+        "profile_payload_equipment_item",
+        "profile_payload_equipment",
+        "item_id, profile_payload_id, position",
+    ),
+    (
+        "profile_payload_weapons_item",
+        "profile_payload_weapons",
+        "item_id, profile_payload_id, position",
+    ),
+    (
+        "loadout_payload_skills_item",
+        "loadout_payload_skills",
+        "item_id, loadout_payload_id, position",
+    ),
+    (
+        "loadout_payload_equipment_item",
+        "loadout_payload_equipment",
+        "item_id, loadout_payload_id, position",
+    ),
+    (
+        "loadout_payload_weapons_item",
+        "loadout_payload_weapons",
+        "item_id, loadout_payload_id, position",
     ),
     ("profiles_unit", "profiles", "unit_id, army_id, group_id, position, profile_id"),
     (

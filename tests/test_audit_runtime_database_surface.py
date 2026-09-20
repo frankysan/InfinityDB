@@ -9,7 +9,6 @@ from tools.audit_runtime_database_surface import (
     CONTEXTUAL,
     NO_ISSUE,
     OVERLAP,
-    REPLACEABLE,
     SOURCE,
     audit_database,
     discover_runtime_database_methods,
@@ -114,36 +113,18 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
 
     assert report["summary"] == {
         "surfaceCount": 25,
-        "runtimeTableCount": 62,
-        "runtimeFieldCount": 230,
-        "tableWithOpenIssueCount": 24,
-        "replaceableSourceTableCount": 16,
+        "runtimeTableCount": 47,
+        "runtimeFieldCount": 187,
+        "tableWithOpenIssueCount": 8,
+        "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 8,
         "issue:none:fieldCount": 152,
-        "issue:replaceable_duplicate:fieldCount": 43,
         "issue:semantic_overlap:fieldCount": 35,
         "role:canonical_application:fieldCount": 105,
         "role:contextual_application:fieldCount": 60,
-        "role:intentional_source_representation:fieldCount": 65,
+        "role:intentional_source_representation:fieldCount": 22,
     }
-    assert report["openIssues"]["replaceableSourceTables"] == [
-        "loadout_options",
-        "option_equipment",
-        "option_equipment_extras",
-        "option_skill_extras",
-        "option_skills",
-        "option_weapon_extras",
-        "option_weapon_templates",
-        "option_weapons",
-        "profile_equipment",
-        "profile_equipment_extras",
-        "profile_skill_extras",
-        "profile_skills",
-        "profile_weapon_extras",
-        "profile_weapons",
-        "profiles",
-        "units",
-    ]
+    assert report["openIssues"]["replaceableSourceTables"] == []
     assert report["openIssues"]["semanticOverlapTables"] == [
         "army_lists",
         "equipment",
@@ -155,7 +136,24 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
         "weapons",
     ]
 
-    assert _field(report, "units", "name")["issue"] == REPLACEABLE
+    observed_tables = {item["table"] for item in report["inventory"]}
+    assert {
+        "profiles",
+        "profile_skills",
+        "profile_skill_extras",
+        "profile_equipment",
+        "profile_equipment_extras",
+        "profile_weapons",
+        "profile_weapon_extras",
+        "loadout_options",
+        "option_skills",
+        "option_skill_extras",
+        "option_equipment",
+        "option_equipment_extras",
+        "option_weapons",
+        "option_weapon_templates",
+        "option_weapon_extras",
+    }.isdisjoint(observed_tables)
     assert _field(report, "units", "canonical_faction_id")["role"] == CONTEXTUAL
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE

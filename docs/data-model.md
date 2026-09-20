@@ -282,10 +282,12 @@ Canonical profile and loadout layers now additionally answer, conservatively:
 > and which values must remain attached to a source/Army occurrence?
 
 Unit-detail repository/API assembly consumes those canonical profile/loadout
-payloads while retaining source occurrence context. Other unit-level facts,
-source-local relationships, catalog reverse lookups, and wider metadata overlap
-remain partly source-backed, so the application model is intentionally only
-partially canonicalized at this stage.
+payloads while retaining source occurrence context. Normal unit search,
+skill/equipment/weapon filters, skill extras, and catalog reverse usage likewise
+expand canonical payloads through their occurrence mappings. Source-local
+relationships and the unresolved army/faction plus catalog/metadata overlap remain
+partly source-backed, so the application model is intentionally only partially
+canonicalized at this stage.
 
 InfinityDB is progressively introducing the remaining canonical application
 model between the normalized source model and repository/API presentation.
@@ -1189,8 +1191,8 @@ shape and logical-source merge behavior:
   identity, so overlapping source records with the same visible occurrence can
   still contribute complementary nested relationships;
 - source `loadout_options` and `option_*` tables remain available for
-  provenance, deferred relationships, validation, and repository paths such as
-  catalog reverse lookups.
+  provenance, deferred relationships, and validation, but normal search/filter/
+  catalog reverse usage now expands canonical payload occurrences instead.
 
 The read-path migration preserves the existing public loadout object shape,
 ordering, points/SWC context, order formatting, nested item accumulation, and
@@ -1454,9 +1456,11 @@ fields still equal the representative source and that the alias, note, and
 #### Next implementation targets
 
 Canonical unit/profile/loadout payloads, their context mappings, and their
-current unit-list/search/detail read-path migrations are complete. The remaining
-semantic work for the 0.6.1 runtime pass begins with relationships and catalog
-paths that still consume source-oriented tables.
+current unit-list/search/detail/filter/catalog-usage migrations are complete. The
+remaining semantic work for the 0.6.1 runtime pass is now limited to the live
+army/faction boundary and the skill/equipment/weapon catalog-versus-metadata
+boundary. Broader relationship structures remain post-0.6.1 unless a correctness
+dependency is discovered.
 
 ### 0.6.1 runtime serving-surface inventory
 
@@ -1469,32 +1473,29 @@ lossless source tables without making them normal serving dependencies. The tool
 also scans the runtime Python modules for direct `Database` calls and fails if a
 new serving method is not represented by the probe plan.
 
-Against the compatibility-21 production database derived from the reviewed
-2026-09-18 snapshot, 25 serving probes read **62 tables / 230 distinct table-field
-pairs**. The maintained semantic classification assigns every observed field one
-of three runtime roles:
+The initial compatibility-21 trace of the reviewed 2026-09-18 snapshot covered
+25 serving probes and read **62 tables / 230 distinct table-field pairs**. That
+baseline identified 43 replaceable fields across 16 source tables in addition to
+the genuine semantic-overlap work.
 
-- **canonical application data** — 105 fields;
-- **explicit contextual application data** — 60 fields; and
-- **intentional source representation** — 65 fields.
+After migrating those replaceable runtime reads, the compatibility-22 trace covers
+**47 tables / 187 distinct table-field pairs**. All **43 replaceable source fields
+across 16 tables are gone from normal serving**: unit search labels come from the
+canonical logical-unit/profile/loadout layers; skill/equipment/weapon filters and
+reverse catalog usage expand canonical payload rows back through their occurrence
+maps; source-specific unit display names are reconstructed from canonical logical
+unit fields plus explicit name aliases. Top-level `unit_option_*` occurrences stay
+source-contextual by design.
 
-Of those 230 fields, 152 have no open 0.6.1 semantic issue. The remaining 78
-identify two concrete follow-up classes rather than an undifferentiated request
-to canonicalize more tables:
-
-1. **43 fields across 16 tables are replaceable source reads.** Profile/loadout
-   canonicalization is complete, but unit search still reads `profiles.name` and
-   `loadout_options.name`, unit skill/equipment/weapon filters still read the
-   source `profile_*` / `option_*` occurrence tables, and catalog reverse lookups
-   still read those same occurrence tables plus `units.name`. These paths should
-   move to the already-materialized canonical profile/loadout/logical-unit layer;
-   no new gameplay identity decision is required.
-2. **35 fields across 8 tables have genuine semantic overlap.** Current army
-   presentation combines `army_lists` with `metadata_factions`, while the
-   skill/equipment/weapon catalogs combine normalized occurrence catalogs with
-   `metadata_skills`, `metadata_equipment`, and `metadata_weapons`. Those
-   boundaries require explicit semantic audits before deciding whether to
-   materialize a new canonical catalog/army layer or retain contextual metadata.
+The current role totals are **105 canonical-application fields**, **60 explicit
+contextual-application fields**, and **22 intentional-source fields**. The remaining
+**35 fields across 8 tables** are all genuine semantic overlap rather
+than mechanical duplication. Current army presentation combines `army_lists` with
+`metadata_factions`, while skill/equipment/weapon catalogs combine normalized
+occurrence catalogs with `metadata_skills`, `metadata_equipment`, and
+`metadata_weapons`. Those boundaries require explicit semantic audits before
+deciding whether to materialize a new canonical catalog/army layer or retain
+contextual metadata.
 
 `army_units`, `unit_factions`, `profile_groups`, profile/loadout occurrence maps,
 logical-unit aliases/notes/source links, and `metadata_ammunitions` are recorded
@@ -1641,15 +1642,15 @@ application structure, not normalized source facts, and therefore do not rewrite
 the source tables. Repository unit queries map a requested source or
 representative ID through `logical_unit_sources`; list/search/detail general
 fields and unit-label search aliases come from the canonical logical-unit layer,
-while source-backed Army/relationship context and repository paths not yet
-canonicalized continue to use their source-oriented tables. The
+while source-backed Army/relationship context and the two explicitly unresolved
+metadata-overlap boundaries continue to use their reviewed source/context tables. The
 normalized-input table registry remains separate from these derived frontend
 tables so generated application structure cannot be supplied as normalized
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 14 and the application
-compatibility revision is 21. Imports build temporary sibling files, check
+compatibility revision is 22. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
