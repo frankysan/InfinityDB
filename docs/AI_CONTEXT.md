@@ -740,3 +740,10 @@ application-level identities.
   session, and refuses a remote checkout whose commit or tracked state differs from
   the clean local checkout. Tracked browser maps travel through Git, not the artifact
   transfer, so exact commit identity is part of the transfer contract.
+- 2026-09-20: Production deployment has two explicit data modes.
+  `install-or-update.sh` is the server-rebuild path and may replace generated runtime
+  databases from server-local raw source. `deploy-transferred.sh` is the no-rebuild
+  path for the commit-matched artifact bundle produced by
+  `send_deployment_artifacts.py`; it must preserve that transferred database/symbol
+  pairing. `deploy-local-test.sh` reuses the no-rebuild path under a separate Compose
+  project, binds only to `127.0.0.1`, and disables production image pruning.

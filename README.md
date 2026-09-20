@@ -170,17 +170,26 @@ prevents replacement.
 ## Linux deployment
 
 The supported Docker Compose deployment packages the application and validated
-runtime databases into an immutable image. Build the runtime data and prepare a
-complete local symbol publication before deploying:
+runtime databases into an immutable image. Production has two explicit data paths:
+`install-or-update.sh` rebuilds runtime databases from raw source already present on
+the server, while `deploy-transferred.sh` deploys a commit-matched database/symbol
+artifact set transferred from a development checkout without rebuilding it.
 
 ```sh
-infinity-db build --compact
-infinity-db build-rules
-DOMAIN=infinity.example.com IMAGE_TAG=app-local sh ./scripts/deploy.sh
+# Server-rebuild deployment
+sh ./scripts/install-or-update.sh
+
+# After tools/send_deployment_artifacts.py has transferred a matched artifact set
+sh ./scripts/deploy-transferred.sh
 ```
 
-Place the supplied Caddy service behind a public TLS reverse proxy. Deployment
-validation fails if required databases or graphical assets are missing or inconsistent.
+For a deployment test on the server that must not be reachable from the LAN, use
+`sh ./scripts/deploy-local-test.sh`. It runs as a separate Compose project on
+`127.0.0.1:8080` by default and does not prune production rollback images.
+
+Place the supplied production Caddy service behind a public TLS reverse proxy.
+Deployment validation fails if required databases or graphical assets are missing or
+inconsistent.
 
 See the [Linux deployment guide](docs/deployment.md) for prerequisites, updates,
 rollback, and operational commands. Use the

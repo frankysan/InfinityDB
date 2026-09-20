@@ -12,11 +12,19 @@ those assets separately for local browser use, but that does not grant
 redistribution rights. Review [third-party notices](../THIRD_PARTY_NOTICES.md)
 before distributing any image or database that contains external data or assets.
 
-This guide documents the **current deployment workflow**. Army/wiki/symbol
+This guide documents the **current deployment workflows**. Army/wiki/symbol
 acquisition and symbol processing/publication are explicit workflows separate
-from deployment; `install-or-update.sh` does not perform network acquisition or
-rebuild the local symbol publication. For moving an existing installation to a
-new host, see the [server migration guide](server-migration.md).
+from deployment. Production has two intentionally separate data modes:
+
+- `install-or-update.sh` rebuilds runtime databases from raw source already present
+  on the server, then deploys them with the existing local symbol publication.
+- `deploy-transferred.sh` consumes a commit-matched database/symbol artifact set
+  transferred from a development checkout and never rebuilds runtime data.
+
+Do not mix those modes in one update: rebuilding after an artifact transfer can replace
+the transferred database with one from a different Army snapshot, which the provenance
+guard correctly rejects. For moving an existing installation to a new host, see the
+[server migration guide](server-migration.md).
 
 ## Prerequisites
 
@@ -59,10 +67,17 @@ The application factory still treats an adjacent `rules.db` as optional when no
 rules path is explicitly configured. This preserves local/development workflows;
 the stricter requirement is part of the Docker production contract.
 
-For a local smoke test, use `DOMAIN=localhost` and open
-`http://localhost`. On a public domain, replace `infinity.example.com` with
-the real hostname before running Compose and configure the external TLS proxy
-to forward that host to Caddy.
+For an isolated local-access-only deployment test on the same server, use:
+
+```sh
+sh ./scripts/deploy-local-test.sh
+```
+
+This creates a separate `infinitydb-test` Compose project, binds Caddy only to
+`127.0.0.1:8080`, uses the current matched runtime/symbol artifacts without
+rebuilding them, and disables production image pruning. Pass another port as the
+first argument when needed. From another machine, use an SSH tunnel such as
+`ssh -L 8080:127.0.0.1:8080 <server>` and browse to `http://localhost:8080`.
 
 
 ## Local graphical symbols
@@ -119,8 +134,18 @@ inspect the exact transfer set:
 SSH public-key authentication can be selected with `--identity-file` to make the same
 transfer non-interactive. The helper deliberately excludes raw snapshots, work trees,
 logs, reports, backups, caches, and other ignored development state. After transfer,
-run the guarded `scripts/deploy.sh` path on the server; `install-or-update.sh` still
-requires its own raw Army snapshot because it rebuilds the runtime databases.
+run the dedicated no-rebuild wrapper on the server:
+
+```sh
+sh ./scripts/deploy-transferred.sh
+```
+
+The wrapper installs the current checkout into the server virtual environment, derives
+a versioned `app-v*` image tag, reads `DOMAIN` and `RETAIN_APP_IMAGES` from the
+environment or `.infinity-db-deploy.env`, and delegates to the same guarded image
+validation/deployment path. It deliberately does not call `infinity-db build` or
+`build-rules`. `install-or-update.sh` remains the separate server-rebuild workflow and
+requires its own raw Army snapshot.
 
 For an exact server replacement, copy the already-published local asset set rather
 than relying on cross-machine SVG regeneration. See
@@ -166,8 +191,12 @@ sh ./scripts/verify-container-image.sh infinity-db:smoke --redistributable
 docker compose ps
 docker compose logs -f app caddy
 docker compose pull caddy
-# Rebuild/deploy only through the guarded deployment path:
-DOMAIN=infinity.example.com IMAGE_TAG=app-local sh ./scripts/deploy.sh
+# Production from server-side raw data:
+sh ./scripts/install-or-update.sh
+# Production from a commit-matched transferred artifact set:
+sh ./scripts/deploy-transferred.sh
+# Isolated loopback-only test stack (default port 8080):
+sh ./scripts/deploy-local-test.sh
 ```
 
 To update Army data, download or place the new raw snapshot and its required
