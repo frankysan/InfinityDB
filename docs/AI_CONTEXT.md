@@ -211,8 +211,19 @@ and serves a read-only browser and same-origin HTTP API.
   share one canonical loadout payload; the merge remains occurrence reconciliation,
   not payload identity. Canonical profile/loadout occurrence tables require
   unit-oriented indexes because unit-detail assembly filters them by source unit.
-  Canonical unit-payload work remains staged behind the same field-level
-  invariance and provenance requirements.
+  The logical-unit field audit on the 2026-09-18 production snapshot maps 920
+  source-defined units to 737 logical units, including 167 multi-source logical
+  units. All 737 representatives are ordinary standard source units; none is a
+  reinforcement-only or mercenary-variant row. That representative rule may
+  govern canonical display/general fields, but it does not erase source context:
+  every multi-source logical unit contributes alternate searchable labels, six
+  have source-note variation, and four have a player-facing note only on a
+  non-representative reinforcement row. Source faction/Army relationships and
+  top-level unit options remain contextual. `spectables` is populated on 30
+  source units but only singleton logical units in this snapshot, so it must be
+  preserved while its canonical/presentation treatment remains unresolved.
+  Canonical unit-payload work remains staged behind explicit modeling of these
+  aliases/deltas and the same provenance requirements.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data

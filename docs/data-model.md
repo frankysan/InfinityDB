@@ -1215,6 +1215,114 @@ Canonical include/peripheral identities, representation normalization, and
 eventual movement of lossless source-only tables to `infinity.raw.db` remain
 separate evidence-driven decisions.
 
+### Logical-unit payload semantic classification audit
+
+The next canonicalization layer is the unit-level payload itself. A deterministic
+read-only audit now compares every source-defined `units` row inside each
+materialized `logical_unit`, together with unit-faction memberships, Army
+occurrences, and top-level `unit_options`. Run it with:
+
+```text
+python tools/audit_unit_semantics.py path/to/infinity.db --output unit-semantics.json
+```
+
+On the production snapshot downloaded 2026-09-18, 920 source-defined units map
+to 737 logical units. The source-count distribution is 570 singletons, 152
+pairs, 14 triples, and one four-source logical unit. The 167 multi-source logical
+units therefore account for 350 source-unit rows. Of the non-representative
+source rows, 133 are reinforcement-only records, 49 are mercenary variants, and
+one is another standard source representation.
+
+The existing representative rule is strong enough to be considered explicit
+semantic policy rather than an accidental implementation detail: all 737
+representatives in the audited snapshot are ordinary `standard` source units,
+and none is reinforcement-only or a mercenary variant. Canonical unit display
+fields may therefore be based on the already-reviewed representative source
+rule, but that rule does **not** authorize discarding differing source facts.
+
+Field evidence across the 167 multi-source logical units is:
+
+| Unit field | Classification | Repeated logical units with variation | Audit conclusion |
+| --- | --- | ---: | --- |
+| `id` | source/provenance | 167 | Original source identity; never a payload fact. |
+| `id_army` | source/provenance | 166 | Source `idArmy` varies heavily and remains provenance. |
+| `canonical_faction_id` | relationship/context | 136 | Source canonical-faction relationship varies across reinforcement/mercenary representations. |
+| `main_army_id` | derived relationship/context | 124 | Every repeated logical unit with a non-null value varies; logical display may follow the representative rule. |
+| `display_army_id` | presentation context | 136 | Source-specific display derivation varies; canonical display may follow the representative rule. |
+| `isc` | representative-backed canonical fact | 132 | Canonical display value may come from the representative; alternate values remain search/provenance context. |
+| `isc_abbr` | representative-backed canonical fact | 29 | Same rule as `isc`; only 36 repeated logical units contain any abbreviation. |
+| `name` | representative-backed canonical fact | 131 | Canonical display value may come from the representative; alternate source names remain significant context. |
+| `slug` | representative-backed canonical fact | 167 | Every multi-source logical unit has source slug variation. |
+| `notes` | contextual delta | 6 | Genuine player-facing source-specific notes exist and must not be replaced by one representative value. |
+| `spectables` | canonical candidate, unproven across variants | 0 | 30 source units contain data, but all belong to singleton logical units; cross-source invariance is not demonstrated. |
+| `source_defined` | source/provenance | 0 | Distinguishes imported source rows from normalization placeholders. |
+| `source_role` | source/provenance | 49 | Standard versus mercenary-variant representation is occurrence provenance. |
+| `relation_reference_count` | relationship summary | 6 | Derived summary of source relations; underlying relationships are audited separately. |
+
+The label differences are mostly source representation rather than evidence for
+separate logical identity, but not universally so. Using only the database-pinned
+identity normalization as a diagnostic, `name` variation falls from 131 logical
+units to 38 after reinforcement-prefix removal and to 10 after full unit-identity
+normalization. `isc` falls from 132 to 13 and then 7; `isc_abbr` falls from 29 to
+12 and remains 12. These transformations are **matching evidence only**. They do
+not rewrite canonical display strings or justify dropping alternate labels.
+
+That distinction matters operationally. The current repository uses representative
+`name`/`isc`/`isc_abbr`/`slug` values for logical-unit display, while search terms
+are the union of labels from every source row. All 167 multi-source logical units
+contribute at least one alternate general label beyond the representative, 467
+alternate labels in total in this snapshot. Any canonical unit table must retain
+those search aliases explicitly or keep an equivalent source-context path.
+
+Notes provide a concrete losslessness/completeness case. Six logical units have
+different source notes. Four of them (`657`, `659`, `1550`, and `1567`) have a
+non-representative reinforcement note while the representative note is null. The
+current `get_unit()` response exposes only the representative note, so these four
+source note deltas are not currently reachable through unit detail. Canonical
+unit design must preserve them explicitly and the later web-app completeness pass
+must decide how to present them.
+
+Unit relationships remain contextual rather than being folded into the canonical
+unit row:
+
+- source `unit_factions` membership sets differ in all 167 multi-source logical
+  units; the logical-unit normal-army view is an aggregate over those source
+  relationships, not a replacement for them;
+- `army_units` rows remain source/Army occurrences carrying position, filters,
+  and `availability_kind`;
+- top-level `unit_options` are also source-unit payload/context rather than simple
+  unit facts. The snapshot contains 18 rows across nine source units / seven
+  logical units. Two logical units have options on multiple source records: the
+  SCARFACE pair is an exact repeat, while EQUIPE MIRAGE-5 has the same option and
+  nested orders/includes but a genuine points difference (`60` versus `51`).
+  The comparison uses `(logical_unit_id, option_id)` only as an observational key;
+  `option_id` remains source-local and is not established canonical identity.
+
+Thirty source units contain non-null `spectables`, but none belongs to a
+multi-source logical unit and the repository currently does not consume this
+field. It therefore remains a canonical-unit payload candidate with insufficient
+variant evidence and a likely 1.0 presentation gap to resolve rather than data
+that may be discarded. Top-level `unit_options` likewise require an explicit
+overlap/presentation decision because their complete source meaning is not
+currently returned by unit detail even though parts are used for search and
+catalog reverse lookup.
+
+The audit establishes the following design constraints for the next step:
+
+- a canonical unit payload may use representative-backed general display and
+  faction-display values because representative selection is already explicit,
+  deterministic semantic policy;
+- alternate source names/ISC/abbreviations/slugs must remain searchable and
+  traceable;
+- source-specific notes remain explicit deltas rather than being silently
+  replaced by the representative note;
+- source canonical-faction/main/display derivations, `unit_factions`, Army
+  occurrences, availability, and top-level unit options remain contextual;
+- `spectables` must be preserved while its canonical/presentation treatment is
+  decided; and
+- `relation_reference_count` is not a canonical fact; the underlying
+  relationships, not the summary count, are the semantic object to audit.
+
 #### Next implementation targets
 
 Canonical profile and loadout payloads, their occurrence mappings, and the
@@ -1222,10 +1330,12 @@ unit-detail read-path migrations are complete. The remaining semantic work is:
 
 ### 1. Canonical unit payload
 
-Audit the fields currently repeated across the source units belonging to each
-`logical_unit`. Promote only fields demonstrated to be invariant or governed by
-an explicit, reviewed semantic rule. Army memberships, availability occurrences,
-source-specific variants, and genuine differences remain separate.
+The field audit is complete. Define the canonical unit payload around the
+existing representative-source rule, add explicit source-context structures for
+alternate search labels and note deltas, and decide how `spectables` and
+top-level `unit_options` are represented before migrating repository reads. Army
+memberships, availability occurrences, source-specific relationships, and
+genuine differences remain separate.
 
 ### 2. Relationships
 

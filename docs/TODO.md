@@ -197,9 +197,23 @@ are all implemented. Durable contracts and evidence are recorded in
 this active backlog.
 
 - [ ] **Extend canonicalization to logical-unit payloads.**
-  - [ ] Audit fields across every existing `logical_unit` for invariance.
-  - [ ] Promote only facts proven invariant or governed by an explicit reviewed
-    semantic rule.
+  - [x] Audit fields across every existing `logical_unit` for invariance and
+    source-variant meaning. The 2026-09-18 production snapshot contains 920
+    source units resolving to 737 logical units; 167 logical units have multiple
+    source representations.
+  - [ ] Define the canonical unit payload around the existing deterministic
+    representative-source rule without treating representative selection as
+    permission to discard source-specific facts.
+  - [ ] Preserve alternate source names, ISC values, abbreviations, and slugs as
+    explicit searchable/traceable context. All 167 multi-source logical units
+    currently contribute at least one alternate general label.
+  - [ ] Model source-specific unit notes explicitly. Six logical units currently
+    have note variation, including four where a player-facing note exists only
+    on a non-representative reinforcement source row.
+  - [ ] Decide the canonical/presentation treatment of `spectables` and top-level
+    `unit_options` before migrating unit reads. `spectables` is populated only
+    on singleton logical units in the audited snapshot, while unit options
+    include both exact repeats and a genuine source-specific points delta.
   - [ ] Keep army membership, availability, source variants, and genuine
     profile/loadout differences as explicit context.
   - [ ] Preserve source IDs and full traceability from canonical facts back to
