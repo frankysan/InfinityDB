@@ -418,6 +418,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 11,
                 "name": "Stealth",
+                "slug": "stealth",
                 "quantity": None,
                 "extras": [{"id": 41, "name": "+3"}],
             }
@@ -443,6 +444,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 11,
                 "name": "Stealth",
+                "slug": "stealth",
                 "quantity": None,
                 "extras": [{"id": 41, "name": "+3"}],
             }
@@ -1259,7 +1261,8 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert b"function profileItems(items, catalog, fallbackLabel)" in body
-    assert b"link.href = `/${catalog}/${encodeURIComponent(item.id)}`" in body
+    assert b'const routeId = catalog === "skills" && item.slug ? item.slug : item.id;' in body
+    assert b"link.href = `/${catalog}/${encodeURIComponent(routeId)}`" in body
 
 
 @pytest.mark.full_assets
@@ -1376,7 +1379,8 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b"getCatalogItems(page)" in body
     assert b"fetch(" not in body
     assert b'["skills", "equipment", "weapons", "traits"].includes(page)' in body
-    assert b"link.href = `/${page}/${encodeURIComponent(item.id)}`;" in body
+    assert b'const routeId = page === "skills" && item.slug ? item.slug : item.id;' in body
+    assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
@@ -1398,6 +1402,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "name": "Stealth",
             "wiki": None,
             "use_count": 1,
+            "slug": "stealth",
             "categories": [{"name": "Unclassified", "source": None, "page": None}],
         },
         "equipment": {
@@ -1433,6 +1438,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
         "id": 11,
         "name": "Stealth",
         "wiki": None,
+        "slug": "stealth",
         "categories": [{"name": "Unclassified", "source": None, "page": None}],
         "variants": [
             {
@@ -1462,6 +1468,20 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
             }
         ],
     }
+
+    status, headers, slug_page = request(app, "/skills/stealth")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"skill.js" in slug_page
+
+    status, headers, slug_body = request(app, "/api/skills/stealth")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    assert json.loads(slug_body) == skill
+
+    status, _, body = request(app, "/api/skills/not-a-skill")
+    assert status == 404
+    assert json.loads(body)["error"] == "Skill not found"
 
     status, _, body = request(app, "/api/units")
     assert status == 200

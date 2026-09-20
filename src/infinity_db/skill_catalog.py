@@ -73,10 +73,20 @@ class SkillCatalog:
             return None
         return dict(next(iter(values)))
 
+    def _attach_public_slug(self, item: dict[str, Any]) -> None:
+        """Attach the additive public Skill slug when it cannot shadow a numeric route."""
+        skill_id = item.get("id")
+        if type(skill_id) is not int:
+            return
+        slug = self.database.application_slug("skills", skill_id)
+        if slug is not None and not slug.isdigit():
+            item["slug"] = slug
+
     def _enrich_skill_item(self, item: dict[str, Any]) -> None:
         skill_id = item.get("id")
         if type(skill_id) is not int:
             return
+        self._attach_public_slug(item)
         semantics = self._parameter_semantics_for_ids({skill_id})
         if semantics is not None:
             item["parameter_semantics"] = semantics
@@ -128,6 +138,7 @@ class SkillCatalog:
         if item is None:
             return None
         result = deepcopy(item)
+        self._attach_public_slug(result)
         source_ids = set(self.database.skill_source_ids(skill_id))
         if not source_ids:
             source_ids = {int(result["id"])}

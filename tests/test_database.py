@@ -2590,6 +2590,20 @@ def test_application_domain_slugs_are_separate_from_source_slugs(
     assert database.application_id_for_slug("skills", skill_slug) == skill["id"]
 
 
+def test_skill_catalog_does_not_emit_numeric_only_slug_that_would_shadow_compatibility_route(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"][0]["name"] = "100"
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    catalog = SkillCatalog(Database(database_path), None)
+
+    skill = catalog.list_skills()[0]
+    assert skill["id"] == 1
+    assert "slug" not in skill
+    assert Database(database_path).application_slug("skills", 1) == "100"
+
+
 def test_application_domain_slug_lookup_rejects_unknown_domains(
     tmp_path: Path, normalized: dict
 ) -> None:

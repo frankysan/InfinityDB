@@ -446,7 +446,8 @@ function profileItems(items, catalog, fallbackLabel) {
       ? `${decoratedName} ×${item.quantity}`
       : decoratedName;
     const link = document.createElement("a");
-    link.href = `/${catalog}/${encodeURIComponent(item.id)}`;
+    const routeId = catalog === "skills" && item.slug ? item.slug : item.id;
+    link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
     link.textContent = label;
     if (hiddenIds.length) {
       const details = document.createElement("span");

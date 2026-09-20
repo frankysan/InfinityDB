@@ -54,7 +54,8 @@ function render() {
     name.scope = "row";
     if (["skills", "equipment", "weapons", "traits"].includes(page)) {
       const link = document.createElement("a");
-      link.href = `/${page}/${encodeURIComponent(item.id)}`;
+      const routeId = page === "skills" && item.slug ? item.slug : item.id;
+      link.href = `/${page}/${encodeURIComponent(routeId)}`;
       link.textContent = item.name;
       name.append(link);
     } else {

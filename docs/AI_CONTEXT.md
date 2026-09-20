@@ -764,9 +764,12 @@ application-level identities.
   Weapons. Each identity retains a deterministic candidate plus `resolved`,
   `collision`, or `unavailable` status; collisions never receive positional numeric
   suffixes. The current 2026-09-18 snapshot resolves all 1,042 initial identities.
-  Source slugs/numeric IDs remain context/provenance, curated IDs such as
-  `skill:doctor` remain typed internal identities, and current numeric web/API
-  routes remain unchanged until a later slug-freezing/alias migration.
+  Source slugs/numeric IDs remain context/provenance and curated IDs such as
+  `skill:doctor` remain typed internal identities. Skills are the first additive
+  public-route consumer: resolved non-numeric Skill slugs are emitted in API/browser
+  links and accepted by web/API detail routes while numeric routes remain valid.
+  Numeric-only candidates stay on the numeric compatibility form, and no redirect or
+  permanent slug-freeze promise is made until the later freezing/alias migration.
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
   rules authority, the pinned Wiki archive as discovery/secondary provenance,

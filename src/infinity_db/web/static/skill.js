@@ -160,7 +160,7 @@ initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentSkill) render(currentSkill);
 });
-if (!/^\d+$/.test(skillId || "")) {
+if (!skillId) {
   name.firstChild.textContent = "Skill unavailable";
   status.textContent = "The requested skill address is invalid.";
 } else {

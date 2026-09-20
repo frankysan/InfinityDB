@@ -707,12 +707,16 @@ new correctness or reproducibility defect.
 ## Architecture follow-up
 
 - [ ] Complete the accepted domain-unique public-ID migration across API lookup and
-  web routes. The schema-17 application slug registry now defines shared candidate
+  web routes. The schema-17 application slug registry defines shared candidate
   normalization, domain-local uniqueness, and fail-closed collision/unavailable states
-  for Armies, Units, Skills, Equipment, and Weapons without changing public routes.
-  Before replacing numeric routes, define per-domain slug freezing, reviewed overrides,
-  aliases/redirects, and compatibility behavior; extend the registry only when a new
-  canonical domain boundary (for example Peripheral entities/profiles) has been proven.
+  for Armies, Units, Skills, Equipment, and Weapons.
+  - [x] Begin with Skills as an additive migration slice: expose resolved non-numeric
+    Skill slugs in API payloads/browser links and accept both slug and numeric Skill
+    detail routes without redirecting or retiring the compatibility form.
+  - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
+    reviewed overrides, aliases/redirects, and compatibility behavior; extend the
+    registry only when a new canonical domain boundary (for example Peripheral
+    entities/profiles) has been proven.
   Keep source numeric IDs/slugs as provenance/context references and application numeric
   IDs as developer/compatibility details rather than the long-term user-facing contract.
 

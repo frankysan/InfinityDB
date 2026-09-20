@@ -112,14 +112,14 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 25,
-        "runtimeTableCount": 49,
-        "runtimeFieldCount": 196,
+        "surfaceCount": 27,
+        "runtimeTableCount": 50,
+        "runtimeFieldCount": 200,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 196,
-        "role:canonical_application:fieldCount": 111,
+        "issue:none:fieldCount": 200,
+        "role:canonical_application:fieldCount": 115,
         "role:contextual_application:fieldCount": 62,
         "role:intentional_source_representation:fieldCount": 23,
     }
@@ -152,6 +152,7 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "application_armies", "name")["role"] == CANONICAL
     assert _field(report, "application_army_sources", "source_army_id")["role"] == CONTEXTUAL
     assert _field(report, "application_catalog_items", "name")["role"] == CANONICAL
+    assert _field(report, "application_domain_slugs", "slug")["role"] == CANONICAL
     assert _field(report, "application_catalog_sources", "source_item_id")["role"] == CONTEXTUAL
     assert _field(report, "army_lists", "kind")["role"] == SOURCE
     assert "metadata_factions" not in observed_tables
@@ -176,6 +177,8 @@ def test_runtime_surface_audit_is_deterministic_and_read_only(tmp_path: Path) ->
 
 def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
     assert discover_runtime_database_methods(ROOT) == {
+        "application_id_for_slug",
+        "application_slug",
         "get_catalog_item",
         "get_skill",
         "get_trait",

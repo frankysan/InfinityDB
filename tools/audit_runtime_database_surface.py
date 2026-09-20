@@ -92,7 +92,12 @@ _register(
     reason="Current application identity/payload or unambiguous lookup catalog.",
 )
 _register(
-    ["application_armies", "application_army_reinforcement_parents", "application_catalog_items"],
+    [
+        "application_armies",
+        "application_army_reinforcement_parents",
+        "application_catalog_items",
+        "application_domain_slugs",
+    ],
     CANONICAL,
     reason=(
         "Materialized InfinityDB application identity/hierarchy or catalog identity "
@@ -255,6 +260,8 @@ TABLE_POLICY["units"] = _policy(
 # helpers. validate() is intentionally excluded from the 0.6.1 serving surface.
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
+    "application_id_for_slug",
+    "application_slug",
     "snapshot_downloaded_on",
     "list_armies",
     "list_skill_extras",
@@ -360,6 +367,9 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     if playable is None:
         raise RuntimeSurfaceAuditError("Runtime audit needs at least one playable army")
     skill = _first(skills, "skill")
+    skill_slug = preparation.application_slug("skills", int(skill["id"]))
+    if skill_slug is None:
+        raise RuntimeSurfaceAuditError("Runtime audit needs at least one resolved Skill slug")
     equipment_item = _first(equipment, "equipment item")
     weapon = _first(weapons, "weapon")
     trait = _first(traits, "weapon trait")
@@ -372,6 +382,14 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ("armies", lambda db: db.list_armies()),
         ("skill-extras", lambda db: db.list_skill_extras()),
         ("skills-list", lambda db: db.list_catalog_items("skills")),
+        (
+            "skill-slug-for-id",
+            lambda db: db.application_slug("skills", int(skill["id"])),
+        ),
+        (
+            "skill-id-for-slug",
+            lambda db: db.application_id_for_slug("skills", skill_slug),
+        ),
         ("equipment-list", lambda db: db.list_catalog_items("equipment")),
         ("weapons-list", lambda db: db.list_catalog_items("weapons")),
         ("skill-detail", lambda db: db.get_skill(int(skill["id"]))),

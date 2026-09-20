@@ -18,6 +18,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Begin the public slug migration with Skills: Skill links and detail APIs now use
+  readable domain-local slugs when available while existing numeric Skill URLs remain
+  valid for compatibility.
 - Validate curated typed record IDs against the shared domain-slug grammar, and make
   Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
 - Make the Unit explorer's matching-unit statistic show the currently visible unique

@@ -51,6 +51,9 @@ ORDER_SYMBOL_PATH = re.compile(
 CHARACTERISTIC_SYMBOL_PATH = re.compile(
     r"/static/characteristics/(peripheral|hackable|cube|cube-2)\.svg"
 )
+DOMAIN_ROUTE_IDENTIFIER = r"[a-z0-9]+(?:-[a-z0-9]+)*"
+SKILL_PAGE_PATH = re.compile(rf"/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+SKILL_API_PATH = re.compile(rf"/api/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
@@ -415,7 +418,7 @@ class Application:
                 breadcrumbs=(("Database", "/"), (catalog.replace("-", " ").title(), None)),
                 catalog_tag="Reference data",
             )
-        elif re.fullmatch(r"/skills/[0-9]+", path):
+        elif SKILL_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
             body = _page(
                 "skill.html",
@@ -496,11 +499,16 @@ class Application:
                 LOGGER.exception("Could not read traits")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The traits are unavailable. Please try again."}
-        elif match := re.fullmatch(r"/api/skills/([0-9]+)", path):
+        elif match := SKILL_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                skill_id = int(match.group(1))
-                payload = self.skill_catalog.get_skill(skill_id)
+                identifier = match.group("identifier")
+                skill_id = (
+                    int(identifier)
+                    if identifier.isdigit()
+                    else self.database.application_id_for_slug("skills", identifier)
+                )
+                payload = None if skill_id is None else self.skill_catalog.get_skill(skill_id)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
