@@ -933,6 +933,10 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
     shutil.copyfile(app.database.path, rebuilt_database)
     with sqlite3.connect(rebuilt_database) as connection:
         connection.execute("UPDATE units SET name = ? WHERE id = ?", ("Updated Ranger", 1))
+        connection.execute(
+            "UPDATE logical_units SET name = ? WHERE representative_unit_id = ?",
+            ("Updated Ranger", 1),
+        )
     rebuilt_app = create_app(rebuilt_database)
 
     rebuilt_status, rebuilt_headers, rebuilt_body = request(rebuilt_app, "/api/armies")

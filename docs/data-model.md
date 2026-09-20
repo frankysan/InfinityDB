@@ -205,28 +205,54 @@ for the current reviewed relationship canonical source identity `1` displays as
 army `901`.
 
 Logical-unit identity is now materialized during frontend SQLite creation while
-normalized/source records remain unchanged for provenance. The frontend relation
-is:
+normalized/source records remain unchanged for provenance. The frontend relation now contains both identity and the first canonical unit
+payload/context layer:
 
 ```text
 logical_units
   id                     application logical-unit ID
   representative_unit_id source unit used for canonical display/general data
+  name
+  isc
+  isc_abbr
+  slug
+  canonical_faction_id
+  main_army_id
+  display_army_id
 
 logical_unit_sources
   source_unit_id          original source-defined unit ID; one row per source unit
   logical_unit_id         owning application logical unit
+
+logical_unit_aliases
+  logical_unit_id
+  source_unit_id
+  field
+  value
+
+logical_unit_notes
+  logical_unit_id
+  source_unit_id
+  note
+
+logical_unit_spectables
+  logical_unit_id
+  source_unit_id
+  spectables
 ```
 
 Since schema version 11, `logical_units.id` equals `representative_unit_id`,
-preserving existing unit URLs and API identifiers. Keeping both fields explicit
+preserving existing unit URLs and API identifiers. Schema version 14 extends the
+same row with the representative-backed canonical fields and materializes the
+source-attributed context tables above. Keeping the representative field explicit
 allows a future application-owned logical ID without rewriting the source model.
 
 Database creation resolves the relation from configured unit aliases in the
 pinned identity policy, normalized `genericUnitMatches`, normalized
 `mercenaryUnitMatches` / `unmatchedMercenaryUnitIds`, and the database-build
-`reinforcementUnitMatches` audit. These remain evidence/provenance; the two
-frontend tables are their resolved application identity. The resolver combines
+`reinforcementUnitMatches` audit. These remain evidence/provenance; the identity
+rows are their resolved application mapping, while the canonical/context tables
+materialize the accepted logical-unit payload boundary. The resolver combines
 transitive relationships as graph components, selects a deterministic
 representative, rejects invalid or contradictory references, and places
 explicitly unmatched mercenary/reinforcement variants in independent logical
@@ -1325,12 +1351,12 @@ The audit establishes the following design constraints for the next step:
 
 ### Canonical logical-unit payload/context design
 
-**Design direction.** The canonical unit layer should materialize one
+**Current materialization.** Schema version 14 materializes one
 application-owned row per existing logical unit without copying the complete
 source `units` row. The canonical row is representative-backed, while source
 labels and player-facing source deltas remain explicit context.
 
-The proposed application boundary is:
+The materialized application boundary is:
 
 ```text
 logical_units
@@ -1404,8 +1430,8 @@ the representative-backed values needed by current list/detail presentation,
 while the subsequent relationship audit owns the lossless model for the
 source-specific relationships.
 
-The version-2 unit semantics audit emits this candidate model directly. On the
-2026-09-18 production snapshot it projects:
+The version-2 unit semantics audit emits this model directly. A clean schema-14
+rebuild from the stored 2026-09-18 normalized source reproduces:
 
 - 737 canonical logical-unit rows;
 - 920 source links;
@@ -1414,9 +1440,11 @@ The version-2 unit semantics audit emits this candidate model directly. On the
 - 30 exact source-context `spectables` occurrences; and
 - 18 top-level `unit_options` rows left as source-context payloads.
 
-These counts are design evidence for the audited snapshot, not permanent schema
+These counts are acceptance evidence for the audited snapshot, not permanent schema
 cardinalities. Future source variation must be represented explicitly rather
-than forced into the current counts.
+than forced into the current counts. Database validation checks that canonical
+fields still equal the representative source and that the alias, note, and
+`spectables` context is complete relative to the retained source rows.
 
 #### Next implementation targets
 
@@ -1425,13 +1453,12 @@ unit-detail read-path migrations are complete. The remaining semantic work is:
 
 ### 1. Canonical unit payload
 
-The field audit and payload/context design are complete. Materialize the
-representative-backed canonical fields on `logical_units`, add the explicit
-alias/note/`spectables` context structures above, and then migrate unit
-list/search/detail reads away from source `units` fields. Prove output/search
-equivalence before removing any source-only runtime dependency. Top-level
-`unit_options`, Army memberships, availability occurrences, source-specific
-relationships, and genuine differences remain separate context.
+The field audit, payload/context design, and schema materialization are complete.
+The next step is to migrate unit list/search/detail reads away from source `units`
+fields and onto this canonical layer. Prove output/search equivalence before
+removing any source-only runtime dependency. Top-level `unit_options`, Army
+memberships, availability occurrences, source-specific relationships, and genuine
+differences remain separate context.
 
 ### 2. Relationships
 
@@ -1553,20 +1580,21 @@ normalization-time availability classification part of the generated database
 contract; repository mercenary filtering consumes `availability_kind` directly
 for current snapshots.
 
-Frontend-only `logical_units`, `logical_unit_sources`, and canonical
-profile/loadout payload tables are derived application structure, not normalized
-source facts, and therefore do not rewrite the source tables. Repository unit
-queries map a requested source or representative ID through
-`logical_unit_sources`, combine source-backed unit/Army context with canonical
-profile/loadout payload occurrences, and continue to use original source rows for
-relationships or repository paths that have not yet been canonicalized. The
+Frontend-only `logical_units`, `logical_unit_sources`, logical-unit alias/note/
+`spectables` context, and canonical profile/loadout payload tables are derived
+application structure, not normalized source facts, and therefore do not rewrite
+the source tables. Repository unit queries currently map a requested source or
+representative ID through `logical_unit_sources`, combine source-backed unit/Army
+context with canonical profile/loadout payload occurrences, and continue to use
+original source unit rows for list/search/detail general fields plus relationships
+or repository paths that have not yet been canonicalized. The
 normalized-input table registry remains separate from these derived frontend
 tables so generated application structure cannot be supplied as normalized
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 13 and the application
-compatibility revision is 19. Imports build temporary sibling files, check
+records its schema version. The current schema version is 14 and the application
+compatibility revision is 20. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

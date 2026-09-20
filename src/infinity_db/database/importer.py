@@ -33,6 +33,7 @@ from ..identities import (
     parse_identity_metadata,
 )
 from .loadout_payloads import materialize_loadout_payloads
+from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
 from .profile_payloads import materialize_profile_payloads
 from .schema import (
@@ -320,6 +321,7 @@ def export_database(
                         for row in logical_identity.logical_unit_sources
                     ),
                 )
+                materialize_logical_unit_payloads(connection)
                 materialize_profile_payloads(connection)
                 materialize_loadout_payloads(connection)
                 create_indexes(connection)

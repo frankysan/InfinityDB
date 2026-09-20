@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 14
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 19
+DATABASE_COMPATIBILITY_VERSION = 20
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -241,14 +241,36 @@ TABLES["option_weapons"] = table(
 DERIVED_TABLES = {
     "logical_units": table(
         "id",
-        "representative_unit_id",
+        "representative_unit_id name isc isc_abbr slug canonical_faction_id main_army_id "
+        "display_army_id",
         ref("representative_unit_id", "units", "id"),
+        ref("canonical_faction_id", "factions", "id"),
+        ref("main_army_id", "factions", "id"),
+        ref("display_army_id", "factions", "id"),
     ),
     "logical_unit_sources": table(
         "source_unit_id",
         "logical_unit_id",
         ref("source_unit_id", "units", "id"),
         ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "logical_unit_aliases": table(
+        "logical_unit_id source_unit_id field",
+        "value",
+        ref("logical_unit_id", "logical_units", "id"),
+        ref("source_unit_id", "units", "id"),
+    ),
+    "logical_unit_notes": table(
+        "logical_unit_id source_unit_id",
+        "note",
+        ref("logical_unit_id", "logical_units", "id"),
+        ref("source_unit_id", "units", "id"),
+    ),
+    "logical_unit_spectables": table(
+        "logical_unit_id source_unit_id",
+        "spectables",
+        ref("logical_unit_id", "logical_units", "id"),
+        ref("source_unit_id", "units", "id"),
     ),
     "profile_payloads": table(
         "id",
@@ -506,6 +528,14 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     connection.execute(
         "CREATE INDEX logical_unit_sources_logical "
         "ON logical_unit_sources(logical_unit_id, source_unit_id)"
+    )
+    connection.execute(
+        "CREATE INDEX logical_units_name "
+        "ON logical_units(name COLLATE NOCASE, id)"
+    )
+    connection.execute(
+        "CREATE INDEX logical_unit_aliases_value "
+        "ON logical_unit_aliases(value COLLATE NOCASE, logical_unit_id)"
     )
     connection.execute(
         "CREATE UNIQUE INDEX profile_payloads_identity "

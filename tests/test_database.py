@@ -275,6 +275,14 @@ def test_database_preserves_every_normalized_table_and_field(
             row[1] == "logical_unit_sources_logical"
             for row in connection.execute("PRAGMA index_list(logical_unit_sources)")
         )
+        assert any(
+            row[1] == "logical_units_name"
+            for row in connection.execute("PRAGMA index_list(logical_units)")
+        )
+        assert any(
+            row[1] == "logical_unit_aliases_value"
+            for row in connection.execute("PRAGMA index_list(logical_unit_aliases)")
+        )
         indexes = {
             row[1]
             for table_name in DATABASE_TABLES
@@ -999,6 +1007,10 @@ def test_database_uses_persisted_generic_mapping(tmp_path: Path, normalized: dic
             "id": 10_001,
             "name": "Different source label",
             "isc": "Different source ISC",
+            "isc_abbr": "DSI",
+            "slug": "different-source-label",
+            "notes": "Source-specific note",
+            "spectables": {"source": ["context"]},
             "canonical_faction_id": None,
             "main_army_id": None,
             "source_defined": True,
@@ -1028,6 +1040,81 @@ def test_database_uses_persisted_generic_mapping(tmp_path: Path, normalized: dic
     assert details is not None
     assert details["id"] == 1
     assert details["source_ids"] == [1, 10_001]
+
+    connection = sqlite3.connect(path)
+    try:
+        representative = connection.execute(
+            "SELECT name, isc, isc_abbr, slug, canonical_faction_id, main_army_id, "
+            "display_army_id FROM units WHERE id = 1"
+        ).fetchone()
+        canonical = connection.execute(
+            "SELECT name, isc, isc_abbr, slug, canonical_faction_id, main_army_id, "
+            "display_army_id FROM logical_units WHERE id = 1"
+        ).fetchone()
+        assert canonical == representative
+        assert connection.execute(
+            "SELECT source_unit_id, field, value FROM logical_unit_aliases "
+            "WHERE logical_unit_id = 1 ORDER BY source_unit_id, field"
+        ).fetchall() == [
+            (10_001, "isc", "Different source ISC"),
+            (10_001, "isc_abbr", "DSI"),
+            (10_001, "name", "Different source label"),
+            (10_001, "slug", "different-source-label"),
+        ]
+        assert connection.execute(
+            "SELECT note FROM logical_unit_notes "
+            "WHERE logical_unit_id = 1 AND source_unit_id = 10001"
+        ).fetchone() == ("Source-specific note",)
+        stored_spectables = connection.execute(
+            "SELECT spectables FROM logical_unit_spectables "
+            "WHERE logical_unit_id = 1 AND source_unit_id = 10001"
+        ).fetchone()[0]
+        assert json.loads(stored_spectables) == {"source": ["context"]}
+    finally:
+        connection.close()
+
+
+def test_database_validation_rejects_missing_logical_unit_alias(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    original = next(unit for unit in data["tables"]["units"] if unit["id"] == 1)
+    original["source_role"] = "standard"
+    data["tables"]["units"].append(
+        {
+            "id": 10_001,
+            "name": "Alternate label",
+            "isc": original["isc"],
+            "canonical_faction_id": None,
+            "main_army_id": None,
+            "source_defined": True,
+            "source_role": "standard",
+        }
+    )
+    data["tables"]["army_units"].append(
+        {"army_id": 301, "unit_id": 10_001, "availability_kind": "standard"}
+    )
+    data["genericUnitMatches"] = [
+        {
+            "sourceUnitId": 10_001,
+            "representativeUnitId": 1,
+            "method": "generic_duplicate_key",
+        }
+    ]
+    path = tmp_path / "army.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            "DELETE FROM logical_unit_aliases "
+            "WHERE logical_unit_id = 1 AND source_unit_id = 10001 AND field = 'name'"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(ValueError, match="canonical logical-unit payloads"):
+        Database(path).validate()
 
 
 def test_database_empty_generic_audit_prevents_legacy_grouping(

@@ -32,6 +32,7 @@ from infinity_db.identities import (
     strip_reinforcement_prefix,
 )
 
+from .logical_unit_payloads import ALIAS_FIELDS, CANONICAL_UNIT_FIELDS
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -64,6 +65,101 @@ class RowLike(Protocol):
     def __getitem__(self, key: str, /) -> Any: ...
 
     def keys(self) -> Iterable[str]: ...
+
+
+def _validate_logical_unit_payloads(connection: sqlite3.Connection) -> None:
+    canonical_mismatch = connection.execute(
+        "SELECT 1 FROM logical_units AS lu "
+        "JOIN units AS r ON r.id = lu.representative_unit_id "
+        "WHERE "
+        + " OR ".join(f"NOT (lu.{field} IS r.{field})" for field in CANONICAL_UNIT_FIELDS)
+        + " LIMIT 1"
+    ).fetchone()
+
+    alias_cases = " + ".join(
+        "CASE WHEN lus.source_unit_id != lu.representative_unit_id "
+        f"AND u.{field} IS NOT NULL AND u.{field} != '' "
+        f"AND NOT (u.{field} IS r.{field}) THEN 1 ELSE 0 END"
+        for field in ALIAS_FIELDS
+    )
+    expected_alias_count = connection.execute(
+        "SELECT COALESCE(SUM("
+        + alias_cases
+        + "), 0) FROM logical_units AS lu "
+        "JOIN units AS r ON r.id = lu.representative_unit_id "
+        "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+        "JOIN units AS u ON u.id = lus.source_unit_id"
+    ).fetchone()[0]
+    alias_count = connection.execute("SELECT COUNT(*) FROM logical_unit_aliases").fetchone()[0]
+
+    alias_valid_cases = " OR ".join(
+        f"(a.field = '{field}' AND a.value IS u.{field} "
+        f"AND u.{field} IS NOT NULL AND u.{field} != '' "
+        f"AND NOT (u.{field} IS r.{field}))"
+        for field in ALIAS_FIELDS
+    )
+    invalid_alias = connection.execute(
+        "SELECT 1 FROM logical_unit_aliases AS a "
+        "JOIN logical_units AS lu ON lu.id = a.logical_unit_id "
+        "LEFT JOIN logical_unit_sources AS lus "
+        "ON lus.logical_unit_id = a.logical_unit_id "
+        "AND lus.source_unit_id = a.source_unit_id "
+        "JOIN units AS u ON u.id = a.source_unit_id "
+        "JOIN units AS r ON r.id = lu.representative_unit_id "
+        "WHERE lus.source_unit_id IS NULL "
+        "OR a.source_unit_id = lu.representative_unit_id "
+        "OR NOT ("
+        + alias_valid_cases
+        + ") LIMIT 1"
+    ).fetchone()
+
+    expected_note_count = connection.execute(
+        "SELECT COUNT(*) FROM units "
+        "WHERE source_defined = 1 AND notes IS NOT NULL AND notes != ''"
+    ).fetchone()[0]
+    note_count = connection.execute("SELECT COUNT(*) FROM logical_unit_notes").fetchone()[0]
+    invalid_note = connection.execute(
+        "SELECT 1 FROM logical_unit_notes AS n "
+        "LEFT JOIN logical_unit_sources AS lus "
+        "ON lus.logical_unit_id = n.logical_unit_id "
+        "AND lus.source_unit_id = n.source_unit_id "
+        "JOIN units AS u ON u.id = n.source_unit_id "
+        "WHERE lus.source_unit_id IS NULL OR u.notes IS NULL OR u.notes = '' "
+        "OR NOT (n.note IS u.notes) LIMIT 1"
+    ).fetchone()
+
+    expected_spectables_count = connection.execute(
+        "SELECT COUNT(*) FROM units "
+        "WHERE source_defined = 1 AND spectables IS NOT NULL AND spectables != ''"
+    ).fetchone()[0]
+    spectables_count = connection.execute(
+        "SELECT COUNT(*) FROM logical_unit_spectables"
+    ).fetchone()[0]
+    invalid_spectables = connection.execute(
+        "SELECT 1 FROM logical_unit_spectables AS s "
+        "LEFT JOIN logical_unit_sources AS lus "
+        "ON lus.logical_unit_id = s.logical_unit_id "
+        "AND lus.source_unit_id = s.source_unit_id "
+        "JOIN units AS u ON u.id = s.source_unit_id "
+        "WHERE lus.source_unit_id IS NULL "
+        "OR u.spectables IS NULL OR u.spectables = '' "
+        "OR NOT (s.spectables IS u.spectables) LIMIT 1"
+    ).fetchone()
+
+    if (
+        canonical_mismatch is not None
+        or alias_count != expected_alias_count
+        or invalid_alias is not None
+        or note_count != expected_note_count
+        or invalid_note is not None
+        or spectables_count != expected_spectables_count
+        or invalid_spectables is not None
+    ):
+        raise ValueError(
+            "Database has invalid materialized canonical logical-unit payloads; "
+            "rebuild the database"
+        )
+
 
 def instance_lru_cache(maxsize: int) -> Callable:
     """Cache immutable database-query results without retaining Database instances."""
@@ -495,6 +591,7 @@ class Database:
                 raise ValueError(
                     "Database has invalid materialized logical-unit identity; rebuild the database"
                 )
+            _validate_logical_unit_payloads(connection)
 
             source_profile_count = connection.execute(
                 "SELECT COUNT(*) FROM profiles"

@@ -85,10 +85,12 @@ Current release: **0.6.0** (2026-09-19).
 
 Generated snapshot provenance under `data/manifests/snapshots/`, the separate
 human-authored snapshot-note contract, the complete manifest-backed symbol
-pipeline through publication, and canonical profile/loadout payloads used by
-unit-detail reads are current implementation. Accepted but unimplemented
-architectural direction is documented separately. Major remaining directions
-include exact migration of legacy wiki provenance, canonical logical-unit and
+pipeline through publication, canonical profile/loadout payloads used by
+unit-detail reads, and materialized canonical logical-unit fields with
+source-attributed alias/note/`spectables` context are current implementation.
+Accepted but unimplemented architectural direction is documented separately.
+Major remaining directions include exact migration of legacy wiki provenance,
+migration of unit list/search/detail reads onto the canonical logical-unit layer,
 relationship/catalog modeling, and the eventual physical separation of
 source-only Army tables into `infinity.raw.db`; see
 [architecture](docs/architecture.md) and [the backlog](docs/TODO.md).

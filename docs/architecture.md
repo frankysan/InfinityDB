@@ -332,20 +332,25 @@ persisted during normalization and
 reinforcement-to-standard matching is audited during database creation; both
 feed the materialized logical-unit identity consumed by repositories.
 
-Logical-unit identity is materialized during frontend database creation. This
-does **not** merge or rewrite source rows: source unit IDs, army occurrences,
-profiles, loadouts, options, and availability provenance remain attached to
-their original source unit. The exporter resolves configured unit aliases plus
-persisted generic and mercenary matches and the database-build reinforcement
-audit into frontend-only `logical_units` and `logical_unit_sources` tables.
-Every source-defined unit maps to exactly one logical unit.
+Logical-unit identity and the first canonical unit payload layer are materialized
+during frontend database creation. This does **not** merge or rewrite source rows:
+source unit IDs, army occurrences, profiles, loadouts, options, and availability
+provenance remain attached to their original source unit. The exporter resolves
+configured unit aliases plus persisted generic and mercenary matches and the
+database-build reinforcement audit into `logical_units` / `logical_unit_sources`,
+then copies the representative-backed general fields onto `logical_units` while
+materializing source-attributed aliases, notes, and opaque `spectables` context.
+Every source-defined unit still maps to exactly one logical unit. Unit list/search/
+detail reads have not yet migrated to those canonical unit fields; that remains a
+separate equivalence-gated step.
 
 ### Canonical application data and semantic deduplication
 
 InfinityDB is progressively separating its **lossless source model** from a
 **canonical application model**. Profile and loadout payloads are already
-materialized and consumed by unit-detail reads; broader unit, relationship, and
-catalog canonicalization remains in progress.
+materialized and consumed by unit-detail reads; canonical logical-unit fields and
+source-attributed context are materialized but not yet consumed by unit list/search/
+detail reads. Relationship and catalog canonicalization remains in progress.
 
 The merged and normalized source layers remain source-oriented and lossless.
 Repeated records in those layers are not inherently defects: repetition may
@@ -362,10 +367,12 @@ source documents.
 The existing `logical_units` and `logical_unit_sources` relation is the first
 application-level identity layer. It establishes which source unit records
 represent one logical unit while preserving every source occurrence. Canonical
-profile and loadout payload layers now extend that principle from **identity
+representative-backed logical-unit fields plus source-attributed alias/note/
+`spectables` context are now materialized beside that identity layer. Canonical
+profile and loadout payload layers extend the same principle from **identity
 deduplication** to **semantic payload deduplication** for unit-detail data.
-Canonical logical-unit facts and wider relationships/catalog overlap remain the
-next semantic stages.
+Migrating unit list/search/detail reads to the canonical unit layer and then
+canonicalizing wider relationships/catalog overlap remain the next semantic stages.
 
 Semantic deduplication must be evidence-driven and lossless:
 
@@ -747,7 +754,7 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 13 and database compatibility revision of 19; it
+schema has a schema version of 14 and database compatibility revision of 20; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of
