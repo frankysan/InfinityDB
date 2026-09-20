@@ -118,8 +118,8 @@ stage-by-stage acceptance, rollback/reproducibility validation, and guarded
 local deployment packaging. Remaining pipeline items below are follow-up
 refactoring, coverage, and optimization work rather than Milestone 1 blockers.
 
-- [ ] **Milestone 2A — complete the canonical runtime-data pass and release
-  0.6.1.**
+- [x] **Milestone 2A — canonical runtime-data pass and 0.6.1 release — completed
+  2026-09-20.**
   Finish the current semantic audit/canonicalization pass across every Army-
   database construct consumed by normal repository/API/web runtime paths. Each
   consumed construct must be classified both by application role (canonical,
@@ -294,7 +294,7 @@ block this interim release.
     flat (+0.52%). The audited `infinity.db` grew from 13,557,760 to 18,108,416
     bytes (+33.56%) because materialized application layers currently coexist
     with retained source/context representations.
-- [ ] Complete the 0.6.1 release after the validated release-state commit is
+- [x] Complete the 0.6.1 release after the validated release-state commit is
   tagged and deployed.
   - [x] Run the local full acceptance command with the production-like Army
     snapshot and required published assets; retain the timestamped check report.
@@ -305,7 +305,7 @@ block this interim release.
     supported.
   - [x] Bump the package/release version, convert the accumulated release notes
     into the dated 0.6.1 section, and update the README current-release marker.
-  - [ ] Re-run local/hosted checks on the release-state commit, create tag
+  - [x] Re-run local/hosted checks on the release-state commit, create tag
     `v0.6.1`, deploy it, and verify the deployed update path.
 
 The eventual physical separation of source-only tables into `infinity.raw.db`,
@@ -324,6 +324,9 @@ source row. Durable contracts and evidence are recorded in `docs/data-model.md`;
 completed implementation checklists have been removed from this active backlog.
 
 - [ ] **Audit relationships after entity canonicalization.**
+  - [x] Add a read-only include/peripheral relationship audit that resolves source-local
+    include targets through canonical loadout payload occurrences and measures army-local
+    peripheral identity repetition/context variation without promoting a heuristic identity.
   - [ ] Revisit includes and peripherals and distinguish visible endpoint data
     from the independently meaningful relationship between those endpoints.
   - [ ] Audit relation/dependency structures.
