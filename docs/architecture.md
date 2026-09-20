@@ -340,17 +340,20 @@ configured unit aliases plus persisted generic and mercenary matches and the
 database-build reinforcement audit into `logical_units` / `logical_unit_sources`,
 then copies the representative-backed general fields onto `logical_units` while
 materializing source-attributed aliases, notes, and opaque `spectables` context.
-Every source-defined unit still maps to exactly one logical unit. Unit list/search/
-detail reads have not yet migrated to those canonical unit fields; that remains a
-separate equivalence-gated step.
+Every source-defined unit still maps to exactly one logical unit. Unit list,
+search, and detail general fields now read that canonical layer; alternate
+source labels, including the existing derived `Unit <source id>` fallback for a
+missing source name, are materialized as traceable search aliases. Source rows
+remain available for relationships and repository paths that have not yet been
+canonicalized.
 
 ### Canonical application data and semantic deduplication
 
 InfinityDB is progressively separating its **lossless source model** from a
 **canonical application model**. Profile and loadout payloads are already
-materialized and consumed by unit-detail reads; canonical logical-unit fields and
-source-attributed context are materialized but not yet consumed by unit list/search/
-detail reads. Relationship and catalog canonicalization remains in progress.
+materialized and consumed by unit-detail reads; canonical logical-unit fields
+and aliases are materialized and consumed by unit list/search/detail reads.
+Relationship and catalog canonicalization remains in progress.
 
 The merged and normalized source layers remain source-oriented and lossless.
 Repeated records in those layers are not inherently defects: repetition may
@@ -754,7 +757,7 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 14 and database compatibility revision of 20; it
+schema has a schema version of 14 and database compatibility revision of 21; it
 rejects incompatible databases with a rebuild instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

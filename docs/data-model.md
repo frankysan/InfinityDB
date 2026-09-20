@@ -1293,12 +1293,15 @@ normalization. `isc` falls from 132 to 13 and then 7; `isc_abbr` falls from 29 t
 12 and remains 12. These transformations are **matching evidence only**. They do
 not rewrite canonical display strings or justify dropping alternate labels.
 
-That distinction matters operationally. The current repository uses representative
-`name`/`isc`/`isc_abbr`/`slug` values for logical-unit display, while search terms
-are the union of labels from every source row. All 167 multi-source logical units
+That distinction mattered directly to the read-path migration. Before the
+canonical logical-unit layer became authoritative for display/search, the
+repository used representative `name`/`isc`/`isc_abbr`/`slug` values while search
+terms were the union of labels from every source row. All 167 multi-source logical units
 contribute at least one alternate general label beyond the representative, 467
-alternate labels in total in this snapshot. Any canonical unit table must retain
-those search aliases explicitly or keep an equivalent source-context path.
+non-empty source labels in total in this snapshot. One additional source row has
+no name and contributes the repository's derived `Unit 1662` fallback search
+term. The canonical alias layer therefore preserves 468 distinct logical-unit
+search values rather than relying on the source `units` rows at query time.
 
 Notes provide a concrete losslessness/completeness case. Six logical units have
 different source notes. Four of them (`657`, `659`, `1550`, and `1567`) have a
@@ -1396,12 +1399,14 @@ already follow the deterministic representative-source rule. The representative
 source remains explicit provenance; its selection does not turn the
 representative's entire source row into canonical truth.
 
-Alternate labels are stored only when a non-representative source value differs
-from the corresponding canonical field. The source ID and field name remain on
-the alias row rather than collapsing aliases into an unattributed search-term
-set. On the audited production snapshot this projects to 472 alias occurrences
-across all 167 multi-source logical units, representing 467 distinct
-`(logical_unit, value)` search terms.
+Alternate labels are stored when a non-representative search/display value
+differs from the corresponding canonical field. For `name`, this includes the
+existing derived `Unit <source id>` fallback when the source name is absent;
+otherwise the alias value is the non-empty source field value. The source ID and
+field name remain on the alias row rather than collapsing aliases into an
+unattributed search-term set. On the audited production snapshot this produces
+473 alias occurrences across all 167 multi-source logical units, representing
+468 distinct `(logical_unit, value)` search terms.
 
 Notes do not belong on the canonical logical-unit row. Every non-empty source
 note remains attached to the source occurrence that supplied it. The production
@@ -1430,12 +1435,12 @@ the representative-backed values needed by current list/detail presentation,
 while the subsequent relationship audit owns the lossless model for the
 source-specific relationships.
 
-The version-2 unit semantics audit emits this model directly. A clean schema-14
+The version-3 unit semantics audit emits this model directly. A clean schema-14
 rebuild from the stored 2026-09-18 normalized source reproduces:
 
 - 737 canonical logical-unit rows;
 - 920 source links;
-- 472 alternate-label occurrences / 467 distinct logical-unit alias values;
+- 473 alternate-label occurrences / 468 distinct logical-unit alias values;
 - 30 source-note occurrences across 28 logical units;
 - 30 exact source-context `spectables` occurrences; and
 - 18 top-level `unit_options` rows left as source-context payloads.
@@ -1448,19 +1453,12 @@ fields still equal the representative source and that the alias, note, and
 
 #### Next implementation targets
 
-Canonical profile and loadout payloads, their occurrence mappings, and the
-unit-detail read-path migrations are complete. The remaining semantic work is:
+Canonical unit/profile/loadout payloads, their context mappings, and their
+current unit-list/search/detail read-path migrations are complete. The remaining
+semantic work for the 0.6.1 runtime pass begins with relationships and catalog
+paths that still consume source-oriented tables.
 
-### 1. Canonical unit payload
-
-The field audit, payload/context design, and schema materialization are complete.
-The next step is to migrate unit list/search/detail reads away from source `units`
-fields and onto this canonical layer. Prove output/search equivalence before
-removing any source-only runtime dependency. Top-level `unit_options`, Army
-memberships, availability occurrences, source-specific relationships, and genuine
-differences remain separate context.
-
-### 2. Relationships
+### 1. Relationships
 
 Re-evaluate includes, peripherals, dependencies, relations, Fireteams, and
 similar structures after the entities they reference have stable canonical
@@ -1583,18 +1581,18 @@ for current snapshots.
 Frontend-only `logical_units`, `logical_unit_sources`, logical-unit alias/note/
 `spectables` context, and canonical profile/loadout payload tables are derived
 application structure, not normalized source facts, and therefore do not rewrite
-the source tables. Repository unit queries currently map a requested source or
-representative ID through `logical_unit_sources`, combine source-backed unit/Army
-context with canonical profile/loadout payload occurrences, and continue to use
-original source unit rows for list/search/detail general fields plus relationships
-or repository paths that have not yet been canonicalized. The
+the source tables. Repository unit queries map a requested source or
+representative ID through `logical_unit_sources`; list/search/detail general
+fields and unit-label search aliases come from the canonical logical-unit layer,
+while source-backed Army/relationship context and repository paths not yet
+canonicalized continue to use their source-oriented tables. The
 normalized-input table registry remains separate from these derived frontend
 tables so generated application structure cannot be supplied as normalized
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 14 and the application
-compatibility revision is 20. Imports build temporary sibling files, check
+compatibility revision is 21. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

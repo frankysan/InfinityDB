@@ -213,7 +213,7 @@ block this interim release.
 - [x] Canonicalize profile and loadout payloads, migrate their unit-detail read
   paths, prove output equivalence, and measure the resulting query/storage
   behavior.
-- [ ] Complete the logical-unit canonical payload/context layer, migrate unit
+- [x] Complete the logical-unit canonical payload/context layer, migrate unit
   list/search/detail general fields and aliases to it, and prove output/search
   equivalence.
 - [ ] Inventory every Army-database table/field/relationship read by the current
@@ -239,41 +239,15 @@ the complete inventory of unused player-relevant source data, and 1.0 web/rules
 completeness explicitly remain post-0.6.1 work unless the runtime audit exposes
 one of them as necessary for correctness.
 
-Profile/loadout groundwork is complete: the semantic-deduplication baseline,
-field classification, canonical payload materialization, unit-detail read-path
-migration, occurrence reconciliation, and secondary storage/query measurements
-are all implemented. Durable contracts and evidence are recorded in
-`docs/data-model.md`; completed implementation checklists have been removed from
-this active backlog.
-
-- [ ] **Extend canonicalization to logical-unit payloads.**
-  - [x] Audit fields across every existing `logical_unit` for invariance and
-    source-variant meaning. The 2026-09-18 production snapshot contains 920
-    source units resolving to 737 logical units; 167 logical units have multiple
-    source representations.
-  - [x] Define the canonical payload/context boundary around the existing
-    deterministic representative-source rule. The accepted design keeps
-    representative-backed display/general fields on `logical_units`; alternate
-    labels, source notes, and `spectables` remain explicit source-attributed
-    context, while top-level `unit_options` stay separate source payloads.
-  - [x] Materialize representative-backed canonical unit fields without treating
-    representative selection as permission to discard source-specific facts.
-  - [x] Materialize alternate source names, ISC values, abbreviations, and slugs
-    as explicit searchable/traceable aliases. The audited snapshot projects 472
-    source-attributed alias occurrences / 467 distinct logical-unit alias values.
-  - [x] Materialize source-specific unit notes. The audited snapshot has 30
-    non-empty source-note occurrences across 28 logical units, including four
-    player-facing notes that exist only on non-representative reinforcement rows.
-  - [x] Preserve the 30 current `spectables` payloads as exact opaque
-    source-context data until their internal schema/presentation semantics have
-    enough evidence for a stronger canonical model.
-  - [x] Keep top-level `unit_options`, army membership, availability, source
-    variants, and genuine profile/loadout differences as explicit context.
-  - [x] Preserve source IDs and full traceability from canonical facts back to
-    supporting source occurrences.
-  - [ ] Migrate unit list/search/detail reads to the canonical logical-unit layer
-    and prove current output/search equivalence before removing source-unit
-    runtime dependencies.
+Profile/loadout/logical-unit canonicalization groundwork is complete: semantic
+classification, canonical materialization, current unit list/search/detail read
+paths, provenance/context retention, equivalence checks, and the profile/loadout
+secondary storage/query measurements are implemented. The production logical-unit
+layer contains 737 canonical rows / 920 source links and preserves 473
+source-attributed alias occurrences representing 468 distinct logical-unit search
+values, including the derived fallback name for the one unnamed non-representative
+source row. Durable contracts and evidence are recorded in `docs/data-model.md`;
+completed implementation checklists have been removed from this active backlog.
 
 - [ ] **Audit relationships after entity canonicalization.**
   - [ ] Revisit includes and peripherals and distinguish visible endpoint data

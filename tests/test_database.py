@@ -1074,6 +1074,106 @@ def test_database_uses_persisted_generic_mapping(tmp_path: Path, normalized: dic
         connection.close()
 
 
+def test_unit_display_and_alias_reads_use_canonical_logical_unit_layer(
+    tmp_path: Path, normalized: dict
+) -> None:
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    original["source_role"] = "standard"
+    normalized["tables"]["units"].append(
+        {
+            "id": 10_001,
+            "name": "Alternate source label",
+            "isc": "Alternate source ISC",
+            "isc_abbr": "ASI",
+            "slug": "alternate-source-label",
+            "canonical_faction_id": None,
+            "main_army_id": None,
+            "source_defined": True,
+            "source_role": "standard",
+        }
+    )
+    normalized["tables"]["army_units"].append(
+        {"army_id": 301, "unit_id": 10_001, "availability_kind": "standard"}
+    )
+    normalized["genericUnitMatches"] = [
+        {
+            "sourceUnitId": 10_001,
+            "representativeUnitId": 1,
+            "method": "generic_duplicate_key",
+        }
+    ]
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    database = Database(path)
+    baseline_page = database.list_units(limit=500)
+    baseline_detail = database.get_unit(10_001)
+    baseline_alias_search = database.list_units(search="Alternate source label")
+    assert [item["id"] for item in baseline_alias_search["items"]] == [1]
+
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            "UPDATE units SET name = 'BROKEN NAME', isc = 'BROKEN ISC', "
+            "isc_abbr = 'BAD', slug = 'broken-slug', notes = 'BROKEN NOTE', "
+            "main_army_id = NULL, display_army_id = NULL "
+            "WHERE id IN (1, 10001)"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    rebuilt = Database(path)
+    assert rebuilt.list_units(limit=500) == baseline_page
+    assert rebuilt.get_unit(10_001) == baseline_detail
+    assert rebuilt.list_units(search="Alternate source label") == baseline_alias_search
+    assert rebuilt.list_units(search="BROKEN NAME")["items"] == []
+
+
+def test_logical_unit_aliases_preserve_source_fallback_name_search(
+    tmp_path: Path, normalized: dict
+) -> None:
+    original = next(unit for unit in normalized["tables"]["units"] if unit["id"] == 1)
+    original["source_role"] = "standard"
+    normalized["tables"]["units"].append(
+        {
+            "id": 10_001,
+            "name": None,
+            "isc": original["isc"],
+            "isc_abbr": original.get("isc_abbr"),
+            "slug": original.get("slug"),
+            "canonical_faction_id": None,
+            "main_army_id": None,
+            "source_defined": True,
+            "source_role": "standard",
+        }
+    )
+    normalized["tables"]["army_units"].append(
+        {"army_id": 301, "unit_id": 10_001, "availability_kind": "standard"}
+    )
+    normalized["genericUnitMatches"] = [
+        {
+            "sourceUnitId": 10_001,
+            "representativeUnitId": 1,
+            "method": "generic_duplicate_key",
+        }
+    ]
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT field, value FROM logical_unit_aliases "
+            "WHERE logical_unit_id = 1 AND source_unit_id = 10001 ORDER BY field"
+        ).fetchall() == [("name", "Unit 10001")]
+    finally:
+        connection.close()
+
+    result = Database(path).list_units(search="Unit 10001")
+    assert [item["id"] for item in result["items"]] == [1]
+
+
 def test_database_validation_rejects_missing_logical_unit_alias(
     tmp_path: Path, normalized: dict
 ) -> None:

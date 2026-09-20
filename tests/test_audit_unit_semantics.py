@@ -399,5 +399,5 @@ def test_unit_semantics_audit_cli_writes_report(tmp_path: Path, capsys) -> None:
     assert main([str(database), "--output", str(output)]) == 0
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["format"] == "InfinityDB logical-unit semantics audit"
-    assert report["formatVersion"] == 2
+    assert report["formatVersion"] == 3
     assert "920 source" not in capsys.readouterr().out

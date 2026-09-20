@@ -178,7 +178,7 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. Schema version 14 / compatibility revision 20 materializes
+  dynamically. Schema version 14 / compatibility revision 21 materializes
   representative-backed canonical logical-unit fields plus source-attributed
   alias/note/`spectables` context, as well as reusable canonical profile and
   loadout payloads scoped to each logical unit plus one occurrence row per
@@ -232,11 +232,13 @@ and serves a read-only browser and same-origin HTTP API.
   singleton-only evidence. Top-level `unit_options` remain separate source-context
   payloads and source-local `option_id` is not canonical option identity. A clean
   rebuild of the 2026-09-18 normalized source materializes 737 canonical rows,
-  920 source links, 472 alias occurrences (467 distinct logical-unit values), 30
+  920 source links, 473 alias occurrences (468 distinct logical-unit values), 30
   note occurrences, 30 `spectables` occurrences, and leaves 18 top-level
-  unit-option rows contextual. Unit list/search/detail still read source unit
-  fields and must prove output/search equivalence before those runtime reads are
-  removed.
+  unit-option rows contextual. The extra alias preserves the existing derived
+  `Unit <source id>` search name for the one non-representative source row whose
+  raw name is absent. Unit list/search/detail general fields and unit-label
+  search now read the canonical logical-unit layer; source unit rows remain for
+  relationships and other runtime paths that have not yet been canonicalized.
   Legacy rediscovery remains only as a database-build compatibility path for
   older normalized inputs.
 - SQLite Army imports replace a complete snapshot. Future user-authored data

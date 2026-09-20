@@ -77,9 +77,15 @@ def _validate_logical_unit_payloads(connection: sqlite3.Connection) -> None:
     ).fetchone()
 
     alias_cases = " + ".join(
-        "CASE WHEN lus.source_unit_id != lu.representative_unit_id "
-        f"AND u.{field} IS NOT NULL AND u.{field} != '' "
-        f"AND NOT (u.{field} IS r.{field}) THEN 1 ELSE 0 END"
+        (
+            "CASE WHEN lus.source_unit_id != lu.representative_unit_id "
+            "AND NOT (COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id) IS "
+            "COALESCE(NULLIF(r.name, ''), 'Unit ' || r.id)) THEN 1 ELSE 0 END"
+            if field == "name"
+            else "CASE WHEN lus.source_unit_id != lu.representative_unit_id "
+            f"AND u.{field} IS NOT NULL AND u.{field} != '' "
+            f"AND NOT (u.{field} IS r.{field}) THEN 1 ELSE 0 END"
+        )
         for field in ALIAS_FIELDS
     )
     expected_alias_count = connection.execute(
@@ -93,9 +99,16 @@ def _validate_logical_unit_payloads(connection: sqlite3.Connection) -> None:
     alias_count = connection.execute("SELECT COUNT(*) FROM logical_unit_aliases").fetchone()[0]
 
     alias_valid_cases = " OR ".join(
-        f"(a.field = '{field}' AND a.value IS u.{field} "
-        f"AND u.{field} IS NOT NULL AND u.{field} != '' "
-        f"AND NOT (u.{field} IS r.{field}))"
+        (
+            "(a.field = 'name' AND a.value IS "
+            "COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id) "
+            "AND NOT (COALESCE(NULLIF(u.name, ''), 'Unit ' || u.id) IS "
+            "COALESCE(NULLIF(r.name, ''), 'Unit ' || r.id)))"
+            if field == "name"
+            else f"(a.field = '{field}' AND a.value IS u.{field} "
+            f"AND u.{field} IS NOT NULL AND u.{field} != '' "
+            f"AND NOT (u.{field} IS r.{field}))"
+        )
         for field in ALIAS_FIELDS
     )
     invalid_alias = connection.execute(
@@ -696,23 +709,66 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def _unit_graph(self) -> dict[str, Any]:
-        """Load materialized logical identity plus source-specific unit relationships."""
+        """Load canonical logical-unit fields plus source-specific relationships."""
         identity_config = self._identity_config()
         with self._connect() as connection:
-            rows = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id, u.display_army_id, u.canonical_faction_id, u.source_role "
-                "FROM units AS u WHERE u.source_defined = 1 ORDER BY u.id"
+            source_rows = connection.execute(
+                "SELECT lus.source_unit_id AS id, lus.logical_unit_id, u.canonical_faction_id "
+                "FROM logical_unit_sources AS lus "
+                "JOIN units AS u ON u.id = lus.source_unit_id "
+                "ORDER BY lus.source_unit_id"
             ).fetchall()
-            rows_by_id = {row["id"]: row for row in rows}
+            source_to_logical = {
+                row["id"]: row["logical_unit_id"] for row in source_rows
+            }
             logical_rows = connection.execute(
                 "SELECT lu.id AS logical_unit_id, lu.representative_unit_id, "
-                "lus.source_unit_id "
+                "COALESCE(NULLIF(lu.name, ''), 'Unit ' || lu.id) AS name, "
+                "lu.isc, lu.isc_abbr, lu.slug, lu.canonical_faction_id, "
+                "lu.main_army_id, lu.display_army_id, n.note AS notes "
                 "FROM logical_units AS lu "
-                "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
-                "ORDER BY lu.id, lus.source_unit_id"
+                "LEFT JOIN logical_unit_notes AS n "
+                "ON n.logical_unit_id = lu.id "
+                "AND n.source_unit_id = lu.representative_unit_id "
+                "ORDER BY lu.id"
             ).fetchall()
-            memberships: dict[int, list[dict[str, Any]]] = {row["id"]: [] for row in rows}
+            sources_by_logical: dict[int, list[int]] = {
+                row["logical_unit_id"]: [] for row in logical_rows
+            }
+            for row in source_rows:
+                sources_by_logical[row["logical_unit_id"]].append(row["id"])
+
+            search_terms_by_logical = {
+                row["logical_unit_id"]: {
+                    row["name"],
+                    row["isc"],
+                    row["isc_abbr"],
+                    row["slug"],
+                }
+                for row in logical_rows
+            }
+            names_by_logical = {
+                row["logical_unit_id"]: [row["name"]] for row in logical_rows
+            }
+            for alias in connection.execute(
+                "SELECT logical_unit_id, field, value FROM logical_unit_aliases "
+                "ORDER BY logical_unit_id, source_unit_id, field"
+            ):
+                search_terms_by_logical[alias["logical_unit_id"]].add(alias["value"])
+                if alias["field"] == "name":
+                    names = names_by_logical[alias["logical_unit_id"]]
+                    if alias["value"] not in names:
+                        names.append(alias["value"])
+
+            for table in ("profiles", "loadout_options", "unit_options"):
+                for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
+                    logical_id = source_to_logical.get(row["unit_id"])
+                    if logical_id is not None:
+                        search_terms_by_logical[logical_id].add(row["name"])
+
+            memberships: dict[int, list[dict[str, Any]]] = {
+                row["id"]: [] for row in source_rows
+            }
             army_names = {
                 row["id"]: army_name(row)
                 for row in connection.execute("SELECT id, name, slug FROM army_lists")
@@ -738,38 +794,29 @@ class Database:
                         "availability_kind": army["availability_kind"],
                     }
                 )
-            normal_armies_by_unit: dict[int, set[int]] = {row["id"]: set() for row in rows}
+            normal_armies_by_unit: dict[int, set[int]] = {
+                row["id"]: set() for row in source_rows
+            }
             for faction in connection.execute("SELECT unit_id, faction_id FROM unit_factions"):
                 if faction["unit_id"] in normal_armies_by_unit:
                     normal_armies_by_unit[faction["unit_id"]].add(faction["faction_id"])
-            search_terms_by_source = {
-                row["id"]: {row["name"], row["isc"], row["isc_abbr"], row["slug"]} for row in rows
-            }
-            for table in ("profiles", "loadout_options", "unit_options"):
-                for row in connection.execute(f"SELECT unit_id, name FROM {table}"):
-                    if row["unit_id"] in search_terms_by_source:
-                        search_terms_by_source[row["unit_id"]].add(row["name"])
-
-        sources_by_logical: dict[int, list[int]] = {}
-        representatives: dict[int, int] = {}
-        for row in logical_rows:
-            logical_id = row["logical_unit_id"]
-            representatives[logical_id] = row["representative_unit_id"]
-            sources_by_logical.setdefault(logical_id, []).append(row["source_unit_id"])
 
         groups: list[dict[str, Any]] = []
-        for logical_id, source_ids in sources_by_logical.items():
-            representative = rows_by_id[representatives[logical_id]]
+        for logical in logical_rows:
+            logical_id = logical["logical_unit_id"]
+            source_ids = sources_by_logical[logical_id]
             group: dict[str, Any] = {
                 "id": logical_id,
-                "name": representative["name"],
-                "isc": representative["isc"],
-                "slug": representative["slug"],
-                "canonical_faction_id": representative["canonical_faction_id"],
-                "main_army_id": representative["main_army_id"],
-                "display_army_id": representative["display_army_id"],
+                "name": logical["name"],
+                "isc": logical["isc"],
+                "isc_abbr": logical["isc_abbr"],
+                "slug": logical["slug"],
+                "notes": logical["notes"],
+                "canonical_faction_id": logical["canonical_faction_id"],
+                "main_army_id": logical["main_army_id"],
+                "display_army_id": logical["display_army_id"],
                 "source_ids": source_ids,
-                "names": [rows_by_id[source_id]["name"] for source_id in source_ids],
+                "names": names_by_logical[logical_id],
                 "armies": {},
                 "army_occurrences": [],
             }
@@ -793,19 +840,16 @@ class Database:
             group["normal_army_ids"] = set().union(
                 *(normal_armies_by_unit[source_id] for source_id in source_ids)
             )
-            group["search_terms"] = set().union(
-                *(search_terms_by_source[source_id] for source_id in source_ids)
-            )
+            group["search_terms"] = search_terms_by_logical[logical_id]
             groups.append(group)
 
         groups_by_source = {
             source_id: group for group in groups for source_id in group["source_ids"]
         }
         return {
-            "rows": rows,
+            "rows": source_rows,
             "army_names": army_names,
             "normal_armies_by_unit": normal_armies_by_unit,
-            "search_terms_by_source": search_terms_by_source,
             "groups": groups,
             "groups_by_source": groups_by_source,
         }
@@ -1791,9 +1835,7 @@ class Database:
         identity_config = self._identity_config()
         with self._connect() as connection:
             selected = connection.execute(
-                f"SELECT u.id, {UNIT_NAME_SQL} AS name, u.isc, u.isc_abbr, u.slug, u.notes, "
-                "u.main_army_id, u.display_army_id "
-                "FROM units AS u WHERE u.id = ? AND u.source_defined = 1",
+                "SELECT logical_unit_id FROM logical_unit_sources WHERE source_unit_id = ?",
                 (unit_id,),
             ).fetchone()
             if selected is None:
@@ -1801,14 +1843,12 @@ class Database:
             graph = self._unit_graph()
             faction_groups = self._faction_groups()
             faction_identities = self._faction_identities()
-            siblings = graph["rows"]
             army_names = graph["army_names"]
-            group = graph["groups_by_source"][selected["id"]]
+            group = graph["groups_by_source"][unit_id]
             source_ids = group["source_ids"]
-            unit = next(sibling for sibling in siblings if sibling["id"] == group["id"])
             normal_army_ids = graph["normal_armies_by_unit"]
             canonical_factions = {
-                row["id"]: row["canonical_faction_id"] for row in siblings
+                row["id"]: row["canonical_faction_id"] for row in graph["rows"]
             }
             placeholders = ", ".join("?" for _ in source_ids)
             armies_by_occurrence: dict[tuple[int, tuple[str, ...]], dict[str, Any]] = {}
@@ -2175,12 +2215,12 @@ class Database:
             for army in armies:
                 del army["_occurrence_key"]
         return {
-            "id": unit["id"],
-            "name": unit["name"],
-            "isc": unit["isc"],
-            "slug": unit["slug"],
-            "isc_abbr": unit["isc_abbr"],
-            "notes": unit["notes"],
+            "id": group["id"],
+            "name": group["name"],
+            "isc": group["isc"],
+            "slug": group["slug"],
+            "isc_abbr": group["isc_abbr"],
+            "notes": group["notes"],
             "main_army_id": group["main_army_id"],
             "main_army_name": army_names.get(group["main_army_id"]),
             "main_faction": main_faction,

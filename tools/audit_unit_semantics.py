@@ -20,7 +20,7 @@ from infinity_db.identities import (
 )
 
 REPORT_FORMAT = "InfinityDB logical-unit semantics audit"
-REPORT_FORMAT_VERSION = 2
+REPORT_FORMAT_VERSION = 3
 
 UNIT_FIELDS = (
     "id",
@@ -41,8 +41,21 @@ UNIT_FIELDS = (
 
 EXPECTED_COLUMNS: dict[str, tuple[str, ...]] = {
     "units": UNIT_FIELDS,
-    "logical_units": ("id", "representative_unit_id"),
+    "logical_units": (
+        "id",
+        "representative_unit_id",
+        "name",
+        "isc",
+        "isc_abbr",
+        "slug",
+        "canonical_faction_id",
+        "main_army_id",
+        "display_army_id",
+    ),
     "logical_unit_sources": ("source_unit_id", "logical_unit_id"),
+    "logical_unit_aliases": ("logical_unit_id", "source_unit_id", "field", "value"),
+    "logical_unit_notes": ("logical_unit_id", "source_unit_id", "note"),
+    "logical_unit_spectables": ("logical_unit_id", "source_unit_id", "spectables"),
     "unit_factions": ("unit_id", "faction_id", "position"),
     "army_lists": (
         "id",
@@ -900,8 +913,15 @@ def _candidate_model_evidence(
             source = units[source_id]
             if source_id != representative_id:
                 for field in alias_fields:
-                    value = source[field]
-                    if value and value != representative[field]:
+                    if field == "name":
+                        value = source[field] or f"Unit {source_id}"
+                        representative_value = (
+                            representative[field] or f"Unit {representative_id}"
+                        )
+                    else:
+                        value = source[field]
+                        representative_value = representative[field]
+                    if value and value != representative_value:
                         aliases.append((logical_id, source_id, field, value))
             if source["notes"]:
                 note_occurrences.append((logical_id, source_id, source["notes"]))
@@ -941,8 +961,9 @@ def _candidate_model_evidence(
             ),
             "logicalUnitCount": len({logical_id for logical_id, *_rest in aliases}),
             "policy": (
-                "Store only non-representative values that differ from the canonical field. "
-                "Keep field and source attribution so search aliases remain traceable."
+                "Store non-representative search/display values that differ from the canonical "
+                "field. Missing source names retain their existing derived 'Unit <id>' fallback; "
+                "keep field and source attribution so every search alias remains traceable."
             ),
         },
         "notes": {

@@ -18,6 +18,11 @@ CANONICAL_UNIT_FIELDS = (
 ALIAS_FIELDS = ("name", "isc", "isc_abbr", "slug")
 
 
+def _display_name(unit: dict[str, Any]) -> str:
+    value = unit["name"]
+    return value if value else f"Unit {unit['id']}"
+
+
 @dataclass(frozen=True)
 class LogicalUnitPayloadMaterialization:
     """Summary of one canonical logical-unit/context materialization."""
@@ -93,8 +98,13 @@ def _materialize_logical_unit_payloads(
 
             if source_id != representative_id:
                 for field in ALIAS_FIELDS:
-                    value = source[field]
-                    if value and value != representative[field]:
+                    if field == "name":
+                        value = _display_name(source)
+                        representative_value = _display_name(representative)
+                    else:
+                        value = source[field]
+                        representative_value = representative[field]
+                    if value and value != representative_value:
                         alias_rows.append(
                             (logical_unit_id, source_id, field, value)
                         )
