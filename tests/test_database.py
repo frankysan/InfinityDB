@@ -2513,7 +2513,7 @@ def test_skill_catalog_uses_curated_declaration_categories(
         [
             {"id": 69, "name": "Strategos L1", "source_defined": True},
             {"id": 70, "name": "Strategos L2", "source_defined": True},
-            {"id": 89, "name": "Holoprojector Deployment", "source_defined": True},
+            {"id": 89, "name": "Sapper", "source_defined": True},
             {"id": 201, "name": "BS Attack", "source_defined": True},
             {"id": 278, "name": "BS=12", "source_defined": True},
             {"id": 279, "name": "BS=11", "source_defined": True},
@@ -2546,7 +2546,6 @@ def test_skill_catalog_uses_curated_declaration_categories(
     assert mixed["categories"] == [
         {"name": "Basic Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
         {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
-        {"name": "Unclassified", "source": None, "page": None},
     ]
     unclassified = next(item for item in catalog.list_skills() if item["id"] == 260)
     assert unclassified["categories"] == [
@@ -2681,6 +2680,30 @@ def test_application_catalog_aliases_accept_readable_slug_references(
     assert database.application_catalog_id("skills", 41) == 41
     assert database.application_catalog_id("skills", 42) == 41
     assert database.application_slug("skills", 41) == "mirrorball"
+
+
+def test_catalog_identity_slugs_resolve_against_complete_metadata_catalog(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"].append(
+        {"id": 169, "name": "TinBot: Firewall", "source_defined": True}
+    )
+    normalized["tables"]["metadata_equipment"] = [
+        {"id": 169, "name": "TinBot: Firewall", "wiki": None},
+        {"id": 188, "name": "TinBot: Neourocinetics", "wiki": None},
+        {"id": 193, "name": "TinBot (Albedo)", "wiki": None},
+        {"id": 235, "name": "TinBot", "wiki": None},
+        {"id": 244, "name": "TinBot: Discover", "wiki": None},
+        {"id": 247, "name": "TinBot: ECM Guided", "wiki": None},
+        {"id": 248, "name": "Tinbot (Repeater)", "wiki": None},
+    ]
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("equipment", 169) == 235
+    assert database.application_catalog_id("equipment", 188) is None
 
 
 def test_skill_catalog_resolves_source_variant_ids_before_attaching_public_slug(

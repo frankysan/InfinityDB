@@ -15,10 +15,16 @@ RULES_APPLICATION_ID = 0x49445231
 RULES_SCHEMA_VERSION = 2
 RULES_COMPATIBILITY_VERSION = 2
 RULES_METADATA_TABLE = "__rules_metadata"
+ArmyLinkRef = int | str
 
 
 def _json_text(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+
+
+def _army_link_ref(value: object) -> ArmyLinkRef:
+    text = str(value)
+    return int(text) if text.isdecimal() else text
 
 
 def _insert_many(
@@ -470,7 +476,9 @@ class RulesDatabase:
             records.append(record)
         return records
 
-    def records_for_army_link(self, entity: str, external_id: int) -> list[dict[str, Any]]:
+    def records_for_army_link(
+        self, entity: str, external_id: ArmyLinkRef
+    ) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT r.* FROM records AS r "
@@ -482,19 +490,19 @@ class RulesDatabase:
             ).fetchall()
             return self._records_from_rows(connection, rows)
 
-    def skill_parameter_semantics(self) -> dict[int, dict[str, str]]:
-        """Return curated skill parameter semantics keyed to Army skill ids."""
+    def skill_parameter_semantics(self) -> dict[ArmyLinkRef, dict[str, str]]:
+        """Return curated skill parameter semantics keyed to authored Army refs."""
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT CAST(l.external_id AS INTEGER) AS skill_id, r.facts_json "
+                "SELECT l.external_id AS skill_ref, r.facts_json "
                 "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
                 "AND l.record_id = r.id "
                 "WHERE r.kind = 'skill' AND c.status = 'current' "
                 "AND l.entity = 'skill' AND l.external_id IS NOT NULL "
-                "ORDER BY skill_id, r.collection_id, r.id"
+                "ORDER BY l.external_id, r.collection_id, r.id"
             ).fetchall()
-            result: dict[int, dict[str, str]] = {}
+            result: dict[ArmyLinkRef, dict[str, str]] = {}
             for row in rows:
                 facts = _decode_json(row["facts_json"], {})
                 semantics = facts.get("parameterSemantics") if isinstance(facts, dict) else None
@@ -504,19 +512,20 @@ class RulesDatabase:
                     "kind": semantics["kind"],
                     "positive_sign": semantics["positiveSign"],
                 }
-                existing = result.get(row["skill_id"])
+                skill_ref = _army_link_ref(row["skill_ref"])
+                existing = result.get(skill_ref)
                 if existing is not None and existing != value:
                     raise ValueError(
-                        f"Skill {row['skill_id']} has conflicting curated parameter semantics"
+                        f"Skill {skill_ref!r} has conflicting curated parameter semantics"
                     )
-                result[row["skill_id"]] = value
+                result[skill_ref] = value
             return result
 
     def skill_declaration_categories(self) -> list[dict[str, Any]]:
-        """Return curated skill declaration categories keyed to Army skill ids."""
+        """Return curated skill declaration categories keyed to authored Army refs."""
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT CAST(l.external_id AS INTEGER) AS skill_id, r.name, r.facts_json, "
+                "SELECT l.external_id AS skill_ref, r.name, r.facts_json, "
                 "s.title AS source_title, s.version AS source_version, c.page "
                 "FROM records AS r JOIN collections AS col ON col.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
@@ -528,14 +537,14 @@ class RulesDatabase:
                 "WHERE r.kind = 'skill-declaration-category' "
                 "AND col.status = 'current' AND l.entity = 'skill' "
                 "AND l.external_id IS NOT NULL "
-                "ORDER BY skill_id, r.collection_id, r.id, c.position"
+                "ORDER BY l.external_id, r.collection_id, r.id, c.position"
             ).fetchall()
             result = []
             for row in rows:
                 facts = _decode_json(row["facts_json"], {})
                 result.append(
                     {
-                        "skill_id": row["skill_id"],
+                        "skill_ref": _army_link_ref(row["skill_ref"]),
                         "name": row["name"],
                         "order": facts["order"],
                         "source_title": row["source_title"],

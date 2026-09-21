@@ -31,7 +31,6 @@ from infinity_db.identities import (
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
     IdentityConfig,
     IdentityConfigError,
-    load_identity_config,
     normalized_profile_identity,
     parse_identity_metadata,
     strip_reinforcement_prefix,

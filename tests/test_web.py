@@ -1595,7 +1595,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     payload = json.loads(body)
     assert payload["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
     assert payload["rules"][0]["id"] == "skill:stealth"
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
@@ -1605,7 +1606,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     stealth = next(item for item in json.loads(body)["items"] if item["id"] == 11)
     assert stealth["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
 
 

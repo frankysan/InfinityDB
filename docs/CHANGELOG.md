@@ -26,7 +26,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
   regenerated from display names. Catalog identity alias groups may also be
   authored with readable source-label slugs or numeric source IDs; the maintained
   Skill, Equipment, and Weapon groups now use readable slugs, with ambiguous or
-  represented-but-unknown slug references rejected instead of guessed.
+  represented-but-unknown slug references rejected instead of guessed. Curated N5
+  `armyLinks` for Skills, Equipment, and Weapons likewise use readable application
+  slugs while numeric source references remain accepted for compatibility.
 - Validate curated typed record IDs against the shared domain-slug grammar, and make
   Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
 - Make the Unit explorer's matching-unit statistic show the currently visible unique
@@ -44,6 +46,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
   disabled, show Team Operations-only units on Skill detail pages when that
   optional-unit category is enabled, and use public Skill slugs for source variants
   merged into curated application identities instead of falling back to numeric IDs.
+- Resolve maintained catalog identity slugs against the complete source metadata
+  catalog rather than only currently-used rows, and keep the reviewed spelling
+  `tinbot-neurocinetics` while preserving the upstream `Neourocinetics` typo only as
+  raw source provenance.
 - Preserve the `+dev` browser display version in containerized development/test
   deployments without embedding Git metadata in the image. The API/package release
   version remains unchanged.

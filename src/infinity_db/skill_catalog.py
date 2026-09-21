@@ -7,7 +7,7 @@ from typing import Any
 
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 
 UNCLASSIFIED_CATEGORY = {"name": "Unclassified", "source": None, "page": None}
 DECLARATION_KIND = "skill-declaration-category"
@@ -31,8 +31,8 @@ class SkillCatalog:
     def __init__(self, database: Database, rules_database: RulesDatabase | None) -> None:
         self.database = database
         self.rules_database = rules_database
-        self._category_index: dict[int, list[dict[str, Any]]] | None = None
-        self._parameter_index: dict[int, dict[str, str]] | None = None
+        self._category_index: dict[ArmyLinkRef, list[dict[str, Any]]] | None = None
+        self._parameter_index: dict[ArmyLinkRef, dict[str, str]] | None = None
 
     def _ensure_category_index(self) -> None:
         if self._category_index is not None:
@@ -40,9 +40,9 @@ class SkillCatalog:
         if self.rules_database is None:
             self._category_index = {}
             return
-        index: dict[int, list[dict[str, Any]]] = {}
+        index: dict[ArmyLinkRef, list[dict[str, Any]]] = {}
         for category in self.rules_database.skill_declaration_categories():
-            index.setdefault(category["skill_id"], []).append(category)
+            index.setdefault(category["skill_ref"], []).append(category)
         for categories in index.values():
             categories.sort(key=lambda item: (item["order"], item["name"], item["page"]))
         self._category_index = index
@@ -56,6 +56,18 @@ class SkillCatalog:
             else self.rules_database.skill_parameter_semantics()
         )
 
+    def _army_refs_for_ids(self, skill_ids: set[int]) -> set[ArmyLinkRef]:
+        refs: set[ArmyLinkRef] = set(skill_ids)
+        for skill_id in skill_ids:
+            application_id = self.database.application_catalog_id("skills", skill_id)
+            if application_id is None:
+                continue
+            refs.update(self.database.skill_source_ids(application_id))
+            slug = self.database.application_slug("skills", application_id)
+            if slug is not None:
+                refs.add(slug)
+        return refs
+
     def _parameter_semantics_for_ids(
         self, skill_ids: set[int]
     ) -> dict[str, str] | None:
@@ -63,8 +75,8 @@ class SkillCatalog:
         assert self._parameter_index is not None
         values = {
             tuple(sorted(semantics.items()))
-            for skill_id in skill_ids
-            if (semantics := self._parameter_index.get(skill_id)) is not None
+            for skill_ref in self._army_refs_for_ids(skill_ids)
+            if (semantics := self._parameter_index.get(skill_ref)) is not None
         }
         if len(values) > 1:
             raise ValueError(
@@ -91,14 +103,8 @@ class SkillCatalog:
         self._ensure_category_index()
         assert self._category_index is not None
         categories: dict[tuple[str, str | None, int | None], tuple[int, dict[str, Any]]] = {}
-        for skill_id in skill_ids:
-            source_categories = self._category_index.get(skill_id, [])
-            if not source_categories:
-                item = dict(UNCLASSIFIED_CATEGORY)
-                key = (item["name"], item["source"], item["page"])
-                categories.setdefault(key, (10_000, item))
-                continue
-            for category in source_categories:
+        for skill_ref in self._army_refs_for_ids(skill_ids):
+            for category in self._category_index.get(skill_ref, []):
                 item = {
                     "name": category["name"],
                     "source": _source_label(category),
@@ -145,8 +151,12 @@ class SkillCatalog:
 
         if self.rules_database is not None:
             rules: dict[str, dict[str, Any]] = {}
-            for source_id in source_ids:
-                for record in self.rules_database.records_for_army_link("skill", source_id):
+            army_refs = sorted(
+                self._army_refs_for_ids(source_ids),
+                key=lambda value: (isinstance(value, str), str(value)),
+            )
+            for skill_ref in army_refs:
+                for record in self.rules_database.records_for_army_link("skill", skill_ref):
                     if record["kind"] == DECLARATION_KIND:
                         continue
                     rules.setdefault(record["id"], record)

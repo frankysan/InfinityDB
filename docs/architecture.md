@@ -168,13 +168,24 @@ aliases. Generic matching and duplicate-detection algorithms remain code.
 Catalog alias-group references are authored as either positive numeric source IDs
 or readable source slugs. The checked-in Skill, Equipment, and Weapon groups use
 source-label slugs wherever those labels are unambiguous. A slug is resolved from
-the normalized source catalog label before application grouping, so the identity
-policy does not depend on the later application-domain slug registry. A group that
-is wholly absent from a source snapshot is inert; once any group member is present,
-unknown or ambiguous authored slugs fail closed. Numeric references remain supported
-where source identity or disambiguation matters. This numeric-or-slug reference shape
-is the preferred direction for other maintained/curated JSON references when their
-owning layer has enough source context to resolve them deterministically.
+the complete source metadata catalog, supplemented by catalog rows actually used by
+the snapshot, before application grouping; this allows maintained groups to name
+valid source identities even when one variant is unused in the current Army lists.
+Per-catalog `slug_aliases` may correct a known upstream spelling only at this
+authoring/resolution boundary (for example `tinbot-neourocinetics` ->
+`tinbot-neurocinetics`); raw source labels remain unchanged for provenance. The
+identity policy therefore does not depend on the later application-domain slug
+registry. A group that is wholly absent from the available source catalog is inert;
+once any group member is present, unknown or ambiguous authored slugs fail
+closed. Numeric references remain supported
+where source identity or disambiguation matters. Curated rules `armyLinks` now apply
+the same authoring principle at the later composition boundary: Skill, Equipment, and
+Weapon links may use application-domain slugs, while legacy/source numeric references
+remain valid. Unlike identity-manifest source-label slugs, these rules slugs deliberately
+refer to the already-grouped application identity and are matched when Army and rules
+data are composed at read time. This numeric-or-slug reference shape is the preferred
+direction for other maintained/curated JSON references when their owning layer has
+enough context to resolve them deterministically.
 Current InfinityDB builds derive unit `main_army_id` from the imported Army
 metadata faction-parent relationship, with maintained canonical-faction
 overrides taking precedence. The former `xx01` arithmetic remains only as a

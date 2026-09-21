@@ -63,8 +63,12 @@ proved that the singular value is the correct game-wide fact.
   configuration. Catalog alias groups accept either positive numeric source IDs
   or source-label slugs in `canonical_id` / `source_ids`; the maintained Skill,
   Equipment, and Weapon groups currently use readable source-label slugs. Slug
-  references are resolved against the current source catalog before application
-  grouping. A wholly absent group is ignored for that snapshot; if any member is
+  references are resolved against the complete source metadata catalog plus any
+  catalog rows used by the current snapshot before application grouping. This lets
+  maintained groups refer to valid but currently unused source variants. Known
+  upstream spelling mistakes may be mapped with per-catalog `slug_aliases`; those
+  aliases affect maintained reference resolution only and do not rewrite raw source
+  provenance. A wholly absent group is ignored for that snapshot; if any member is
   present, unknown or ambiguous slug references fail validation. These authoring
   slugs are source references, not the later public `application_domain_slugs`
   identities. That
@@ -1768,8 +1772,11 @@ The materializer currently uses these source inputs:
 For each public catalog, explicit reviewed alias groups take precedence. The
 authored `canonical_id` and `source_ids` entries may mix positive integer source
 IDs with lowercase domain-local slugs derived from source item labels. Slug
-resolution happens against source rows before grouping; an unknown slug or a slug
-owned by multiple source IDs is a build error rather than an implicit guess.
+resolution uses the complete metadata catalog, supplemented by used source rows,
+before grouping; an unknown slug or a slug owned by multiple source IDs is a build
+error rather than an implicit guess. Per-catalog `slug_aliases` can map a known
+upstream misspelling onto the reviewed authored spelling without mutating the raw
+source label retained for provenance.
 Remaining source rows are grouped only by the existing deterministic label rules used by the
 application: numeric skill variants share the label with the numeric component
 removed, while Equipment/Weapon labels additionally allow the text before a
@@ -2155,9 +2162,13 @@ not rules-database inputs. The rules database has an independent schema,
 application ID, compatibility version, and replaceable snapshot lifecycle; its
 current schema and compatibility versions are both 2.
 
-A curated rule fact may reference stable application-level identities, but
-neither database is an import source for the other; any combined view is
-assembled by application code.
+A curated rule fact may reference stable application-level identities, but neither
+database is an import source for the other; any combined view is assembled by
+application code. Catalog `armyLinks` for Skills, Equipment, and Weapons accept either
+positive numeric source IDs or application-domain slugs. `rules.db` preserves that
+authored reference as text; composition code checks both the legacy/source numeric form
+and the current application slug for the Army item being enriched. The maintained N5
+collection prefers slugs so links survive source-ID churn and remain human-readable.
 
 Trait identity is one implemented example of that composition boundary. Army
 metadata stores raw trait labels and usage, while current curated `trait` records
@@ -2176,9 +2187,10 @@ curated Trait knowledge into its snapshot.
 Skill declaration categories are another application-level composition. Army-derived
 `skills` and their usage remain source data, while current curated
 `skill-declaration-category` records carry the N5 declaration label, deterministic
-display order, Army skill links, and printed-page citation. `SkillCatalog` joins
-those records at read time and keeps uncited `Unclassified` as the fallback for
-skills without a curated declaration. The Army database does not materialize these
+display order, application-domain Skill links, and printed-page citation. `SkillCatalog`
+joins those records at read time using the logical Skill slug (while retaining numeric
+link compatibility) and keeps uncited `Unclassified` as the fallback only when the
+logical Skill has no curated declaration. The Army database does not materialize these
 rules facts.
 
 Skill parameter interpretation follows the same source/curated split. The imported
@@ -2186,8 +2198,9 @@ Army `extras.type` field determines whether an extra is a distance; this source
 semantic is preserved into the frontend database and drives `is_distance` in
 repository responses. Curated `skill` records may additionally carry
 `facts.parameterSemantics` for rule-derived display behavior such as whether a
-positive sign is omitted or forced. `SkillCatalog` joins that hint at read time;
-it is not copied into the Army database.
+positive sign is omitted or forced. Those hints use the same numeric-or-slug Army-link
+contract and are composed onto the logical Skill at read time; they are not copied into
+the Army database.
 
 ## Application query model
 

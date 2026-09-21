@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 
 
 def _special_profile(record: dict[str, Any]) -> dict[str, Any] | None:
@@ -29,6 +29,12 @@ class CatalogRules:
     def __init__(self, rules_database: RulesDatabase | None) -> None:
         self.rules_database = rules_database
 
+    @staticmethod
+    def _army_refs(item: dict[str, Any]) -> tuple[ArmyLinkRef, ...]:
+        item_id = int(item["id"])
+        slug = item.get("slug")
+        return (item_id, slug) if isinstance(slug, str) else (item_id,)
+
     def enrich_catalog_item(
         self, catalog: str, item: dict[str, Any]
     ) -> dict[str, Any]:
@@ -42,7 +48,11 @@ class CatalogRules:
         if entity is None:
             return result
 
-        records = self.rules_database.records_for_army_link(entity, int(result["id"]))
+        records_by_id: dict[str, dict[str, Any]] = {}
+        for army_ref in self._army_refs(result):
+            for record in self.rules_database.records_for_army_link(entity, army_ref):
+                records_by_id.setdefault(record["id"], record)
+        records = list(records_by_id.values())
         if records:
             result["rules"] = records
 

@@ -390,7 +390,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 29
+                    "id": "camouflage"
                 }
             ],
             "relatedRecords": [
@@ -445,7 +445,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 74
+                    "id": "super-jump"
                 }
             ],
             "citations": [
@@ -485,7 +485,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 161
+                    "id": "forward-deployment"
                 }
             ],
             "citations": [
@@ -1351,7 +1351,7 @@
             "armyLinks": [
                 {
                     "entity": "weapon",
-                    "id": 226
+                    "id": "armed-turret"
                 }
             ],
             "citations": [
@@ -1382,7 +1382,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 265
+                    "id": "aerial"
                 }
             ],
             "citations": [
@@ -1413,11 +1413,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 25
+                    "id": "booty"
                 },
                 {
                     "entity": "skill",
-                    "id": 29
+                    "id": "camouflage"
                 }
             ],
             "citations": [
@@ -1448,15 +1448,15 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 82
+                    "id": "climbing-plus"
                 },
                 {
                     "entity": "skill",
-                    "id": 191
+                    "id": "surprise-attack"
                 },
                 {
                     "entity": "skill",
-                    "id": 262
+                    "id": "combat-instinct"
                 }
             ],
             "citations": [
@@ -1487,7 +1487,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 215
+                    "id": "decoy"
                 }
             ],
             "citations": [
@@ -1518,15 +1518,15 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 26
+                    "id": "chain-of-command"
                 },
                 {
                     "entity": "skill",
-                    "id": 84
+                    "id": "courage"
                 },
                 {
                     "entity": "skill",
-                    "id": 207
+                    "id": "counterintelligence"
                 }
             ],
             "citations": [
@@ -1557,11 +1557,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 85
+                    "id": "dogged"
                 },
                 {
                     "entity": "skill",
-                    "id": 86
+                    "id": "no-wound-incapacitation"
                 }
             ],
             "citations": [
@@ -1592,11 +1592,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 38
+                    "id": "explode"
                 },
                 {
                     "entity": "skill",
-                    "id": 259
+                    "id": "exrah"
                 }
             ],
             "citations": [
@@ -1627,15 +1627,15 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 250
+                    "id": "frenzy"
                 },
                 {
                     "entity": "skill",
-                    "id": 258
+                    "id": "regular"
                 },
                 {
                     "entity": "skill",
-                    "id": 261
+                    "id": "ft-master"
                 }
             ],
             "citations": [
@@ -1666,7 +1666,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 252
+                    "id": "g-jumper"
                 }
             ],
             "citations": [
@@ -1697,11 +1697,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 247
+                    "id": "guard"
                 },
                 {
                     "entity": "skill",
-                    "id": 1000
+                    "id": "hacker"
                 }
             ],
             "citations": [
@@ -1732,7 +1732,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 162
+                    "id": "immunity"
                 }
             ],
             "citations": [
@@ -1763,7 +1763,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 256
+                    "id": "impetuous"
                 }
             ],
             "citations": [
@@ -1794,11 +1794,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 55
+                    "id": "metachemistry"
                 },
                 {
                     "entity": "skill",
-                    "id": 281
+                    "id": "infinity-spec-ops"
                 }
             ],
             "citations": [
@@ -1829,11 +1829,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 52
+                    "id": "inspiring-leadership"
                 },
                 {
                     "entity": "skill",
-                    "id": 272
+                    "id": "journalist"
                 }
             ],
             "citations": [
@@ -1864,31 +1864,15 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 19
+                    "id": "martial-arts"
                 },
                 {
                     "entity": "skill",
-                    "id": 20
+                    "id": "marksmanship"
                 },
                 {
                     "entity": "skill",
-                    "id": 21
-                },
-                {
-                    "entity": "skill",
-                    "id": 22
-                },
-                {
-                    "entity": "skill",
-                    "id": 23
-                },
-                {
-                    "entity": "skill",
-                    "id": 156
-                },
-                {
-                    "entity": "skill",
-                    "id": 268
+                    "id": "limited-cover"
                 }
             ],
             "citations": [
@@ -1919,7 +1903,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 39
+                    "id": "natural-born-warrior"
                 }
             ],
             "citations": [
@@ -1950,11 +1934,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 28
+                    "id": "mimetism"
                 },
                 {
                     "entity": "skill",
-                    "id": 235
+                    "id": "remote-presence"
                 }
             ],
             "citations": [
@@ -1985,7 +1969,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 248
+                    "id": "mnemonica"
                 }
             ],
             "citations": [
@@ -2016,11 +2000,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 109
+                    "id": "neurocinetics"
                 },
                 {
                     "entity": "skill",
-                    "id": 211
+                    "id": "nco"
                 }
             ],
             "citations": [
@@ -2051,7 +2035,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 122
+                    "id": "number-2"
                 }
             ],
             "citations": [
@@ -2082,7 +2066,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 243
+                    "id": "peripheral"
                 }
             ],
             "citations": [
@@ -2113,7 +2097,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 72
+                    "id": "protheion"
                 }
             ],
             "citations": [
@@ -2144,11 +2128,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 83
+                    "id": "religious-troop"
                 },
                 {
                     "entity": "skill",
-                    "id": 255
+                    "id": "remdriver"
                 }
             ],
             "citations": [
@@ -2179,7 +2163,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 237
+                    "id": "shasvastii"
                 }
             ],
             "citations": [
@@ -2210,19 +2194,19 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 67
+                    "id": "sixth-sense"
                 },
                 {
                     "entity": "skill",
-                    "id": 164
+                    "id": "stealth"
                 },
                 {
                     "entity": "skill",
-                    "id": 189
+                    "id": "specialist-operative"
                 },
                 {
                     "entity": "skill",
-                    "id": 251
+                    "id": "strategic-deployment"
                 }
             ],
             "citations": [
@@ -2253,15 +2237,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 69
+                    "id": "strategos"
                 },
                 {
                     "entity": "skill",
-                    "id": 70
-                },
-                {
-                    "entity": "skill",
-                    "id": 119
+                    "id": "lieutenant"
                 }
             ],
             "citations": [
@@ -2292,7 +2272,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 74
+                    "id": "super-jump"
                 }
             ],
             "citations": [
@@ -2323,15 +2303,15 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 213
+                    "id": "tactical-awareness"
                 },
                 {
                     "entity": "skill",
-                    "id": 270
+                    "id": "tagcom"
                 },
                 {
                     "entity": "skill",
-                    "id": 275
+                    "id": "tech-recovery"
                 }
             ],
             "citations": [
@@ -2362,11 +2342,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 62
+                    "id": "regeneration"
                 },
                 {
                     "entity": "skill",
-                    "id": 276
+                    "id": "technorganic"
                 }
             ],
             "citations": [
@@ -2397,7 +2377,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 246
+                    "id": "transmutation"
                 }
             ],
             "citations": [
@@ -2428,19 +2408,19 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 58
+                    "id": "terrain"
                 },
                 {
                     "entity": "skill",
-                    "id": 61
+                    "id": "total-reaction"
                 },
                 {
                     "entity": "skill",
-                    "id": 220
+                    "id": "vulnerability"
                 },
                 {
                     "entity": "skill",
-                    "id": 267
+                    "id": "warhorse"
                 }
             ],
             "citations": [
@@ -2471,11 +2451,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 33
+                    "id": "parachutist"
                 },
                 {
                     "entity": "skill",
-                    "id": 47
+                    "id": "infiltration"
                 }
             ],
             "citations": [
@@ -2506,7 +2486,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 161
+                    "id": "forward-deployment"
                 }
             ],
             "citations": [
@@ -2537,7 +2517,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 249
+                    "id": "impersonation"
                 }
             ],
             "citations": [
@@ -2568,7 +2548,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 238
+                    "id": "hidden-deployment"
                 }
             ],
             "citations": [
@@ -2599,7 +2579,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 56
+                    "id": "minelayer"
                 }
             ],
             "citations": [
@@ -2630,7 +2610,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 89
+                    "id": "sapper"
                 }
             ],
             "citations": [
@@ -2661,7 +2641,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 201
+                    "id": "bs-attack"
                 }
             ],
             "citations": [
@@ -2692,7 +2672,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 240
+                    "id": "cc-attack"
                 }
             ],
             "citations": [
@@ -2723,7 +2703,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 131
+                    "id": "discover"
                 }
             ],
             "citations": [
@@ -2754,7 +2734,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 40
+                    "id": "dodge"
                 }
             ],
             "citations": [
@@ -2785,7 +2765,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 254
+                    "id": "gizmokit"
                 }
             ],
             "citations": [
@@ -2816,11 +2796,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 53
+                    "id": "doctor"
                 },
                 {
                     "entity": "skill",
-                    "id": 277
+                    "id": "cyberplug"
                 }
             ],
             "citations": [
@@ -2851,11 +2831,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 49
+                    "id": "engineer"
                 },
                 {
                     "entity": "skill",
-                    "id": 273
+                    "id": "medikit"
                 }
             ],
             "citations": [
@@ -2886,7 +2866,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 59
+                    "id": "forward-observer"
                 }
             ],
             "citations": [
@@ -2917,7 +2897,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 73
+                    "id": "morpho-scan"
                 }
             ],
             "citations": [
@@ -2948,7 +2928,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 64
+                    "id": "paramedic"
                 }
             ],
             "citations": [
@@ -2979,7 +2959,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 65
+                    "id": "sensor"
                 }
             ],
             "citations": [
@@ -3010,7 +2990,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 242
+                    "id": "triangulated-fire"
                 }
             ],
             "citations": [
@@ -3041,11 +3021,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 263
+                    "id": "jump"
                 },
                 {
                     "entity": "skill",
-                    "id": 271
+                    "id": "climb"
                 }
             ],
             "citations": [
@@ -3076,7 +3056,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 35
+                    "id": "combat-jump"
                 }
             ],
             "citations": [
@@ -3107,7 +3087,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 89
+                    "id": "sapper"
                 }
             ],
             "citations": [
@@ -3138,7 +3118,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 24
+                    "id": "berserk"
                 }
             ],
             "citations": [
@@ -3169,7 +3149,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 201
+                    "id": "bs-attack"
                 }
             ],
             "citations": [
@@ -3200,7 +3180,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 240
+                    "id": "cc-attack"
                 }
             ],
             "citations": [
@@ -3231,7 +3211,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 131
+                    "id": "discover"
                 }
             ],
             "citations": [
@@ -3262,7 +3242,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 40
+                    "id": "dodge"
                 }
             ],
             "citations": [
@@ -3293,7 +3273,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 254
+                    "id": "gizmokit"
                 }
             ],
             "citations": [
@@ -3324,11 +3304,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 53
+                    "id": "doctor"
                 },
                 {
                     "entity": "skill",
-                    "id": 277
+                    "id": "cyberplug"
                 }
             ],
             "citations": [
@@ -3359,11 +3339,11 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 49
+                    "id": "engineer"
                 },
                 {
                     "entity": "skill",
-                    "id": 273
+                    "id": "medikit"
                 }
             ],
             "citations": [
@@ -3394,7 +3374,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 59
+                    "id": "forward-observer"
                 }
             ],
             "citations": [
@@ -3425,7 +3405,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 73
+                    "id": "morpho-scan"
                 }
             ],
             "citations": [
@@ -3456,7 +3436,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 64
+                    "id": "paramedic"
                 }
             ],
             "citations": [
@@ -3487,7 +3467,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 65
+                    "id": "sensor"
                 }
             ],
             "citations": [
@@ -3518,7 +3498,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": 242
+                    "id": "triangulated-fire"
                 }
             ],
             "citations": [

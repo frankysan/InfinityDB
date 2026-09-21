@@ -98,7 +98,7 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
     export_rules_database(documents, output)
 
     database = RulesDatabase(output)
-    records = database.records_for_army_link("weapon", 226)
+    records = database.records_for_army_link("weapon", "armed-turret")
 
     assert [record["id"] for record in records] == ["weapon:armed-turret"]
     assert records[0]["facts"]["specialProfile"] == {
@@ -127,8 +127,8 @@ def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> Non
     export_rules_database(documents, output)
 
     assert RulesDatabase(output).skill_parameter_semantics() == {
-        74: {"kind": "distance", "positive_sign": "omit"},
-        161: {"kind": "distance", "positive_sign": "force"},
+        "super-jump": {"kind": "distance", "positive_sign": "omit"},
+        "forward-deployment": {"kind": "distance", "positive_sign": "force"},
     }
 
 def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:
@@ -141,12 +141,12 @@ def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> 
     categories = [
         category
         for category in database.skill_declaration_categories()
-        if category["skill_id"] == 89
+        if category["skill_ref"] == "sapper"
     ]
 
     assert categories == [
         {
-            "skill_id": 89,
+            "skill_ref": "sapper",
             "name": "Deployment",
             "order": 20,
             "source_title": "N5 Core Rules",
@@ -154,7 +154,7 @@ def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> 
             "page": 111,
         },
         {
-            "skill_id": 89,
+            "skill_ref": "sapper",
             "name": "Long Skill",
             "order": 40,
             "source_title": "N5 Core Rules",

@@ -25,7 +25,7 @@ def identity_document() -> dict:
 def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     config = load_identity_config()
 
-    assert config.document["schema_version"] == 2
+    assert config.document["schema_version"] == 3
     assert config.canonical_unit_id(1690) == 300
     assert config.canonical_unit_id(11345) == 1345
     assert config.canonical_army_id(998) == 999
@@ -35,6 +35,10 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
         for group in config.document["catalogs"][catalog]["groups"]:
             assert isinstance(group["canonical_id"], str)
             assert all(isinstance(ref, str) for ref in group["source_ids"])
+
+    assert config.document["catalogs"]["equipment"]["slug_aliases"] == {
+        "tinbot-neourocinetics": "tinbot-neurocinetics"
+    }
 
     assert dict(
         config.resolve_catalog_aliases(
@@ -120,6 +124,25 @@ def test_catalog_identity_groups_accept_numeric_or_slug_references(
             {19: "Camouflage L1", 20: "Camouflage L2"},
         )
     ) == {19: 19, 20: 19}
+
+
+def test_catalog_slug_aliases_correct_source_spelling_without_changing_raw_label(
+    identity_document: dict,
+) -> None:
+    identity_document["catalogs"]["equipment"]["groups"] = [
+        {
+            "canonical_id": "tinbot",
+            "source_ids": ["tinbot", "tinbot-neurocinetics"],
+        }
+    ]
+    config = parse_identity_config(identity_document)
+
+    assert dict(
+        config.resolve_catalog_aliases(
+            "equipment",
+            {188: "TinBot: Neourocinetics", 235: "TinBot"},
+        )
+    ) == {188: 235, 235: 235}
 
 
 def test_catalog_identity_group_can_be_absent_from_source_snapshot(

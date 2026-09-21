@@ -118,8 +118,11 @@ numeric IDs. The current Army snapshot exposes the following source links:
 | `skill:cyberplug` | 277 | N5 v5.3 p. 90 |
 | `skill:peripheral` | 243 | N5 v5.3 pp. 106-108 |
 
-These numeric IDs remain snapshot/source links in `armyLinks`; they are not the
-semantic identity of the curated skills.
+These numeric IDs remain useful source/provenance references, but maintained
+`armyLinks` now prefer the corresponding application Skill slugs (`doctor`, `engineer`,
+`cyberplug`, and `peripheral`). Numeric IDs remain accepted as compatibility or explicit
+disambiguation references; neither form becomes the semantic identity of the curated
+skill record itself.
 
 The records should use the existing `skill` contract, existing skill-type/label
 vocabulary, primary PDF citations, and optional Wiki citations where they add

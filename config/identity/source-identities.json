@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "units": {
     "groups": [
       {
@@ -64,12 +64,15 @@
       ]
     },
     "equipment": {
+      "slug_aliases": {
+        "tinbot-neourocinetics": "tinbot-neurocinetics"
+      },
       "groups": [
         {
           "canonical_id": "tinbot",
           "source_ids": [
             "tinbot-firewall",
-            "tinbot-neourocinetics",
+            "tinbot-neurocinetics",
             "tinbot-albedo",
             "tinbot",
             "tinbot-discover",

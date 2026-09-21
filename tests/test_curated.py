@@ -269,7 +269,9 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["skill:camouflage"]["kind"] == "skill"
     assert records["skill:camouflage"]["labelIds"] == ["optional"]
     assert records["skill:camouflage"]["facts"]["typeId"] == "automatic"
-    assert records["skill:camouflage"]["armyLinks"] == [{"entity": "skill", "id": 29}]
+    assert records["skill:camouflage"]["armyLinks"] == [
+        {"entity": "skill", "id": "camouflage"}
+    ]
     assert records["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
     assert records["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
         "Disposable ("
@@ -279,7 +281,7 @@ def test_checked_in_n5_collection_is_valid() -> None:
         "wiki-traits-oldid-4110"
     )
     assert records["weapon:armed-turret"]["armyLinks"] == [
-        {"entity": "weapon", "id": 226}
+        {"entity": "weapon", "id": "armed-turret"}
     ]
     assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == [
         "Total Reaction"
@@ -380,7 +382,7 @@ def test_skill_declaration_category_requires_valid_order_and_skill_links(
 
     document["records"][-1]["armyLinks"] = [{"entity": "weapon", "id": 19}]
     path.write_text(json.dumps(document), encoding="utf-8")
-    with pytest.raises(ValueError, match="must reference integer skill ids"):
+    with pytest.raises(ValueError, match="must reference skills"):
         load_curated_document(path)
 
     document = valid_document()
@@ -399,4 +401,32 @@ def test_skill_declaration_category_requires_valid_order_and_skill_links(
     document["records"].append(declaration)
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="requires exactly one citation"):
+        load_curated_document(path)
+
+
+def test_army_links_accept_numeric_ids_and_catalog_slugs(tmp_path: Path) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["armyLinks"] = [
+        {"entity": "skill", "id": 29},
+        {"entity": "skill", "id": "camouflage"},
+    ]
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    assert load_curated_document(path)["records"][0]["armyLinks"] == record["armyLinks"]
+
+    record["armyLinks"] = [{"entity": "skill", "id": "29"}]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="JSON integers"):
+        load_curated_document(path)
+
+    record["armyLinks"] = [{"entity": "state", "id": "camouflaged"}]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="string 'id' references are not supported"):
+        load_curated_document(path)
+
+    record["armyLinks"] = [{"entity": "skill", "id": "Camouflage"}]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="lowercase ASCII slug"):
         load_curated_document(path)

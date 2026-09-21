@@ -309,7 +309,11 @@ and serves a read-only browser and same-origin HTTP API.
   collapsing those contexts.
 - Skills, Equipment, and Weapons application identities are InfinityDB
   abstractions materialized from normalized catalog rows, reviewed catalog alias
-  groups, and metadata enrichment. `application_catalog_sources` preserves each
+  groups, and metadata enrichment. Catalog identity slug references resolve against
+  the complete source metadata catalog plus currently used rows; reviewed
+  per-catalog slug aliases may correct upstream spelling at the identity-authoring
+  boundary without rewriting raw provenance. `application_catalog_sources` preserves
+  each
   contributing source ID/label; detailed `metadata_weapons` modes and profiles
   remain contextual rather than being promoted to invariant catalog facts.
 - `tools/benchmark_runtime.py` is the canonical repository-read benchmark for the
@@ -540,7 +544,11 @@ reserved `rules/example.json` template is excluded from directory ingestion.
 The rules database has its own schema/versioning and replacement lifecycle. It
 must not import Army JSON data, and Army database construction must not import
 rules data. Application/service code may combine the two only through stable
-application-level identities.
+application-level identities. For `armyLinks`, Skill, Equipment, and Weapon IDs may be
+positive numeric source references or application-domain slugs; the checked-in N5 rules
+use slugs. `rules.db` preserves the authored value and composition code matches it to
+the current Army application identity. Numeric-looking strings are rejected so numeric
+compatibility references remain unambiguous JSON integers.
 
 ## API and UI constraints
 
@@ -771,6 +779,14 @@ application-level identities.
   collision disambiguation. Apply this numeric-or-slug authoring convention to other
   maintained/curated JSON reference fields only where their owning layer can resolve
   the domain deterministically.
+- 2026-09-21: Curated N5 `armyLinks` for Skills, Equipment, and Weapons now use
+  readable application-domain slugs instead of opaque numeric source IDs. The curated
+  v3 validator accepts either a positive integer or a domain slug for those entities,
+  rejects numeric-looking slug strings, and retains numeric compatibility. `rules.db`
+  stores the authored reference without importing Army data; Skill/Catalog composition
+  checks both source-ID and application-slug forms so grouped identities such as Martial
+  Arts, Strategos, BS Attack, CC Attack, and Armed Turret resolve through the same
+  logical identity used by public routes.
 - 2026-09-20: Domain-unique application slugs now have a derived persistence
   layer. Schema version 17 / compatibility revision 25 materializes
   `application_domain_slugs` for Armies, logical Units, Skills, Equipment, and

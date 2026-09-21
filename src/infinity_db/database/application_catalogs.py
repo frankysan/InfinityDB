@@ -76,6 +76,37 @@ def _source_catalog_rows(connection: sqlite3.Connection, catalog: str) -> list[d
     )
 
 
+def _catalog_reference_labels(
+    connection: sqlite3.Connection,
+    catalog: str,
+    used_rows: list[dict[str, Any]],
+) -> dict[int, str]:
+    """Return the complete source catalog labels available for identity resolution."""
+
+    if catalog == "weapons":
+        metadata_rows = _dict_rows(
+            connection,
+            "SELECT id, MIN(NULLIF(name, '')) AS name "
+            "FROM metadata_weapons GROUP BY id ORDER BY id",
+        )
+    else:
+        metadata_table = {"skills": "metadata_skills", "equipment": "metadata_equipment"}[
+            catalog
+        ]
+        metadata_rows = _dict_rows(
+            connection,
+            f"SELECT id, name FROM {metadata_table} ORDER BY id",
+        )
+    labels = {
+        int(row["id"]): str(row["name"])
+        for row in metadata_rows
+        if row.get("name") not in (None, "")
+    }
+    for row in used_rows:
+        labels.setdefault(int(row["id"]), str(row["name"]))
+    return labels
+
+
 def derive_application_catalogs(
     connection: sqlite3.Connection,
     identity_config: IdentityConfig,
@@ -85,7 +116,7 @@ def derive_application_catalogs(
     for catalog in CATALOGS:
         rows = _source_catalog_rows(connection, catalog)
         resolved_aliases = identity_config.resolve_catalog_aliases(
-            catalog, {int(row["id"]): row["name"] for row in rows}
+            catalog, _catalog_reference_labels(connection, catalog, rows)
         )
         groups: dict[tuple[str, Any], list[dict[str, Any]]] = defaultdict(list)
         merge_key_for = _skill_merge_key if catalog == "skills" else _catalog_merge_key

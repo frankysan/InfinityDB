@@ -15,7 +15,7 @@ from typing import Any
 from infinity_army_data.project_resources import maintained_config_path
 from infinity_db.domain_slugs import normalize_domain_slug, require_domain_slug
 
-IDENTITY_CONFIG_SCHEMA_VERSION = 2
+IDENTITY_CONFIG_SCHEMA_VERSION = 3
 DEFAULT_IDENTITY_CONFIG = maintained_config_path("identity", "source-identities.json")
 CATALOG_NAMES = ("skills", "equipment", "weapons")
 IDENTITY_CONFIG_METADATA_KEY = "identityConfig"
@@ -49,6 +49,7 @@ class IdentityConfig:
     army_aliases: Mapping[int, int]
     canonical_faction_overrides: Mapping[int, int]
     catalog_alias_groups: Mapping[str, tuple[CatalogAliasGroup, ...]]
+    catalog_slug_aliases: Mapping[str, Mapping[str, str]]
     word_aliases: Mapping[str, str]
     reinforcement_prefixes: tuple[str, ...]
     profile_identity_ignored_words: frozenset[str]
@@ -77,10 +78,12 @@ class IdentityConfig:
         if groups is None:
             raise IdentityConfigError(f"Unknown catalog: {catalog}")
 
+        slug_aliases = self.catalog_slug_aliases.get(catalog, {})
         slug_owners: dict[str, list[int]] = {}
         for source_id, label in source_items.items():
             slug = normalize_domain_slug(label)
             if slug:
+                slug = slug_aliases.get(slug, slug)
                 slug_owners.setdefault(slug, []).append(source_id)
 
         def resolve(ref: IdentifierRef, context: str) -> int | None:
@@ -274,7 +277,7 @@ def _identifier_ref(value: Any, context: str) -> IdentifierRef:
 
 def _catalog_alias_groups(value: Any, context: str) -> tuple[CatalogAliasGroup, ...]:
     section = _object(value, context)
-    _only_keys(section, {"groups"}, context)
+    _only_keys(section, {"groups", "slug_aliases"}, context)
     groups = section.get("groups")
     if not isinstance(groups, list):
         raise IdentityConfigError(f"{context}.groups must be an array")
@@ -307,6 +310,36 @@ def _catalog_alias_groups(value: Any, context: str) -> tuple[CatalogAliasGroup, 
         parsed_groups.append(CatalogAliasGroup(canonical_ref, parsed_refs))
 
     return tuple(parsed_groups)
+
+
+def _catalog_slug_aliases(value: Any, context: str) -> Mapping[str, str]:
+    section = _object(value, context)
+    aliases = section.get("slug_aliases", {})
+    mapping = _object(aliases, f"{context}.slug_aliases")
+    result: dict[str, str] = {}
+    for source, target in mapping.items():
+        if not isinstance(source, str):
+            raise IdentityConfigError(
+                f"{context}.slug_aliases keys must be domain-local slugs"
+            )
+        try:
+            source_slug = require_domain_slug(
+                source, context=f"{context}.slug_aliases key"
+            )
+        except ValueError as exc:
+            raise IdentityConfigError(str(exc)) from exc
+        try:
+            target_slug = require_domain_slug(
+                target, context=f"{context}.slug_aliases.{source}"
+            )
+        except (TypeError, ValueError) as exc:
+            raise IdentityConfigError(str(exc)) from exc
+        if source_slug == target_slug:
+            raise IdentityConfigError(
+                f"{context}.slug_aliases.{source} must change the source slug"
+            )
+        result[source_slug] = target_slug
+    return MappingProxyType(result)
 
 
 def _numeric_alias_groups(value: Any, context: str) -> Mapping[int, int]:
@@ -438,6 +471,14 @@ def parse_identity_config(document: Any) -> IdentityConfig:
             for catalog in CATALOG_NAMES
         }
     )
+    catalog_slug_aliases = MappingProxyType(
+        {
+            catalog: _catalog_slug_aliases(
+                catalogs[catalog], f"identity config.catalogs.{catalog}"
+            )
+            for catalog in CATALOG_NAMES
+        }
+    )
 
     name_normalization = _object(
         root.get("name_normalization"), "identity config.name_normalization"
@@ -499,6 +540,7 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         army_aliases=army_aliases,
         canonical_faction_overrides=canonical_faction_overrides,
         catalog_alias_groups=catalog_alias_groups,
+        catalog_slug_aliases=catalog_slug_aliases,
         word_aliases=word_aliases,
         reinforcement_prefixes=tuple(reinforcement_prefixes),
         profile_identity_ignored_words=frozenset(parsed_ignored_words),
