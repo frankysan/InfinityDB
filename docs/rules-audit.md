@@ -32,6 +32,14 @@ The initial audit baseline is:
   curated rules source catalog as `wiki-en-20260918-130233`. Use its snapshot
   identity for stable local wiki provenance; cross-check the live wiki when a page
   carries a later N5.3/FAQ update or when the snapshot revision is uncertain.
+- Reinforcements: official English Reinforcements Extra at
+  <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf> and
+  stable wiki revision
+  <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>.
+  The current wiki carries the global N5.3 / FAQ v0.1 banner, but the
+  Reinforcements page body explicitly identifies the material as an N4 Annex
+  rule. Keep it as a distinct annex scope unless Corvus Belli publishes a
+  replacement that explicitly integrates the detailed rules into N5.
 - ITS material remains season-scoped and must not be silently merged into core
   rules semantics.
 
@@ -244,7 +252,14 @@ rules have been audited.
   - [x] Restrictions, Retreat!/Loss of Lieutenant, and Fireteam bonus summaries
   - [x] Deployable Profiles and cross-section completeness reconciliation
   - [x] Data-generated chart/table opportunities and source-conflict review
-- [ ] Reinforcements
+- [x] Reinforcements
+  - [x] Annex scope/provenance and current-N5 navigation reconciliation
+  - [x] Main Section / Reinforcement Section list structure and faction-shared pool
+  - [x] Commlink and typed `Commlink (+X)` parameter semantics
+  - [x] Request Reinforcements activation/category boundary
+  - [x] Reinforcement Fireteams and parent-Army constraints
+  - [x] DropPod/deployment/runtime boundary
+  - [x] Army source/application-model reconciliation
 - [ ] ITS FAQ
 - [ ] Final cross-section reconciliation and gap analysis
 
@@ -1949,3 +1964,115 @@ The Quick Reference Charts therefore serve their intended audit purpose: they
 validate prior findings, expose a small number of missed cross-domain gaps, and
 identify several places where InfinityDB's data-generated views can be more
 maintainable and navigable than copied static charts.
+
+### Reinforcements — annex audit complete
+
+Status: the official Reinforcements Extra has been reviewed as a distinct annex
+scope. The current wiki exposes it from the N5.3 navigation and the N5 V5.3 core
+Game Modes table still names games with Reinforcements, but the detailed
+Reinforcements page explicitly identifies itself as an N4 Annex rule. InfinityDB
+therefore records the useful semantics without silently promoting the annex into
+the `n5-core-rules` source identity.
+
+Primary sources reviewed:
+
+- Official English Reinforcements Extra:
+  <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf>.
+- Stable wiki revision:
+  <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>,
+  revision dated 2025-04-25; the page body identifies the rule as an N4 Annex
+  despite the site's current N5.3 / FAQ v0.1 global banner.
+- PDF cross-section: Infinity N5 V5.3, printed page 6, where the Game Modes table
+  still groups 350-point Magnum games and games with Reinforcements.
+
+No local copy of the Reinforcements PDF is currently part of the tracked rules
+baseline, so this audit does not invent printed-page locators for the annex.
+
+#### Reinforcement Section is list context, not a standalone Army concept
+
+With the Extra, one Army List is partitioned into a Main Section and a
+Reinforcement Section. The Reinforcement Section forms its own Combat Group(s),
+uses only `Reinforcements (Reinf.)` Unit Profiles, and has section-specific AVA.
+Each faction has one Reinforcement Section shared by its generic and Sectorial
+armies.
+
+This maps cleanly onto InfinityDB's existing source/application distinction. Army
+source documents expose explicit ordinary-list -> reinforcement-list links, and
+the application layer materializes them in
+`application_army_reinforcement_parents`. The rules concept is nevertheless a
+**section/pool attached to an ordinary Army List**, not an independently legal
+Army List. Application identities with `role = reinforcement` are useful
+catalog/browse contexts; their `playable` field means application selectability,
+not rules-native standalone legality.
+
+The same distinction applies to Unit identity. A logical Unit can reconcile
+standard and Reinforcement source variants while retaining the exact source
+occurrence/profile context that determines section eligibility, AVA, profile
+name, and related Fireteam membership. Do not infer Reinforcement eligibility
+from the logical Unit alone.
+
+#### Commlink combines a profile Skill with list-level effects
+
+`Commlink` is an Automatic, Obligatory Special Skill. An Army List using the
+Extra must include exactly one Commlink Trooper in its Main Section. The Skill
+creates/enables the Reinforcement Section and grants access to `Request
+Reinforcements`; that capability remains available even when the bearer is Null
+or has been removed from the table.
+
+The positive parenthetical value in `Commlink (+X)` is a typed parameter: it
+increases the Army List's maximum Trooper count above the normal 15-Trooper
+limit. It is not a Skill Level, an Attribute MOD, or a generic numeric bonus.
+This is another direct consumer for curated `parameterSemantics` once the annex
+is represented in the rules-reference layer.
+
+#### Request Reinforcements is a phase-scoped Skill, not an Order declaration category
+
+`Request Reinforcements` is a Special Skill used in a dedicated step of the
+Tactical Phase when its activation condition is met. It is not declared by
+spending a normal Order and the source does not assign it Basic Short, Short,
+Long, or ARO in the ordinary declaration-category sense.
+
+The generated Orders/AROs completeness work must therefore distinguish
+**absence because an action is phase-scoped** from a genuinely missing category.
+Do not force Request Reinforcements into the normal declaration matrix merely to
+satisfy a Skill-shaped data contract.
+
+#### Reinforcement Fireteams require both section and parent-Army context
+
+The Reinforcement Section has its own Fireteams Chart, but permitted Fireteam
+Types/counts also remain constrained by the selected parent Army List. Main and
+Reinforcement Section Troopers cannot be mixed in the same Fireteam.
+
+This reinforces the Fireteams audit: composition eligibility and chart rows are
+Army/section-local relationships, while Fireteam Type quotas belong to the
+selected Army context. A future canonical Fireteam model must keep the
+ordinary-Army -> Reinforcement Section relationship available while resolving
+Reinforcement chart membership.
+
+#### DropPod placement and reinforcement timing remain session procedure
+
+Request thresholds, Tactical-Phase timing, Combat Group transfer timing,
+DropPod placement, table-half/ZoC deployment, and scenario-specific deployment
+exceptions depend on the current match. They may support future play aids, but
+they are not persistent Unit/Profile properties and do not require InfinityDB to
+simulate Reinforcement deployment.
+
+The DropPod itself is a deployment Token/scenery representation used by the
+Extra, not Trooper Equipment. Likewise, the 100-point/2-SWC section allocation
+and the Request Reinforcements Victory-Point thresholds are list/session rules,
+not canonical Army or Unit attributes.
+
+#### Application reconciliation
+
+This audit does not require an opportunistic schema/runtime change. It does make
+four follow-ups explicit in the existing backlog:
+
+- represent the Reinforcements Extra as its own versioned/scoped rules source
+  rather than adding Commlink/Request Reinforcements to core N5 records;
+- curate Commlink, its typed `+X` parameter, and Request Reinforcements without
+  forcing the latter into the normal Order declaration-category vocabulary;
+- preserve section/pool parentage, Reinforcement occurrence/profile context, and
+  Reinforcement-vs-parent Fireteam constraints through later relationship work;
+  and
+- keep browser/API wording clear that a reinforcement application identity is a
+  catalog Section/pool context, not a standalone legal Army List.

@@ -112,6 +112,10 @@ in `docs/releasing.md`.
     - [ ] Materialize curated-derived controller-eligibility and cross-army Peripheral
       relationships only after the source mapping and rules vocabulary are both validated.
   - [ ] Audit relation/dependency structures.
+    - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
+      as contextual source/application data. Treat `role = reinforcement` rows as
+      selectable catalog Section/pool contexts, not independently legal Army
+      Lists, and retain section-specific profile/AVA occurrence provenance.
   - [ ] Audit Fireteam structures.
     - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
       preserve Fireteam type quotas, named Fireteams, type membership, min/max
@@ -125,6 +129,9 @@ in `docs/releasing.md`.
       required-choice set where applicable, not as "every flagged row is mandatory",
       and preserve chart notes because the rules allow them to override general
       Fireteam rules.
+    - [ ] For Reinforcement Fireteams, retain both the Reinforcement Section chart
+      context and the selected parent Army's permitted Fireteam Types/counts; do
+      not mix Main-Section and Reinforcement-Section member eligibility.
   - [ ] Identify normalization-only link structures that do not constitute
     additional player-facing information.
   - [ ] Record any distinct player-relevant relationship not currently
@@ -190,7 +197,7 @@ in `docs/releasing.md`.
     - [x] Setting up the Gaming Table.
     - [x] Scenarios.
     - [x] Quick Reference Charts as a validation/completeness pass.
-    - [ ] Reinforcements, retaining its distinct rules scope.
+    - [x] Reinforcements, retaining its distinct rules scope.
     - [ ] ITS FAQ, retaining season/scenario scope rather than treating it as core rules.
   - [ ] Reconcile implementation-relevant findings against Army/API fields, the
     canonical application model, validation, querying/filtering, and browser
@@ -504,6 +511,16 @@ work against that contract.
     on. Preserve scenario/season scope and keep temporary effects out of static
     Unit/Profile facts. This catalog coverage is in scope for 1.0; a complete
     scenario library and scenario list/detail pages are not.
+  - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
+    annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
+    and `Request Reinforcements`, link the capability they create to the annex
+    scope, and retain the ordinary-Army -> Reinforcement Section/pool context.
+    - [ ] Encode `Commlink (+X)` as a typed maximum-Trooper-count parameter, not a
+      Skill Level or Attribute MOD.
+    - [ ] Extend declaration-category validation so phase-scoped actions such as
+      `Request Reinforcements` can be explicitly classified outside Basic Short/
+      Short/Long/ARO instead of being treated as incomplete or assigned a false
+      category.
   - [ ] Store original, concise editorial summaries and structured facts (labels,
     requirements, effects, restrictions, related rules, and page locators),
     rather than bulk-extracting or serving copyrighted PDF text or artwork.

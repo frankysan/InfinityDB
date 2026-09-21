@@ -1172,3 +1172,61 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Armed_Turret>
 - PDF: Infinity N5 V5.3, printed pages 70 and 195
+
+## Reinforcements
+
+### RR-RF-LIST-001 — Reinforcement point/SWC splits and list-size limits are list-building procedure
+
+**Scope:** Reinforcements annex list construction.
+
+The Extra reserves 100 Army Points and 2 SWC for the Reinforcement Section,
+requires one Commlink Trooper in the Main Section, and counts Reinforcement
+Troopers toward the normal 15-Trooper Army List maximum (subject to explicit
+maximum-count bonuses such as `Commlink (+X)`). Its recommended 350-point game
+therefore uses a 250/5 Main Section plus a 100/2 Reinforcement Section.
+
+These constraints may matter to a future saved-list/list-validator feature, but
+they are not canonical properties of a Unit, Army identity, or Reinforcement
+pool. The current catalog/reference application only needs the section/parent and
+Skill/parameter semantics recorded in `rules-semantics.md`.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+- Official annex: <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf>
+
+### RR-RF-DEP-001 — Request thresholds and DropPod deployment are runtime procedure
+
+**Scope:** Reinforcements annex session/deployment behavior.
+
+The Request Reinforcements step compares current Victory Points against a game-
+size threshold (or becomes available in the third Game Round), then places a
+DropPod Token and deploys the entire Reinforcement Section, Peripherals, and
+Deployable Weapons/Equipment within the resulting deployment area subject to
+current table/scenario restrictions.
+
+This is potentially useful play-aid material but does not justify static Unit
+fields or a Reinforcements state engine. The DropPod is a deployment Token/
+scenery representation for the procedure, not Trooper Equipment to add to the
+Equipment catalog.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+### RR-RF-CG-001 — Reinforcement Combat Group transfers are session state
+
+**Scope:** Reinforcements annex Combat Group procedure.
+
+Once deployed, Reinforcement Troopers form separate Combat Group(s), cannot move
+into or out of those groups until the following Tactical Phase, and the Commlink
+Trooper receives a special one-time transfer option when the Section deploys.
+
+These facts explain why the Reinforcement Section is more than a second static
+roster, but Combat Group membership and transfer timing remain live list/session
+state. No canonical Unit/Profile relationship is required for current
+InfinityDB catalog/reference responsibilities.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>

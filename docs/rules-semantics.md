@@ -2472,3 +2472,140 @@ Sources:
 - PDF: Infinity N5 V5.3, printed pages 70 and 195
 - Source/correction boundary: `config/catalogs/weapon-overrides.json` and
   `data/curated/rules/n5-core-v5.3.json`
+
+## Reinforcements
+
+### RS-RF-SCOPE-001 — Reinforcements is a separately scoped annex, not core N5 rules data
+
+**Classification:** source-native source-scope semantics.
+
+The current wiki navigation presents Infinity Reinforcements alongside the N5.3
+main sections, and the core N5 V5.3 Game Modes table still names games with
+Reinforcements. The detailed Reinforcements page itself, however, explicitly
+identifies the material as an official N4 Annex rule with provisional annex
+status.
+
+InfinityDB must preserve that source identity instead of silently folding
+`Commlink` and `Request Reinforcements` into the `n5-core-rules` collection. A
+future reviewed replacement can supersede this annex scope if Corvus Belli
+publishes one explicitly for N5.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+- Official annex: <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf>
+- PDF cross-reference: Infinity N5 V5.3, printed page 6
+
+### RS-RF-SECTION-001 — Reinforcement eligibility is Army-List section/occurrence context
+
+**Classification:** source-native list relationship semantics with an InfinityDB
+application-model consequence.
+
+The Extra divides one Army List into a Main Section and a Reinforcement Section.
+Only Unit Profiles explicitly named `Reinforcements (Reinf.)` can be included in
+the Reinforcement Section, and those profiles cannot be placed in the Main
+Section. Section-specific AVA and deployment rules therefore belong to the
+source occurrence/profile context, not intrinsic logical-Unit identity.
+
+InfinityDB may reconcile a Reinforcement source Unit with its standard logical
+Unit while retaining the source profile/list occurrence that says where that
+variant can be selected. Canonicalization must not turn Reinforcement eligibility
+into a universal Unit property.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+- Source/application context: `army_units`, canonical profile/loadout occurrences
+
+### RS-RF-POOL-001 — A faction Reinforcement Section is a shared pool attached to ordinary Armies
+
+**Classification:** source-native relationship semantics plus InfinityDB
+application abstraction.
+
+Each faction has one Reinforcement Section shared by its generic and Sectorial
+armies, with its own Units, AVA, and Fireteams Chart. The source Army documents
+likewise explicitly link ordinary lists to Reinforcement-list identities, which
+InfinityDB materializes in `application_army_reinforcement_parents`.
+
+The application `role = reinforcement` identity is therefore a useful canonical
+**catalog Section/pool context**, not evidence of an independently legal Army
+List. For these rows, `application_armies.playable` means browser/application
+selectability only. Parentage and source occurrence data carry the rules-relevant
+meaning.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+- Application model: `application_armies`, `application_army_reinforcement_parents`
+
+### RS-RF-COMM-001 — Commlink separates a profile Skill from the list capability it grants
+
+**Classification:** source-native Skill and list-level relationship semantics.
+
+`Commlink` is an Automatic, Obligatory Special Skill. A Reinforcements Army List
+must contain one Commlink Trooper in its Main Section, and at most one Trooper in
+the Army List may possess the Skill. Commlink grants access to `Request
+Reinforcements` during the Tactical Phase even if the bearer is Null or has been
+removed from the table.
+
+InfinityDB should therefore keep the profile occurrence (`this Trooper has
+Commlink`) distinct from the list/session capability that follows from it. The
+capability is not lost by mutating the imported profile when the bearer changes
+runtime State.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+### RS-RF-PARAM-001 — `Commlink (+X)` is a maximum-Trooper-count parameter
+
+**Classification:** source-native typed parameter semantics.
+
+A positive value in parentheses after Commlink increases the maximum number of
+Troopers permitted in the Army List beyond the normal limit of 15. The source
+also allows this bonus to combine with other effects that modify that maximum.
+
+The parenthetical value is therefore neither a Skill Level nor a generic MOD to
+an Attribute. A future annex-scoped Commlink record should encode the parameter
+as a typed `maximum Trooper count bonus` in `parameterSemantics` while preserving
+the exact Army/source representation for provenance.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+### RS-RF-REQ-001 — Request Reinforcements sits outside the normal Order declaration matrix
+
+**Classification:** source-native activation/category semantics.
+
+`Request Reinforcements` is a Special Skill used in its own Tactical Phase step
+when the current activation condition is met. The source does not make it a
+Basic Short, Short, Long, or ARO declaration performed through the normal Order
+expenditure flow.
+
+Rules-reference validation must allow phase-scoped actions to have a different
+activation classification instead of treating the absence of a normal
+`skillTypes` category as missing data. Generated Orders/AROs views should exclude
+or separately identify such actions rather than inventing an Order category.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+### RS-RF-FT-001 — Reinforcement Fireteams combine section-local composition with parent-Army quotas
+
+**Classification:** source-native contextual relationship semantics.
+
+The Reinforcement Section has its own Fireteams Chart and Main/Reinforcement
+Troopers cannot be mixed in one Fireteam. At deployment, however, the player must
+also obey the selected parent Army List's allowed Fireteam Types and existing
+Type limits.
+
+A canonical Fireteam relationship model therefore needs both contexts: the
+Reinforcement Section chart controls member/composition eligibility, while the
+ordinary Army List remains relevant to allowed Type/count. Neither can be
+reduced to an intrinsic Unit flag or a Reinforcement-only chart lookup.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>

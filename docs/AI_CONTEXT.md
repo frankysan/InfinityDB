@@ -193,6 +193,12 @@ and serves a read-only browser and same-origin HTTP API.
   reinforcement lists, and grouping identities; the browser selector
   consumes that contract rather than Army-ID ranges. Grouping identity `901` is
   non-playable.
+- Rules semantics refine the `reinforcement` application role: the linked
+  identity represents a faction-shared Reinforcement Section/pool attached to an
+  ordinary Army List, not a standalone legal Army. For reinforcement rows,
+  `playable` means application/browser selectability; preserve the parent Army
+  relationship and section-specific profile/AVA occurrence context when
+  canonicalizing or presenting the data.
 - Mercenary variants are classified during normalization, their source markers
   are validated, audited mercenary-to-standard mappings are persisted, and
   repository queries consume explicit availability provenance. Generic standard
