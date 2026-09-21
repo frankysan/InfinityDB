@@ -335,3 +335,121 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Traits>
 - PDF: Infinity N5 V5.3, printed pages 174-175
+
+## Skills and Equipment / Broader research
+
+### RR-SE-RULE-001 — Rule composition needs precedence, not simple effect union
+
+**Scope:** core N5.
+
+The module explicitly permits Skills/Equipment effects to combine while also
+stating that NFB incompatibility and the most restrictive applicable option take
+precedence. Requirements and Restrictions can additionally invalidate an
+otherwise available action.
+
+A future rule-assistant or compatibility view will therefore need more than a
+set of tags/effects. Composition has precedence and exclusion semantics. Keep
+this as research until InfinityDB has a consumer that evaluates combinations in
+an actual game context.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- PDF: Infinity N5 V5.3, printed page 76
+
+### RR-SE-PROFILE-001 — Runtime/profile overlays form a reusable relationship family
+
+**Scope:** core N5.
+
+Several rules alter which effective profile or characteristics apply without
+creating a new canonical Unit identity. Examples include Transmutation, AI
+Motorcycle, Infinity Spec-Ops Initial/Enhanced profiles, Morpho-Scan, and
+random/table-driven changes from Booty or MetaChemistry.
+
+These mechanisms do not all work alike, so `profile overlay` is an InfinityDB
+research grouping rather than a source-native category. If future comparison or
+game-session features need them, model the specific transition source, duration,
+copied/replaced fields, and persistence rules rather than a generic mutable
+profile blob.
+
+Sources:
+
+- Wiki: Transmutation, AI Motorcycle, Infinity Spec-Ops, Morpho-Scan, Booty, and
+  MetaChemistry pages
+- PDF: Infinity N5 V5.3, printed pages 86, 98-103, 117, and 119
+
+### RR-SE-REL-001 — Skills can modify relationships and group behavior
+
+**Scope:** core N5.
+
+FT Master, Strategic Deployment, TAGCom, G: Jumper, Peripheral, and similar
+Special Skills show that Skill effects may be properties of relationships or
+groups rather than only of the bearer. Examples affect Fireteam Training,
+deployment of associated Troopers, Pilot/TAG relationships, Proxy activation,
+Controller/Peripheral activation, or Combat Group counting.
+
+This supports treating future relationship rules as first-class cited semantics
+instead of materializing their effects into unrelated canonical Unit fields.
+The detailed Fireteam and Command consequences remain deferred to their own
+section audits.
+
+Sources:
+
+- Wiki: relevant Special Skill pages under the Skills and Equipment module
+- PDF: Infinity N5 V5.3, printed pages 93-94, 106-109, and 112-115
+
+### RR-SE-HACK-001 — Equipment/Skill identities seed a Hacking relationship graph
+
+**Scope:** core N5 with detailed semantics deferred to Combat.
+
+Hacker, Hacking Device variants, Firewall, Repeater, TinBot, and related
+Equipment already establish cross-links between Troopers, devices, programs,
+Hacking Area, MODs, and defensive effects. The Skills and Equipment chapter is
+enough to establish that those identities are related, but the Hacking rules in
+Combat define the actual program/target/range semantics.
+
+Do not materialize a complete Hacking graph from this section alone. Carry the
+identities and source links forward to the Combat audit and reconcile them there.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Device>
+- Wiki: Firewall, Repeater, TinBot, and Hacker pages
+- PDF: Infinity N5 V5.3, printed pages 95 and 122-127
+
+### RR-SE-REINF-001 — Live Special Skills navigation includes annex-scoped rules
+
+**Scope:** Reinforcements annex, not core N5 Skills and Equipment.
+
+The live Special Skills navigation lists `Commlink` and `Request Reinforcements`,
+while the core N5 V5.3 Skills and Equipment PDF inventory does not. Those links
+resolve into the Reinforcements rules.
+
+This is a useful audit warning for future automated wiki discovery: page
+navigation/parentage is not enough to assign rules scope. Preserve the explicit
+annex source and defer the detailed rules semantics to the Reinforcements audit.
+
+Sources:
+
+- Wiki: live Special Skills navigation
+- Wiki: Commlink and Request Reinforcements pages
+- PDF: Infinity N5 V5.3, printed pages 75-127 (core inventory)
+
+### RR-SE-COMMON-001 — Common Skills are rules-reference entities without Army occurrences
+
+**Scope:** core N5.
+
+Common Skills are available to every Trooper by the rules, so their usefulness to
+InfinityDB does not depend on appearing as Army metadata records. They can still
+be targets of Traits, declaration-category help, cross-links, and play-aid
+content.
+
+A future rules thesaurus/catalog may therefore need identities whose source of
+existence is the ruleset rather than an Army catalog row. This is a useful test
+case for keeping application rule identity separate from Army occurrence
+identity.
+
+Sources:
+
+- Wiki: Common Skills index under the Skills and Equipment module
+- PDF: Infinity N5 V5.3, printed pages 76-85

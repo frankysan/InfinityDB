@@ -136,7 +136,15 @@ rules have been audited.
   - [x] Alignment
   - [x] Labels
   - [x] Traits
-- [ ] Skills and Equipment
+- [x] Skills and Equipment
+  - [x] Module framework: MODs, Levels, Labels, Traits, NFB, and Skill categories
+  - [x] Common Skills: complete 18-skill core inventory and category semantics
+  - [x] Special Skills: complete 76-skill N5 V5.3 core inventory and
+    relationship/parameter/profile-impact semantics
+  - [x] Equipment: complete 26-item N5 V5.3 core inventory and
+    action/variant/profile semantics
+  - [x] Live-wiki scope reconciliation, including Reinforcements annex links
+  - [x] Curated rules/application-model reconciliation
 - [ ] Combat
 - [ ] Ammunition and Weaponry
 - [ ] Fireteams
@@ -405,3 +413,203 @@ No schema/runtime changes are made by this audit. The confirmed implementation
 gaps are already represented by the existing TODO work for broader curated rules
 coverage, a glossary/profile-notation help layer, and a Game States reference
 catalog.
+
+### Skills and Equipment — section complete
+
+Status: core N5 V5.3 semantic extraction complete for the Skills and Equipment
+module. The core PDF section (printed pages 75-127) was used to establish scope
+and the complete Common Skill, Special Skill, and Equipment inventories. The live
+N5.3 wiki indexes and selected individual pages were then used to check current
+classification, relationships, profile notation, and cross-module links.
+
+The live Special Skills navigation currently also lists `Commlink` and `Request
+Reinforcements`. Both resolve to the Reinforcements annex rather than the core
+N5 V5.3 Skills and Equipment chapter. They are recorded as scoped research and
+do **not** increase the core Special Skill inventory from 76 to 78. Wiki
+navigation membership is therefore not sufficient evidence for rules scope.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- Wiki indexes: Common Skills, Special Skills, and Equipment under that module
+- PDF: Infinity N5 V5.3, printed pages 75-127
+- Targeted validation: Infinity N5 V5.3, printed page 191, Orders and AROs
+  Reference Chart. This targeted cross-check does not complete the later Quick
+  Reference Charts audit.
+
+#### Module framework and MOD semantics
+
+Printed pages 75-76 and the current module overview define three independent
+classification axes that InfinityDB must keep separate:
+
+1. whether an action/rule is a Common Skill, Special Skill, or piece of Equipment;
+2. declaration/timing categories such as Automatic, Deployment, Basic Short,
+   Short, Long, and ARO;
+3. Labels, Traits, Levels, Requirements, Effects, Restrictions, and
+   parenthetical profile parameters.
+
+A single rule may participate in several of these axes. For example, Sapper is a
+Special Skill that is both a Deployment Skill and a Long Skill, while GizmoKit
+and MediKit are pieces of Equipment whose use is a Short Skill. Declaration
+category is therefore not equivalent to catalog/domain identity.
+
+The MOD review extends the Basic Rules profile-notation finding. Parenthetical
+values can modify the user, an opponent, an Attribute, a weapon value, Burst,
+Saving Rolls, ammunition/Traits, or dice behavior. Positive/negative signs and
+the target of the modifier have rule-defined meaning; `+1SD` is not a Burst
+increase. These meanings must remain typed rather than being normalized to a
+single signed number.
+
+Levels are likewise distinct from arbitrary parenthetical parameters. When a
+Skill or Equipment item has Levels, only the listed Level is available and Levels
+are not cumulative; `Total` lets the player choose among Levels for each
+Order/ARO. This is not the same concept as `Mimetism (-3)`, `Immunity (POS)`, or
+a parameterized modifier.
+
+NFB is a compatibility rule, not merely a display label: using one NFB rule can
+exclude use of another NFB Skill, Equipment item, Hacking Program, or related
+effect. This reinforces the earlier finding that Labels are structured semantic
+selectors.
+
+#### Common Skills inventory
+
+The core N5 V5.3 chapter defines 18 Common Skills:
+
+`Alert!`, `BS Attack`, `Cautious Movement`, `CC Attack`, `Climb`, `Discover`,
+`Dodge`, `Idle`, `Intuitive Attack`, `Jump`, `Move`, `Look Out!`,
+`Place Deployable`, `Reload`, `Request Speedball`, `Reset`,
+`Speculative Attack`, and `Suppressive Fire`.
+
+Common Skills are available by rule rather than because they are listed in a
+Trooper's Unit Profile. Their absence from Army skill metadata is therefore not a
+missing-source-data defect. Where InfinityDB needs them for reference,
+declaration help, Traits, or relationship targets, they belong in the rules
+reference layer.
+
+The current declaration categories were checked against both the prose rules and
+the page-191 Orders/AROs chart. The latter is used here only as a targeted
+consistency check; the complete Quick Reference Charts section remains pending.
+
+#### Special Skills inventory
+
+The core PDF chapter defines 76 Special Skills:
+
+`Aerial`, `Berserk`, `Booty`, `Camouflage`, `Chain of Command`,
+`Climbing Plus`, `Combat Instinct`, `Combat Jump`, `Courage`,
+`Counterintelligence`, `Cyberplug`, `Decoy`, `Doctor`, `Dogged`, `Engineer`,
+`Explode`, `Exrah`, `Forward Deployment`, `Forward Observer`, `Frenzy`,
+`FT Master`, `G: Jumper`, `Guard`, `Hacker`, `Hidden Deployment`, `Immunity`,
+`Impersonation`, `Impetuous`, `Infiltration`, `Infinity Spec-Ops`,
+`Inspiring Leadership`, `Journalist`, `Lieutenant`, `Limited Cover`,
+`Marksmanship`, `Martial Arts`, `MetaChemistry`, `Mimetism`, `Minelayer`,
+`Mnemonica`, `Morpho-Scan`, `Natural Born Warrior`, `NCO`, `Neurocinetics`,
+`No Cover`, `No Wound Incapacitation`, `Non-Hackable`, `Number 2`,
+`Parachutist`, `Paramedic`, `Peripheral`, `Protheion`, `Regeneration`,
+`Religious Troop`, `Remdriver`, `Remote Presence`, `Sapper`, `Sensor`,
+`Shasvastii`, `Sixth Sense`, `Specialist Operative`, `Strategic Deployment`,
+`Stealth`, `Strategos`, `Super-Jump`, `Surprise Attack`,
+`Tactical Awareness`, `TAGCom`, `Tech-Recovery`, `Technorganic`, `Terrain`,
+`Total Reaction`, `Transmutation`, `Triangulated Fire`, `Vulnerability`, and
+`Warhorse`.
+
+The audit does not attempt to reproduce all 76 rule texts. It instead records
+the semantics that alter how InfinityDB should classify or relate source data.
+Notable recurring structures are:
+
+- levels/variants (`Martial Arts`, `Strategos`);
+- parenthetical parameters that are not Levels (`Mimetism`, `Immunity`,
+  `Forward Deployment`, `Vulnerability`, and others);
+- relationships to other entities (`Cyberplug` to Peripheral (Cyberplug),
+  `Hacker` to Hacking Devices/Programs, recovery Skills to States);
+- alternate/profile-transition behavior (`Transmutation`, `Infinity Spec-Ops`);
+- list/relationship/runtime effects (`FT Master`, `TAGCom`, `Strategic
+  Deployment`, `Frenzy`, `G: Jumper`);
+- dynamic or random profile overlays (`Booty`, `MetaChemistry`, `Morpho-Scan`);
+- cross-domain exceptions (`Technorganic` changes normal VITA/STR recovery
+  applicability).
+
+These patterns belong in structured rules/reference relationships where a
+consumer needs them. They should not be inferred from display names.
+
+#### Equipment inventory
+
+The N5 V5.3 chapter defines 26 Equipment entries:
+
+`360° Visor`, `AI Motorcycle`, `Albedo`, `Baggage`, `Bangbomb`,
+`Biometric Visor`, `Cube / Cube 2.0`, `Dazer`, `Deactivator`,
+`Deployable Cover`, `Deployable Repeater`, `ECM`, `FastPanda`, `Firewall`,
+`GizmoKit`, `Hacking Device`, `HoloMask`, `Holoprojector`, `MediKit`,
+`Motorcycle`, `Multispectral Visor`, `Nanoscreen`, `Repeater`, `SymbioMate`,
+`TinBot`, and `X-Visor`.
+
+The rules ontology does not always match the source/asset presentation
+classification. Most notably, Cube/Cube 2.0 are defined here as Automatic
+Equipment even though Army/profile presentation and the symbol pipeline expose
+Cube as a characteristic-style symbol. InfinityDB should preserve both facts:
+source/presentation categorization does not redefine the rules-domain concept.
+
+Equipment can also expose actions. GizmoKit and MediKit are Equipment but their
+use is a **Short Skill**; Deactivator similarly appears as a Short Skill in the
+current Orders/AROs chart. This exposes a current limitation in the curated
+declaration-category data model, whose records and query path are restricted to
+`armyLinks.entity == "skill"`.
+
+Other Equipment entries demonstrate variant and relationship semantics:
+Hacking Device types grant different Hacking Programs; TinBot suffixes grant
+different benefits; AI Motorcycle changes between mounted and dismounted
+profiles and can produce a Peripheral (Synchronized) representation; Firewall
+carries a parameterized interaction rather than being a generic scalar
+modifier.
+
+#### Curated-data reconciliation
+
+The six tracked `skillTypes` in
+`data/curated/rules/n5-core-v5.3.json` correctly correspond to the current
+Automatic, Deployment, Basic Short, Short, Long, and ARO rule categories.
+However, the existing `skill-declaration-category` records predate the current
+N5 V5.3 audit and cannot currently be treated as authoritative.
+
+Confirmed examples include:
+
+- `BS Attack`, `CC Attack`, `Dodge`, and `Forward Observer` are current Short
+  Skill / ARO rules, not Basic Short Skill / ARO;
+- `Doctor` and `Engineer` are Short Skills, not Basic Short Skill / ARO;
+- `Cyberplug` and `Paramedic` are Automatic Skills, not Basic Short Skill / ARO;
+- `Parachutist` is a Long Skill, not merely a Deployment Skill;
+- `Triangulated Fire` is a Long Skill, not Basic Short Skill / ARO;
+- `Berserk` uses the current Long Skill category; the tracked `Entire Order`
+  category is not one of the six current `skillTypes`;
+- `Regular` is a Training characteristic, not a Skill;
+- GizmoKit and MediKit are Equipment actions but are currently linked through
+  the declaration-category contract as if they were Skills.
+
+Several printed-page citations in those records are also stale. The problem is
+therefore broader than renaming one category: both the curated facts and the
+current Skill-only link/query contract need reconciliation against N5 V5.3.
+
+This audit does not alter curated data or runtime code. A focused TODO item now
+tracks that correction before declaration-category coverage is expanded.
+
+#### Canonical identity and exact variants
+
+The existing application catalog groups Martial Arts L1-L5, Strategos L1-L2, and
+several TinBot source variants under canonical application identities. The rules
+audit does not invalidate that identity design, provided source-specific
+Level/variant information remains preserved and presentable.
+
+A canonical family answers “which rule/equipment concept is this?”; a specific
+Level, parameter, or source variant answers “which rules apply to this
+occurrence?” Those are separate questions. A consumer must not infer the exact
+rule effects from the family identity alone.
+
+#### Cross-section deferrals
+
+Detailed Hacking Device/Firewall/Repeater program topology is deferred to Combat
+because the Hacking rules define the program and target semantics. Detailed
+weapon-like behavior of GizmoKit/MediKit and other Equipment will also be
+cross-checked during Combat/Ammunition and Weaponry.
+
+`Commlink` and `Request Reinforcements` are visible in the live Special Skills
+navigation but are Reinforcements annex rules, not core Skills and Equipment
+entries in the N5 V5.3 PDF. Their detailed semantics remain deferred to the
+Reinforcements audit.

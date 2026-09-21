@@ -167,7 +167,7 @@ in `docs/releasing.md`.
     - [ ] Introduction.
     - [x] Basic Rules.
     - [x] Game States and Glossary.
-    - [ ] Skills and Equipment.
+    - [x] Skills and Equipment.
     - [ ] Combat.
     - [ ] Ammunition and Weaponry.
     - [ ] Fireteams.
@@ -447,6 +447,12 @@ work against that contract.
   - [ ] Expand canonical rule identities across skills, equipment, ammunition,
     traits, states, Fireteam concepts, glossary terms, and other useful rule
     domains, retaining rulebook version and printed-page citation.
+  - [ ] Reconcile the existing declaration-category records with the current N5
+    V5.3 Skills and Equipment rules before expanding that dataset: remove stale
+    category names/mappings, refresh printed-page citations, and generalize the
+    link contract so actions supplied by Equipment are not represented as Skills.
+    Validate authored category names against the canonical `skillTypes` vocabulary
+    and resolve links against the correct Army catalog domain.
   - [ ] Store original, concise editorial summaries and structured facts (labels,
     requirements, effects, restrictions, related rules, and page locators),
     rather than bulk-extracting or serving copyrighted PDF text or artwork.

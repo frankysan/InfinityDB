@@ -826,3 +826,318 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Traits>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 - Curated data: `data/curated/rules/n5-core-v5.3.json`
+
+## Skills and Equipment / Module semantics
+
+### RS-SE-SCOPE-001 — Navigation membership does not determine rules scope
+
+**Classification:** source-native scope with an audit/provenance consequence.
+
+The core N5 V5.3 Skills and Equipment chapter occupies printed pages 75-127 and
+contains 18 Common Skills, 76 Special Skills, and 26 Equipment entries. The live
+Special Skills navigation additionally links `Commlink` and `Request
+Reinforcements`, but those rules belong to the Reinforcements annex rather than
+the core chapter.
+
+InfinityDB must therefore retain source scope alongside a rule identity.
+Discovering a term under a wiki navigation list is not sufficient evidence that
+it belongs to core N5. Annex, FAQ, ITS, and core material may cross-link through
+the same live wiki.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- Wiki: Reinforcements-linked `Commlink` and `Request Reinforcements` pages
+- PDF: Infinity N5 V5.3, printed pages 75-127
+
+### RS-SE-KIND-001 — Common Skills, Special Skills, and Equipment are distinct rule kinds
+
+**Classification:** source-native with a catalog-model consequence.
+
+Common Skills can be declared by any Trooper and do not need to appear in its
+Unit Profile. Special Skills are available because the Unit Profile lists them.
+Equipment is a separate kind of game object that can grant passive effects and,
+in some cases, actions.
+
+InfinityDB must not interpret the absence of a Common Skill from Army metadata as
+missing Unit data. Rules-reference identity and Army-profile occurrence are
+different concerns. Equipment likewise must not be coerced into the Skill domain
+merely because using a piece of Equipment can declare a Skill-like action.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- PDF: Infinity N5 V5.3, printed pages 76 and 119
+
+### RS-SE-CAT-001 — Declaration category is independent of rule/catalog kind
+
+**Classification:** source-native with a curated-data modeling consequence.
+
+Automatic, Deployment, Basic Short, Short, Long, and ARO describe when or how an
+action/rule is used. They are not synonyms for Common Skill, Special Skill, or
+Equipment. One rule can also carry more than one declaration category; for
+example, Sapper is both a Deployment Skill and a Long Skill.
+
+Equipment can participate in the same action vocabulary. GizmoKit and MediKit
+are Equipment whose use is a Short Skill, and Deactivator also appears as a
+Short Skill in the current Orders/AROs reference.
+
+A reusable declaration-category relation therefore needs at least:
+
+- the referenced rules/catalog domain;
+- the canonical entity identity within that domain;
+- one or more current declaration categories;
+- source scope/version and citation.
+
+It must not be structurally restricted to `entity == "skill"`.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- PDF: Infinity N5 V5.3, printed pages 76, 111, 121, 123-124, and 191
+
+### RS-SE-CAT-002 — Existing declaration-category facts require N5 V5.3 reconciliation
+
+**Classification:** confirmed InfinityDB curated-data correctness gap.
+
+The tracked `skillTypes` vocabulary correctly defines the six current categories:
+Automatic, Deployment, Basic Short, Short, Long, and ARO. The existing
+`skill-declaration-category` records do not consistently match those rules.
+
+Confirmed mismatches include current Short Skill / ARO rules stored as Basic
+Short Skill / ARO (`BS Attack`, `CC Attack`, `Dodge`, `Forward Observer`);
+current Short Skills stored as Basic Short Skill / ARO (`Doctor`, `Engineer`);
+Automatic Skills stored as Basic Short Skill / ARO (`Cyberplug`, `Paramedic`);
+`Parachutist` stored as Deployment rather than Long; and `Triangulated Fire`
+stored as Basic Short Skill / ARO rather than Long. The tracked `Entire Order`
+record for Berserk also uses a category name absent from the current six-category
+vocabulary, and `Regular` is Training rather than a Skill.
+
+The Equipment cases expose an additional schema issue:
+`skill-declaration-category` validation and query code currently require
+`armyLinks.entity == "skill"`, so Short Skill actions supplied by GizmoKit,
+MediKit, or Deactivator cannot be represented in their actual Equipment domain.
+
+Consumers must not treat the current declaration-category dataset as fully
+audited N5 V5.3 truth until the focused backlog reconciliation is complete.
+
+Sources:
+
+- PDF: Infinity N5 V5.3, printed pages 76, 77-85, 86-118, 123-124, and 191
+- Curated data: `data/curated/rules/n5-core-v5.3.json`
+- Validation/query ownership: `src/infinity_db/curated.py` and
+  `src/infinity_db/rules_database.py`
+
+### RS-SE-MOD-001 — MOD notation encodes direction, target, timing, and operation
+
+**Classification:** source-native with a parsing/presentation consequence.
+
+The Skills and Equipment module makes parenthetical MOD semantics more specific
+than a generic signed number:
+
+- positive MODs apply to the user;
+- negative MODs apply to enemies, with different timing for Automatic versus
+  declared Skills/Weapons/Equipment;
+- Burst MODs normally apply only in the Active Turn;
+- `ReRoll` changes dice handling rather than an Attribute;
+- `+1SD` adds/selects a die without increasing Burst;
+- `Attribute=value` and `PS=value` replace the relevant value;
+- ammunition, Trait, Saving-Roll, and other annotations modify different parts of
+  resolution.
+
+These rules refine `RS-BR-ROLL-001/002`. InfinityDB should preserve the exact
+source annotation and use typed parameter semantics for interpretation. A value
+such as `-3` is insufficient without the owning rule and semantic target.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module#Modifiers_Explained_.28MODs.29>
+- PDF: Infinity N5 V5.3, printed page 75
+
+### RS-SE-LEVEL-001 — Levels are not generic parameters, and `Total` is a selector
+
+**Classification:** source-native with an identity/presentation consequence.
+
+For a Special Skill or piece of Equipment with actual Levels, a Trooper may use
+only the listed Level; Levels are not cumulative. `Total` instead permits the
+player to select the applicable Level for each Order or ARO.
+
+This concept must remain distinct from parenthetical variants or parameters such
+as `Mimetism (-3)`, `Immunity (POS)`, or `Forward Deployment (+4")`. Application
+identity may group source records into a rule family, but the exact Level/variant
+attached to the profile occurrence determines which rules apply.
+
+The existing canonical grouping of Martial Arts L1-L5 and Strategos L1-L2 is
+therefore compatible with the rules only while the source Level remains
+preserved and presentable.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module#Levels.2C_Labels_and_Traits>
+- PDF: Infinity N5 V5.3, printed page 76
+- Identity configuration: `config/identity/source-identities.json`
+
+### RS-SE-NFB-001 — NFB is a cross-domain compatibility constraint
+
+**Classification:** source-native.
+
+Negative Feedback (NFB) is not simply descriptive metadata. Use of a Special
+Skill, Equipment item, Hacking Program, or other relevant rule carrying NFB is
+incompatible with other NFB rules as specified by the Label/Trait interaction.
+
+InfinityDB should model NFB as semantic rules metadata where compatibility
+guidance is exposed. It should not infer compatibility merely because two effects
+belong to different catalog domains.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module#Levels.2C_Labels_and_Traits>
+- PDF: Infinity N5 V5.3, printed page 76
+
+### RS-SE-RULE-001 — Requirements, Effects, Restrictions, Labels, and applicability are separate facts
+
+**Classification:** source-native with a curated-reference consequence.
+
+Skill and Equipment rules repeatedly separate declaration category, Labels,
+Optional/Obligatory applicability, Requirements, Effects, and Restrictions.
+These fields answer different questions and can change independently.
+
+The existing direction of keeping concise structured rule facts in `rules.db` is
+therefore preferable to flattening a rule into one prose summary. In particular,
+`Optional` and `Obligatory` describe whether an available rule is applied, while
+Requirements determine whether an attempted use is valid and Restrictions limit
+otherwise permitted behavior.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- PDF: Infinity N5 V5.3, printed pages 75-127
+
+## Skills and Equipment / Profile and relationship semantics
+
+### RS-SE-PROFILE-001 — Alternate Unit Profiles can be rule-driven states of one Trooper
+
+**Classification:** source-native with a canonicalization consequence.
+
+Some Skills and Equipment explicitly switch a Trooper between different Unit
+Profiles instead of describing separate canonical Troopers. Transmutation uses a
+rule/trigger to move to another profile. AI Motorcycle similarly has Mounted and
+Dismounted profiles, with different weapon sets and representation behavior.
+
+Canonicalization must therefore distinguish:
+
+- logical Trooper/Unit identity;
+- available profile variants;
+- the rule-driven transition between those variants;
+- the currently active profile in a game/session.
+
+Two differing profiles under such a rule are meaningful alternatives, not
+duplicate source rows to collapse simply because they share a Unit identity.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Seed-Embryo> (Transmutation)
+- Wiki: <https://infinitythewiki.com/AI_Motorcycle>
+- PDF: Infinity N5 V5.3, printed pages 117 and 119
+
+### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment in the rules ontology
+
+**Classification:** source-native with a source/presentation-classification consequence.
+
+The Skills and Equipment chapter defines Cube and Cube 2.0 as Automatic
+Equipment. Army/Profile source data and the symbol publication layer may expose
+Cube through a characteristic-style icon/category, but that is a different
+classification purpose.
+
+InfinityDB should preserve both pieces of information without treating the asset
+or upstream presentation category as the rules ontology. This is analogous to
+the earlier distinction between Training semantics and technical order-symbol
+organization.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Cube>
+- PDF: Infinity N5 V5.3, printed page 121
+
+### RS-SE-VARIANT-001 — Canonical equipment families do not erase exact source variants
+
+**Classification:** source-native semantics with an InfinityDB identity consequence.
+
+Some Equipment concepts have named variants whose rules differ. Hacking Device
+types grant different program sets. TinBot source variants grant different
+Equipment, Skills, or MODs. Firewall values also encode specific interaction
+parameters.
+
+InfinityDB may group such source records under a canonical application identity
+for browsing, but the exact source variant remains contextual player-relevant
+information. Family identity alone is insufficient to determine the applicable
+rules.
+
+This supports the current application/catalog policy of retaining
+`application_catalog_sources` and source labels alongside canonical identities.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Device>
+- Wiki: <https://infinitythewiki.com/TinBot>
+- Wiki: <https://infinitythewiki.com/Firewall>
+- PDF: Infinity N5 V5.3, printed pages 123 and 127
+- Identity configuration: `config/identity/source-identities.json`
+
+### RS-SE-RECOVERY-001 — VITA/STR recovery domains have explicit rule exceptions
+
+**Classification:** source-native cross-domain relationship semantics.
+
+The normal recovery split aligns Doctor/MediKit with VITA-bearing targets and
+Engineer/GizmoKit with STR-bearing targets. The Skills and Equipment rules also
+define exceptions rather than making that split an immutable type rule:
+Technorganic can allow either recovery route while the Trooper is Unconscious,
+regardless of whether the profile uses VITA or STR.
+
+Future contextual help or relationship data should therefore encode explicit
+rule edges and exceptions, not derive all recovery applicability from VITA/STR
+alone.
+
+Sources:
+
+- Wiki: Doctor, Engineer, GizmoKit, and MediKit pages
+- PDF: Infinity N5 V5.3, printed pages 90-91, 116, and 123-124
+
+### RS-SE-PERIPHERAL-001 — Cyberplug is an explicit Skill-to-Peripheral relationship
+
+**Classification:** source-native relationship semantics.
+
+Cyberplug is an Automatic Special Skill that grants access to Peripherals
+(Cyberplug). Those Peripherals have Controller relationships and Connected/
+Autonomous profile behavior defined by the Peripheral rules.
+
+This supports the current Peripheral design direction: controller eligibility
+and Peripheral type are reviewed rules relationships, not strings that should be
+inferred from similar names in Army data. The Skill and the Peripheral remain
+separate concepts connected by a rules-derived edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Cyberplug>
+- Wiki: <https://infinitythewiki.com/Peripheral>
+- PDF: Infinity N5 V5.3, printed pages 90 and 106-109
+
+### RS-SE-SPECOPS-001 — Spec-Ops customization is list/session context, not immutable Unit data
+
+**Classification:** source-native with a persistence-boundary consequence.
+
+Infinity Spec-Ops allows a player to customize a Trooper while constructing an
+Army List and provides Initial/Enhanced Unit Profiles that can transition during
+play. The selected options are therefore user/list configuration applied to a
+rules-defined base concept, not immutable canonical source facts for every
+instance of that Unit.
+
+A future saved-list/game model should keep those selections outside the
+replaceable imported Army snapshot. Tournament legality remains a separately
+scoped ITS concern rather than being inferred from the existence of the core
+rule.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Infinity_Spec-Ops>
+- PDF: Infinity N5 V5.3, printed pages 98-99
