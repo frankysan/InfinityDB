@@ -754,10 +754,12 @@ new correctness or reproducibility defect.
       `resolved` slug is always actually routable; digit-only candidates retain their
       diagnostic candidate but become `unavailable`, and consumers no longer suppress
       them independently.
-    - [ ] Add deterministic owning-layer resolvers and migrate the remaining maintained
-      entity references where safe: 8 Weapon-category IDs, 8 Weapon-correction IDs, and
-      2 Army display-identity references. Keep numeric authoring available for ambiguity
-      and provenance.
+    - [x] Add deterministic owning-layer resolvers and migrate maintained entity
+      references where safe. All 8 Weapon-category and 8 Weapon-correction references now
+      use source-label slugs; the Army display target uses `non-aligned-armies`. Keep
+      canonical source identity `1` numeric because it is provenance identity with no
+      authoritative source-faction slug, and retain numeric authoring generally for
+      ambiguity/provenance.
     - [ ] Add project-wide invariant coverage proving numeric/slug equivalence, source-ID
       canonicalization, slug preference/fallback, and fail-closed unknown/ambiguous behavior
       for every current domain where a stable slug exists; rerun the sanity audit afterward.

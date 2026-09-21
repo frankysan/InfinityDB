@@ -80,11 +80,11 @@ proved that the singular value is the correct game-wide fact.
 - Weapon-family classification policy is maintained in validated
   `config/catalogs/weapon-categories.json`, while known Army weapon metadata
   corrections are maintained separately in `config/catalogs/weapon-overrides.json`.
-  Those corrections include source name/profile fixes and exact metadata weapon
-  rows that should not become display profiles. Normalization applies the authored
-  build inputs before normalized catalog/metadata rows are materialized, while the
-  original Army metadata envelope remains unchanged for provenance. The frontend
-  database does not need the config files at runtime.
+  Maintained `weapon_id` references accept positive numeric source IDs or source-label
+  slugs and currently prefer slugs. Normalization resolves them against the source
+  weapon catalog before applying source name/profile fixes and exact metadata-row
+  suppressions. Numeric authoring remains valid for ambiguity/provenance, and the
+  frontend database does not need these config files at runtime.
 - Current InfinityDB builds derive a unit's application `main_army_id` from
   the imported Army metadata parent for its canonical faction. Maintained
   canonical-faction overrides take precedence when explicitly configured. The
@@ -95,7 +95,9 @@ proved that the singular value is the correct game-wide fact.
   Non-Aligned Armies grouping identity. Presentation is modeled separately:
   normalization derives `display_army_id` from reviewed relationships in
   `data/curated/identities/army-display.json`; the current curated relationship
-  displays canonical-1 units with the 901 grouping identity. `main_army_id` is
+  keeps provenance-only canonical identity `1` numeric but names the display target
+  by the source slug `non-aligned-armies`, which resolves to grouping identity 901.
+  `main_army_id` is
   therefore a source-derived grouping/application field, not authority for a
   unit's complete game-wide membership, availability, or ownership.
 - InfinityDB normalization pins the exact validated identity configuration and

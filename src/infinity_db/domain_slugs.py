@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import re
-import unicodedata
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-SLUG_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+from infinity_army_data.identifier_refs import (
+    normalize_identifier_slug,
+    require_identifier_slug,
+)
+
 APPLICATION_SLUG_DOMAINS = ("armies", "units", "skills", "equipment", "weapons")
 DOMAIN_SLUG_STATUSES = ("resolved", "collision", "unavailable")
 
@@ -24,33 +26,19 @@ class DomainSlugResolution:
 
 
 def normalize_domain_slug(value: object) -> str:
-    """Return a deterministic lowercase ASCII slug candidate.
+    """Return a deterministic lowercase ASCII slug candidate."""
 
-    This function creates candidates only. A candidate does not become a stable
-    public identity until the owning domain accepts it. Callers must reject or
-    explicitly record collisions rather than add order-dependent numeric suffixes.
-    """
-
-    decomposed = unicodedata.normalize("NFKD", str(value or "")).casefold()
-    ascii_text = "".join(
-        character
-        for character in decomposed
-        if not unicodedata.category(character).startswith("M")
-        and character.isascii()
-    )
-    return re.sub(r"[^a-z0-9]+", "-", ascii_text).strip("-")
+    return normalize_identifier_slug(value)
 
 
 def require_domain_slug(value: object, *, context: str) -> str:
     """Validate one already-assigned domain-local slug and return it."""
 
-    if not isinstance(value, str) or not SLUG_PATTERN.fullmatch(value):
-        raise ValueError(
-            f"{context} must be a lowercase ASCII slug containing only letters, "
-            "numbers, and single hyphen separators"
-        )
-    return value
-
+    try:
+        return require_identifier_slug(value, context=context)
+    except ValueError as exc:
+        # Public route slugs may contain digits, but never consist only of digits.
+        raise ValueError(str(exc)) from exc
 
 def resolve_domain_slug_candidates(
     rows: Iterable[tuple[Any, object]],

@@ -1,44 +1,44 @@
 {
   "format": "InfinityDB weapon source corrections",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "corrections": [
     {
-      "weapon_id": 62,
+      "weapon_id": "monofilament-mine",
       "profile": "ARM=0, BTS=0, STR=1, S=1",
       "reason": "Army source omits the Monofilament Mine deployable profile."
     },
     {
-      "weapon_id": 63,
+      "weapon_id": "viral-mine",
       "profile": "ARM=0, BTS=0, STR=1, S=1",
       "reason": "Army source omits the Viral Mine deployable profile."
     },
     {
-      "weapon_id": 196,
+      "weapon_id": "shock-mine",
       "profile": "ARM=0, BTS=0, STR=1, S=1",
       "reason": "Army source omits the Shock Mine deployable profile."
     },
     {
-      "weapon_id": 197,
+      "weapon_id": "e-m-mine",
       "profile": "ARM=0, BTS=0, STR=1, S=1",
       "reason": "Army source omits the E/M Mine deployable profile."
     },
     {
-      "weapon_id": 199,
+      "weapon_id": "ap-mine",
       "profile": "ARM=0, BTS=0, STR=1, S=1",
       "reason": "Army source omits the AP Mine deployable profile."
     },
     {
-      "weapon_id": 220,
+      "weapon_id": "para-mine",
       "profile": "ARM=0, BTS=0, STR=1, S=1",
       "reason": "Army source omits the PARA Mine deployable profile."
     },
     {
-      "weapon_id": 217,
+      "weapon_id": "spitfire-multi",
       "name": "MULTI Spitfire",
       "reason": "Normalize a known Army source naming anomaly to the catalog display name."
     },
     {
-      "weapon_id": 226,
+      "weapon_id": "armed-turret",
       "suppress_metadata_profiles": [
         {
           "name": "Armed Turret",

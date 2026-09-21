@@ -9,6 +9,12 @@ import pytest
 
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
+from infinity_army_data.weapon_config import (
+    load_weapon_category_config,
+    load_weapon_override_config,
+    resolve_weapon_category_config,
+    resolve_weapon_override_config,
+)
 from infinity_army_data.weapon_profiles import weapon_profile_override
 from infinity_db.catalog_slugs import (
     attach_public_catalog_slug,
@@ -942,12 +948,39 @@ def test_normalization_persists_weapon_categories(normalized: dict) -> None:
     ],
 )
 def test_manual_weapon_category_overrides_take_precedence(weapon_id: int, category: str) -> None:
-    assert weapon_category("Rifle", weapon_id) == category
+    source_names = {
+        177: "Trench-Hammer",
+        1: "Akrylat-Kanone",
+        174: "Cybermine",
+        18: "Chain Rifle",
+    }
+    config = resolve_weapon_category_config(
+        load_weapon_category_config(), source_names, allow_missing=True
+    )
+    assert weapon_category("Rifle", weapon_id, config=config) == category
 
 
-@pytest.mark.parametrize("weapon_id", [62, 63, 196, 197, 199, 220])
-def test_missing_mine_profiles_have_import_overrides(weapon_id: int) -> None:
-    assert weapon_profile_override(weapon_id) == "ARM=0, BTS=0, STR=1, S=1"
+@pytest.mark.parametrize(
+    ("weapon_id", "source_name"),
+    [
+        (62, "Monofilament Mine"),
+        (63, "Viral Mine"),
+        (196, "Shock Mine"),
+        (197, "E/M Mine"),
+        (199, "AP Mine"),
+        (220, "PARA Mine"),
+    ],
+)
+def test_missing_mine_profiles_have_import_overrides(
+    weapon_id: int, source_name: str
+) -> None:
+    config = resolve_weapon_override_config(
+        load_weapon_override_config(), {weapon_id: source_name}, allow_missing=True
+    )
+    assert (
+        weapon_profile_override(weapon_id, config=config)
+        == "ARM=0, BTS=0, STR=1, S=1"
+    )
 
 
 def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normalized: dict) -> None:

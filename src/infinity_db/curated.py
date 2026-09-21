@@ -45,11 +45,11 @@ def _validate_army_link_id(entity: str, value: Any, context: str) -> None:
         raise ValueError(
             f"{context}: string 'id' references are not supported for entity {entity!r}"
         )
-    require_domain_slug(value, context=f"{context} 'id'")
     if value.isdecimal():
         raise ValueError(
             f"{context}: numeric source ids must be JSON integers, not slug strings"
         )
+    require_domain_slug(value, context=f"{context} 'id'")
 
 
 def _validate_reference(

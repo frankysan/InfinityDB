@@ -107,22 +107,23 @@ public-reference enrichment can trust `application_slug()` directly and no longe
 consumer-side `slug.isdigit()` suppression. Trait slug assignment is intentionally
 unaffected because Traits do not share these numeric compatibility routes.
 
-### 5. Remaining maintained JSON references still use opaque entity IDs
+### 5. Maintained Weapon/display references use owning-layer slugs where safe — closed
 
-After excluding actual numeric values such as `formatVersion`, the current
-maintained files still contain 18 entity references that are good candidates
-for the numeric-or-slug authoring convention:
+Closed on 2026-09-21. Both maintained Weapon configuration formats now accept a
+positive numeric source ID or a source-label slug, resolve through the owning
+normalization layer, and keep numeric authoring available for ambiguity/provenance.
+All 8 Weapon-category and all 8 Weapon-correction references are now slug-authored.
+Resolution uses the uncorrected source label, so a maintained name correction does
+not change how its own source reference is found.
 
-- 8 `weapon_id` references in `config/catalogs/weapon-categories.json`;
-- 8 `weapon_id` references in `config/catalogs/weapon-overrides.json`;
-- 2 display-identity references in
-  `data/curated/identities/army-display.json`.
+The curated Army display-identity format likewise accepts numeric or slug faction
+references. The display target is now authored as `non-aligned-armies` and resolves
+to source grouping ID 901. Canonical source identity `1` deliberately remains
+numeric: it is provenance identity with no authoritative source faction metadata
+slug. This is therefore an accepted numeric-only use, not an unfinished migration.
 
-Each owning build layer needs a deterministic resolver before these are changed.
-Numeric references remain a valid fallback for ambiguity/provenance. Unit and
-Army source-identity groups are not part of this count: those numeric references
-participate in constructing source/logical identity and are intentionally kept
-as provenance-level IDs for now.
+The audit originally counted 18 candidates. Seventeen were safely migrated; the
+remaining provenance reference was reviewed and retained numerically by design.
 
 ### 6. The contract lacks one project-wide invariant regression
 
@@ -164,8 +165,8 @@ Before starting the 0.6.2 release checklist:
    state;
 3. **Closed:** define and apply the cross-domain API slug-companion policy;
 4. **Closed:** move numeric-shadow handling into the slug registry/resolver boundary;
-5. migrate the remaining maintained Weapon/display references after adding
-   deterministic owning-layer resolvers;
+5. **Closed:** migrate maintained Weapon/display references where the owning source
+   identity has a deterministic slug, retaining provenance-only canonical faction ID 1;
 6. add project-wide dual-identifier invariant tests and rerun the sanity audit.
 
 Only after those items are green should the normal release process in

@@ -34,6 +34,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
   existing numeric fields: Unit Army context exposes application Army slugs, Trait usage
   variants expose catalog `item_slug`, and Skill Modifier rows expose `skill_slug`.
   Source/provenance-only IDs remain numeric-only.
+- Prefer readable source-label slugs in maintained Weapon category/correction config
+  and in the curated Army display target. Numeric references remain accepted for
+  compatibility, ambiguity, and provenance; canonical mercenary source identity `1`
+  intentionally remains numeric because it has no authoritative source-faction slug.
 - Validate curated typed record IDs against the shared domain-slug grammar, and make
   Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
 - Make the Unit explorer's matching-unit statistic show the currently visible unique

@@ -199,9 +199,12 @@ derivation is explicitly suppressed for that source identity. ID `901` remains
 the metadata grouping identity for Non-Aligned armies. The former legacy
 `1` -> `901` ownership override remains removed. Separately,
 `data/curated/identities/army-display.json` records the reviewed display
-relationship from canonical source identity `1` to display army `901`;
-normalization derives `display_army_id` from that curated fact without changing
-source membership, availability, or playability semantics.
+relationship from canonical source identity `1` to the source faction slug
+`non-aligned-armies`; normalization resolves that slug against the owning Army
+faction metadata to display army `901` without changing source membership,
+availability, or playability semantics. Canonical source identity `1` remains
+numeric in this file because it is provenance identity with no authoritative
+source-faction slug to own an equivalent readable reference.
 
 The authored identity configuration is a build input, not a deployed runtime
 file. InfinityDB normalization validates it, supplies normalization-time
@@ -221,13 +224,16 @@ normalized or SQLite snapshot.
 Weapon catalog policy now follows the same code/config ownership rule without
 becoming deployed runtime state. `config/catalogs/weapon-categories.json` owns
 the ordered weapon-family taxonomy, regular-expression patterns, fallback
-category, and explicit weapon-ID category decisions.
+category, and explicit weapon-reference category decisions.
 `config/catalogs/weapon-overrides.json` owns corrections for incomplete or
 inconsistent Army weapon metadata, such as missing deployable profiles, known
 source naming anomalies, and exact metadata-profile rows that should not become
-display weapon modes. Normalization validates and consumes both files; those
-corrections are applied before normalized metadata rows are materialized, while
-the original Army metadata envelope remains preserved for source provenance.
+display weapon modes. Both maintained formats accept a positive numeric source
+ID or a source-label slug, with readable slugs preferred. Normalization resolves
+those references against the uncorrected source weapon catalog before applying
+name/profile corrections; unknown or ambiguous slugs fail in strict resolver
+use, while partial synthetic inputs may leave absent maintained references inert.
+The original Army metadata envelope remains preserved for source provenance.
 Repository/runtime queries therefore do not read the working-tree configuration.
 Classification mechanics,
 validation, and fallback behavior remain Python code. Actual game-rule facts

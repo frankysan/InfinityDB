@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping
+from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
 
+from infinity_army_data.identifier_refs import (
+    IdentifierRef,
+    normalize_identifier_slug,
+    parse_identifier_ref,
+)
 from infinity_army_data.project_resources import maintained_curated_path
 
 DISPLAY_IDENTITY_FORMAT = "InfinityDB curated display identities"
-DISPLAY_IDENTITY_FORMAT_VERSION = 1
+DISPLAY_IDENTITY_FORMAT_VERSION = 2
 DEFAULT_DISPLAY_IDENTITY_CURATED = maintained_curated_path("identities", "army-display.json")
 DISPLAY_IDENTITY_METADATA_KEY = "displayIdentityCurated"
 DISPLAY_IDENTITY_SHA256_METADATA_KEY = "displayIdentityCuratedSha256"
@@ -29,12 +35,99 @@ class DisplayIdentityCurated:
 
     document_json: str
     content_sha256: str
-    canonical_faction_display_armies: Mapping[int, int]
+    canonical_faction_display_armies: Mapping[IdentifierRef, IdentifierRef]
 
     @property
     def document(self) -> dict[str, Any]:
         """Return a detached JSON-compatible copy of the validated document."""
         return json.loads(self.document_json)
+
+    def resolve_factions(
+        self,
+        factions: Iterable[Mapping[str, Any]],
+        *,
+        active_canonical_ids: set[int] | None = None,
+    ) -> Mapping[int, int]:
+        """Resolve authored faction references against source faction identities."""
+
+        by_id: dict[int, Mapping[str, Any]] = {}
+        slug_owners: dict[str, set[int]] = defaultdict(set)
+        for row in factions:
+            faction_id = row.get("id")
+            if type(faction_id) is not int or faction_id <= 0:
+                continue
+            existing = by_id.get(faction_id)
+            if existing is None:
+                by_id[faction_id] = row
+            for raw_slug in (row.get("slug"), normalize_identifier_slug(row.get("name"))):
+                if isinstance(raw_slug, str) and raw_slug:
+                    slug_owners[raw_slug].add(faction_id)
+
+        def resolve(reference: IdentifierRef, context: str) -> int:
+            if isinstance(reference, int):
+                return reference
+            owners = sorted(slug_owners.get(reference, ()))
+            if not owners:
+                raise DisplayIdentityError(
+                    f"{context} references unknown source faction slug {reference!r}"
+                )
+            if len(owners) > 1:
+                raise DisplayIdentityError(
+                    f"{context} source faction slug {reference!r} is ambiguous across IDs "
+                    f"{owners!r}"
+                )
+            return owners[0]
+
+        resolved: dict[int, int] = {}
+        for canonical_ref, display_ref in self.canonical_faction_display_armies.items():
+            canonical_id = resolve(canonical_ref, "canonicalFactionId")
+            if active_canonical_ids is not None and canonical_id not in active_canonical_ids:
+                continue
+            display_id = resolve(display_ref, "displayArmyId")
+            if canonical_id in resolved:
+                raise DisplayIdentityError(
+                    f"multiple curated mappings resolve to canonical faction ID {canonical_id}"
+                )
+            resolved[canonical_id] = display_id
+        return MappingProxyType(resolved)
+
+    def resolve_master(self, master: Mapping[str, Any]) -> Mapping[int, int]:
+        """Resolve display mappings against the source identities available in one master."""
+
+        rows_by_id: dict[int, dict[str, Any]] = {}
+        metadata = master.get("armyMetadata")
+        if isinstance(metadata, Mapping):
+            data = metadata.get("data")
+            if isinstance(data, Mapping):
+                for row in data.get("factions", ()) or ():
+                    if isinstance(row, Mapping) and type(row.get("id")) is int:
+                        rows_by_id[row["id"]] = dict(row)
+        for raw_id, army in (master.get("armyLists") or {}).items():
+            try:
+                army_id = int(raw_id)
+            except (TypeError, ValueError):
+                continue
+            if not isinstance(army, Mapping):
+                continue
+            meta = army.get("_meta")
+            if not isinstance(meta, Mapping):
+                continue
+            row = rows_by_id.setdefault(army_id, {"id": army_id})
+            if not row.get("slug") and isinstance(meta.get("slug"), str):
+                row["slug"] = meta["slug"]
+            if not row.get("name") and isinstance(meta.get("name"), str):
+                row["name"] = meta["name"]
+
+        active_canonical_ids: set[int] = set()
+        for unit in (master.get("units") or {}).values():
+            if not isinstance(unit, Mapping):
+                continue
+            shared = unit.get("shared")
+            if isinstance(shared, Mapping) and type(shared.get("canonical")) is int:
+                active_canonical_ids.add(shared["canonical"])
+        return self.resolve_factions(
+            rows_by_id.values(), active_canonical_ids=active_canonical_ids
+        )
 
 
 def _canonical_json(document: Mapping[str, Any]) -> str:
@@ -47,10 +140,11 @@ def _canonical_json(document: Mapping[str, Any]) -> str:
     )
 
 
-def _positive_int(value: Any, context: str) -> int:
-    if type(value) is not int or value <= 0:
-        raise DisplayIdentityError(f"{context} must be a positive integer")
-    return value
+def _identifier_ref(value: Any, context: str) -> IdentifierRef:
+    try:
+        return parse_identifier_ref(value, context=context)
+    except ValueError as exc:
+        raise DisplayIdentityError(str(exc)) from exc
 
 
 def parse_display_identity_curated(document: Any) -> DisplayIdentityCurated:
@@ -111,7 +205,7 @@ def parse_display_identity_curated(document: Any) -> DisplayIdentityCurated:
     if not isinstance(mappings, list) or not mappings:
         raise DisplayIdentityError("display identity curated data.mappings must be non-empty")
 
-    compiled: dict[int, int] = {}
+    compiled: dict[IdentifierRef, IdentifierRef] = {}
     for index, mapping in enumerate(mappings):
         context = f"display identity curated data.mappings[{index}]"
         if not isinstance(mapping, dict):
@@ -122,10 +216,10 @@ def parse_display_identity_curated(document: Any) -> DisplayIdentityCurated:
             raise DisplayIdentityError(
                 f"{context} has unknown field(s): {', '.join(sorted(unknown_mapping))}"
             )
-        canonical_faction_id = _positive_int(
+        canonical_faction_ref = _identifier_ref(
             mapping.get("canonicalFactionId"), f"{context}.canonicalFactionId"
         )
-        display_army_id = _positive_int(
+        display_army_ref = _identifier_ref(
             mapping.get("displayArmyId"), f"{context}.displayArmyId"
         )
         source_id = mapping.get("sourceId")
@@ -134,11 +228,11 @@ def parse_display_identity_curated(document: Any) -> DisplayIdentityCurated:
         reason = mapping.get("reason")
         if not isinstance(reason, str) or not reason.strip():
             raise DisplayIdentityError(f"{context}.reason must be a non-empty string")
-        if canonical_faction_id in compiled:
+        if canonical_faction_ref in compiled:
             raise DisplayIdentityError(
-                f"{context}: duplicate canonical faction id {canonical_faction_id}"
+                f"{context}: duplicate canonical faction reference {canonical_faction_ref!r}"
             )
-        compiled[canonical_faction_id] = display_army_id
+        compiled[canonical_faction_ref] = display_army_ref
 
     document_json = _canonical_json(document)
     return DisplayIdentityCurated(

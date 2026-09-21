@@ -138,7 +138,9 @@ and serves a read-only browser and same-origin HTTP API.
   provenance and explicitly leaves `main_army_id` unset for canonical-1 units;
   901 remains the distinct Non-Aligned Armies grouping identity. A separate
   reviewed relationship in `data/curated/identities/army-display.json` derives
-  `display_army_id` for presentation; current canonical-1 units display as 901.
+  `display_army_id` for presentation; the provenance-only canonical reference remains
+  numeric `1`, while the display target is authored as source slug
+  `non-aligned-armies` and resolves to 901.
 - Source investigation shows ID `1` and ID `901` represent different concepts.
   ID `1` behaves as a mercenary source/origin identity with no army list and no
   ordinary faction membership role; 901 is the Non-Aligned Armies grouping
@@ -661,6 +663,13 @@ compatibility references remain unambiguous JSON integers.
   count growth fail the InfinityDB application build before SQLite export.
   Synthetic/ad-hoc inputs without downloader snapshot provenance and the
   standalone `infinity-army` pipeline are deliberately outside this baseline.
+- 2026-09-21: Maintained Weapon category/correction references now accept numeric
+  source IDs or deterministic source-label slugs, and all 16 tracked references use
+  readable slugs. Resolution happens against the source weapon catalog before source
+  corrections are applied; numeric authoring remains available for ambiguity/provenance.
+  The curated display-identity target similarly uses the source faction slug
+  `non-aligned-armies`, while canonical source identity `1` remains numeric because no
+  authoritative source-faction slug owns that provenance identity.
 - 2026-09-17: Weapon catalog policy was split from implementation code.
   `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
   and explicit category decisions; `config/catalogs/weapon-overrides.json` owns

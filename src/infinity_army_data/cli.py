@@ -5,7 +5,7 @@ import hashlib
 import re
 import sys
 import zipfile
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import datetime
 from pathlib import Path
 
@@ -131,13 +131,20 @@ def _normalize(
     *,
     compact: bool,
     canonical_faction_overrides: Mapping[int, int] | None = None,
-    display_army_overrides: Mapping[int, int] | None = None,
+    display_army_overrides: (
+        Mapping[int, int] | Callable[[dict], Mapping[int, int]] | None
+    ) = None,
     normalized_metadata: Mapping[str, object] | None = None,
 ) -> dict:
+    resolved_display_army_overrides = (
+        display_army_overrides(master)
+        if callable(display_army_overrides)
+        else display_army_overrides
+    )
     normalized = normalize_master(
         master,
         canonical_faction_overrides=canonical_faction_overrides,
-        display_army_overrides=display_army_overrides,
+        display_army_overrides=resolved_display_army_overrides,
     )
     annotate_availability_semantics(normalized)
     audit_generic_logical_matches(normalized)
@@ -193,7 +200,9 @@ def cmd_normalize(
     args: argparse.Namespace,
     *,
     canonical_faction_overrides: Mapping[int, int] | None = None,
-    display_army_overrides: Mapping[int, int] | None = None,
+    display_army_overrides: (
+        Mapping[int, int] | Callable[[dict], Mapping[int, int]] | None
+    ) = None,
     normalized_metadata: Mapping[str, object] | None = None,
 ) -> int:
     from .normalize import load_master
@@ -216,7 +225,9 @@ def cmd_build(
     args: argparse.Namespace,
     *,
     canonical_faction_overrides: Mapping[int, int] | None = None,
-    display_army_overrides: Mapping[int, int] | None = None,
+    display_army_overrides: (
+        Mapping[int, int] | Callable[[dict], Mapping[int, int]] | None
+    ) = None,
     normalized_metadata: Mapping[str, object] | None = None,
 ) -> int:
     if args.source is None:
