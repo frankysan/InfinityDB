@@ -736,6 +736,9 @@ new correctness or reproducibility defect.
     run the general release checklist in `docs/releasing.md` and release this public-identity/slug
     work as version 0.6.2. The project-wide documentation audit is a release gate, not a
     post-release cleanup task.
+  - [ ] Bring Armies onto the general dual numeric/slug identifier contract when the
+    public-route migration reaches that domain. The current numeric-only Army route layer is
+    a known temporary exception, not a precedent for future domains.
   - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
     reviewed overrides, aliases/redirects, and compatibility behavior; extend the
     registry only when a new canonical domain boundary (for example Peripheral

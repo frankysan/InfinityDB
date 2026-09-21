@@ -787,6 +787,17 @@ compatibility references remain unambiguous JSON integers.
   checks both source-ID and application-slug forms so grouped identities such as Martial
   Arts, Strategos, BS Attack, CC Attack, and Armed Turret resolve through the same
   logical identity used by public routes.
+- 2026-09-21: Treat dual numeric/slug identity as the default contract for every
+  application domain once a stable domain-local slug can be resolved. Application-facing
+  repository/API calls, routes, filters, cross-links, browser state, and maintained
+  references should accept either the numeric application ID or canonical slug; producers
+  should prefer slugs for human-facing and human-authored output while retaining numeric
+  compatibility. New domains must establish one central resolver and reuse it across all
+  consumers rather than inventing local slug schemes. Unresolved/colliding slugs fall back
+  to numeric identity and must not be guessed. Source/provenance-only references are outside
+  this rule until explicitly mapped to an application identity. Armies are currently the
+  known public-route exception and should converge on this contract rather than define a
+  separate model.
 - 2026-09-20: Domain-unique application slugs now have a derived persistence
   layer. Schema version 17 / compatibility revision 25 materializes
   `application_domain_slugs` for Armies, logical Units, Skills, Equipment, and

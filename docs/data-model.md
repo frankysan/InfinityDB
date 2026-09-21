@@ -1798,6 +1798,23 @@ by the current runtime. It does not claim that two source records are globally
 identical outside the documented grouping rule, does not canonicalize curated
 rules knowledge, and does not turn source metadata modes into one invariant fact.
 
+#### Dual application identifier contract
+
+Application domains with a stable resolved slug use a dual identifier contract: the
+numeric application ID and the domain-local slug are alternate references to the same
+canonical application identity. Repository/API lookup boundaries, public routes,
+filters, cross-domain links, and other application-facing calls should accept either
+form. Producers should emit/prefer the slug for human-facing URLs, browser state, API
+references, and maintainable authored data, while retaining numeric IDs for backward
+compatibility, internal joins, provenance bridges, and deterministic fallback.
+
+This contract applies to future domains as they are introduced. A new domain should not
+ship a consumer-specific numeric-only or slug-only lookup path when a stable dual
+identity can be provided centrally. Numeric-only fallback remains correct when the slug
+is unresolved, colliding, or otherwise unavailable; callers must not invent a slug to
+avoid that fallback. Source-native IDs remain source/provenance identifiers unless an
+explicit application-identity mapping promotes the reference into this contract.
+
 #### Application domain slugs
 
 Schema version 17 / compatibility revision 25 adds a derived
@@ -1836,7 +1853,8 @@ profile/loadout/unit-option occurrences. Numeric-only candidates remain on numer
 compatibility routes because the two forms would otherwise be ambiguous. No redirect or
 permanent-freeze promise is made by this transition; per-domain freezing, reviewed
 overrides, aliases, and canonical redirect behavior still precede retirement of numeric
-routes. Armies remain numeric-only publicly. The current 2026-09-18 snapshot resolves all
+routes. Armies remain numeric-only publicly as a temporary exception to this general
+dual-identifier contract. The current 2026-09-18 snapshot resolves all
 1,042 initial identities
 (57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons)
 without collision or unavailable candidates; these counts are evidence only.

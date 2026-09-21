@@ -529,6 +529,27 @@ remains a later design step after canonical unit, relationship, and catalog
 coverage is complete; `infinity.raw.db` is the intended long-term home for that
 lossless source representation.
 
+### General application-domain identifier contract
+
+Every InfinityDB application domain should expose two interchangeable identity forms
+when a stable domain-local slug can be resolved: the numeric application ID and the
+canonical slug. Numeric IDs remain valid compatibility and implementation keys; slugs
+are the preferred human-facing form. Application-facing repository/API calls, web
+routes, filters, cross-links, and maintained references that identify a domain object
+should accept either form rather than creating slug-only or numeric-only interfaces.
+Generated URLs, browser state, API references, and human-authored configuration should
+prefer the slug when it is resolved and unambiguous.
+
+This is a forward-compatible domain rule, not a one-time route migration convention.
+When adding a new application domain, establish its canonical numeric identity and
+domain-local slug resolver together, then reuse that resolver across all consumers. Do
+not create a second ad-hoc slug scheme in a route, filter, JavaScript component, or
+curated loader. If a slug is unavailable, collides, or cannot be resolved
+deterministically, retain the numeric form and fail closed rather than guessing. Tests
+for a new domain should demonstrate that numeric and slug references resolve to the same
+application identity. Source-only/provenance layers may continue to use source-native
+identifiers where application identity is intentionally not in scope.
+
 ### Current: domain-unique application slug layer
 
 Source identity, internal application identity, and public navigation identity are
@@ -567,7 +588,8 @@ Modifier payloads expose `public_slug` after source/logical Unit identity resolu
 migration does not redirect numeric routes or declare the derived slug permanently
 frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
 behavior remain required before numeric routes are retired or redirected. Armies remain
-numeric-only at the public route layer for now.
+numeric-only at the public route layer for now; that is a temporary exception to the
+general dual-identifier contract, not a separate identity model.
 
 Traits share the public slug grammar and fail-closed collision policy but intentionally
 do not duplicate their canonical identity in `application_domain_slugs`. Curated Trait
