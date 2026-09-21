@@ -950,6 +950,66 @@ compact-dropdown pattern. Developer mode sets `data-developer-mode` on the docum
 root; use `.developer-only` for inline technical details and `.id-column` for table
 columns so they remain hidden in the player-facing view by default.
 
+### Design direction: browser UX and responsibility boundaries
+
+Browser presentation should optimize first for fast lookup, comparison, and scanning
+of dense game data. Clarity, hierarchy, legibility, and predictable interaction take
+priority over decorative complexity, while avoiding an unnecessarily cramped
+interface. Navigation, terminology, controls, tables, cards, badges, and feedback
+states should reuse shared patterns rather than creating page-local visual languages.
+Secondary provenance and developer information should use progressive disclosure so
+technical depth remains available without dominating the normal player view.
+
+Responsive behavior is a content-priority decision rather than simple shrinking.
+Phone, compact/tablet, and desktop layouts should deliberately adapt navigation,
+filters, tables/statlines, detail groups, and multi-column data. Accessibility is part
+of the design contract: semantic HTML, keyboard operation, visible focus, sufficient
+contrast, non-color-only meaning, usable touch targets, reduced-motion behavior where
+motion exists, and useful screen-reader labels/status announcements are expected.
+Faction/army accents and future theme colors must remain subordinate to semantic
+meaning so domain state remains understandable regardless of theme, color perception,
+or asset availability.
+
+Preserve the current lightweight browser-native architecture unless a concrete
+requirement justifies changing it. Native ES modules and the absence of a frontend
+build pipeline are deliberate current constraints, not gaps to solve by default.
+
+Python owns imported-data/domain semantics, identity and rules interpretation,
+database access/querying, request validation, stable API contracts, application/version
+metadata, and HTTP concerns. Domain meaning that would otherwise require JavaScript to
+infer IDs, names, source quirks, or rules semantics belongs in backend/API fields.
+Browser code owns information presentation, interaction state, responsive/accessibility
+behavior, client-side display formatting, theme/UI preferences, and composition of
+semantic API data into views. API payloads should expose semantic roles, states,
+identities, labels, and relationships rather than CSS classes, literal colors, layout
+instructions, or page-specific markup.
+
+The same-origin deployment model remains appropriate. As the web layer is refactored,
+separate API handling, page-shell/static delivery, and top-level request dispatch more
+clearly on the Python side, and organize browser code around explicit API transport,
+preferences/theme state, reusable view/components, and page modules. Browser JSON API
+access continues through `api.js`; new page scripts should not accumulate independent
+transport or domain-interpretation logic.
+
+### Design direction: theming
+
+Themes use stable semantic identifiers, initially `light` and `dark`, and are implemented
+through semantic theme tokens separated from theme-neutral layout/component rules.
+Components consume roles such as surfaces, text, borders, actions, focus, status,
+shadows, and data emphasis rather than hard-coded light-theme colors. Faction/army
+colors remain domain accent tokens layered onto the selected theme with contrast-safe
+treatments in each supported theme.
+
+An explicit user theme selection overrides any project/operating-system default and is
+stored through the existing Settings preference contract; theming must not introduce a
+second persistence mechanism. Resolve the selected theme before first meaningful paint
+to avoid navigation/reload flashes. Browser metadata and `color-scheme` behavior should
+track the selected theme so form controls, scrollbars, and other user-agent UI remain
+coherent. Project-owned graphics should use the same semantic token contract where
+practical instead of unnecessary light/dark asset forks. Supported themes must preserve
+contrast and distinguishability for status/range colors, links, focus indicators, muted
+text, tables, selected rows, dialogs, menus, and faction accents.
+
 ## Required Army API metadata
 
 The required API `metadata.json` is a supplemental source snapshot. Its records

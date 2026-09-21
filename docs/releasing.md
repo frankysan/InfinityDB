@@ -2,12 +2,69 @@
 
 This document is the canonical release checklist for InfinityDB. **Every release**
 must pass this checklist unless a step is explicitly inapplicable to that release.
-Version-specific release requirements belong in `docs/TODO.md`; they extend this
-process rather than replacing it.
+Active version-specific implementation/release blockers belong in `docs/TODO.md`;
+they extend this process rather than replacing it. Long-lived acceptance definitions,
+such as the version-1.0 completeness gate below, remain in this document.
 
 A release is not ready merely because its implementation checks pass. The release
 gate includes repository state, documentation, release metadata, hosted validation,
 and post-release verification.
+
+
+## Version 1.0 data-completeness gate
+
+Version 1.0 represents the point where InfinityDB is **data-complete for normal
+Infinity gameplay**. Every player-relevant data point available from the supported
+Infinity sources that can reasonably be useful to a player must be represented in a
+maintained structured layer and accessible through the web application in a usable
+form. A specialized or final-form UI is not required when a basic presentation makes
+the information understandable and navigable.
+
+ITS-specific rules, missions, season material, classifications, and tournament
+content are deliberately outside the 1.0 requirement unless they become necessary to
+interpret otherwise in-scope data. Final visual polish, every planned search/filter/
+comparison feature, exhaustive performance work, optional themes, deployment
+conveniences, and unrelated architectural refactors likewise do not block 1.0.
+
+The 1.0 release gate requires:
+
+- [ ] Inventory player-relevant information from Infinity Army, supported official
+  rules PDFs, and the Infinity Wiki, and identify any in-scope information not yet
+  represented by InfinityDB.
+- [ ] Represent every identified in-scope data point in the database or another
+  explicitly defined maintained structured layer, including the relationships needed
+  to understand it without relying on undocumented source-ID conventions.
+- [ ] Provide a usable web presentation for every represented in-scope data category;
+  important information must not be available only through raw JSON, developer tools,
+  database inspection, or undocumented routes.
+- [ ] Cover, where applicable, armies/sectorials/grouping identities, units and
+  canonical identities, profiles and variants, availability, attributes/statistics,
+  weapons/ammunition, skills, equipment, hacking data, deployables/peripherals/
+  companions, Fireteams, maintained exceptions, other structured Army gameplay data,
+  and the rules information needed to interpret those concepts.
+- [ ] Import or curate useful explanatory rules knowledge for every referenced skill,
+  equipment item, weapon trait, state, terminology entry, or other gameplay concept,
+  using concise player-oriented summaries where direct reproduction is inappropriate.
+- [ ] Preserve rules/source provenance so users can identify the official material
+  behind summaries or interpretations; distinguish InfinityDB summaries and
+  abstractions from verbatim/source-native facts.
+- [ ] Resolve duplicate, renamed, superseded, or differently structured rules concepts
+  into a coherent maintained representation with sufficient relationships to surface
+  relevant rules alongside the entities that use them.
+- [ ] Represent empty, unavailable, and not-applicable values deliberately rather than
+  silently omitting them where that could mislead users.
+- [ ] Complete a consistency audit across source snapshots, normalized databases,
+  canonical application data, APIs, and browser presentation. Known source quirks,
+  corrections, derivations, and material cross-source discrepancies must be explicit,
+  reproducible, and traceable.
+- [ ] Resolve any known defect that materially misrepresents a player's unit, profile,
+  weapon, skill, equipment, army relationship, or rule information.
+
+Immediately before 1.0, perform a final source-by-source completeness audit. Record
+where each discovered player-relevant information type is represented, verify every
+in-scope type has a usable web presentation and required rules context, review every
+deliberate omission, and confirm that no remaining backlog item represents missing
+player-relevant information required by this definition.
 
 ## 1. Confirm release scope
 

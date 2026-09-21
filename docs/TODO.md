@@ -9,7 +9,8 @@ even when its parent task contains completed substeps. This file does not define
 current application behavior or claim that an accepted architecture is already
 implemented; current behavior belongs in the relevant reference documentation,
 while lasting design direction belongs in `docs/architecture.md` or
-`docs/data-model.md`.
+`docs/data-model.md`, and durable release acceptance criteria belong in
+`docs/releasing.md`.
 
 Keep completed substeps while their parent task is still open because they
 clarify progress and remaining scope. Once a standalone or parent task is
@@ -17,131 +18,15 @@ complete, remove it after any durable outcome is recorded in `CHANGELOG.md`,
 architecture/data-model documentation, or another appropriate reference. Git
 history retains implementation detail.
 
-## Version 1.0.0 release requirements
+## Current milestone
 
-Version 1.0.0 represents the point where InfinityDB is **data-complete for normal Infinity gameplay**.
-
-The defining requirement is that every data point available from the supported Infinity sources that can reasonably be useful to a player is represented by InfinityDB and can be presented in some usable way through the web application.
-
-This does **not** mean that every planned feature, visualization, workflow, or UI refinement must be complete before 1.0.0. A data type may satisfy the 1.0.0 requirement through a basic but functional presentation, provided that the information is accessible, understandable, and correctly connected to the rest of the database.
-
-**ITS-specific content is deliberately outside the scope of version 1.0.0.**
-
-### 1. Player-relevant data completeness
-
-- [ ] Inventory all player-relevant data available from the supported source material and identify any information not currently represented in InfinityDB.
-- [ ] Every identified in-scope data point has a maintained representation in the database or another explicitly defined structured data layer.
-- [ ] Every represented in-scope data point can be accessed through the web application in some usable form.
-- [ ] No player-relevant source information is omitted merely because the final specialized UI for it has not yet been implemented.
-- [ ] Data relationships needed to understand or navigate the information are represented explicitly rather than requiring knowledge of source-specific IDs or conventions.
-
-In-scope information includes, where applicable:
-
-- [ ] armies, sectorials, grouping identities, and their relationships
-- [ ] units and canonical unit identities
-- [ ] troop profiles and profile variants
-- [ ] availability and army-specific unit relationships
-- [ ] attributes and statistics
-- [ ] weapons and ammunition
-- [ ] skills
-- [ ] equipment
-- [ ] hacking programs and related hacking data
-- [ ] deployables, peripherals, companions, and other associated game entities
-- [ ] Fireteam-related data
-- [ ] special army/unit relationships and exceptions represented by curated data
-- [ ] other structured gameplay information exposed by Infinity Army
-- [ ] rules information needed to understand the above data
-- [ ] other player-relevant information discovered during the completeness audit
-
-### 2. Rules knowledge
-
-- [ ] Import or curate the relevant rules content from the supported official PDFs and Infinity Wiki.
-- [ ] Every rule, skill, equipment item, weapon trait, state, terminology entry, or other gameplay concept referenced by database content has useful explanatory information available in InfinityDB.
-- [ ] Provide concise player-oriented descriptions or summaries where reproducing source text directly is inappropriate or unnecessary.
-- [ ] Preserve source/provenance information so users can identify the official material from which a rule summary or interpretation was derived.
-- [ ] Rules relationships are represented sufficiently to allow relevant rules information to be surfaced alongside units, profiles, weapons, equipment, skills, and other database entities.
-- [ ] Resolve duplicate, renamed, superseded, or differently structured rule concepts from the PDFs and Wiki into a coherent maintained representation.
-- [ ] Clearly distinguish InfinityDB summaries or normalized descriptions from verbatim official rules text where applicable.
-
-### 3. Web presentation completeness
-
-For 1.0.0, **availability of the information is mandatory; a specialized or final-form interface is not**.
-
-- [ ] Every in-scope data category has at least one functional presentation in the web application.
-- [ ] Users can navigate from the major player-facing entities to their relevant related data.
-- [ ] Important data is not accessible only through raw JSON, development tools, database inspection, or undocumented URLs.
-- [ ] Generic tables, sections, or detail views are acceptable for 1.0.0 where a richer dedicated interface is planned later.
-- [ ] Information needed to interpret another displayed value is either shown directly or reachable through clear navigation.
-- [ ] Empty, unavailable, or not-applicable values are represented deliberately rather than silently omitted in ways that could mislead the user.
-
-### 4. Data correctness and provenance
-
-- [ ] Complete a consistency audit across source snapshots, normalized databases, APIs, and browser presentation.
-- [ ] Known source quirks and domain-specific corrections are represented explicitly in maintained curated data or documented derivation rules.
-- [ ] Derived facts used by the application are reproducible from their documented inputs.
-- [ ] Player-facing data can be traced to the source snapshot, curated rule, or derivation responsible for it.
-- [ ] Known material discrepancies between Infinity Army, official PDFs, and the Infinity Wiki are documented and handled deliberately.
-- [ ] No known defect remains that materially misrepresents a player's unit, profile, weapon, skill, equipment, army relationship, or rule information.
-
-### 5. Explicitly out of scope for 1.0.0
-
-The following do not block version 1.0.0 unless they become necessary to satisfy one of the requirements above:
-
-- ITS-specific rules, missions, season material, classifications, or tournament content
-- final-form or specialized UI for every data type
-- every planned search, filter, comparison, or visualization feature
-- exhaustive performance optimization
-- architectural refactors that do not affect correctness or data completeness
-- optional cosmetic improvements and additional themes
-- speculative future data-model simplification
-- features whose sole purpose is administration, development convenience, or deployment ergonomics
-
-These may remain in the general backlog for post-1.0 development.
-
-### 6. Final 1.0.0 completeness audit
-
-Before releasing 1.0.0:
-
-- [ ] Perform a source-by-source inventory of Infinity Army, the supported official rules PDFs, and the Infinity Wiki.
-- [ ] For every discovered player-relevant information type, record where and how InfinityDB represents it.
-- [ ] Verify that every in-scope type has a usable web presentation.
-- [ ] Verify that referenced rules and game concepts have accessible descriptions or summaries.
-- [ ] Review all deliberately omitted source data and confirm that each omission is either non-player-relevant or explicitly outside the 1.0.0 scope.
-- [ ] Confirm that remaining TODO items do not represent missing player-relevant data required by this definition of database completeness.
-
-## Milestone sequence
-
-**Milestone 1 — data/wiki/symbol ingestion — completed 2026-09-19.** Army,
-wiki-derived curated/rules data, and symbols now have pinned-source acquisition,
-explicit provenance, reproducible transformation/publication, live
-stage-by-stage acceptance, rollback/reproducibility validation, and guarded
-local deployment packaging. Remaining pipeline items below are follow-up
-refactoring, coverage, and optimization work rather than Milestone 1 blockers.
-
-- [x] **Milestone 2A — canonical runtime-data pass and 0.6.1 release — completed
-  2026-09-20.**
-  Finish the current semantic audit/canonicalization pass across every Army-
-  database construct consumed by normal repository/API/web runtime paths. Each
-  consumed construct must be classified both by application role (canonical,
-  contextual, or intentionally retained source representation) and by semantic
-  provenance (source-native, source-derived, InfinityDB abstraction, or
-  presentation convenience); known canonical replacements must be used by the
-  corresponding read paths. Preserve
-  player-visible behavior through equivalence testing and record representative
-  before/after performance evidence. Any InfinityDB-specific abstraction touched
-  by the pass must document its source inputs, derivation, assumptions, and limits.
-  This interim release did not require unused source structures, the physical
-  `infinity.raw.db` split, or the full 1.0 completeness inventory to be finished.
-  Its durable acceptance evidence is recorded in `docs/data-model.md` and the
-  dated changelog.
-
-- [ ] **Milestone 2B — continue the canonical application model and advance
-  1.0 completeness.**
-  After 0.6.1, continue semantic coverage beyond the currently consumed runtime
-  surface: broader relationships and source-only catalog/metadata structures,
-  the `infinity.raw.db` separation, and the source-to-presentation completeness inventory.
-  Use that inventory as groundwork for the broader web-app consistency audit.
-  The detailed checklist is maintained below.
+**Milestone 2B — continue the canonical application model and advance 1.0
+completeness.** Continue semantic coverage beyond the runtime surface completed
+for 0.6.1: broader relationships and source-only catalog/metadata structures,
+the `infinity.raw.db` separation, and the source-to-presentation completeness
+inventory. Use that inventory as groundwork for the broader web-app consistency
+audit. The durable version-1.0 acceptance criteria are maintained in
+`docs/releasing.md`.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
@@ -207,26 +92,12 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
 
 ### Active Milestone 2B work
 
-The 0.6.1 runtime canonicalization/release gate is complete. Durable evidence,
-benchmarks, semantic classifications, and upgrade requirements are recorded in
-`docs/data-model.md` and `docs/CHANGELOG.md`; completed release checklists are not
-kept in this active backlog. Every release follows the general checklist in
-`docs/releasing.md`, including its mandatory project-wide documentation audit; this
-backlog records only release-specific scope and gates.
-
-Milestone 2A canonicalization groundwork is complete; this section now contains
-only active Milestone 2B work. Durable counts, equivalence evidence, and benchmark
-results remain in `docs/data-model.md` rather than the backlog.
+This section contains only active Milestone 2B work. The completed 0.6.1
+canonicalization evidence, benchmarks, classifications, and upgrade requirements
+remain in `docs/data-model.md` and `docs/CHANGELOG.md`; release procedure belongs
+in `docs/releasing.md`.
 
 - [ ] **Audit relationships after entity canonicalization.**
-  - [x] Add a read-only include/peripheral relationship audit that resolves source-local
-    include targets through canonical loadout payload occurrences and measures army-local
-    peripheral identity repetition/context variation without promoting a heuristic identity.
-  - [x] Add a dedicated read-only peripheral semantics audit that separates army-local
-    definitions, explicit profile/loadout attachments, definition-only availability,
-    canonical-parent attachment stability, and unresolved global-option peripheral
-    references. Do not infer controller eligibility from Army source data; any rules-derived
-    eligibility must enter through reviewed `data/curated/` data.
   - [ ] Revisit includes and distinguish visible endpoint data from the independently
     meaningful relationship between those endpoints; use the clean target-resolution audit
     as evidence before materializing canonical include relationships.
@@ -235,11 +106,6 @@ results remain in `docs/data-model.md` rather than the backlog.
     - [ ] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
       Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; do not
       create a parallel Peripheral rules loader/database.
-    - [x] Run and review the dedicated Army Peripheral semantics audit on the current
-      2026-09-18 database before accepting any canonical Peripheral entity/profile mapping.
-      It finds 279 definitions / 56 names, 818 loadout attachments, zero profile or
-      definition-only attachments, 41 repeated-name raw identities, three `mercs`
-      variants, and 22 canonical loadout payloads with semantic attachment variants.
     - [ ] Design a separate reviewed source-to-Peripheral identity/mapping contract; do not
       overload the current display-identity contract or write Wiki/rules knowledge into Army
       source tables.
@@ -310,20 +176,6 @@ new correctness or reproducibility defect.
 
 - [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
   small shared symbol-pipeline utility layer.
-  - [x] `snapshot_archive.py` centralizes the timestamped ZIP naming, collision
-    handling, and deterministic archive member ordering shared by the Army,
-    wiki, and symbol downloaders.
-  - [x] `download_army_json.py`: expose snapshot identity/result to callers while
-    keeping its standalone CLI and explicit network behavior.
-  - [x] `download_army_symbols.py`: own complete discovery, static declarations,
-    override/cache/network source resolution, recursive SVG audit, and manifest
-    reference/asset updates while retaining complete timestamped archive output.
-    - [x] Expose current source-semantic discovery and raw network acquisition as
-      reusable functions so the standalone CLI and orchestrator share one
-      implementation.
-    - [x] Resolve raw assets through Git-ignored local overrides, the prior
-      validated immutable symbol snapshot/cache, then network, and record the
-      chosen source method for every resolved asset.
   - [ ] Make the symbol-downloader input contract match its CLI and tests. Prefer
     the immutable raw Army ZIP as the authoritative input; either fully support
     directory/current merged-master inputs end to end or stop advertising them.
@@ -335,9 +187,6 @@ new correctness or reproducibility defect.
     Inkscape conversion, and reports. Duplicate/canonical and text-conversion
     state are integrated into the build manifest; multi-category processing
     beyond the current canonical flow remains.
-  - [x] `svg_compress.py`: keep the standalone CLI and production validation
-    behavior; expose an importable result/update path for orchestration.
-  - [x] `reorganize_symbols.py`: become the publisher and final mapping generator.
   - [ ] `path_sanitization.py`: remain shared infrastructure for external/mirror
     naming; pipeline-generated asset names should use one host-independent
     policy.
@@ -347,13 +196,9 @@ new correctness or reproducibility defect.
 
 - [ ] Make every integrated symbol stage idempotent and traceable before adding
   sophisticated incremental caching.
-  - [x] Timestamped Army, wiki, and symbol acquisition never overwrites an
-    existing archive; same-second collisions receive a deterministic numeric
-    suffix.
   - [ ] Changes to an override SHA-256 invalidate downstream processing for that
     asset. Removing an override falls back to validated symbol archives/cache or
     network by the normal resolution rules.
-  - [x] Reuse validated archived downloads and rebuild work deterministically.
   - [ ] After the integrated build is stable, consider cache keys based on snapshot
     SHA-256, source SVG SHA-256, processor/tool versions, font-alias config,
     duplicate renderer/settings, conversion backend/settings, and compression
@@ -378,8 +223,6 @@ new correctness or reproducibility defect.
 
 - [ ] Add focused end-to-end and cross-platform regression coverage for the
   integrated Army/symbol pipeline.
-  - [x] Dedicated Army, wiki, and symbol downloader tests cover their timestamped
-    archive naming and deterministic archive contents.
   - [ ] Snapshot/discovery tests: metadata/faction validation, complete archive,
     snapshot identity/hash, all profile/faction logos, multiple logos for one
     unit, one logo shared by units, duplicate URLs, static declarations,
@@ -389,10 +232,6 @@ new correctness or reproducibility defect.
   - [ ] SVG fixtures: exact duplicate, XML-different visual duplicate, no-text,
     normal text, alias-font, missing-font, empty-text cleanup, and troublesome
     real-world conversion cases.
-  - [x] Publisher tests: several references to one canonical asset, deterministic
-    unit/profile/army paths, category-specific static assets, strict v7-to-v8
-    publication, compressed-input hash verification, reconciliation/backups, and
-    failed publication preserving the prior static tree.
   - [ ] Run core portability coverage on Windows, Ubuntu/Linux, and macOS when CI
     permits: project-relative path generation, path sanitization, executable
     discovery including `.exe`/`.cmd`, subprocess argument construction without
@@ -406,86 +245,19 @@ new correctness or reproducibility defect.
 
 ## Continuous integration and validation
 
-- [ ] Finish non-blocking CI hardening documented in `docs/ci.md`. The core
-  validation layers are implemented; these remaining follow-up items are
-  post-Milestone-1 hardening and do not block the Milestone 2 consistency audit.
-  - [x] Repair the deployment-smoke runtime import boundary. Read-only runtime
-    database/web imports no longer pull the database exporter, Army normalizer,
-    or weapon-policy configuration from source-checkout-relative paths.
-  - [x] Package configuration intentionally required by supported installed CLI
-    build/ingestion operations through the shared
-    `<sys.prefix>/share/infinity-db/config/` resource contract and verify it from
-    outside the checkout.
-  - [x] Add explicit `--assets off|auto|required` handling to `run_checks.py`.
-    Required CI defaults to `off`; `auto` uses full-asset tests only when a
-    validated complete set exists and fails on detected partial/corrupt state;
-    `required` fails unless the complete set validates.
-  - [x] Split asset-dependent pytest coverage into an explicit full-asset marker
-    while making normal tests hermetic through project-owned fixtures or injected
-    temporary static roots. Test absent/present asset behavior deliberately so a
-    clean source archive passes without third-party graphical assets.
-  - [x] Make local production deployment fail closed unless a complete published
-    symbol set is bound to terminal v8 build-manifest state, then revalidate the
-    installed Docker package and representative symbol routes before activation.
-  - [x] Make version tests independent of incidental Git-checkout state. Test the
-    `+dev` display suffix with controlled repository/version inputs rather than
-    requiring source archives or detached release trees to contain Git metadata
-    and be ahead/dirty.
-  - [x] Make the normal Ruff stage cover the complete maintained `tools/` tree
-    rather than a hand-maintained script allow-list.
-  - [x] Add Pyright as a normal `run_checks.py` type stage over maintained
-    `src/`, `tools/`, and `tests/` code so editor-visible type regressions fail
-    required CI, and configure VS Code for workspace-wide diagnostics.
-  - [x] Install the real `symbols` Python dependency set in required source CI and
-    exercise fontTools, tinycss2/cssselect2, and Pillow with synthetic fixtures.
-  - [x] Add focused regression tests for standalone tools, allowing conditional
-    external-tool integration where appropriate.
-  - [ ] Integrate curated snapshot-note validation into routine project checks so
-    every checked-in file under `data/curated/snapshot-notes/` is validated even
-    when no downloader or comparison workflow happens to load it.
-  - [x] Add clean-checkout Linux source CI that drives the normal check runner in
-    hermetic asset mode, using the tracked synthetic Army fixture for the Army
-    database build and the tracked curated collections for `rules.db`.
-  - [x] Protect `main` with the active `Protect main` repository ruleset:
-    require pull requests, resolved review threads, an up-to-date required-check
-    set (four `Source checks` matrix jobs plus `deployment-smoke` and
-    `installed-wheel`), block deletion/non-fast-forward updates, and allow no
-    bypass actors.
-  - [ ] Establish and retain release evidence for the configured GitHub Actions
-    workflows. Before claiming a release has passed hosted CI, record successful
-    `Source checks`, `Installed wheel smoke`, and `Deployment smoke test` runs
-    for the release commit or tag. Local results and workflow definitions are not
-    substitutes for those hosted executions.
-  - [x] Add an installed-wheel smoke job that builds/installs the wheel in a clean
-    environment and validates supported imports, startup, CLI/resource packaging,
-    and generated test databases without repository-relative assumptions.
-  - [x] Expand hermetic CI across Windows, Ubuntu/Linux, and macOS at Python 3.11;
-    add a Linux Python 3.14 compatibility leg without multiplying the entire
-    operating-system matrix.
-  - [ ] Complete optional/manual full-asset CI for a validated complete symbol set.
-    - [x] Add a dispatch-only `Full-asset checks` workflow restricted to `main`
-      that stages a checksum-pinned private published-asset bundle through the
-      `full-assets` environment, runs `--assets required`, and never uploads the
-      third-party graphical tree as a workflow artifact.
-    - [x] Add safe private-bundle staging with HTTPS-only download, digest/size
-      checks, traversal/symlink/case-collision guards, and published-contract
-      validation before replacing ignored local assets.
-    - [ ] Add authorized `FULL_ASSET_BUNDLE_URL` and
-      `FULL_ASSET_BUNDLE_SHA256` secrets to the existing repository
-      `full-assets` environment, then record one successful manual run.
-  - [ ] Keep live Army/wiki/symbol acquisition and expensive performance/capacity
-    checks explicit, manual, or scheduled rather than dependencies of required
-    source CI.
+The implemented CI contract is documented in `docs/ci.md`. Remaining backlog
+work is limited to:
 
-## Distribution, documentation, and test reproducibility
-
-- [ ] Reduce duplicated normative documentation after correcting the audit
-  drift. Keep imported-data/identity contracts authoritative in
-  `docs/data-model.md`, filesystem/provenance layout in `data/README.md`,
-  architecture rationale in `docs/architecture.md`, and concise invariants in
-  `docs/AI_CONTEXT.md`; replace repeated contract text with links where practical.
-  As part of this pass, remove stale statements that call the already-implemented
-  `army-symbol-build.json` or snapshot-manifest work merely planned/future work.
+- [ ] Integrate curated snapshot-note validation into routine project checks so
+  every checked-in file under `data/curated/snapshot-notes/` is validated even
+  when no downloader or comparison workflow happens to load it.
+- [ ] Retain release evidence for the configured hosted workflows. Before
+  claiming a release has passed hosted CI, record successful `Source checks`,
+  `Installed wheel smoke`, and `Deployment smoke test` runs for the release
+  commit or tag.
+- [ ] Complete optional/manual full-asset CI administration by adding authorized
+  `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets to the existing
+  `full-assets` environment, then record one successful manual run.
 
 ## Broader web-app consistency audit
 
@@ -561,118 +333,42 @@ new correctness or reproducibility defect.
 
 ## Visual design, frontend architecture, and theming
 
-- [ ] Define and document InfinityDB's visual-design and UI/UX guiding
-  principles before larger presentation changes.
-  - [ ] Optimize first for fast lookup, comparison, and scanning of dense game data;
-    prefer clarity, hierarchy, and legibility over decorative complexity while
-    avoiding an unnecessarily cramped interface.
-  - [ ] Keep navigation, page hierarchy, terminology, controls, tables, cards,
-    badges, and feedback states predictable across catalog and detail views.
-    Extend shared design-system primitives instead of giving individual pages
-    their own visual language.
-  - [ ] Use progressive disclosure for secondary, provenance, and developer-only
-    information so technical depth remains available without overwhelming the
-    default reading flow.
-  - [ ] Treat responsive behavior as a content-priority decision rather than simple
-    shrinking. Define deliberate phone, tablet/compact, and desktop behavior for
-    navigation, filters, tables/statlines, detail groups, and multi-column data.
-  - [ ] Treat accessibility as part of the design contract: semantic HTML, complete
-    keyboard operation, visible focus, sufficient contrast, non-color-only
-    meaning, useful touch targets, reduced-motion support where motion exists,
-    and sensible screen-reader labels/status announcements.
-  - [ ] Keep theme and faction/army accent colors subordinate to semantic meaning.
-    Source/domain state must remain understandable regardless of selected theme,
-    color perception, or whether a particular graphical asset is available.
-  - [ ] Preserve the current lightweight/browser-native direction unless a concrete
-    requirement justifies changing it. New visual work should not implicitly
-    introduce a frontend framework or build pipeline.
-  - [ ] Once agreed, record durable principles in the canonical architecture/design
-    documentation and keep this TODO focused on remaining implementation work.
+The accepted UX, backend/frontend responsibility, and theming direction is
+maintained in `docs/architecture.md`. This backlog contains only implementation
+work against that contract.
 
-- [ ] Define a clearer backend/frontend responsibility boundary and reflect it
-  in source organization without changing the current same-origin deployment
-  model merely for architectural fashion.
-  - [ ] Backend Python owns imported-data/domain semantics, identity and rules
-    interpretation, database access/querying, request validation, stable API
-    contracts, application/version metadata, and HTTP concerns. Domain meaning
-    that would otherwise require browser code to infer IDs, names, source quirks,
-    or rules semantics belongs in backend/API fields.
-  - [ ] Frontend code owns information presentation, interaction state, responsive
-    behavior, accessibility behavior, client-side display formatting, theme/UI
-    preferences, and composition of semantic API data into views. It must not
-    duplicate maintained domain interpretation already represented by the
-    backend contract.
-  - [ ] Keep API payloads semantic rather than presentational: expose roles, states,
-    identities, labels, and relationships rather than CSS class names, literal
-    colors, layout instructions, or page-specific markup.
-  - [ ] Split the current Python web layer so API handling, shared page-shell/static
-    delivery, and top-level request dispatch are visibly separate concerns.
-    Keep existing URLs and the shared shell contract stable while doing so.
-  - [ ] Organize the browser side around explicit shared layers (API transport,
-    preferences/theme state, reusable view/components, and page modules) so page
-    scripts stop accumulating cross-cutting behavior. Continue routing browser
-    HTTP access through `api.js` rather than ad hoc `fetch()` calls.
-  - [ ] Preserve native ES modules and the no-frontend-build-tool decision for now;
-    source-tree separation should improve ownership and maintainability without
-    requiring bundling/transpilation.
-  - [ ] Add focused contract/regression coverage as responsibilities move so a
-    frontend refactor cannot silently recreate backend domain logic, and backend
-    changes cannot silently break established browser contracts.
+- [ ] Refactor the web layer toward the documented backend/frontend responsibility
+  boundary without changing the current same-origin deployment model.
+  - [ ] Split API handling, shared page-shell/static delivery, and top-level request
+    dispatch into visibly separate Python concerns while preserving existing URLs.
+  - [ ] Organize browser code around explicit API transport, preferences/theme
+    state, reusable view/components, and page modules; keep JSON API access routed
+    through `api.js`.
+  - [ ] Add focused contract/regression coverage as responsibilities move so domain
+    interpretation cannot silently migrate back into browser code.
 
-- [ ] Introduce first-class customizable theme support, with Light and Dark as
-  the initial themes and an extension contract that does not require component
-  rewrites when more themes are added later.
-  - [ ] Refactor the CSS token model into semantic theme tokens versus theme-neutral
-    layout/component rules. Components should consume tokens such as surfaces,
-    text, borders, actions, focus, status, shadows, and data emphasis rather than
-    hard-coded light-theme colors.
-  - [ ] Keep faction/army colors as domain accent tokens layered onto the selected
-    theme. Define contrast-safe treatments for both Light and Dark rather than
-    assuming the current accent/background pairings work unchanged in both.
-  - [ ] Define a stable theme identifier/preference contract (`light` and `dark`
-    initially), and decide/document default startup behavior such as following
-    the operating-system preference versus a fixed project default. An explicit
-    user selection must take precedence over the default.
-  - [ ] Integrate the theme selector with the existing Settings/preferences model.
-    Theme changes apply immediately; persistence follows the existing
-    remember-settings consent policy rather than creating an unrelated storage
-    mechanism.
-  - [ ] Resolve and apply the selected theme before first meaningful paint to avoid
-    a light-to-dark or dark-to-light flash during navigation/reload.
-  - [ ] Replace hard-coded light-only browser metadata/assumptions with theme-aware
-    `color-scheme` behavior so form controls, scrollbars, and other user-agent UI
-    remain coherent with the selected theme.
-  - [ ] Keep the InfinityDB logo and other project-owned themed graphics driven by
-    the same semantic token contract where practical; do not fork separate
-    light/dark asset files when CSS-variable theming is sufficient.
-  - [ ] Audit status colors, range-modifier colors, links, focus indicators, muted
-    text, tables, selected rows, dialogs, menus, and faction accents for contrast
-    and distinguishability in every supported theme.
-  - [ ] Add regression coverage for preference initialization/switching/persistence
-    and representative core pages in both themes. Consider targeted visual
-    regression screenshots at compact and desktop widths once the theme tokens
-    stabilize.
+- [ ] Implement first-class Light and Dark themes using the semantic theme contract
+  documented in `docs/architecture.md`.
+  - [ ] Separate semantic theme tokens from theme-neutral layout/component rules
+    and remove remaining hard-coded light-theme assumptions.
+  - [ ] Decide and document the default startup behavior (for example, operating-
+    system preference versus a fixed project default); an explicit user choice wins.
+  - [ ] Add the theme selector to Settings, resolve the selected theme before first
+    meaningful paint, and keep persistence on the existing preference contract.
+  - [ ] Audit contrast and distinguishability for status/range colors, links, focus,
+    muted text, tables, dialogs, menus, and faction accents in both themes.
+  - [ ] Add regression coverage for initialization, switching, persistence, and
+    representative core pages in both themes.
 
-- [ ] Add a project favicon derived from `infinitydb-logo.svg`.
-  - [ ] Generate browser-appropriate favicon assets from the SVG source and wire
-    them into the shared page shell / site metadata.
-  - [ ] Keep the favicon legible in both light and dark browser chrome where
-    practical.
+- [ ] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
+  in light and dark browser chrome where practical.
 
-- [ ] Refactor the frontend design-system structure after the principles and
-  theme contract are agreed.
-  - [ ] Review the current monolithic `styles.css` and separate foundational tokens,
-    theme values, shared components/layout, and page-specific exceptions where
-    doing so improves ownership without requiring a CSS build step.
-  - [ ] Inventory repeated or one-off component styles and either promote recurring
-    patterns to shared primitives or remove unnecessary variants. Avoid adding
-    new page-local copies during the transition.
-  - [ ] Define which responsive/layout behaviors are shared primitives versus
-    intentional page-specific composition, and document the small set of
-    supported density variants rather than allowing arbitrary per-page spacing.
-  - [ ] Keep existing shared shell, navigation, detail-group, table-density, badge,
-    and settings patterns working during the migration; visual cleanup should be
-    incremental rather than a simultaneous rewrite of every page.
+- [ ] Refactor the frontend design-system structure after the theme contract is
+  implemented: separate foundational tokens, theme values, shared components/layout,
+  and page-specific exceptions where that improves ownership without adding a CSS
+  build step. Promote recurring patterns to shared primitives and preserve the
+  established shared shell, navigation, detail, table-density, badge, and Settings
+  behavior during the migration.
 
 ## Reliability and operations
 
@@ -706,89 +402,21 @@ new correctness or reproducibility defect.
   as the authoritative final gate; the 2026-09-20 local full run is 606 tests and
   takes roughly 73 seconds on the primary development machine.
 
-## Architecture follow-up
+## Public-identifier follow-up
 
-- [ ] Complete the accepted domain-unique public-ID migration across API lookup and
-  web routes. The schema-17 application slug registry defines shared candidate
-  normalization, domain-local uniqueness, and fail-closed collision/unavailable states
-  for Armies, Units, Skills, Equipment, and Weapons.
-  - [x] Begin with Skills as an additive migration slice: expose resolved non-numeric
-    Skill slugs in API payloads/browser links and accept both slug and numeric Skill
-    detail routes without redirecting or retiring the compatibility form.
-  - [x] Extend the same additive migration contract to Equipment, including catalog
-    links and nested Unit payload references, while keeping numeric Equipment routes
-    valid and suppressing numeric-only slug candidates.
-  - [x] Extend the additive migration contract to Weapons, including catalog links,
-    detail API/web lookup, and nested Unit weapon references while retaining numeric
-    routes and resolving source-variant IDs through application catalog provenance.
-  - [x] Extend the additive migration contract to logical Units: expose a distinct
-    application `public_slug` without reinterpreting the existing source/context
-    `slug`, prefer it for browser Unit links, and accept both slug and numeric Unit
-    detail routes.
-  - [x] Finish the Trait public-identity alignment for this workstream: curated
-    `trait:<slug>` IDs own stable public Trait slugs without duplicating rules identity
-    into the Army-domain registry; uncurated Trait links reuse the collision-checked raw
-    Trait catalog assignment rather than independently normalizing individual labels.
-  - [x] Align Unit explorer Skill/Equipment/Weapon filters with the same public identity
-    contract: browser state prefers application slugs, numeric query values remain valid,
-    and grouped application identities match all of their materialized source variants.
-  - [x] Bring Armies onto the general dual numeric/slug identifier contract: expose a
-    separate application `public_slug`, accept either numeric Army IDs or public slugs in
-    Unit-explorer/API Army filters, preserve source/application numeric compatibility, and
-    prefer the public slug in generated browser state.
-  - [x] **Close the dual-identifier consistency gaps found by the 2026-09-21 sanity audit.**
-    This work is a 0.6.2 release blocker; see
-    `docs/dual-identifier-sanity.md` for evidence and scope.
-    - [x] Centralize application-domain reference resolution so repository/detail lookups
-      accept either numeric IDs or stable slugs instead of requiring web-layer pre-resolution.
-    - [x] Canonicalize accepted legacy grouped source-ID Unit-explorer filters to the
-      application identity and preferred slug, including non-representative Skill/Equipment/
-      Weapon source IDs such as TinBot variants. Catalog list payloads expose the materialized
-      `source_ids` accepted for each application item so browser state can upgrade them.
-    - [x] Define and apply an additive slug-companion policy for cross-domain API references
-      that represent canonical application identities, while retaining numeric fields and
-      leaving source/context-only IDs explicitly numeric. Scalar references receive sibling
-      `*_slug` fields; structured Army references use `public_slug` where `slug` is already
-      source/context data.
-    - [x] Move numeric-shadow handling into the slug registry/resolver boundary so a
-      `resolved` slug is always actually routable; digit-only candidates retain their
-      diagnostic candidate but become `unavailable`, and consumers no longer suppress
-      them independently.
-    - [x] Add deterministic owning-layer resolvers and migrate maintained entity
-      references where safe. All 8 Weapon-category and 8 Weapon-correction references now
-      use source-label slugs; the Army display target uses `non-aligned-armies`. Keep
-      canonical source identity `1` numeric because it is provenance identity with no
-      authoritative source-faction slug, and retain numeric authoring generally for
-      ambiguity/provenance.
-    - [x] Add project-wide invariant coverage proving numeric/slug equivalence, source-ID
-      canonicalization, slug preference/fallback, and fail-closed unknown/ambiguous behavior
-      for every current domain where a stable slug exists; the sanity audit has been rerun
-      and is closed.
-  - [ ] **0.6.2 release checkpoint.** The dual-identifier sanity audit and the
-    2026-09-21 project-wide documentation audit are complete. Finish the remaining
-    general release checklist in `docs/releasing.md`, including release metadata and
-    validation, then release this public-identity/slug work as version 0.6.2.
-  - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
-    reviewed overrides, aliases/redirects, and compatibility behavior; extend the
-    registry only when a new canonical domain boundary (for example Peripheral
-    entities/profiles) has been proven.
-  - [x] Extend the numeric-or-slug authoring convention to curated rules `armyLinks`
-    for Skills, Equipment, and Weapons. The maintained N5 collection now uses logical
-    application-domain slugs while numeric source IDs remain accepted for compatibility.
-  - [ ] Apply the same numeric-or-slug authoring convention to future maintained JSON
-    reference fields whenever their owning build layer has a deterministic resolver. Keep
-    numeric references valid and make unknown/ambiguous slugs fail closed.
-  Keep source numeric IDs/slugs as provenance/context references and application numeric
-  IDs as developer/compatibility details rather than the long-term user-facing contract.
+- [ ] **0.6.2 release checkpoint.** The dual-identifier sanity audit and the
+  2026-09-21 project-wide documentation audit are complete. Finish the remaining
+  general release checklist in `docs/releasing.md`, including release metadata and
+  validation, then release the public-identity/slug work as version 0.6.2.
+- [ ] Before retiring or redirecting numeric routes, define and implement the
+  per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
+  compatibility policy documented as future work in `docs/architecture.md`.
 
 ## Potential product features
 
 - [ ] Expand the existing versioned curated rules-reference infrastructure with
   substantially broader N5 v5.3 coverage from
   `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10).
-  - [x] Keep curated rules in their own source-controlled JSON layer and
-    independent `rules.db`; do not add PDF-derived facts to `infinity.db` or
-    `infinity.raw.db`.
   - [ ] Expand canonical rule identities across skills, equipment, ammunition,
     traits, states, Fireteam concepts, glossary terms, and other useful rule
     domains, retaining rulebook version and printed-page citation.
