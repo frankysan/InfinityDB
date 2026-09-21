@@ -174,45 +174,11 @@ in `docs/releasing.md`.
     normalization-only structure, or unrepresented player information.
   - [ ] Add confirmed unrepresented player information to the 1.0 completeness
     backlog.
+  - [ ] Reconcile cross-source classification where the Army presentation shape and
+    rules ontology differ without rewriting source provenance. In particular, keep
+    Cube/Cube 2.0 Army characteristic occurrences intact while cross-linking and
+    presenting their N5 rules identity as Automatic Equipment.
   - [ ] Do not treat unused tables/columns alone as proof of a completeness gap.
-
-- [ ] **Complete a rules-semantics documentation pass across the current ruleset.**
-  Keep page-level progress, source versions, and individual findings in
-  `docs/rules-audit.md`; use this backlog only for section-level completion.
-  - [x] Establish `docs/rules-audit.md`, `docs/rules-semantics.md`, and
-    `docs/rules-research.md`, including the source/finding classification contract.
-  - [ ] Audit the wiki/PDF rules sections, using the wiki Main Sections structure as
-    the traversal spine and the current PDF/FAQ material for stable citations:
-    - [ ] Introduction.
-    - [x] Basic Rules.
-    - [x] Game States and Glossary.
-    - [x] Skills and Equipment.
-    - [x] Combat.
-    - [x] Ammunition and Weaponry.
-    - [x] Fireteams.
-    - [x] Command.
-    - [x] Movement.
-    - [x] Terrain and Scenery Structures.
-    - [x] Triumph and Defeat.
-    - [x] Setting up the Gaming Table.
-    - [x] Scenarios.
-    - [x] Quick Reference Charts as a validation/completeness pass.
-    - [x] Reinforcements, retaining its distinct rules scope.
-    - [x] ITS FAQ, retaining season/scenario scope rather than treating it as core rules.
-  - [ ] Reconcile implementation-relevant findings against Army/API fields, the
-    canonical application model, validation, querying/filtering, and browser
-    presentation; distinguish source-native concepts from InfinityDB abstractions.
-  - [ ] Record verified findings with no current consumer in `docs/rules-research.md`
-    instead of forcing premature schema or UI changes.
-  - [ ] Re-review the accumulated `rules-semantics.md` and `rules-research.md`
-    findings against the architectural rule that rules are semantic evidence,
-    not the application schema. Keep material that improves catalog/data
-    interpretation, relationships, validation, querying, or presentation (plus
-    necessary explanatory context); demote or remove procedural/edge-case detail
-    that does not serve InfinityDB's reference responsibilities, without treating
-    audit completeness as a requirement to model the complete ruleset.
-  - [ ] Complete a final gap analysis and feed confirmed implementation work into
-    the existing canonical-model, completeness, and product-feature backlogs.
 
 Completion of every possible deduplication opportunity is **not** itself a
 version-1.0 requirement. Canonicalization blocks 1.0 only where unresolved
@@ -514,7 +480,10 @@ work against that contract.
     Unit/Profile facts. Include the scoped action identities surfaced by the
     current ITS FAQ where their owning scenarios classify them as Skills/AROs,
     including `Activate Communication Antenna`, `Oppose Activation`, and `Emit
-    Akial Interference`. This catalog coverage is in scope for 1.0; a complete
+    Akial Interference`. Keep semantic identity, source publication provenance, and
+    applicability separate so the same canonical concept can be cited or overlaid
+    by core, scenario, FAQ, or season material without duplication or collection-
+    load-order semantics. This catalog coverage is in scope for 1.0; a complete
     scenario library and scenario list/detail pages are not.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
@@ -604,6 +573,10 @@ work against that contract.
     example TAG versus other Troop Types), and cross-link resolvable outcomes to
     canonical Skills, Equipment, Weapons, and Attributes without rewriting Unit
     profiles.
+  - [ ] Add a generated cross-army rule-variant usage index once exact variant
+    semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
+    variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
+    Army occurrence relationships rather than maintaining a second classification.
   - [ ] Model the finite V5.3 Restrictions Chart as explicit cross-domain
     relationships (Troop Type/Training/Equipment/Skill -> restricted action or
     Lieutenant eligibility) and expose it as contextual help/generated reference.
@@ -629,7 +602,9 @@ work against that contract.
     min/max requirements, FTO/wildcard notes, and source-data provenance.
   - [ ] Pair it with concise general Fireteam rules while clearly separating general
     rules from army-specific chart exceptions and retaining Infinity Army as the
-    current chart authority.
+    current chart authority. Generate the Fireteam Level -> bonuses matrix from the
+    same curated general-rule facts rather than hard-coding the Quick Reference
+    chart separately.
   - [ ] Make historically/community-significant Fireteam vocabulary discoverable
     without presenting it as current N5 terminology. In particular, map historical
     official `Linkable` and community `pure Fireteam` usage to the current

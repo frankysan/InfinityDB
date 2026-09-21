@@ -108,7 +108,8 @@ labels, traits, and states provide vocabulary reused by later sections. Quick
 Reference Charts are primarily a validation/completeness pass after the prose
 rules have been audited.
 
-- [ ] Introduction
+- [x] Introduction
+  - [x] Game premise, objective, rounds/turns, Orders/AROs, and scoring overview
 - [x] Basic Rules
   - [x] Basic Rules overview: game elements, terminology/alignment, labels/traits,
     armies, game states, and game modes
@@ -261,9 +262,32 @@ rules have been audited.
   - [x] DropPod/deployment/runtime boundary
   - [x] Army source/application-model reconciliation
 - [x] ITS FAQ
-- [ ] Final cross-section reconciliation and gap analysis
+- [x] Final cross-section reconciliation and gap analysis
 
 ## Completed page notes
+
+### Introduction — section complete
+
+Status: the live N5.3 Introduction has been reviewed as the final outstanding
+Main Sections traversal item. It is an orientation/summary page rather than a
+second source of detailed mechanics.
+
+Primary source reviewed:
+
+- Wiki: <https://infinitythewiki.com/Introduction>, live N5.3 page (the page
+  records minor text changes in N5.2).
+
+The page summarizes Infinity as a three-Round competitive skirmish with Active
+Turns, Orders, AROs, scenario objectives, Objective Points, and Victory Points.
+Every implementation-relevant concept in that summary is defined more precisely
+in sections already audited: Orders/AROs and game sequence in Basic Rules, and
+scoring/end-game context in Triumph and Defeat and Scenarios.
+
+InfinityDB should therefore treat the Introduction as explanatory navigation,
+not as authority for a second set of round, scoring, or end-game invariants. In
+particular, its overview wording must not override scenario- or game-mode-specific
+configuration. No new `rules-semantics.md`, `rules-research.md`, or implementation
+backlog entry is required.
 
 ### Basic Rules — section complete
 
@@ -2164,3 +2188,78 @@ constraints now made explicit:
 - generated declaration/category validation must understand source scope so
   scenario-only Skills/AROs and phase-scoped actions are intentional extensions,
   not apparent gaps or core-rule categories.
+
+### Final cross-section reconciliation and gap analysis — complete
+
+Status: the accumulated audit has been reconciled across the current application
+model and backlog. The final finding set contains 127 implementation-relevant
+`RS-*` entries and 62 retained `RR-*` research entries; their stable IDs are
+unique. The research set was re-reviewed against InfinityDB's catalog/reference
+boundary rather than promoted merely because a rule can be structured.
+
+#### Cross-source classifications must coexist instead of overwriting each other
+
+Several sections independently demonstrate that source presentation taxonomy and
+rules taxonomy answer different questions. `Regular`/`Irregular` can appear in
+Army skill-like structures while remaining Training semantics; Army exposes a
+`damage`-named weapon field while N5 calls the rules value PS; and Cube/Cube 2.0
+are presented through characteristic-style Army/UI data while the N5 rules define
+them as Automatic Equipment.
+
+The canonical application model must preserve the original Army relationship and
+provenance while allowing the rules layer to attach the correct semantic identity.
+The final pass found one backlog omission here: Cube/Cube 2.0 need explicit
+rules-Equipment cross-links/presentation without destructively moving their Army
+characteristic occurrences.
+
+#### Publication identity, semantic identity, and applicability are separate axes
+
+Core N5, the Reinforcements annex, scenario-defined rules, FAQ rulings, and ITS
+season material can cross-link the same concepts without sharing the same scope.
+The existing curated-v3 collection/record scope is the right foundation, but
+future scenario/FAQ records must keep source publication provenance separate from
+where a rule or ruling currently applies. Navigation parentage, wiki placement,
+and collection load order are not applicability rules.
+
+This is especially important for the version-1.0 scenario-specific catalog
+coverage: scenario Skills/Equipment/actions can be first-class scoped identities
+without requiring the post-1.0 full scenario library. The backlog now makes this
+applicability requirement explicit.
+
+#### The strongest chart/table opportunities are projections of canonical facts
+
+The Quick Reference pass established the general rule: InfinityDB should generate
+reference views from the same facts used by catalog/detail pages rather than copy
+or independently hard-code source charts. Existing backlog work already covers
+Weapon/Ammunition, Deployables, Hacking Device -> Program, Orders/AROs,
+Restrictions, Martial Arts, Booty, and MetaChemistry.
+
+Two useful projections were not yet explicit:
+
+- a cross-army rule-variant usage index, showing canonical Skill/Equipment plus
+  exact Level/MOD/parameter variant -> Unit/profile/loadout occurrences; and
+- a Fireteam Level -> bonus matrix generated from curated Fireteam rules facts,
+  kept separate from Army-local Fireteam composition charts.
+
+Both exploit InfinityDB's cross-army scope without creating a second ontology or
+a live-game legality engine, so they have been added as product follow-ups.
+
+#### Runtime/session mechanics remain outside the canonical catalog model
+
+The re-review does not justify promoting movement geometry, Order pools, current
+States, Command Token expenditure, Fireteam integrity during play, terrain zones,
+objective/card state, Reinforcement timing, or similar mutable match facts into
+static Unit/Profile data. Their retained research entries either explain a
+static-data boundary or support optional future reference/play-aid work. A full
+scenario library, mission engine, rules engine, and game-state tracker remain
+outside the version-1.0 requirement.
+
+#### Backlog reconciliation
+
+The rules-audit process itself is now complete and can leave the active TODO. The
+confirmed implementation work is represented by existing or newly sharpened
+items in the canonical-model and product backlogs: broader cited rules coverage;
+PS and declaration-category reconciliation; scoped scenario concepts; separate
+Reinforcements and FAQ layers; Peripheral and Fireteam relationships; source-to-
+presentation completeness; and generated reference projections. No additional
+schema/runtime change is justified solely by audit completeness.
