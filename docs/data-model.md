@@ -1837,24 +1837,26 @@ slugs may seed a candidate where useful, but they are not thereby promoted to a
 permanent public identity.
 
 Repository lookup can translate a `resolved` slug to/from the current numeric
-application key. Skills, Equipment, Weapons, and logical Units are additive public
-consumers. Catalog payloads expose resolved non-numeric `slug` values; Unit payloads
-expose the application route identity as `public_slug` so the pre-existing Unit `slug`
-continues to represent source/context data. Browser links prefer those application
-slugs, and detail web/API routes accept either the slug or the existing numeric
-application ID. Nested Unit Equipment and Weapon references resolve source-variant IDs
-through catalog provenance before exposing the canonical application slug, while Unit
-references embedded in other player-facing payloads resolve source Unit IDs to their
-logical Unit before exposing `public_slug`. Unit-explorer Skill/Equipment/Weapon filter
-values likewise prefer these public slugs; numeric filter references remain accepted for
-compatibility. Repository filtering resolves either form to the application catalog
-identity and expands it across all materialized source members before matching canonical
-profile/loadout/unit-option occurrences. Numeric-only candidates remain on numeric
-compatibility routes because the two forms would otherwise be ambiguous. No redirect or
-permanent-freeze promise is made by this transition; per-domain freezing, reviewed
-overrides, aliases, and canonical redirect behavior still precede retirement of numeric
-routes. Armies remain numeric-only publicly as a temporary exception to this general
-dual-identifier contract. The current 2026-09-18 snapshot resolves all
+application key. Armies, Skills, Equipment, Weapons, and logical Units are additive
+public consumers. Catalog payloads expose resolved non-numeric `slug` values; Unit and
+Army payloads expose the application navigation identity as `public_slug` so their
+pre-existing `slug` fields continue to represent source/context data. Browser links and
+Unit-explorer state prefer those application slugs while existing numeric references
+remain valid. Skill, Equipment, Weapon, and Unit detail web/API routes accept either the
+slug or numeric application ID. Unit-explorer/API Army filters accept either a
+source/application numeric Army ID or the resolved application Army slug; both forms are
+normalized through the application Army identity before playability and availability are
+evaluated. Nested Unit Equipment and Weapon references resolve source-variant IDs through
+catalog provenance before exposing the canonical application slug, while Unit references
+embedded in other player-facing payloads resolve source Unit IDs to their logical Unit
+before exposing `public_slug`. Unit-explorer Skill/Equipment/Weapon filters likewise
+resolve either form to the application catalog identity and expand it across all
+materialized source members before matching canonical profile/loadout/unit-option
+occurrences. Numeric-only candidates remain on numeric compatibility routes because the
+two forms would otherwise be ambiguous. No redirect or permanent-freeze promise is made
+by this transition; per-domain freezing, reviewed overrides, aliases, and canonical
+redirect behavior still precede retirement of numeric routes. The current 2026-09-18
+snapshot resolves all
 1,042 initial identities
 (57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons)
 without collision or unavailable candidates; these counts are evidence only.

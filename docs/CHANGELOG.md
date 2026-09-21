@@ -18,11 +18,12 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
-- Continue the public slug migration across Skills, Equipment, Weapons, logical Units,
-  and Traits: catalog/unit links and detail APIs use readable domain-local slugs when
-  available while existing numeric URLs remain valid for compatibility. Unit payloads
-  keep source/context `slug` separate and expose the application route as `public_slug`;
-  curated Trait routes remain anchored to their stable rules identities instead of being
+- Continue the public slug migration across Armies, Skills, Equipment, Weapons, logical
+  Units, and Traits: catalog/unit links, detail APIs, and Unit-explorer filters use readable
+  domain-local slugs when available while existing numeric references remain valid for
+  compatibility. Unit and Army payloads keep source/context `slug` separate and expose the
+  application navigation identity as `public_slug`; curated Trait routes remain anchored
+  to their stable rules identities instead of being
   regenerated from display names. Catalog identity alias groups may also be
   authored with readable source-label slugs or numeric source IDs; the maintained
   Skill, Equipment, and Weapon groups now use readable slugs, with ambiguous or

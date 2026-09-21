@@ -575,21 +575,22 @@ may seed application candidates but are not automatically promoted to permanent
 public identifiers. Repository helpers resolve only `resolved` registry entries
 bidirectionally between a domain-local slug and its current numeric application key.
 
-Skills, Equipment, Weapons, and logical Units are additive route consumers. Catalog
-list/detail API payloads expose a resolved application `slug`; Unit payloads instead
-expose a distinct `public_slug` so the existing source/context `slug` keeps its current
-meaning. Browser links prefer the application slug, and the corresponding detail web/API
-routes accept either that slug or the existing numeric application ID. Numeric-only slug
-candidates are not emitted as route identifiers because they would shadow the
-compatibility numeric namespace. Nested Unit payload references to Equipment and Weapons
-expose the canonical application slug after resolving any source-variant ID through
-application catalog provenance; Unit references embedded in catalog, Trait, and Skill
-Modifier payloads expose `public_slug` after source/logical Unit identity resolution. This
-migration does not redirect numeric routes or declare the derived slug permanently
+Armies, Skills, Equipment, Weapons, and logical Units are additive public consumers of
+the registry. Catalog list/detail API payloads expose a resolved application `slug`; Unit
+and Army payloads instead expose a distinct `public_slug` so their pre-existing
+source/context `slug` fields keep their current meaning. Browser links and Unit-explorer
+filter state prefer application slugs while existing numeric references remain valid.
+Skill, Equipment, Weapon, and Unit detail web/API routes accept either form; Army
+selection through the Unit explorer/API accepts either a source/application numeric ID
+or the resolved Army public slug and normalizes both to the application Army identity.
+Numeric-only slug candidates are not emitted as route identifiers because they would
+shadow the compatibility numeric namespace. Nested Unit payload references to Equipment
+and Weapons expose the canonical application slug after resolving any source-variant ID
+through application catalog provenance; Unit references embedded in catalog, Trait, and
+Skill Modifier payloads expose `public_slug` after source/logical Unit identity resolution.
+This migration does not redirect numeric routes or declare derived slugs permanently
 frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
-behavior remain required before numeric routes are retired or redirected. Armies remain
-numeric-only at the public route layer for now; that is a temporary exception to the
-general dual-identifier contract, not a separate identity model.
+behavior remain required before numeric routes are retired or redirected.
 
 Traits share the public slug grammar and fail-closed collision policy but intentionally
 do not duplicate their canonical identity in `application_domain_slugs`. Curated Trait

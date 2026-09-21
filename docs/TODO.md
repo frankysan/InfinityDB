@@ -732,13 +732,14 @@ new correctness or reproducibility defect.
   - [x] Align Unit explorer Skill/Equipment/Weapon filters with the same public identity
     contract: browser state prefers application slugs, numeric query values remain valid,
     and grouped application identities match all of their materialized source variants.
-  - [ ] **0.6.2 release checkpoint.** After the public-identity alignment above is complete,
-    run the general release checklist in `docs/releasing.md` and release this public-identity/slug
-    work as version 0.6.2. The project-wide documentation audit is a release gate, not a
-    post-release cleanup task.
-  - [ ] Bring Armies onto the general dual numeric/slug identifier contract when the
-    public-route migration reaches that domain. The current numeric-only Army route layer is
-    a known temporary exception, not a precedent for future domains.
+  - [x] Bring Armies onto the general dual numeric/slug identifier contract: expose a
+    separate application `public_slug`, accept either numeric Army IDs or public slugs in
+    Unit-explorer/API Army filters, preserve source/application numeric compatibility, and
+    prefer the public slug in generated browser state.
+  - [ ] **0.6.2 release checkpoint.** With the current public-identity domains now aligned,
+    run the general release checklist in `docs/releasing.md` and release this
+    public-identity/slug work as version 0.6.2. The project-wide documentation audit is a
+    release gate, not a post-release cleanup task.
   - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
     reviewed overrides, aliases/redirects, and compatibility behavior; extend the
     registry only when a new canonical domain boundary (for example Peripheral

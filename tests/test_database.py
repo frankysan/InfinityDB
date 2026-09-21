@@ -752,6 +752,8 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     assert database.list_units()["total"] == 3
     first_army = database.list_units(army_id=101)
     assert {unit["id"] for unit in first_army["items"]} == {1, 3}
+    first_army_by_slug = database.list_units(army_id="first-army")
+    assert {unit["id"] for unit in first_army_by_slug["items"]} == {1, 3}
     shared = next(unit for unit in first_army["items"] if unit["id"] == 1)
     assert shared["main_army_id"] is None
     assert shared["army_ids"] == [101, 201]
@@ -2679,6 +2681,9 @@ def test_application_domain_slugs_are_separate_from_source_slugs(
     assert database.list_armies()[0]["slug"] == "first_army"
     assert database.application_slug("armies", 101) == "first-army"
     assert database.application_id_for_slug("armies", "first-army") == 101
+    assert database.application_army_id(101) == 101
+    assert database.application_army_id("first-army") == 101
+    assert database.application_army_id("missing-army") is None
     assert database.application_slug("units", 1) == "alpha"
     assert database.application_id_for_slug("units", "alpha") == 1
     assert database.application_unit_id(1) == 1

@@ -1213,6 +1213,25 @@ class Database:
         return None if row is None else int(row["application_id"])
 
     @instance_lru_cache(maxsize=512)
+    def application_army_id(self, army_ref: int | str) -> int | None:
+        """Resolve a source/application Army ID or public slug to application identity."""
+
+        if isinstance(army_ref, int) and not isinstance(army_ref, bool):
+            if not SQLITE_INTEGER_MIN <= army_ref <= SQLITE_INTEGER_MAX:
+                raise ValueError(
+                    "army_id must be an integer within SQLite's signed 64-bit range"
+                )
+            graph = self._application_army_graph()
+            application_id = graph["source_to_application"].get(army_ref, army_ref)
+            return application_id if application_id in graph["armies"] else None
+        if isinstance(army_ref, str):
+            slug = require_domain_slug(army_ref, context="army_id")
+            if slug.isdigit():
+                raise ValueError("army_id numeric references must be integers, not strings")
+            return self.application_id_for_slug("armies", slug)
+        raise ValueError("army_id must be an integer or domain-local slug")
+
+    @instance_lru_cache(maxsize=512)
     def application_unit_id(self, unit_id: int) -> int | None:
         """Resolve a source or application Unit ID to its logical application identity."""
 
@@ -1796,7 +1815,7 @@ class Database:
     @instance_lru_cache(maxsize=128)
     def list_units(
         self,
-        army_id: int | None = None,
+        army_id: int | str | None = None,
         search: str = "",
         skill_id: int | str | None = None,
         equipment_id: int | str | None = None,
@@ -1810,18 +1829,17 @@ class Database:
         descending: bool = False,
         _unbounded: bool = False,
     ) -> dict[str, Any]:
-        if army_id is not None and (
-            type(army_id) is not int or not SQLITE_INTEGER_MIN <= army_id <= SQLITE_INTEGER_MAX
-        ):
-            raise ValueError("army_id must be an integer within SQLite's signed 64-bit range")
+        unresolved_army_filter = False
         if army_id is not None:
-            application_armies = self._application_army_graph()
-            army_id = application_armies["source_to_application"].get(army_id, army_id)
-            army = application_armies["armies"].get(army_id)
-            if army is not None and not army["playable"]:
-                raise ArmySelectionError(
-                    f"army_id {army_id} is a grouping-only identity, not a selectable army"
-                )
+            resolved_army_id = self.application_army_id(army_id)
+            unresolved_army_filter = resolved_army_id is None
+            army_id = resolved_army_id
+            if army_id is not None:
+                army = self._application_army_graph()["armies"].get(army_id)
+                if army is not None and not army["playable"]:
+                    raise ArmySelectionError(
+                        f"army_id {army_id} is a grouping-only identity, not a selectable army"
+                    )
         rule_filters: dict[str, int | str | None] = {
             "skills": skill_id,
             "equipment": equipment_id,
@@ -1907,6 +1925,8 @@ class Database:
         grouped = []
         matching_requirements: list[tuple[frozenset[str], ...]] = []
         for group in groups:
+            if unresolved_army_filter:
+                continue
             if any(
                 not set(group["source_ids"]).intersection(source_ids)
                 for source_ids in matching_sources_by_rule.values()

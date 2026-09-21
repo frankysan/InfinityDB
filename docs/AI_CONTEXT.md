@@ -824,16 +824,14 @@ compatibility references remain unambiguous JSON integers.
   them, and `/weapons/{slug}` plus `/api/weapons/{slug}` resolve to the canonical
   application Weapon identity. Existing numeric Weapon routes remain valid, curated
   source-variant IDs resolve through application catalog provenance before slug lookup,
-  and numeric-only candidates stay on the compatibility numeric form. Armies remain
-  numeric-only publicly for now.
+  and numeric-only candidates stay on the compatibility numeric form.
 - 2026-09-21: Logical Units are the fourth additive public-route consumer. Existing
   Unit `slug` remains source/context data, while player-facing Unit payloads expose a
   separate resolved `public_slug`. Unit list/detail, catalog usage, Trait usage, and
   Skill Modifier links prefer that application slug; `/units/{slug}` and
   `/api/units/{slug}` resolve through the registry while numeric Unit routes remain
   valid. Source Unit references are resolved to their logical application Unit before
-  slug lookup, numeric-only candidates remain on numeric compatibility URLs, and Armies
-  remain numeric-only publicly for now.
+  slug lookup, and numeric-only candidates remain on numeric compatibility URLs.
 - 2026-09-21: Unit explorer Skill, Equipment, and Weapon filters are public-identity
   consumers too. Browser filter option/state values prefer resolved application-domain
   slugs and preserve numeric query values only for compatibility. Repository filtering
@@ -841,6 +839,12 @@ compatibility references remain unambiguous JSON integers.
   identity to all materialized source IDs before matching canonical profile/loadout/unit-
   option occurrences. A grouped filter must therefore match every represented variant
   (for example any TinBot source variant) rather than only the numeric representative.
+- 2026-09-21: Armies now consume the same dual identifier contract. `/api/armies`
+  exposes an additive `public_slug` while retaining the existing Army `slug` as source/
+  context data. Unit-explorer and `/api/units` Army filters accept either a source/
+  application numeric ID or the application Army public slug, normalize through one
+  repository resolver, reject grouping-only identities after resolution, and prefer the
+  public slug in browser query state while preserving numeric compatibility.
 - 2026-09-21: Trait public identity is aligned with the shared slug policy without
   duplicating curated rules identity into the Army database. Curated Traits already own
   stable typed IDs in `rules.db`; a simple `trait:<slug>` ID projects directly to the

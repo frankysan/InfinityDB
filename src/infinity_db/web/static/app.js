@@ -46,7 +46,7 @@ function hasActiveFilters() {
   return state.armyId || state.search || state.skillId || state.equipmentId || state.weaponId;
 }
 
-function catalogFilterIdentifier(value) {
+function domainFilterIdentifier(value) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : "";
 }
 
@@ -58,10 +58,10 @@ function readLocation() {
   const equipmentId = params.get("equipment_id") || "";
   const weaponId = params.get("weapon_id") || "";
   return {
-    armyId: /^\d+$/.test(armyId) ? armyId : "",
-    skillId: catalogFilterIdentifier(skillId),
-    equipmentId: catalogFilterIdentifier(equipmentId),
-    weaponId: catalogFilterIdentifier(weaponId),
+    armyId: domainFilterIdentifier(armyId),
+    skillId: domainFilterIdentifier(skillId),
+    equipmentId: domainFilterIdentifier(equipmentId),
+    weaponId: domainFilterIdentifier(weaponId),
     search: (params.get("search") || "").trim().slice(0, 200),
     mercs: elements.mercs.checked,
     specops: elements.specops.checked,
@@ -121,10 +121,32 @@ function showPanel(panel) {
   if (panel !== elements.table) elements.pagination.forEach((pagination) => { pagination.hidden = true; });
 }
 
+function armyFilterValue(army) {
+  return army.public_slug || String(army.id);
+}
+
+function normalizeArmyFilterState(armies) {
+  const current = state.armyId;
+  if (!current) return false;
+  const army = armies.find(
+    (candidate) => armyFilterValue(candidate) === current || String(candidate.id) === current,
+  );
+  if (!army) {
+    state.armyId = "";
+    state.offset = 0;
+    return true;
+  }
+  const replacement = armyFilterValue(army);
+  if (replacement === current) return false;
+  state.armyId = replacement;
+  return true;
+}
+
 function populateArmies(armies) {
   // Keep source strings out of HTML so upstream data is always treated as text.
   elements.army.replaceChildren(new Option("All armies", ""));
   const playableArmies = armies.filter((army) => army.playable !== false);
+  const normalizedArmyFilter = normalizeArmyFilterState(playableArmies);
   const shownGroups = new Set();
 
   for (const army of playableArmies) {
@@ -138,13 +160,12 @@ function populateArmies(armies) {
       ? 2
       : Number(army.role === "sectorial" || army.role === "non_aligned");
     const indent = "\u00a0\u00a0\u00a0\u00a0".repeat(indentLevel);
-    elements.army.add(new Option(`${indent}${army.name} (${number.format(army.unit_count)})`, String(army.id)));
+    elements.army.add(new Option(
+      `${indent}${army.name} (${number.format(army.unit_count)})`,
+      armyFilterValue(army),
+    ));
   }
-  if (state.armyId && !playableArmies.some((army) => String(army.id) === state.armyId)) {
-    state.armyId = "";
-    state.offset = 0;
-    writeLocation(true);
-  }
+  if (normalizedArmyFilter) writeLocation(true);
   elements.armyCount.textContent = number.format(playableArmies.length);
   elements.army.disabled = false;
   syncFilters();

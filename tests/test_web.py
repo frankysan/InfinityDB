@@ -239,6 +239,7 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert set(armies) == {101, 198, 201}
     assert [army["id"] for army in json.loads(body)["items"]] == [101, 198, 201]
     assert armies[101]["slug"] == "zulu_company"
+    assert armies[101]["public_slug"] == "zulu-company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
     assert armies[198]["kind"] == "reinforcement"
@@ -298,15 +299,21 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     assert armies[901]["role"] == "grouping"
     assert armies[901]["playable"] is False
 
-    status, _, body = request(role_app, "/api/units", query="army_id=901")
-    assert status == 400
-    assert "grouping-only identity" in json.loads(body)["error"]
+    for army_ref in ("901", "non-aligned"):
+        status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
+        assert status == 400
+        assert "grouping-only identity" in json.loads(body)["error"]
 
 
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
-    for army_id, expected in [(101, {1, 3}), (201, {1, 2})]:
+    for army_ref, expected in [
+        (101, {1, 3}),
+        ("zulu-company", {1, 3}),
+        (201, {1, 2}),
+        ("alpha-company", {1, 2}),
+    ]:
         status, _, body = request(
-            app, "/api/units", query=urlencode({"army_id": army_id, "mercs": 1})
+            app, "/api/units", query=urlencode({"army_id": army_ref, "mercs": 1})
         )
         assert status == 200
         payload = json.loads(body)
@@ -537,6 +544,7 @@ def test_unit_details_include_occurrence_availability_categories(
         ({"search": "beta", "army_id": 101}, set()),
         ({"search": "beta", "army_id": 201}, {2}),
         ({"army_id": 999}, set()),
+        ({"army_id": "missing-army"}, set()),
     ],
 )
 def test_unit_search_and_empty_results(
@@ -558,7 +566,7 @@ def test_unit_search_and_empty_results(
         "offset=-1",
         "offset=1.5",
         "offset=9223372036854775808",
-        "army_id=abc",
+        "army_id=ABC",
         "army_id=9223372036854775808",
         urlencode({"search": "x" * 201}),
     ],
@@ -1019,14 +1027,17 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
 
 
-def test_unit_explorer_catalog_filters_prefer_public_slugs(app: Callable) -> None:
+def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None:
     status, _, body = request(app, "/static/app.js")
 
     assert status == 200
+    assert b"return army.public_slug || String(army.id);" in body
     assert b"return item.slug || String(item.id);" in body
-    assert b"catalogFilterIdentifier(skillId)" in body
-    assert b"catalogFilterIdentifier(equipmentId)" in body
-    assert b"catalogFilterIdentifier(weaponId)" in body
+    assert b"armyId: domainFilterIdentifier(armyId)" in body
+    assert b"skillId: domainFilterIdentifier(skillId)" in body
+    assert b"equipmentId: domainFilterIdentifier(equipmentId)" in body
+    assert b"weaponId: domainFilterIdentifier(weaponId)" in body
+    assert b"normalizeArmyFilterState(playableArmies)" in body
     assert b'normalizeCatalogFilterState(equipment.items, "equipmentId")' in body
 
 
