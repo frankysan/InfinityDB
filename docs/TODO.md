@@ -168,7 +168,7 @@ in `docs/releasing.md`.
     - [x] Basic Rules.
     - [x] Game States and Glossary.
     - [x] Skills and Equipment.
-    - [ ] Combat.
+    - [x] Combat.
     - [ ] Ammunition and Weaponry.
     - [ ] Fireteams.
     - [ ] Command.
@@ -445,8 +445,17 @@ work against that contract.
   substantially broader N5 v5.3 coverage from
   `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10).
   - [ ] Expand canonical rule identities across skills, equipment, ammunition,
-    traits, states, Fireteam concepts, glossary terms, and other useful rule
-    domains, retaining rulebook version and printed-page citation.
+    traits, states, Hacking Programs, Fireteam concepts, glossary terms, and other
+    useful rule domains, retaining rulebook version and printed-page citation.
+  - [ ] Reconcile N5 weapon-profile presentation terminology with the current
+    Combat rules. Army metadata still exposes the source field as `damage`, but
+    N5 V5.3 defines that value as Possibility of Survival (PS); the web weapon
+    profile currently labels it `DAM`. Preserve source provenance while exposing
+    the rules-native `PS` term to users, and cover both ranged and melee profiles.
+  - [ ] Add reviewed Hacking Program identities plus explicit Hacking Device ->
+    Program and Upgrade-Program relationships. Keep Hacking Area, Firewall,
+    Supportware, and target/state effects as rules-derived semantics rather than
+    inferring a complete hacking graph from Army Equipment names.
   - [ ] Reconcile the existing declaration-category records with the current N5
     V5.3 Skills and Equipment rules before expanding that dataset: remove stale
     category names/mappings, refresh printed-page citations, and generalize the

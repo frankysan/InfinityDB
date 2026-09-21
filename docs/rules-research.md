@@ -453,3 +453,112 @@ Sources:
 
 - Wiki: Common Skills index under the Skills and Equipment module
 - PDF: Infinity N5 V5.3, printed pages 76-85
+
+
+## Combat Module / Broader research
+
+### RR-CM-RES-001 — Guts and post-hit resolution are runtime procedure
+
+**Scope:** core N5.
+
+Wounds, Unconsciousness/Death, Guts Rolls, cover-seeking movement, and related
+post-Attack consequences form a runtime resolution sequence. Static profiles can
+provide VITA/STR and Skills that modify that procedure, but they do not describe
+the Trooper's current Wounds, failed Saving Rolls, or Guts outcome.
+
+This is useful future play-aid/reference material and should remain outside the
+replaceable canonical Army snapshot unless a separate game-session model is
+introduced.
+
+Sources:
+
+- Wiki: Wounds and Guts Roll pages under Combat Module
+- PDF: Infinity N5 V5.3, printed pages 37-38
+
+### RR-CM-TPL-001 — Template placement forms a reusable spatial-rules vocabulary
+
+**Scope:** core N5.
+
+Template attacks introduce Main Target, Area of Effect, Blast Focus, Circular/
+Small Teardrop/Large Teardrop templates, Direct versus Impact placement, Total
+Cover interactions, and secondary affected game elements.
+
+These are strong thesaurus/reference concepts for a future tabletop/scenario
+helper, but InfinityDB currently has no live geometry model. Record the concepts
+without trying to compute template coverage from static Unit data.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Template_Weapons_and_Equipment>
+- PDF: Infinity N5 V5.3, printed pages 43-50
+
+### RR-CM-CC-001 — Engaged groups create situational combat relationships
+
+**Scope:** core N5.
+
+Close Combat can restrict what nearby Troopers may declare, change Burst through
+allied participants, and interact with BS Attacks into the engagement. The
+participants and eligible bonuses depend on current Silhouette contact, States,
+and declarations.
+
+A future game/session layer could represent an engagement graph, but canonical
+Unit/Peripheral relationships alone are insufficient to determine it.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Close_Combat>
+- PDF: Infinity N5 V5.3, printed pages 51-53
+
+### RR-CM-HACK-001 — Supportware is a sustained runtime relationship
+
+**Scope:** core N5.
+
+Supportware Programs can apply continuing effects to Allied Troopers. A target
+can benefit from only one Supportware Program at a time, each Hacker can sustain
+only one, and later Programs or specific Hacker States can cancel the existing
+relationship.
+
+This is a useful reusable rules relationship but not a static Equipment fact. It
+should become a rules-reference relationship before any future session layer
+tries to track active Supportware.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Quantronic_Combat_%28Hacking%29>
+- PDF: Infinity N5 V5.3, printed pages 54-55
+
+### RR-CM-HACK-002 — Core Hacking Programs form a finite cross-domain vocabulary
+
+**Scope:** core N5.
+
+N5 V5.3 defines twelve core Programs: Assisted Fire, Carbonite, Controlled Jump,
+Cybermask, Enhanced Reaction, Fairy Dust, Oblivion, Spotlight, Total Control,
+Trinity, White Noise, and Zero Pain. Their effects connect to Troop Types,
+Attributes, Ammunition, States, Labels, deployment, visibility, and Equipment.
+
+The set is a strong candidate for the cross-domain rules thesaurus and a future
+first-class Hacking Program catalog. Exact Device grants and Upgrade Programs
+should be represented as cited relationships rather than embedded in prose.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Programs_Chart>
+- PDF: Infinity N5 V5.3, printed pages 57-62
+
+### RR-CM-ACT-001 — Combat resolution exposes a reusable action ontology
+
+**Scope:** core N5.
+
+Attack declaration, Burst allocation, target selection, Range/Cover/other MODs,
+Normal or Face-to-Face Roll, Saving Roll, Wounds/States, and post-hit effects form
+a reusable procedural graph shared by BS, CC, and Hacking with domain-specific
+branches.
+
+This could support future rule-navigation or play-aid features, but it is not a
+reason to encode executable game simulation into the current reference database.
+Keep the concepts and relationships source-backed and consumer-driven.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Combat_Module>
+- PDF: Infinity N5 V5.3, printed pages 36-62

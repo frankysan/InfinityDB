@@ -145,7 +145,16 @@ rules have been audited.
     action/variant/profile semantics
   - [x] Live-wiki scope reconciliation, including Reinforcements annex links
   - [x] Curated rules/application-model reconciliation
-- [ ] Combat
+- [x] Combat
+  - [x] Combat overview: weapon types, Burst, MODs, Attack Rolls, PS/SR, Wounds,
+    Unconsciousness/Death, and Guts
+  - [x] Ballistic Skills, BS Attack, Cover/Range, and ranged weapon profiles
+  - [x] Template Weapons and Equipment, Direct/Impact Templates, Intuitive Attack,
+    and Speculative Attack
+  - [x] Close Combat, CC Attack, multiple-Trooper interactions, and melee profiles
+  - [x] Quantronic Combat: Hacker, Firewall, Hacking Area, Repeaters, Devices,
+    program chart, and the 12 core Hacking Programs
+  - [x] Curated/application-model reconciliation
 - [ ] Ammunition and Weaponry
 - [ ] Fireteams
 - [ ] Command
@@ -613,3 +622,153 @@ cross-checked during Combat/Ammunition and Weaponry.
 navigation but are Reinforcements annex rules, not core Skills and Equipment
 entries in the N5 V5.3 PDF. Their detailed semantics remain deferred to the
 Reinforcements audit.
+
+
+### Combat — section complete
+
+Status: core N5.3 wiki/PDF semantic extraction complete for the Combat Module.
+FAQ callouts embedded on live wiki pages were observed but remain FAQ-scoped and
+were not promoted into core findings.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Combat_Module> and the linked Combat pages,
+  including the Quantronic Combat subtree, reviewed against the live N5.3 wiki.
+- PDF: Infinity N5 V5.3, printed pages 36-62. The PDF index confirms that the
+  Ammunition and Weaponry module begins on printed page 63, so ammunition-specific
+  effects remain deferred to the next audit unit.
+
+The section produced implementation-relevant findings in `rules-semantics.md`
+plus future-facing rules/reference material in `rules-research.md`. It also
+confirmed one concrete presentation mismatch and one substantial missing rules
+domain: the current web weapon profile presents the source `damage` field as
+`DAM`, while N5 V5.3 calls the concept **Possibility of Survival (PS)**; and the
+curated rules collection has no first-class Hacking Program catalog despite the
+Combat rules defining twelve programs and explicit Device-to-Program mappings.
+Both are tracked in `TODO.md`; runtime/curated data is unchanged by this audit.
+
+#### Combat framework, PS, Saving Rolls, and Wounds
+
+Printed pages 36-38 define BS, CC, and Hacking as the three combat/Attack
+families. The item used to perform an Attack is a separate axis: Weapons, Skills,
+and Equipment can all supply attack actions. This reinforces the Skills and
+Equipment finding that catalog kind and action/declaration semantics must not be
+collapsed.
+
+Burst is action/profile context rather than an invariant count of attacks. The
+Active Player normally uses the full current B value and declares its allocation;
+Reactive-Turn B is normally 1 unless another rule changes it. Burst MODs and
+Special Dice remain separate concepts, and the general B cap is 6.
+
+Possibility of Survival (PS) is the rules-native lethality value. Counterintuitively
+for consumers accustomed to a `damage` field, **lower PS is more lethal** because
+it lowers the target's Saving-Roll Success Value. The normalized Army metadata
+continues to preserve the upstream `damage` field name for provenance, but the
+current browser's `DAM` heading is not N5.3 terminology. Presentation should map
+the stored source field to PS without renaming or rewriting raw provenance.
+
+Saving Rolls are also structurally richer than a single defense stat. A profile
+can select ARM, BTS, another Attribute, a combination, an Attribute modifier, or
+a fixed/substituted value; the number of Saving Rolls is a separate field. Some
+Attacks have no PS at all and instead call for a direct Attribute Roll with a MOD.
+The current metadata representation therefore correctly needs to preserve exact
+`ammunition`, `saving`, `savingNum`, PS/source-`damage`, and Trait values rather
+than deriving one generic damage formula.
+
+Wounds and Unconscious/Dead transitions are runtime consequences. VITA/STR is
+canonical profile data; accumulated Wounds and resulting States are not.
+
+#### Ballistic Skills and ranged profiles
+
+Sources reviewed include Ballistic Skills, BS Attack, Ranged Weapon Profile,
+Template Weapons and Equipment, Direct Template Weapons, Impact Template
+Weapons, Intuitive Attack, and Speculative Attack (printed pages 39-50).
+
+A ranged profile has distinct semantic columns: range-band MODs, PS, Burst,
+Ammunition, Saving Roll Attribute, number of Saving Rolls, and Traits. Modes of a
+weapon may differ across any of these values. InfinityDB's existing decision to
+retain detailed metadata modes/profiles as contextual data rather than flattening
+them into the canonical Weapon identity is therefore rules-correct.
+
+Range is not limited to the Weapon catalog. Any BS Weapon, Skill, or Equipment
+capable of making a BS Attack can define Range MODs, and being beyond the maximum
+range makes the Attack fail rather than merely applying another numeric MOD. This
+matters for equipment such as MediKit and for future rules-reference composition.
+
+Template semantics likewise cross catalog kinds. Direct Templates do not make a
+BS Roll to hit, while Impact Templates do; both use template geometry and can be
+provided by Weapons or Equipment. `Direct Template`/`Impact Template` should
+therefore remain Traits that describe use semantics, not catalog-kind selectors.
+Detailed template placement and secondary-target geometry remain research-only
+until InfinityDB has a spatial/play-aid consumer.
+
+#### Close Combat and melee profiles
+
+Sources reviewed include Close Combat, CC Attack, and Melee Weapon Profile
+(printed pages 51-53).
+
+CC Attack, like BS Attack, can be supplied by a Weapon, Skill, or Equipment item.
+Melee profiles use the same PS/Burst/Ammunition/Saving-Roll/Trait vocabulary as
+ranged profiles but usually lack Range bands. The exact melee profile is therefore
+a contextual rules profile, not a property that should be inferred from the
+weapon's display name alone.
+
+Multiple-Trooper Close Combat adds runtime Burst based on currently participating
+allies/Peripherals and their States. That bonus describes the current engagement,
+not a static weapon/profile Burst value, so it is retained in research rather than
+materialized into source data.
+
+#### Quantronic Combat (Hacking)
+
+Sources reviewed include Quantronic Combat, Hacker, Firewall, Hacking Area,
+Repeater, Deployable Repeater, Hacking Programs Chart, Hacking Device, and all
+twelve core programs on printed pages 54-62:
+
+`Assisted Fire`, `Carbonite`, `Controlled Jump`, `Cybermask`,
+`Enhanced Reaction`, `Fairy Dust`, `Oblivion`, `Spotlight`, `Total Control`,
+`Trinity`, `White Noise`, and `Zero Pain`.
+
+The Combat rules resolve the relationship graph deferred from the Skills and
+Equipment audit:
+
+- `Hacker` is a Skill/role that permits Hacking Device/program use;
+- each Hacking Device variant grants an explicit finite Program set;
+- a Hacker may also receive Upgrade Programs independently of the Device;
+- Hacking Area is a runtime area derived from the Hacker's ZoC plus allied
+  Repeater/Deployable-Repeater ZoCs and special enemy-Repeater interactions;
+- Firewall is a defensive relationship with a parameterized attack MOD and a
+  normally fixed +3 Saving-Roll MOD, with only one Firewall applied at a time;
+- Program profiles have their own typed schema: Attack MOD, Opponent MOD, PS,
+  Burst, Target, Skill Type, and Special effects.
+
+This is not safely reconstructible from Equipment names alone. Hacking Devices,
+Programs, Upgrade Programs, Repeaters, Firewall, target predicates, States, and
+Supportware duration are distinct concepts connected by rules-derived edges.
+The existing rules-reference expansion backlog now explicitly includes Hacking
+Program identities and Device/Upgrade relationships.
+
+Supportware and Hacking Area also demonstrate why not every useful rule edge
+belongs in the canonical imported snapshot. Both depend on current game state,
+positions, active programs, and relationships. InfinityDB can document their
+semantics without pretending to know a static Trooper's live Hacking Area or
+Supportware state.
+
+#### Curated/application reconciliation
+
+The current curated rules collection already contains the relevant Labels and
+Traits used by Combat, including Attack, BS Attack, CC Attack, Comms Attack,
+Hackable, Supportware, Burst, Direct Template, Impact Template, and related
+weapon Traits. It does **not** contain first-class Hacking Program records; only
+the special Armed Turret weapon currently exists as a curated `kind: weapon`
+record. This is a rules-reference coverage gap, not an Army-import defect.
+
+The Army application database already preserves detailed Weapon metadata fields
+(`ammunition`, `burst`, source `damage`, `saving`, `savingNum`, `properties`,
+`distance`, `mode`, and profile data) and keeps those profile/mode facts contextual
+to the source Weapon. That storage boundary is compatible with the Combat rules.
+The main confirmed current presentation issue is terminology: the browser renders
+source `damage` as `DAM` rather than N5.3 `PS`.
+
+Detailed Ammunition interactions, combined ammunition, mixed weapons, and named
+weapon special rules remain intentionally deferred to the next **Ammunition and
+Weaponry** audit.

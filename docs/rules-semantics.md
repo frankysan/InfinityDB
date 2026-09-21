@@ -1141,3 +1141,250 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Infinity_Spec-Ops>
 - PDF: Infinity N5 V5.3, printed pages 98-99
+
+
+## Combat Module
+
+### RS-CM-BASE-001 — Attack family and catalog kind are independent axes
+
+**Classification:** source-native with an InfinityDB modeling consequence.
+
+The Combat Module defines three combat families: Ballistic Skills (BS), Close
+Combat (CC), and Quantronic Combat (Hacking). A BS or CC Attack can be performed
+using a Weapon, Special Skill, or piece of Equipment that authorizes that action;
+Hacking Programs likewise form rules actions reached through Hacker/Device
+semantics.
+
+InfinityDB must therefore avoid equating `weapon`, `equipment`, or `skill` catalog
+identity with one combat/action type. Rules-derived action relationships should be
+modeled separately from source catalog kind.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Combat_Module>
+- Wiki: <https://infinitythewiki.com/BS_Attack>
+- Wiki: <https://infinitythewiki.com/CC_Attack>
+- PDF: Infinity N5 V5.3, printed pages 36, 39, and 51
+
+### RS-CM-BURST-001 — Burst is contextual action data, not a universal attack count
+
+**Classification:** source-native.
+
+Burst (`B`) is the number of dice used for the declared Attack in its current
+context. The Active Player normally uses the full current Burst and declares how
+it is allocated. In ARO, Burst is normally reduced to 1 unless another rule
+modifies it. Burst-changing MODs, optional bonuses, and Special Dice are distinct;
+the general maximum Burst of an Attack is 6, while `+1SD` does not increase B.
+
+Stored Weapon/Program B is therefore a base profile fact. Runtime ARO Burst,
+Fireteam bonuses, multiple-Trooper CC bonuses, and similar effects must not be
+written back into canonical source profiles.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Combat_Module#Burst_.28B.29>
+- PDF: Infinity N5 V5.3, printed page 36
+
+### RS-CM-PS-001 — N5 uses Possibility of Survival, not Damage, as the profile value
+
+**Classification:** source-native with a source/presentation-boundary consequence.
+
+N5 V5.3 defines **Possibility of Survival (PS)** as the value used when resolving
+harm/effects. Lower PS is more lethal because PS is added to the target's
+protection when determining the Saving-Roll Success Value.
+
+Infinity Army metadata currently reaches InfinityDB through a source field named
+`damage`; preserving that source key is provenance, not permission to present the
+N5 concept as `Damage`/`DAM`. The current Weapon detail UI labels the field `DAM`;
+rules-facing presentation should expose **PS** while retaining the upstream field
+name internally where required for compatibility.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Possibility_of_Survival_%28PS%29>
+- Wiki: <https://infinitythewiki.com/Ranged_Weapon_Profile>
+- PDF: Infinity N5 V5.3, printed pages 37 and 46
+- Current presentation: `src/infinity_db/web/static/catalog-detail.js`
+
+### RS-CM-SR-001 — Saving-Roll profile fields encode typed expressions
+
+**Classification:** source-native with a persistence/presentation consequence.
+
+A combat profile separately specifies PS, the Saving Roll Attribute/expression,
+and the number of Saving Rolls. The Saving expression may identify ARM, BTS,
+PH or another Attribute; combine Attributes; halve/substitute a value; or apply
+a MOD. Some effects have no PS and instead require a direct Attribute Roll with
+a listed MOD.
+
+InfinityDB should therefore preserve the exact source fields and their typed
+meaning rather than deriving a single generic `damage-versus-defense` scalar.
+`saving` and `savingNum` are independent facts, and rules summaries should not
+assume every hit resolves against unmodified ARM or BTS.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Saving_Roll_%28SR%29>
+- Wiki: <https://infinitythewiki.com/Ranged_Weapon_Profile>
+- PDF: Infinity N5 V5.3, printed pages 37 and 46-47
+
+### RS-CM-WPN-001 — Canonical Weapon identity does not replace exact mode/profile semantics
+
+**Classification:** source-native semantics with an InfinityDB identity
+consequence.
+
+Ranged Weapon profiles independently define Range MODs, PS, Burst, Ammunition,
+Saving Roll Attribute, number of Saving Rolls, and Traits. A Weapon may expose
+multiple modes whose values differ across those fields. Melee profiles use the
+same combat-profile vocabulary but normally omit Range bands.
+
+This confirms the current application-catalog boundary: canonical Weapon identity
+can group equivalent source identities for browsing, while `metadata_weapons`
+modes/profiles remain contextual player-relevant data. Consumers must not infer a
+specific mode's combat values from the canonical family identity alone.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Ranged_Weapon_Profile>
+- Wiki: <https://infinitythewiki.com/Melee_Weapon_Profile>
+- PDF: Infinity N5 V5.3, printed pages 46-47 and 53
+- Model contract: `docs/data-model.md`, application catalog identity and metadata context
+
+### RS-CM-RANGE-001 — Range profiles belong to attack-capable rules, not only Weapons
+
+**Classification:** source-native.
+
+BS Weapons, pieces of Equipment, and Special Skills capable of making BS Attacks
+can define Range MODs. If the target is beyond the applicable maximum Range, the
+Attack fails; this is different from merely receiving another numeric Range MOD.
+
+Rules-reference composition should therefore be able to associate a range profile
+with an action supplied by Equipment or a Skill as well as by a Weapon. The
+current Weapon metadata range table remains valid for Weapon profiles, but it is
+not a complete ontology of every ranged action in the game.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Ballistic_Skills#Range>
+- Wiki: <https://infinitythewiki.com/Ranged_Weapon_Profile>
+- PDF: Infinity N5 V5.3, printed pages 42 and 46-47
+
+### RS-CM-TPL-001 — Template type is attack semantics, not catalog identity
+
+**Classification:** source-native cross-domain semantics.
+
+Template Weapons and Equipment use area-of-effect geometry. Direct Templates and
+Impact Templates are distinct use modes: Direct Templates normally make no BS
+Roll to hit, while Impact Templates require an Attack Roll. Either behavior may
+be supplied by a Weapon or Equipment item.
+
+`Direct Template` and `Impact Template` should therefore remain Traits/rules
+semantics attached to the relevant profile rather than being used to decide that
+the source item belongs in the Weapon catalog.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Template_Weapons_and_Equipment>
+- Wiki: <https://infinitythewiki.com/Direct_Template_Weapons>
+- Wiki: <https://infinitythewiki.com/Impact_Template_Weapons>
+- PDF: Infinity N5 V5.3, printed pages 43-50
+
+### RS-CM-CC-001 — Close Combat bonuses are runtime relationship effects
+
+**Classification:** source-native with a canonicalization consequence.
+
+CC Attack uses the attacker's applicable CC profile, but Close Combat with
+multiple Troopers can add Burst according to which allied Troopers/Peripherals are
+currently in Silhouette contact and eligible under the current States. That bonus
+is produced by the live engagement relationship, not by the Weapon's static B.
+
+InfinityDB should preserve base melee profile Burst and treat multi-Trooper CC
+bonuses as runtime rules context. Peripheral/controller identity can inform the
+relationship graph without turning the situational bonus into a canonical loadout
+fact.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Close_Combat>
+- Wiki: <https://infinitythewiki.com/CC_Attack>
+- PDF: Infinity N5 V5.3, printed pages 51-53
+
+### RS-CM-HACK-001 — Hacking Device variants grant explicit Program sets
+
+**Classification:** source-native relationship semantics.
+
+`Hacker` identifies Troopers capable of using Hacking Devices/Programs. Each
+Hacking Device variant grants an explicit Program set, while Hackers may also
+receive Upgrade Programs separately. In N5 V5.3 the standard Device families map
+to finite sets of the twelve core Hacking Programs.
+
+This is a reviewed rules relationship, not a naming convention. InfinityDB should
+model Hacking Program identity and Device-to-Program/Upgrade links in the rules
+reference layer rather than infer them from Equipment labels or flatten them into
+the canonical Hacking Device family.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Hacker>
+- Wiki: <https://infinitythewiki.com/Hacking_Device>
+- PDF: Infinity N5 V5.3, printed pages 54 and 58-62
+
+### RS-CM-HACK-002 — Hacking Area is a derived runtime relationship graph
+
+**Classification:** source-native relationship semantics.
+
+A Hacker's Hacking Area includes the Hacker's own ZoC plus the ZoCs of allied
+Repeaters and Deployable Repeaters, with additional rules for interacting through
+enemy Repeaters. It can create ARO/target relationships without LoF and outside
+the Hacker's own ZoC.
+
+Hacking Area is therefore not a fixed range value that belongs on a Hacker's
+canonical Unit Profile. InfinityDB may document which entities extend or use the
+area, but an actual live Hacking Area requires game positions, Repeater state,
+Army-list alignment, and current States.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Area>
+- Wiki: <https://infinitythewiki.com/Repeater>
+- PDF: Infinity N5 V5.3, printed pages 55-57
+
+### RS-CM-HACK-003 — Firewall is a two-sided, non-stacking defensive modifier
+
+**Classification:** source-native parameter and relationship semantics.
+
+Firewall applies a parameterized negative MOD to an enemy's Comms Attack WIP
+Roll and normally gives the protected Trooper +3 to Saving Rolls against that
+Comms Attack. A Trooper benefits from only one Firewall at a time even when
+multiple sources are available. The parenthetical value in `Firewall (-3)` or
+`Firewall (-6)` therefore does not describe the whole effect.
+
+InfinityDB should not flatten Firewall to a single scalar modifier. The attack
+MOD, Saving-Roll MOD, applicability to Comms Attacks, source relationship, and
+non-stacking rule are separate facts.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Firewall>
+- Wiki: <https://infinitythewiki.com/Repeater>
+- PDF: Infinity N5 V5.3, printed pages 55-56
+
+### RS-CM-HACK-004 — Hacking Programs have a dedicated typed profile schema
+
+**Classification:** source-native rules-domain semantics.
+
+The Hacking Programs chart defines Program profiles using **Attack MOD, Opponent
+MOD, PS, Burst, Target, Skill Type, and Special**. Targets may be Troop Types,
+Hackers, broader game elements, or effectively unrestricted depending on the
+Program. Program effects can invoke Ammunition, States, Supportware, profile
+changes, MODs, or non-damaging effects.
+
+Hacking Programs should therefore become a rules-reference domain rather than be
+encoded as pseudo-Weapons or pseudo-Skills solely to reuse an existing schema.
+Shared concepts such as PS, Burst, Ammunition, Labels, and States can be related
+across domains while preserving the Program-specific profile fields.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Programs_Chart>
+- Wiki: <https://infinitythewiki.com/Quantronic_Combat_%28Hacking%29>
+- PDF: Infinity N5 V5.3, printed pages 57-62
