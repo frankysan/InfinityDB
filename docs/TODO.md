@@ -736,7 +736,28 @@ new correctness or reproducibility defect.
     separate application `public_slug`, accept either numeric Army IDs or public slugs in
     Unit-explorer/API Army filters, preserve source/application numeric compatibility, and
     prefer the public slug in generated browser state.
-  - [ ] **0.6.2 release checkpoint.** With the current public-identity domains now aligned,
+  - [ ] **Close the dual-identifier consistency gaps found by the 2026-09-21 sanity audit.**
+    This work is a 0.6.2 release blocker; see
+    `docs/dual-identifier-sanity.md` for evidence and scope.
+    - [ ] Centralize application-domain reference resolution so repository/detail lookups
+      accept either numeric IDs or stable slugs instead of requiring web-layer pre-resolution.
+    - [ ] Canonicalize accepted legacy grouped source-ID Unit-explorer filters to the
+      application identity and preferred slug, including non-representative Skill/Equipment/
+      Weapon source IDs such as TinBot variants.
+    - [ ] Define and apply an additive slug-companion policy for cross-domain API references
+      that represent canonical application identities, while retaining numeric fields and
+      leaving source/context-only IDs explicitly numeric.
+    - [ ] Move numeric-shadow handling into the slug registry/resolver boundary so a
+      `resolved` slug is always actually routable; consumers should not need repeated
+      `slug.isdigit()` suppression.
+    - [ ] Add deterministic owning-layer resolvers and migrate the remaining maintained
+      entity references where safe: 8 Weapon-category IDs, 8 Weapon-correction IDs, and
+      2 Army display-identity references. Keep numeric authoring available for ambiguity
+      and provenance.
+    - [ ] Add project-wide invariant coverage proving numeric/slug equivalence, source-ID
+      canonicalization, slug preference/fallback, and fail-closed unknown/ambiguous behavior
+      for every current domain where a stable slug exists; rerun the sanity audit afterward.
+  - [ ] **0.6.2 release checkpoint.** After the dual-identifier sanity audit is fully closed,
     run the general release checklist in `docs/releasing.md` and release this
     public-identity/slug work as version 0.6.2. The project-wide documentation audit is a
     release gate, not a post-release cleanup task.
@@ -747,10 +768,10 @@ new correctness or reproducibility defect.
   - [x] Extend the numeric-or-slug authoring convention to curated rules `armyLinks`
     for Skills, Equipment, and Weapons. The maintained N5 collection now uses logical
     application-domain slugs while numeric source IDs remain accepted for compatibility.
-  - [ ] Extend the same convention to the remaining maintained JSON reference fields
-    (for example weapon source corrections and display-identity mappings) only after
-    each owning build layer has a deterministic resolver. Keep numeric references valid
-    and make unknown/ambiguous slugs fail closed.
+  - [ ] After the 0.6.2 blocker migration above, apply the same numeric-or-slug authoring
+    convention to future maintained JSON reference fields whenever their owning build layer
+    has a deterministic resolver. Keep numeric references valid and make unknown/ambiguous
+    slugs fail closed.
   Keep source numeric IDs/slugs as provenance/context references and application numeric
   IDs as developer/compatibility details rather than the long-term user-facing contract.
 
