@@ -42,6 +42,8 @@ provenance/state, and build outputs.
   publication artifacts. Ignored by Git.
 - `curated/rules/` — source-controlled, human-reviewed rules-reference
   collections consumed by `infinity-db build-rules`.
+- `curated/identities/` — source-controlled, reviewed source-derived identity and
+  presentation relationships consumed by the relevant build/normalization stage.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
@@ -55,9 +57,10 @@ changes. Generated snapshot manifests are local provenance records rather than
 maintained project knowledge. They are retained until explicitly removed; the
 acquisition tools do not automatically prune either archives or manifests.
 
-InfinityDB 0.5.1 treats generated database data as replaceable: builds validate
-new frontend and raw-archive snapshots before atomically replacing both
-generated database files.
+Generated Army database data is replaceable. Builds create temporary frontend
+and raw-archive siblings, validate both before publication, and replace each
+destination atomically. The pair is not yet one atomic transaction: recovery
+from interruption between the two replacements remains an explicit backlog item.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated-v3 rules contract records the local reviewed artifact plus its upstream

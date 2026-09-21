@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "units": {
     "groups": [
       {
@@ -28,38 +28,72 @@
     "skills": {
       "groups": [
         {
-          "canonical_id": 19,
-          "source_ids": [19, 20, 21, 22, 23],
+          "canonical_id": "martial-arts-l1",
+          "source_ids": [
+            "martial-arts-l1",
+            "martial-arts-l2",
+            "martial-arts-l3",
+            "martial-arts-l4",
+            "martial-arts-l5"
+          ],
           "reason": "Numbered source variants share one logical skill identity"
         },
         {
-          "canonical_id": 69,
-          "source_ids": [69, 70],
+          "canonical_id": "strategos-l1",
+          "source_ids": [
+            "strategos-l1",
+            "strategos-l2"
+          ],
           "reason": "Numbered source variants share one logical skill identity"
         },
         {
-          "canonical_id": 201,
-          "source_ids": [201, 278, 279]
+          "canonical_id": "bs-attack",
+          "source_ids": [
+            "bs-attack",
+            "bs-12",
+            "bs-11"
+          ]
         },
         {
-          "canonical_id": 240,
-          "source_ids": [240, 274]
+          "canonical_id": "cc-attack",
+          "source_ids": [
+            "cc-attack",
+            "cc-21"
+          ]
         }
       ]
     },
     "equipment": {
+      "slug_aliases": {
+        "tinbot-neourocinetics": "tinbot-neurocinetics"
+      },
       "groups": [
         {
-          "canonical_id": 235,
-          "source_ids": [169, 188, 193, 235, 244, 247, 248]
+          "canonical_id": "tinbot",
+          "source_ids": [
+            "tinbot-firewall",
+            "tinbot-neurocinetics",
+            "tinbot-albedo",
+            "tinbot",
+            "tinbot-discover",
+            "tinbot-ecm-guided",
+            "tinbot-repeater"
+          ]
         }
       ]
     },
     "weapons": {
       "groups": [
         {
-          "canonical_id": 226,
-          "source_ids": [209, 215, 219, 222, 226, 228]
+          "canonical_id": "armed-turret",
+          "source_ids": [
+            "armed-turret-combi-r",
+            "armed-turret-marksman-r",
+            "armed-turret-ap-rifle",
+            "armed-turret-rifle",
+            "armed-turret",
+            "armed-turret-e-mitter"
+          ]
         }
       ]
     }

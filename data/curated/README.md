@@ -11,7 +11,12 @@ provenance under `data/manifests/`.
 `infinity-db build-rules`. `identities/` contains reviewed source-derived
 presentation relationships consumed during Army normalization. These categories
 have separate schemas and loaders; neither loader treats arbitrary JSON from the
-other curated categories as valid input.
+other curated categories as valid input. Curated identifiers are stable
+project/domain identities. `armyLinks` are cross-domain references rather than curated
+record identities: Skill, Equipment, and Weapon links may use either a positive numeric
+source ID or the owning application-domain slug, with slugs preferred in maintained
+rules data. Numeric references remain valid for compatibility, provenance, and explicit
+disambiguation.
 
 The sections below document the implemented `curated/rules/` contract.
 
@@ -23,7 +28,6 @@ notes associated with immutable snapshots by SHA-256. Those notes remain
 separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
-
 
 ### Curated display identities
 
@@ -143,7 +147,7 @@ The main collection structure is:
                 "restrictions": [],
                 "interactions": ["rule:discover", "rule:surprise-attack"]
             },
-            "armyLinks": [{"entity": "skill", "id": 42}],
+            "armyLinks": [{"entity": "skill", "id": "camouflage"}],
             "relatedRecords": ["rule:camouflage", "rule:marker-state"],
             "citations": [
                 {"sourceId": "n5-core-v5.3-pdf", "page": 113, "section": "States"}
@@ -158,7 +162,6 @@ Supported record kinds include `rule`, `skill`, `skill-declaration-category`,
 `equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
 `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
-
 
 Weapon records may use `facts.specialProfile` for rulebook-defined deployable
 profiles that are not fully represented by Army weapon metadata. The special
@@ -186,9 +189,15 @@ misspellings belong in the normal `aliases` array. This is source-identity data;
 the matching algorithm remains application code.
 
 Army links may target existing `skills`, `equipment`, `weapons`, `ammunition`,
-`extras`, `characteristics`, `troop_types`, `units`, or profile occurrences.
-They annotate Army data; they do not establish list legality or replace
-Army-derived statistics.
+`extras`, `characteristics`, `troop_types`, `units`, or profile occurrences. For
+`skill`, `equipment`, and `weapon`, an `id` may be either a positive numeric source ID
+or a lowercase application-domain slug. The checked-in N5 collection uses slugs for
+those catalog domains; numeric IDs remain accepted for compatibility/provenance. A
+numeric-looking string is not a slug and must instead be written as a JSON integer.
+The independent rules database stores the authored reference as text; application
+composition matches slugs to the current Army application identity without making
+either database an import source for the other. Army links annotate Army data; they do
+not establish list legality or replace Army-derived statistics.
 
 An archived wiki citation uses an archive member plus an optional heading, for
 example:

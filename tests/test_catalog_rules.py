@@ -18,7 +18,7 @@ def test_armed_turret_profile_comes_from_curated_rules(tmp_path: Path) -> None:
 
     item = catalog.enrich_catalog_item(
         "weapons",
-        {"id": 226, "name": "Armed Turret", "profiles": []},
+        {"id": 226, "name": "Armed Turret", "slug": "armed-turret", "profiles": []},
     )
 
     assert item["special_profile"] == {

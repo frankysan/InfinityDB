@@ -4,6 +4,7 @@ import infinity_army_data
 
 
 def test_display_version_uses_release_version_for_a_clean_checkout(monkeypatch) -> None:
+    monkeypatch.delenv("INFINITY_DB_DISPLAY_VERSION", raising=False)
     monkeypatch.setattr(
         infinity_army_data, "_source_checkout_has_unreleased_changes", lambda: False
     )
@@ -12,9 +13,21 @@ def test_display_version_uses_release_version_for_a_clean_checkout(monkeypatch) 
 
 
 def test_display_version_marks_an_unreleased_checkout_as_development(monkeypatch) -> None:
-    monkeypatch.setattr(infinity_army_data, "_source_checkout_has_unreleased_changes", lambda: True)
+    monkeypatch.delenv("INFINITY_DB_DISPLAY_VERSION", raising=False)
+    monkeypatch.setattr(
+        infinity_army_data, "_source_checkout_has_unreleased_changes", lambda: True
+    )
 
     assert infinity_army_data._display_version() == f"{infinity_army_data.__version__}+dev"
+
+
+def test_display_version_prefers_explicit_runtime_value(monkeypatch) -> None:
+    monkeypatch.setenv("INFINITY_DB_DISPLAY_VERSION", "custom-display-version")
+    monkeypatch.setattr(
+        infinity_army_data, "_source_checkout_has_unreleased_changes", lambda: False
+    )
+
+    assert infinity_army_data._display_version() == "custom-display-version"
 
 
 def test_commits_after_the_version_tag_are_unreleased(monkeypatch, tmp_path) -> None:

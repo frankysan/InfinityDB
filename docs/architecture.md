@@ -130,6 +130,7 @@ config/                      = maintained project/domain knowledge
 raw source data              = immutable external input
 data/manifests/snapshots/    = generated acquisition provenance
 data/curated/rules/          = source-controlled human-reviewed rules data
+data/curated/identities/     = source-controlled reviewed identity relationships
 data/curated/snapshot-notes/ = source-controlled human snapshot annotations
 data/generated/              = reproducible database/JSON build output
 ```
@@ -164,6 +165,27 @@ investigative normalization remain usable.
 of the code/config split. It owns maintained logical-identity exceptions for
 source unit, army-list, skill, equipment, and weapon IDs plus identity-name
 aliases. Generic matching and duplicate-detection algorithms remain code.
+Catalog alias-group references are authored as either positive numeric source IDs
+or readable source slugs. The checked-in Skill, Equipment, and Weapon groups use
+source-label slugs wherever those labels are unambiguous. A slug is resolved from
+the complete source metadata catalog, supplemented by catalog rows actually used by
+the snapshot, before application grouping; this allows maintained groups to name
+valid source identities even when one variant is unused in the current Army lists.
+Per-catalog `slug_aliases` may correct a known upstream spelling only at this
+authoring/resolution boundary (for example `tinbot-neourocinetics` ->
+`tinbot-neurocinetics`); raw source labels remain unchanged for provenance. The
+identity policy therefore does not depend on the later application-domain slug
+registry. A group that is wholly absent from the available source catalog is inert;
+once any group member is present, unknown or ambiguous authored slugs fail
+closed. Numeric references remain supported
+where source identity or disambiguation matters. Curated rules `armyLinks` now apply
+the same authoring principle at the later composition boundary: Skill, Equipment, and
+Weapon links may use application-domain slugs, while legacy/source numeric references
+remain valid. Unlike identity-manifest source-label slugs, these rules slugs deliberately
+refer to the already-grouped application identity and are matched when Army and rules
+data are composed at read time. This numeric-or-slug reference shape is the preferred
+direction for other maintained/curated JSON references when their owning layer has
+enough context to resolve them deterministically.
 Current InfinityDB builds derive unit `main_army_id` from the imported Army
 metadata faction-parent relationship, with maintained canonical-faction
 overrides taking precedence. The former `xx01` arithmetic remains only as a
@@ -177,9 +199,12 @@ derivation is explicitly suppressed for that source identity. ID `901` remains
 the metadata grouping identity for Non-Aligned armies. The former legacy
 `1` -> `901` ownership override remains removed. Separately,
 `data/curated/identities/army-display.json` records the reviewed display
-relationship from canonical source identity `1` to display army `901`;
-normalization derives `display_army_id` from that curated fact without changing
-source membership, availability, or playability semantics.
+relationship from canonical source identity `1` to the source faction slug
+`non-aligned-armies`; normalization resolves that slug against the owning Army
+faction metadata to display army `901` without changing source membership,
+availability, or playability semantics. Canonical source identity `1` remains
+numeric in this file because it is provenance identity with no authoritative
+source-faction slug to own an equivalent readable reference.
 
 The authored identity configuration is a build input, not a deployed runtime
 file. InfinityDB normalization validates it, supplies normalization-time
@@ -199,13 +224,16 @@ normalized or SQLite snapshot.
 Weapon catalog policy now follows the same code/config ownership rule without
 becoming deployed runtime state. `config/catalogs/weapon-categories.json` owns
 the ordered weapon-family taxonomy, regular-expression patterns, fallback
-category, and explicit weapon-ID category decisions.
+category, and explicit weapon-reference category decisions.
 `config/catalogs/weapon-overrides.json` owns corrections for incomplete or
 inconsistent Army weapon metadata, such as missing deployable profiles, known
 source naming anomalies, and exact metadata-profile rows that should not become
-display weapon modes. Normalization validates and consumes both files; those
-corrections are applied before normalized metadata rows are materialized, while
-the original Army metadata envelope remains preserved for source provenance.
+display weapon modes. Both maintained formats accept a positive numeric source
+ID or a source-label slug, with readable slugs preferred. Normalization resolves
+those references against the uncorrected source weapon catalog before applying
+name/profile corrections; unknown or ambiguous slugs fail in strict resolver
+use, while partial synthetic inputs may leave absent maintained references inert.
+The original Army metadata envelope remains preserved for source provenance.
 Repository/runtime queries therefore do not read the working-tree configuration.
 Classification mechanics,
 validation, and fallback behavior remain Python code. Actual game-rule facts
@@ -247,8 +275,8 @@ Infinity Army presents one concrete Army list at a time, while InfinityDB presen
 the whole game and must preserve cross-Army identities and relationships alongside
 those list-local occurrences. A source Army list is therefore an occurrence/context
 container, not the complete application ontology for faction identity or unit
-membership. Database schema version 15 materializes an explicit application Army
-identity/hierarchy from reviewed Army aliases plus the overlapping
+membership. The explicit application Army identity/hierarchy was introduced in
+database schema version 15 from reviewed Army aliases plus the overlapping
 `army_lists`/`metadata_factions` evidence. That derived layer owns the canonical
 application name/slug, role/playability/grouping, source-ID provenance mapping,
 and explicit reinforcement-parent relationships without replacing either source
@@ -492,18 +520,123 @@ version 13 added the corresponding canonical-loadout layer beside the lossless
 source tables. Build-time materialization scopes reusable payloads to an existing
 `logical_unit` and keeps source/Army context on one-to-one occurrence relations:
 profile AVA/logo and loadout points/SWC remain contextual, while source-local
-includes/peripherals remain in their lossless source relationships pending their
-own identity audit.
+includes/peripherals remain in their lossless source relationships while
+Milestone 2B applies the completed relationship/Peripheral audits to choose their
+canonical relationship and identity boundaries.
 
 Unit-detail repository reads now consume both canonical payload layers. Source
-profile/loadout tables remain available for provenance, deferred relationships,
-validation, and source-oriented repository paths such as catalog reverse
-lookups. Compatibility revision 19 also requires unit-oriented indexes on both
-canonical occurrence tables so this read-path split does not regress unit-detail
+profile/loadout tables remain available for provenance, validation, and deferred
+source-local/contextual relationships. Normal search/filter/catalog reverse reads
+now expand canonical payload occurrences rather than traversing those legacy
+payload tables. Compatibility revision 19 also requires unit-oriented indexes on
+both canonical occurrence tables so this read-path split does not regress unit-detail
 query behavior. The physical removal of source-only tables from `infinity.db`
 remains a later design step after canonical unit, relationship, and catalog
 coverage is complete; `infinity.raw.db` is the intended long-term home for that
 lossless source representation.
+
+### General application-domain identifier contract
+
+Every InfinityDB application domain should expose two interchangeable identity forms
+when a stable domain-local slug can be resolved: the numeric application ID and the
+canonical slug. Numeric IDs remain valid compatibility and implementation keys; slugs
+are the preferred human-facing form. Application-facing repository/API calls, web
+routes, filters, cross-links, and maintained references that identify a domain object
+should accept either form rather than creating slug-only or numeric-only interfaces.
+Generated URLs, browser state, API references, and human-authored configuration should
+prefer the slug when it is resolved and unambiguous.
+
+This is a forward-compatible domain rule, not a one-time route migration convention.
+When adding a new application domain, establish its canonical numeric identity and
+domain-local slug resolver together, then reuse that resolver across all consumers. Do
+not create a second ad-hoc slug scheme in a route, filter, JavaScript component, or
+curated loader. If a slug is unavailable, collides, or cannot be resolved
+deterministically, retain the numeric form and fail closed rather than guessing. Tests
+for a new domain should demonstrate that numeric and slug references resolve to the same
+application identity. Source-only/provenance layers may continue to use source-native
+identifiers where application identity is intentionally not in scope.
+
+### Current: domain-unique application slug layer
+
+Source identity, internal application identity, and public navigation identity are
+separate layers. Corvus Belli numeric IDs remain source/provenance references, and
+current numeric application IDs remain implementation keys while route migration is
+in progress. InfinityDB-curated concepts use stable typed IDs such as `skill:doctor`
+or `rule:peripheral-type:servant`; the prefix identifies the domain and is not a claim
+that one slug must be globally unique across unrelated domains.
+
+Schema version 17 / compatibility revision 25 introduces the derived
+`application_domain_slugs` registry for the current application-owned `armies`,
+`units`, `skills`, `equipment`, and `weapons` domains. Each row retains the numeric
+application key, a deterministic normalized candidate, an optional resolved slug,
+and a `resolved`, `collision`, or `unavailable` status. Slugs are unique only within
+their domain. Candidate generation lowercases, removes Unicode combining marks,
+limits output to ASCII letters/numbers with single hyphen separators, and never
+invents order-dependent numeric suffixes. Duplicate candidates therefore fail
+closed as explicit collision records instead of silently becoming `foo-2`. Because
+these domains retain numeric compatibility routes, a digit-only candidate is also
+recorded as `unavailable`: the candidate remains visible for diagnostics, but it never
+receives a routable `slug` that could shadow the numeric namespace.
+
+The registry is the application identity foundation for a staged public-route
+migration. Existing Army/unit source/display slugs remain source/context data; they
+may seed application candidates but are not automatically promoted to permanent
+public identifiers. Repository resolution is centralized at the application-domain
+boundary. One shared resolver accepts either a source/application numeric reference or a
+domain-local slug and returns the current application identity for Armies, Units,
+Skills, Equipment, and Weapons. Domain-specific helpers and detail reads reuse that resolver rather than asking
+web routes or other consumers to translate slugs first. Slug lookup itself still resolves
+only `resolved` registry entries.
+
+Armies, Skills, Equipment, Weapons, and logical Units are additive public consumers of
+the registry. Catalog list/detail API payloads expose a resolved application `slug`; Unit
+and Army payloads instead expose a distinct `public_slug` so their pre-existing
+source/context `slug` fields keep their current meaning. Browser links and Unit-explorer
+filter state prefer application slugs while existing numeric references remain valid.
+Catalog-list payloads expose each logical Skill/Equipment/Weapon item's materialized
+`source_ids`, allowing the browser to recognize accepted non-representative legacy
+numeric filters and canonicalize them to the same preferred slug. Skill, Equipment,
+Weapon, and Unit detail web/API routes accept either form; Army
+selection through the Unit explorer/API accepts either a source/application numeric ID
+or the resolved Army public slug and normalizes both to the application Army identity.
+Digit-only candidates are rejected by the registry itself and therefore have no public
+slug to emit; consumers do not perform their own numeric-shadow suppression. Nested Unit
+payload references to Equipment
+and Weapons expose the canonical application slug after resolving any source-variant ID
+through application catalog provenance; Unit references embedded in catalog, Trait, and
+Skill Modifier payloads expose `public_slug` after source/logical Unit identity resolution.
+Cross-domain API references follow the same additive rule: existing numeric fields stay
+unchanged, while canonical application references gain a readable companion when one is
+routable. Scalar Army fields use `main_army_slug` / `display_army_slug`; structured Army
+objects retain source/context `slug` and add `public_slug`; Trait usage variants add
+`item_slug`; and Skill Modifier rows add `skill_slug`. Source/provenance-only IDs are not
+relabeled as canonical slugs.
+This migration does not redirect numeric routes or declare derived slugs permanently
+frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
+behavior remain required before numeric routes are retired or redirected.
+
+Traits share the public slug grammar and fail-closed collision policy but intentionally
+do not duplicate their canonical identity in `application_domain_slugs`. Curated Trait
+identity is already owned by `rules.db` as a stable typed ID of the form `trait:<slug>`;
+that single slug segment is therefore the canonical public route projection and remains
+stable when the curated display name changes. Trait list/detail payloads expose it
+explicitly as `slug`. Raw Army Traits without a curated record retain only a provisional
+source-derived identity: the Army Trait catalog assigns their slug across the complete
+raw Trait set with the shared collision checker, and cross-links are emitted only when
+that catalog actually assigned the label a slug. Application code must not independently
+normalize an arbitrary Trait label into a link, because that would bypass collision
+resolution and create a parallel identity scheme.
+
+The current reviewed 2026-09-18 snapshot resolves all initial registry candidates:
+57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons
+(1,042 identities total), with no collisions or unavailable candidates. These counts
+are snapshot evidence rather than permanent invariants.
+
+The Peripheral rules/identity work must use this project-wide identity architecture
+rather than introduce a one-off slug scheme. It must not infer a canonical
+`peripheral:*` or `peripheral-profile:*` identity merely from an Army label; those
+domains become valid only after the reviewed Army-definition-to-entity mapping proves
+the corresponding entity/profile boundary.
 
 ## Snapshot acquisition and provenance
 
@@ -697,7 +830,9 @@ clean checkout from silently producing a symbol-less local deployment image.
 | Layer | Responsibility | Extension point |
 | --- | --- | --- |
 | `infinity_army_data` | Interpret and validate source data | Source-format changes and additional normalization |
+| `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
 | `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
+| `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
 | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
 | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
 | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
@@ -802,14 +937,78 @@ Unit-list and general-profile surfaces may use the unit's derived display-factio
 colors as accents. Keep those accents within the shared token and gradient
 system so catalog-specific styling remains legible and consistent.
 
-Browser preferences are stored locally. The Settings sidebar section provides
-distance units, a default-off Developer mode, and a developer-only cache-bypass
-control; on compact screens it becomes a top-bar menu beside Navigation. New
-sidebar or top-bar menus should use this same inline-sidebar and
-compact-dropdown pattern. Developer mode sets `data-developer-mode` on the
-document root; use `.developer-only` for inline technical details and
-`.id-column` for table columns so they remain hidden in the player-facing view
-by default.
+Browser preferences are stored locally. User-selected distance-unit, optional-unit,
+Developer-mode, and cache-bypass values are stored in browser `sessionStorage`; values
+loaded from persistent cookies are mirrored there before use. Disabling persistent settings
+therefore does not reset them during the current tab/session. When the user enables
+**Remember settings** and accepts the cookie prompt, the same values are mirrored to
+one-year SameSite cookies for reuse in later browser sessions; disabling that option
+removes the persistent cookies without clearing the current session values. The Settings
+sidebar exposes those controls; on compact screens it becomes a top-bar menu beside
+Navigation. New sidebar or top-bar menus should use this same inline-sidebar and
+compact-dropdown pattern. Developer mode sets `data-developer-mode` on the document
+root; use `.developer-only` for inline technical details and `.id-column` for table
+columns so they remain hidden in the player-facing view by default.
+
+### Design direction: browser UX and responsibility boundaries
+
+Browser presentation should optimize first for fast lookup, comparison, and scanning
+of dense game data. Clarity, hierarchy, legibility, and predictable interaction take
+priority over decorative complexity, while avoiding an unnecessarily cramped
+interface. Navigation, terminology, controls, tables, cards, badges, and feedback
+states should reuse shared patterns rather than creating page-local visual languages.
+Secondary provenance and developer information should use progressive disclosure so
+technical depth remains available without dominating the normal player view.
+
+Responsive behavior is a content-priority decision rather than simple shrinking.
+Phone, compact/tablet, and desktop layouts should deliberately adapt navigation,
+filters, tables/statlines, detail groups, and multi-column data. Accessibility is part
+of the design contract: semantic HTML, keyboard operation, visible focus, sufficient
+contrast, non-color-only meaning, usable touch targets, reduced-motion behavior where
+motion exists, and useful screen-reader labels/status announcements are expected.
+Faction/army accents and future theme colors must remain subordinate to semantic
+meaning so domain state remains understandable regardless of theme, color perception,
+or asset availability.
+
+Preserve the current lightweight browser-native architecture unless a concrete
+requirement justifies changing it. Native ES modules and the absence of a frontend
+build pipeline are deliberate current constraints, not gaps to solve by default.
+
+Python owns imported-data/domain semantics, identity and rules interpretation,
+database access/querying, request validation, stable API contracts, application/version
+metadata, and HTTP concerns. Domain meaning that would otherwise require JavaScript to
+infer IDs, names, source quirks, or rules semantics belongs in backend/API fields.
+Browser code owns information presentation, interaction state, responsive/accessibility
+behavior, client-side display formatting, theme/UI preferences, and composition of
+semantic API data into views. API payloads should expose semantic roles, states,
+identities, labels, and relationships rather than CSS classes, literal colors, layout
+instructions, or page-specific markup.
+
+The same-origin deployment model remains appropriate. As the web layer is refactored,
+separate API handling, page-shell/static delivery, and top-level request dispatch more
+clearly on the Python side, and organize browser code around explicit API transport,
+preferences/theme state, reusable view/components, and page modules. Browser JSON API
+access continues through `api.js`; new page scripts should not accumulate independent
+transport or domain-interpretation logic.
+
+### Design direction: theming
+
+Themes use stable semantic identifiers, initially `light` and `dark`, and are implemented
+through semantic theme tokens separated from theme-neutral layout/component rules.
+Components consume roles such as surfaces, text, borders, actions, focus, status,
+shadows, and data emphasis rather than hard-coded light-theme colors. Faction/army
+colors remain domain accent tokens layered onto the selected theme with contrast-safe
+treatments in each supported theme.
+
+An explicit user theme selection overrides any project/operating-system default and is
+stored through the existing Settings preference contract; theming must not introduce a
+second persistence mechanism. Resolve the selected theme before first meaningful paint
+to avoid navigation/reload flashes. Browser metadata and `color-scheme` behavior should
+track the selected theme so form controls, scrollbars, and other user-agent UI remain
+coherent. Project-owned graphics should use the same semantic token contract where
+practical instead of unnecessary light/dark asset forks. Supported themes must preserve
+contrast and distinguishability for status/range colors, links, focus indicators, muted
+text, tables, selected rows, dialogs, menus, and faction accents.
 
 ## Required Army API metadata
 
@@ -828,17 +1027,19 @@ the InfinityDB-generated acquisition provenance written under
 ## SQLite persistence
 
 SQLite is the initial backend because it runs locally without a separate
-service. Schema definitions are separate from ingestion code. The current
-schema has a schema version of 14 and database compatibility revision of 22; it
-rejects incompatible databases with a rebuild instruction. The importer builds
+service. Schema definitions are separate from ingestion code. The current Army
+application database has schema version 17 and database compatibility revision
+25; it rejects incompatible databases with a rebuild
+instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of
 persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 
 Rules-reference data uses a distinct SQLite database with its own schema,
-compatibility/versioning, importer, and atomic replacement policy. This database
-is not an extension of `infinity.db` or `infinity.raw.db`.
+compatibility/versioning, importer, and atomic replacement policy. The current
+`rules.db` schema and compatibility versions are both 2. This database is not an
+extension of `infinity.db` or `infinity.raw.db`.
 
 The source-controlled `data/curated/rules/` JSON layer is the only
 application-facing representation of facts researched from PDFs or the wiki.
@@ -870,8 +1071,8 @@ after a deployment or data refresh.
 
 ### `GET /api/version`
 
-Returns `{ "version": "0.6.1", "snapshot_revision": "..." }`. The browser uses
-it to detect application or imported-snapshot changes.
+Returns `{ "version": "<application version>", "snapshot_revision": "..." }`. The
+browser uses it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`
 
@@ -895,8 +1096,16 @@ player-facing count.
 
 ### `GET /api/units?army_id=101&search=fusilier&limit=50&offset=0`
 
-Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0 }`, where each
-item has `id`, `name`, `main_army_id`, `main_faction`, `display_army_id`,
+Returns `{ "items": [...], "total": 0, "limit": 50, "offset": 0,
+"availability": {...} }`, where `total` is the number of unique logical units visible
+under the currently enabled optional-unit modes. `availability.shown` matches `total`;
+`availability.available` counts the same Army/search/catalog query with every valid
+availability path considered; and `availability.filtered` is their unique-unit
+difference. `availability.categories` reports `shown`/`filtered` explanatory counts for
+`standard`, `mercs`, `specops`, `teamops`, and `reinforcement`. Category figures are
+derived from non-redundant minimal availability requirements and may overlap, so they
+are explanatory rather than additive. Each item has `id`, `name`, `main_army_id`,
+`main_faction`, `display_army_id`,
 `display_faction`, `army_ids`, and `armies` (`id` and `name` per currently
 visible Army availability).
 `main_faction` is the source-derived main/grouping context resolved through the
@@ -947,7 +1156,11 @@ total above illustrates the response shape.
   an empty list.
 - Optional `skill_id`, `equipment_id`, and `weapon_id` parameters narrow
   results to units with matching catalog items in a profile, loadout, or unit
-  option.
+  option. Each accepts the current application-domain slug or a legacy numeric
+  source/application ID. Filtering resolves the reference to the logical catalog
+  identity and matches every materialized source member of that identity, so grouped
+  items such as TinBot behave as one filter. The browser explorer writes slugs when
+  available and keeps numeric values only as compatibility fallbacks.
 - Unknown resources return 404; unsupported methods return 405; database read
   failures return 503 without exposing internal exception details.
 
@@ -978,8 +1191,10 @@ page consumes this endpoint.
 equivalent source labels where appropriate and include an ID, display name, and
 reference link when the metadata snapshot provides one.
 
-`GET /api/skills/{id}`, `GET /api/equipment/{id}`, and
-`GET /api/weapons/{id}` return one catalog item and its distinct usage variants.
+`GET /api/skills/{id-or-slug}`, `GET /api/equipment/{id-or-slug}`, and
+`GET /api/weapons/{id-or-slug}` return one catalog item and its distinct usage variants.
+Skill, Equipment, and Weapon slugs are resolved through the application-domain slug
+registry; existing numeric IDs remain accepted for compatibility.
 Each variant includes the relevant extras and logical units that use it. Weapon
 details additionally include metadata weapon profiles, such as ammunition,
 traits, and range data, when present in the supplied metadata snapshot.

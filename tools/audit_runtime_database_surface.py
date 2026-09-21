@@ -92,7 +92,12 @@ _register(
     reason="Current application identity/payload or unambiguous lookup catalog.",
 )
 _register(
-    ["application_armies", "application_army_reinforcement_parents", "application_catalog_items"],
+    [
+        "application_armies",
+        "application_army_reinforcement_parents",
+        "application_catalog_items",
+        "application_domain_slugs",
+    ],
     CANONICAL,
     reason=(
         "Materialized InfinityDB application identity/hierarchy or catalog identity "
@@ -252,9 +257,12 @@ TABLE_POLICY["units"] = _policy(
 )
 
 # Database methods called directly by the web layer or the player-facing catalog
-# helpers. validate() is intentionally excluded from the 0.6.1 serving surface.
+# helpers. validate() is intentionally excluded from the audited serving surface.
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
+    "application_catalog_id",
+    "application_domain_id",
+    "application_slug",
     "snapshot_downloaded_on",
     "list_armies",
     "list_skill_extras",
@@ -271,6 +279,10 @@ PROBED_DIRECT_METHODS = {
 }
 RUNTIME_MODULES = (
     "src/infinity_db/web/app.py",
+    "src/infinity_db/army_slugs.py",
+    "src/infinity_db/catalog_slugs.py",
+    "src/infinity_db/domain_references.py",
+    "src/infinity_db/unit_slugs.py",
     "src/infinity_db/skill_catalog.py",
     "src/infinity_db/trait_catalog.py",
 )
@@ -284,6 +296,8 @@ def _database_calls(path: Path) -> set[str]:
             continue
         owner = node.func.value
         if isinstance(owner, ast.Attribute) and owner.attr == "database":
+            calls.add(node.func.attr)
+        elif isinstance(owner, ast.Name) and owner.id == "database":
             calls.add(node.func.attr)
     return calls
 
@@ -360,6 +374,9 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     if playable is None:
         raise RuntimeSurfaceAuditError("Runtime audit needs at least one playable army")
     skill = _first(skills, "skill")
+    skill_slug = preparation.application_slug("skills", int(skill["id"]))
+    if skill_slug is None:
+        raise RuntimeSurfaceAuditError("Runtime audit needs at least one resolved Skill slug")
     equipment_item = _first(equipment, "equipment item")
     weapon = _first(weapons, "weapon")
     trait = _first(traits, "weapon trait")
@@ -370,8 +387,21 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     return [
         ("snapshot-metadata", lambda db: db.snapshot_downloaded_on()),
         ("armies", lambda db: db.list_armies()),
+        ("unit-application-id", lambda db: db.application_domain_id("units", unit_id)),
         ("skill-extras", lambda db: db.list_skill_extras()),
         ("skills-list", lambda db: db.list_catalog_items("skills")),
+        (
+            "skill-application-id",
+            lambda db: db.application_catalog_id("skills", int(skill["id"])),
+        ),
+        (
+            "skill-slug-for-id",
+            lambda db: db.application_slug("skills", int(skill["id"])),
+        ),
+        (
+            "skill-id-for-slug",
+            lambda db: db.application_id_for_slug("skills", skill_slug),
+        ),
         ("equipment-list", lambda db: db.list_catalog_items("equipment")),
         ("weapons-list", lambda db: db.list_catalog_items("weapons")),
         ("skill-detail", lambda db: db.get_skill(int(skill["id"]))),
@@ -583,7 +613,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "Runtime surface: "
         f"{summary['surfaceCount']} probes | {summary['runtimeTableCount']} tables | "
         f"{summary['runtimeFieldCount']} fields | "
-        f"{summary['tableWithOpenIssueCount']} tables need 0.6.1 follow-up"
+        f"{summary['tableWithOpenIssueCount']} tables need follow-up"
     )
     return 0
 

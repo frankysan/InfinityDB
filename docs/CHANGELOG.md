@@ -5,6 +5,48 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+## [0.6.2] - 2026-09-21
+
+### Added
+
+- Add deterministic domain-local public slugs for Armies, logical Units, Skills,
+  Equipment, and Weapons. Numeric identifiers remain accepted for compatibility and
+  provenance, while ambiguous or colliding readable identifiers fail closed.
+- Add a loopback-only local deployment test path and explicitly separate server-rebuild
+  deployments from transferred, prevalidated database/asset deployments.
+
+### Changed
+
+- Use readable public slugs throughout browser links, catalog/detail APIs, Unit explorer
+  filters, maintained catalog identity configuration, and curated Army links where a
+  deterministic application identity exists. Stable curated Trait identities and
+  source/provenance-only numeric identifiers are unchanged.
+- Expose readable slug companions on canonical cross-domain API references while
+  retaining the existing numeric fields for compatibility.
+- Show the Unit explorer's currently visible unique-unit count alongside the total
+  available under the same filters, with an expandable availability breakdown.
+
+### Upgrade notes
+
+- Rebuild generated Army databases before deploying 0.6.2. Schema 17 / compatibility
+  revision 25 is intentionally incompatible with older generated `infinity.db` files;
+  there is no in-place database migration.
+
+### Fixed
+
+- Resolve grouped Skill, Equipment, and Weapon filters across all source variants,
+  including legacy numeric filter URLs, and canonicalize accepted references to their
+  readable public slug when available.
+- Preserve current-tab settings when persistent settings are disabled, include
+  Team Operations-only units on Skill detail pages when that optional category is
+  enabled, and keep merged Skill source variants on their application public slug.
+- Resolve maintained catalog identity slugs against the complete source metadata
+  catalog, including represented-but-currently-unused source entries, and preserve the
+  reviewed TinBot Neurocinetics spelling while retaining the upstream typo only as raw
+  provenance.
+- Preserve the `+dev` browser display version in containerized development/test
+  deployments without embedding Git metadata in the image.
+
 ## [0.6.1] - 2026-09-20
 
 ### Changed

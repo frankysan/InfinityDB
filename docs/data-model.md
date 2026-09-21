@@ -51,14 +51,28 @@ proved that the singular value is the correct game-wide fact.
 - Profile group, profile and loadout option IDs are local to their army/unit
   hierarchy and use composite keys in normalized data.
 - Skills, weapons, equipment, ammunition, characteristics, troop types,
-  categories and extras use stable global lookup IDs.
+  categories and extras use source-native numeric lookup IDs within their source
+  catalogs. Those IDs remain source references; they are not the long-term public
+  identity contract for InfinityDB resources.
 - Skill, equipment, and weapon occurrences retain their owning profile,
   loadout, or unit option, display order, quantity, and linked extras. This
   supports both unit details and reverse lookup from the rules-reference
   catalogs.
 - Explicit source-equivalent unit, army, skill, equipment, and weapon IDs are
   maintained in validated `config/identity/source-identities.json`
-  configuration. That policy also owns reinforcement-label prefixes used by
+  configuration. Catalog alias groups accept either positive numeric source IDs
+  or source-label slugs in `canonical_id` / `source_ids`; the maintained Skill,
+  Equipment, and Weapon groups currently use readable source-label slugs. Slug
+  references are resolved against the complete source metadata catalog plus any
+  catalog rows used by the current snapshot before application grouping. This lets
+  maintained groups refer to valid but currently unused source variants. Known
+  upstream spelling mistakes may be mapped with per-catalog `slug_aliases`; those
+  aliases affect maintained reference resolution only and do not rewrite raw source
+  provenance. A wholly absent group is ignored for that snapshot; if any member is
+  present, unknown or ambiguous slug references fail validation. These authoring
+  slugs are source references, not the later public `application_domain_slugs`
+  identities. That
+  policy also owns reinforcement-label prefixes used by
   unit/profile identity normalization and backend profile display names. Generic
   duplicate/name matching remains implementation
   behavior rather than authored alias data; normalization now persists the
@@ -66,11 +80,11 @@ proved that the singular value is the correct game-wide fact.
 - Weapon-family classification policy is maintained in validated
   `config/catalogs/weapon-categories.json`, while known Army weapon metadata
   corrections are maintained separately in `config/catalogs/weapon-overrides.json`.
-  Those corrections include source name/profile fixes and exact metadata weapon
-  rows that should not become display profiles. Normalization applies the authored
-  build inputs before normalized catalog/metadata rows are materialized, while the
-  original Army metadata envelope remains unchanged for provenance. The frontend
-  database does not need the config files at runtime.
+  Maintained `weapon_id` references accept positive numeric source IDs or source-label
+  slugs and currently prefer slugs. Normalization resolves them against the source
+  weapon catalog before applying source name/profile fixes and exact metadata-row
+  suppressions. Numeric authoring remains valid for ambiguity/provenance, and the
+  frontend database does not need these config files at runtime.
 - Current InfinityDB builds derive a unit's application `main_army_id` from
   the imported Army metadata parent for its canonical faction. Maintained
   canonical-faction overrides take precedence when explicitly configured. The
@@ -81,7 +95,9 @@ proved that the singular value is the correct game-wide fact.
   Non-Aligned Armies grouping identity. Presentation is modeled separately:
   normalization derives `display_army_id` from reviewed relationships in
   `data/curated/identities/army-display.json`; the current curated relationship
-  displays canonical-1 units with the 901 grouping identity. `main_army_id` is
+  keeps provenance-only canonical identity `1` numeric but names the display target
+  by the source slug `non-aligned-armies`, which resolves to grouping identity 901.
+  `main_army_id` is
   therefore a source-derived grouping/application field, not authority for a
   unit's complete game-wide membership, availability, or ownership.
 - InfinityDB normalization pins the exact validated identity configuration and
@@ -933,9 +949,10 @@ public profile object shape, ordering, AVA handling, display-name normalization,
 and merged logical-source behavior are intentionally unchanged.
 
 The lossless `profiles` and nested `profile_*` source tables remain in the
-frontend database for provenance, validation, contextual relationships that have
-not yet been canonicalized, and repository paths such as catalog reverse
-lookups. `get_unit()` no longer uses those source payload rows to assemble its
+frontend database for provenance, validation, and contextual relationships that
+have not yet been canonicalized. Normal catalog reverse usage now expands the
+canonical profile/loadout occurrence layers instead. `get_unit()` no longer uses
+those source payload rows to assemble its
 profile objects. This is a staged read-path migration rather than permission to
 remove the source representation.
 
@@ -1015,8 +1032,10 @@ still differ after resolving each ID to the referenced peripheral definition.
 The 104 collapsed cases are therefore local-identity/provenance differences,
 not evidence of different peripheral names or roles. The remaining seven all
 involve the same `TURTLEMEK` name with an Army-context difference in the
-peripheral definition's `mercs` value. Canonical peripheral identity remains a
-later relationship task; the audit resolution is diagnostic only.
+peripheral definition's `mercs` value. This was a diagnostic comparison, not an
+identity rule. The later dedicated Peripheral audit separates `mercs` as source
+context and treats name only as a grouping candidate pending reviewed entity
+mapping.
 
 ##### Loadout fields
 
@@ -1410,7 +1429,7 @@ The audit establishes the following design constraints for the next step:
 
 ### Canonical logical-unit payload/context design
 
-**Current materialization.** Schema version 14 materializes one
+**Current materialization.** Introduced in schema version 14, InfinityDB materializes one
 application-owned row per existing logical unit without copying the complete
 source `units` row. The canonical row is representative-backed, while source
 labels and player-facing source deltas remain explicit context.
@@ -1513,12 +1532,11 @@ fields still equal the representative source and that the alias, note, and
 #### Next implementation targets
 
 Canonical unit/profile/loadout payloads, their context mappings, application Army
-identity/hierarchy, application catalog identity, and the current runtime read
-migrations are complete for the 0.6.1 serving surface. The representative runtime
-benchmark is also complete; the remaining release-gate work is final local/hosted
-acceptance and release execution rather than unresolved runtime semantics. Broader
-relationship structures remain post-0.6.1 unless a correctness dependency is
-identified.
+identity/hierarchy, application catalog identity, and the audited runtime read
+migrations were completed and released in 0.6.1 on 2026-09-20. The representative
+runtime benchmark, local/hosted acceptance, release tag, deployment, and deployed
+update verification are complete. Milestone 2B now covers broader relationships,
+source-only structures, the eventual `infinity.raw.db` split, and 1.0 completeness.
 
 ### 0.6.1 runtime benchmark evidence
 
@@ -1614,7 +1632,7 @@ membership.
 In semantic-provenance terms, the source list/metadata projections and their
 membership/occurrence relationships are source-native evidence; current
 role/playability and `main_army_id` are source-derived InfinityDB semantics; the
-planned canonical application army identity/hierarchy is an InfinityDB
+materialized canonical application army identity/hierarchy is an InfinityDB
 abstraction; and display-army selection remains a presentation convenience.
 Those categories must remain visible even when several concepts share IDs or
 names.
@@ -1658,8 +1676,8 @@ canonical/origin context and can point to identities without an Army list (IDs 1
 and 903 in this snapshot). It is not sufficient evidence for playability, Army
 membership, or application ownership.
 
-Schema version 15 / compatibility revision 23 materializes that reviewed
-application Army abstraction without rewriting either source projection:
+The reviewed application Army abstraction was introduced in schema version 15 /
+compatibility revision 23 without rewriting either source projection:
 
 ```text
 application_armies
@@ -1698,7 +1716,7 @@ the application layer. `army_units` still supplies concrete list availability an
 legacy `army_lists.kind` source-shape field remains exposed for compatibility and
 as a reinforcement fallback where an explicit parent relationship is unavailable.
 
-### 1. Relationships
+### Relationship audit after entity canonicalization
 
 Re-evaluate includes, peripherals, dependencies, relations, Fireteams, and
 similar structures after the entities they reference have stable canonical
@@ -1714,7 +1732,33 @@ The audit must distinguish:
 A relationship is not automatically redundant merely because both endpoint
 entities are already visible in the UI.
 
-### 3. Application catalog identity and metadata context
+#### Current Milestone 2B relationship evidence
+
+The read-only audits against the 2026-09-18 Army snapshot establish a clean
+starting point without yet changing runtime schema. Include targets resolve
+completely through the canonical loadout/profile occurrence layer: 2/2 profile
+includes, 949/949 loadout includes, and 35/35 shared unit-option includes resolve
+with no missing targets, raw fallbacks, cross-logical-unit targets, or ambiguous
+shared targets. The resolved profile/loadout includes point to 1 and 101 distinct
+canonical target payloads respectively. This is sufficient evidence to design
+canonical include relationships without inventing target identity.
+
+Peripherals require a separate boundary. The same snapshot has 279 army-local
+definitions / 56 names and 818 resolved loadout attachments, with no profile
+attachments and no definition-only rows. All 279 definitions are referenced by at
+least one loadout attachment. Forty-one names span multiple raw identities and
+three names vary in source `mercs` context. Most importantly, 22 repeated
+canonical loadout payloads have different semantic Peripheral attachment
+signatures (32 differ when representation/context fields are included). Therefore
+Peripheral attachment cannot yet be moved blindly onto the canonical loadout
+payload, and name remains only a diagnostic grouping candidate until the separate
+reviewed source-to-Peripheral identity/profile mapping is defined.
+
+Controller eligibility is not represented by these Army relationships and must
+enter through reviewed curated rules data. The current design for that rules side
+is documented in `docs/peripheral-curated-data-design.md`.
+
+### Application catalog identity and metadata context
 
 `application_catalog_items` and `application_catalog_sources` are InfinityDB
 abstractions. Infinity Army does not provide one upstream object that corresponds
@@ -1727,8 +1771,15 @@ The materializer currently uses these source inputs:
 - `metadata_skills`, `metadata_equipment`, and `metadata_weapons` enrichment;
 - reviewed catalog alias groups from `config/identity/source-identities.json`.
 
-For each public catalog, explicit reviewed alias groups take precedence. Remaining
-source rows are grouped only by the existing deterministic label rules used by the
+For each public catalog, explicit reviewed alias groups take precedence. The
+authored `canonical_id` and `source_ids` entries may mix positive integer source
+IDs with lowercase domain-local slugs derived from source item labels. Slug
+resolution uses the complete metadata catalog, supplemented by used source rows,
+before grouping; an unknown slug or a slug owned by multiple source IDs is a build
+error rather than an implicit guess. Per-catalog `slug_aliases` can map a known
+upstream misspelling onto the reviewed authored spelling without mutating the raw
+source label retained for provenance.
+Remaining source rows are grouped only by the existing deterministic label rules used by the
 application: numeric skill variants share the label with the numeric component
 removed, while Equipment/Weapon labels additionally allow the text before a
 colon to define the shared identity. The configured canonical ID is retained for
@@ -1748,9 +1799,93 @@ The abstraction is deliberately limited to Skills, Equipment, and Weapons used
 by the current runtime. It does not claim that two source records are globally
 identical outside the documented grouping rule, does not canonicalize curated
 rules knowledge, and does not turn source metadata modes into one invariant fact.
-Numeric application IDs remain implementation keys; the planned public slug
-routing layer is responsible for hiding them from ordinary user-facing URLs and
-API lookup.
+
+#### Dual application identifier contract
+
+Application domains with a stable resolved slug use a dual identifier contract: the
+numeric application ID and the domain-local slug are alternate references to the same
+canonical application identity. Repository/API lookup boundaries, public routes,
+filters, cross-domain links, and other application-facing calls should accept either
+form. Producers should emit/prefer the slug for human-facing URLs, browser state, API
+references, and maintainable authored data, while retaining numeric IDs for backward
+compatibility, internal joins, provenance bridges, and deterministic fallback. API
+references are additive rather than substitutive: an existing canonical numeric reference
+keeps its numeric field and gains a slug companion when a routable application slug exists.
+Scalar references use a sibling `*_slug` field; structured Army/Unit references use
+`public_slug` where `slug` already means source/context data. Parallel numeric-ID arrays may
+use an existing structured reference list as their slug companion rather than duplicate a
+second positional array. Source/provenance-only IDs stay numeric-only. For the application
+Skill/Equipment/Weapon catalogs, list representations expose the materialized `source_ids`
+that resolve to each application item. This alias set is part of the filter compatibility
+contract: legacy source-ID state can be recognized and rewritten to the preferred slug
+without treating unused metadata-only candidates as accepted references.
+
+This contract applies to future domains as they are introduced. A new domain should not
+ship a consumer-specific numeric-only or slug-only lookup path when a stable dual
+identity can be provided centrally. Numeric-only fallback remains correct when the slug
+is unresolved, colliding, or otherwise unavailable; callers must not invent a slug to
+avoid that fallback. Source-native IDs remain source/provenance identifiers unless an
+explicit application-identity mapping promotes the reference into this contract.
+
+#### Application domain slugs
+
+Schema version 17 / compatibility revision 25 adds a derived
+`application_domain_slugs` registry for `armies`, `units`, `skills`, `equipment`,
+and `weapons`. Numeric application IDs remain implementation keys, while each
+registry row records a normalized candidate and one of three states:
+
+- `resolved`: the candidate is non-empty, unique within the domain, and routable
+  without shadowing the numeric compatibility namespace, so `slug` receives that value;
+- `collision`: two or more application identities normalize to the same candidate,
+  so `slug` remains null and the conflict requires an explicit reviewed decision;
+- `unavailable`: no usable public candidate can be derived, including digit-only
+  candidates that would shadow numeric compatibility routes, so `slug` remains null.
+
+Candidates are deterministic lowercase ASCII identifiers with single hyphen
+separators. Collision handling is deliberately fail-closed: the application does not
+generate positional `-2`/`-3` suffixes whose meaning could change with source order
+or a later snapshot. The registry is application-owned derived data and therefore
+does not replace Army/source slugs or provenance IDs. Source/application display
+slugs may seed a candidate where useful, but they are not thereby promoted to a
+permanent public identity.
+
+Repository lookup centralizes numeric/slug normalization for every registry-backed
+domain. `application_domain_id()` accepts a source/application numeric reference or a
+resolved public slug and returns the canonical application numeric identity; Army, Unit,
+and catalog-specific helpers delegate to it. Unit, Skill, Equipment, and Weapon detail
+reads accept the same dual reference directly, so HTTP and browser consumers do not need
+their own slug-to-ID translation path. A `resolved` slug still maps through the persisted
+registry rather than being regenerated from a label at read time.
+
+Armies, Skills, Equipment, Weapons, and logical Units are additive
+public consumers. Catalog payloads expose resolved non-numeric `slug` values; Unit and
+Army payloads expose the application navigation identity as `public_slug` so their
+pre-existing `slug` fields continue to represent source/context data. Browser links and
+Unit-explorer state prefer those application slugs while existing numeric references
+remain valid. Skill, Equipment, Weapon, and Unit detail web/API routes accept either the
+slug or numeric application ID. Unit-explorer/API Army filters accept either a
+source/application numeric Army ID or the resolved application Army slug; both forms are
+normalized through the application Army identity before playability and availability are
+evaluated. Nested Unit Equipment and Weapon references resolve source-variant IDs through
+catalog provenance before exposing the canonical application slug, while Unit references
+embedded in other player-facing payloads resolve source Unit IDs to their logical Unit
+before exposing `public_slug`. Unit-explorer Skill/Equipment/Weapon filters likewise
+resolve either form to the application catalog identity and expand it across all
+materialized source members before matching canonical profile/loadout/unit-option
+occurrences. Digit-only candidates retain their diagnostic `candidate_slug` but are
+marked `unavailable` in the registry, so `application_slug()` returns no public slug and
+all consumers fall back to the numeric identity consistently. No redirect or permanent-freeze promise is made
+by this transition; per-domain freezing, reviewed overrides, aliases, and canonical
+redirect behavior still precede retirement of numeric routes. The current 2026-09-18
+snapshot resolves all
+1,042 initial identities
+(57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons)
+without collision or unavailable candidates; these counts are evidence only.
+
+Curated/application concepts that need an explicit namespace use typed IDs such as
+`skill:doctor`. Curated v3 records now validate that the prefix matches the record
+kind and that every colon-separated segment follows the same slug grammar. Source
+numeric IDs remain provenance/foreign references rather than public identity.
 
 #### Relationship to version 1.0.0 completeness
 
@@ -1856,15 +1991,16 @@ normalized source facts, and therefore do not rewrite the source tables.
 Repository unit queries map a requested source or representative ID through
 `logical_unit_sources`; list/search/detail general
 fields and unit-label search aliases come from the canonical logical-unit layer,
-while source-backed Army/relationship context and the two explicitly unresolved
-metadata-overlap boundaries continue to use their reviewed source/context tables. The
-normalized-input table registry remains separate from these derived frontend
-tables so generated application structure cannot be supplied as normalized
+while source-backed Army/relationship context that has not yet been canonicalized
+continues to use its reviewed source/context tables. The normal Army/faction and
+Skill/Equipment/Weapon metadata-overlap boundaries were resolved by the 0.6.1 read
+migrations. The normalized-input table registry remains separate from these
+derived frontend tables so generated application structure cannot be supplied as normalized
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 15 and the application
-compatibility revision is 23. Imports build temporary sibling files, check
+records its schema version. The current schema version is 17 and the application
+compatibility revision is 25. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
@@ -2068,24 +2204,38 @@ checked-in v5.3 collection is bound to the English 2026-09-18 wiki snapshot
 curated facts in a separate SQLite database rather than either Army-derived
 database. Directory ingestion skips `example.json`. Other curated subtrees are
 not rules-database inputs. The rules database has an independent schema,
-application ID, compatibility version, and replaceable snapshot lifecycle.
+application ID, compatibility version, and replaceable snapshot lifecycle; its
+current schema and compatibility versions are both 2.
 
-A curated rule fact may reference stable application-level identities, but
-neither database is an import source for the other; any combined view is
-assembled by application code.
+A curated rule fact may reference stable application-level identities, but neither
+database is an import source for the other; any combined view is assembled by
+application code. Catalog `armyLinks` for Skills, Equipment, and Weapons accept either
+positive numeric source IDs or application-domain slugs. `rules.db` preserves that
+authored reference as text; composition code checks both the legacy/source numeric form
+and the current application slug for the Army item being enriched. The maintained N5
+collection prefers slugs so links survive source-ID churn and remain human-readable.
 
 Trait identity is one implemented example of that composition boundary. Army
 metadata stores raw trait labels and usage, while current curated `trait` records
 own canonical names, aliases/misspellings, parameterized source-label prefixes,
-concise summaries, and citations. The application joins those sources at read
-time; the Army database does not copy curated trait knowledge into its snapshot.
+concise summaries, citations, and stable typed IDs such as
+`trait:continuous-damage`. For a route-backed curated Trait, the single slug segment
+after `trait:` is also its public route slug; the display name is not used to regenerate
+that identity. Trait API payloads expose this route value explicitly as `slug`. Raw
+Traits that lack curated identity use the Army Trait catalog's shared domain-slug
+normalization/collision pass and remain provisional rather than being copied into the
+application-domain slug registry. Cross-links to raw Traits are emitted only from that
+resolved catalog identity, never by independently normalizing an arbitrary label. The
+application joins Army and rules sources at read time; the Army database does not copy
+curated Trait knowledge into its snapshot.
 
 Skill declaration categories are another application-level composition. Army-derived
 `skills` and their usage remain source data, while current curated
 `skill-declaration-category` records carry the N5 declaration label, deterministic
-display order, Army skill links, and printed-page citation. `SkillCatalog` joins
-those records at read time and keeps uncited `Unclassified` as the fallback for
-skills without a curated declaration. The Army database does not materialize these
+display order, application-domain Skill links, and printed-page citation. `SkillCatalog`
+joins those records at read time using the logical Skill slug (while retaining numeric
+link compatibility) and keeps uncited `Unclassified` as the fallback only when the
+logical Skill has no curated declaration. The Army database does not materialize these
 rules facts.
 
 Skill parameter interpretation follows the same source/curated split. The imported
@@ -2093,8 +2243,9 @@ Army `extras.type` field determines whether an extra is a distance; this source
 semantic is preserved into the frontend database and drives `is_distance` in
 repository responses. Curated `skill` records may additionally carry
 `facts.parameterSemantics` for rule-derived display behavior such as whether a
-positive sign is omitted or forced. `SkillCatalog` joins that hint at read time;
-it is not copied into the Army database.
+positive sign is omitted or forced. Those hints use the same numeric-or-slug Army-link
+contract and are composed onto the logical Skill at read time; they are not copied into
+the Army database.
 
 ## Application query model
 

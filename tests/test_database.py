@@ -9,17 +9,28 @@ import pytest
 
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
+from infinity_army_data.weapon_config import (
+    load_weapon_category_config,
+    load_weapon_override_config,
+    resolve_weapon_category_config,
+    resolve_weapon_override_config,
+)
 from infinity_army_data.weapon_profiles import weapon_profile_override
+from infinity_db.catalog_slugs import (
+    attach_public_catalog_slug,
+    enrich_nested_catalog_slugs,
+)
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database, raw_database_path
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
 from infinity_db.database.repository import (
     army_required_flags,
-    canonical_skill_id,
+    availability_summary,
     catalog_merge_key,
     logical_source_loadout_merge_key,
     merged_catalog_name,
     merged_skill_name,
+    minimal_availability_requirements,
     skill_merge_key,
     visible_armies_for_group,
 )
@@ -36,7 +47,13 @@ from infinity_db.database.schema import (
     create_schema,
     quote,
 )
-from infinity_db.identities import REINFORCEMENT_UNIT_MATCHES_KEY, load_identity_config
+from infinity_db.domain_references import public_slug_for_reference
+from infinity_db.domain_slugs import APPLICATION_SLUG_DOMAINS
+from infinity_db.identities import (
+    REINFORCEMENT_UNIT_MATCHES_KEY,
+    load_identity_config,
+    parse_identity_config,
+)
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
@@ -456,6 +473,7 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
     assert Database(path).list_traits() == [
         {
             "id": "suppressive-fire",
+            "slug": "suppressive-fire",
             "name": "Suppressive Fire",
             "use_count": 1,
             "description": None,
@@ -552,6 +570,7 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     traits = {item["id"]: item for item in catalog.list_traits()}
     assert traits["suppressive-fire"] == {
         "id": "suppressive-fire",
+        "slug": "suppressive-fire",
         "name": "Suppressive Fire (SF)",
         "use_count": 1,
         "description": (
@@ -560,9 +579,80 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     }
     detail = catalog.get_trait("continuous-damage")
     assert detail is not None
+    assert detail["slug"] == "continuous-damage"
     assert detail["name"] == "Continuous Damage"
     assert detail["rules"][0]["id"] == "trait:continuous-damage"
     assert detail["rules"][0]["citations"][0]["heading"] == "Continuous Damage"
+
+
+def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": ["Continous Damage"],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    document = copy.deepcopy(documents[0][1])
+    record = next(
+        record
+        for record in document["records"]
+        if record["id"] == "trait:continuous-damage"
+    )
+    record["name"] = "Persistent Damage"
+    rules_path = tmp_path / "rules.db"
+    export_rules_database([(root / "curated.json", document)], rules_path)
+    catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    reference = catalog.reference("Continous Damage")
+    assert reference == {
+        "label": "Continous Damage",
+        "name": "Persistent Damage",
+        "slug": "continuous-damage",
+    }
+    detail = catalog.get_trait("continuous-damage")
+    assert detail is not None
+    assert detail["slug"] == "continuous-damage"
+    assert detail["name"] == "Persistent Damage"
+
+
+def test_uncurated_trait_reference_uses_catalog_slug_instead_of_guessing(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": ["Uncurated Trait"],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+    catalog = TraitCatalog(Database(database_path), None)
+
+    assert catalog.reference("Uncurated Trait") == {
+        "label": "Uncurated Trait",
+        "name": "Uncurated Trait",
+        "slug": "uncurated-trait",
+    }
+    assert catalog.reference("Not Present In Army Data") == {
+        "label": "Not Present In Army Data",
+        "name": "Not Present In Army Data",
+        "slug": None,
+    }
 
 
 def test_trait_catalog_enriches_catalog_profiles_from_curated_rules(
@@ -609,17 +699,19 @@ def test_armed_turret_uses_its_base_name_with_visible_metadata_profile(
     data["tables"]["weapons"].extend(
         [
             {
-                "id": 209,
-                "name": "Armed Turret (Combi R.)",
+                "id": source_id,
+                "name": name,
                 "source_defined": True,
                 "category": "Uncategorized",
-            },
-            {
-                "id": 226,
-                "name": "Armed Turret",
-                "source_defined": True,
-                "category": "Uncategorized",
-            },
+            }
+            for source_id, name in (
+                (209, "Armed Turret (Combi R.)"),
+                (215, "Armed Turret (Marksman R.)"),
+                (219, "Armed Turret (AP Rifle)"),
+                (222, "Armed Turret (Rifle)"),
+                (226, "Armed Turret"),
+                (228, "Armed Turret (E/Mitter)"),
+            )
         ]
     )
     data["tables"]["metadata_weapons"] = [
@@ -645,6 +737,7 @@ def test_armed_turret_uses_its_base_name_with_visible_metadata_profile(
             "type": None,
             "ammunition": None,
             "properties": None,
+            "source_ids": [209, 215, 219, 222, 226, 228],
             "use_count": 0,
         }
     ]
@@ -668,6 +761,8 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
     assert database.list_units()["total"] == 3
     first_army = database.list_units(army_id=101)
     assert {unit["id"] for unit in first_army["items"]} == {1, 3}
+    first_army_by_slug = database.list_units(army_id="first-army")
+    assert {unit["id"] for unit in first_army_by_slug["items"]} == {1, 3}
     shared = next(unit for unit in first_army["items"] if unit["id"] == 1)
     assert shared["main_army_id"] is None
     assert shared["army_ids"] == [101, 201]
@@ -706,6 +801,18 @@ def test_queries_use_actual_army_membership_and_unique_source_units(
         "total": 3,
         "limit": 1,
         "offset": 1,
+        "availability": {
+            "shown": 3,
+            "available": 3,
+            "filtered": 0,
+            "categories": {
+                "standard": {"shown": 3, "filtered": 0},
+                "mercs": {"shown": 0, "filtered": 0},
+                "specops": {"shown": 0, "filtered": 0},
+                "teamops": {"shown": 0, "filtered": 0},
+                "reinforcement": {"shown": 0, "filtered": 0},
+            },
+        },
     }
 
 
@@ -801,28 +908,6 @@ def test_list_skill_extras_returns_distinct_sorted_pairs(tmp_path: Path, normali
     ]
 
 
-@pytest.mark.parametrize(
-    ("skill_id", "expected"),
-    [
-        (19, 19),
-        (20, 19),
-        (21, 19),
-        (22, 19),
-        (23, 19),
-        (69, 69),
-        (70, 69),
-        (201, 201),
-        (278, 201),
-        (279, 201),
-        (240, 240),
-        (274, 240),
-        (24, 24),
-    ],
-)
-def test_skill_variants_use_a_shared_catalog_identity(skill_id: int, expected: int) -> None:
-    assert canonical_skill_id(skill_id) == expected
-
-
 def test_skill_merge_key_collapses_any_numeric_name_variants() -> None:
     assert skill_merge_key("Strategos L1") == skill_merge_key("Strategos L2")
     assert skill_merge_key("BS=11") == skill_merge_key("BS=12")
@@ -865,12 +950,39 @@ def test_normalization_persists_weapon_categories(normalized: dict) -> None:
     ],
 )
 def test_manual_weapon_category_overrides_take_precedence(weapon_id: int, category: str) -> None:
-    assert weapon_category("Rifle", weapon_id) == category
+    source_names = {
+        177: "Trench-Hammer",
+        1: "Akrylat-Kanone",
+        174: "Cybermine",
+        18: "Chain Rifle",
+    }
+    config = resolve_weapon_category_config(
+        load_weapon_category_config(), source_names, allow_missing=True
+    )
+    assert weapon_category("Rifle", weapon_id, config=config) == category
 
 
-@pytest.mark.parametrize("weapon_id", [62, 63, 196, 197, 199, 220])
-def test_missing_mine_profiles_have_import_overrides(weapon_id: int) -> None:
-    assert weapon_profile_override(weapon_id) == "ARM=0, BTS=0, STR=1, S=1"
+@pytest.mark.parametrize(
+    ("weapon_id", "source_name"),
+    [
+        (62, "Monofilament Mine"),
+        (63, "Viral Mine"),
+        (196, "Shock Mine"),
+        (197, "E/M Mine"),
+        (199, "AP Mine"),
+        (220, "PARA Mine"),
+    ],
+)
+def test_missing_mine_profiles_have_import_overrides(
+    weapon_id: int, source_name: str
+) -> None:
+    config = resolve_weapon_override_config(
+        load_weapon_override_config(), {weapon_id: source_name}, allow_missing=True
+    )
+    assert (
+        weapon_profile_override(weapon_id, config=config)
+        == "ARM=0, BTS=0, STR=1, S=1"
+    )
 
 
 def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normalized: dict) -> None:
@@ -890,6 +1002,7 @@ def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normal
             "id": 69,
             "name": "Strategos",
             "wiki": None,
+            "source_ids": [69, 70],
             "use_count": 0,
         }
     ]
@@ -917,12 +1030,12 @@ def test_catalog_use_count_matches_detail_variant_unit_totals(
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
-def test_catalog_details_omit_variants_without_visible_units(
+def test_catalog_details_include_optional_units_for_client_filtering(
     tmp_path: Path, normalized: dict, catalog: str
 ) -> None:
     for membership in normalized["tables"]["army_units"]:
         if membership["unit_id"] == 1:
-            membership["filters"] = {"mercs": True}
+            membership["filters"] = {"teamops": True}
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
 
@@ -930,7 +1043,8 @@ def test_catalog_details_omit_variants_without_visible_units(
     detail = database.get_skill(1) if catalog == "skills" else database.get_catalog_item(catalog, 1)
 
     assert detail is not None
-    assert detail["variants"] == []
+    assert detail["variants"]
+    assert detail["variants"][0]["units"][0]["id"] == 1
 
 
 def test_unit_details_expose_backend_profile_display_name(
@@ -1272,6 +1386,8 @@ def test_database_empty_generic_audit_prevents_legacy_grouping(
     assert duplicate is not None
     assert duplicate["id"] == 10_001
     assert duplicate["source_ids"] == [10_001]
+    assert database.application_slug("units", 1) is None
+    assert database.application_slug("units", 10_001) is None
 
 
 def test_database_uses_persisted_mercenary_mapping_for_logical_unit(
@@ -1478,6 +1594,65 @@ def test_details_keep_normal_and_mercenary_army_occurrences_separate(
     first_army_occurrences = [army for army in details["armies"] if army["id"] == 101]
     assert [army["availability_flags"] for army in first_army_occurrences] == [[], ["mercs"]]
     assert all(len(army["profiles"]) == 1 for army in first_army_occurrences)
+
+
+def test_minimal_availability_requirements_drop_redundant_optional_paths() -> None:
+    group = {
+        "names": ["Example Unit"],
+        "slug": "example-unit",
+        "armies": {101: {}},
+        "army_occurrences": [
+            {
+                "id": 101,
+                "source_id": 1,
+                "availability_kind": "standard",
+                "role": "main",
+                "kind": "army",
+                "filters": {},
+            },
+            {
+                "id": 101,
+                "source_id": 2,
+                "availability_kind": "standard",
+                "role": "main",
+                "kind": "army",
+                "filters": {"reinforcement": True},
+            },
+        ],
+    }
+
+    requirements = minimal_availability_requirements(
+        group,
+        {1: 101, 2: 101},
+        {1: {101}, 2: {101}},
+        101,
+    )
+
+    assert requirements == (frozenset(),)
+
+
+def test_availability_summary_uses_unique_units_and_reports_overlapping_categories() -> None:
+    requirements = [
+        (frozenset(),),
+        (frozenset({"specops"}),),
+        (frozenset({"mercs"}), frozenset({"reinforcement"})),
+        (frozenset({"mercs", "reinforcement"}),),
+    ]
+
+    summary = availability_summary(requirements, {"specops"})
+
+    assert summary == {
+        "shown": 2,
+        "available": 4,
+        "filtered": 2,
+        "categories": {
+            "standard": {"shown": 1, "filtered": 0},
+            "mercs": {"shown": 0, "filtered": 2},
+            "specops": {"shown": 1, "filtered": 0},
+            "teamops": {"shown": 0, "filtered": 0},
+            "reinforcement": {"shown": 0, "filtered": 2},
+        },
+    }
 
 
 def test_reinforcement_classification_uses_application_role_with_source_fallback() -> None:
@@ -1707,7 +1882,24 @@ def test_empty_import_replaces_previous_database(tmp_path: Path, normalized: dic
     database = Database(path)
     database.validate()
     assert database.list_armies() == []
-    assert database.list_units() == {"items": [], "total": 0, "limit": 50, "offset": 0}
+    assert database.list_units() == {
+        "items": [],
+        "total": 0,
+        "limit": 50,
+        "offset": 0,
+        "availability": {
+            "shown": 0,
+            "available": 0,
+            "filtered": 0,
+            "categories": {
+                "standard": {"shown": 0, "filtered": 0},
+                "mercs": {"shown": 0, "filtered": 0},
+                "specops": {"shown": 0, "filtered": 0},
+                "teamops": {"shown": 0, "filtered": 0},
+                "reinforcement": {"shown": 0, "filtered": 0},
+            },
+        },
+    }
 
 
 def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
@@ -1741,6 +1933,8 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
     ]
     assert database.list_units(search="sarko")["items"][0]["id"] == 1610
     assert database.list_units(search="sas")["items"][0]["id"] == 237
+    assert database.application_slug("units", 4) is None
+    assert database.application_slug("units", 5) is None
     assert database.list_units(search="UNIT 4")["items"] == [
         {
             "id": 4,
@@ -1779,6 +1973,18 @@ def test_fallback_names_are_used_for_normalized_display_sorting_and_search(
         "total": 2,
         "limit": 1,
         "offset": 1,
+        "availability": {
+            "shown": 2,
+            "available": 2,
+            "filtered": 0,
+            "categories": {
+                "standard": {"shown": 2, "filtered": 0},
+                "mercs": {"shown": 0, "filtered": 0},
+                "specops": {"shown": 0, "filtered": 0},
+                "teamops": {"shown": 0, "filtered": 0},
+                "reinforcement": {"shown": 0, "filtered": 0},
+            },
+        },
     }
 
 
@@ -2225,6 +2431,47 @@ def test_unit_loadout_read_path_uses_materialized_canonical_payloads(
     assert Database(path).get_unit(1) == expected
 
 
+def test_unit_catalog_filter_expands_logical_equipment_identity(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"] = [
+        {"id": 235, "name": "TinBot", "source_defined": True},
+        {"id": 244, "name": "TinBot: Discover", "source_defined": True},
+    ]
+    normalized["tables"]["metadata_equipment"] = [
+        {"id": 169, "name": "TinBot: Firewall", "wiki": None},
+        {"id": 188, "name": "TinBot: Neourocinetics", "wiki": None},
+        {"id": 193, "name": "TinBot (Albedo)", "wiki": None},
+        {"id": 235, "name": "TinBot", "wiki": None},
+        {"id": 244, "name": "TinBot: Discover", "wiki": None},
+        {"id": 247, "name": "TinBot: ECM Guided", "wiki": None},
+        {"id": 248, "name": "Tinbot (Repeater)", "wiki": None},
+    ]
+    for table in (
+        "army_equipment",
+        "profile_equipment",
+        "option_equipment",
+        "unit_option_equipment",
+    ):
+        for occurrence in normalized["tables"][table]:
+            occurrence["item_id"] = 244
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert database.application_catalog_id("equipment", 244) == 235
+    assert database.application_slug("equipment", 235) == "tinbot"
+    tinbot = next(
+        item for item in database.list_catalog_items("equipment") if item["id"] == 235
+    )
+    assert tinbot["source_ids"] == [235, 244]
+    expected_ids = {1}
+    for equipment_ref in (244, 235, "tinbot"):
+        result = database.list_units(equipment_id=equipment_ref)
+        assert {item["id"] for item in result["items"]} == expected_ids
+
+
 def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
     tmp_path: Path, normalized: dict
 ) -> None:
@@ -2346,10 +2593,10 @@ def test_skill_catalog_uses_curated_declaration_categories(
         [
             {"id": 69, "name": "Strategos L1", "source_defined": True},
             {"id": 70, "name": "Strategos L2", "source_defined": True},
-            {"id": 89, "name": "Holoprojector Deployment", "source_defined": True},
-            {"id": 201, "name": "Discover", "source_defined": True},
-            {"id": 278, "name": "Discover L2", "source_defined": True},
-            {"id": 279, "name": "Discover L3", "source_defined": True},
+            {"id": 89, "name": "Sapper", "source_defined": True},
+            {"id": 201, "name": "BS Attack", "source_defined": True},
+            {"id": 278, "name": "BS=12", "source_defined": True},
+            {"id": 279, "name": "BS=11", "source_defined": True},
             {"id": 260, "name": "Unclassified Example", "source_defined": True},
         ]
     )
@@ -2379,7 +2626,6 @@ def test_skill_catalog_uses_curated_declaration_categories(
     assert mixed["categories"] == [
         {"name": "Basic Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
         {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
-        {"name": "Unclassified", "source": None, "page": None},
     ]
     unclassified = next(item for item in catalog.list_skills() if item["id"] == 260)
     assert unclassified["categories"] == [
@@ -2415,6 +2661,7 @@ def test_skill_catalog_adds_curated_distance_parameter_semantics(
     }
 
     extra = next(item for item in catalog.list_skill_extras() if item["skill_id"] == 74)
+    assert extra["skill_slug"] == "super-jump"
     assert extra["is_distance"] is True
     assert extra["parameter_semantics"] == {
         "kind": "distance",
@@ -2450,8 +2697,11 @@ def test_skill_catalog_without_rules_keeps_source_distance_typing(
 def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
     tmp_path: Path, normalized: dict
 ) -> None:
-    normalized["tables"]["skills"].append(
-        {"id": 69, "name": "Strategos L1", "source_defined": True}
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 69, "name": "Strategos L1", "source_defined": True},
+            {"id": 70, "name": "Strategos L2", "source_defined": True},
+        ]
     )
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
@@ -2461,3 +2711,473 @@ def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
     assert strategos["categories"] == [
         {"name": "Unclassified", "source": None, "page": None}
     ]
+
+
+def test_application_domain_slugs_are_separate_from_source_slugs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert database.list_armies()[0]["slug"] == "first_army"
+    assert database.application_slug("armies", 101) == "first-army"
+    assert database.application_id_for_slug("armies", "first-army") == 101
+    assert database.application_domain_id("armies", 101) == 101
+    assert database.application_domain_id("armies", "first-army") == 101
+    assert database.application_army_id(101) == 101
+    assert database.application_army_id("first-army") == 101
+    assert database.application_army_id("missing-army") is None
+    assert database.application_slug("units", 1) == "alpha"
+    assert database.application_id_for_slug("units", "alpha") == 1
+    assert database.application_domain_id("units", "alpha") == 1
+    assert database.application_unit_id(1) == 1
+    assert database.application_unit_id("alpha") == 1
+    assert database.application_unit_id(999_999) is None
+    assert database.application_slug("units", 3) == "100-guard"
+    unit_by_slug = database.get_unit("alpha")
+    unit_by_id = database.get_unit(1)
+    assert unit_by_slug is not None
+    assert unit_by_id is not None
+    assert unit_by_slug["id"] == unit_by_id["id"]
+
+    for catalog in ("skills", "equipment", "weapons"):
+        item = database.list_catalog_items(catalog)[0]
+        item_slug = database.application_slug(catalog, item["id"])
+        assert item_slug is not None
+        assert database.application_id_for_slug(catalog, item_slug) == item["id"]
+        assert database.application_domain_id(catalog, item_slug) == item["id"]
+        assert database.application_catalog_id(catalog, item_slug) == item["id"]
+        detail = (
+            database.get_skill(item_slug)
+            if catalog == "skills"
+            else database.get_catalog_item(catalog, item_slug)
+        )
+        assert detail is not None
+        assert detail["id"] == item["id"]
+
+
+def test_application_catalog_aliases_accept_readable_slug_references(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 41, "name": "Mirrorball L1", "source_defined": True},
+            {"id": 42, "name": "Mirrorball L2", "source_defined": True},
+        ]
+    )
+    document = load_identity_config().document
+    document["catalogs"]["skills"]["groups"].append(
+        {
+            "canonical_id": "mirrorball-l1",
+            "source_ids": ["mirrorball-l1", "mirrorball-l2"],
+            "reason": "Readable slug-authored alias test",
+        }
+    )
+    config = parse_identity_config(document)
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path, identity_config=config)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("skills", 41) == 41
+    assert database.application_catalog_id("skills", 42) == 41
+    assert database.application_slug("skills", 41) == "mirrorball"
+
+
+def test_catalog_identity_slugs_resolve_against_complete_metadata_catalog(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"].append(
+        {"id": 169, "name": "TinBot: Firewall", "source_defined": True}
+    )
+    normalized["tables"]["metadata_equipment"] = [
+        {"id": 169, "name": "TinBot: Firewall", "wiki": None},
+        {"id": 188, "name": "TinBot: Neourocinetics", "wiki": None},
+        {"id": 193, "name": "TinBot (Albedo)", "wiki": None},
+        {"id": 235, "name": "TinBot", "wiki": None},
+        {"id": 244, "name": "TinBot: Discover", "wiki": None},
+        {"id": 247, "name": "TinBot: ECM Guided", "wiki": None},
+        {"id": 248, "name": "Tinbot (Repeater)", "wiki": None},
+    ]
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("equipment", 169) == 235
+    assert database.application_catalog_id("equipment", 188) is None
+
+
+def test_skill_catalog_resolves_source_variant_ids_before_attaching_public_slug(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 19, "name": "Martial Arts L1", "source_defined": True},
+            {"id": 20, "name": "Martial Arts L2", "source_defined": True},
+            {"id": 21, "name": "Martial Arts L3", "source_defined": True},
+            {"id": 22, "name": "Martial Arts L4", "source_defined": True},
+            {"id": 23, "name": "Martial Arts L5", "source_defined": True},
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = 20
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+    catalog = SkillCatalog(database, None)
+
+    assert database.application_catalog_id("skills", 20) == 19
+    assert database.application_slug("skills", 19) == "martial-arts"
+
+    raw_unit = database.get_unit(1)
+    assert raw_unit is not None
+    raw_skill = raw_unit["armies"][0]["profiles"][0]["skills"][0]
+    assert raw_skill["id"] == 20
+    assert "slug" not in raw_skill
+
+    enriched = catalog.enrich_unit(raw_unit)
+    skill = enriched["armies"][0]["profiles"][0]["skills"][0]
+    assert skill["id"] == 20
+    assert skill["slug"] == "martial-arts"
+
+
+def test_skill_catalog_does_not_emit_numeric_only_slug_that_would_shadow_compatibility_route(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"][0]["name"] = "100"
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    catalog = SkillCatalog(Database(database_path), None)
+
+    skill = catalog.list_skills()[0]
+    assert skill["id"] == 1
+    assert "slug" not in skill
+    assert Database(database_path).application_slug("skills", 1) is None
+
+    with sqlite3.connect(database_path) as connection:
+        row = connection.execute(
+            "SELECT candidate_slug, slug, status FROM application_domain_slugs "
+            "WHERE domain = 'skills' AND application_id = 1"
+        ).fetchone()
+    assert row == ("100", None, "unavailable")
+
+
+def test_equipment_slug_enrichment_resolves_source_variant_ids(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"].extend(
+        [
+            {"id": 169, "name": "TinBot: Firewall", "source_defined": True},
+            {"id": 188, "name": "TinBot: Neourocinetics", "source_defined": True},
+            {"id": 193, "name": "TinBot (Albedo)", "source_defined": True},
+            {"id": 235, "name": "TinBot", "source_defined": True},
+            {"id": 244, "name": "TinBot: Discover", "source_defined": True},
+            {"id": 247, "name": "TinBot: ECM Guided", "source_defined": True},
+            {"id": 248, "name": "Tinbot (Repeater)", "source_defined": True},
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_equipment"]:
+        occurrence["item_id"] = 244
+    for occurrence in normalized["tables"]["option_equipment"]:
+        occurrence["item_id"] = 244
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("equipment", 244) == 235
+    assert database.application_slug("equipment", 235) == "tinbot"
+
+    raw_unit = database.get_unit(1)
+    assert raw_unit is not None
+    raw_equipment = raw_unit["armies"][0]["profiles"][0]["equipment"][0]
+    assert raw_equipment["id"] == 244
+    assert "slug" not in raw_equipment
+
+    enriched = enrich_nested_catalog_slugs(
+        database,
+        raw_unit,
+        frozenset({"equipment"}),
+    )
+    equipment = enriched["armies"][0]["profiles"][0]["equipment"][0]
+    assert equipment["id"] == 244
+    assert equipment["slug"] == "tinbot"
+
+
+def test_equipment_slug_enrichment_does_not_emit_numeric_only_slug(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"][0]["name"] = "100"
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    equipment = database.list_catalog_items("equipment")[0]
+    attach_public_catalog_slug(database, "equipment", equipment)
+
+    assert equipment["id"] == 1
+    assert "slug" not in equipment
+    assert database.application_slug("equipment", 1) is None
+
+
+def test_weapon_slug_enrichment_resolves_source_variant_ids(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["weapons"].extend(
+        [
+            {
+                "id": source_id,
+                "name": name,
+                "source_defined": True,
+                "category": "Uncategorized",
+            }
+            for source_id, name in (
+                (209, "Armed Turret (Combi R.)"),
+                (215, "Armed Turret (Marksman R.)"),
+                (219, "Armed Turret (AP Rifle)"),
+                (222, "Armed Turret (Rifle)"),
+                (226, "Armed Turret"),
+                (228, "Armed Turret (E/Mitter)"),
+            )
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_weapons"]:
+        occurrence["item_id"] = 228
+    for occurrence in normalized["tables"]["option_weapons"]:
+        occurrence["item_id"] = 228
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("weapons", 228) == 226
+    assert database.application_slug("weapons", 226) == "armed-turret"
+
+    raw_unit = database.get_unit(1)
+    assert raw_unit is not None
+    raw_weapon = raw_unit["armies"][0]["profiles"][0]["weapons"][0]
+    assert raw_weapon["id"] == 228
+    assert "slug" not in raw_weapon
+
+    enriched = enrich_nested_catalog_slugs(
+        database,
+        raw_unit,
+        frozenset({"weapons"}),
+    )
+    weapon = enriched["armies"][0]["profiles"][0]["weapons"][0]
+    assert weapon["id"] == 228
+    assert weapon["slug"] == "armed-turret"
+
+
+def test_weapon_slug_enrichment_does_not_emit_numeric_only_slug(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["weapons"][0]["name"] = "100"
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    weapon = database.list_catalog_items("weapons")[0]
+    attach_public_catalog_slug(database, "weapons", weapon)
+
+    assert weapon["id"] == 1
+    assert "slug" not in weapon
+    assert database.application_slug("weapons", 1) is None
+
+
+def test_dual_identifier_contract_canonicalizes_source_ids_and_prefers_public_slugs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    document = load_identity_config().document
+    document["units"]["groups"].append(
+        {
+            "canonical_id": 1,
+            "source_ids": [1, 2],
+            "reason": "Dual-identifier contract fixture",
+        }
+    )
+    document["armies"]["groups"].append(
+        {
+            "canonical_id": 201,
+            "source_ids": [201, 301],
+            "reason": "Dual-identifier contract fixture",
+        }
+    )
+
+    catalog_cases: dict[str, tuple[int, int]] = {}
+    for catalog in ("skills", "equipment", "weapons"):
+        rows = [
+            {
+                "id": 41,
+                "name": f"Contract {catalog.title()} L1",
+                "source_defined": True,
+            },
+            {
+                "id": 42,
+                "name": f"Contract {catalog.title()} L2",
+                "source_defined": True,
+            },
+        ]
+        if catalog == "weapons":
+            for row in rows:
+                row["category"] = "Uncategorized"
+        data["tables"][catalog].extend(rows)
+        document["catalogs"][catalog]["groups"].append(
+            {
+                "canonical_id": f"contract-{catalog}-l1",
+                "source_ids": [
+                    f"contract-{catalog}-l1",
+                    f"contract-{catalog}-l2",
+                ],
+                "reason": "Dual-identifier contract fixture",
+            }
+        )
+        catalog_cases[catalog] = (42, 41)
+
+    path = tmp_path / "dual-identifiers.sqlite3"
+    export_database(data, path, identity_config=parse_identity_config(document))
+    database = Database(path)
+
+    cases = {
+        "armies": (301, 201),
+        "units": (2, 1),
+        **catalog_cases,
+    }
+    assert set(cases) == set(APPLICATION_SLUG_DOMAINS)
+
+    for domain in APPLICATION_SLUG_DOMAINS:
+        source_id, application_id = cases[domain]
+        slug = database.application_slug(domain, application_id)
+        assert slug is not None
+        assert not slug.isdigit()
+        assert database.application_domain_id(domain, application_id) == application_id
+        assert database.application_domain_id(domain, source_id) == application_id
+        assert database.application_domain_id(domain, slug) == application_id
+        assert database.application_id_for_slug(domain, slug) == application_id
+        assert public_slug_for_reference(database, domain, source_id) == slug
+        assert public_slug_for_reference(database, domain, slug) == slug
+        assert database.application_domain_id(domain, "unknown-contract-slug") is None
+
+    for catalog, (source_id, application_id) in catalog_cases.items():
+        item = next(
+            item
+            for item in database.list_catalog_items(catalog)
+            if item["id"] == application_id
+        )
+        assert source_id in item["source_ids"]
+
+
+def test_dual_identifier_contract_unavailable_and_colliding_slugs_fail_closed(
+    tmp_path: Path, normalized: dict
+) -> None:
+    numeric = copy.deepcopy(normalized)
+    next(row for row in numeric["tables"]["army_lists"] if row["id"] == 101)["slug"] = "100"
+    next(row for row in numeric["tables"]["units"] if row["id"] == 1)["slug"] = "100"
+    for catalog in ("skills", "equipment", "weapons"):
+        numeric["tables"][catalog][0]["name"] = "100"
+
+    numeric_path = tmp_path / "numeric-shadow.sqlite3"
+    export_database(numeric, numeric_path)
+    numeric_database = Database(numeric_path)
+    numeric_ids = {
+        "armies": 101,
+        "units": 1,
+        "skills": 1,
+        "equipment": 1,
+        "weapons": 1,
+    }
+    assert set(numeric_ids) == set(APPLICATION_SLUG_DOMAINS)
+    for domain, application_id in numeric_ids.items():
+        assert numeric_database.application_domain_id(domain, application_id) == application_id
+        assert numeric_database.application_slug(domain, application_id) is None
+        assert public_slug_for_reference(numeric_database, domain, application_id) is None
+
+    collision = copy.deepcopy(normalized)
+    for army_id in (101, 201):
+        next(
+            row for row in collision["tables"]["army_lists"] if row["id"] == army_id
+        )["slug"] = "contract-collision"
+    for unit_id in (1, 2):
+        next(row for row in collision["tables"]["units"] if row["id"] == unit_id)[
+            "slug"
+        ] = "contract-collision"
+    for catalog in ("skills", "equipment", "weapons"):
+        collision["tables"][catalog][0]["name"] = "Contract Collision"
+        second = {
+            "id": 2,
+            "name": "Contract Collision",
+            "source_defined": True,
+        }
+        if catalog == "weapons":
+            second["category"] = "Uncategorized"
+        collision["tables"][catalog].append(second)
+
+    collision_path = tmp_path / "slug-collision.sqlite3"
+    export_database(collision, collision_path)
+    collision_database = Database(collision_path)
+    collision_ids = {
+        "armies": (101, 201),
+        "units": (1, 2),
+        "skills": (1, 2),
+        "equipment": (1, 2),
+        "weapons": (1, 2),
+    }
+    assert set(collision_ids) == set(APPLICATION_SLUG_DOMAINS)
+    for domain, application_ids in collision_ids.items():
+        assert collision_database.application_domain_id(
+            domain, "contract-collision"
+        ) is None
+        for application_id in application_ids:
+            assert collision_database.application_slug(domain, application_id) is None
+            assert (
+                public_slug_for_reference(collision_database, domain, application_id)
+                is None
+            )
+
+
+def test_dual_identifier_contract_traits_keep_slug_owned_identity(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": ["Continous Damage"],
+        }
+    ]
+    database_path = tmp_path / "trait-contract.sqlite3"
+    export_database(data, database_path)
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "trait-contract-rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    assert "traits" not in APPLICATION_SLUG_DOMAINS
+    trait = catalog.get_trait("continuous-damage")
+    assert trait is not None
+    assert trait["id"] == "continuous-damage"
+    assert trait["slug"] == "continuous-damage"
+    assert catalog.reference("Continous Damage")["slug"] == "continuous-damage"
+    assert catalog.get_trait("unknown-contract-trait") is None
+    assert catalog.reference("Not Present In Army Data")["slug"] is None
+
+
+def test_application_domain_slug_lookup_rejects_unknown_domains(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    with pytest.raises(ValueError, match="Unknown slug domain"):
+        database.application_slug("profiles", 1)
+    with pytest.raises(ValueError, match="Unknown slug domain"):
+        database.application_id_for_slug("profiles", "trooper")

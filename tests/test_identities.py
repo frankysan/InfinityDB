@@ -25,20 +25,153 @@ def identity_document() -> dict:
 def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     config = load_identity_config()
 
-    assert config.document["schema_version"] == 2
+    assert config.document["schema_version"] == 3
     assert config.canonical_unit_id(1690) == 300
     assert config.canonical_unit_id(11345) == 1345
     assert config.canonical_army_id(998) == 999
     assert config.resolve_canonical_faction_id(1) == 1
-    assert config.canonical_catalog_id("skills", 20) == 19
-    assert config.canonical_catalog_id("skills", 70) == 69
-    assert config.canonical_catalog_id("skills", 278) == 201
-    assert config.canonical_catalog_id("equipment", 248) == 235
-    assert config.canonical_catalog_id("weapons", 228) == 226
-    assert config.catalog_source_ids("skills", 20) == (19, 20, 21, 22, 23)
+
+    for catalog in ("skills", "equipment", "weapons"):
+        for group in config.document["catalogs"][catalog]["groups"]:
+            assert isinstance(group["canonical_id"], str)
+            assert all(isinstance(ref, str) for ref in group["source_ids"])
+
+    assert config.document["catalogs"]["equipment"]["slug_aliases"] == {
+        "tinbot-neourocinetics": "tinbot-neurocinetics"
+    }
+
+    assert dict(
+        config.resolve_catalog_aliases(
+            "skills",
+            {
+                19: "Martial Arts L1",
+                20: "Martial Arts L2",
+                21: "Martial Arts L3",
+                22: "Martial Arts L4",
+                23: "Martial Arts L5",
+                69: "Strategos L1",
+                70: "Strategos L2",
+                201: "BS Attack",
+                278: "BS=12",
+                279: "BS=11",
+                240: "CC Attack",
+                274: "CC=21",
+            },
+        )
+    ) == {
+        19: 19,
+        20: 19,
+        21: 19,
+        22: 19,
+        23: 19,
+        69: 69,
+        70: 69,
+        201: 201,
+        278: 201,
+        279: 201,
+        240: 240,
+        274: 240,
+    }
+    assert dict(
+        config.resolve_catalog_aliases(
+            "equipment",
+            {
+                169: "TinBot: Firewall",
+                188: "TinBot: Neourocinetics",
+                193: "TinBot (Albedo)",
+                235: "TinBot",
+                244: "TinBot: Discover",
+                247: "TinBot: ECM Guided",
+                248: "Tinbot (Repeater)",
+            },
+        )
+    ) == {169: 235, 188: 235, 193: 235, 235: 235, 244: 235, 247: 235, 248: 235}
+    assert dict(
+        config.resolve_catalog_aliases(
+            "weapons",
+            {
+                209: "Armed Turret (Combi R.)",
+                215: "Armed Turret (Marksman R.)",
+                219: "Armed Turret (AP Rifle)",
+                222: "Armed Turret (Rifle)",
+                226: "Armed Turret",
+                228: "Armed Turret (E/Mitter)",
+            },
+        )
+    ) == {209: 226, 215: 226, 219: 226, 222: 226, 226: 226, 228: 226}
+
     assert config.word_aliases["reconaissance"] == "recon"
     assert config.reinforcement_prefixes == ("reinf", "refuerzos")
     assert "intervention" in config.profile_identity_ignored_words
+
+
+def test_catalog_identity_groups_accept_numeric_or_slug_references(
+    identity_document: dict,
+) -> None:
+    identity_document["catalogs"]["skills"]["groups"] = [
+        {
+            "canonical_id": "camouflage-l1",
+            "source_ids": [19, "camouflage-l2"],
+            "reason": "Readable mixed-reference test",
+        }
+    ]
+
+    config = parse_identity_config(identity_document)
+
+    assert dict(
+        config.resolve_catalog_aliases(
+            "skills",
+            {19: "Camouflage L1", 20: "Camouflage L2"},
+        )
+    ) == {19: 19, 20: 19}
+
+
+def test_catalog_slug_aliases_correct_source_spelling_without_changing_raw_label(
+    identity_document: dict,
+) -> None:
+    identity_document["catalogs"]["equipment"]["groups"] = [
+        {
+            "canonical_id": "tinbot",
+            "source_ids": ["tinbot", "tinbot-neurocinetics"],
+        }
+    ]
+    config = parse_identity_config(identity_document)
+
+    assert dict(
+        config.resolve_catalog_aliases(
+            "equipment",
+            {188: "TinBot: Neourocinetics", 235: "TinBot"},
+        )
+    ) == {188: 235, 235: 235}
+
+
+def test_catalog_identity_group_can_be_absent_from_source_snapshot(
+    identity_document: dict,
+) -> None:
+    config = parse_identity_config(identity_document)
+
+    assert dict(config.resolve_catalog_aliases("skills", {42: "Stealth"})) == {}
+
+
+def test_catalog_identity_slug_references_fail_closed_when_unknown_or_ambiguous(
+    identity_document: dict,
+) -> None:
+    identity_document["catalogs"]["skills"]["groups"] = [
+        {
+            "canonical_id": 19,
+            "source_ids": [19, "camouflage-l2"],
+        }
+    ]
+    config = parse_identity_config(identity_document)
+
+    with pytest.raises(IdentityConfigError, match="unknown skills slug"):
+        config.resolve_catalog_aliases("skills", {19: "Camouflage L1"})
+
+    with pytest.raises(IdentityConfigError, match="ambiguous skills slug"):
+        config.resolve_catalog_aliases(
+            "skills",
+            {19: "Camouflage L1", 20: "Camouflage L2", 21: "Camouflage-L2"},
+        )
 
 
 def test_reinforcement_prefixes_are_manifest_backed_identity_policy() -> None:
@@ -75,8 +208,7 @@ def test_unlisted_source_ids_are_not_implicitly_aliased() -> None:
     assert config.canonical_unit_id(42) == 42
     assert config.canonical_army_id(101) == 101
     assert config.resolve_canonical_faction_id(101) == 101
-    assert config.canonical_catalog_id("skills", 42) is None
-    assert config.catalog_source_ids("skills", 42) == ()
+    assert dict(config.resolve_catalog_aliases("skills", {42: "Stealth"})) == {}
 
 
 def test_identity_metadata_contains_document_and_hash() -> None:

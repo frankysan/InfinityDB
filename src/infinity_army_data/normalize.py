@@ -42,6 +42,14 @@ from typing import Any
 from .metadata import METADATA_TABLES, MetadataError, normalize_metadata, validate_metadata_envelope
 from .normalized_format import FORMAT_NAME, FORMAT_VERSION
 from .weapon_categories import weapon_category
+from .weapon_config import (
+    WeaponCategoryConfig,
+    WeaponOverrideConfig,
+    load_weapon_category_config,
+    load_weapon_override_config,
+    resolve_weapon_category_config,
+    resolve_weapon_override_config,
+)
 from .weapon_profiles import (
     weapon_metadata_profile_suppressed,
     weapon_name_override,
@@ -212,7 +220,13 @@ def display_army_id(
     return resolved_main_army_id
 
 
-def build_catalogs(master: dict[str, Any], b: Builder) -> dict[str, set[Any]]:
+def build_catalogs(
+    master: dict[str, Any],
+    b: Builder,
+    *,
+    weapon_category_config: WeaponCategoryConfig,
+    weapon_override_config: WeaponOverrideConfig,
+) -> dict[str, set[Any]]:
     identities: dict[str, dict[Any, dict[str, Any]]] = {
         source_name: {} for source_name in GLOBAL_CATALOGS
     }
@@ -237,10 +251,12 @@ def build_catalogs(master: dict[str, Any], b: Builder) -> dict[str, set[Any]]:
             item = identities[source_name][item_id]
             row = dict(item)
             if source_name == "weapons":
-                name = weapon_name_override(item_id)
+                name = weapon_name_override(item_id, config=weapon_override_config)
                 if name is not None:
                     row["name"] = name
-                row["category"] = weapon_category(row.get("name"), item_id)
+                row["category"] = weapon_category(
+                    row.get("name"), item_id, config=weapon_category_config
+                )
             row["source_defined"] = True
             b.tables[global_table].append(row)
 
@@ -624,6 +640,38 @@ def deduplicate_option_weapons(tables: dict[str, list[dict[str, Any]]]) -> None:
     tables["option_weapon_templates"] = templates
 
 
+def _source_weapon_names(
+    master: Mapping[str, Any], metadata_weapon_rows: Iterable[Mapping[str, Any]]
+) -> dict[int, str]:
+    """Collect source weapon labels before maintained display corrections are applied."""
+
+    result: dict[int, str] = {}
+    for row in metadata_weapon_rows:
+        weapon_id = row.get("id")
+        name = row.get("name")
+        if (
+            type(weapon_id) is int
+            and weapon_id not in result
+            and isinstance(name, str)
+            and name.strip()
+        ):
+            result[weapon_id] = name
+    for army in master.get("armyLists", {}).values():
+        for row in (army.get("filters") or {}).get("weapons", []):
+            if not isinstance(row, Mapping):
+                continue
+            weapon_id = row.get("id")
+            name = row.get("name")
+            if (
+                type(weapon_id) is int
+                and weapon_id not in result
+                and isinstance(name, str)
+                and name.strip()
+            ):
+                result[weapon_id] = name
+    return result
+
+
 def normalize_master(
     master: dict[str, Any],
     *,
@@ -638,23 +686,39 @@ def normalize_master(
     metadata_rows: dict[str, list[dict[str, Any]]] = {}
     metadata_faction_names: dict[int, str] = {}
     metadata_faction_parents: dict[int, int | None] | None = None
+    authored_weapon_categories = load_weapon_category_config()
+    authored_weapon_overrides = load_weapon_override_config()
     if metadata is not None:
         try:
             validate_metadata_envelope(metadata)
             metadata_rows = normalize_metadata(metadata)
+            source_weapon_names = _source_weapon_names(
+                master, metadata_rows["metadata_weapons"]
+            )
+            weapon_category_config = resolve_weapon_category_config(
+                authored_weapon_categories, source_weapon_names, allow_missing=True
+            )
+            weapon_override_config = resolve_weapon_override_config(
+                authored_weapon_overrides, source_weapon_names, allow_missing=True
+            )
             metadata_rows["metadata_weapons"] = [
                 row
                 for row in metadata_rows["metadata_weapons"]
                 if not weapon_metadata_profile_suppressed(
-                    row["id"], row.get("name"), row.get("mode")
+                    row["id"],
+                    row.get("name"),
+                    row.get("mode"),
+                    config=weapon_override_config,
                 )
             ]
             for row in metadata_rows["metadata_weapons"]:
-                name = weapon_name_override(row["id"])
+                name = weapon_name_override(row["id"], config=weapon_override_config)
                 if name is not None:
                     row["name"] = name
                 if not row.get("profile"):
-                    profile = weapon_profile_override(row["id"])
+                    profile = weapon_profile_override(
+                        row["id"], config=weapon_override_config
+                    )
                     if profile is not None:
                         row["profile"] = profile
         except MetadataError as exc:
@@ -663,6 +727,14 @@ def normalize_master(
         for row in metadata_rows["metadata_factions"]:
             metadata_faction_names[row["id"]] = row["name"]
             metadata_faction_parents[row["id"]] = row.get("parent")
+    else:
+        source_weapon_names = _source_weapon_names(master, ())
+        weapon_category_config = resolve_weapon_category_config(
+            authored_weapon_categories, source_weapon_names, allow_missing=True
+        )
+        weapon_override_config = resolve_weapon_override_config(
+            authored_weapon_overrides, source_weapon_names, allow_missing=True
+        )
     for table_name, _ in METADATA_TABLES.values():
         metadata_rows.setdefault(table_name, [])
 
@@ -694,7 +766,12 @@ def normalize_master(
             unit_membership_reference_count=membership_refs[faction_id],
         )
 
-    catalog_ids = build_catalogs(master, b)
+    catalog_ids = build_catalogs(
+        master,
+        b,
+        weapon_category_config=weapon_category_config,
+        weapon_override_config=weapon_override_config,
+    )
 
     # Army-list records and army-local peripherals/catalog context.
     for army_key, army in sorted(army_lists.items(), key=lambda kv: int(kv[0])):

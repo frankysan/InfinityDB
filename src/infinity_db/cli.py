@@ -58,7 +58,7 @@ def cmd_normalize(args: argparse.Namespace) -> int:
     result = normalize_dataset(
         args,
         canonical_faction_overrides=config.canonical_faction_overrides,
-        display_army_overrides=display_identities.canonical_faction_display_armies,
+        display_army_overrides=display_identities.resolve_master,
         normalized_metadata={
             **identity_metadata(config),
             **display_identity_metadata(display_identities),
@@ -74,7 +74,7 @@ def cmd_build(args: argparse.Namespace) -> int:
     build_dataset(
         args,
         canonical_faction_overrides=config.canonical_faction_overrides,
-        display_army_overrides=display_identities.canonical_faction_display_armies,
+        display_army_overrides=display_identities.resolve_master,
         normalized_metadata={
             **identity_metadata(config),
             **display_identity_metadata(display_identities),

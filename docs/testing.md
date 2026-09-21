@@ -92,7 +92,7 @@ or ZIP for the Army build. The rules stage
 always uses the normal curated-rules defaults.
 
 ```powershell
-python tools/run_checks.py --stage build --build-source "data/raw/JSON 20260910-204106.zip"
+python tools/run_checks.py --stage build --build-source "data/raw/JSON 20260918-204434.zip"
 python tools/run_checks.py --stage rules
 ```
 
@@ -193,9 +193,9 @@ so the command set and reporting format stay consistent.
 
 ## Runtime repository benchmark
 
-The canonicalization release gate uses a local repository-read benchmark rather
-than a CI timing threshold. Run it against an already-built production-like Army
-database:
+The 0.6.1 canonicalization release gate used a local repository-read benchmark
+rather than a CI timing threshold. The benchmark remains available for later
+before/after work; run it against an already-built production-like Army database:
 
 ```powershell
 python tools/benchmark_runtime.py data\generated\infinity.db

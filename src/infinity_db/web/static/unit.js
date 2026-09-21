@@ -7,7 +7,7 @@ const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
 const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
-const unitId = /^\/units\/(\d+)$/.exec(window.location.pathname)?.[1];
+const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
@@ -446,7 +446,8 @@ function profileItems(items, catalog, fallbackLabel) {
       ? `${decoratedName} ×${item.quantity}`
       : decoratedName;
     const link = document.createElement("a");
-    link.href = `/${catalog}/${encodeURIComponent(item.id)}`;
+    const routeId = item.slug || item.id;
+    link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
     link.textContent = label;
     if (hiddenIds.length) {
       const details = document.createElement("span");
@@ -770,10 +771,10 @@ function render(unit) {
 
 initializeDistanceUnitToggle();
 
-if (!unitId) {
+if (!unitIdentifier) {
   status.textContent = "The requested unit address is invalid.";
 } else {
-  getUnit(unitId).then((unit) => {
+  getUnit(unitIdentifier).then((unit) => {
     render(unit);
     window.addEventListener("distanceunitchange", () => render(unit));
     window.addEventListener("optionalunitschange", () => render(unit));

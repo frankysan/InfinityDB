@@ -21,12 +21,16 @@ from infinity_army_data.availability import (
     STANDARD_AVAILABILITY,
 )
 from infinity_army_data.normalized_format import FORMAT_NAME, FORMAT_VERSION
+from infinity_db.domain_slugs import (
+    APPLICATION_SLUG_DOMAINS,
+    assign_domain_slugs,
+    require_domain_slug,
+)
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
     IdentityConfig,
     IdentityConfigError,
-    load_identity_config,
     normalized_profile_identity,
     parse_identity_metadata,
     strip_reinforcement_prefix,
@@ -37,6 +41,7 @@ from .application_armies import (
     validate_application_armies,
 )
 from .application_catalogs import validate_application_catalogs
+from .application_domain_slugs import validate_application_domain_slugs
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .schema import (
     APPLICATION_ID,
@@ -236,13 +241,6 @@ def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityC
             "Database has invalid identity configuration metadata; rebuild the database"
         ) from exc
 
-def canonical_skill_id(
-    skill_id: int, identity_config: IdentityConfig | None = None
-) -> int:
-    """Return the configured representative ID for an explicit skill identity group."""
-    config = identity_config or load_identity_config()
-    return config.canonical_catalog_id("skills", skill_id) or skill_id
-
 def skill_merge_key(name: object) -> str | None:
     """Identify skill labels that differ only by a numeric level or value."""
     text = str(name or "").strip()
@@ -269,29 +267,6 @@ def merged_catalog_name(name: object) -> str:
     if ":" in text:
         return text.split(":", 1)[0].strip()
     return merged_skill_name(text)
-
-def configured_catalog_group(
-    identity_config: IdentityConfig,
-    catalog: str,
-    item_id: int,
-    available_ids: Collection[int],
-) -> tuple[int, tuple[int, ...]] | None:
-    """Return an explicit manifest group restricted to IDs present in this snapshot."""
-    source_ids = tuple(
-        source_id
-        for source_id in identity_config.catalog_source_ids(catalog, item_id)
-        if source_id in available_ids
-    )
-    if not source_ids:
-        return None
-    canonical_id = identity_config.canonical_catalog_id(catalog, item_id)
-    if canonical_id not in source_ids:
-        canonical_id = min(source_ids)
-    return canonical_id, source_ids
-
-def trait_slug(name: object) -> str:
-    """Return a URL-safe identity for one raw Army trait label."""
-    return re.sub(r"[^a-z0-9]+", "-", str(name or "").casefold()).strip("-")
 
 def source_trait_name(value: object) -> str:
     """Return a visible Army trait label, excluding bracketed profile annotations."""
@@ -355,16 +330,22 @@ def _canonical_usage_select(
     )
 
 
-def _canonical_filter_query(catalog: str) -> str:
-    """Return source-unit matches for one canonical profile/loadout catalog item."""
+def _canonical_filter_query(catalog: str, item_count: int) -> str:
+    """Return source-unit matches for one application catalog identity."""
+    if item_count < 1:
+        raise ValueError("item_count must be positive")
+    placeholders = ", ".join("?" for _ in range(item_count))
     return (
         "SELECT ppo.unit_id FROM profile_payload_occurrences AS ppo "
         f"JOIN profile_payload_{catalog} AS po "
-        "ON po.profile_payload_id = ppo.profile_payload_id WHERE po.item_id = ? "
+        "ON po.profile_payload_id = ppo.profile_payload_id "
+        f"WHERE po.item_id IN ({placeholders}) "
         "UNION SELECT lpo.unit_id FROM loadout_payload_occurrences AS lpo "
         f"JOIN loadout_payload_{catalog} AS lo "
-        "ON lo.loadout_payload_id = lpo.loadout_payload_id WHERE lo.item_id = ? "
-        f"UNION SELECT unit_id FROM unit_option_{catalog} WHERE item_id = ?"
+        "ON lo.loadout_payload_id = lpo.loadout_payload_id "
+        f"WHERE lo.item_id IN ({placeholders}) "
+        f"UNION SELECT unit_id FROM unit_option_{catalog} "
+        f"WHERE item_id IN ({placeholders})"
     )
 
 
@@ -508,6 +489,84 @@ def army_required_flags(
     if isinstance(filters, dict):
         required.update(flag for flag in AVAILABILITY_FLAGS if filters.get(flag))
     return required
+
+
+def minimal_availability_requirements(
+    group: Mapping[str, Any],
+    canonical_factions: Mapping[int, int | None],
+    declared_faction_ids_by_unit: Mapping[int, Collection[int]],
+    army_id: int | None = None,
+) -> tuple[frozenset[str], ...]:
+    """Return non-redundant optional-mode requirements for one logical unit.
+
+    Requirements are scoped to one application Army when ``army_id`` is supplied.
+    If one path is a strict superset of another, the superset cannot affect
+    visibility and is omitted from the summary.
+    """
+    requirements: set[frozenset[str]] = set()
+    for occurrence in group["army_occurrences"]:
+        if army_id is not None and occurrence["id"] != army_id:
+            continue
+        source_id = occurrence["source_id"]
+        requirements.add(
+            frozenset(
+                army_required_flags(
+                    occurrence,
+                    group,
+                    canonical_factions[source_id],
+                    declared_faction_ids_by_unit[source_id],
+                )
+            )
+        )
+
+    if not requirements and army_id is None and not group["armies"]:
+        requirements.add(frozenset())
+
+    minimal = [
+        required
+        for required in requirements
+        if not any(other < required for other in requirements)
+    ]
+    return tuple(sorted(minimal, key=lambda required: (len(required), sorted(required))))
+
+
+def availability_summary(
+    requirements_by_group: Iterable[tuple[frozenset[str], ...]],
+    selected_flags: set[str],
+) -> dict[str, Any]:
+    """Summarize current and potential logical-unit visibility."""
+    categories = {
+        "standard": {"shown": 0, "filtered": 0},
+        **{flag: {"shown": 0, "filtered": 0} for flag in AVAILABILITY_FLAGS},
+    }
+    shown = 0
+    available = 0
+
+    for requirements in requirements_by_group:
+        if not requirements:
+            continue
+        available += 1
+        satisfied = [required for required in requirements if required <= selected_flags]
+        is_shown = bool(satisfied)
+        if is_shown:
+            shown += 1
+            if any(not required for required in satisfied):
+                categories["standard"]["shown"] += 1
+            for flag in AVAILABILITY_FLAGS:
+                if any(flag in required for required in satisfied):
+                    categories[flag]["shown"] += 1
+        else:
+            for flag in AVAILABILITY_FLAGS:
+                if any(flag in required for required in requirements):
+                    categories[flag]["filtered"] += 1
+
+    return {
+        "shown": shown,
+        "available": available,
+        "filtered": available - shown,
+        "categories": categories,
+    }
+
 
 def visible_armies_for_group(
     group: Mapping[str, Any],
@@ -788,6 +847,7 @@ class Database:
             identity_config = identity_config_from_connection(connection)
             validate_application_armies(connection, identity_config)
             validate_application_catalogs(connection, identity_config)
+            validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(
                 "SELECT COUNT(*) FROM units WHERE source_defined = 1"
             ).fetchone()[0]
@@ -1136,6 +1196,109 @@ class Database:
                 items_by_source[source_id] = item
         return items_by_source
 
+    @instance_lru_cache(maxsize=512)
+    def application_id_for_slug(self, domain: str, slug: str) -> int | None:
+        """Resolve one domain-local slug to the current application numeric key."""
+
+        if domain not in APPLICATION_SLUG_DOMAINS:
+            raise ValueError(f"Unknown slug domain: {domain}")
+        slug = require_domain_slug(slug, context=f"{domain} slug")
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT application_id FROM application_domain_slugs "
+                "WHERE domain = ? AND status = 'resolved' "
+                "AND slug = ? COLLATE NOCASE",
+                (domain, slug),
+            ).fetchone()
+        return None if row is None else int(row["application_id"])
+
+    @instance_lru_cache(maxsize=1024)
+    def application_domain_id(self, domain: str, item_ref: int | str) -> int | None:
+        """Resolve one source/application numeric ID or public slug to application identity."""
+
+        if domain not in APPLICATION_SLUG_DOMAINS:
+            raise ValueError(f"Unknown slug domain: {domain}")
+        context = {
+            "armies": "army_id",
+            "units": "unit_id",
+            "skills": "skill_id",
+            "equipment": "equipment_id",
+            "weapons": "weapon_id",
+        }[domain]
+        if isinstance(item_ref, str):
+            slug = require_domain_slug(item_ref, context=context)
+            if slug.isdigit():
+                raise ValueError(
+                    f"{context} numeric references must be integers, not strings"
+                )
+            return self.application_id_for_slug(domain, slug)
+        if type(item_ref) is not int:
+            raise ValueError(f"{context} must be an integer or domain-local slug")
+
+        if domain == "armies":
+            if not SQLITE_INTEGER_MIN <= item_ref <= SQLITE_INTEGER_MAX:
+                raise ValueError(
+                    "army_id must be an integer within SQLite's signed 64-bit range"
+                )
+            graph = self._application_army_graph()
+            application_id = graph["source_to_application"].get(item_ref, item_ref)
+            return application_id if application_id in graph["armies"] else None
+
+        if not 0 <= item_ref <= SQLITE_INTEGER_MAX:
+            raise ValueError(
+                f"{domain} identifier must be a nonnegative SQLite signed 64-bit integer"
+            )
+        if domain == "units":
+            graph = self._unit_graph()
+            group = graph["groups_by_source"].get(item_ref)
+            if group is not None:
+                return int(group["id"])
+            return next(
+                (int(group["id"]) for group in graph["groups"] if group["id"] == item_ref),
+                None,
+            )
+
+        graph = self._application_catalog_graph(domain)
+        return item_ref if item_ref in graph["items"] else graph["source_to_item"].get(item_ref)
+
+    @instance_lru_cache(maxsize=512)
+    def application_army_id(self, army_ref: int | str) -> int | None:
+        """Resolve a source/application Army ID or public slug to application identity."""
+
+        return self.application_domain_id("armies", army_ref)
+
+    @instance_lru_cache(maxsize=512)
+    def application_unit_id(self, unit_ref: int | str) -> int | None:
+        """Resolve a source/application Unit ID or public slug to application identity."""
+
+        return self.application_domain_id("units", unit_ref)
+
+    @instance_lru_cache(maxsize=512)
+    def application_catalog_id(self, catalog: str, item_ref: int | str) -> int | None:
+        """Resolve a source/application catalog ID or public slug to application identity."""
+
+        if catalog not in {"skills", "equipment", "weapons"}:
+            raise ValueError(f"Unknown catalog: {catalog}")
+        return self.application_domain_id(catalog, item_ref)
+
+    @instance_lru_cache(maxsize=512)
+    def application_slug(self, domain: str, application_id: int) -> str | None:
+        """Return the current domain-local slug for one application identity."""
+
+        if domain not in APPLICATION_SLUG_DOMAINS:
+            raise ValueError(f"Unknown slug domain: {domain}")
+        if type(application_id) is not int or not 0 <= application_id <= SQLITE_INTEGER_MAX:
+            raise ValueError(
+                "application_id must be an integer within SQLite's signed 64-bit range"
+            )
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT slug FROM application_domain_slugs "
+                "WHERE domain = ? AND application_id = ? AND status = 'resolved'",
+                (domain, application_id),
+            ).fetchone()
+        return None if row is None or row["slug"] is None else str(row["slug"])
+
     @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
         """Return canonical application Armies with current logical-unit counts."""
@@ -1299,6 +1462,7 @@ class Database:
                     "name": item["name"],
                     "wiki": item.get("wiki"),
                 }
+            public["source_ids"] = list(graph["source_ids_by_item"].get(item["id"], ()))
             public["use_count"] = len(use_keys.get(item["id"], set()))
             merged.append(public)
         return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
@@ -1351,13 +1515,15 @@ class Database:
     def list_traits(self) -> list[dict[str, Any]]:
         """Return distinct raw Army trait labels carried by catalogued profiles."""
         traits = []
-        slug_counts: dict[str, int] = {}
-        for name, items in self.trait_usage_index().items():
-            base_slug = trait_slug(name) or "trait"
-            slug_counts[base_slug] = slug_counts.get(base_slug, 0) + 1
-            slug = base_slug if slug_counts[base_slug] == 1 else f"{base_slug}-{slug_counts[base_slug]}"
+        usage = self.trait_usage_index()
+        slugs = assign_domain_slugs(
+            ((name, name) for name in usage),
+            domain="traits",
+        )
+        for name, items in usage.items():
             traits.append({
-                "id": slug,
+                "id": slugs[name],
+                "slug": slugs[name],
                 "name": name,
                 "use_count": len(items),
                 "description": None,
@@ -1400,7 +1566,7 @@ class Database:
         return {**trait, "variants": variants}
 
     @instance_lru_cache(maxsize=128)
-    def get_catalog_item(self, catalog: str, item_id: int) -> dict[str, Any] | None:
+    def get_catalog_item(self, catalog: str, item_ref: int | str) -> dict[str, Any] | None:
         """Return an equipment or weapon item and its extra-specific unit usage."""
         tables = {
             "equipment": ("equipment", "equipment"),
@@ -1408,10 +1574,8 @@ class Database:
         }
         if catalog not in tables:
             raise ValueError(f"Unknown catalog: {catalog}")
-        if type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("item_id must be an integer within SQLite's signed 64-bit range")
         graph = self._application_catalog_graph(catalog)
-        application_item_id = item_id if item_id in graph["items"] else graph["source_to_item"].get(item_id)
+        application_item_id = self.application_catalog_id(catalog, item_ref)
         if application_item_id is None:
             return None
         item = graph["items"].get(application_item_id)
@@ -1480,7 +1644,7 @@ class Database:
             )
             if row["extra_id"] is not None:
                 occurrence["extras"].append({"id": row["extra_id"], "name": row["extra_name"]})
-        units_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
+        units_by_source = self._visible_unit_items_by_source(frozenset(AVAILABILITY_FLAGS))
         item_names = graph["source_names_by_item"][application_item_id]
         variants: dict[tuple[Any, tuple[tuple[Any, Any], ...]], dict[str, Any]] = {}
         for occurrence in occurrences.values():
@@ -1560,23 +1724,19 @@ class Database:
         return result
 
     @instance_lru_cache(maxsize=128)
-    def skill_source_ids(self, skill_id: int) -> tuple[int, ...]:
-        """Return source skill IDs represented by one application skill identity."""
-        if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+    def skill_source_ids(self, skill_ref: int | str) -> tuple[int, ...]:
+        """Return source skill IDs represented by one application Skill reference."""
         graph = self._application_catalog_graph("skills")
-        application_skill_id = skill_id if skill_id in graph["items"] else graph["source_to_item"].get(skill_id)
+        application_skill_id = self.application_catalog_id("skills", skill_ref)
         if application_skill_id is None:
             return ()
         return graph["source_ids_by_item"].get(application_skill_id, ())
 
     @instance_lru_cache(maxsize=128)
-    def get_skill(self, skill_id: int) -> dict[str, Any] | None:
-        """Return one skill together with the units that use it."""
-        if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+    def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+        """Return one Skill reference together with the units that use it."""
         graph = self._application_catalog_graph("skills")
-        application_skill_id = skill_id if skill_id in graph["items"] else graph["source_to_item"].get(skill_id)
+        application_skill_id = self.application_catalog_id("skills", skill_ref)
         if application_skill_id is None:
             return None
         skill = graph["items"].get(application_skill_id)
@@ -1650,7 +1810,7 @@ class Database:
             )
             if occurrence["unit"] not in variant["units"]:
                 variant["units"].append(occurrence["unit"])
-        unit_items_by_source = self._visible_unit_items_by_source(frozenset({"specops"}))
+        unit_items_by_source = self._visible_unit_items_by_source(frozenset(AVAILABILITY_FLAGS))
         for variant in variants.values():
             items = {
                 item["id"]: item
@@ -1670,11 +1830,11 @@ class Database:
     @instance_lru_cache(maxsize=128)
     def list_units(
         self,
-        army_id: int | None = None,
+        army_id: int | str | None = None,
         search: str = "",
-        skill_id: int | None = None,
-        equipment_id: int | None = None,
-        weapon_id: int | None = None,
+        skill_id: int | str | None = None,
+        equipment_id: int | str | None = None,
+        weapon_id: int | str | None = None,
         limit: int = 50,
         offset: int = 0,
         mercs: bool = False,
@@ -1684,35 +1844,25 @@ class Database:
         descending: bool = False,
         _unbounded: bool = False,
     ) -> dict[str, Any]:
-        if army_id is not None and (
-            type(army_id) is not int or not SQLITE_INTEGER_MIN <= army_id <= SQLITE_INTEGER_MAX
-        ):
-            raise ValueError("army_id must be an integer within SQLite's signed 64-bit range")
+        unresolved_army_filter = False
         if army_id is not None:
-            application_armies = self._application_army_graph()
-            army_id = application_armies["source_to_application"].get(army_id, army_id)
-            army = application_armies["armies"].get(army_id)
-            if army is not None and not army["playable"]:
-                raise ArmySelectionError(
-                    f"army_id {army_id} is a grouping-only identity, not a selectable army"
-                )
-        rule_filters = {
+            resolved_army_id = self.application_army_id(army_id)
+            unresolved_army_filter = resolved_army_id is None
+            army_id = resolved_army_id
+            if army_id is not None:
+                army = self._application_army_graph()["armies"].get(army_id)
+                if army is not None and not army["playable"]:
+                    raise ArmySelectionError(
+                        f"army_id {army_id} is a grouping-only identity, not a selectable army"
+                    )
+        rule_filters: dict[str, int | None] = {}
+        for catalog, item_ref in {
             "skills": skill_id,
             "equipment": equipment_id,
             "weapons": weapon_id,
-        }
-        for name, item_id in rule_filters.items():
-            if item_id is not None and (
-                type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX
-            ):
-                parameter = {
-                    "skills": "skill",
-                    "equipment": "equipment",
-                    "weapons": "weapon",
-                }[name]
-                raise ValueError(
-                    f"{parameter}_id must be an integer within SQLite's signed 64-bit range"
-                )
+        }.items():
+            if item_ref is not None:
+                rule_filters[catalog] = self.application_catalog_id(catalog, item_ref)
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -1735,15 +1885,23 @@ class Database:
             if enabled
         }
         matching_sources_by_rule: dict[str, set[int]] = {}
-        if any(item_id is not None for item_id in rule_filters.values()):
+        if rule_filters:
             with self._connect() as connection:
-                for catalog, item_id in rule_filters.items():
-                    if item_id is None:
+                for catalog, application_id in rule_filters.items():
+                    graph = self._application_catalog_graph(catalog)
+                    source_ids = (
+                        ()
+                        if application_id is None
+                        else graph["source_ids_by_item"].get(application_id, ())
+                    )
+                    if not source_ids:
+                        matching_sources_by_rule[catalog] = set()
                         continue
-                    query = _canonical_filter_query(catalog)
+                    query = _canonical_filter_query(catalog, len(source_ids))
+                    parameters = source_ids * 3
                     matching_sources_by_rule[catalog] = {
                         row["unit_id"]
-                        for row in connection.execute(query, (item_id, item_id, item_id))
+                        for row in connection.execute(query, parameters)
                     }
         graph = self._unit_graph()
         faction_groups = self._faction_groups()
@@ -1756,21 +1914,14 @@ class Database:
         declared_faction_ids_by_unit = graph["declared_faction_ids_by_unit"]
         search_key = accent_insensitive_key(search)
         grouped = []
+        matching_requirements: list[tuple[frozenset[str], ...]] = []
         for group in groups:
+            if unresolved_army_filter:
+                continue
             if any(
                 not set(group["source_ids"]).intersection(source_ids)
                 for source_ids in matching_sources_by_rule.values()
             ):
-                continue
-            visible_armies = visible_armies_for_group(
-                group,
-                selected_flags,
-                canonical_factions,
-                declared_faction_ids_by_unit,
-            )
-            if group["armies"] and not visible_armies:
-                continue
-            if army_id is not None and army_id not in visible_armies:
                 continue
             if search:
                 if search_key:
@@ -1787,6 +1938,25 @@ class Database:
                     )
                 if not matches_search:
                     continue
+
+            requirements = minimal_availability_requirements(
+                group,
+                canonical_factions,
+                declared_faction_ids_by_unit,
+                army_id,
+            )
+            if not requirements:
+                continue
+            matching_requirements.append(requirements)
+            if not any(required <= selected_flags for required in requirements):
+                continue
+
+            visible_armies = visible_armies_for_group(
+                group,
+                selected_flags,
+                canonical_factions,
+                declared_faction_ids_by_unit,
+            )
             grouped.append({**group, "armies": visible_armies})
         grouped.sort(
             key=lambda group: (unit_sort_key(group["name"]), group["id"]),
@@ -1817,7 +1987,14 @@ class Database:
             }
             for group in grouped[offset : offset + limit]
         ]
-        return {"items": items, "total": total, "limit": limit, "offset": offset}
+        summary = availability_summary(matching_requirements, selected_flags)
+        return {
+            "items": items,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "availability": summary,
+        }
 
     @instance_lru_cache(maxsize=32)
     def visible_unit_ids(
@@ -1839,23 +2016,23 @@ class Database:
         return [item["id"] for item in page["items"]]
 
     @instance_lru_cache(maxsize=128)
-    def get_unit(self, unit_id: int) -> dict[str, Any] | None:
-        """Return a browsable unit and its army-specific profiles and loadouts."""
-        if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("unit_id must be a nonnegative SQLite signed 64-bit integer")
+    def get_unit(self, unit_ref: int | str) -> dict[str, Any] | None:
+        """Return one Unit reference with its army-specific profiles and loadouts."""
+        application_unit_id = self.application_unit_id(unit_ref)
+        if application_unit_id is None:
+            return None
+        graph = self._unit_graph()
+        group = next(
+            (item for item in graph["groups"] if item["id"] == application_unit_id),
+            None,
+        )
+        if group is None:
+            return None
         identity_config = self._identity_config()
         with self._connect() as connection:
-            selected = connection.execute(
-                "SELECT logical_unit_id FROM logical_unit_sources WHERE source_unit_id = ?",
-                (unit_id,),
-            ).fetchone()
-            if selected is None:
-                return None
-            graph = self._unit_graph()
             faction_groups = self._faction_groups()
             faction_identities = self._faction_identities()
             army_names = graph["army_names"]
-            group = graph["groups_by_source"][unit_id]
             source_ids = group["source_ids"]
             declared_faction_ids = graph["declared_faction_ids_by_unit"]
             canonical_factions = {

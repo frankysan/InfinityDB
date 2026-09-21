@@ -333,6 +333,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     print(f"Transferred deployment artifacts to {args.destination}:{args.remote_root}")
+    print(
+        "Next on remote: "
+        f"cd {shlex.quote(args.remote_root)} && sh ./scripts/deploy-transferred.sh"
+    )
     return 0
 
 

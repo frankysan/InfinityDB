@@ -34,6 +34,7 @@ from ..identities import (
 )
 from .application_armies import materialize_application_armies
 from .application_catalogs import materialize_application_catalogs
+from .application_domain_slugs import materialize_application_domain_slugs
 from .loadout_payloads import materialize_loadout_payloads
 from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
@@ -119,8 +120,25 @@ def validate_input(data: dict[str, Any]) -> dict[str, tuple[str, ...]]:
             raise ValueError(
                 "Normalized data has invalid display-identity curated metadata"
             ) from exc
+        faction_rows = [
+            *tables.get("metadata_factions", []),
+            *tables.get("army_lists", []),
+        ]
+        active_canonical_ids = {
+            row["canonical_faction_id"]
+            for row in tables.get("units", [])
+            if type(row.get("canonical_faction_id")) is int
+        }
+        try:
+            display_army_overrides = display_identities.resolve_factions(
+                faction_rows, active_canonical_ids=active_canonical_ids
+            )
+        except DisplayIdentityError as exc:
+            raise ValueError(
+                "Normalized data cannot resolve pinned display-identity references"
+            ) from exc
         for row in tables.get("units", []):
-            expected_display_army_id = display_identities.canonical_faction_display_armies.get(
+            expected_display_army_id = display_army_overrides.get(
                 row.get("canonical_faction_id"), row.get("main_army_id")
             )
             if row.get("display_army_id") != expected_display_army_id:
@@ -326,6 +344,7 @@ def export_database(
                 materialize_application_armies(connection, identity_config)
                 materialize_application_catalogs(connection, identity_config)
                 materialize_logical_unit_payloads(connection)
+                materialize_application_domain_slugs(connection)
                 materialize_profile_payloads(connection)
                 materialize_loadout_payloads(connection)
                 create_indexes(connection)

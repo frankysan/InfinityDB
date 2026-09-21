@@ -32,7 +32,7 @@ function renderItems(items) {
     for (const [index, unit] of (item.units || []).entries()) {
       if (index) units.append(", ");
       const link = document.createElement("a");
-      link.href = `/units/${unit.id}`;
+      link.href = `/units/${unit.public_slug || unit.id}`;
       link.textContent = unit.name;
       units.append(link);
     }

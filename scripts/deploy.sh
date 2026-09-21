@@ -26,6 +26,15 @@ if [ "$RETAIN_APP_IMAGES" -lt 1 ]; then
   exit 2
 fi
 
+: "${PRUNE_APP_IMAGES:=1}"
+case "$PRUNE_APP_IMAGES" in
+  0|1) ;;
+  *)
+    echo "PRUNE_APP_IMAGES must be 0 or 1." >&2
+    exit 2
+    ;;
+esac
+
 repo_root="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
 cd "$repo_root"
 
@@ -38,8 +47,9 @@ fi
 echo "Validating manifest-bound published symbol set..."
 "$python" tools/verify_deployment_assets.py
 
-echo "Building application image infinity-db:$IMAGE_TAG..."
-docker compose build app
+display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"
+echo "Building application image infinity-db:$IMAGE_TAG (display $display_version)..."
+docker compose build --build-arg "INFINITY_DB_DISPLAY_VERSION=$display_version" app
 
 # Verify the exact image that Compose will deploy. The published-assets mode
 # checks that the locally validated symbol publication survived Docker/package
@@ -47,4 +57,7 @@ docker compose build app
 sh ./scripts/verify-container-image.sh "infinity-db:$IMAGE_TAG" --published-assets
 
 docker compose up -d --no-build --wait
-exec sh "$(dirname "$0")/prune-app-images.sh" "$RETAIN_APP_IMAGES"
+if [ "$PRUNE_APP_IMAGES" = "1" ]; then
+  exec sh "$(dirname "$0")/prune-app-images.sh" "$RETAIN_APP_IMAGES"
+fi
+echo "Application image pruning skipped for this deployment."

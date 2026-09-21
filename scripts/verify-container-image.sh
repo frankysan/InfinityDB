@@ -213,6 +213,7 @@ fi
 # the production process opened and composed both runtime databases.
 docker exec "$container" python -c '
 import json
+import os
 from urllib.request import urlopen
 
 with urlopen("http://127.0.0.1:8000/api/armies", timeout=3) as response:
@@ -236,6 +237,15 @@ with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)
 if not version.get("version") or not version.get("snapshot_revision"):
     raise SystemExit("/api/version returned incomplete runtime identity")
+
+expected_display_version = os.environ.get("INFINITY_DB_DISPLAY_VERSION", "").strip()
+if expected_display_version:
+    with urlopen("http://127.0.0.1:8000/", timeout=3) as response:
+        page = response.read().decode("utf-8")
+    if f"Version {expected_display_version}" not in page:
+        raise SystemExit(
+            f"Browser footer does not show built display version {expected_display_version!r}"
+        )
 '
 
 if [ "$published_assets" -eq 1 ]; then

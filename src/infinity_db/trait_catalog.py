@@ -5,15 +5,18 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from infinity_db.database.repository import Database, trait_slug
+from infinity_db.database.repository import Database
+from infinity_db.domain_references import public_slug_for_reference
+from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
 
 
 def _record_slug(record: dict[str, Any]) -> str:
-    record_id = str(record.get("id") or "")
-    if record_id.startswith("trait:"):
-        return record_id.removeprefix("trait:")
-    return trait_slug(record.get("name")) or "trait"
+    return route_slug_from_typed_domain_id(
+        record.get("id"),
+        expected_domain="trait",
+        context="curated trait id",
+    )
 
 
 def _source_prefixes(record: dict[str, Any]) -> tuple[str, ...]:
@@ -91,7 +94,15 @@ class TraitCatalog:
             return {"label": text, "name": None, "slug": None}
         record = self._record_for_label(text)
         if record is None:
-            return {"label": text, "name": text, "slug": trait_slug(text) or None}
+            source = next(
+                (item for item in self.database.list_traits() if item["name"] == text),
+                None,
+            )
+            return {
+                "label": text,
+                "name": text,
+                "slug": None if source is None else source["slug"],
+            }
         return {
             "label": text,
             "name": record["name"],
@@ -137,6 +148,7 @@ class TraitCatalog:
         return [
             {
                 "id": group["id"],
+                "slug": group["id"],
                 "name": group["name"],
                 "use_count": group["use_count"],
                 "description": group["description"],
@@ -158,7 +170,13 @@ class TraitCatalog:
                 key = (variant["catalog"], variant["item_id"])
                 existing = variants_by_item.get(key)
                 if existing is None:
-                    variants_by_item[key] = deepcopy(variant)
+                    candidate = deepcopy(variant)
+                    slug = public_slug_for_reference(
+                        self.database, variant["catalog"], variant["item_id"]
+                    )
+                    if slug is not None:
+                        candidate["item_slug"] = slug
+                    variants_by_item[key] = candidate
                     continue
                 units = {unit["id"]: unit for unit in existing["units"]}
                 units.update({unit["id"]: unit for unit in variant["units"]})
@@ -167,6 +185,7 @@ class TraitCatalog:
                 )
         payload = {
             "id": trait["id"],
+            "slug": trait["id"],
             "name": trait["name"],
             "use_count": trait["use_count"],
             "description": trait["description"],

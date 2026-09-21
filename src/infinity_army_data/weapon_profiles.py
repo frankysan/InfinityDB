@@ -2,29 +2,37 @@
 
 from __future__ import annotations
 
-from .weapon_config import load_weapon_override_config
+from .weapon_config import WeaponOverrideConfig, load_weapon_override_config
 
 _SOURCE_CORRECTIONS = load_weapon_override_config()
 
 
-def weapon_profile_override(weapon_id: int) -> str | None:
+def weapon_profile_override(
+    weapon_id: int, *, config: WeaponOverrideConfig = _SOURCE_CORRECTIONS
+) -> str | None:
     """Return a maintained profile correction for incomplete Army source metadata."""
 
-    return _SOURCE_CORRECTIONS.profile_overrides.get(weapon_id)
+    return config.profile_overrides.get(weapon_id)
 
 
-def weapon_name_override(weapon_id: int) -> str | None:
+def weapon_name_override(
+    weapon_id: int, *, config: WeaponOverrideConfig = _SOURCE_CORRECTIONS
+) -> str | None:
     """Return a corrected display name for a known Army source naming anomaly."""
 
-    return _SOURCE_CORRECTIONS.name_overrides.get(weapon_id)
+    return config.name_overrides.get(weapon_id)
 
 
 def weapon_metadata_profile_suppressed(
-    weapon_id: int, name: object, mode: object
+    weapon_id: int,
+    name: object,
+    mode: object,
+    *,
+    config: WeaponOverrideConfig = _SOURCE_CORRECTIONS,
 ) -> bool:
     """Whether one Army metadata weapon row is configured as non-display metadata."""
 
-    suppressions = _SOURCE_CORRECTIONS.metadata_profile_suppressions.get(weapon_id, ())
+    suppressions = config.metadata_profile_suppressions.get(weapon_id, ())
     source_name = str(name or "").strip()
     source_mode = None if mode is None else str(mode).strip()
     return any(

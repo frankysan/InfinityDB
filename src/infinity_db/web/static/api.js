@@ -65,6 +65,6 @@ export function getUnits({ armyId, search, skillId, equipmentId, weaponId, limit
   return get(`/api/units?${params}`, signal);
 }
 
-export function getUnit(unitId, signal) {
-  return get(`/api/units/${encodeURIComponent(unitId)}`, signal);
+export function getUnit(unitIdentifier, signal) {
+  return get(`/api/units/${encodeURIComponent(unitIdentifier)}`, signal);
 }

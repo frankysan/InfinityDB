@@ -79,8 +79,9 @@ and serves a read-only browser and same-origin HTTP API.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
 - Server migration distinguishes exact runtime transfer from rebuildability.
-  Exact runtime preservation copies the generated databases and complete local
-  published symbol inventory on the same Git revision; reproducible rebuilds
+  Exact runtime preservation copies the generated databases, terminal symbol
+  build manifest, and complete local published symbol inventory on the same Git
+  revision; reproducible rebuilds
   additionally preserve immutable Army/SYMBOLS snapshots, generated provenance,
   `army-symbol-build.json`, and local overrides. Cross-machine SVG regeneration
   is not promised byte-identical because fonts and external processor versions
@@ -137,7 +138,9 @@ and serves a read-only browser and same-origin HTTP API.
   provenance and explicitly leaves `main_army_id` unset for canonical-1 units;
   901 remains the distinct Non-Aligned Armies grouping identity. A separate
   reviewed relationship in `data/curated/identities/army-display.json` derives
-  `display_army_id` for presentation; current canonical-1 units display as 901.
+  `display_army_id` for presentation; the provenance-only canonical reference remains
+  numeric `1`, while the display target is authored as source slug
+  `non-aligned-armies` and resolves to 901.
 - Source investigation shows ID `1` and ID `901` represent different concepts.
   ID `1` behaves as a mercenary source/origin identity with no army list and no
   ordinary faction membership role; 901 is the Non-Aligned Armies grouping
@@ -198,8 +201,9 @@ and serves a read-only browser and same-origin HTTP API.
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
   reads consume that materialized mapping rather than rebuilding identity
-  dynamically. Schema version 14 / compatibility revision 22 materializes
-  representative-backed canonical logical-unit fields plus source-attributed
+  dynamically. Introduced in schema version 14 / compatibility revision 22, the
+  canonical layer materializes representative-backed logical-unit fields plus
+  source-attributed
   alias/note/`spectables` context, as well as reusable canonical profile and
   loadout payloads scoped to each logical unit plus one occurrence row per
   source profile/loadout. Profile AVA/logo and loadout points/SWC remain
@@ -290,8 +294,8 @@ and serves a read-only browser and same-origin HTTP API.
   despite residing on an application-owned row. The latter
   preserves 99 references across 89 source units to faction IDs 203/903/906/907
   that have no current Army list. Source `canonical_faction_id` is origin/context,
-  not ownership or availability. Schema version 16 / compatibility revision 24
-  now materializes the canonical application Army identity/hierarchy as an
+  not ownership or availability. Schema version 17 / compatibility revision 25
+  now contains the canonical application Army identity/hierarchy as an
   InfinityDB abstraction in `application_armies`, `application_army_sources`,
   and `application_army_reinforcement_parents`. It stores canonical name/slug,
   role/playability/grouping, reviewed source-ID mappings and preferred-source
@@ -307,7 +311,11 @@ and serves a read-only browser and same-origin HTTP API.
   collapsing those contexts.
 - Skills, Equipment, and Weapons application identities are InfinityDB
   abstractions materialized from normalized catalog rows, reviewed catalog alias
-  groups, and metadata enrichment. `application_catalog_sources` preserves each
+  groups, and metadata enrichment. Catalog identity slug references resolve against
+  the complete source metadata catalog plus currently used rows; reviewed
+  per-catalog slug aliases may correct upstream spelling at the identity-authoring
+  boundary without rewriting raw provenance. `application_catalog_sources` preserves
+  each
   contributing source ID/label; detailed `metadata_weapons` modes and profiles
   remain contextual rather than being promoted to invariant catalog facts.
 - `tools/benchmark_runtime.py` is the canonical repository-read benchmark for the
@@ -538,7 +546,11 @@ reserved `rules/example.json` template is excluded from directory ingestion.
 The rules database has its own schema/versioning and replacement lifecycle. It
 must not import Army JSON data, and Army database construction must not import
 rules data. Application/service code may combine the two only through stable
-application-level identities.
+application-level identities. For `armyLinks`, Skill, Equipment, and Weapon IDs may be
+positive numeric source references or application-domain slugs; the checked-in N5 rules
+use slugs. `rules.db` preserves the authored value and composition code matches it to
+the current Army application identity. Numeric-looking strings are rejected so numeric
+compatibility references remain unambiguous JSON integers.
 
 ## API and UI constraints
 
@@ -560,6 +572,11 @@ application-level identities.
   page documents retain the navigation/header/footer markers expected by
   `_page()`.
 - Shared menus use the inline-sidebar / compact-topbar pattern.
+- User-selected browser settings persist for the current tab/session through
+  `sessionStorage`; values loaded from persistent cookies must be mirrored into the session
+  store before use. The **Remember settings** consent path additionally mirrors values to
+  one-year SameSite cookies for later sessions; turning persistence off removes those
+  cookies but must not reset current-session choices.
 - `styles.css` is the design-system source of truth. Reuse established tokens,
   surfaces, table density, detail-group primitives, and badges rather than
   adding page-local equivalents.
@@ -586,6 +603,9 @@ application-level identities.
 - Keep `__version__` at the released value until an explicit release. While
   unreleased work exists, the browser footer uses `__display_version__` with
   the `+dev` suffix.
+- Every release follows the canonical `docs/releasing.md` checklist. A project-wide
+  documentation audit is a mandatory release gate and must review the complete maintained
+  documentation corpus rather than only the files touched by that release.
 
 ## Decision log
 
@@ -648,6 +668,13 @@ application-level identities.
   count growth fail the InfinityDB application build before SQLite export.
   Synthetic/ad-hoc inputs without downloader snapshot provenance and the
   standalone `infinity-army` pipeline are deliberately outside this baseline.
+- 2026-09-21: Maintained Weapon category/correction references now accept numeric
+  source IDs or deterministic source-label slugs, and all 16 tracked references use
+  readable slugs. Resolution happens against the source weapon catalog before source
+  corrections are applied; numeric authoring remains available for ambiguity/provenance.
+  The curated display-identity target similarly uses the source faction slug
+  `non-aligned-armies`, while canonical source identity `1` remains numeric because no
+  authoritative source-faction slug owns that provenance identity.
 - 2026-09-17: Weapon catalog policy was split from implementation code.
   `config/catalogs/weapon-categories.json` owns ordered weapon-family matching
   and explicit category decisions; `config/catalogs/weapon-overrides.json` owns
@@ -740,3 +767,136 @@ application-level identities.
   session, and refuses a remote checkout whose commit or tracked state differs from
   the clean local checkout. Tracked browser maps travel through Git, not the artifact
   transfer, so exact commit identity is part of the transfer contract.
+- 2026-09-20: Production deployment has two explicit data modes.
+  `install-or-update.sh` is the server-rebuild path and may replace generated runtime
+  databases from server-local raw source. `deploy-transferred.sh` is the no-rebuild
+  path for the commit-matched artifact bundle produced by
+  `send_deployment_artifacts.py`; it must preserve that transferred database/symbol
+  pairing. `deploy-local-test.sh` reuses the no-rebuild path under a separate Compose
+  project, binds only to `127.0.0.1`, and disables production image pruning.
+  `stop-local-test.sh` is the matching teardown path: it always targets only the
+  `infinitydb-test` Compose project and retains its named volumes by default.
+
+- 2026-09-20: Containerized deployments preserve the checkout-derived browser display
+  version explicitly instead of copying Git metadata into the image. `deploy.sh`
+  computes `__display_version__` in the source checkout and passes it into the Docker
+  build as `INFINITY_DB_DISPLAY_VERSION`; installed/containerized code prefers that
+  value when rendering the browser footer. The package/API `__version__` remains the
+  released semantic version and is not changed by this deployment metadata.
+- 2026-09-20: Human-authored catalog identity overrides may use either positive
+  numeric source IDs or readable source-label slugs. The checked-in Skill, Equipment,
+  and Weapon identity groups now use readable source-label slugs throughout. Slug
+  references are resolved before application catalog grouping and therefore do not
+  depend on the later public application-slug registry. A group wholly absent from a
+  source snapshot is inert; once any member is present, unknown or ambiguous slugs
+  fail closed. Numeric references remain valid for compatibility, provenance, and
+  collision disambiguation. Apply this numeric-or-slug authoring convention to other
+  maintained/curated JSON reference fields only where their owning layer can resolve
+  the domain deterministically.
+- 2026-09-21: Curated N5 `armyLinks` for Skills, Equipment, and Weapons now use
+  readable application-domain slugs instead of opaque numeric source IDs. The curated
+  v3 validator accepts either a positive integer or a domain slug for those entities,
+  rejects numeric-looking slug strings, and retains numeric compatibility. `rules.db`
+  stores the authored reference without importing Army data; Skill/Catalog composition
+  checks both source-ID and application-slug forms so grouped identities such as Martial
+  Arts, Strategos, BS Attack, CC Attack, and Armed Turret resolve through the same
+  logical identity used by public routes.
+- 2026-09-21: Centralize dual-ID resolution in the Army repository.
+  `application_domain_id()` is the shared resolver for the registry-backed Army, Unit,
+  Skill, Equipment, and Weapon domains; domain-specific resolver helpers delegate to it,
+  and detail reads accept numeric/source IDs or stable slugs directly. Web detail routes
+  parse numeric route syntax but no longer resolve slugs before calling the repository.
+- 2026-09-21: Treat dual numeric/slug identity as the default contract for every
+  application domain once a stable domain-local slug can be resolved. Application-facing
+  repository/API calls, routes, filters, cross-links, browser state, and maintained
+  references should accept either the numeric application ID or canonical slug; producers
+  should prefer slugs for human-facing and human-authored output while retaining numeric
+  compatibility. New domains must establish one central resolver and reuse it across all
+  consumers rather than inventing local slug schemes. Unresolved/colliding slugs fall back
+  to numeric identity and must not be guessed. Source/provenance-only references are outside
+  this rule until explicitly mapped to an application identity. Armies now follow the
+  same contract for Unit-explorer/API filtering while retaining their source/context slug
+  separately from the application `public_slug`.
+- 2026-09-20: Domain-unique application slugs now have a derived persistence
+  layer. Schema version 17 / compatibility revision 25 materializes
+  `application_domain_slugs` for Armies, logical Units, Skills, Equipment, and
+  Weapons. Each identity retains a deterministic candidate plus `resolved`,
+  `collision`, or `unavailable` status; collisions never receive positional numeric
+  suffixes. The current 2026-09-18 snapshot resolves all 1,042 initial identities.
+  Source slugs/numeric IDs remain context/provenance and curated IDs such as
+  `skill:doctor` remain typed internal identities. Skills are the first additive
+  public-route consumer: resolved non-numeric Skill slugs are emitted in API/browser
+  links and accepted by web/API detail routes while numeric routes remain valid.
+  Numeric-only candidates stay on the numeric compatibility form, and no redirect or
+  permanent slug-freeze promise is made until the later freezing/alias migration.
+- 2026-09-21: Equipment is the second additive public-route consumer of the
+  application-domain slug registry. Equipment catalog/detail API payloads and nested
+  Unit equipment references expose resolved non-numeric application slugs, browser
+  links prefer them, and `/equipment/{slug}` plus `/api/equipment/{slug}` resolve to
+  the canonical application Equipment identity. Numeric Equipment routes remain valid,
+  source-variant IDs are resolved through the application catalog provenance mapping
+  before slug lookup, and numeric-only slug candidates remain on the compatibility
+  numeric form.
+- 2026-09-21: Weapons are the third additive public-route consumer of the same
+  application-domain slug registry. Weapon catalog/detail API payloads and nested Unit
+  weapon references expose resolved non-numeric application slugs, browser links prefer
+  them, and `/weapons/{slug}` plus `/api/weapons/{slug}` resolve to the canonical
+  application Weapon identity. Existing numeric Weapon routes remain valid, curated
+  source-variant IDs resolve through application catalog provenance before slug lookup,
+  and numeric-only candidates stay on the compatibility numeric form.
+- 2026-09-21: Logical Units are the fourth additive public-route consumer. Existing
+  Unit `slug` remains source/context data, while player-facing Unit payloads expose a
+  separate resolved `public_slug`. Unit list/detail, catalog usage, Trait usage, and
+  Skill Modifier links prefer that application slug; `/units/{slug}` and
+  `/api/units/{slug}` resolve through the registry while numeric Unit routes remain
+  valid. Source Unit references are resolved to their logical application Unit before
+  slug lookup, and numeric-only candidates remain on numeric compatibility URLs.
+- 2026-09-21: Unit explorer Skill, Equipment, and Weapon filters are public-identity
+  consumers too. Browser filter option/state values prefer resolved application-domain
+  slugs and preserve numeric query values only for compatibility. Repository filtering
+  resolves either form to the logical application catalog identity, then expands that
+  identity to all materialized source IDs before matching canonical profile/loadout/unit-
+  option occurrences. A grouped filter must therefore match every represented variant
+  (for example any TinBot source variant) rather than only the numeric representative.
+  Catalog-list payloads expose those materialized `source_ids`, and the browser uses them
+  to canonicalize accepted legacy source-ID query values to the preferred application
+  slug so selector state and backend filtering cannot diverge.
+- 2026-09-21: Armies now consume the same dual identifier contract. `/api/armies`
+  exposes an additive `public_slug` while retaining the existing Army `slug` as source/
+  context data. Unit-explorer and `/api/units` Army filters accept either a source/
+  application numeric ID or the application Army public slug, normalize through one
+  repository resolver, reject grouping-only identities after resolution, and prefer the
+  public slug in browser query state while preserving numeric compatibility.
+- 2026-09-21: Numeric-shadow handling is owned by the application-domain slug registry.
+  Digit-only candidates remain visible as `candidate_slug` for diagnostics but are stored
+  as `unavailable` with no routable slug because they would collide with numeric
+  compatibility routes. `application_slug()` therefore returns only actually routable
+  public identifiers, and downstream consumers no longer repeat `slug.isdigit()` guards.
+  Trait slug assignment remains independent because Trait routes do not share a numeric
+  application-ID namespace.
+- 2026-09-21: Cross-domain API references now follow an additive slug-companion policy.
+  Existing numeric fields remain stable; canonical application references gain readable
+  companions when routable. Unit Army scalar references use `main_army_slug` /
+  `display_army_slug`, structured Army references use `public_slug`, Trait usage variants
+  use `item_slug`, and Skill Modifier rows use `skill_slug`. Source/context-only IDs remain
+  numeric-only rather than being relabeled.
+- 2026-09-21: Trait public identity is aligned with the shared slug policy without
+  duplicating curated rules identity into the Army database. Curated Traits already own
+  stable typed IDs in `rules.db`; a simple `trait:<slug>` ID projects directly to the
+  public Trait route and remains stable across display-name changes. Trait list/detail
+  payloads expose `slug` explicitly. Uncurated raw Traits use the complete Army Trait
+  catalog's shared normalization/collision pass, and application cross-links must reuse
+  that assigned slug rather than normalize individual labels independently. Qualified
+  typed IDs are not flattened implicitly into route slugs.
+
+- 2026-09-20: Peripheral rule semantics belong in the existing curated v3
+  `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
+  rules authority, the pinned Wiki archive as discovery/secondary provenance,
+  and FAQ rulings kept as dated clarification records. Reviewed Army-local
+  Peripheral-to-canonical-entity/profile mappings are a separate future curated
+  identity contract; Wiki/rules knowledge is never written into Army source
+  tables. The current 2026-09-18 Army audit finds 279 army-local definitions, 56
+  names, 818 resolved loadout attachments, no profile attachments, all 279
+  definitions attached somewhere, 41 names with multiple raw identities, three
+  names with `mercs` variation, and 22 canonical loadout payloads with differing
+  semantic attachment signatures.

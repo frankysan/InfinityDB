@@ -79,6 +79,11 @@ instructions must not depend on a particular user's machine configuration.
 - Do not silently discard ambiguous, unresolved, or source-specific information.
 - Keep source-format, database, HTTP, browser, and deployment concerns in their
   established layers.
+- For an application domain with a stable canonical slug, treat numeric IDs and
+  domain-local slugs as interchangeable lookup forms. Application-facing calls should
+  accept either; generated links, browser state, API references, and human-authored
+  configuration should prefer the slug. Keep numeric compatibility/fallback, and reuse
+  the domain's central resolver instead of creating consumer-specific slug logic.
 - Normal builds and tests must not unexpectedly require network access.
 - Do not redistribute third-party data or assets unless their licensing permits
   it; see `THIRD_PARTY_NOTICES.md`.
@@ -146,6 +151,8 @@ Normally omit standalone changelog entries for:
 Detailed implementation history should remain available through Git history, architecture and data-model documentation, deployment documentation, manifests, generated reports, and tests rather than being duplicated in the changelog.
 
 Before finalizing a release, review the complete `Unreleased` section as a whole rather than only promoting individual accumulated entries. Merge overlapping entries, remove implementation-only details, and ensure the resulting release notes tell a concise and coherent story of the release.
+
+Before finalizing **any release**, follow the canonical checklist in `docs/releasing.md`. A project-wide documentation audit is a mandatory release gate: review the complete maintained documentation corpus, not only files changed since the previous release, and correct stale current-state claims before tagging. Version-specific release requirements may add gates but do not replace this process.
 
 - Update `docs/architecture.md` when changing architectural boundaries,
   engineering principles, or lasting design decisions.

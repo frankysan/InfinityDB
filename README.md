@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.6.1** (2026-09-20).
+Current release: **0.6.2** (2026-09-21).
 
 ## Guiding principles
 
@@ -111,7 +111,7 @@ local graphical deployment. Use the symbol orchestrator with an existing pinned
 Army snapshot:
 
 ```powershell
-python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-083509.zip"
+python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-204434.zip"
 ```
 
 Or intentionally fetch a fresh Army snapshot first:
@@ -138,7 +138,7 @@ python tools/download_wiki_snapshot.py --language es
 
 ```powershell
 # Run individual Army-data stages
-infinity-db merge "data/raw/JSON 20260910-204106.zip" data/generated/master.json --compact
+infinity-db merge "data/raw/JSON 20260918-204434.zip" data/generated/master.json --compact
 infinity-db normalize data/generated/master.json data/generated/normalized.json --compact
 infinity-db export data/generated/normalized.json data/generated/infinity.db
 
@@ -170,17 +170,26 @@ prevents replacement.
 ## Linux deployment
 
 The supported Docker Compose deployment packages the application and validated
-runtime databases into an immutable image. Build the runtime data and prepare a
-complete local symbol publication before deploying:
+runtime databases into an immutable image. Production has two explicit data paths:
+`install-or-update.sh` rebuilds runtime databases from raw source already present on
+the server, while `deploy-transferred.sh` deploys a commit-matched database/symbol
+artifact set transferred from a development checkout without rebuilding it.
 
 ```sh
-infinity-db build --compact
-infinity-db build-rules
-DOMAIN=infinity.example.com IMAGE_TAG=app-local sh ./scripts/deploy.sh
+# Server-rebuild deployment
+sh ./scripts/install-or-update.sh
+
+# After tools/send_deployment_artifacts.py has transferred a matched artifact set
+sh ./scripts/deploy-transferred.sh
 ```
 
-Place the supplied Caddy service behind a public TLS reverse proxy. Deployment
-validation fails if required databases or graphical assets are missing or inconsistent.
+For a deployment test on the server that must not be reachable from the LAN, use
+`sh ./scripts/deploy-local-test.sh`. It runs as a separate Compose project on
+`127.0.0.1:8080` by default and does not prune production rollback images.
+
+Place the supplied production Caddy service behind a public TLS reverse proxy.
+Deployment validation fails if required databases or graphical assets are missing or
+inconsistent.
 
 See the [Linux deployment guide](docs/deployment.md) for prerequisites, updates,
 rollback, and operational commands. Use the
@@ -200,12 +209,15 @@ scripts/                    # Linux deployment and maintenance scripts
 data/
   raw/                      # Immutable Army/source snapshots, ignored by Git
   wiki/                     # Wiki research snapshots, ignored by Git
-  curated/                  # Source-controlled reviewed rules and annotations
+  pdf/                      # Local rules/FAQ/ITS research documents, ignored by Git
+  curated/                  # Source-controlled reviewed rules, identities, and annotations
   manifests/                # Generated provenance/build state, ignored by Git
   work/                     # Rebuildable processing work, ignored by Git
   reports/                  # Generated processing reports, ignored by Git
   logs/                     # Verbose pipeline logs, ignored by Git
+  backups/                  # Local retained processing/publication history, ignored by Git
   generated/                # Databases and normalized build artifacts, ignored by Git
+image_overrides/            # Local authoritative symbol overrides, ignored by Git
 ```
 
 ## Development checks
@@ -240,9 +252,13 @@ profile definitions, asset modes, reports, and exit codes.
   boundaries, current architecture, and accepted design direction.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
+- [Peripheral curated-data design](docs/peripheral-curated-data-design.md) —
+  active Milestone 2B rules, identity, and relationship design.
 - [Data storage and provenance](data/README.md) — raw, curated, generated, and
   local processing artifacts.
 - [Development checks](docs/testing.md) — local and CI validation.
+- [Release process](docs/releasing.md) — mandatory release checklist and project-wide
+  documentation audit.
 - [Linux deployment](docs/deployment.md) — production deployment and updates.
 - [Server migration](docs/server-migration.md) — exact transfer and rebuild
   requirements.

@@ -239,6 +239,7 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert set(armies) == {101, 198, 201}
     assert [army["id"] for army in json.loads(body)["items"]] == [101, 198, 201]
     assert armies[101]["slug"] == "zulu_company"
+    assert armies[101]["public_slug"] == "zulu-company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
     assert armies[198]["kind"] == "reinforcement"
@@ -298,15 +299,37 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     assert armies[901]["role"] == "grouping"
     assert armies[901]["playable"] is False
 
-    status, _, body = request(role_app, "/api/units", query="army_id=901")
-    assert status == 400
-    assert "grouping-only identity" in json.loads(body)["error"]
+    status, _, body = request(role_app, "/api/units")
+    assert status == 200
+    unit_payload = json.loads(body)["items"][0]
+    assert unit_payload["main_army_id"] == 101
+    assert unit_payload["main_army_slug"] == "main"
+    assert unit_payload["display_army_id"] == 101
+    assert unit_payload["display_army_slug"] == "main"
+    assert unit_payload["main_faction"]["public_slug"] == "main"
+    assert unit_payload["display_faction"]["public_slug"] == "main"
+    assert {army["id"]: army["public_slug"] for army in unit_payload["armies"]} == {
+        101: "main",
+        102: "sectorial",
+        901: "non-aligned",
+        902: "independent",
+    }
+
+    for army_ref in ("901", "non-aligned"):
+        status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
+        assert status == 400
+        assert "grouping-only identity" in json.loads(body)["error"]
 
 
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
-    for army_id, expected in [(101, {1, 3}), (201, {1, 2})]:
+    for army_ref, expected in [
+        (101, {1, 3}),
+        ("zulu-company", {1, 3}),
+        (201, {1, 2}),
+        ("alpha-company", {1, 2}),
+    ]:
         status, _, body = request(
-            app, "/api/units", query=urlencode({"army_id": army_id, "mercs": 1})
+            app, "/api/units", query=urlencode({"army_id": army_ref, "mercs": 1})
         )
         assert status == 200
         payload = json.loads(body)
@@ -342,12 +365,19 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
 
 
 def test_unit_rule_filters_match_profiles_and_loadouts(app: Callable) -> None:
-    for parameter in ("skill_id=11", "equipment_id=21", "weapon_id=31"):
+    for parameter in (
+        "skill_id=11",
+        "equipment_id=21",
+        "weapon_id=31",
+        "skill_id=stealth",
+        "equipment_id=medikit",
+        "weapon_id=combi-rifle",
+    ):
         status, _, body = request(app, "/api/units", query=parameter)
         assert status == 200
         assert {item["id"] for item in json.loads(body)["items"]} == {1}
 
-    status, _, body = request(app, "/api/units", query="skill_id=11&weapon_id=31")
+    status, _, body = request(app, "/api/units", query="skill_id=stealth&weapon_id=combi-rifle")
     assert status == 200
     assert {item["id"] for item in json.loads(body)["items"]} == {1}
 
@@ -367,7 +397,20 @@ def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
 
     status, _, body = request(app, "/api/units", query="army_id=101&specops=1")
     assert status == 200
-    assert {item["id"] for item in json.loads(body)["items"]} == {1, 4}
+    payload = json.loads(body)
+    assert {item["id"] for item in payload["items"]} == {1, 4}
+    assert payload["availability"] == {
+        "shown": 2,
+        "available": 4,
+        "filtered": 2,
+        "categories": {
+            "standard": {"shown": 1, "filtered": 0},
+            "mercs": {"shown": 0, "filtered": 1},
+            "specops": {"shown": 1, "filtered": 0},
+            "teamops": {"shown": 0, "filtered": 1},
+            "reinforcement": {"shown": 0, "filtered": 0},
+        },
+    }
 
     status, _, body = request(app, "/api/units", query="army_id=101&teamops=1")
     assert status == 200
@@ -395,7 +438,13 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert status == 200
     unit = json.loads(body)
     assert unit["name"] == "Alpha Ranger"
+    assert unit["slug"] == "ranger-prototype"
+    assert unit["public_slug"] == "ranger-prototype"
     assert {army["id"] for army in unit["armies"]} == {101, 201}
+    assert {army["id"]: army["public_slug"] for army in unit["armies"]} == {
+        101: "zulu-company",
+        201: "alpha-company",
+    }
     for army in unit["armies"]:
         assert army["profiles"][0]["type"] == "Line Trooper"
         assert army["profiles"][0]["classification"] == "Light Infantry"
@@ -405,6 +454,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 11,
                 "name": "Stealth",
+                "slug": "stealth",
                 "quantity": None,
                 "extras": [{"id": 41, "name": "+3"}],
             }
@@ -413,6 +463,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 21,
                 "name": "Medikit",
+                "slug": "medikit",
                 "quantity": 2,
                 "extras": [{"id": 42, "name": "Mimetism"}],
             }
@@ -421,6 +472,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 31,
                 "name": "Combi Rifle",
+                "slug": "combi-rifle",
                 "quantity": None,
                 "extras": [{"id": 43, "name": "AP"}],
             }
@@ -430,6 +482,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 11,
                 "name": "Stealth",
+                "slug": "stealth",
                 "quantity": None,
                 "extras": [{"id": 41, "name": "+3"}],
             }
@@ -438,6 +491,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 21,
                 "name": "Medikit",
+                "slug": "medikit",
                 "quantity": None,
                 "extras": [{"id": 42, "name": "Mimetism"}],
             }
@@ -446,6 +500,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 31,
                 "name": "Combi Rifle",
+                "slug": "combi-rifle",
                 "quantity": 2,
                 "extras": [{"id": 43, "name": "AP"}],
             }
@@ -456,6 +511,21 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert b"unit.js" in body
     assert b'aria-label="Project navigation"' in body
     assert b"Skip to unit details" in body
+
+    status, headers, slug_page = request(app, "/units/ranger-prototype")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"unit.js" in slug_page
+
+    status, headers, slug_body = request(app, "/api/units/ranger-prototype")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    assert json.loads(slug_body) == unit
+
+    status, _, body = request(app, "/api/units/not-a-unit")
+    assert status == 404
+    assert json.loads(body)["error"] == "Unit not found"
+
     status, _, body = request(app, "/api/units/9099")
     assert status == 404
     assert json.loads(body)["error"] == "Unit not found"
@@ -494,6 +564,7 @@ def test_unit_details_include_occurrence_availability_categories(
         ({"search": "beta", "army_id": 101}, set()),
         ({"search": "beta", "army_id": 201}, {2}),
         ({"army_id": 999}, set()),
+        ({"army_id": "missing-army"}, set()),
     ],
 )
 def test_unit_search_and_empty_results(
@@ -515,7 +586,7 @@ def test_unit_search_and_empty_results(
         "offset=-1",
         "offset=1.5",
         "offset=9223372036854775808",
-        "army_id=abc",
+        "army_id=ABC",
         "army_id=9223372036854775808",
         urlencode({"search": "x" * 201}),
     ],
@@ -544,13 +615,13 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/traits"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
-    assert b'data-app-version="0.6.1"' in body
+    assert b'data-app-version="0.6.2"' in body
     assert b'data-snapshot-revision="' in body
-    assert b"/static/version-check.js?v=0.6.1" in body
+    assert b"/static/version-check.js?v=0.6.2" in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
-        assert asset.endswith("?v=0.6.1")
+        assert asset.endswith("?v=0.6.2")
         status, headers, body = request(app, asset)
         assert status == 200
         assert body
@@ -567,10 +638,17 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/units" aria-current="page"' in body
     assert body.index(b'id="pagination-top"') < body.index(b'id="results"')
     assert body.index(b'id="results"') < body.index(b'id="pagination-bottom"')
+    assert b'id="unit-count-details"' in body
+    assert b'id="unit-count-shown-breakdown"' in body
+    assert b'id="unit-count-filtered-breakdown"' in body
+    assert b"Optional availability categories may overlap" in body
 
     status, _, script = request(app, "/static/app.js")
     assert status == 200
     assert b'className = "page-results-summary"' in script
+    assert b"renderAvailabilitySummary(data)" in script
+    assert b"summary.shown" in script
+    assert b"summary.available" in script
 
 
 def test_browser_version_check_uses_an_uncached_server_version(app: Callable) -> None:
@@ -579,7 +657,7 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert status == 200
     assert headers["cache-control"] == "no-store"
     version = json.loads(body)
-    assert version["version"] == "0.6.1"
+    assert version["version"] == "0.6.2"
     assert len(version["snapshot_revision"]) == 64
     assert int(version["snapshot_revision"], 16) >= 0
 
@@ -766,6 +844,12 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'getElementById("distance-unit-toggle")?.checked ? "in" : "cm"' in preferences
     assert b'getElementById("developer-mode-toggle")?.checked' in preferences
     assert b"window.localStorage" not in preferences
+    assert b"window.sessionStorage.getItem(name)" in preferences
+    assert b"window.sessionStorage.setItem(name, value)" in preferences
+    assert b"if (!isRememberingSettings()) return session;" in preferences
+    assert b"const persistent = cookieValue(name);" in preferences
+    assert b"if (persistent === undefined) return session;" in preferences
+    assert b"setSessionValue(name, persistent);" in preferences
     assert b'new CustomEvent("developermodechange"' in preferences
 
 
@@ -773,8 +857,8 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     status, _, body = request(app, "/units")
 
     assert status == 200
-    assert b'<script type="module" src="/static/navigation.js?v=0.6.1"></script>' in body
-    assert b'<script type="module" src="/static/page-navigation.js?v=0.6.1"></script>' in body
+    assert b'<script type="module" src="/static/navigation.js?v=0.6.2"></script>' in body
+    assert b'<script type="module" src="/static/page-navigation.js?v=0.6.2"></script>' in body
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body
@@ -887,7 +971,7 @@ def test_army_symbol_is_served(app: Callable) -> None:
 
 
 def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -> None:
-    status, headers, _ = request(app, "/static/styles.css?v=0.6.1")
+    status, headers, _ = request(app, "/static/styles.css?v=0.6.2")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
 
@@ -902,7 +986,7 @@ def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> Non
     assert status == 200
     assert body
     etag = headers["etag"]
-    assert etag.startswith('"0.6.1-')
+    assert etag.startswith('"0.6.2-')
 
     status, conditional_headers, conditional_body = request(
         app,
@@ -946,21 +1030,41 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
-    status, headers, body = request(app, "/static/unit.js?v=0.6.1")
+    status, headers, body = request(app, "/static/unit.js?v=0.6.2")
 
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
-    assert b'from "./api.js?v=0.6.1"' in body
-    assert b'from "./preferences.js?v=0.6.1"' in body
+    assert b'from "./api.js?v=0.6.2"' in body
+    assert b'from "./preferences.js?v=0.6.2"' in body
 
-    status, _, body = request(app, "/static/api.js?v=0.6.1")
+    status, _, body = request(app, "/static/api.js?v=0.6.2")
     assert status == 200
-    assert b'import("./preferences.js?v=0.6.1")' in body
+    assert b'import("./preferences.js?v=0.6.2")' in body
     assert b'cache: "no-store"' in body
 
     status, headers, _ = request(app, "/api/armies")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+
+
+def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None:
+    status, _, body = request(app, "/static/app.js")
+
+    assert status == 200
+    assert b"return army.public_slug || String(army.id);" in body
+    assert b"return item.slug || String(item.id);" in body
+    assert b"armyId: domainFilterIdentifier(armyId)" in body
+    assert b"skillId: domainFilterIdentifier(skillId)" in body
+    assert b"equipmentId: domainFilterIdentifier(equipmentId)" in body
+    assert b"weaponId: domainFilterIdentifier(weaponId)" in body
+    assert b"normalizeArmyFilterState(playableArmies)" in body
+    for call in (
+        b'normalizeCatalogFilterState(skills.items, "skillId")',
+        b'normalizeCatalogFilterState(equipment.items, "equipmentId")',
+        b'normalizeCatalogFilterState(weapons.items, "weaponId")',
+    ):
+        assert call in body
+    assert b"candidate.source_ids?.some((sourceId) => String(sourceId) === current)" in body
 
 
 def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:
@@ -983,6 +1087,7 @@ def test_unit_list_renders_all_toggle_visible_armies(app: Callable) -> None:
     assert b"function factionSlug(" not in body
     assert b"Math.floor(Number(armyId) / 100)" not in body
     assert b"const faction = unit.display_faction?.slug;" in body
+    assert body.count(b"unit.public_slug || unit.id") == 2
 
 
 def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -> None:
@@ -1006,6 +1111,7 @@ def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> N
     assert b"Math.floor(Number(armyId) / 100)" not in body
     assert b"const faction = army.faction;" in body
     assert b"const displayFaction = unit.display_faction?.slug;" in body
+    assert b"const unitIdentifier = /^\\/units\\/([a-z0-9]+(?:-[a-z0-9]+)*)$/" in body
 
 
 def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:
@@ -1233,7 +1339,8 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert b"function profileItems(items, catalog, fallbackLabel)" in body
-    assert b"link.href = `/${catalog}/${encodeURIComponent(item.id)}`" in body
+    assert b"const routeId = item.slug || item.id;" in body
+    assert b"link.href = `/${catalog}/${encodeURIComponent(routeId)}`" in body
 
 
 @pytest.mark.full_assets
@@ -1316,6 +1423,10 @@ def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"skill-extras.js" in body
 
+    status, _, script = request(app, "/static/skill-extras.js")
+    assert status == 200
+    assert b"unit.public_slug || unit.id" in script
+
     status, headers, body = request(app, "/api/skill-extras")
     assert status == 200
     assert headers["content-type"].startswith("application/json")
@@ -1350,7 +1461,8 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b"getCatalogItems(page)" in body
     assert b"fetch(" not in body
     assert b'["skills", "equipment", "weapons", "traits"].includes(page)' in body
-    assert b"link.href = `/${page}/${encodeURIComponent(item.id)}`;" in body
+    assert b"const routeId = item.slug || item.id;" in body
+    assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
@@ -1371,26 +1483,51 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "id": 11,
             "name": "Stealth",
             "wiki": None,
+            "source_ids": [11],
             "use_count": 1,
+            "slug": "stealth",
             "categories": [{"name": "Unclassified", "source": None, "page": None}],
         },
         "equipment": {
             "id": 21,
             "name": "Medikit",
             "wiki": "https://infinitythewiki.com/Medikit",
+            "source_ids": [21],
             "use_count": 1,
+            "slug": "medikit",
         },
         "weapons": {
             "id": 31,
             "name": "Combi Rifle",
+            "slug": "combi-rifle",
             "type": None,
             "category": "Rifles",
             "ammunition": None,
             "properties": None,
+            "source_ids": [31],
             "use_count": 1,
         },
     }
     assert json.loads(body)["items"] == [expected[catalog]]
+
+
+def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:
+    with sqlite3.connect(app.database.path) as connection:
+        connection.execute(
+            "INSERT INTO application_catalog_sources "
+            "(catalog, application_item_id, source_item_id, source_name, has_metadata) "
+            "VALUES (?, ?, ?, ?, ?)",
+            ("equipment", 21, 244, "Medikit: Legacy Variant", 0),
+        )
+        connection.commit()
+
+    status, _, body = request(app, "/api/equipment")
+
+    assert status == 200
+    item = json.loads(body)["items"][0]
+    assert item["id"] == 21
+    assert item["slug"] == "medikit"
+    assert item["source_ids"] == [21, 244]
 
 
 def test_skill_details_page_and_api_are_served(app: Callable) -> None:
@@ -1407,6 +1544,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
         "id": 11,
         "name": "Stealth",
         "wiki": None,
+        "slug": "stealth",
         "categories": [{"name": "Unclassified", "source": None, "page": None}],
         "variants": [
             {
@@ -1419,6 +1557,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                         "name": "Alpha Ranger",
                         "isc": "Explorer Prototype",
                         "slug": "ranger-prototype",
+                        "public_slug": "ranger-prototype",
                         "main_army_id": None,
                         "main_army_name": None,
                         "main_faction": None,
@@ -1428,14 +1567,36 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                         "source_ids": [1],
                         "army_ids": [101, 201],
                         "armies": [
-                            {"id": 101, "name": "Zulu Company"},
-                            {"id": 201, "name": "Alpha Company"},
+                            {
+                                "id": 101,
+                                "name": "Zulu Company",
+                                "public_slug": "zulu-company",
+                            },
+                            {
+                                "id": 201,
+                                "name": "Alpha Company",
+                                "public_slug": "alpha-company",
+                            },
                         ],
                     }
                 ],
             }
         ],
     }
+
+    status, headers, slug_page = request(app, "/skills/stealth")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"skill.js" in slug_page
+
+    status, headers, slug_body = request(app, "/api/skills/stealth")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    assert json.loads(slug_body) == skill
+
+    status, _, body = request(app, "/api/skills/not-a-skill")
+    assert status == 404
+    assert json.loads(body)["error"] == "Skill not found"
 
     status, _, body = request(app, "/api/units")
     assert status == 200
@@ -1466,7 +1627,9 @@ def test_trait_apis_compose_army_usage_with_curated_rules(
     status, _, body = request(rules_app, "/api/traits")
     assert status == 200
     traits = {item["id"]: item for item in json.loads(body)["items"]}
+    assert traits["continuous-damage"]["slug"] == "continuous-damage"
     assert traits["continuous-damage"]["name"] == "Continuous Damage"
+    assert traits["disposable-x"]["slug"] == "disposable-x"
     assert traits["disposable-x"]["name"] == "Disposable (X)"
 
     status, _, body = request(rules_app, "/api/weapons/31")
@@ -1489,7 +1652,10 @@ def test_trait_apis_compose_army_usage_with_curated_rules(
     status, _, body = request(rules_app, "/api/traits/continuous-damage")
     assert status == 200
     payload = json.loads(body)
+    assert payload["slug"] == "continuous-damage"
     assert payload["description"].startswith("After a failed Saving Roll")
+    assert payload["variants"][0]["item_id"] == 31
+    assert payload["variants"][0]["item_slug"] == "combi-rifle"
     assert payload["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4110"
 
 
@@ -1516,7 +1682,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     payload = json.loads(body)
     assert payload["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
     assert payload["rules"][0]["id"] == "skill:stealth"
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
@@ -1526,7 +1693,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     stealth = next(item for item in json.loads(body)["items"] if item["id"] == 11)
     assert stealth["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
 
 
@@ -1553,16 +1721,17 @@ def test_visible_unit_ids_api_matches_default_unit_listing(app: Callable) -> Non
 
 
 @pytest.mark.parametrize(
-    ("catalog", "item_id", "name"),
+    ("catalog", "item_id", "slug", "name"),
     [
-        ("equipment", 21, "Medikit"),
-        ("weapons", 31, "Combi Rifle"),
+        ("equipment", 21, "medikit", "Medikit"),
+        ("weapons", 31, "combi-rifle", "Combi Rifle"),
     ],
 )
 def test_equipment_and_weapon_details_are_served(
     app: Callable,
     catalog: str,
     item_id: int,
+    slug: str | None,
     name: str,
 ) -> None:
     status, headers, body = request(app, f"/{catalog}/{item_id}")
@@ -1577,7 +1746,19 @@ def test_equipment_and_weapon_details_are_served(
     assert payload["name"] == name
     if catalog == "equipment":
         assert payload["wiki"] == "https://infinitythewiki.com/Medikit"
+    assert payload["slug"] == slug
     assert payload["variants"][0]["units"][0]["id"] == 1
+
+    if slug is not None:
+        status, headers, body = request(app, f"/{catalog}/{slug}")
+        assert status == 200
+        assert headers["content-type"].startswith("text/html")
+        assert b"catalog-detail.js" in body
+
+        status, headers, slug_body = request(app, f"/api/{catalog}/{slug}")
+        assert status == 200
+        assert headers["content-type"].startswith("application/json")
+        assert json.loads(slug_body) == payload
 
 
 def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> None:
@@ -1680,7 +1861,19 @@ def test_weapon_api_adds_curated_special_profile_when_rules_database_is_availabl
     document = {
         "version": "test",
         "units": [unit],
-        "filters": {"weapons": [{"id": 226, "name": "Armed Turret"}]},
+        "filters": {
+            "weapons": [
+                {"id": source_id, "name": name}
+                for source_id, name in (
+                    (209, "Armed Turret (Combi R.)"),
+                    (215, "Armed Turret (Marksman R.)"),
+                    (219, "Armed Turret (AP Rifle)"),
+                    (222, "Armed Turret (Rifle)"),
+                    (226, "Armed Turret"),
+                    (228, "Armed Turret (E/Mitter)"),
+                )
+            ]
+        },
         "reinforcements": None,
     }
     source = make_source("101-main.json", json.dumps(document).encode())

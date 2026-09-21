@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+
 CURATED_FORMAT = "InfinityDB curated reference"
 CURATED_FORMAT_VERSION = 3
 REQUIRED_COLLECTION_FIELDS = frozenset(
@@ -16,6 +18,11 @@ REQUIRED_RECORD_FIELDS = frozenset({"id", "kind", "name", "summary", "citations"
 REQUIRED_SKILL_TYPE_FIELDS = frozenset({"id", "name", "labels", "descriptions"})
 REQUIRED_LABEL_FIELDS = frozenset({"id", "name", "description"})
 EXCLUDED_CURATED_FILENAMES = frozenset({"example.json"})
+ARMY_LINK_SLUG_DOMAINS = {
+    "skill": "skills",
+    "equipment": "equipment",
+    "weapon": "weapons",
+}
 
 
 def _require_string(value: Any, field: str, context: str) -> None:
@@ -26,6 +33,23 @@ def _require_string(value: Any, field: str, context: str) -> None:
 def _require_positive_int(value: Any, field: str, context: str) -> None:
     if type(value) is not int or value < 1:
         raise ValueError(f"{context}: '{field}' must be a positive integer")
+
+
+def _validate_army_link_id(entity: str, value: Any, context: str) -> None:
+    if type(value) is int:
+        _require_positive_int(value, "id", context)
+        return
+    if not isinstance(value, str):
+        raise ValueError(f"{context}: 'id' must be a positive integer or domain slug")
+    if entity not in ARMY_LINK_SLUG_DOMAINS:
+        raise ValueError(
+            f"{context}: string 'id' references are not supported for entity {entity!r}"
+        )
+    if value.isdecimal():
+        raise ValueError(
+            f"{context}: numeric source ids must be JSON integers, not slug strings"
+        )
+    require_domain_slug(value, context=f"{context} 'id'")
 
 
 def _validate_reference(
@@ -271,6 +295,9 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             raise ValueError(f"{context}: missing fields {sorted(missing)}")
         for field in ("id", "kind", "name", "summary"):
             _require_string(record[field], field, context)
+        validate_typed_domain_id(
+            record["id"], expected_domain=record["kind"], context=f"{context}.id"
+        )
         if not isinstance(record["citations"], list) or not record["citations"]:
             raise ValueError(f"{context}: 'citations' must be a non-empty array")
         for optional_list in ("aliases", "relatedRecords"):
@@ -358,15 +385,11 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                     f"{context}: skill declaration category requires non-empty 'armyLinks'"
                 )
             for link in links:
-                if (
-                    not isinstance(link, dict)
-                    or link.get("entity") != "skill"
-                    or type(link.get("id")) is not int
-                ):
+                if not isinstance(link, dict) or link.get("entity") != "skill":
                     raise ValueError(
-                        f"{context}: skill declaration category armyLinks must reference "
-                        "integer skill ids"
+                        f"{context}: skill declaration category armyLinks must reference skills"
                     )
+                _validate_army_link_id("skill", link.get("id"), context)
             if len(record["citations"]) != 1:
                 raise ValueError(
                     f"{context}: skill declaration category requires exactly one citation"
@@ -409,5 +432,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             _require_string(link.get("entity"), "entity", link_context)
             if "id" not in link and "name" not in link:
                 raise ValueError(f"{link_context}: requires 'id' or 'name'")
+            if "id" in link:
+                _validate_army_link_id(link["entity"], link["id"], link_context)
 
     return document

@@ -124,9 +124,10 @@ def test_separate_merge_normalize_export_commands(
 
 def test_normalize_derives_mercenary_display_identity_from_curated_data(tmp_path: Path) -> None:
     curated = load_display_identity_curated()
-    canonical_faction_id, display_army_id = next(
-        iter(curated.canonical_faction_display_armies.items())
-    )
+    canonical_faction_id = 1
+    display_army_id = 901
+    display_army_slug = curated.canonical_faction_display_armies[canonical_faction_id]
+    assert display_army_slug == "non-aligned-armies"
     master_path = tmp_path / "master.json"
     normalized_path = tmp_path / "normalized.json"
     master_path.write_text(
@@ -135,7 +136,7 @@ def test_normalize_derives_mercenary_display_identity_from_curated_data(tmp_path
                 "_meta": {"format": "Infinity Army merged JSON", "formatVersion": 1},
                 "armyLists": {
                     str(display_army_id): {
-                        "_meta": {"slug": "display-group", "kind": "faction"},
+                        "_meta": {"slug": display_army_slug, "kind": "faction"},
                         "unitIds": [1],
                     }
                 },
@@ -161,9 +162,7 @@ def test_normalize_derives_mercenary_display_identity_from_curated_data(tmp_path
     unit = normalized["tables"]["units"][0]
     assert unit["canonical_faction_id"] == canonical_faction_id
     assert unit["main_army_id"] is None
-    assert unit["display_army_id"] == curated.canonical_faction_display_armies[
-        unit["canonical_faction_id"]
-    ]
+    assert unit["display_army_id"] == display_army_id
 
 
 def test_invalid_source_reports_error_without_database(
