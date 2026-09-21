@@ -157,6 +157,37 @@ in `docs/releasing.md`.
     backlog.
   - [ ] Do not treat unused tables/columns alone as proof of a completeness gap.
 
+- [ ] **Complete a rules-semantics documentation pass across the current ruleset.**
+  Keep page-level progress, source versions, and individual findings in
+  `docs/rules-audit.md`; use this backlog only for section-level completion.
+  - [x] Establish `docs/rules-audit.md`, `docs/rules-semantics.md`, and
+    `docs/rules-research.md`, including the source/finding classification contract.
+  - [ ] Audit the wiki/PDF rules sections, using the wiki Main Sections structure as
+    the traversal spine and the current PDF/FAQ material for stable citations:
+    - [ ] Introduction.
+    - [ ] Basic Rules.
+    - [ ] Game States and Glossary.
+    - [ ] Skills and Equipment.
+    - [ ] Combat.
+    - [ ] Ammunition and Weaponry.
+    - [ ] Fireteams.
+    - [ ] Command.
+    - [ ] Movement.
+    - [ ] Terrain and Scenery Structures.
+    - [ ] Triumph and Defeat.
+    - [ ] Setting up the Gaming Table.
+    - [ ] Scenarios.
+    - [ ] Quick Reference Charts as a validation/completeness pass.
+    - [ ] Reinforcements, retaining its distinct rules scope.
+    - [ ] ITS FAQ, retaining season/scenario scope rather than treating it as core rules.
+  - [ ] Reconcile implementation-relevant findings against Army/API fields, the
+    canonical application model, validation, querying/filtering, and browser
+    presentation; distinguish source-native concepts from InfinityDB abstractions.
+  - [ ] Record verified findings with no current consumer in `docs/rules-research.md`
+    instead of forcing premature schema or UI changes.
+  - [ ] Complete a final gap analysis and feed confirmed implementation work into
+    the existing canonical-model, completeness, and product-feature backlogs.
+
 Completion of every possible deduplication opportunity is **not** itself a
 version-1.0 requirement. Canonicalization blocks 1.0 only where unresolved
 duplication prevents InfinityDB from establishing data correctness,

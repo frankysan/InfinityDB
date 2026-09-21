@@ -16,6 +16,10 @@ model.
   direction.
 - `docs/data-model.md` is authoritative for normalized data semantics and
   persistence structure.
+- `docs/rules-semantics.md` records audited, implementation-relevant game-rule
+  semantics. `docs/rules-audit.md` owns rules-source coverage/version tracking,
+  while `docs/rules-research.md` holds verified findings without a current
+  application consumer.
 - This document records non-obvious constraints and decision history that are
   useful during implementation.
 - `README.md` is the user-facing project introduction, setup, and operations
