@@ -1708,6 +1708,15 @@ described above. Source list rows, metadata rows, `army_units`, `unit_factions`,
 and source canonical-faction values remain unchanged and traceable; the broader
 63-ID faction registry is not collapsed into application Army identities.
 
+The Reinforcements rules audit further narrows the meaning of the application
+`reinforcement` role. In rules terms the linked identity represents a faction-
+shared **Reinforcement Section/pool attached to an ordinary Army List**, not an
+independently legal Army List. For `role = reinforcement`, `playable` therefore
+means application/browser selectability only. `application_army_reinforcement_parents`
+preserves the ordinary-Army context, while source profile/availability occurrences
+retain Reinforcement-section eligibility, AVA, and profile wording. Logical-unit
+canonicalization must not erase those occurrence-level distinctions.
+
 Normal Army/faction serving now consumes these materialized rows. `/api/armies`,
 Army filtering, unit list/detail Army names and faction/group presentation, reviewed
 source aliases, playability, and reinforcement-parent grouping all resolve through

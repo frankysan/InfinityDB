@@ -41,13 +41,20 @@
    source-derived facts, InfinityDB-specific abstractions, and presentation-only
    conveniences. When InfinityDB introduces a concept that does not exist in the
    source, document its evidence, derivation, assumptions, and intended scope.
-7. **Build conservatively.** When validation or interpretation is uncertain,
+7. **Rules are semantic evidence, not the application schema.** Use the official
+   rules to understand, classify, relate, validate, and explain Infinity data,
+   but model rules concepts only where they serve InfinityDB's catalog,
+   relationship, query, or presentation responsibilities. InfinityDB is not a
+   rules engine or an exhaustive replacement for the official rules; procedural
+   rules and edge cases may remain cited context without becoming application
+   entities or runtime logic.
+8. **Build conservatively.** When validation or interpretation is uncertain,
    preserve source or existing valid data rather than guessing or
    destructively correcting it.
-8. **Separate stages and responsibilities.** Acquisition, validation,
+9. **Separate stages and responsibilities.** Acquisition, validation,
    normalization, processing, publishing, and deployment should remain
    independently understandable and testable.
-9. **Be deterministic and portable.** Given the same inputs and configuration,
+10. **Be deterministic and portable.** Given the same inputs and configuration,
    the project should produce the same logical result on Windows, Linux, and
    macOS.
 

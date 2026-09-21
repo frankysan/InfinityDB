@@ -16,6 +16,10 @@ model.
   direction.
 - `docs/data-model.md` is authoritative for normalized data semantics and
   persistence structure.
+- `docs/rules-semantics.md` records audited, implementation-relevant game-rule
+  semantics. `docs/rules-audit.md` owns rules-source coverage/version tracking,
+  while `docs/rules-research.md` holds verified findings without a current
+  application consumer.
 - This document records non-obvious constraints and decision history that are
   useful during implementation.
 - `README.md` is the user-facing project introduction, setup, and operations
@@ -189,6 +193,12 @@ and serves a read-only browser and same-origin HTTP API.
   reinforcement lists, and grouping identities; the browser selector
   consumes that contract rather than Army-ID ranges. Grouping identity `901` is
   non-playable.
+- Rules semantics refine the `reinforcement` application role: the linked
+  identity represents a faction-shared Reinforcement Section/pool attached to an
+  ordinary Army List, not a standalone legal Army. For reinforcement rows,
+  `playable` means application/browser selectability; preserve the parent Army
+  relationship and section-specific profile/AVA occurrence context when
+  canonicalizing or presenting the data.
 - Mercenary variants are classified during normalization, their source markers
   are validated, audited mercenary-to-standard mappings are persisted, and
   repository queries consume explicit availability provenance. Generic standard
@@ -900,3 +910,21 @@ compatibility references remain unambiguous JSON integers.
   definitions attached somewhere, 41 names with multiple raw identities, three
   names with `mercs` variation, and 22 canonical loadout payloads with differing
   semantic attachment signatures.
+
+- 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
+  release.** Use the completed N5.3 Wiki/PDF/FAQ audit to enrich data InfinityDB
+  already exposes with concise original summaries, authoritative links/citations,
+  reviewed semantic labels, variant-aware meaning, and explicit related-catalog
+  relationships. Supporting rules identities may be added when needed to explain
+  an existing item without requiring a new standalone browser catalog. Keep
+  semantic identity, publication provenance, and applicability scope independent.
+  The 0.7.0 gate does not require a complete scenario/ITS library, rules engine,
+  live game-state model, organizer tooling, or standalone UI for every supporting
+  rules domain; remaining gaps must be classified explicitly rather than silently
+  treated as covered.
+- 2026-09-21: Cube and Cube 2.0 are canonical N5 Automatic Equipment whose Army
+  Unit Profile occurrence is encoded only by the dedicated Cube/Cube 2.0 symbols;
+  they are not listed in the profile's textual Equipment block. Treat this as a
+  source-presentation encoding, not an Army-versus-rules classification conflict.
+  Preserve the symbol/source occurrence and resolve it to the canonical Equipment
+  identity without inventing a textual source row.
