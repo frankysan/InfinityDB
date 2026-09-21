@@ -844,6 +844,9 @@ compatibility references remain unambiguous JSON integers.
   identity to all materialized source IDs before matching canonical profile/loadout/unit-
   option occurrences. A grouped filter must therefore match every represented variant
   (for example any TinBot source variant) rather than only the numeric representative.
+  Catalog-list payloads expose those materialized `source_ids`, and the browser uses them
+  to canonicalize accepted legacy source-ID query values to the preferred application
+  slug so selector state and backend filtering cannot diverge.
 - 2026-09-21: Armies now consume the same dual identifier contract. `/api/armies`
   exposes an additive `public_slug` while retaining the existing Army `slug` as source/
   context data. Unit-explorer and `/api/units` Army filters accept either a source/

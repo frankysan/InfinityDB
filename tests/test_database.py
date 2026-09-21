@@ -729,6 +729,7 @@ def test_armed_turret_uses_its_base_name_with_visible_metadata_profile(
             "type": None,
             "ammunition": None,
             "properties": None,
+            "source_ids": [209, 215, 219, 222, 226, 228],
             "use_count": 0,
         }
     ]
@@ -966,6 +967,7 @@ def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normal
             "id": 69,
             "name": "Strategos",
             "wiki": None,
+            "source_ids": [69, 70],
             "use_count": 0,
         }
     ]
@@ -2425,6 +2427,10 @@ def test_unit_catalog_filter_expands_logical_equipment_identity(
 
     assert database.application_catalog_id("equipment", 244) == 235
     assert database.application_slug("equipment", 235) == "tinbot"
+    tinbot = next(
+        item for item in database.list_catalog_items("equipment") if item["id"] == 235
+    )
+    assert tinbot["source_ids"] == [235, 244]
     expected_ids = {1}
     for equipment_ref in (244, 235, "tinbot"):
         result = database.list_units(equipment_id=equipment_ref)

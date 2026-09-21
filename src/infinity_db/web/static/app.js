@@ -178,7 +178,10 @@ function catalogFilterValue(item) {
 function normalizeCatalogFilterState(items, stateKey) {
   const current = state[stateKey];
   if (!current || !/^\d+$/.test(current)) return false;
-  const item = items.find((candidate) => String(candidate.id) === current);
+  const item = items.find((candidate) => (
+    String(candidate.id) === current
+    || candidate.source_ids?.some((sourceId) => String(sourceId) === current)
+  ));
   if (!item) return false;
   const replacement = catalogFilterValue(item);
   if (replacement === current) return false;

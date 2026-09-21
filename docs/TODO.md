@@ -741,9 +741,10 @@ new correctness or reproducibility defect.
     `docs/dual-identifier-sanity.md` for evidence and scope.
     - [x] Centralize application-domain reference resolution so repository/detail lookups
       accept either numeric IDs or stable slugs instead of requiring web-layer pre-resolution.
-    - [ ] Canonicalize accepted legacy grouped source-ID Unit-explorer filters to the
+    - [x] Canonicalize accepted legacy grouped source-ID Unit-explorer filters to the
       application identity and preferred slug, including non-representative Skill/Equipment/
-      Weapon source IDs such as TinBot variants.
+      Weapon source IDs such as TinBot variants. Catalog list payloads expose the materialized
+      `source_ids` accepted for each application item so browser state can upgrade them.
     - [ ] Define and apply an additive slug-companion policy for cross-domain API references
       that represent canonical application identities, while retaining numeric fields and
       leaving source/context-only IDs explicitly numeric.

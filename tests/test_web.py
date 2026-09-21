@@ -1039,6 +1039,7 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
     assert b"weaponId: domainFilterIdentifier(weaponId)" in body
     assert b"normalizeArmyFilterState(playableArmies)" in body
     assert b'normalizeCatalogFilterState(equipment.items, "equipmentId")' in body
+    assert b"candidate.source_ids?.some((sourceId) => String(sourceId) === current)" in body
 
 
 def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:
@@ -1457,6 +1458,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "id": 11,
             "name": "Stealth",
             "wiki": None,
+            "source_ids": [11],
             "use_count": 1,
             "slug": "stealth",
             "categories": [{"name": "Unclassified", "source": None, "page": None}],
@@ -1465,6 +1467,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "id": 21,
             "name": "Medikit",
             "wiki": "https://infinitythewiki.com/Medikit",
+            "source_ids": [21],
             "use_count": 1,
             "slug": "medikit",
         },
@@ -1476,10 +1479,30 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "category": "Rifles",
             "ammunition": None,
             "properties": None,
+            "source_ids": [31],
             "use_count": 1,
         },
     }
     assert json.loads(body)["items"] == [expected[catalog]]
+
+
+def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:
+    with sqlite3.connect(app.database.path) as connection:
+        connection.execute(
+            "INSERT INTO application_catalog_sources "
+            "(catalog, application_item_id, source_item_id, source_name, has_metadata) "
+            "VALUES (?, ?, ?, ?, ?)",
+            ("equipment", 21, 244, "Medikit: Legacy Variant", 0),
+        )
+        connection.commit()
+
+    status, _, body = request(app, "/api/equipment")
+
+    assert status == 200
+    item = json.loads(body)["items"][0]
+    assert item["id"] == 21
+    assert item["slug"] == "medikit"
+    assert item["source_ids"] == [21, 244]
 
 
 def test_skill_details_page_and_api_are_served(app: Callable) -> None:

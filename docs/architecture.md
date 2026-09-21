@@ -584,7 +584,10 @@ the registry. Catalog list/detail API payloads expose a resolved application `sl
 and Army payloads instead expose a distinct `public_slug` so their pre-existing
 source/context `slug` fields keep their current meaning. Browser links and Unit-explorer
 filter state prefer application slugs while existing numeric references remain valid.
-Skill, Equipment, Weapon, and Unit detail web/API routes accept either form; Army
+Catalog-list payloads expose each logical Skill/Equipment/Weapon item's materialized
+`source_ids`, allowing the browser to recognize accepted non-representative legacy
+numeric filters and canonicalize them to the same preferred slug. Skill, Equipment,
+Weapon, and Unit detail web/API routes accept either form; Army
 selection through the Unit explorer/API accepts either a source/application numeric ID
 or the resolved Army public slug and normalizes both to the application Army identity.
 Numeric-only slug candidates are not emitted as route identifiers because they would

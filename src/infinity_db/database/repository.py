@@ -1462,6 +1462,7 @@ class Database:
                     "name": item["name"],
                     "wiki": item.get("wiki"),
                 }
+            public["source_ids"] = list(graph["source_ids_by_item"].get(item["id"], ()))
             public["use_count"] = len(use_keys.get(item["id"], set()))
             merged.append(public)
         return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))

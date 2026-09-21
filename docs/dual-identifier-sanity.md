@@ -67,17 +67,19 @@ reuse that resolver, and `get_unit()`, `get_skill()`, `skill_source_ids()`, and
 therefore only parse numeric route syntax; they no longer perform slug-to-ID
 resolution themselves.
 
-### 2. Legacy grouped source IDs do not fully canonicalize browser filter state
+### 2. Legacy grouped source IDs canonicalize browser filter state — closed
 
-The backend can resolve a source-variant numeric filter such as a TinBot source
-Equipment ID to the logical TinBot application identity. The browser's
-`normalizeCatalogFilterState()` can only match the application item IDs present
-in the catalog response, however. A legacy URL containing a non-representative
-source ID can therefore filter correctly while the corresponding select control
-appears unselected and the URL is not upgraded to the preferred slug.
+Closed on 2026-09-21. Public Skill, Equipment, and Weapon catalog-list payloads
+now expose the materialized `source_ids` accepted for each application item. The
+Unit explorer uses those aliases when a numeric filter is loaded, so an accepted
+non-representative source ID resolves to the same select option and is rewritten
+to the preferred application slug.
 
-The API/browser contract needs enough source-to-application identity information
-to canonicalize any accepted legacy numeric filter to the same public slug.
+This keeps numeric compatibility without leaving the browser in a mismatched
+state where the backend filter is active but the corresponding selector appears
+unselected. Only materialized source IDs that the repository actually accepts
+are exposed; unused metadata-only alias candidates are not advertised as valid
+filter references.
 
 ### 3. Cross-domain API references need a consistent slug companion policy
 
@@ -156,7 +158,7 @@ Before starting the 0.6.2 release checklist:
 
 1. **Closed:** centralize application-domain reference resolution and make
    repository/detail lookups dual-ID where the domain supports stable slugs;
-2. canonicalize legacy grouped source-ID filters into preferred slug browser
+2. **Closed:** canonicalize legacy grouped source-ID filters into preferred slug browser
    state;
 3. define and apply the cross-domain API slug-companion policy;
 4. move numeric-shadow handling into the slug registry/resolver boundary;
