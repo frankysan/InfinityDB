@@ -805,6 +805,14 @@ application-level identities.
   valid. Source Unit references are resolved to their logical application Unit before
   slug lookup, numeric-only candidates remain on numeric compatibility URLs, and Armies
   remain numeric-only publicly for now.
+- 2026-09-21: Trait public identity is aligned with the shared slug policy without
+  duplicating curated rules identity into the Army database. Curated Traits already own
+  stable typed IDs in `rules.db`; a simple `trait:<slug>` ID projects directly to the
+  public Trait route and remains stable across display-name changes. Trait list/detail
+  payloads expose `slug` explicitly. Uncurated raw Traits use the complete Army Trait
+  catalog's shared normalization/collision pass, and application cross-links must reuse
+  that assigned slug rather than normalize individual labels independently. Qualified
+  typed IDs are not flattened implicitly into route slugs.
 
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary

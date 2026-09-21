@@ -725,10 +725,10 @@ new correctness or reproducibility defect.
     application `public_slug` without reinterpreting the existing source/context
     `slug`, prefer it for browser Unit links, and accept both slug and numeric Unit
     detail routes.
-  - [ ] Finish the Trait public-identity alignment for this workstream: reconcile the
-    existing curated Trait slug identity with the shared domain-slug/public-route policy,
-    preserve stable curated Trait identities, and add regression coverage for the accepted
-    boundary rather than creating a parallel one-off slug scheme.
+  - [x] Finish the Trait public-identity alignment for this workstream: curated
+    `trait:<slug>` IDs own stable public Trait slugs without duplicating rules identity
+    into the Army-domain registry; uncurated Trait links reuse the collision-checked raw
+    Trait catalog assignment rather than independently normalizing individual labels.
   - [ ] **0.6.2 release checkpoint.** After the Trait alignment above is complete, run the
     general release checklist in `docs/releasing.md` and release this public-identity/slug
     work as version 0.6.2. The project-wide documentation audit is a release gate, not a

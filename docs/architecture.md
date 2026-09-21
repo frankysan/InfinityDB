@@ -556,12 +556,22 @@ frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical
 behavior remain required before numeric routes are retired or redirected. Armies remain
 numeric-only at the public route layer for now.
 
+Traits share the public slug grammar and fail-closed collision policy but intentionally
+do not duplicate their canonical identity in `application_domain_slugs`. Curated Trait
+identity is already owned by `rules.db` as a stable typed ID of the form `trait:<slug>`;
+that single slug segment is therefore the canonical public route projection and remains
+stable when the curated display name changes. Trait list/detail payloads expose it
+explicitly as `slug`. Raw Army Traits without a curated record retain only a provisional
+source-derived identity: the Army Trait catalog assigns their slug across the complete
+raw Trait set with the shared collision checker, and cross-links are emitted only when
+that catalog actually assigned the label a slug. Application code must not independently
+normalize an arbitrary Trait label into a link, because that would bypass collision
+resolution and create a parallel identity scheme.
+
 The current reviewed 2026-09-18 snapshot resolves all initial registry candidates:
 57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons
 (1,042 identities total), with no collisions or unavailable candidates. These counts
-are snapshot evidence rather than permanent invariants. Traits use the same
-normalizer and now reject collisions instead of generating positional suffixes, but
-they are not yet persisted in the application registry.
+are snapshot evidence rather than permanent invariants.
 
 The Peripheral rules/identity work must use this project-wide identity architecture
 rather than introduce a one-off slug scheme. It must not infer a canonical

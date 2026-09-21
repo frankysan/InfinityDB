@@ -1542,7 +1542,9 @@ def test_trait_apis_compose_army_usage_with_curated_rules(
     status, _, body = request(rules_app, "/api/traits")
     assert status == 200
     traits = {item["id"]: item for item in json.loads(body)["items"]}
+    assert traits["continuous-damage"]["slug"] == "continuous-damage"
     assert traits["continuous-damage"]["name"] == "Continuous Damage"
+    assert traits["disposable-x"]["slug"] == "disposable-x"
     assert traits["disposable-x"]["name"] == "Disposable (X)"
 
     status, _, body = request(rules_app, "/api/weapons/31")
@@ -1565,6 +1567,7 @@ def test_trait_apis_compose_army_usage_with_curated_rules(
     status, _, body = request(rules_app, "/api/traits/continuous-damage")
     assert status == 200
     payload = json.loads(body)
+    assert payload["slug"] == "continuous-damage"
     assert payload["description"].startswith("After a failed Saving Roll")
     assert payload["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4110"
 

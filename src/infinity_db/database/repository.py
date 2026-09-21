@@ -24,7 +24,6 @@ from infinity_army_data.normalized_format import FORMAT_NAME, FORMAT_VERSION
 from infinity_db.domain_slugs import (
     APPLICATION_SLUG_DOMAINS,
     assign_domain_slugs,
-    normalize_domain_slug,
     require_domain_slug,
 )
 from infinity_db.identities import (
@@ -295,10 +294,6 @@ def configured_catalog_group(
     if canonical_id not in source_ids:
         canonical_id = min(source_ids)
     return canonical_id, source_ids
-
-def trait_slug(name: object) -> str:
-    """Return the shared domain-slug candidate for one raw Army trait label."""
-    return normalize_domain_slug(name)
 
 def source_trait_name(value: object) -> str:
     """Return a visible Army trait label, excluding bracketed profile annotations."""
@@ -1509,6 +1504,7 @@ class Database:
         for name, items in usage.items():
             traits.append({
                 "id": slugs[name],
+                "slug": slugs[name],
                 "name": name,
                 "use_count": len(items),
                 "description": None,

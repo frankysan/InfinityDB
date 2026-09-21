@@ -466,6 +466,7 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
     assert Database(path).list_traits() == [
         {
             "id": "suppressive-fire",
+            "slug": "suppressive-fire",
             "name": "Suppressive Fire",
             "use_count": 1,
             "description": None,
@@ -562,6 +563,7 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     traits = {item["id"]: item for item in catalog.list_traits()}
     assert traits["suppressive-fire"] == {
         "id": "suppressive-fire",
+        "slug": "suppressive-fire",
         "name": "Suppressive Fire (SF)",
         "use_count": 1,
         "description": (
@@ -570,9 +572,80 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     }
     detail = catalog.get_trait("continuous-damage")
     assert detail is not None
+    assert detail["slug"] == "continuous-damage"
     assert detail["name"] == "Continuous Damage"
     assert detail["rules"][0]["id"] == "trait:continuous-damage"
     assert detail["rules"][0]["citations"][0]["heading"] == "Continuous Damage"
+
+
+def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": ["Continous Damage"],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    document = copy.deepcopy(documents[0][1])
+    record = next(
+        record
+        for record in document["records"]
+        if record["id"] == "trait:continuous-damage"
+    )
+    record["name"] = "Persistent Damage"
+    rules_path = tmp_path / "rules.db"
+    export_rules_database([(root / "curated.json", document)], rules_path)
+    catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    reference = catalog.reference("Continous Damage")
+    assert reference == {
+        "label": "Continous Damage",
+        "name": "Persistent Damage",
+        "slug": "continuous-damage",
+    }
+    detail = catalog.get_trait("continuous-damage")
+    assert detail is not None
+    assert detail["slug"] == "continuous-damage"
+    assert detail["name"] == "Persistent Damage"
+
+
+def test_uncurated_trait_reference_uses_catalog_slug_instead_of_guessing(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": ["Uncurated Trait"],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+    catalog = TraitCatalog(Database(database_path), None)
+
+    assert catalog.reference("Uncurated Trait") == {
+        "label": "Uncurated Trait",
+        "name": "Uncurated Trait",
+        "slug": "uncurated-trait",
+    }
+    assert catalog.reference("Not Present In Army Data") == {
+        "label": "Not Present In Army Data",
+        "name": "Not Present In Army Data",
+        "slug": None,
+    }
 
 
 def test_trait_catalog_enriches_catalog_profiles_from_curated_rules(

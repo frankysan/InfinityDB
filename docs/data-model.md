@@ -2159,8 +2159,16 @@ assembled by application code.
 Trait identity is one implemented example of that composition boundary. Army
 metadata stores raw trait labels and usage, while current curated `trait` records
 own canonical names, aliases/misspellings, parameterized source-label prefixes,
-concise summaries, and citations. The application joins those sources at read
-time; the Army database does not copy curated trait knowledge into its snapshot.
+concise summaries, citations, and stable typed IDs such as
+`trait:continuous-damage`. For a route-backed curated Trait, the single slug segment
+after `trait:` is also its public route slug; the display name is not used to regenerate
+that identity. Trait API payloads expose this route value explicitly as `slug`. Raw
+Traits that lack curated identity use the Army Trait catalog's shared domain-slug
+normalization/collision pass and remain provisional rather than being copied into the
+application-domain slug registry. Cross-links to raw Traits are emitted only from that
+resolved catalog identity, never by independently normalizing an arbitrary label. The
+application joins Army and rules sources at read time; the Army database does not copy
+curated Trait knowledge into its snapshot.
 
 Skill declaration categories are another application-level composition. Army-derived
 `skills` and their usage remain source data, while current curated

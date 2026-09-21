@@ -7,6 +7,7 @@ from infinity_db.domain_slugs import (
     normalize_domain_slug,
     require_domain_slug,
     resolve_domain_slug_candidates,
+    route_slug_from_typed_domain_id,
     validate_assigned_domain_slugs,
     validate_typed_domain_id,
 )
@@ -76,4 +77,22 @@ def test_curated_typed_ids_use_kind_as_the_domain_prefix() -> None:
     with pytest.raises(ValueError, match="must start with 'skill'"):
         validate_typed_domain_id(
             "equipment:doctor", expected_domain="skill", context="record id"
+        )
+
+
+def test_simple_typed_ids_project_to_public_route_slugs_without_flattening_qualifiers() -> None:
+    assert (
+        route_slug_from_typed_domain_id(
+            "trait:continuous-damage",
+            expected_domain="trait",
+            context="trait id",
+        )
+        == "continuous-damage"
+    )
+
+    with pytest.raises(ValueError, match="exactly one domain-local route slug"):
+        route_slug_from_typed_domain_id(
+            "trait:continuous-damage:p1",
+            expected_domain="trait",
+            context="trait id",
         )

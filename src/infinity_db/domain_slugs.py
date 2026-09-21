@@ -142,3 +142,25 @@ def validate_typed_domain_id(value: object, *, expected_domain: str, context: st
     for index, part in enumerate(parts):
         require_domain_slug(part, context=f"{context} segment {index}")
     return value
+
+
+def route_slug_from_typed_domain_id(
+    value: object, *, expected_domain: str, context: str
+) -> str:
+    """Project one simple typed identity onto its domain-local public route slug.
+
+    Route-backed curated identities use exactly ``domain:slug``. Qualified typed
+    identities remain valid internal IDs, but cannot be flattened into a public
+    route implicitly because that would create a second identity scheme.
+    """
+
+    identifier = validate_typed_domain_id(
+        value, expected_domain=expected_domain, context=context
+    )
+    parts = identifier.split(":")
+    if len(parts) != 2:
+        raise ValueError(
+            f"{context} must contain exactly one domain-local route slug after "
+            f"{expected_domain!r}"
+        )
+    return require_domain_slug(parts[1], context=f"{context} route slug")
