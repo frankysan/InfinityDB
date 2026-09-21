@@ -1230,3 +1230,39 @@ InfinityDB catalog/reference responsibilities.
 Source:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+## ITS FAQ
+
+### RR-FAQ-RUNTIME-001 — Card use, timing, and tracking remain session procedure
+
+**Scope:** ITS scenario runtime behavior.
+
+The Akial Interference FAQ answers when an Emit Akial Interference card becomes
+used, excludes Predator Kills that happened before the objective was drawn, and
+allows players to track used cards by any convenient method.
+
+Those rulings are important when explaining or adjudicating the scenario, but
+they describe mutable match state and player procedure. Beyond cataloging the
+scoped Skill/action identities and FAQ links needed by the general reference,
+InfinityDB does not need persistent Unit/Profile fields or a card-state engine
+for 1.0.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/ITS_FAQ>
+- Official FAQ v0.0 PDF, printed page 3:
+  <https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf>
+
+### RR-FAQ-SPATIAL-001 — ITS movement/deployment clarifications depend on live table context
+
+**Scope:** ITS scenario spatial procedure.
+
+Neutral HVT movement blocking and Crossing Lines' nearest-enemy-Deployment-Zone
+rule are resolved from the current table state; the Crossing Lines
+Netrod/Imetron ruling is a scenario-local exception to that mission's deployment
+rule. They may support contextual help or future play aids, but they do not
+justify static Unit eligibility or geometry fields in the catalog model.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/ITS_FAQ>

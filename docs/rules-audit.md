@@ -260,7 +260,7 @@ rules have been audited.
   - [x] Reinforcement Fireteams and parent-Army constraints
   - [x] DropPod/deployment/runtime boundary
   - [x] Army source/application-model reconciliation
-- [ ] ITS FAQ
+- [x] ITS FAQ
 - [ ] Final cross-section reconciliation and gap analysis
 
 ## Completed page notes
@@ -2076,3 +2076,91 @@ four follow-ups explicit in the existing backlog:
   and
 - keep browser/API wording clear that a reinforcement application identity is a
   catalog Section/pool context, not a standalone legal Army List.
+
+### ITS FAQ — season-scoped audit complete
+
+Status: the current live ITS FAQ has been reviewed as a Season 18 source under
+Infinity N5.3/FAQ v0.1. It currently exposes ten ITS rulings: nine carried
+forward from FAQ v0.0 (October 2025) plus one v0.1 ruling (September 2026) for
+Peripheral (Ancillary). The official FAQ v0.0 PDF preserves the older ITS set on
+printed pages 2–3, while the current ITS page establishes their continuing
+Season 18 placement.
+
+Primary sources reviewed:
+
+- current wiki ITS FAQ: <https://infinitythewiki.com/ITS_FAQ>;
+- current wiki Peripheral page, which cross-posts the new Ancillary ruling:
+  <https://infinitythewiki.com/Peripheral>;
+- official ITS Season 18 catalog:
+  <https://infinityuniverse.com/games/infinity/its/tournament/5566>; and
+- official FAQ v0.0 PDF, printed pages 2–3:
+  <https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf>.
+
+#### FAQ publication identity and ITS applicability are separate axes
+
+The Season 18 ITS FAQ mixes ruling publication versions deliberately: the nine
+v0.0 rulings remain visible alongside the later v0.1 Peripheral (Ancillary)
+ruling. The Ancillary ruling is also displayed on the topical Peripheral page.
+Page placement therefore cannot be the identity of a ruling, and current-season
+applicability cannot be inferred from the ruling's original publication date.
+
+The planned FAQ layer should give every ruling a canonical identity independent
+of where the wiki displays it. Preserve original FAQ version/date and source
+citation separately from applicable rules/season/scenario scope so one ruling
+can be cross-linked from multiple topics without duplication.
+
+#### General ITS rulings are scoped overlays on core concepts
+
+The general rulings touch Neutral Troopers/HVT movement, carrying scenario
+elements while entering Marker State, the end-of-game Killed status of an
+Ancillary, and Spotlight-based Classified Objectives. These facts depend on ITS
+objective/scenario context and should link to their owning core concepts without
+rewriting Neutral, Marker, Peripheral, Spotlight, Targeted, or State semantics
+as universal base rules.
+
+The Spotlight ruling is particularly useful structurally: Telemetry and HVT:
+Designation are completed by the required successful Spotlight Rolls even when
+the target does not enter Targeted State. Objective completion therefore needs
+its own scoped condition relationship; it cannot always be inferred from the
+normal resulting State of the action used.
+
+#### Area of Interest exposes scenario-scoped action/ARO relationships
+
+`Activate Communication Antenna` is a scenario Short Skill and `Oppose
+Activation` is a scenario ARO. The FAQ specifies both an additional trigger for
+that ARO and that only `Oppose Activation` produces a Face to Face WIP Roll
+against the activation; other AROs resolve as Normal Rolls.
+
+These are valid rules-reference identities/relationships when scenario-defined
+catalog concepts are curated, but they must retain Area of Interest/ITS scope.
+The generated Orders/AROs completeness view must therefore be scope-aware: a
+scenario-only action or ARO must not appear as a missing core N5 declaration,
+and adding one must not pollute the core declaration matrix.
+
+#### Akial Interference and Crossing Lines are scenario procedure overlays
+
+The Akial rulings clarify when an Emit Akial Interference card becomes used,
+when Predator can begin counting Kills, and that card-use tracking is
+implementation-neutral. Crossing Lines adds a Netrod/Imetron exception to its
+Superior Deployment rule and resolves Impetuous movement toward the nearest
+enemy Deployment Zone.
+
+The named scenario Skill/action identities may be useful catalog concepts, but
+card state, kill timing, deployment-zone selection, and similar match state are
+session procedure. They belong in future scoped scenario/FAQ reference or play
+aids, not static Unit/Profile facts.
+
+#### Application reconciliation
+
+No opportunistic schema or runtime change is required by this audit. The
+existing FAQ and scenario backlog is directionally correct, with three concrete
+constraints now made explicit:
+
+- FAQ rulings need canonical identity independent of wiki placement, with ruling
+  publication version/date stored separately from current ITS applicability;
+- scenario-defined actions referenced by the FAQ need scoped identities and
+  declaration relationships where they are part of the 1.0 rules catalog,
+  without requiring full scenario list/detail pages; and
+- generated declaration/category validation must understand source scope so
+  scenario-only Skills/AROs and phase-scoped actions are intentional extensions,
+  not apparent gaps or core-rule categories.

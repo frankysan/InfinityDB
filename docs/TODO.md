@@ -198,7 +198,7 @@ in `docs/releasing.md`.
     - [x] Scenarios.
     - [x] Quick Reference Charts as a validation/completeness pass.
     - [x] Reinforcements, retaining its distinct rules scope.
-    - [ ] ITS FAQ, retaining season/scenario scope rather than treating it as core rules.
+    - [x] ITS FAQ, retaining season/scenario scope rather than treating it as core rules.
   - [ ] Reconcile implementation-relevant findings against Army/API fields, the
     canonical application model, validation, querying/filtering, and browser
     presentation; distinguish source-native concepts from InfinityDB abstractions.
@@ -498,7 +498,9 @@ work against that contract.
     - [ ] Once reconciled, generate an Orders/AROs declaration matrix from these
       cross-domain relationships and use it as a completeness check for missing,
       invalid, or contradictory declaration categories rather than maintaining a
-      second hard-coded chart.
+      second hard-coded chart. Make the projection source/scope-aware so
+      scenario-only Skills/AROs can be represented without appearing in the core
+      N5 matrix or being flagged as missing core categories.
   - [ ] Model Ammunition rules as first-class cited identities and relationships.
     Distinguish the eleven base Ammunition types from source-defined combined
     forms, preserve component relationships for combined Ammunition, and keep
@@ -509,7 +511,10 @@ work against that contract.
     reference, including scenario-only Skills, Equipment when present, contextual
     roles such as Specialist Troop, and the scenario elements those concepts act
     on. Preserve scenario/season scope and keep temporary effects out of static
-    Unit/Profile facts. This catalog coverage is in scope for 1.0; a complete
+    Unit/Profile facts. Include the scoped action identities surfaced by the
+    current ITS FAQ where their owning scenarios classify them as Skills/AROs,
+    including `Activate Communication Antenna`, `Oppose Activation`, and `Emit
+    Akial Interference`. This catalog coverage is in scope for 1.0; a complete
     scenario library and scenario list/detail pages are not.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
@@ -537,6 +542,10 @@ work against that contract.
     flatten it into the base-rule summary. This preserves the distinction
     between a rule and a later clarification, and permits an answer to be
     superseded cleanly.
+    - [ ] Give each ruling a canonical identity independent of wiki page
+      placement. Store the original FAQ publication version/date separately from
+      current rules/ITS-season/scenario applicability so cross-posted or
+      carried-forward rulings are linked rather than duplicated.
   - [ ] Prioritize links to features already represented by the app: deployment
     and private-information handling; BS Attack/MOD and template behavior;
     hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;

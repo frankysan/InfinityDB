@@ -2609,3 +2609,91 @@ reduced to an intrinsic Unit flag or a Reinforcement-only chart lookup.
 Source:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+## ITS FAQ
+
+### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes
+
+**Classification:** source-native provenance and scope semantics.
+
+The current Season 18 ITS FAQ carries nine rulings originally published as FAQ
+v0.0 in October 2025 together with a v0.1 September 2026 ruling. The v0.1
+Peripheral (Ancillary) ruling is also cross-posted on the topical Peripheral
+page.
+
+A canonical FAQ ruling must therefore be identified independently of wiki page
+placement. Store its publication version/date and source locator separately from
+its applicable rules, topics, ITS season, and scenario scope. This allows one
+ruling to appear in several reference contexts without cloning it, and allows a
+carried-forward ruling to remain applicable without pretending it was
+republished in the current season.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/ITS_FAQ>
+- Wiki: <https://infinitythewiki.com/Peripheral>
+- Official FAQ v0.0 PDF, printed pages 2–3:
+  <https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf>
+- Official ITS Season 18 catalog:
+  <https://infinityuniverse.com/games/infinity/its/tournament/5566>
+
+### RS-FAQ-OVERLAY-001 — ITS FAQ rulings are scoped overlays, not core-rule mutations
+
+**Classification:** source-native scoped relationship semantics.
+
+Current ITS rulings alter or clarify behavior only in objective/scenario context:
+Neutral HVTs do not block movement, a Trooper carrying a scenario element cannot
+enter Marker State, an undeployed Peripheral (Ancillary) is not Killed for
+scenario objectives, and Crossing Lines supplies deployment and Impetuous
+exceptions of its own.
+
+InfinityDB should link these rulings to the canonical Neutral, Marker,
+Peripheral, State, deployment, and movement concepts while retaining ITS and,
+where applicable, scenario scope. They must not overwrite the base concept or be
+materialized as universal Unit/Profile facts.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/ITS_FAQ>
+
+### RS-FAQ-OBJ-001 — Objective completion is not equivalent to entering a resulting State
+
+**Classification:** source-native scenario/objective relationship semantics.
+
+For the Telemetry and HVT: Designation Classified Objectives, the FAQ makes the
+successful Spotlight Roll(s) the completion condition and explicitly says the
+target does not need to enter Targeted State.
+
+A future objective relationship therefore cannot infer completion solely from
+the normal State effect of the Skill or Program used. Scenario/classified
+objective conditions need to reference the qualifying action, Roll/event count,
+and scope directly while linking to the underlying Spotlight identity.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/ITS_FAQ>
+- Official FAQ v0.0 PDF, printed page 2:
+  <https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf>
+
+### RS-FAQ-ACTION-001 — Scenario actions require scope-aware declaration relationships
+
+**Classification:** source-native scoped action/category semantics.
+
+The Area of Interest ruling describes `Activate Communication Antenna` as a
+scenario Short Skill and `Oppose Activation` as an ARO. It adds a scenario-only
+ARO trigger and makes `Oppose Activation` the only ARO that resolves Face to
+Face against the activation. The Akial ruling likewise treats `Emit Akial
+Interference` as a Skill used by that scenario.
+
+These action identities are legitimate rules-reference concepts if included by
+the scenario-catalog pass, but their declaration categories and interactions
+must retain scenario/season scope. Generated Orders/AROs validation should be
+able to project a core matrix separately from scoped scenario extensions rather
+than either omitting valid scenario actions or promoting them to universal N5
+categories.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/ITS_FAQ>
+- Official FAQ v0.0 PDF, printed page 3:
+  <https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf>
