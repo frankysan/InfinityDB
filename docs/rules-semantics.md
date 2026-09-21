@@ -2031,3 +2031,86 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Super-Jump>
 - Wiki: <https://infinitythewiki.com/Climbing_Plus>
 - PDF: Infinity N5 V5.3, printed pages 27-35
+
+## Terrain and Scenery Structures
+
+### RS-TS-SCOPE-001 — Special Terrain is optional table context
+
+**Classification:** source-native with an InfinityDB data-boundary consequence.
+
+Special Terrain is optional battlefield configuration agreed before play. Each
+Special Terrain area has a Type of Terrain and at least one additional
+characteristic from Difficult Terrain, Saturation, or Visibility Conditions;
+its effects depend on the Trooper's relationship to that area on the table.
+
+InfinityDB may use these rules to explain profile Skills, Equipment, and
+cross-domain relationships, but a selected Special Terrain zone is not an
+intrinsic Unit/Profile/Army fact. Actual zone placement and current effects
+belong to scenario/table/session context.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terrain_and_Scenery_Structures>
+- PDF: Infinity N5 V5.3, printed page 143
+
+### RS-TS-TYPE-001 — Type of Terrain is a finite parameter vocabulary
+
+**Classification:** source-native with a profile-parameter consequence.
+
+The current Types of Terrain are Aquatic, Desert, Mountain, Jungle, and Zero-G.
+The Terrain Special Skill uses those same identities as its profile parameter.
+When several Types are listed, one is chosen when the Trooper is placed on the
+table; `Terrain (Total)` covers all current Types.
+
+A Terrain parenthetical value should therefore be interpreted as a typed terrain
+scope/choice, not as a Level or generic text/numeric modifier. InfinityDB can
+retain the exact source extra while rules-reference data supplies the finite
+vocabulary and relationships.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Types_of_Terrain>
+- Wiki: <https://infinitythewiki.com/Terrain>
+- PDF: Infinity N5 V5.3, printed pages 116 and 143
+
+### RS-TS-CHAR-001 — Named terrain examples compose independent characteristics
+
+**Classification:** source-native structure with an InfinityDB modeling
+consequence.
+
+The rules define Special Terrain using independent characteristics: Type of
+Terrain, Difficult Terrain, Saturation, and Visibility Conditions. Named examples
+such as Beach, Swamp, Woods, Jungle, Engine Room, or Generator Room are suggested
+combinations of those characteristics, not additional canonical Types of
+Terrain.
+
+InfinityDB should not infer a permanent terrain taxonomy from the examples. A
+future scenario/table record may preserve a named area's display identity while
+representing its mechanical characteristics separately.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terrain_and_Scenery_Structures>
+- PDF: Infinity N5 V5.3, printed pages 143-145
+
+### RS-TS-VIS-001 — Visibility Conditions are reusable zone concepts across domains
+
+**Classification:** source-native cross-domain relationship semantics.
+
+The current Visibility Conditions are Low Visibility, Poor Visibility, Zero
+Visibility, and White Noise. They can be assigned to Special Terrain, but the
+same zone semantics also arise outside terrain: Smoke/Eclipse create visibility
+zones and the White Noise Hacking Program creates a White Noise Zone.
+
+InfinityDB should therefore treat these as reusable rules-reference/glossary
+concepts rather than creating independent terrain-, ammunition-, and
+Hacking-specific identities for the same zone meaning. Whether a zone currently
+exists and affects an action remains table/session state.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Visibility_Conditions>
+- Wiki: <https://infinitythewiki.com/Smoke_Ammunition>
+- Wiki: <https://infinitythewiki.com/Eclipse_Ammunition>
+- Wiki: <https://infinitythewiki.com/White_Noise>
+- PDF: Infinity N5 V5.3, printed pages 66 and 144-145

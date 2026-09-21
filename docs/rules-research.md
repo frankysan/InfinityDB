@@ -901,3 +901,78 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Climb>
 - Wiki: <https://infinitythewiki.com/Jump>
 - PDF: Infinity N5 V5.3, printed pages 27-35
+
+## Terrain and Scenery Structures
+
+### RR-TS-DIFF-001 — Difficult Terrain is runtime movement context
+
+**Scope:** core N5.
+
+Difficult Terrain affects a movement action when the Trooper enters or is in
+contact with the area. It can stop the current movement and impose a reduction
+on subsequent movement through the area. The Terrain Special Skill and some
+Equipment can alter whether those restrictions apply.
+
+This is useful explanatory context for MOV and Terrain-related catalog entries,
+but it should not be projected into a terrain-adjusted canonical MOV Attribute.
+The applied value depends on current table position, selected terrain, Skill, and
+Order.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Difficult_Terrain>
+- Wiki: <https://infinitythewiki.com/Terrain>
+- PDF: Infinity N5 V5.3, printed pages 116 and 144
+
+### RR-TS-SAT-001 — Saturation is contextual Burst modification
+
+**Scope:** core N5.
+
+A Saturation Zone modifies Burst for a BS Attack that originates in, enters, or
+passes through the zone. Its rules include timing relative to Burst allocation,
+a floor, and non-stacking behavior between multiple Saturation Zones.
+
+Those details are action-resolution context rather than a Weapon-profile
+property. A reference view may explain that a Weapon's printed Burst can be
+modified by Saturation without storing a second canonical Burst value.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Saturation>
+- PDF: Infinity N5 V5.3, printed page 144
+
+### RR-TS-ACCESS-001 — Access Width is scenery geometry, not static Trooper eligibility
+
+**Scope:** core N5.
+
+Scenery can have Narrow or Wide Access Widths. Whether a Trooper can pass a
+Narrow access depends on the Silhouette used for that check, with an explicit
+exception that Prone/SX uses the Silhouette value printed on the Unit Profile.
+
+The terms are useful for a glossary or table/scenario reference, but InfinityDB
+should not derive a permanent `can pass narrow access` property because current
+State, scenery, and scenario rules participate in the decision.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Scenery_Structures>
+- PDF: Infinity N5 V5.3, printed page 145
+
+### RR-TS-TERM-001 — Difficult Movement is a historical/current-search alias for Difficult Terrain
+
+**Scope:** N5 terminology history.
+
+The N5.3 Terrain and Scenery Structures update replaces the parent-section term
+`Difficult Movement` with `Difficult Terrain`. Older N5 material and community
+discussion may therefore still use the former term for the same terrain
+characteristic.
+
+A future thesaurus/search layer should retain `Difficult Movement` as
+historical terminology while presenting `Difficult Terrain` as the current N5.3
+canonical term. This is provenance/search metadata, not a second rules concept.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terrain_and_Scenery_Structures>, N5.3
+  update annotation
+- PDF: Infinity N5 V5.3, printed pages 143-144

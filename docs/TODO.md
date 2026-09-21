@@ -185,7 +185,7 @@ in `docs/releasing.md`.
     - [x] Fireteams.
     - [x] Command.
     - [x] Movement.
-    - [ ] Terrain and Scenery Structures.
+    - [x] Terrain and Scenery Structures.
     - [ ] Triumph and Defeat.
     - [ ] Setting up the Gaming Table.
     - [ ] Scenarios.

@@ -204,7 +204,15 @@ rules have been audited.
   - [x] Jump
   - [x] Cross-section reconciliation: Movement Label, Prone, Super-Jump,
     Climbing Plus, source distance units, and application presentation
-- [ ] Terrain and Scenery Structures
+- [x] Terrain and Scenery Structures
+  - [x] Special Terrain scope, area of effect, and characteristic composition
+  - [x] Types of Terrain
+  - [x] Difficult Terrain
+  - [x] Saturation
+  - [x] Visibility Conditions
+  - [x] Scenery Structures / Access Width
+  - [x] Cross-section reconciliation: Terrain Special Skill, Movement, Smoke/
+    Eclipse, White Noise, Dazer, Silhouette, and application boundaries
 - [ ] Triumph and Defeat
 - [ ] Setting up the Gaming Table
 - [ ] Scenarios
@@ -1386,3 +1394,131 @@ No schema or runtime change is required by this audit. Future rules-reference
 coverage can add reviewed Movement-label and Skill-parameter relationships where
 they improve profile help/search, without attempting to reproduce the Movement
 Module as executable rules.
+
+### Terrain and Scenery Structures — section complete
+
+Status: core N5.3 Terrain and Scenery Structures semantic extraction complete.
+The pass records the finite terrain vocabulary and the rules relationships that
+help explain profile Skills and cross-domain effects, while keeping battlefield
+layout, zone placement, and movement/combat resolution in table/session context.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Terrain_and_Scenery_Structures>,
+  <https://infinitythewiki.com/Types_of_Terrain>,
+  <https://infinitythewiki.com/Difficult_Terrain>,
+  <https://infinitythewiki.com/Saturation>,
+  <https://infinitythewiki.com/Visibility_Conditions>, and
+  <https://infinitythewiki.com/Scenery_Structures>.
+- PDF: Infinity N5 V5.3, printed pages 143-145.
+- Cross-section rules used for reconciliation:
+  <https://infinitythewiki.com/Terrain>,
+  <https://infinitythewiki.com/Dazer>,
+  <https://infinitythewiki.com/Smoke_Ammunition>,
+  <https://infinitythewiki.com/Eclipse_Ammunition>, and
+  <https://infinitythewiki.com/White_Noise>.
+
+The live parent page is explicitly part of the N5.3 update. The principal N5.3
+terminology change visible there is `Difficult Terrain` replacing the older
+`Difficult Movement` wording. The N5 V5.3 PDF is the edition baseline for all
+findings below.
+
+#### Special Terrain is table configuration, not canonical Unit data
+
+Special Terrain is optional and agreed by the players before the game. A zone is
+defined by a Type of Terrain plus at least one other terrain characteristic from
+Difficult Terrain, Saturation, and Visibility Conditions. Its effects apply by
+table position/contact.
+
+That is useful semantic evidence for interpreting Terrain-related Skills and
+Equipment, but the selected zones are match/table configuration. They do not
+belong in canonical Unit, profile, or Army-list identity. A future scenario or
+table reference may describe them without turning InfinityDB into a board-state
+engine.
+
+#### Terrain Type is a finite vocabulary shared with the Terrain Special Skill
+
+The current Type of Terrain vocabulary is:
+
+- Aquatic;
+- Desert;
+- Mountain;
+- Jungle; and
+- Zero-G.
+
+The Terrain Special Skill uses exactly this vocabulary as a profile parameter.
+A profile that lists several Types requires a choice when the Trooper is placed
+on the table; `Terrain (Total)` applies to all five current Types.
+
+This makes a Terrain parenthetical value a typed parameter/relationship rather
+than a generic text extra or numeric MOD. InfinityDB can eventually use the
+finite vocabulary for explanation, filtering, and rules-reference links while
+preserving the exact Army occurrence for provenance.
+
+The existing curated declaration-category record for Terrain is already covered
+by the previously recorded declaration-category reconciliation task; this pass
+does not duplicate that backlog item.
+
+#### Terrain characteristics are independent axes; examples are not identities
+
+The rules' Beach, Swamp, Jungle, Engine Room, Generator Room, and similar rows
+are explicitly suggestions/examples assembled from the independent
+characteristics. They are not additional canonical Types of Terrain.
+
+InfinityDB should therefore avoid constructing a terrain ontology from example
+names. If scenario/table content is modeled later, a named area can retain its
+scenario/display name while its mechanical characteristics remain separate,
+typed relationships.
+
+#### Visibility Conditions are reusable zone semantics across rules domains
+
+Low, Poor, Zero Visibility, and White Noise are four current Visibility
+Conditions. They are not Types of Terrain. Terrain can assign them to an area,
+but other rules can create the same semantic zone effects: Smoke and Eclipse
+create visibility zones, and the White Noise Hacking Program creates a White
+Noise Zone.
+
+This supports a shared glossary/rules-reference identity for visibility-zone
+concepts rather than separate terrain-, ammunition-, and hacking-specific copies.
+Actual active zones and their geometry remain runtime/table state.
+
+#### Difficult Terrain and Saturation modify actions, not stored profile facts
+
+Difficult Terrain can end movement on contact and applies a movement reduction
+when the Trooper continues through the area. Saturation applies a contextual
+Burst MOD to BS Attacks crossing the zone. Neither effect rewrites the
+Trooper's stored MOV pair or a Weapon's printed Burst.
+
+The same principle applies to Terrain Skill immunity/bonuses, Visibility MODs,
+and Dazer-created Difficult Terrain: InfinityDB should describe the relationships
+where useful, but keep source profile values canonical and treat the applied
+effect as action/table context.
+
+#### Scenery Access Width is a table property evaluated against Silhouette
+
+Scenery Structures currently define Narrow and Wide Access Widths. Narrow admits
+Troopers with the required Silhouette size, while Wide admits all Troopers.
+The rule also demonstrates that the Silhouette used for an access check is
+contextual: a Prone Trooper represented by SX uses the Silhouette value printed
+on its Unit Profile for this restriction.
+
+Access Width is therefore useful glossary/profile-help context around `S`, but it
+does not justify a static `can pass narrow` Unit field. Scenery geometry,
+current State, and scenario exceptions remain table context.
+
+#### Application reconciliation
+
+The current application boundary remains appropriate:
+
+- profile MOV and Silhouette remain source/canonical facts;
+- the Terrain Skill remains a Skill occurrence whose parameter can be given
+  typed rules semantics;
+- visibility, Saturation, Difficult Terrain, and Access Width can become
+  glossary/reference concepts and cross-links;
+- named example terrains are not promoted to canonical game entities; and
+- actual terrain zones, scenery layout, active visibility templates, and applied
+  movement/Burst MODs remain outside the canonical application model.
+
+No new schema/runtime task is required by this audit. The existing broader
+curated-rules/reference backlog can absorb Terrain parameters and cross-domain
+zone links where they improve catalog interpretation.
