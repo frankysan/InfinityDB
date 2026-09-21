@@ -155,7 +155,14 @@ rules have been audited.
   - [x] Quantronic Combat: Hacker, Firewall, Hacking Area, Repeaters, Devices,
     program chart, and the 12 core Hacking Programs
   - [x] Curated/application-model reconciliation
-- [ ] Ammunition and Weaponry
+- [x] Ammunition and Weaponry
+  - [x] Ammunition framework and complete 11-type base Ammunition inventory
+  - [x] Combined Ammunition and Combined Saving Roll semantics
+  - [x] Weaponry and Mixed Weapons
+  - [x] Deployable/special weapon rules: Perimeter Weapons, Armed Turret,
+    Chest Mines, D-Charges, Disco Baller, Drop Bears, Mine Dispenser, Mines,
+    Pitcher, Sepsitor, SymbioBomb, and WildParrot
+  - [x] Army metadata/curated/application-model reconciliation
 - [ ] Fireteams
 - [ ] Command
 - [ ] Movement
@@ -588,7 +595,10 @@ Confirmed examples include:
 - `Triangulated Fire` is a Long Skill, not Basic Short Skill / ARO;
 - `Berserk` uses the current Long Skill category; the tracked `Entire Order`
   category is not one of the six current `skillTypes`;
-- `Regular` is a Training characteristic, not a Skill;
+- the rules classify `Regular`/`Irregular` as Training. Army-derived data also
+  exposes `Regular` through a skill-like source structure for its own
+  compatibility/representation needs; InfinityDB must preserve that source fact
+  without adopting the source container as the rules-domain classification;
 - GizmoKit and MediKit are Equipment actions but are currently linked through
   the declaration-category contract as if they were Skills.
 
@@ -611,12 +621,13 @@ Level, parameter, or source variant answers “which rules apply to this
 occurrence?” Those are separate questions. A consumer must not infer the exact
 rule effects from the family identity alone.
 
-#### Cross-section deferrals
+#### Cross-section follow-up
 
-Detailed Hacking Device/Firewall/Repeater program topology is deferred to Combat
-because the Hacking rules define the program and target semantics. Detailed
-weapon-like behavior of GizmoKit/MediKit and other Equipment will also be
-cross-checked during Combat/Ammunition and Weaponry.
+The detailed Hacking Device/Firewall/Repeater topology identified here has now
+been reconciled by the completed Combat audit, and the Weapon/Ammunition
+semantics have been cross-checked by the completed Ammunition and Weaponry audit.
+Those later sections own the resulting findings rather than duplicating them
+here.
 
 `Commlink` and `Request Reinforcements` are visible in the live Special Skills
 navigation but are Reinforcements annex rules, not core Skills and Equipment
@@ -635,8 +646,8 @@ Primary sources reviewed:
 - Wiki: <https://infinitythewiki.com/Combat_Module> and the linked Combat pages,
   including the Quantronic Combat subtree, reviewed against the live N5.3 wiki.
 - PDF: Infinity N5 V5.3, printed pages 36-62. The PDF index confirms that the
-  Ammunition and Weaponry module begins on printed page 63, so ammunition-specific
-  effects remain deferred to the next audit unit.
+  Ammunition and Weaponry module begins on printed page 63; those
+  ammunition-specific effects are covered by the completed section below.
 
 The section produced implementation-relevant findings in `rules-semantics.md`
 plus future-facing rules/reference material in `rules-research.md`. It also
@@ -769,6 +780,130 @@ to the source Weapon. That storage boundary is compatible with the Combat rules.
 The main confirmed current presentation issue is terminology: the browser renders
 source `damage` as `DAM` rather than N5.3 `PS`.
 
-Detailed Ammunition interactions, combined ammunition, mixed weapons, and named
-weapon special rules remain intentionally deferred to the next **Ammunition and
-Weaponry** audit.
+Detailed Ammunition interactions, combined Ammunition, Mixed Weapons, and named
+weapon special rules are covered by the completed **Ammunition and Weaponry**
+audit below.
+
+### Ammunition and Weaponry — section complete
+
+Status: core N5.3 wiki/PDF semantic extraction complete for Ammunition and
+Weaponry. FAQ callouts embedded on live wiki pages were observed but remain
+FAQ-scoped and were not promoted into core findings.
+
+Primary sources reviewed:
+
+- Wiki: the Ammunition and Weaponry navigation set, including all eleven base
+  Ammunition pages, Combined Ammunition, Combined Saving Roll, Mixed Weapons,
+  and the named special/deployable weapon pages.
+- PDF: Infinity N5 V5.3, printed pages 63-74. The PDF index places Ammunition on
+  pages 63-67 and Weaponry on pages 68-74.
+
+The section produced implementation-relevant findings in `rules-semantics.md`
+and future-facing runtime/spatial findings in `rules-research.md`. The existing
+Army data model already preserves Ammunition IDs/names and detailed Weapon
+profile fields; the main gap is rules identity/semantics rather than source-data
+retention. The curated N5 V5.3 collection currently has no first-class
+Ammunition records, so the rules-reference expansion backlog now explicitly
+tracks base identities, combined composition, and Saving-Roll relationships.
+
+#### Ammunition and Saving-Roll semantics
+
+N5 V5.3 defines eleven base Ammunition types:
+
+`N`, `AP`, `DA`, `Eclipse`, `E/M`, `EXP`, `PARA`, `Shock`, `Smoke`, `Stun`,
+and `T2`.
+
+They do not form a single "damage modifier" axis. Depending on Ammunition, the
+rule may change the Saving Roll Attribute or its effective value, change the
+number of Saving Rolls, change Wounds per failed Roll, apply or cancel States,
+create a visibility zone without a Saving Roll, or impose target-eligibility
+conditions. The Combat finding that Weapon profiles must preserve PS,
+Ammunition, Saving Roll Attribute, Saving Roll count, and Traits independently
+is therefore reinforced rather than simplified by this section.
+
+`Combined Ammunition` and `Combined Saving Roll` also establish an important
+parsing boundary. A plus sign in the Ammunition field (for example `AP+DA`)
+means one composite Ammunition applying the component effects together. A plus
+sign in a Saving Roll expression (for example `ARM+BTS`) instead means that the
+weapon requires Saving Rolls against different Attributes. These operations are
+not interchangeable and must be interpreted in field context.
+
+Army source data already exposes global Ammunition identities and may include
+combined names such as `AP+DA` as source catalog entries. InfinityDB should keep
+those source IDs/labels for provenance while a curated rules layer can express
+the semantic composition explicitly. It should not infer arbitrary composition
+from punctuation alone when a reviewed source mapping is available.
+
+#### Weapon modes and shared resources
+
+Mixed Weapons confirm that one canonical Weapon can have materially different
+BS and CC modes. A mode may change the Attribute used for the Attack, Range
+bands, Burst, Ammunition, Saving Roll fields, and Traits. This reinforces the
+existing application-model decision to keep exact Weapon mode/profile rows
+contextual rather than promoting one mode to invariant canonical Weapon facts.
+
+Disposable use counts can also be shared across modes. The rules explicitly
+state this for multi-mode Disposable weapons, and Drop Bears/D-Charges provide
+concrete examples. A consumer must therefore not model each mode as having an
+independent ammunition/use counter merely because the modes have separate
+profile rows.
+
+#### Deployables, delivery weapons, and representation
+
+Several named rules expose a reusable relationship pattern:
+
+- Pitcher places a Deployable Repeater;
+- Mine Dispenser and Drop Bears can deploy a Mine;
+- Disco Baller places/activates a Disco Ball effect;
+- Armed Turret, Mines, WildParrot, and other Deployables become independent
+  table game elements with their own ARM/BTS/STR/S profile.
+
+A delivery Weapon can therefore have no meaningful PS/Ammunition/Saving-Roll
+payload of its own because its effect is to place another game element. Blank or
+dash profile values in those cases are semantic, not necessarily incomplete
+metadata.
+
+Mines also demonstrate runtime representation separate from identity: they can
+begin as a Camouflaged Marker and later be represented by a Mine Token while
+remaining the same deployed rules object. This aligns with the earlier
+Model/Marker/Token distinction and should not create duplicate canonical
+entities merely because the table representation changes.
+
+Perimeter Weapons cross catalog boundaries: the rule can apply to Weapons or
+Equipment carrying the Perimeter Trait. Their trigger/Boost behavior depends on
+current positions, enemy activity, and Trigger Area, so those runtime facts
+belong in research/session semantics rather than the static Army snapshot.
+
+#### Target predicates and State effects
+
+Ammunition/weapon effects frequently depend on target properties rather than
+only on a profile number. Examples include E/M applying additional
+Immobilized-B effects to specific Troop Types, PARA having no effect when PH is
+absent, Shock interacting with VITA 1 and Unconscious-related rules, and
+Sepsitor requiring Cube or equivalent Equipment before it can cause
+Sepsitorized State.
+
+InfinityDB should represent such knowledge as cited rules relationships and
+predicates if/when consumed. It must not turn those effects into unconditional
+static properties of every Weapon occurrence.
+
+SymbioBomb additionally introduces an owner-to-user assignment relationship
+during Deployment. The Unit Profile identifies who owns the item; the current
+game determines which eligible Trooper becomes its user. Those are different
+relationship scopes.
+
+#### Application reconciliation
+
+The Army normalization/database layers already preserve Ammunition catalog IDs
+and names plus Weapon mode/profile fields such as Ammunition, Burst, source
+`damage`/PS, Saving Roll expression/count, Traits, Range, and mode. That is a
+suitable lossless/source-context foundation for the rules semantics above.
+
+The curated rules layer already has the generic `ammunition` kind available but
+contains no current first-class Ammunition records. The implementation backlog
+now calls for the eleven base identities plus reviewed composition/effect
+relationships rather than hard-coding effects into Weapon names or browser
+logic.
+
+This audit does not change runtime data, curated rules records, or the web UI.
+It only records the semantic contract and the resulting focused backlog work.

@@ -400,16 +400,17 @@ Sources:
 
 ### RR-SE-HACK-001 — Equipment/Skill identities seed a Hacking relationship graph
 
-**Scope:** core N5 with detailed semantics deferred to Combat.
+**Scope:** core N5; detailed semantics reconciled by the Combat audit.
 
 Hacker, Hacking Device variants, Firewall, Repeater, TinBot, and related
-Equipment already establish cross-links between Troopers, devices, programs,
-Hacking Area, MODs, and defensive effects. The Skills and Equipment chapter is
-enough to establish that those identities are related, but the Hacking rules in
-Combat define the actual program/target/range semantics.
+Equipment establish cross-links between Troopers, devices, programs, Hacking
+Area, MODs, and defensive effects. The Skills and Equipment chapter establishes
+that those identities are related; the completed Combat audit records the actual
+program/target/range semantics and implementation-relevant boundaries.
 
-Do not materialize a complete Hacking graph from this section alone. Carry the
-identities and source links forward to the Combat audit and reconcile them there.
+The original warning still applies: do not infer a complete Hacking graph from
+Equipment names/source links alone. Use the reviewed Combat findings and future
+curated relationships instead.
 
 Sources:
 
@@ -562,3 +563,99 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Combat_Module>
 - PDF: Infinity N5 V5.3, printed pages 36-62
+
+## Ammunition and Weaponry / Broader research
+
+### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones
+
+**Scope:** core N5.
+
+Smoke and Eclipse are Ammunition whose principal effect is to create a Zero
+Visibility Zone rather than resolve ordinary Wounds. Eclipse additionally has
+the Reflective interaction that blocks vision systems which can otherwise see
+through Smoke.
+
+The placement, duration, overlap, and Line-of-Fire consequences depend on the
+current table state. These are useful future play-aid/spatial-reference concepts
+but should not be materialized as static properties of a Unit carrying a Smoke
+or Eclipse Weapon.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Smoke_Ammunition>
+- Wiki: <https://infinitythewiki.com/Eclipse_Ammunition>
+- PDF: Infinity N5 V5.3, printed pages 64 and 66
+
+### RR-AW-DEP-001 — Perimeter/Mine activation is runtime spatial behavior
+
+**Scope:** core N5.
+
+Perimeter Weapons and Mines monitor a Trigger Area and can react to Enemy
+activity according to current position, visibility/valid-target rules, States,
+and declarations. The Weapon/Equipment identity and deployment profile are
+reference data; whether it triggers or Boosts is game-session state.
+
+A future tabletop helper could model this event/spatial relationship, but the
+canonical Army snapshot should not attempt to infer active trigger areas.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Perimeter_Weapons>
+- Wiki: <https://infinitythewiki.com/Mines>
+- PDF: Infinity N5 V5.3, printed pages 69 and 72
+
+### RR-AW-SYMBIO-001 — SymbioBomb separates owner, assigned user, and use-time effect
+
+**Scope:** core N5.
+
+A Unit Profile can list a SymbioBomb on its owner, while Deployment assigns the
+single-use item to another eligible same-army Trooper who becomes its user.
+During play that user can invoke one of the permitted Pheroware Tactics, after
+which the SymbioBomb is removed.
+
+This is a strong future example for a session/list relationship layer:
+catalog/loadout ownership is static source data, assignment is deployment state,
+and the selected use is action state. Those identities/scopes should not be
+collapsed into one permanent Unit relationship.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/SymbioBomb>
+- PDF: Infinity N5 V5.3, printed page 74
+
+### RR-AW-SCENERY-001 — Anti-materiel effects connect Weapon rules to scenery
+
+**Scope:** core N5.
+
+D-Charges and other Anti-materiel Weapons can interact with scenery/structures
+through rules that are not ordinary Trooper damage resolution. This creates a
+cross-domain relationship between Weapon/Ammunition/Traits and the later
+Terrain/Scenery Structure rules.
+
+Retain the relationship as a thesaurus/research edge until the Terrain and
+Scenery Structures audit establishes the authoritative target/object vocabulary.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/D-Charges>
+- Wiki: <https://infinitythewiki.com/Traits#Anti-materiel>
+- PDF: Infinity N5 V5.3, printed page 70
+
+### RR-AW-OBJECT-001 — Delivery and deployed-object lifecycle is a reusable ontology
+
+**Scope:** core N5.
+
+Pitchers, Mine Dispensers, Drop Bears, Disco Ballers, WildParrots, and similar
+rules distinguish the carried/delivery item, the placement action, the deployed
+game element, its table representation, and later activation/removal. Different
+rules use different subsets of that lifecycle.
+
+This vocabulary is likely useful for a future game-term thesaurus and tabletop
+helper. The implementation-relevant source/profile boundaries are recorded in
+`rules-semantics.md`; exact placement/trigger/removal procedures remain
+research-only until a consumer needs them.
+
+Sources:
+
+- Wiki: Ammunition and Weaponry named weapon pages
+- PDF: Infinity N5 V5.3, printed pages 69-74

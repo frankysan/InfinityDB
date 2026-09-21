@@ -169,7 +169,7 @@ in `docs/releasing.md`.
     - [x] Game States and Glossary.
     - [x] Skills and Equipment.
     - [x] Combat.
-    - [ ] Ammunition and Weaponry.
+    - [x] Ammunition and Weaponry.
     - [ ] Fireteams.
     - [ ] Command.
     - [ ] Movement.
@@ -460,8 +460,17 @@ work against that contract.
     V5.3 Skills and Equipment rules before expanding that dataset: remove stale
     category names/mappings, refresh printed-page citations, and generalize the
     link contract so actions supplied by Equipment are not represented as Skills.
+    Preserve Army-derived compatibility/source shapes such as `Regular` appearing
+    in skill-like data without treating those shapes as the rules-domain
+    classification; `Regular`/`Irregular` remain Training semantics in InfinityDB.
     Validate authored category names against the canonical `skillTypes` vocabulary
     and resolve links against the correct Army catalog domain.
+  - [ ] Model Ammunition rules as first-class cited identities and relationships.
+    Distinguish the eleven base Ammunition types from source-defined combined
+    forms, preserve component relationships for combined Ammunition, and keep
+    Ammunition composition separate from Combined Saving Roll notation. Link
+    state/Attribute/Saving-Roll effects explicitly instead of deriving them from
+    Ammunition display names.
   - [ ] Store original, concise editorial summaries and structured facts (labels,
     requirements, effects, restrictions, related rules, and page locators),
     rather than bulk-extracting or serving copyrighted PDF text or artwork.
@@ -563,8 +572,10 @@ work against that contract.
   weapon profiles plus curated rules data.
   - [ ] Normalize display of multi-mode/multi-ammunition profiles, link ammunition
     names and traits to their effects, and provide a unit-neutral
-    comparison/filter view. Validate it against Army metadata; do not copy
-    source charts wholesale into the application.
+    comparison/filter view. Preserve the field-specific meaning of `+`: Ammunition
+    composition and Combined Saving Rolls are separate rules operations. Validate
+    the view against Army metadata; do not copy source charts wholesale into the
+    application.
 - [ ] Add optional play-aid pages for core procedures, distinct from the unit
   database: order expenditure/ARO sequence, modifiers, movement/combat
   resolution, command tokens, and Fireteam quick reference. Use concise cited

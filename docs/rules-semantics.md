@@ -911,7 +911,15 @@ Automatic Skills stored as Basic Short Skill / ARO (`Cyberplug`, `Paramedic`);
 `Parachutist` stored as Deployment rather than Long; and `Triangulated Fire`
 stored as Basic Short Skill / ARO rather than Long. The tracked `Entire Order`
 record for Berserk also uses a category name absent from the current six-category
-vocabulary, and `Regular` is Training rather than a Skill.
+vocabulary.
+
+`Regular` requires a different interpretation. The rules classify
+Regular/Irregular as Training, but Army-derived data also exposes `Regular`
+through a skill-like source structure. That source representation is valid
+provenance and may be retained for compatibility; it must not be treated as
+evidence that the rules-domain concept itself is a Skill. InfinityDB can preserve
+the Army occurrence while classifying/presenting the semantic concept as
+Training.
 
 The Equipment cases expose an additional schema issue:
 `skill-declaration-category` validation and query code currently require
@@ -1388,3 +1396,231 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Hacking_Programs_Chart>
 - Wiki: <https://infinitythewiki.com/Quantronic_Combat_%28Hacking%29>
 - PDF: Infinity N5 V5.3, printed pages 57-62
+
+## Ammunition and Weaponry
+
+### RS-AW-AMMO-001 — Ammunition is a typed rules-effect vocabulary
+
+**Classification:** source-native with a curated-data consequence.
+
+N5 V5.3 defines eleven base Ammunition types: Normal (N), Armor Piercing (AP),
+Double Action (DA), Eclipse, Electromagnetic (E/M), Explosive (EXP), Paralysis
+(PARA), Shock, Smoke, Stun, and T2.
+
+These identities describe different rule operations rather than variants of one
+numeric damage scalar. Depending on the type, Ammunition can change the
+effective Saving Roll Attribute, number of Saving Rolls, Wounds caused, State
+effects, visibility effects, or whether a target can be affected at all.
+
+InfinityDB should therefore model reviewed Ammunition identities/effects in the
+rules layer and link Weapon profiles to them. Source Ammunition IDs/names remain
+provenance; effects should not be inferred from Weapon display names.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Ammunition>
+- Wiki: <https://infinitythewiki.com/Ammunition_Summary_Chart>
+- PDF: Infinity N5 V5.3, printed pages 63-67
+
+### RS-AW-AMMO-002 — Ammunition effects are orthogonal to PS and profile fields
+
+**Classification:** source-native with a Weapon-profile interpretation
+consequence.
+
+The same Weapon-profile schema separates PS, Ammunition, Saving Roll Attribute,
+number of Saving Rolls, and Traits because Ammunition can modify different parts
+of resolution. AP halves the applicable ARM/BTS value; DA and EXP increase the
+number of Saving Rolls; T2 changes Wounds per failed Roll; E/M/PARA/Stun can
+cause States; Smoke/Eclipse create visibility effects without ordinary damaging
+Saving Rolls.
+
+InfinityDB must preserve those fields independently. A rules-aware view may
+explain how they combine, but normalization must not replace them with one
+derived "damage" value.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Ammunition_Summary_Chart>
+- PDF: Infinity N5 V5.3, printed pages 63-67
+
+### RS-AW-AMMO-003 — Combined Ammunition is explicit composition
+
+**Classification:** source-native relationship semantics.
+
+When Ammunition types are joined with `+`, the rules treat them as one Combined
+Ammunition whose component effects apply together. Criticals add one additional
+Saving Roll applying the relevant combined effects; the component rules still
+determine effects such as defense halving, Saving Roll count, Wounds, and States.
+
+Army may expose a combined expression such as `AP+DA` as its own source
+Ammunition row. InfinityDB should preserve that source identity while a curated
+rules layer records reviewed component relationships. Canonical composition must
+not depend solely on parsing punctuation from a display label when source IDs
+and reviewed mappings are available.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Combined_Ammunition>
+- PDF: Infinity N5 V5.3, printed page 67
+
+### RS-AW-SAVE-001 — Combined Saving Roll is not Combined Ammunition
+
+**Classification:** source-native with a parsing/presentation consequence.
+
+A Weapon may require Saving Rolls against more than one Attribute, represented
+by a combined Saving Roll expression such as `ARM+BTS`. This is a different
+operation from an Ammunition expression such as `AP+DA`: the former identifies
+multiple defense Attributes/Rolls; the latter composes Ammunition effects.
+
+The `+` token is therefore field-scoped syntax. InfinityDB must retain typed
+field context when parsing, normalizing, validating, or presenting Weapon
+profiles instead of assigning a universal meaning to the character.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Combined_Saving_Roll>
+- PDF: Infinity N5 V5.3, printed page 67
+
+### RS-AW-WPN-001 — Canonical Weapon identity and mode profile are separate
+
+**Classification:** source-native with an InfinityDB canonicalization
+consequence.
+
+Mixed Weapons can operate as both BS and CC Weapons, and each mode can carry
+different Attack Attribute semantics, Range, Burst, Ammunition, Saving Roll
+fields, and Traits. Other multi-mode Weapons likewise change profile facts
+without becoming unrelated canonical items.
+
+This confirms the current application boundary: canonical Weapon identity may
+group reviewed variants/modes, while exact metadata mode/profile rows remain
+contextual data. A consumer must select the applicable mode rather than merge
+mode fields into one synthetic profile.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Mixed_Weapons>
+- PDF: Infinity N5 V5.3, printed pages 68-69
+
+### RS-AW-WPN-002 — Disposable use pools can be shared across Weapon modes
+
+**Classification:** source-native with a future session-model consequence.
+
+For a Disposable Weapon with multiple modes, the Disposable use count is shared
+between those modes. Drop Bears and D-Charges are explicit examples: using one
+mode consumes from the same limited resource available to the other mode.
+
+Static Weapon profiles should therefore preserve the shared-resource semantic
+relationship. A future game/session model must not create an independent use
+counter for every metadata mode row.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits#Disposable>
+- Wiki: <https://infinitythewiki.com/Drop_Bears>
+- Wiki: <https://infinitythewiki.com/D-Charges>
+- PDF: Infinity N5 V5.3, printed pages 70-71
+
+### RS-AW-DEP-001 — Deployables become independent game elements with profiles
+
+**Classification:** source-native relationship semantics.
+
+Deployable Weapons and Equipment can be placed on the table as game elements
+separate from their bearer. Several have their own ARM, BTS, STR, and S values,
+and some have their own Weapons, Equipment, Skills, trigger rules, or
+representation.
+
+InfinityDB should distinguish ownership/source loadout from the rules identity
+and profile of the deployed object. A Deployable is not automatically a
+Peripheral, and its table profile must not be flattened into the bearer's Unit
+Profile.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Perimeter_Weapons>
+- Wiki: <https://infinitythewiki.com/Armed_Turret>
+- Wiki: <https://infinitythewiki.com/Mines>
+- PDF: Infinity N5 V5.3, printed pages 69-74
+
+### RS-AW-DEP-002 — Delivery Weapons can place another rules object
+
+**Classification:** source-native relationship semantics with a
+missing-value/presentation consequence.
+
+Some Weapon profiles primarily deliver or place another game element: Pitcher
+places a Deployable Repeater; Mine Dispenser and Drop Bears can place Mines;
+Disco Baller places a Disco Ball effect. Their delivery profile can therefore
+legitimately have no PS, Ammunition, or Saving Roll value of its own.
+
+Blank/dash attack-effect fields on such a profile are semantic absence, not
+automatically incomplete source data. A rules-aware model should express the
+`delivers/places` relationship instead of fabricating damage values.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Pitcher>
+- Wiki: <https://infinitythewiki.com/Mine_Dispenser>
+- Wiki: <https://infinitythewiki.com/Drop_Bears>
+- Wiki: <https://infinitythewiki.com/Disco_Baller>
+- PDF: Infinity N5 V5.3, printed pages 71-73
+
+### RS-AW-MINE-001 — Runtime representation does not change deployable identity
+
+**Classification:** source-native with an InfinityDB identity consequence.
+
+A Mine may initially be represented by a Camouflaged Marker and later by a Mine
+Token when its identity is revealed. That is a runtime representation/state
+transition of the same deployed rules object, not evidence for separate
+canonical Mine entities.
+
+This follows the glossary distinction between Model, Marker, Token, and the
+underlying game element. InfinityDB rules/reference identity should remain
+separate from table representation.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Mines>
+- Wiki: <https://infinitythewiki.com/Camouflaged>
+- PDF: Infinity N5 V5.3, printed page 72
+
+### RS-AW-EFFECT-001 — Weapon/Ammunition effects can depend on target predicates
+
+**Classification:** source-native with a rules-relationship consequence.
+
+Several effects are conditional on target data rather than merely on a hit and a
+numeric profile. E/M can impose additional State effects on specified Troop
+Types; PARA has no effect on targets without PH; Shock has specific interaction
+with VITA 1 and Unconscious-related rules; Sepsitor can affect only eligible
+Troopers with Cube or equivalent Equipment.
+
+If InfinityDB exposes these interactions, they should be represented as cited
+target/effect predicates tied to rules identities. They must not be promoted to
+unconditional static properties of every Weapon occurrence.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Electromagnetic_(E/M)_Ammunition>
+- Wiki: <https://infinitythewiki.com/Paralysis_(PARA)_Ammunition>
+- Wiki: <https://infinitythewiki.com/Shock_Ammunition>
+- Wiki: <https://infinitythewiki.com/Sepsitor>
+- PDF: Infinity N5 V5.3, printed pages 64-65 and 73
+
+### RS-AW-DATA-001 — Army Ammunition identity and rules identity are separate layers
+
+**Classification:** source-native data plus InfinityDB rules-reference
+interpretation.
+
+Army-derived data already carries Ammunition lookup identities and Weapon
+profiles reference those source values. The N5 rules independently define the
+semantic identities/effects of the eleven base Ammunition types and the
+composition rules for combined forms.
+
+InfinityDB should preserve the Army IDs/labels and map them to reviewed
+rules-reference identities rather than rewriting source rows. This follows the
+same source-versus-semantic boundary used elsewhere: the shape chosen by Army is
+valid provenance but does not force InfinityDB's rules ontology.
+
+Sources:
+
+- PDF: Infinity N5 V5.3, printed pages 63-67
+- Source model: normalized/metadata Ammunition tables and Weapon profile
+  Ammunition references
