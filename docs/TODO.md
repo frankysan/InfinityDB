@@ -185,6 +185,13 @@ in `docs/releasing.md`.
     presentation; distinguish source-native concepts from InfinityDB abstractions.
   - [ ] Record verified findings with no current consumer in `docs/rules-research.md`
     instead of forcing premature schema or UI changes.
+  - [ ] Re-review the accumulated `rules-semantics.md` and `rules-research.md`
+    findings against the architectural rule that rules are semantic evidence,
+    not the application schema. Keep material that improves catalog/data
+    interpretation, relationships, validation, querying, or presentation (plus
+    necessary explanatory context); demote or remove procedural/edge-case detail
+    that does not serve InfinityDB's reference responsibilities, without treating
+    audit completeness as a requirement to model the complete ruleset.
   - [ ] Complete a final gap analysis and feed confirmed implementation work into
     the existing canonical-model, completeness, and product-feature backlogs.
 

@@ -5,6 +5,15 @@ Infinity ruleset. The goal is not to reproduce the rules. The goal is to identif
 source-authoritative semantics that improve data interpretation, normalization,
 validation, relationships, querying, filtering, or presentation.
 
+Infinity's rules use an unusually explicit and structured vocabulary, which
+makes them valuable semantic evidence for this work. That structure is an input
+property, not an application-model requirement. InfinityDB remains a catalog and
+relationship reference: it does not need to mirror the rules ontology, encode
+every procedure or edge case, or become an authoritative/infallible substitute
+for the official rules. Audit completeness means that relevant rules material
+has been examined for useful semantics, not that every rule must be represented
+in the database, API, or UI.
+
 Implementation-relevant findings move to `rules-semantics.md`. Verified findings
 without a current consumer go to `rules-research.md`. Page-level coverage stays
 here so `TODO.md` can remain a milestone-level backlog.
@@ -64,6 +73,13 @@ For every audited page or PDF section:
    currently unused findings in `rules-research.md`.
 7. Do not implement schema/code/UI changes opportunistically during the audit.
    Feed confirmed gaps back into the normal project backlog.
+
+Do not treat a precisely specified rule as a modeling requirement merely because
+it is easy to structure. Procedural rules, timing details, and edge cases should
+be retained only when they clarify terminology, prevent a likely data
+misinterpretation, support a plausible reference/presentation need, or provide
+necessary context for another finding. Otherwise the authoritative source link
+is sufficient.
 
 A normal finding records:
 

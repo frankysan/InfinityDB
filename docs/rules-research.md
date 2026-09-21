@@ -9,6 +9,14 @@ source and a concise statement of what is known. Once an application becomes
 clear, promote the finding to `rules-semantics.md` and create normal TODO/code
 work only if implementation is actually required.
 
+An entry here is not a promise that InfinityDB will eventually model the rule.
+The ruleset is useful semantic evidence, while InfinityDB's product model remains
+centered on catalogs, structure, relationships, querying, and presentation.
+Procedural mechanics and edge cases may remain permanently as contextual
+research, or be removed during later review when they do not materially help
+those responsibilities. The official rules remain authoritative for exact rules
+wording and game resolution.
+
 ## Entry contract
 
 Record:
