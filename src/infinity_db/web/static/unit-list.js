@@ -15,7 +15,7 @@ export function renderUnitRows(container, units) {
     if (faction) row.classList.add(`unit-row--faction-${faction}`);
     row.addEventListener("click", (event) => {
       if (!event.target.closest("a")) {
-        const url = `/units/${unit.id}`;
+        const url = `/units/${unit.public_slug || unit.id}`;
         window.infinityNavigate ? window.infinityNavigate(url) : window.location.assign(url);
       }
     });
@@ -23,7 +23,7 @@ export function renderUnitRows(container, units) {
     nameCell.scope = "row";
     nameCell.className = "unit-name";
     const nameLink = document.createElement("a");
-    nameLink.href = `/units/${unit.id}`;
+    nameLink.href = `/units/${unit.public_slug || unit.id}`;
     nameLink.textContent = unit.name;
     const nameContent = document.createElement("span");
     nameContent.className = "unit-name-content";

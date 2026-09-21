@@ -792,8 +792,17 @@ application-level identities.
   them, and `/weapons/{slug}` plus `/api/weapons/{slug}` resolve to the canonical
   application Weapon identity. Existing numeric Weapon routes remain valid, curated
   source-variant IDs resolve through application catalog provenance before slug lookup,
-  and numeric-only candidates stay on the compatibility numeric form. Armies and Units
+  and numeric-only candidates stay on the compatibility numeric form. Armies remain
+  numeric-only publicly for now.
+- 2026-09-21: Logical Units are the fourth additive public-route consumer. Existing
+  Unit `slug` remains source/context data, while player-facing Unit payloads expose a
+  separate resolved `public_slug`. Unit list/detail, catalog usage, Trait usage, and
+  Skill Modifier links prefer that application slug; `/units/{slug}` and
+  `/api/units/{slug}` resolve through the registry while numeric Unit routes remain
+  valid. Source Unit references are resolved to their logical application Unit before
+  slug lookup, numeric-only candidates remain on numeric compatibility URLs, and Armies
   remain numeric-only publicly for now.
+
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
   rules authority, the pinned Wiki archive as discovery/secondary provenance,

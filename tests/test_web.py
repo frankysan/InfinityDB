@@ -408,6 +408,8 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert status == 200
     unit = json.loads(body)
     assert unit["name"] == "Alpha Ranger"
+    assert unit["slug"] == "ranger-prototype"
+    assert unit["public_slug"] == "ranger-prototype"
     assert {army["id"] for army in unit["armies"]} == {101, 201}
     for army in unit["armies"]:
         assert army["profiles"][0]["type"] == "Line Trooper"
@@ -475,6 +477,21 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert b"unit.js" in body
     assert b'aria-label="Project navigation"' in body
     assert b"Skip to unit details" in body
+
+    status, headers, slug_page = request(app, "/units/ranger-prototype")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"unit.js" in slug_page
+
+    status, headers, slug_body = request(app, "/api/units/ranger-prototype")
+    assert status == 200
+    assert headers["content-type"].startswith("application/json")
+    assert json.loads(slug_body) == unit
+
+    status, _, body = request(app, "/api/units/not-a-unit")
+    assert status == 404
+    assert json.loads(body)["error"] == "Unit not found"
+
     status, _, body = request(app, "/api/units/9099")
     assert status == 404
     assert json.loads(body)["error"] == "Unit not found"
@@ -1015,6 +1032,7 @@ def test_unit_list_renders_all_toggle_visible_armies(app: Callable) -> None:
     assert b"function factionSlug(" not in body
     assert b"Math.floor(Number(armyId) / 100)" not in body
     assert b"const faction = unit.display_faction?.slug;" in body
+    assert body.count(b"unit.public_slug || unit.id") == 2
 
 
 def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -> None:
@@ -1038,6 +1056,7 @@ def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> N
     assert b"Math.floor(Number(armyId) / 100)" not in body
     assert b"const faction = army.faction;" in body
     assert b"const displayFaction = unit.display_faction?.slug;" in body
+    assert b"const unitIdentifier = /^\\/units\\/([a-z0-9]+(?:-[a-z0-9]+)*)$/" in body
 
 
 def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> None:
@@ -1349,6 +1368,10 @@ def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"skill-extras.js" in body
 
+    status, _, script = request(app, "/static/skill-extras.js")
+    assert status == 200
+    assert b"unit.public_slug || unit.id" in script
+
     status, headers, body = request(app, "/api/skill-extras")
     assert status == 200
     assert headers["content-type"].startswith("application/json")
@@ -1457,6 +1480,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                         "name": "Alpha Ranger",
                         "isc": "Explorer Prototype",
                         "slug": "ranger-prototype",
+                        "public_slug": "ranger-prototype",
                         "main_army_id": None,
                         "main_army_name": None,
                         "main_faction": None,

@@ -261,6 +261,7 @@ TABLE_POLICY["units"] = _policy(
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
     "application_catalog_id",
+    "application_unit_id",
     "application_id_for_slug",
     "application_slug",
     "snapshot_downloaded_on",
@@ -280,6 +281,7 @@ PROBED_DIRECT_METHODS = {
 RUNTIME_MODULES = (
     "src/infinity_db/web/app.py",
     "src/infinity_db/catalog_slugs.py",
+    "src/infinity_db/unit_slugs.py",
     "src/infinity_db/skill_catalog.py",
     "src/infinity_db/trait_catalog.py",
 )
@@ -384,6 +386,7 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     return [
         ("snapshot-metadata", lambda db: db.snapshot_downloaded_on()),
         ("armies", lambda db: db.list_armies()),
+        ("unit-application-id", lambda db: db.application_unit_id(unit_id)),
         ("skill-extras", lambda db: db.list_skill_extras()),
         ("skills-list", lambda db: db.list_catalog_items("skills")),
         (

@@ -1239,6 +1239,23 @@ class Database:
         return None if row is None else int(row["application_id"])
 
     @instance_lru_cache(maxsize=512)
+    def application_unit_id(self, unit_id: int) -> int | None:
+        """Resolve a source or application Unit ID to its logical application identity."""
+
+        if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:
+            raise ValueError(
+                "unit_id must be an integer within SQLite's signed 64-bit range"
+            )
+        graph = self._unit_graph()
+        group = graph["groups_by_source"].get(unit_id)
+        if group is not None:
+            return int(group["id"])
+        return next(
+            (int(group["id"]) for group in graph["groups"] if group["id"] == unit_id),
+            None,
+        )
+
+    @instance_lru_cache(maxsize=512)
     def application_catalog_id(self, catalog: str, item_id: int) -> int | None:
         """Resolve a source or application catalog ID to its application identity."""
 

@@ -541,18 +541,20 @@ may seed application candidates but are not automatically promoted to permanent
 public identifiers. Repository helpers resolve only `resolved` registry entries
 bidirectionally between a domain-local slug and its current numeric application key.
 
-Skills, Equipment, and Weapons are additive route consumers. Their list/detail API
-payloads expose a resolved application `slug`, browser links prefer that slug, and both
-`/{domain}/{slug}` and `/api/{domain}/{slug}` resolve through the registry. Existing
-numeric Skill, Equipment, and Weapon routes remain supported unchanged. Numeric-only
-slug candidates are not emitted as route identifiers because they would shadow the
-compatibility numeric namespace. Nested Unit payload references to Equipment and
-Weapons also expose the canonical application slug after resolving any source-variant
-ID through application catalog provenance. This migration does not redirect numeric
-routes or declare the derived slug permanently frozen; per-domain freezing, reviewed
-overrides, aliases, and redirect/canonical-URL behavior remain required before numeric
-routes are retired or redirected. Armies and Units remain numeric-only at the public
-route layer for now.
+Skills, Equipment, Weapons, and logical Units are additive route consumers. Catalog
+list/detail API payloads expose a resolved application `slug`; Unit payloads instead
+expose a distinct `public_slug` so the existing source/context `slug` keeps its current
+meaning. Browser links prefer the application slug, and the corresponding detail web/API
+routes accept either that slug or the existing numeric application ID. Numeric-only slug
+candidates are not emitted as route identifiers because they would shadow the
+compatibility numeric namespace. Nested Unit payload references to Equipment and Weapons
+expose the canonical application slug after resolving any source-variant ID through
+application catalog provenance; Unit references embedded in catalog, Trait, and Skill
+Modifier payloads expose `public_slug` after source/logical Unit identity resolution. This
+migration does not redirect numeric routes or declare the derived slug permanently
+frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
+behavior remain required before numeric routes are retired or redirected. Armies remain
+numeric-only at the public route layer for now.
 
 The current reviewed 2026-09-18 snapshot resolves all initial registry candidates:
 57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons

@@ -24,6 +24,11 @@ from infinity_db.database import ArmySelectionError, Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.unit_slugs import (
+    attach_public_unit_slug,
+    enrich_nested_unit_slugs,
+    enrich_unit_items,
+)
 
 LOGGER = logging.getLogger(__name__)
 ASSETS = {
@@ -56,6 +61,8 @@ CHARACTERISTIC_SYMBOL_PATH = re.compile(
     r"/static/characteristics/(peripheral|hackable|cube|cube-2)\.svg"
 )
 DOMAIN_ROUTE_IDENTIFIER = r"[a-z0-9]+(?:-[a-z0-9]+)*"
+UNIT_PAGE_PATH = re.compile(rf"/units/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+UNIT_API_PATH = re.compile(rf"/api/units/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 SKILL_PAGE_PATH = re.compile(rf"/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 SKILL_API_PATH = re.compile(rf"/api/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 EQUIPMENT_PAGE_PATH = re.compile(
@@ -399,7 +406,7 @@ class Application:
             else:
                 status = HTTPStatus.NOT_FOUND
                 payload = {"error": "Resource not found"}
-        elif re.fullmatch(r"/units/[0-9]+", path):
+        elif UNIT_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
             body = _page(
                 "unit.html",
@@ -499,6 +506,7 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 payload = {"items": self.skill_catalog.list_skill_extras()}
+                payload = enrich_nested_unit_slugs(self.database, payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -541,6 +549,8 @@ class Application:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
+                else:
+                    payload = enrich_nested_unit_slugs(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -569,6 +579,7 @@ class Application:
                     attach_public_catalog_slug(self.database, "equipment", payload)
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
+                    payload = enrich_nested_unit_slugs(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -597,6 +608,7 @@ class Application:
                     attach_public_catalog_slug(self.database, "weapons", payload)
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
+                    payload = enrich_nested_unit_slugs(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -611,6 +623,8 @@ class Application:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Trait not found"}
+                else:
+                    payload = enrich_nested_unit_slugs(self.database, payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -652,6 +666,10 @@ class Application:
             else:
                 try:
                     payload = self.database.list_units(**query)
+                    payload = {
+                        **payload,
+                        "items": enrich_unit_items(self.database, payload["items"]),
+                    }
                 except ArmySelectionError as exc:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": str(exc)}
@@ -659,13 +677,18 @@ class Application:
                     LOGGER.exception("Could not read units")
                     status = HTTPStatus.SERVICE_UNAVAILABLE
                     payload = {"error": "The database is unavailable. Please try again."}
-        elif match := re.fullmatch(r"/api/units/([0-9]+)", path):
+        elif match := UNIT_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                unit_id = int(match.group(1))
-                if unit_id > 2**63 - 1:
+                identifier = match.group("identifier")
+                unit_id = (
+                    int(identifier)
+                    if identifier.isdigit()
+                    else self.database.application_id_for_slug("units", identifier)
+                )
+                if unit_id is not None and unit_id > 2**63 - 1:
                     raise ValueError("unit_id must be between 0 and 9223372036854775807")
-                payload = self.database.get_unit(unit_id)
+                payload = None if unit_id is None else self.database.get_unit(unit_id)
                 if payload is not None:
                     payload = self.skill_catalog.enrich_unit(payload)
                     payload = enrich_nested_catalog_slugs(
@@ -673,6 +696,7 @@ class Application:
                         payload,
                         frozenset({"equipment", "weapons"}),
                     )
+                    attach_public_unit_slug(self.database, payload)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

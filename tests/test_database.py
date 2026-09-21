@@ -2590,6 +2590,8 @@ def test_application_domain_slugs_are_separate_from_source_slugs(
     assert database.application_id_for_slug("armies", "first-army") == 101
     assert database.application_slug("units", 1) == "alpha"
     assert database.application_id_for_slug("units", "alpha") == 1
+    assert database.application_unit_id(1) == 1
+    assert database.application_unit_id(999_999) is None
     assert database.application_slug("units", 3) == "100-guard"
 
     skill = database.list_catalog_items("skills")[0]
