@@ -572,8 +572,12 @@ closed as explicit collision records instead of silently becoming `foo-2`.
 The registry is the application identity foundation for a staged public-route
 migration. Existing Army/unit source/display slugs remain source/context data; they
 may seed application candidates but are not automatically promoted to permanent
-public identifiers. Repository helpers resolve only `resolved` registry entries
-bidirectionally between a domain-local slug and its current numeric application key.
+public identifiers. Repository resolution is centralized at the application-domain
+boundary. One shared resolver accepts either a source/application numeric reference or a
+domain-local slug and returns the current application identity for Armies, Units,
+Skills, Equipment, and Weapons. Domain-specific helpers and detail reads reuse that resolver rather than asking
+web routes or other consumers to translate slugs first. Slug lookup itself still resolves
+only `resolved` registry entries.
 
 Armies, Skills, Equipment, Weapons, and logical Units are additive public consumers of
 the registry. Catalog list/detail API payloads expose a resolved application `slug`; Unit

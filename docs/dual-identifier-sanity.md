@@ -54,18 +54,18 @@ the intended contract:
 
 ## Gaps to close before 0.6.2
 
-### 1. Repository lookup methods are not consistently dual-ID
+### 1. Repository lookup methods are consistently dual-ID — closed
 
-The web layer currently performs part of the slug-to-numeric conversion before
-calling repository methods. `application_army_id()` accepts `int | str`, but
-`application_unit_id()`, `application_catalog_id()`, `get_unit()`,
-`get_skill()`, and `get_catalog_item()` are still numeric-only interfaces.
+Closed on 2026-09-21. The repository now owns one shared application-domain
+reference resolver for Armies, Units, Skills, Equipment, and Weapons. It accepts
+source/application numeric IDs or stable public slugs and normalizes them to the
+application identity before the consumer-specific read proceeds.
 
-This works for the current routes but leaves the core application boundary
-inconsistent and encourages future consumers to reimplement identifier parsing.
-The repository/application layer should provide one shared domain-reference
-resolution contract and detail lookups should accept either supported form
-directly.
+`application_army_id()`, `application_unit_id()`, and `application_catalog_id()`
+reuse that resolver, and `get_unit()`, `get_skill()`, `skill_source_ids()`, and
+`get_catalog_item()` accept either supported form directly. The web detail routes
+therefore only parse numeric route syntax; they no longer perform slug-to-ID
+resolution themselves.
 
 ### 2. Legacy grouped source IDs do not fully canonicalize browser filter state
 
@@ -154,8 +154,8 @@ redesigned deliberately:
 
 Before starting the 0.6.2 release checklist:
 
-1. centralize application-domain reference resolution and make repository/detail
-   lookups dual-ID where the domain supports stable slugs;
+1. **Closed:** centralize application-domain reference resolution and make
+   repository/detail lookups dual-ID where the domain supports stable slugs;
 2. canonicalize legacy grouped source-ID filters into preferred slug browser
    state;
 3. define and apply the cross-domain API slug-companion policy;

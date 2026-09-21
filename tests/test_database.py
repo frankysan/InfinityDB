@@ -2681,19 +2681,38 @@ def test_application_domain_slugs_are_separate_from_source_slugs(
     assert database.list_armies()[0]["slug"] == "first_army"
     assert database.application_slug("armies", 101) == "first-army"
     assert database.application_id_for_slug("armies", "first-army") == 101
+    assert database.application_domain_id("armies", 101) == 101
+    assert database.application_domain_id("armies", "first-army") == 101
     assert database.application_army_id(101) == 101
     assert database.application_army_id("first-army") == 101
     assert database.application_army_id("missing-army") is None
     assert database.application_slug("units", 1) == "alpha"
     assert database.application_id_for_slug("units", "alpha") == 1
+    assert database.application_domain_id("units", "alpha") == 1
     assert database.application_unit_id(1) == 1
+    assert database.application_unit_id("alpha") == 1
     assert database.application_unit_id(999_999) is None
     assert database.application_slug("units", 3) == "100-guard"
+    unit_by_slug = database.get_unit("alpha")
+    unit_by_id = database.get_unit(1)
+    assert unit_by_slug is not None
+    assert unit_by_id is not None
+    assert unit_by_slug["id"] == unit_by_id["id"]
 
-    skill = database.list_catalog_items("skills")[0]
-    skill_slug = database.application_slug("skills", skill["id"])
-    assert skill_slug is not None
-    assert database.application_id_for_slug("skills", skill_slug) == skill["id"]
+    for catalog in ("skills", "equipment", "weapons"):
+        item = database.list_catalog_items(catalog)[0]
+        item_slug = database.application_slug(catalog, item["id"])
+        assert item_slug is not None
+        assert database.application_id_for_slug(catalog, item_slug) == item["id"]
+        assert database.application_domain_id(catalog, item_slug) == item["id"]
+        assert database.application_catalog_id(catalog, item_slug) == item["id"]
+        detail = (
+            database.get_skill(item_slug)
+            if catalog == "skills"
+            else database.get_catalog_item(catalog, item_slug)
+        )
+        assert detail is not None
+        assert detail["id"] == item["id"]
 
 
 def test_application_catalog_aliases_accept_readable_slug_references(

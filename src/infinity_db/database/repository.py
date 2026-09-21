@@ -1212,54 +1212,74 @@ class Database:
             ).fetchone()
         return None if row is None else int(row["application_id"])
 
-    @instance_lru_cache(maxsize=512)
-    def application_army_id(self, army_ref: int | str) -> int | None:
-        """Resolve a source/application Army ID or public slug to application identity."""
+    @instance_lru_cache(maxsize=1024)
+    def application_domain_id(self, domain: str, item_ref: int | str) -> int | None:
+        """Resolve one source/application numeric ID or public slug to application identity."""
 
-        if isinstance(army_ref, int) and not isinstance(army_ref, bool):
-            if not SQLITE_INTEGER_MIN <= army_ref <= SQLITE_INTEGER_MAX:
+        if domain not in APPLICATION_SLUG_DOMAINS:
+            raise ValueError(f"Unknown slug domain: {domain}")
+        context = {
+            "armies": "army_id",
+            "units": "unit_id",
+            "skills": "skill_id",
+            "equipment": "equipment_id",
+            "weapons": "weapon_id",
+        }[domain]
+        if isinstance(item_ref, str):
+            slug = require_domain_slug(item_ref, context=context)
+            if slug.isdigit():
+                raise ValueError(
+                    f"{context} numeric references must be integers, not strings"
+                )
+            return self.application_id_for_slug(domain, slug)
+        if type(item_ref) is not int:
+            raise ValueError(f"{context} must be an integer or domain-local slug")
+
+        if domain == "armies":
+            if not SQLITE_INTEGER_MIN <= item_ref <= SQLITE_INTEGER_MAX:
                 raise ValueError(
                     "army_id must be an integer within SQLite's signed 64-bit range"
                 )
             graph = self._application_army_graph()
-            application_id = graph["source_to_application"].get(army_ref, army_ref)
+            application_id = graph["source_to_application"].get(item_ref, item_ref)
             return application_id if application_id in graph["armies"] else None
-        if isinstance(army_ref, str):
-            slug = require_domain_slug(army_ref, context="army_id")
-            if slug.isdigit():
-                raise ValueError("army_id numeric references must be integers, not strings")
-            return self.application_id_for_slug("armies", slug)
-        raise ValueError("army_id must be an integer or domain-local slug")
 
-    @instance_lru_cache(maxsize=512)
-    def application_unit_id(self, unit_id: int) -> int | None:
-        """Resolve a source or application Unit ID to its logical application identity."""
-
-        if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:
+        if not 0 <= item_ref <= SQLITE_INTEGER_MAX:
             raise ValueError(
-                "unit_id must be an integer within SQLite's signed 64-bit range"
+                f"{domain} identifier must be a nonnegative SQLite signed 64-bit integer"
             )
-        graph = self._unit_graph()
-        group = graph["groups_by_source"].get(unit_id)
-        if group is not None:
-            return int(group["id"])
-        return next(
-            (int(group["id"]) for group in graph["groups"] if group["id"] == unit_id),
-            None,
-        )
+        if domain == "units":
+            graph = self._unit_graph()
+            group = graph["groups_by_source"].get(item_ref)
+            if group is not None:
+                return int(group["id"])
+            return next(
+                (int(group["id"]) for group in graph["groups"] if group["id"] == item_ref),
+                None,
+            )
+
+        graph = self._application_catalog_graph(domain)
+        return item_ref if item_ref in graph["items"] else graph["source_to_item"].get(item_ref)
 
     @instance_lru_cache(maxsize=512)
-    def application_catalog_id(self, catalog: str, item_id: int) -> int | None:
-        """Resolve a source or application catalog ID to its application identity."""
+    def application_army_id(self, army_ref: int | str) -> int | None:
+        """Resolve a source/application Army ID or public slug to application identity."""
+
+        return self.application_domain_id("armies", army_ref)
+
+    @instance_lru_cache(maxsize=512)
+    def application_unit_id(self, unit_ref: int | str) -> int | None:
+        """Resolve a source/application Unit ID or public slug to application identity."""
+
+        return self.application_domain_id("units", unit_ref)
+
+    @instance_lru_cache(maxsize=512)
+    def application_catalog_id(self, catalog: str, item_ref: int | str) -> int | None:
+        """Resolve a source/application catalog ID or public slug to application identity."""
 
         if catalog not in {"skills", "equipment", "weapons"}:
             raise ValueError(f"Unknown catalog: {catalog}")
-        if type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX:
-            raise ValueError(
-                "item_id must be an integer within SQLite's signed 64-bit range"
-            )
-        graph = self._application_catalog_graph(catalog)
-        return item_id if item_id in graph["items"] else graph["source_to_item"].get(item_id)
+        return self.application_domain_id(catalog, item_ref)
 
     @instance_lru_cache(maxsize=512)
     def application_slug(self, domain: str, application_id: int) -> str | None:
@@ -1545,7 +1565,7 @@ class Database:
         return {**trait, "variants": variants}
 
     @instance_lru_cache(maxsize=128)
-    def get_catalog_item(self, catalog: str, item_id: int) -> dict[str, Any] | None:
+    def get_catalog_item(self, catalog: str, item_ref: int | str) -> dict[str, Any] | None:
         """Return an equipment or weapon item and its extra-specific unit usage."""
         tables = {
             "equipment": ("equipment", "equipment"),
@@ -1553,10 +1573,8 @@ class Database:
         }
         if catalog not in tables:
             raise ValueError(f"Unknown catalog: {catalog}")
-        if type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("item_id must be an integer within SQLite's signed 64-bit range")
         graph = self._application_catalog_graph(catalog)
-        application_item_id = item_id if item_id in graph["items"] else graph["source_to_item"].get(item_id)
+        application_item_id = self.application_catalog_id(catalog, item_ref)
         if application_item_id is None:
             return None
         item = graph["items"].get(application_item_id)
@@ -1705,23 +1723,19 @@ class Database:
         return result
 
     @instance_lru_cache(maxsize=128)
-    def skill_source_ids(self, skill_id: int) -> tuple[int, ...]:
-        """Return source skill IDs represented by one application skill identity."""
-        if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+    def skill_source_ids(self, skill_ref: int | str) -> tuple[int, ...]:
+        """Return source skill IDs represented by one application Skill reference."""
         graph = self._application_catalog_graph("skills")
-        application_skill_id = skill_id if skill_id in graph["items"] else graph["source_to_item"].get(skill_id)
+        application_skill_id = self.application_catalog_id("skills", skill_ref)
         if application_skill_id is None:
             return ()
         return graph["source_ids_by_item"].get(application_skill_id, ())
 
     @instance_lru_cache(maxsize=128)
-    def get_skill(self, skill_id: int) -> dict[str, Any] | None:
-        """Return one skill together with the units that use it."""
-        if type(skill_id) is not int or not 0 <= skill_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("skill_id must be an integer within SQLite's signed 64-bit range")
+    def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+        """Return one Skill reference together with the units that use it."""
         graph = self._application_catalog_graph("skills")
-        application_skill_id = skill_id if skill_id in graph["items"] else graph["source_to_item"].get(skill_id)
+        application_skill_id = self.application_catalog_id("skills", skill_ref)
         if application_skill_id is None:
             return None
         skill = graph["items"].get(application_skill_id)
@@ -1840,31 +1854,14 @@ class Database:
                     raise ArmySelectionError(
                         f"army_id {army_id} is a grouping-only identity, not a selectable army"
                     )
-        rule_filters: dict[str, int | str | None] = {
+        rule_filters: dict[str, int | None] = {}
+        for catalog, item_ref in {
             "skills": skill_id,
             "equipment": equipment_id,
             "weapons": weapon_id,
-        }
-        for name, item_ref in rule_filters.items():
-            parameter = {
-                "skills": "skill",
-                "equipment": "equipment",
-                "weapons": "weapon",
-            }[name]
-            if item_ref is None:
-                continue
-            if isinstance(item_ref, int) and not isinstance(item_ref, bool):
-                if not 0 <= item_ref <= SQLITE_INTEGER_MAX:
-                    raise ValueError(
-                        f"{parameter}_id must be an integer within SQLite's signed 64-bit range"
-                    )
-                continue
-            if isinstance(item_ref, str):
-                require_domain_slug(item_ref, context=f"{parameter}_id")
-                continue
-            raise ValueError(
-                f"{parameter}_id must be an integer or domain-local slug"
-            )
+        }.items():
+            if item_ref is not None:
+                rule_filters[catalog] = self.application_catalog_id(catalog, item_ref)
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -1887,17 +1884,10 @@ class Database:
             if enabled
         }
         matching_sources_by_rule: dict[str, set[int]] = {}
-        if any(item_ref is not None for item_ref in rule_filters.values()):
+        if rule_filters:
             with self._connect() as connection:
-                for catalog, item_ref in rule_filters.items():
-                    if item_ref is None:
-                        continue
+                for catalog, application_id in rule_filters.items():
                     graph = self._application_catalog_graph(catalog)
-                    application_id = (
-                        self.application_catalog_id(catalog, item_ref)
-                        if isinstance(item_ref, int)
-                        else self.application_id_for_slug(catalog, item_ref)
-                    )
                     source_ids = (
                         ()
                         if application_id is None
@@ -2025,23 +2015,23 @@ class Database:
         return [item["id"] for item in page["items"]]
 
     @instance_lru_cache(maxsize=128)
-    def get_unit(self, unit_id: int) -> dict[str, Any] | None:
-        """Return a browsable unit and its army-specific profiles and loadouts."""
-        if type(unit_id) is not int or not 0 <= unit_id <= SQLITE_INTEGER_MAX:
-            raise ValueError("unit_id must be a nonnegative SQLite signed 64-bit integer")
+    def get_unit(self, unit_ref: int | str) -> dict[str, Any] | None:
+        """Return one Unit reference with its army-specific profiles and loadouts."""
+        application_unit_id = self.application_unit_id(unit_ref)
+        if application_unit_id is None:
+            return None
+        graph = self._unit_graph()
+        group = next(
+            (item for item in graph["groups"] if item["id"] == application_unit_id),
+            None,
+        )
+        if group is None:
+            return None
         identity_config = self._identity_config()
         with self._connect() as connection:
-            selected = connection.execute(
-                "SELECT logical_unit_id FROM logical_unit_sources WHERE source_unit_id = ?",
-                (unit_id,),
-            ).fetchone()
-            if selected is None:
-                return None
-            graph = self._unit_graph()
             faction_groups = self._faction_groups()
             faction_identities = self._faction_identities()
             army_names = graph["army_names"]
-            group = graph["groups_by_source"][unit_id]
             source_ids = group["source_ids"]
             declared_faction_ids = graph["declared_faction_ids_by_unit"]
             canonical_factions = {

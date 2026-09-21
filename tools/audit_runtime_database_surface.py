@@ -262,7 +262,6 @@ EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
     "application_catalog_id",
     "application_unit_id",
-    "application_id_for_slug",
     "application_slug",
     "snapshot_downloaded_on",
     "list_armies",

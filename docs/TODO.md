@@ -739,7 +739,7 @@ new correctness or reproducibility defect.
   - [ ] **Close the dual-identifier consistency gaps found by the 2026-09-21 sanity audit.**
     This work is a 0.6.2 release blocker; see
     `docs/dual-identifier-sanity.md` for evidence and scope.
-    - [ ] Centralize application-domain reference resolution so repository/detail lookups
+    - [x] Centralize application-domain reference resolution so repository/detail lookups
       accept either numeric IDs or stable slugs instead of requiring web-layer pre-resolution.
     - [ ] Canonicalize accepted legacy grouped source-ID Unit-explorer filters to the
       application identity and preferred slug, including non-representative Skill/Equipment/

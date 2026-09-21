@@ -1836,8 +1836,15 @@ does not replace Army/source slugs or provenance IDs. Source/application display
 slugs may seed a candidate where useful, but they are not thereby promoted to a
 permanent public identity.
 
-Repository lookup can translate a `resolved` slug to/from the current numeric
-application key. Armies, Skills, Equipment, Weapons, and logical Units are additive
+Repository lookup centralizes numeric/slug normalization for every registry-backed
+domain. `application_domain_id()` accepts a source/application numeric reference or a
+resolved public slug and returns the canonical application numeric identity; Army, Unit,
+and catalog-specific helpers delegate to it. Unit, Skill, Equipment, and Weapon detail
+reads accept the same dual reference directly, so HTTP and browser consumers do not need
+their own slug-to-ID translation path. A `resolved` slug still maps through the persisted
+registry rather than being regenerated from a label at read time.
+
+Armies, Skills, Equipment, Weapons, and logical Units are additive
 public consumers. Catalog payloads expose resolved non-numeric `slug` values; Unit and
 Army payloads expose the application navigation identity as `public_slug` so their
 pre-existing `slug` fields continue to represent source/context data. Browser links and

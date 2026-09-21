@@ -134,14 +134,14 @@ class SkillCatalog:
             self._enrich_skill_item(item)
         return items
 
-    def get_skill(self, skill_id: int) -> dict[str, Any] | None:
-        """Return one Army skill enriched with curated declarations and rules."""
-        item = self.database.get_skill(skill_id)
+    def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+        """Return one Army Skill reference enriched with curated declarations and rules."""
+        item = self.database.get_skill(skill_ref)
         if item is None:
             return None
         result = deepcopy(item)
         self._attach_public_slug(result)
-        source_ids = set(self.database.skill_source_ids(skill_id))
+        source_ids = set(self.database.skill_source_ids(int(result["id"])))
         if not source_ids:
             source_ids = {int(result["id"])}
         result["categories"] = self._categories_for_ids(source_ids)

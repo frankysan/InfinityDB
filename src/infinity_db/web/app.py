@@ -557,12 +557,8 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 identifier = match.group("identifier")
-                skill_id = (
-                    int(identifier)
-                    if identifier.isdigit()
-                    else self.database.application_id_for_slug("skills", identifier)
-                )
-                payload = None if skill_id is None else self.skill_catalog.get_skill(skill_id)
+                skill_ref = int(identifier) if identifier.isdigit() else identifier
+                payload = self.skill_catalog.get_skill(skill_ref)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
@@ -579,16 +575,8 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 identifier = match.group("identifier")
-                item_id = (
-                    int(identifier)
-                    if identifier.isdigit()
-                    else self.database.application_id_for_slug("equipment", identifier)
-                )
-                payload = (
-                    None
-                    if item_id is None
-                    else self.database.get_catalog_item("equipment", item_id)
-                )
+                item_ref = int(identifier) if identifier.isdigit() else identifier
+                payload = self.database.get_catalog_item("equipment", item_ref)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
@@ -608,16 +596,8 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 identifier = match.group("identifier")
-                item_id = (
-                    int(identifier)
-                    if identifier.isdigit()
-                    else self.database.application_id_for_slug("weapons", identifier)
-                )
-                payload = (
-                    None
-                    if item_id is None
-                    else self.database.get_catalog_item("weapons", item_id)
-                )
+                item_ref = int(identifier) if identifier.isdigit() else identifier
+                payload = self.database.get_catalog_item("weapons", item_ref)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
@@ -703,14 +683,8 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 identifier = match.group("identifier")
-                unit_id = (
-                    int(identifier)
-                    if identifier.isdigit()
-                    else self.database.application_id_for_slug("units", identifier)
-                )
-                if unit_id is not None and unit_id > 2**63 - 1:
-                    raise ValueError("unit_id must be between 0 and 9223372036854775807")
-                payload = None if unit_id is None else self.database.get_unit(unit_id)
+                unit_ref = int(identifier) if identifier.isdigit() else identifier
+                payload = self.database.get_unit(unit_ref)
                 if payload is not None:
                     payload = self.skill_catalog.enrich_unit(payload)
                     payload = enrich_nested_catalog_slugs(
