@@ -96,17 +96,16 @@ only IDs do not gain invented application slugs, and plural `army_ids` are alrea
 with the structured `armies` list whose entries now carry both numeric `id` and
 `public_slug`, avoiding a redundant positional `army_slugs` array.
 
-### 4. Numeric-only slug candidates are marked resolved too early
+### 4. Closed: numeric-shadow handling belongs to the registry
 
-The slug registry may currently return a digit-only value such as `"100"` with
-status `resolved`, even though routes must interpret that token as numeric ID
-100. Consumers consequently repeat `not slug.isdigit()` checks before emitting a
-slug.
+The application-domain slug registry now treats a digit-only candidate such as
+`"100"` as `unavailable` because the public route must interpret that token as numeric
+ID 100. The diagnostic `candidate_slug` is retained, while persisted `slug` remains null.
 
-A registry/resolver state described as resolved should mean that the slug is
-actually usable as the domain's public alternate identifier. Numeric-shadowing
-candidates should be made unavailable/fallback at the owning identity layer so
-consumers do not each need to rediscover the routing ambiguity.
+`resolved` therefore means that the alternate identifier is actually routable. Shared
+public-reference enrichment can trust `application_slug()` directly and no longer repeats
+consumer-side `slug.isdigit()` suppression. Trait slug assignment is intentionally
+unaffected because Traits do not share these numeric compatibility routes.
 
 ### 5. Remaining maintained JSON references still use opaque entity IDs
 
@@ -164,7 +163,7 @@ Before starting the 0.6.2 release checklist:
 2. **Closed:** canonicalize legacy grouped source-ID filters into preferred slug browser
    state;
 3. **Closed:** define and apply the cross-domain API slug-companion policy;
-4. move numeric-shadow handling into the slug registry/resolver boundary;
+4. **Closed:** move numeric-shadow handling into the slug registry/resolver boundary;
 5. migrate the remaining maintained Weapon/display references after adding
    deterministic owning-layer resolvers;
 6. add project-wide dual-identifier invariant tests and rerun the sanity audit.

@@ -1832,11 +1832,12 @@ Schema version 17 / compatibility revision 25 adds a derived
 and `weapons`. Numeric application IDs remain implementation keys, while each
 registry row records a normalized candidate and one of three states:
 
-- `resolved`: the candidate is non-empty and unique within the domain, so `slug`
-  receives that value;
+- `resolved`: the candidate is non-empty, unique within the domain, and routable
+  without shadowing the numeric compatibility namespace, so `slug` receives that value;
 - `collision`: two or more application identities normalize to the same candidate,
   so `slug` remains null and the conflict requires an explicit reviewed decision;
-- `unavailable`: no usable candidate can be derived, so `slug` remains null.
+- `unavailable`: no usable public candidate can be derived, including digit-only
+  candidates that would shadow numeric compatibility routes, so `slug` remains null.
 
 Candidates are deterministic lowercase ASCII identifiers with single hyphen
 separators. Collision handling is deliberately fail-closed: the application does not
@@ -1869,8 +1870,9 @@ embedded in other player-facing payloads resolve source Unit IDs to their logica
 before exposing `public_slug`. Unit-explorer Skill/Equipment/Weapon filters likewise
 resolve either form to the application catalog identity and expand it across all
 materialized source members before matching canonical profile/loadout/unit-option
-occurrences. Numeric-only candidates remain on numeric compatibility routes because the
-two forms would otherwise be ambiguous. No redirect or permanent-freeze promise is made
+occurrences. Digit-only candidates retain their diagnostic `candidate_slug` but are
+marked `unavailable` in the registry, so `application_slug()` returns no public slug and
+all consumers fall back to the numeric identity consistently. No redirect or permanent-freeze promise is made
 by this transition; per-domain freezing, reviewed overrides, aliases, and canonical
 redirect behavior still precede retirement of numeric routes. The current 2026-09-18
 snapshot resolves all

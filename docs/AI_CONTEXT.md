@@ -853,6 +853,13 @@ compatibility references remain unambiguous JSON integers.
   application numeric ID or the application Army public slug, normalize through one
   repository resolver, reject grouping-only identities after resolution, and prefer the
   public slug in browser query state while preserving numeric compatibility.
+- 2026-09-21: Numeric-shadow handling is owned by the application-domain slug registry.
+  Digit-only candidates remain visible as `candidate_slug` for diagnostics but are stored
+  as `unavailable` with no routable slug because they would collide with numeric
+  compatibility routes. `application_slug()` therefore returns only actually routable
+  public identifiers, and downstream consumers no longer repeat `slug.isdigit()` guards.
+  Trait slug assignment remains independent because Trait routes do not share a numeric
+  application-ID namespace.
 - 2026-09-21: Cross-domain API references now follow an additive slug-companion policy.
   Existing numeric fields remain stable; canonical application references gain readable
   companions when routable. Unit Army scalar references use `main_army_slug` /

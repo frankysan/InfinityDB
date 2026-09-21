@@ -750,9 +750,10 @@ new correctness or reproducibility defect.
       leaving source/context-only IDs explicitly numeric. Scalar references receive sibling
       `*_slug` fields; structured Army references use `public_slug` where `slug` is already
       source/context data.
-    - [ ] Move numeric-shadow handling into the slug registry/resolver boundary so a
-      `resolved` slug is always actually routable; consumers should not need repeated
-      `slug.isdigit()` suppression.
+    - [x] Move numeric-shadow handling into the slug registry/resolver boundary so a
+      `resolved` slug is always actually routable; digit-only candidates retain their
+      diagnostic candidate but become `unavailable`, and consumers no longer suppress
+      them independently.
     - [ ] Add deterministic owning-layer resolvers and migrate the remaining maintained
       entity references where safe: 8 Weapon-category IDs, 8 Weapon-correction IDs, and
       2 Army display-identity references. Keep numeric authoring available for ambiguity

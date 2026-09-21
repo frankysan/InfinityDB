@@ -18,7 +18,4 @@ def public_slug_for_reference(
     application_id = database.application_domain_id(domain, item_ref)
     if application_id is None:
         return None
-    slug = database.application_slug(domain, application_id)
-    if slug is None or slug.isdigit():
-        return None
-    return slug
+    return database.application_slug(domain, application_id)

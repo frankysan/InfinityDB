@@ -567,7 +567,10 @@ and a `resolved`, `collision`, or `unavailable` status. Slugs are unique only wi
 their domain. Candidate generation lowercases, removes Unicode combining marks,
 limits output to ASCII letters/numbers with single hyphen separators, and never
 invents order-dependent numeric suffixes. Duplicate candidates therefore fail
-closed as explicit collision records instead of silently becoming `foo-2`.
+closed as explicit collision records instead of silently becoming `foo-2`. Because
+these domains retain numeric compatibility routes, a digit-only candidate is also
+recorded as `unavailable`: the candidate remains visible for diagnostics, but it never
+receives a routable `slug` that could shadow the numeric namespace.
 
 The registry is the application identity foundation for a staged public-route
 migration. Existing Army/unit source/display slugs remain source/context data; they
@@ -590,8 +593,9 @@ numeric filters and canonicalize them to the same preferred slug. Skill, Equipme
 Weapon, and Unit detail web/API routes accept either form; Army
 selection through the Unit explorer/API accepts either a source/application numeric ID
 or the resolved Army public slug and normalizes both to the application Army identity.
-Numeric-only slug candidates are not emitted as route identifiers because they would
-shadow the compatibility numeric namespace. Nested Unit payload references to Equipment
+Digit-only candidates are rejected by the registry itself and therefore have no public
+slug to emit; consumers do not perform their own numeric-shadow suppression. Nested Unit
+payload references to Equipment
 and Weapons expose the canonical application slug after resolving any source-variant ID
 through application catalog provenance; Unit references embedded in catalog, Trait, and
 Skill Modifier payloads expose `public_slug` after source/logical Unit identity resolution.

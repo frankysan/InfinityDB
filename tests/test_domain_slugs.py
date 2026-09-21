@@ -42,6 +42,24 @@ def test_provisional_candidate_resolution_records_unresolved_states() -> None:
     assert resolved[4].status == "resolved"
 
 
+def test_numeric_candidates_can_be_rejected_by_domains_with_numeric_routes() -> None:
+    application = resolve_domain_slug_candidates(
+        [(1, "100"), (2, "Alpha")],
+        domain="skills",
+        reject_numeric=True,
+    )
+
+    assert application[1].candidate_slug == "100"
+    assert application[1].slug is None
+    assert application[1].status == "unavailable"
+    assert application[2].slug == "alpha"
+    assert application[2].status == "resolved"
+
+    trait = resolve_domain_slug_candidates([(1, "100")], domain="traits")
+    assert trait[1].slug == "100"
+    assert trait[1].status == "resolved"
+
+
 def test_candidate_collisions_fail_closed_instead_of_getting_numeric_suffixes() -> None:
     with pytest.raises(ValueError, match="slug collision 'cc-attack-3'"):
         assign_domain_slugs(

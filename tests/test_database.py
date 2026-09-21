@@ -2820,7 +2820,14 @@ def test_skill_catalog_does_not_emit_numeric_only_slug_that_would_shadow_compati
     skill = catalog.list_skills()[0]
     assert skill["id"] == 1
     assert "slug" not in skill
-    assert Database(database_path).application_slug("skills", 1) == "100"
+    assert Database(database_path).application_slug("skills", 1) is None
+
+    with sqlite3.connect(database_path) as connection:
+        row = connection.execute(
+            "SELECT candidate_slug, slug, status FROM application_domain_slugs "
+            "WHERE domain = 'skills' AND application_id = 1"
+        ).fetchone()
+    assert row == ("100", None, "unavailable")
 
 
 def test_equipment_slug_enrichment_resolves_source_variant_ids(
@@ -2878,7 +2885,7 @@ def test_equipment_slug_enrichment_does_not_emit_numeric_only_slug(
 
     assert equipment["id"] == 1
     assert "slug" not in equipment
-    assert database.application_slug("equipment", 1) == "100"
+    assert database.application_slug("equipment", 1) is None
 
 
 def test_weapon_slug_enrichment_resolves_source_variant_ids(
@@ -2943,7 +2950,7 @@ def test_weapon_slug_enrichment_does_not_emit_numeric_only_slug(
 
     assert weapon["id"] == 1
     assert "slug" not in weapon
-    assert database.application_slug("weapons", 1) == "100"
+    assert database.application_slug("weapons", 1) is None
 
 
 def test_application_domain_slug_lookup_rejects_unknown_domains(

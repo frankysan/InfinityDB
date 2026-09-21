@@ -53,13 +53,18 @@ def require_domain_slug(value: object, *, context: str) -> str:
 
 
 def resolve_domain_slug_candidates(
-    rows: Iterable[tuple[Any, object]], *, domain: str
+    rows: Iterable[tuple[Any, object]],
+    *,
+    domain: str,
+    reject_numeric: bool = False,
 ) -> dict[Any, DomainSlugResolution]:
     """Resolve provisional candidates without inventing disambiguating suffixes.
 
-    A unique non-empty candidate is ``resolved``. Duplicate candidates remain
-    visible as ``collision`` records, and identities with no usable candidate
-    become ``unavailable``. Neither unresolved state receives a routable slug.
+    A unique non-empty candidate is ``resolved`` unless the owning domain rejects
+    digit-only candidates because they would shadow its numeric compatibility
+    namespace. Duplicate candidates remain visible as ``collision`` records, and
+    identities with no usable candidate become ``unavailable``. Neither unresolved
+    state receives a routable slug.
     """
 
     candidates: dict[Any, str | None] = {}
@@ -76,6 +81,8 @@ def resolve_domain_slug_candidates(
     for key, candidate in candidates.items():
         if candidate is None:
             result[key] = DomainSlugResolution(None, None, "unavailable")
+        elif reject_numeric and candidate.isdigit():
+            result[key] = DomainSlugResolution(candidate, None, "unavailable")
         elif len(owners[candidate]) > 1:
             result[key] = DomainSlugResolution(candidate, None, "collision")
         else:

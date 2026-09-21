@@ -59,7 +59,9 @@ def derive_application_domain_slugs(
     result: list[dict[str, Any]] = []
     for domain in APPLICATION_SLUG_DOMAINS:
         seeds = _domain_seeds(connection, domain)
-        resolutions = resolve_domain_slug_candidates(seeds, domain=domain)
+        resolutions = resolve_domain_slug_candidates(
+            seeds, domain=domain, reject_numeric=True
+        )
         result.extend(
             {
                 "domain": domain,
