@@ -48,7 +48,6 @@ class IdentityConfig:
     unit_aliases: Mapping[int, int]
     army_aliases: Mapping[int, int]
     canonical_faction_overrides: Mapping[int, int]
-    catalog_aliases: Mapping[str, Mapping[int, int]]
     catalog_alias_groups: Mapping[str, tuple[CatalogAliasGroup, ...]]
     word_aliases: Mapping[str, str]
     reinforcement_prefixes: tuple[str, ...]
@@ -68,20 +67,6 @@ class IdentityConfig:
     def resolve_canonical_faction_id(self, source_id: int) -> int:
         """Apply an explicit canonical-faction override, when one is configured."""
         return self.canonical_faction_overrides.get(source_id, source_id)
-
-    def canonical_catalog_id(self, catalog: str, source_id: int) -> int | None:
-        aliases = self.catalog_aliases.get(catalog)
-        return aliases.get(source_id) if aliases is not None else None
-
-    def catalog_source_ids(self, catalog: str, source_id: int) -> tuple[int, ...]:
-        """Return the explicit alias group containing ``source_id``, when configured."""
-        aliases = self.catalog_aliases.get(catalog)
-        if aliases is None:
-            return ()
-        canonical_id = aliases.get(source_id)
-        if canonical_id is None:
-            return ()
-        return tuple(item_id for item_id, target in aliases.items() if target == canonical_id)
 
     def resolve_catalog_aliases(
         self, catalog: str, source_items: Mapping[int, object]
@@ -113,9 +98,28 @@ class IdentityConfig:
                 )
             return owners[0]
 
+        def is_present(ref: IdentifierRef, context: str) -> bool:
+            if isinstance(ref, int):
+                return ref in source_items
+            owners = slug_owners.get(ref, [])
+            if len(owners) > 1:
+                raise IdentityConfigError(
+                    f"{context} references ambiguous {catalog} slug {ref!r}; "
+                    f"matches source IDs {owners}. Use a numeric ID for this reference."
+                )
+            return bool(owners)
+
         aliases: dict[int, int] = {}
         for index, group in enumerate(groups):
             context = f"identity config.catalogs.{catalog}.groups[{index}]"
+            if not any(
+                is_present(ref, f"{context}.source_ids[{position}]")
+                for position, ref in enumerate(group.source_refs)
+            ):
+                # Source snapshots and hermetic fixtures can legitimately omit an
+                # entire maintained alias group. Once any member is present, all
+                # authored slug references are resolved strictly below.
+                continue
             resolved_sources = [
                 source_id
                 for position, ref in enumerate(group.source_refs)
@@ -268,9 +272,7 @@ def _identifier_ref(value: Any, context: str) -> IdentifierRef:
     raise IdentityConfigError(f"{context} must be a positive integer or domain-local slug")
 
 
-def _catalog_alias_groups(
-    value: Any, context: str
-) -> tuple[tuple[CatalogAliasGroup, ...], Mapping[int, int]]:
+def _catalog_alias_groups(value: Any, context: str) -> tuple[CatalogAliasGroup, ...]:
     section = _object(value, context)
     _only_keys(section, {"groups"}, context)
     groups = section.get("groups")
@@ -278,7 +280,6 @@ def _catalog_alias_groups(
         raise IdentityConfigError(f"{context}.groups must be an array")
 
     parsed_groups: list[CatalogAliasGroup] = []
-    numeric_aliases: dict[int, int] = {}
     for index, raw_group in enumerate(groups):
         group_context = f"{context}.groups[{index}]"
         group = _object(raw_group, group_context)
@@ -303,23 +304,9 @@ def _catalog_alias_groups(
         if reason is not None and (not isinstance(reason, str) or not reason.strip()):
             raise IdentityConfigError(f"{group_context}.reason must be a non-empty string")
 
-        if all(type(ref) is int for ref in parsed_refs) and type(canonical_ref) is int:
-            numeric_sources = tuple(int(ref) for ref in parsed_refs)
-            canonical_id = int(canonical_ref)
-            if canonical_id not in numeric_sources:
-                raise IdentityConfigError(
-                    f"{group_context}.canonical_id must also appear in source_ids"
-                )
-            for source_id in numeric_sources:
-                if source_id in numeric_aliases:
-                    raise IdentityConfigError(
-                        f"{context} source ID {source_id} belongs to more than one alias group"
-                    )
-                numeric_aliases[source_id] = canonical_id
-
         parsed_groups.append(CatalogAliasGroup(canonical_ref, parsed_refs))
 
-    return tuple(parsed_groups), MappingProxyType(numeric_aliases)
+    return tuple(parsed_groups)
 
 
 def _numeric_alias_groups(value: Any, context: str) -> Mapping[int, int]:
@@ -443,17 +430,13 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         raise IdentityConfigError(
             "identity config.catalogs is missing: " + ", ".join(sorted(missing))
         )
-    parsed_catalogs = {
-        catalog: _catalog_alias_groups(
-            catalogs[catalog], f"identity config.catalogs.{catalog}"
-        )
-        for catalog in CATALOG_NAMES
-    }
     catalog_alias_groups = MappingProxyType(
-        {catalog: parsed_catalogs[catalog][0] for catalog in CATALOG_NAMES}
-    )
-    catalog_aliases = MappingProxyType(
-        {catalog: parsed_catalogs[catalog][1] for catalog in CATALOG_NAMES}
+        {
+            catalog: _catalog_alias_groups(
+                catalogs[catalog], f"identity config.catalogs.{catalog}"
+            )
+            for catalog in CATALOG_NAMES
+        }
     )
 
     name_normalization = _object(
@@ -515,7 +498,6 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         unit_aliases=unit_aliases,
         army_aliases=army_aliases,
         canonical_faction_overrides=canonical_faction_overrides,
-        catalog_aliases=catalog_aliases,
         catalog_alias_groups=catalog_alias_groups,
         word_aliases=word_aliases,
         reinforcement_prefixes=tuple(reinforcement_prefixes),

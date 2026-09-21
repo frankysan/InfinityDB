@@ -24,8 +24,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
   keep source/context `slug` separate and expose the application route as `public_slug`;
   curated Trait routes remain anchored to their stable rules identities instead of being
   regenerated from display names. Catalog identity alias groups may also be
-  authored with readable source-label slugs or numeric source IDs; unknown or ambiguous
-  slugs fail validation instead of being guessed.
+  authored with readable source-label slugs or numeric source IDs; the maintained
+  Skill, Equipment, and Weapon groups now use readable slugs, with ambiguous or
+  represented-but-unknown slug references rejected instead of guessed.
 - Validate curated typed record IDs against the shared domain-slug grammar, and make
   Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
 - Make the Unit explorer's matching-unit statistic show the currently visible unique

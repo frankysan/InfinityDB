@@ -242,13 +242,6 @@ def identity_config_from_connection(connection: sqlite3.Connection) -> IdentityC
             "Database has invalid identity configuration metadata; rebuild the database"
         ) from exc
 
-def canonical_skill_id(
-    skill_id: int, identity_config: IdentityConfig | None = None
-) -> int:
-    """Return the configured representative ID for an explicit skill identity group."""
-    config = identity_config or load_identity_config()
-    return config.canonical_catalog_id("skills", skill_id) or skill_id
-
 def skill_merge_key(name: object) -> str | None:
     """Identify skill labels that differ only by a numeric level or value."""
     text = str(name or "").strip()
@@ -275,25 +268,6 @@ def merged_catalog_name(name: object) -> str:
     if ":" in text:
         return text.split(":", 1)[0].strip()
     return merged_skill_name(text)
-
-def configured_catalog_group(
-    identity_config: IdentityConfig,
-    catalog: str,
-    item_id: int,
-    available_ids: Collection[int],
-) -> tuple[int, tuple[int, ...]] | None:
-    """Return an explicit manifest group restricted to IDs present in this snapshot."""
-    source_ids = tuple(
-        source_id
-        for source_id in identity_config.catalog_source_ids(catalog, item_id)
-        if source_id in available_ids
-    )
-    if not source_ids:
-        return None
-    canonical_id = identity_config.canonical_catalog_id(catalog, item_id)
-    if canonical_id not in source_ids:
-        canonical_id = min(source_ids)
-    return canonical_id, source_ids
 
 def source_trait_name(value: object) -> str:
     """Return a visible Army trait label, excluding bracketed profile annotations."""

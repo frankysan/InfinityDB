@@ -20,7 +20,6 @@ from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_uni
 from infinity_db.database.repository import (
     army_required_flags,
     availability_summary,
-    canonical_skill_id,
     catalog_merge_key,
     logical_source_loadout_merge_key,
     merged_catalog_name,
@@ -692,17 +691,19 @@ def test_armed_turret_uses_its_base_name_with_visible_metadata_profile(
     data["tables"]["weapons"].extend(
         [
             {
-                "id": 209,
-                "name": "Armed Turret (Combi R.)",
+                "id": source_id,
+                "name": name,
                 "source_defined": True,
                 "category": "Uncategorized",
-            },
-            {
-                "id": 226,
-                "name": "Armed Turret",
-                "source_defined": True,
-                "category": "Uncategorized",
-            },
+            }
+            for source_id, name in (
+                (209, "Armed Turret (Combi R.)"),
+                (215, "Armed Turret (Marksman R.)"),
+                (219, "Armed Turret (AP Rifle)"),
+                (222, "Armed Turret (Rifle)"),
+                (226, "Armed Turret"),
+                (228, "Armed Turret (E/Mitter)"),
+            )
         ]
     )
     data["tables"]["metadata_weapons"] = [
@@ -894,28 +895,6 @@ def test_list_skill_extras_returns_distinct_sorted_pairs(tmp_path: Path, normali
             "units": [{"id": 1, "name": "Álpha"}],
         },
     ]
-
-
-@pytest.mark.parametrize(
-    ("skill_id", "expected"),
-    [
-        (19, 19),
-        (20, 19),
-        (21, 19),
-        (22, 19),
-        (23, 19),
-        (69, 69),
-        (70, 69),
-        (201, 201),
-        (278, 201),
-        (279, 201),
-        (240, 240),
-        (274, 240),
-        (24, 24),
-    ],
-)
-def test_skill_variants_use_a_shared_catalog_identity(skill_id: int, expected: int) -> None:
-    assert canonical_skill_id(skill_id) == expected
 
 
 def test_skill_merge_key_collapses_any_numeric_name_variants() -> None:
@@ -2535,9 +2514,9 @@ def test_skill_catalog_uses_curated_declaration_categories(
             {"id": 69, "name": "Strategos L1", "source_defined": True},
             {"id": 70, "name": "Strategos L2", "source_defined": True},
             {"id": 89, "name": "Holoprojector Deployment", "source_defined": True},
-            {"id": 201, "name": "Discover", "source_defined": True},
-            {"id": 278, "name": "Discover L2", "source_defined": True},
-            {"id": 279, "name": "Discover L3", "source_defined": True},
+            {"id": 201, "name": "BS Attack", "source_defined": True},
+            {"id": 278, "name": "BS=12", "source_defined": True},
+            {"id": 279, "name": "BS=11", "source_defined": True},
             {"id": 260, "name": "Unclassified Example", "source_defined": True},
         ]
     )
@@ -2638,8 +2617,11 @@ def test_skill_catalog_without_rules_keeps_source_distance_typing(
 def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
     tmp_path: Path, normalized: dict
 ) -> None:
-    normalized["tables"]["skills"].append(
-        {"id": 69, "name": "Strategos L1", "source_defined": True}
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 69, "name": "Strategos L1", "source_defined": True},
+            {"id": 70, "name": "Strategos L2", "source_defined": True},
+        ]
     )
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
@@ -2706,8 +2688,11 @@ def test_skill_catalog_resolves_source_variant_ids_before_attaching_public_slug(
 ) -> None:
     normalized["tables"]["skills"].extend(
         [
-            {"id": 19, "name": "Camouflage L1", "source_defined": True},
-            {"id": 20, "name": "Camouflage L2", "source_defined": True},
+            {"id": 19, "name": "Martial Arts L1", "source_defined": True},
+            {"id": 20, "name": "Martial Arts L2", "source_defined": True},
+            {"id": 21, "name": "Martial Arts L3", "source_defined": True},
+            {"id": 22, "name": "Martial Arts L4", "source_defined": True},
+            {"id": 23, "name": "Martial Arts L5", "source_defined": True},
         ]
     )
     for occurrence in normalized["tables"]["profile_skills"]:
@@ -2719,7 +2704,7 @@ def test_skill_catalog_resolves_source_variant_ids_before_attaching_public_slug(
     catalog = SkillCatalog(database, None)
 
     assert database.application_catalog_id("skills", 20) == 19
-    assert database.application_slug("skills", 19) == "camouflage"
+    assert database.application_slug("skills", 19) == "martial-arts"
 
     raw_unit = database.get_unit(1)
     assert raw_unit is not None
@@ -2730,7 +2715,7 @@ def test_skill_catalog_resolves_source_variant_ids_before_attaching_public_slug(
     enriched = catalog.enrich_unit(raw_unit)
     skill = enriched["armies"][0]["profiles"][0]["skills"][0]
     assert skill["id"] == 20
-    assert skill["slug"] == "camouflage"
+    assert skill["slug"] == "martial-arts"
 
 
 def test_skill_catalog_does_not_emit_numeric_only_slug_that_would_shadow_compatibility_route(
@@ -2752,8 +2737,13 @@ def test_equipment_slug_enrichment_resolves_source_variant_ids(
 ) -> None:
     normalized["tables"]["equipment"].extend(
         [
-            {"id": 235, "name": "Proxy L1", "source_defined": True},
-            {"id": 244, "name": "Proxy L2", "source_defined": True},
+            {"id": 169, "name": "TinBot: Firewall", "source_defined": True},
+            {"id": 188, "name": "TinBot: Neourocinetics", "source_defined": True},
+            {"id": 193, "name": "TinBot (Albedo)", "source_defined": True},
+            {"id": 235, "name": "TinBot", "source_defined": True},
+            {"id": 244, "name": "TinBot: Discover", "source_defined": True},
+            {"id": 247, "name": "TinBot: ECM Guided", "source_defined": True},
+            {"id": 248, "name": "Tinbot (Repeater)", "source_defined": True},
         ]
     )
     for occurrence in normalized["tables"]["profile_equipment"]:
@@ -2766,7 +2756,7 @@ def test_equipment_slug_enrichment_resolves_source_variant_ids(
     database = Database(database_path)
 
     assert database.application_catalog_id("equipment", 244) == 235
-    assert database.application_slug("equipment", 235) == "proxy"
+    assert database.application_slug("equipment", 235) == "tinbot"
 
     raw_unit = database.get_unit(1)
     assert raw_unit is not None
@@ -2781,7 +2771,7 @@ def test_equipment_slug_enrichment_resolves_source_variant_ids(
     )
     equipment = enriched["armies"][0]["profiles"][0]["equipment"][0]
     assert equipment["id"] == 244
-    assert equipment["slug"] == "proxy"
+    assert equipment["slug"] == "tinbot"
 
 
 def test_equipment_slug_enrichment_does_not_emit_numeric_only_slug(
@@ -2806,17 +2796,19 @@ def test_weapon_slug_enrichment_resolves_source_variant_ids(
     normalized["tables"]["weapons"].extend(
         [
             {
-                "id": 226,
-                "name": "Armed Turret",
+                "id": source_id,
+                "name": name,
                 "source_defined": True,
                 "category": "Uncategorized",
-            },
-            {
-                "id": 228,
-                "name": "Armed Turret (MULTI Rifle)",
-                "source_defined": True,
-                "category": "Uncategorized",
-            },
+            }
+            for source_id, name in (
+                (209, "Armed Turret (Combi R.)"),
+                (215, "Armed Turret (Marksman R.)"),
+                (219, "Armed Turret (AP Rifle)"),
+                (222, "Armed Turret (Rifle)"),
+                (226, "Armed Turret"),
+                (228, "Armed Turret (E/Mitter)"),
+            )
         ]
     )
     for occurrence in normalized["tables"]["profile_weapons"]:

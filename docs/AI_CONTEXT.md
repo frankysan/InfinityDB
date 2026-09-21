@@ -762,13 +762,15 @@ application-level identities.
   value when rendering the browser footer. The package/API `__version__` remains the
   released semantic version and is not changed by this deployment metadata.
 - 2026-09-20: Human-authored catalog identity overrides may use either positive
-  numeric source IDs or readable source-label slugs. Slug references are resolved
-  before application catalog grouping and therefore do not depend on the later
-  public application-slug registry; unknown or ambiguous slugs fail closed. Numeric
-  references remain valid for compatibility, provenance, and collision
-  disambiguation. Apply this numeric-or-slug authoring convention to other
-  maintained/curated JSON reference fields only where their owning layer can
-  resolve the domain deterministically.
+  numeric source IDs or readable source-label slugs. The checked-in Skill, Equipment,
+  and Weapon identity groups now use readable source-label slugs throughout. Slug
+  references are resolved before application catalog grouping and therefore do not
+  depend on the later public application-slug registry. A group wholly absent from a
+  source snapshot is inert; once any member is present, unknown or ambiguous slugs
+  fail closed. Numeric references remain valid for compatibility, provenance, and
+  collision disambiguation. Apply this numeric-or-slug authoring convention to other
+  maintained/curated JSON reference fields only where their owning layer can resolve
+  the domain deterministically.
 - 2026-09-20: Domain-unique application slugs now have a derived persistence
   layer. Schema version 17 / compatibility revision 25 materializes
   `application_domain_slugs` for Armies, logical Units, Skills, Equipment, and

@@ -61,10 +61,13 @@ proved that the singular value is the correct game-wide fact.
 - Explicit source-equivalent unit, army, skill, equipment, and weapon IDs are
   maintained in validated `config/identity/source-identities.json`
   configuration. Catalog alias groups accept either positive numeric source IDs
-  or source-label slugs in `canonical_id` / `source_ids`; slug references are
-  resolved against the current source catalog before application grouping and
-  fail validation when unknown or ambiguous. These authoring slugs are source
-  references, not the later public `application_domain_slugs` identities. That
+  or source-label slugs in `canonical_id` / `source_ids`; the maintained Skill,
+  Equipment, and Weapon groups currently use readable source-label slugs. Slug
+  references are resolved against the current source catalog before application
+  grouping. A wholly absent group is ignored for that snapshot; if any member is
+  present, unknown or ambiguous slug references fail validation. These authoring
+  slugs are source references, not the later public `application_domain_slugs`
+  identities. That
   policy also owns reinforcement-label prefixes used by
   unit/profile identity normalization and backend profile display names. Generic
   duplicate/name matching remains implementation

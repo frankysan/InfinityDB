@@ -1772,7 +1772,19 @@ def test_weapon_api_adds_curated_special_profile_when_rules_database_is_availabl
     document = {
         "version": "test",
         "units": [unit],
-        "filters": {"weapons": [{"id": 226, "name": "Armed Turret"}]},
+        "filters": {
+            "weapons": [
+                {"id": source_id, "name": name}
+                for source_id, name in (
+                    (209, "Armed Turret (Combi R.)"),
+                    (215, "Armed Turret (Marksman R.)"),
+                    (219, "Armed Turret (AP Rifle)"),
+                    (222, "Armed Turret (Rifle)"),
+                    (226, "Armed Turret"),
+                    (228, "Armed Turret (E/Mitter)"),
+                )
+            ]
+        },
         "reinforcements": None,
     }
     source = make_source("101-main.json", json.dumps(document).encode())

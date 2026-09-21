@@ -166,13 +166,15 @@ of the code/config split. It owns maintained logical-identity exceptions for
 source unit, army-list, skill, equipment, and weapon IDs plus identity-name
 aliases. Generic matching and duplicate-detection algorithms remain code.
 Catalog alias-group references are authored as either positive numeric source IDs
-or readable source slugs. A slug is resolved from the normalized source catalog
-label before application grouping, so the identity policy does not depend on the
-later application-domain slug registry. Unknown or ambiguous authored slugs fail
-closed; numeric references remain supported where source identity or disambiguation
-matters. This numeric-or-slug reference shape is the preferred direction for other
-maintained/curated JSON references when their owning layer has enough source
-context to resolve them deterministically.
+or readable source slugs. The checked-in Skill, Equipment, and Weapon groups use
+source-label slugs wherever those labels are unambiguous. A slug is resolved from
+the normalized source catalog label before application grouping, so the identity
+policy does not depend on the later application-domain slug registry. A group that
+is wholly absent from a source snapshot is inert; once any group member is present,
+unknown or ambiguous authored slugs fail closed. Numeric references remain supported
+where source identity or disambiguation matters. This numeric-or-slug reference shape
+is the preferred direction for other maintained/curated JSON references when their
+owning layer has enough source context to resolve them deterministically.
 Current InfinityDB builds derive unit `main_army_id` from the imported Army
 metadata faction-parent relationship, with maintained canonical-faction
 overrides taking precedence. The former `xx01` arithmetic remains only as a
