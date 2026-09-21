@@ -10,7 +10,6 @@ A release is not ready merely because its implementation checks pass. The releas
 gate includes repository state, documentation, release metadata, hosted validation,
 and post-release verification.
 
-
 ## Version 1.0 data-completeness gate
 
 Version 1.0 represents the point where InfinityDB is **data-complete for normal

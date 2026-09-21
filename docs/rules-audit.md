@@ -220,7 +220,13 @@ rules have been audited.
   - [x] Free Game
   - [x] Cross-section reconciliation: Cost, Null States, Retreat! State,
     Game Modes, scenarios, and application/session boundaries
-- [ ] Setting up the Gaming Table
+- [x] Setting up the Gaming Table
+  - [x] Advisory scope and relationship to Game Modes/scenarios
+  - [x] Terrain and Cover / recommended table-size guidance
+  - [x] Terrain Layout and Accessibility
+  - [x] Symmetrical and Asymmetrical Deployment Zones
+  - [x] Cross-section reconciliation: Game Modes, Deployment Zones, Terrain/
+    Scenery, Cover, scenarios, and application boundaries
 - [ ] Scenarios
 - [ ] Quick Reference Charts
 - [ ] Reinforcements
@@ -686,7 +692,6 @@ navigation but are Reinforcements annex rules, not core Skills and Equipment
 entries in the N5 V5.3 PDF. Their detailed semantics remain deferred to the
 Reinforcements audit.
 
-
 ### Combat — section complete
 
 Status: core N5.3 wiki/PDF semantic extraction complete for the Combat Module.
@@ -959,7 +964,6 @@ logic.
 
 This audit does not change runtime data, curated rules records, or the web UI.
 It only records the semantic contract and the resulting focused backlog work.
-
 
 ### Fireteams — section complete
 
@@ -1609,3 +1613,74 @@ No new schema/runtime task is required by this audit. The existing glossary,
 Game States, scenario-reference, and future saved-list/session work already
 provide appropriate homes for these concepts if and when InfinityDB needs to
 present them.
+
+### Setting up the Gaming Table — section complete
+
+Status: core N5 V5.3 semantic extraction complete. This section is explicitly
+presented as setup advice rather than mandatory rules, so the audit records the
+scope distinctions and useful setup vocabulary without turning qualitative table
+design guidance into an InfinityDB validation model.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Setting_up_the_Gaming_Table>, live N5.3
+  page.
+- PDF: Infinity N5 V5.3, printed pages 147-148.
+- Cross-section rules used for reconciliation: Basic Rules / Game Modes,
+  Initiative and Deployment, Terrain and Scenery Structures, Cover, and the
+  scenario Forces and Deployment tables.
+
+#### Generic table guidance is advisory, not scenario authority
+
+The section explicitly says its advice is informative and not mandatory. It
+recommends table sizes by Army Points, balancing Cover against long-range lines
+of fire, terrain density/layout, accessibility, and Deployment Zone asymmetry.
+
+Those recommendations are useful explanatory/setup-reference material, but they
+are not universal list-legality constraints. Basic Rules Game Modes already
+provide recommended table/deployment dimensions, while individual scenarios can
+define their own Forces and Deployment parameters. If InfinityDB presents setup
+information, it should label generic recommendations as such and preserve a
+scenario's own setup values as scenario-scoped facts.
+
+#### Terrain layout and accessibility are table-design guidance
+
+The rules recommend enough terrain and Cover to allow maneuver without removing
+the value of long-range weapons. They also recommend accessible elevated areas,
+avoiding excessive bottlenecks/blind alleys, and arranging large/small terrain
+so players have useful movement routes.
+
+These are intentionally qualitative table-design principles. They should not be
+converted into hard data validation such as a required scenery count, mandatory
+maximum gap, or algorithmic `balanced table` result. A future table/scenario aid
+may summarize the guidance, but InfinityDB remains a catalog/reference system
+rather than a terrain-layout judge.
+
+#### Symmetrical and asymmetrical Deployment Zones are setup vocabulary
+
+The section distinguishes symmetrical and asymmetrical Deployment Zones by the
+amount, size, and arrangement of terrain on each side. It explicitly presents an
+asymmetrical zone with more Cover and/or elevated terrain as a possible tactical
+advantage for the player choosing that side.
+
+This is useful thesaurus/map vocabulary but not a characteristic of an Army,
+Unit, or the Deployment Zone dimensions themselves. A future scenario/map
+reference could annotate terrain symmetry separately from the numeric Deployment
+Zone geometry if that helps explain a published layout.
+
+#### Application reconciliation
+
+No current application schema or runtime behavior needs to change:
+
+- existing Game Mode research already captures recommended point/table/deployment
+  presets;
+- Terrain/Scenery and Cover semantics are already documented by their owning
+  sections;
+- Deployment Zone dimensions remain game/scenario setup context;
+- table density, accessibility, sight lines, and symmetry are qualitative
+  configuration of a particular physical/digital table; and
+- scenario-specific setup data should remain scoped to the scenario rather than
+  inferred from generic recommendations.
+
+The section therefore adds only one implementation-relevant scope finding and
+two research/reference findings. No new implementation backlog item is warranted.

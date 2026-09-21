@@ -1150,7 +1150,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Infinity_Spec-Ops>
 - PDF: Infinity N5 V5.3, printed pages 98-99
 
-
 ## Combat Module
 
 ### RS-CM-BASE-001 — Attack family and catalog kind are independent axes
@@ -1624,7 +1623,6 @@ Sources:
 - PDF: Infinity N5 V5.3, printed pages 63-67
 - Source model: normalized/metadata Ammunition tables and Weapon profile
   Ammunition references
-
 
 ## Fireteams
 
@@ -2174,3 +2172,27 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>
 - PDF: Infinity N5 V5.3, printed page 146
+
+## Setting up the Gaming Table
+
+### RS-TABLE-SCOPE-001 — Generic table setup is advisory; scenario setup is scoped data
+
+**Classification:** source-native scope semantics with an InfinityDB presentation
+consequence.
+
+The Setting up the Gaming Table section explicitly describes its terrain/layout
+guidance as informative and advisable rather than mandatory. Its point-based
+table-size recommendations are generic setup guidance. Basic Rules Game Modes
+also provide recommended table/deployment dimensions, while an individual
+scenario can define its own Forces and Deployment parameters.
+
+InfinityDB should therefore distinguish a generic **recommended setup** from a
+scenario's **scenario-scoped setup facts**. Future scenario or setup pages may
+present both, but should not turn the generic recommendations into universal
+list-legality rules or overwrite explicit scenario dimensions.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Setting_up_the_Gaming_Table>
+- Wiki: <https://infinitythewiki.com/Basic_Rules#Game_Modes>
+- PDF: Infinity N5 V5.3, printed pages 6 and 147-148

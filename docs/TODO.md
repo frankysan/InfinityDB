@@ -187,7 +187,7 @@ in `docs/releasing.md`.
     - [x] Movement.
     - [x] Terrain and Scenery Structures.
     - [x] Triumph and Defeat.
-    - [ ] Setting up the Gaming Table.
+    - [x] Setting up the Gaming Table.
     - [ ] Scenarios.
     - [ ] Quick Reference Charts as a validation/completeness pass.
     - [ ] Reinforcements, retaining its distinct rules scope.

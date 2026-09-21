@@ -463,7 +463,6 @@ Sources:
 - Wiki: Common Skills index under the Skills and Equipment module
 - PDF: Infinity N5 V5.3, printed pages 76-85
 
-
 ## Combat Module / Broader research
 
 ### RR-CM-RES-001 — Guts and post-hit resolution are runtime procedure
@@ -667,7 +666,6 @@ Sources:
 
 - Wiki: Ammunition and Weaponry named weapon pages
 - PDF: Infinity N5 V5.3, printed pages 69-74
-
 
 ## Fireteams
 
@@ -1015,3 +1013,44 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>
 - PDF: Infinity N5 V5.3, printed page 147
+
+## Setting up the Gaming Table
+
+### RR-TABLE-LAYOUT-001 — Terrain balance and accessibility are advisory design guidance
+
+**Scope:** core N5 setup guidance.
+
+The rules recommend arranging enough Cover to permit maneuver without eliminating
+the value of long-range weapons, using large and small scenery to create useful
+routes, keeping elevated areas reasonably accessible, and avoiding excessive
+bottlenecks or blind alleys. They also suggest a less-than-10-inch spacing
+between large terrain pieces as part of one example layout approach.
+
+The section explicitly says this guidance is not mandatory. These ideas may be
+useful in a future setup aid, but InfinityDB should not convert them into hard
+validation thresholds or claim that a table is rules-valid/invalid based on
+terrain density, sight lines, accessibility, or spacing.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Setting_up_the_Gaming_Table>
+- PDF: Infinity N5 V5.3, printed pages 147-148
+
+### RR-TABLE-SYM-001 — Deployment Zone symmetry describes terrain layout, not zone dimensions
+
+**Scope:** core N5 setup vocabulary.
+
+The rules distinguish symmetrical and asymmetrical Deployment Zones by whether
+the terrain amount, size, and arrangement are comparable on both sides. An
+asymmetrical zone may deliberately provide more Cover and/or higher terrain and
+therefore a tactical advantage to the player who chooses that side.
+
+This is useful glossary/map terminology for a future scenario or table reference.
+It should not be conflated with the numeric dimensions of a Deployment Zone or
+turned into an Army/Unit property. If represented later, terrain symmetry should
+remain metadata about a specific table/layout.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Setting_up_the_Gaming_Table#Symmetrical_and_Asymmetrical_Deployment_Zones>
+- PDF: Infinity N5 V5.3, printed page 148
