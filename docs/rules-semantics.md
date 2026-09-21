@@ -2114,3 +2114,63 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Eclipse_Ammunition>
 - Wiki: <https://infinitythewiki.com/White_Noise>
 - PDF: Infinity N5 V5.3, printed pages 66 and 144-145
+
+## Triumph and Defeat
+
+### RS-TD-SCORE-001 — Objective Points and Victory Points are distinct scoring domains
+
+**Classification:** source-native with an InfinityDB scenario-model consequence.
+
+Victory Points are derived from the Cost of a player's Troopers that are not in
+a Null State. Missions and scenarios instead define objectives that award
+Objective Points. If both players finish a scenario with the same Objective
+Points, Victory Points are used as the tiebreaker.
+
+InfinityDB should therefore keep Cost, Victory Points, and Objective Points as
+separate semantic concepts. A scenario reference can relate objectives to their
+Objective Point awards, while current Victory Points require Army-list and
+runtime-State context and must not be stored as a canonical Unit/Profile value.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>
+- Wiki: <https://infinitythewiki.com/Terminology#Victory_Points>
+- PDF: Infinity N5 V5.3, printed pages 146-147
+
+### RS-TD-RET-001 — Retreat! situation and Retreat! State have different scopes
+
+**Classification:** source-native with an InfinityDB state-model consequence.
+
+The core Retreat! check applies to the player's army as a whole. When the army
+enters the Retreat! situation, surviving Troopers normally enter Retreat! State.
+The two concepts are not interchangeable: the situation is army/session state,
+while Retreat! State is a Trooper State with its own effects and cancellation
+rules.
+
+InfinityDB should preserve that distinction in glossary/state relationships.
+For example, spending a Command Token can cancel Retreat! State for one Trooper
+without cancelling the army's Retreat! situation.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>
+- PDF: Infinity N5 V5.3, printed pages 146 and 170
+
+### RS-TD-RET-002 — The Retreat! threshold is session/list context, not static army data
+
+**Classification:** source-native with an InfinityDB data-boundary consequence.
+
+Under the core Retreat! rule, the threshold is 25% of the Army Points available
+for building the Army List and is compared with the army's current Victory
+Points. Troopers not yet placed on the table are treated as survivors for this
+check.
+
+The threshold therefore depends on game/list setup plus runtime State. InfinityDB
+must not derive a permanent `retreat threshold` from a faction, Unit, or
+canonical profile, nor assume that summing imported option Costs alone yields
+the current Retreat! status.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>
+- PDF: Infinity N5 V5.3, printed page 146

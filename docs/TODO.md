@@ -186,7 +186,7 @@ in `docs/releasing.md`.
     - [x] Command.
     - [x] Movement.
     - [x] Terrain and Scenery Structures.
-    - [ ] Triumph and Defeat.
+    - [x] Triumph and Defeat.
     - [ ] Setting up the Gaming Table.
     - [ ] Scenarios.
     - [ ] Quick Reference Charts as a validation/completeness pass.

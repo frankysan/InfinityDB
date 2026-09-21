@@ -213,7 +213,13 @@ rules have been audited.
   - [x] Scenery Structures / Access Width
   - [x] Cross-section reconciliation: Terrain Special Skill, Movement, Smoke/
     Eclipse, White Noise, Dazer, Silhouette, and application boundaries
-- [ ] Triumph and Defeat
+- [x] Triumph and Defeat
+  - [x] Standard Game and Victory Points
+  - [x] Retreat! situation and its relationship to Retreat! State
+  - [x] Mission or Scenario / Objective Points
+  - [x] Free Game
+  - [x] Cross-section reconciliation: Cost, Null States, Retreat! State,
+    Game Modes, scenarios, and application/session boundaries
 - [ ] Setting up the Gaming Table
 - [ ] Scenarios
 - [ ] Quick Reference Charts
@@ -1522,3 +1528,84 @@ The current application boundary remains appropriate:
 No new schema/runtime task is required by this audit. The existing broader
 curated-rules/reference backlog can absorb Terrain parameters and cross-domain
 zone links where they improve catalog interpretation.
+
+### Triumph and Defeat — section complete
+
+Status: core N5 V5.3 Triumph and Defeat semantic extraction complete. This
+section primarily defines scoring and end-game/session concepts rather than
+additional static Unit or catalog data, so only the distinctions that improve
+InfinityDB's reference semantics are promoted.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>.
+- PDF: Infinity N5 V5.3, printed pages 146-147.
+- Cross-section rules used for reconciliation:
+  <https://infinitythewiki.com/States>,
+  <https://infinitythewiki.com/Normal_State>, and the Retreat! State on
+  printed page 170.
+
+The live Triumph and Defeat wiki page currently carries an N5.2 / FAQ 0.0.0
+notice. Its Standard Game, Retreat!, Mission/Scenario, and Free Game material
+was cross-checked against the N5 V5.3 PDF; no semantic discrepancy relevant to
+this audit was found. The PDF remains the edition baseline.
+
+#### Victory Points and Objective Points are different scoring concepts
+
+The existing glossary finding `RS-GSG-TERM-003` already establishes that
+Victory Points are a runtime aggregation of the Cost of a player's non-Null
+Troopers. Triumph and Defeat adds the scoring context: Standard Games compare
+Victory Points directly, while missions/scenarios award their own Objective
+Points and use Victory Points as the tiebreaker when Objective Points are tied.
+
+InfinityDB should therefore keep `Cost`, `Victory Points`, and `Objective
+Points` semantically distinct. Cost is imported list-option data; Victory Points
+require an Army List plus runtime State; Objective Points are defined by the
+selected scenario. A future scenario reference can describe scoring without
+turning either aggregate into an intrinsic Unit/Profile field.
+
+#### Retreat! situation and Retreat! State have different scopes
+
+Retreat! is first evaluated at the Army/player level during the Tactical Phase.
+Under the core rule, an army enters the Retreat! situation when its current
+Victory Points are at or below 25% of the Army Points available for list
+construction. That army-level situation then causes surviving Troopers to enter
+Retreat! State unless a rule protects them from it.
+
+These concepts should not be collapsed. `Retreat! situation` is session-level
+army state; `Retreat! State` is a Trooper State in the existing State vocabulary.
+The State may also be cancelled for an individual Trooper by a Command Token
+without ending the army's Retreat! situation.
+
+The threshold is likewise not a canonical Army or Unit property. It depends on
+the agreed/list-construction point budget and current runtime Victory Points.
+Troopers not yet placed on the table are specifically treated as survivors for
+the Retreat! check, which further demonstrates that it is a game-state
+calculation rather than a simple database sum.
+
+#### Mission/scenario and Free Game are game-context vocabulary
+
+A mission/scenario defines objectives and their Objective Point awards. A Free
+Game is one where players agree to change the recommended Game Mode parameters,
+such as Army Points, table/deployment dimensions, Trooper limits, or Game
+Rounds.
+
+These terms are useful for the cross-domain thesaurus and future scenario/setup
+reference features, but they are not canonical Army-data domains. The already
+planned scenario/ITS reference work is the appropriate consumer; this audit
+does not add a separate game-mode schema or rules engine.
+
+#### Application reconciliation
+
+The current application boundary remains appropriate:
+
+- option Cost remains source/list-context data;
+- the State vocabulary can represent Null and Retreat! State semantics;
+- Victory Points and Retreat! require a selected Army List plus runtime State;
+- Objective Points belong to scenario scoring rather than Unit/catalog data; and
+- game-mode/free-game parameters belong to session/scenario setup.
+
+No new schema/runtime task is required by this audit. The existing glossary,
+Game States, scenario-reference, and future saved-list/session work already
+provide appropriate homes for these concepts if and when InfinityDB needs to
+present them.

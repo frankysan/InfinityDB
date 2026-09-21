@@ -976,3 +976,42 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Terrain_and_Scenery_Structures>, N5.3
   update annotation
 - PDF: Infinity N5 V5.3, printed pages 143-144
+
+## Triumph and Defeat
+
+### RR-TD-STD-001 — Standard Game and Retreat! end conditions are play/session procedure
+
+**Scope:** core N5.
+
+A Standard Game normally lasts three Game Rounds and compares Victory Points at
+the end. Retreat! adds additional end-game behavior and modifies the current
+Player Turn while the army remains in that situation.
+
+These procedures are useful for concise glossary/play-aid context, but
+InfinityDB does not need to execute the end-game sequence to present Units,
+Costs, States, or scenario references. The semantic distinctions that matter to
+the data model—Victory Points, Null State, Retreat! situation, and Retreat!
+State—are recorded separately in `rules-semantics.md`.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>
+- PDF: Infinity N5 V5.3, printed page 146
+
+### RR-TD-MODE-001 — Mission, scenario, and Free Game are session/setup vocabulary
+
+**Scope:** core N5.
+
+The rules use mission/scenario for games whose defined objectives award
+Objective Points, while a Free Game is a game whose participants agree to
+change one or more recommended Game Mode parameters.
+
+These are strong thesaurus and future scenario/setup-reference terms, but they
+do not imply that InfinityDB needs a complete game-session schema. Existing
+planned scenario and ITS reference work can use the vocabulary if it improves
+discovery or explanation.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Triumph_and_Defeat_Module>
+- PDF: Infinity N5 V5.3, printed page 147
