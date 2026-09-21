@@ -183,7 +183,7 @@ in `docs/releasing.md`.
     - [x] Combat.
     - [x] Ammunition and Weaponry.
     - [x] Fireteams.
-    - [ ] Command.
+    - [x] Command.
     - [ ] Movement.
     - [ ] Terrain and Scenery Structures.
     - [ ] Triumph and Defeat.

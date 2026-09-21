@@ -777,3 +777,64 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Fireteams:_Basic_Rules>
 - Wiki: <https://infinitythewiki.com/Fireteams_Chart>
 - PDF: Infinity N5 V5.3, printed pages 132-133
+
+## Command
+
+### RR-CMD-TOK-001 — Command Token use procedures are session/play-aid material
+
+**Scope:** core N5.
+
+Strategic, Executive, and Operational Use define a broad set of match-time
+actions involving deployment, Order Pool disruption, Suppressive Fire,
+Speedballs, Combat Group reassignment, Possessed cancellation, Guts Rolls,
+Irregular-to-Regular Order conversion, Retreat!, Doctor/Engineer rerolls, and
+Fireteam creation.
+
+Those relationships are useful for navigation and concise contextual help, but
+the exact timing, expenditure limits, current token balance, valid target, and
+result belong to the state of a particular match. InfinityDB does not need a
+Command Token execution engine to present the Units, Skills, States, Fireteams,
+and other catalog concepts involved.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Command_Tokens>
+- PDF: Infinity N5 V5.3, printed pages 128-129
+
+### RR-CMD-CO-001 — Spearhead and Coordinated resolution are transient action roles
+
+**Scope:** core N5.
+
+A Coordinated Order creates temporary action-local structure: participating
+Troopers, one Spearhead, a shared Skill sequence, target constraints, modified
+Burst, restricted enemy reactions, and special handling for CC, States, Hacking,
+Targetless/Deployable items, and failed participant Requirements. The Spearhead
+Token is removed when the Order ends.
+
+`Spearhead` is therefore useful thesaurus/reference vocabulary, but it is not a
+Unit characteristic or persistent relationship. Detailed Coordinated Order
+resolution should remain procedural research unless InfinityDB later gains an
+explicit play-aid/session consumer.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Coordinated_Orders>
+- PDF: Infinity N5 V5.3, printed pages 129-131
+
+### RR-CMD-TERM-001 — Command use-mode terms are useful scoped glossary vocabulary
+
+**Scope:** core N5 terminology.
+
+`Strategic Use`, `Executive Use`, and `Operational Use` are named scopes for
+spending Command Tokens. They are useful glossary/thesaurus terms because player
+discussion and related Skills can reference one use mode specifically
+(Counterintelligence, for example, targets Strategic Use).
+
+A future thesaurus should link these terms beneath Command Token rather than
+treat them as three token types or new application domains.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Command_Tokens>
+- Wiki: <https://infinitythewiki.com/Counterintelligence>
+- PDF: Infinity N5 V5.3, printed pages 90 and 128-129

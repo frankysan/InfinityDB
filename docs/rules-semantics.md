@@ -1805,3 +1805,138 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Fireteams:_Basic_Rules>
 - Wiki: <https://infinitythewiki.com/Fireteam_Integrity>
 - PDF: Infinity N5 V5.3, printed pages 132-134
+
+## Command
+
+### RS-CMD-TOK-001 — Command Tokens are player/match resources
+
+**Classification:** source-native with an InfinityDB data-boundary consequence.
+
+Command Tokens represent command-and-control resources available to a player.
+The core Command rules normally give each player four for the match. Strategic,
+Executive, and Operational are use modes for that same resource rather than
+different token identities.
+
+InfinityDB may explain and cross-link Command Token interactions, but a current
+token balance is not an invariant Unit/Profile/catalog fact. Actual availability
+and expenditure belong to a constructed-list/game-session context.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Command_Tokens>
+- PDF: Infinity N5 V5.3, printed pages 128-129
+
+### RS-CMD-TOK-002 — Static catalog facts can modify a session resource conditionally
+
+**Classification:** source-native relationship semantics.
+
+Some static profile/catalog facts interact with Command Tokens only when their
+game/list conditions apply. A Lieutenant option can provide `+1 Command Token`
+when that Trooper is selected as the Lieutenant. Counterintelligence modifies
+specific effects of the opponent's Strategic Use of a Command Token.
+
+InfinityDB should preserve the source Skill/profile facts and may curate these
+relationships for explanation or search. It should not materialize their
+resulting match resource as an unconditional property of the logical Unit.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Command_Tokens>
+- Wiki: <https://infinitythewiki.com/Lieutenant>
+- Wiki: <https://infinitythewiki.com/Counterintelligence>
+- PDF: Infinity N5 V5.3, printed pages 90, 99, and 128-129
+
+### RS-CMD-RES-001 — Command Tokens and Orders are distinct resource domains
+
+**Classification:** source-native.
+
+Command Tokens can be spent together with or act upon Orders, but they are not
+Order types. A normal Coordinated Order spends one Command Token plus one Regular
+Order. Separately, NCO operates on Special Lieutenant Orders by replacing them
+with Tactical Orders; it does not turn them into Command Tokens.
+
+InfinityDB should therefore keep Command-resource semantics separate from
+Training and generated Order semantics. Cross-links may describe interactions,
+but one resource vocabulary must not be used as the storage/type system for the
+other.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Command_Tokens>
+- Wiki: <https://infinitythewiki.com/Coordinated_Orders>
+- Wiki: <https://infinitythewiki.com/NCO>
+- PDF: Infinity N5 V5.3, printed pages 104 and 128-131
+
+### RS-CMD-CO-001 — Coordinated Order participation is runtime/session context
+
+**Classification:** source-native with an InfinityDB relationship-boundary
+consequence.
+
+A Coordinated Order temporarily activates a selected set of up to four Troopers.
+The set exists for that Order and is constrained by current list/game context:
+participants must share a Combat Group and Training, and runtime rules exclude
+such cases as Peripherals/Controllers and Fireteam members.
+
+InfinityDB should not materialize "coordinated with" as a persistent Unit or
+profile relationship. Combat Group membership of a constructed list and actual
+Coordinated Order participation belong to a future list/session layer.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Coordinated_Orders>
+- PDF: Infinity N5 V5.3, printed pages 129-131
+
+### RS-CMD-CO-002 — Coordinated Order eligibility reinforces Training semantics
+
+**Classification:** source-native with a source-representation consequence.
+
+Participants in one Coordinated Order must have the same Training
+(`Regular`/`Irregular`). This is a rules-domain predicate over Training, not over
+membership in a Skill catalog.
+
+Army-derived data can validly expose `Regular` through a skill-like compatibility
+structure. InfinityDB should preserve that source occurrence for provenance while
+resolving the semantic concept to Training when interpreting rules relationships
+such as Coordinated Order eligibility.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Coordinated_Orders>
+- PDF: Infinity N5 V5.3, printed page 129
+
+### RS-CMD-CO-003 — Shared Skill identity does not require a shared implementing item
+
+**Classification:** source-native with a catalog-model consequence.
+
+Coordinated Order participants declare the same sequence of Skills, but they can
+perform the same Skill in different ways. In a coordinated BS Attack, for
+example, different Troopers may use different Weapons or Equipment while still
+sharing the `BS Attack` declaration.
+
+InfinityDB should therefore keep action/Skill identity separate from the
+Weapon/Equipment used to perform that action. Reviewed relationships may connect
+those domains without collapsing their canonical identities.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Coordinated_Orders#Coordinating_Skills>
+- PDF: Infinity N5 V5.3, printed pages 129-130
+
+### RS-CMD-FT-001 — Command-based Fireteam creation does not redefine chart eligibility
+
+**Classification:** source-native cross-domain relationship semantics.
+
+Operational Use of a Command Token can create a Fireteam, but the selected
+Trooper must meet the Army Fireteam Chart Requirements. The Command rule is a
+runtime creation mechanism; it does not add chart eligibility or alter the
+Army-local composition authority.
+
+InfinityDB should keep imported Fireteam chart eligibility independent from
+Command Token/session state. A future play aid can cross-link the creation
+mechanism to Fireteam rules without merging the domains.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Command_Tokens#Command_Tokens:_Operational_Use>
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
+- PDF: Infinity N5 V5.3, printed page 129

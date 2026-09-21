@@ -189,7 +189,11 @@ rules have been audited.
   - [x] Fireteam Examples
   - [x] Army Fireteam-chart representation reconciliation
   - [x] Historical/community terminology: `Linkable` and `pure Fireteam`
-- [ ] Command
+- [x] Command
+  - [x] Command Module overview and Command Token resource/use-mode semantics
+  - [x] Coordinated Orders
+  - [x] Cross-section interactions: Lieutenant, Counterintelligence, and NCO
+  - [x] Application/session-boundary reconciliation
 - [ ] Movement
 - [ ] Terrain and Scenery Structures
 - [ ] Triumph and Defeat
@@ -1125,3 +1129,121 @@ interpretation before a first-class application Fireteam model is built:
 The existing Fireteam feature and Milestone 2 relationship backlog now records
 those consequences. No runtime schema, normalization behavior, or UI was changed
 by this audit.
+
+### Command — section complete
+
+Status: core N5.3 wiki/PDF semantic extraction complete for the Command Module.
+The pass records the resource, catalog, and relationship semantics that help
+InfinityDB interpret profile data and cross-link concepts. Detailed timing,
+resource expenditure, ARO, and multi-Trooper resolution procedures remain
+reference context rather than an application state machine.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Command_Module>,
+  <https://infinitythewiki.com/Command_Tokens>, and
+  <https://infinitythewiki.com/Coordinated_Orders>, reviewed against the live
+  N5.3 / FAQ v0.1 wiki.
+- PDF: Infinity N5 V5.3, printed pages 128-131.
+- Cross-section rules used to classify static catalog interactions:
+  <https://infinitythewiki.com/Lieutenant>,
+  <https://infinitythewiki.com/Counterintelligence>, and
+  <https://infinitythewiki.com/NCO> (PDF printed pages 99, 90, and 104).
+
+Embedded FAQ material on the Coordinated Orders wiki page was observed but not
+promoted into core findings; FAQ/errata remains a separately scoped audit source.
+
+#### Command Tokens are match resources, not profile entities
+
+A player normally starts a match with four Command Tokens. `Strategic`,
+`Executive`, and `Operational` describe **ways the same resource can be used**,
+not three different token identities.
+
+This is useful for InfinityDB because profile/catalog facts can affect Command
+Tokens without making the runtime token pool part of canonical Unit data. For
+example, a Lieutenant option can provide `+1 Command Token`, while
+Counterintelligence modifies particular Strategic Use effects. Those are
+source/rules relationships from a Skill/profile option to a player/session
+resource.
+
+InfinityDB can expose those relationships and explanatory cross-links while
+leaving the actual token count, expenditure, timing, and remaining resource to a
+future list/game-session layer. There is no reason to materialize a current
+Command Token balance in the imported application database.
+
+#### Command Tokens and Orders are separate resource families
+
+The Command Module repeatedly combines Command Tokens with Orders but does not
+make them interchangeable. A normal Coordinated Order consumes one Command
+Token and one Regular Order from the relevant Combat Group. Other Skills operate
+on Orders without operating on Command Tokens: for example, NCO replaces Special
+Lieutenant Orders with Tactical Orders.
+
+This distinction reinforces the existing Order semantics audit. Static profile
+data can describe Training, generated Order capabilities, and Skills such as
+NCO/Tactical Awareness; Command Tokens remain a separate player/match resource.
+
+#### Coordinated Orders are runtime activation, not a persistent relationship
+
+A Coordinated Order temporarily activates up to four eligible Troopers together.
+The participating set, chosen Spearhead, declared Skill sequence, targets, and
+resolution exist for that Order only. This is not equivalent to Unit identity,
+Fireteam membership, Peripheral/controller linkage, or another persistent
+relationship that belongs in the canonical application model.
+
+The rules nevertheless expose useful semantic predicates:
+
+- all participants must be in the same Combat Group;
+- all participants must have the same Training (`Regular`/`Irregular`);
+- all declare the same sequence of Skills;
+- one participant has the transient `Spearhead` role; and
+- Peripherals/Controllers and Fireteam members are excluded by the applicable
+  runtime rules.
+
+The same-Training requirement independently confirms the rules-domain
+classification established earlier: Regular/Irregular are Training categories.
+Army-derived data may validly surface `Regular` through a skill-like source
+structure for compatibility, but that source container does not redefine the
+game concept.
+
+#### Skill identity and implementing item are different
+
+A Coordinated Order requires participants to declare the same Skill sequence,
+but participants can perform that Skill with different Weapons or Equipment.
+The rule example treats different weapons as implementations of the shared
+`BS Attack` declaration.
+
+This is useful catalog semantics. InfinityDB should keep the identity of an
+action/Skill distinct from the Weapon or Equipment selected to perform it.
+Cross-links can express that an item participates in or enables an action without
+merging the item into the Skill catalog.
+
+#### Command interactions do not change Fireteam chart authority
+
+Operational Use of a Command Token can create a new Fireteam during play, but
+the Trooper selected as Fireteam Leader still has to meet the Army's Fireteam
+Chart Requirements. The Command rule is therefore a runtime creation mechanism;
+it does not create new chart eligibility or modify the imported Army
+Fireteams Chart.
+
+This supports the Fireteams audit boundary: Army-local chart/configuration data
+remains the static reference authority, while creation, current membership, and
+Command Token expenditure are session state.
+
+#### Application reconciliation
+
+No new imported-data domain is required for Command Tokens or Coordinated Orders.
+The current separation is appropriate:
+
+- Army/profile data can preserve Skills and option annotations such as
+  Lieutenant, NCO, Counterintelligence, and related extras;
+- curated rules data can provide reviewed relationships from those catalog facts
+  to Command/Order concepts;
+- Fireteam chart eligibility remains imported Army context; and
+- Command Token balance, Combat Group membership of a constructed list,
+  Spearhead selection, participating Troopers, expenditure, and action resolution
+  are runtime/list-session facts.
+
+The broader rules-reference/play-aid backlog already provides a suitable future
+home for concise Command Token and Coordinated Order guidance. This audit adds no
+separate rules-engine or session-model implementation requirement.
