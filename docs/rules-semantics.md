@@ -498,3 +498,331 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Rolls#Modifiers_.28MOD.29>
 - PDF: Infinity N5 V5.3, printed pages 23-24
+
+## Game States and Glossary / State semantics
+
+### RS-GSG-STATE-001 — States are runtime overlays, not canonical profile facts
+
+**Classification:** source-native with an InfinityDB data-boundary consequence.
+
+States represent positive or negative runtime conditions of Troopers or other
+game elements. They are cumulative, have explicit activation and cancellation
+procedures, and can modify the same Attribute cumulatively.
+
+InfinityDB must therefore keep static Army/Profile facts separate from current
+in-game State. A rules catalog may describe what a State does and which Skills,
+Weapons, or Equipment interact with it, but a canonical Unit/Profile payload
+must not be rewritten to reflect a temporary State. Actual active States would
+belong to a future game/session layer.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/States>
+- PDF: Infinity N5 V5.3, printed page 157
+
+### RS-GSG-STATE-002 — State Tokens are reminders, not the underlying State or identity
+
+**Classification:** source-native presentation semantics.
+
+The rules represent States using State Tokens, while Terminology defines a State
+Token as a game element indicating the effect of a rule, Skill, or State as a
+reminder. This is distinct from a Model, Marker, and deployable Token.
+
+InfinityDB UI/help and any future game-state model should therefore distinguish
+`state`, `state token`, `marker`, `token`, and `model` rather than treating every
+tabletop indicator as one generic marker type. The underlying rules concept
+should remain addressable even when its physical representation changes.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/States>
+- Wiki: <https://infinitythewiki.com/Terminology#State_Token>
+- PDF: Infinity N5 V5.3, printed pages 157 and 173
+
+### RS-GSG-STATE-003 — Null is a Label that classifies a finite subset of States
+
+**Classification:** source-native with a curated-data consequence.
+
+`Null` is a rules Label, not a separate kind of State. In N5.3 the Null States
+are Dead, Disconnected, Possessed, Sepsitorized, and Unconscious. A Trooper in a
+State carrying this Label does not provide an Order or Victory Points to its
+player.
+
+InfinityDB should model this as a relationship from State identities to the
+`Null` Label rather than by duplicating `is_null` rules in consumers. The current
+curated `null` Label is therefore a useful reusable vocabulary entry for the
+planned State catalog.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Labels#Null>
+- Wiki: <https://infinitythewiki.com/States>
+- PDF: Infinity N5 V5.3, printed pages 157 and 174
+
+### RS-GSG-STATE-004 — State effects can change effective Training, alignment, or profiles
+
+**Classification:** source-native with an InfinityDB canonicalization consequence.
+
+Several States demonstrate that runtime values can diverge materially from
+static source data without changing canonical identity:
+
+- Isolated can make a Trooper Irregular for a Turn and suppress its Order-Pool
+  contribution while the State persists.
+- Possessed changes which side treats the Trooper as Ally/Enemy and requires a
+  Possessed Trooper profile overlay.
+- Foxhole and Prone alter effective Silhouette/movement behavior.
+- Suppressive Fire substitutes an SF Mode profile for the selected weapon.
+
+These are runtime overlays. They must not mutate canonical Training, alignment,
+Unit/Profile, or weapon-profile source facts. This reinforces the existing rule
+that imported payload identity describes the source profile, while game-session
+conditions would be modeled separately.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Isolated_State>
+- Wiki: <https://infinitythewiki.com/Possessed_State>
+- Wiki: <https://infinitythewiki.com/Foxhole_State>
+- Wiki: <https://infinitythewiki.com/Prone_State>
+- Wiki: <https://infinitythewiki.com/Suppressive_Fire_State>
+- PDF: Infinity N5 V5.3, printed pages 161 and 168-171
+
+### RS-GSG-STATE-005 — Similar State names can encode materially different mechanics
+
+**Classification:** source-native with an identity consequence.
+
+Immobilized-A and Immobilized-B are distinct State identities. IMM-A restricts
+the affected Trooper to Dodge with a PH-6 MOD, while IMM-B uses Reset with a
+WIP-3 MOD. Both still provide Orders. Impersonation similarly has meaningful
+IMP-1 and IMP-2 levels with different interaction/reveal behavior.
+
+State canonicalization must preserve these distinctions. A future State catalog
+may expose family/group relationships such as `Immobilized` or `Impersonation`,
+but a normalized family name must never erase the source State/level that
+controls rules behavior.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Immobilized-A_State>
+- Wiki: <https://infinitythewiki.com/Immobilized-B_State>
+- Wiki: <https://infinitythewiki.com/Impersonation_State>
+- PDF: Infinity N5 V5.3, printed pages 164-167
+
+### RS-GSG-STATE-006 — Unloaded is item-specific runtime state
+
+**Classification:** source-native with a future state-model consequence.
+
+Unloaded State is activated when the ammunition/uses of a relevant Disposable
+weapon or piece of Equipment are exhausted. Its effect is that the **relevant
+weapon or Equipment** can no longer be used, and cancellation/reload semantics
+operate on Disposable items. This means a State associated with a Trooper/game
+element can have an item-specific target rather than describing the bearer as a
+whole.
+
+A future play/session model should therefore not assume every State is a simple
+boolean attached only to a Trooper ID. State instances may need affected-item or
+mode context. Static InfinityDB data should continue to model `Disposable (X)`
+and `Non-Reloadable` as rules/catalog semantics, not current ammunition state.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Unloaded_State>
+- Wiki: <https://infinitythewiki.com/Traits#Disposable_.28X.29>
+- PDF: Infinity N5 V5.3, printed pages 172 and 174-175
+
+## Game States and Glossary / Terminology and Alignment
+
+### RS-GSG-TERM-001 — Model, Marker, Token, and State Token are distinct game-element concepts
+
+**Classification:** source-native.
+
+Terminology defines four different representation/object concepts:
+
+- a Model is a game element with Attributes represented by a miniature;
+- a Marker is a game element with Attributes represented by a Marker under a
+  Skill/Weapon/Equipment rule;
+- a Token represents Deployable Equipment or a Deployable Weapon;
+- a State Token is a reminder indicating the effect of a rule, Skill, or State.
+
+InfinityDB should use these terms precisely in reference/help text and future
+tabletop/session features. In particular, a visible Marker is not merely a UI
+icon and a State Token does not become the canonical identity of the affected
+Trooper or item.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terminology>
+- PDF: Infinity N5 V5.3, printed page 173
+
+### RS-GSG-TERM-002 — Deployable Weapons and Equipment become independent game elements
+
+**Classification:** source-native relationship semantics.
+
+Terminology and the Deployable Trait establish that deployed Weapons/Equipment
+can become independent battlefield game elements with their own Attributes and
+can be targeted. Deployable Equipment belongs to an Army List; a Deployable
+Weapon may belong to one, depending on the rule.
+
+This is stronger semantics than “an Equipment item carried by a Unit.” If
+InfinityDB later exposes deployable profiles or relationships, carrier/catalog
+identity and deployed-game-element identity must remain separate rather than
+flattening the deployed profile into its carrier.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terminology>
+- Wiki: <https://infinitythewiki.com/Traits#Deployable>
+- PDF: Infinity N5 V5.3, printed pages 173-175
+
+### RS-GSG-TERM-003 — Victory Points are runtime Cost aggregation over non-Null Troopers
+
+**Classification:** source-native with an InfinityDB context consequence.
+
+Victory Points are defined as the combined Cost of a player's Troopers that are
+in a non-Null State. They therefore combine static list Cost with current runtime
+State rather than being a static Unit/Profile value.
+
+InfinityDB may expose Cost as imported Army-list option data, but it must not
+present a simple sum of canonical Costs as current Victory Points without a
+specific Army List and game-state context.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terminology#Victory_Points>
+- Wiki: <https://infinitythewiki.com/Labels#Null>
+- PDF: Infinity N5 V5.3, printed pages 173-174
+
+### RS-GSG-ALIGN-001 — Alignment is contextual and Hostile is not Neutral
+
+**Classification:** source-native.
+
+Alignment classifies game elements relative to the players' Army Lists: Ally
+belongs to the player's side, Enemy to the opposing side, Hostile belongs to no
+player but is treated as Enemy by everyone and can declare/receive Attacks, and
+Neutral belongs to neither player's Army List without the additional Hostile
+Enemy rule.
+
+These terms must not be inferred from canonical faction ownership alone. Future
+scenario/game-session data should carry explicit alignment semantics where rules
+create Hostile or Neutral game elements, and glossary/UI text must not use
+`Hostile` and `Neutral` interchangeably.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Alignment>
+- PDF: Infinity N5 V5.3, printed page 173
+
+### RS-GSG-VOC-001 — Same surface terms require scoped thesaurus concepts
+
+**Classification:** source-native vocabulary with an InfinityDB abstraction consequence.
+
+The rules reuse the same surface terms in distinct but related semantic roles:
+
+- `Hackable` is both a Trooper Characteristic and a Label;
+- `Hostile` is both an Alignment term and a Label;
+- `Marker` is both a Terminology game-element concept and a Label;
+- `Null` is a Label used to classify States and is commonly referenced through
+  the derived phrase “Null State”;
+- `Non-Reloadable` exists as both a Label and a Trait.
+
+A future InfinityDB game-terms thesaurus therefore cannot use normalized display
+text alone as global identity. Terms need a concept kind/scope (for example
+`characteristic`, `label`, `trait`, `alignment`, `game-element`, `state`) plus
+explicit relationships between same-name or related concepts. This avoids accidental
+merges while still allowing cross-links and aliases.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Unit_Profile#Trooper_Characteristics>
+- Wiki: <https://infinitythewiki.com/Terminology>
+- Wiki: <https://infinitythewiki.com/Alignment>
+- Wiki: <https://infinitythewiki.com/Labels>
+- PDF: Infinity N5 V5.3, printed pages 8 and 173-174
+
+## Game States and Glossary / Labels and Traits
+
+### RS-GSG-LABEL-001 — Labels are semantic selectors, not display-only badges
+
+**Classification:** source-native and already represented by curated rules data.
+
+Labels identify defining aspects shared by Skills, Weapons, and Equipment, and
+rules may refer to a Label as a group. For example, a rule referring to Airborne
+Deployment applies to all Skills carrying the AD Label, while `Hackable`,
+`Movement`, `Comms Attack`, `Private Information`, and other Labels carry shared
+interaction semantics.
+
+InfinityDB should therefore preserve Label membership as structured rules data
+where consumers need it. Label behavior belongs in the curated rules layer and
+should not be reconstructed from names or duplicated as browser-only logic.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Labels>
+- PDF: Infinity N5 V5.3, printed page 174
+
+### RS-GSG-LABEL-002 — `FAQs` in curated labels is InfinityDB metadata, not an N5 Label
+
+**Classification:** InfinityDB abstraction.
+
+The N5.3 rules define 23 Labels, and all 23 are represented by name in
+`data/curated/rules/n5-core-v5.3.json`. That curated vocabulary contains one
+additional entry named `FAQs`, described as a category for FAQ-related rule
+references. `FAQs` is not one of the source-native Labels listed by the N5.3
+rules.
+
+Consumers must therefore not present the complete curated `labels` array as if
+it were a verbatim list of Infinity rules Labels. Either the project-specific
+entry must remain explicitly typed/scoped as metadata, or future vocabulary
+modeling should separate source Labels from project/navigation categories.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Labels>
+- PDF: Infinity N5 V5.3, printed page 174
+- Curated data: `data/curated/rules/n5-core-v5.3.json`
+
+### RS-GSG-TRAIT-001 — Trait names have complete current curated identity coverage
+
+**Classification:** source-native vocabulary with an existing curated-data mapping.
+
+The current N5.3 Traits page defines 33 Traits. The curated N5 V5.3 rules file
+contains 33 `kind: "trait"` records with matching canonical names. Current Trait
+**identity/name coverage is therefore complete**.
+
+This finding is about vocabulary coverage, not full rules coverage. Attachment
+of Traits to every relevant Weapon/Equipment/Skill and all structured effect
+relationships still need validation during the later domain audits.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+- Curated data: `data/curated/rules/n5-core-v5.3.json`
+
+### RS-GSG-TRAIT-002 — Traits encode typed parameters and cross-domain relationships
+
+**Classification:** source-native with a parsing/curated-data consequence.
+
+Traits are not a uniform bag of booleans. Examples include:
+
+- `BS Weapon (PH)` / `BS Weapon (WIP)`, which substitute the Attribute used for
+  BS rules;
+- `Disposable (X)` and `Silent (X)`, which carry parameters;
+- `Direct Template (...)` / `Impact Template (...)`, which identify a template;
+- `State`, which points to a Game State named by the profile;
+- `Target (Attribute)`, which selects VITA or STR;
+- `Suppressive Fire (SF)`, which links a weapon to Suppressive Fire State/profile
+  behavior;
+- `Deployable`, which changes the carrier/item relationship by creating an
+  independent game element.
+
+InfinityDB should continue using canonical Trait identities plus structured
+parameter/source semantics rather than flattening Trait text or reparsing it in
+each consumer. The existing `sourceIdentity.prefixes` pattern for parameterized
+Traits is an appropriate foundation to extend.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+- Curated data: `data/curated/rules/n5-core-v5.3.json`

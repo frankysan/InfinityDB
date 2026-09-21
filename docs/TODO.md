@@ -166,7 +166,7 @@ in `docs/releasing.md`.
     the traversal spine and the current PDF/FAQ material for stable citations:
     - [ ] Introduction.
     - [x] Basic Rules.
-    - [ ] Game States and Glossary.
+    - [x] Game States and Glossary.
     - [ ] Skills and Equipment.
     - [ ] Combat.
     - [ ] Ammunition and Weaponry.

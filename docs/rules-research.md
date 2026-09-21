@@ -182,3 +182,156 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Rolls>
 - Wiki: <https://infinitythewiki.com/Face_to_Face_Rolls>
 - PDF: Infinity N5 V5.3, printed pages 23-26
+
+## Game States and Glossary / State research
+
+### RR-GSG-STATE-001 — State effects form several reusable semantic families
+
+**Scope:** core N5.
+
+The 23 current States are not one uniform mechanic. The audit exposes recurring
+families that may be useful for a future State catalog or thesaurus:
+
+- representation/hidden-information States: Camouflaged, Decoy, Hidden
+  Deployment, Holoecho, HoloMask, Impersonation;
+- control/Order/alignment States: Dead, Disconnected, Isolated, Possessed,
+  Retreat!, Sepsitorized, Unconscious;
+- action/Attribute/profile overlays: Engaged, Foxhole, Immobilized-A,
+  Immobilized-B, Normal, Prone, Stunned, Suppressive Fire, Targeted;
+- item-availability state: Unloaded.
+
+These are research groupings, not source-native State categories. If a future
+catalog exposes them, mark them as InfinityDB classification metadata and keep
+the canonical State identities/rules primary.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/States> and its 23 linked State pages
+- PDF: Infinity N5 V5.3, printed pages 157-172
+
+### RR-GSG-STATE-002 — Marker and disguise States separate visible representation from real identity
+
+**Scope:** core N5.
+
+Camouflaged, Decoy, Hidden Deployment, Holoecho, HoloMask, and Impersonation all
+show that what is visible on the table may intentionally not identify the real
+Trooper/profile. HoloMask is especially explicit: a Trooper can present another
+appearance while continuing to use its real Unit Profile, while Hidden Deployment
+can represent the Trooper with no Model/Marker on the table at all.
+
+This is likely useful for a future rules glossary, game-session model, or privacy-
+aware list sharing, but it should not be projected back into canonical Unit
+identity. A reference database should describe the State without attempting to
+infer the current hidden identity of an actual game piece.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Camouflaged_State>
+- Wiki: <https://infinitythewiki.com/Decoy_State>
+- Wiki: <https://infinitythewiki.com/Hidden_Deployment_State>
+- Wiki: <https://infinitythewiki.com/Holoecho_State>
+- Wiki: <https://infinitythewiki.com/HoloMask_State>
+- Wiki: <https://infinitythewiki.com/Impersonation_State>
+- PDF: Infinity N5 V5.3, printed pages 157 and 159-167
+
+### RR-GSG-STATE-003 — State transitions can propagate across relationships
+
+**Scope:** core N5.
+
+State changes can have effects on related game elements rather than only on the
+state-bearing element. Isolated can cause a Peripheral to enter Disconnected when
+either the Peripheral or its Controller becomes Isolated; deployment and
+operating-distance rules can also leave a Peripheral Disconnected. Other States
+interact with Fireteam membership, Combat Groups, Lieutenant status, and
+Coordinated Orders.
+
+A future game/session model may therefore need transition rules over relationship
+edges, not just independent state flags on entities. This reinforces the value of
+keeping Peripheral/controller and future Fireteam relationships explicit.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Isolated_State>
+- Wiki: <https://infinitythewiki.com/Disconnected_State>
+- PDF: Infinity N5 V5.3, printed pages 160 and 168
+
+### RR-GSG-STATE-004 — State cancellation has typed recovery actors and conditions
+
+**Scope:** core N5.
+
+State cancellation is not one generic “clear status” operation. Examples include
+Dodge for Immobilized-A, Reset for Immobilized-B/Isolated/Targeted, Doctor versus
+Engineer depending on VITA/STR for Stunned/Unconscious recovery, Command Tokens
+or Total Control for Possessed, and Reload/Baggage for Unloaded. Some State
+cancellation also has scenario-specific routes or explicit exceptions.
+
+This could support future contextual cross-links such as “ways to cancel this
+State,” but should be curated from explicit rule relationships rather than
+inferred from shared wording.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/States> and affected State pages
+- PDF: Infinity N5 V5.3, printed pages 164-172
+
+## Game States and Glossary / Vocabulary research
+
+### RR-GSG-TERM-001 — Terminology is a strong seed for the cross-domain game-terms thesaurus
+
+**Scope:** project research grounded in source-native terminology.
+
+The source Glossary supplies an initial cross-domain concept set whose members do
+not belong naturally to one Army-data domain: Attributes, Deployable Equipment,
+Deployable Weapon, Marker, Model, Peripheral, Scenery Element, State Token,
+Target, Token, Trooper, Unit Profile, Victory Points, plus the Alignment terms.
+
+A future thesaurus can use these as source-backed concepts and link them to
+existing domains where applicable without creating dedicated database entities
+for every term. The new scoped-concept requirement in `rules-semantics.md`
+should be treated as part of that design.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terminology>
+- Wiki: <https://infinitythewiki.com/Alignment>
+- PDF: Infinity N5 V5.3, printed page 173
+
+### RR-GSG-TERM-002 — Targetability and ownership form separate semantic axes
+
+**Scope:** core N5.
+
+Terminology and Alignment show that “what this game element is,” “which side it
+belongs to,” and “whether/how it can be targeted” are separate questions. A
+Scenery Element may or may not become a target; Deployable Equipment/Weapons can
+be targets; Hostile elements belong to no player's Army List but are treated as
+Enemy; Neutral elements also belong to neither Army List without the Hostile
+attack semantics.
+
+This distinction may later help scenario/scenery modeling and rules-aware search,
+but current canonical Army entities do not require an alignment/targetability
+schema.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Terminology>
+- Wiki: <https://infinitythewiki.com/Alignment>
+- PDF: Infinity N5 V5.3, printed page 173
+
+### RR-GSG-TRAIT-001 — Trait-to-State links can seed future cross-domain references
+
+**Scope:** core N5.
+
+Several Traits explicitly connect Weapon/Equipment profiles to other rules
+concepts: `State` names a Game State caused by the item; `Suppressive Fire (SF)`
+links to Suppressive Fire State; `Concealed` invokes Camouflaged State effects;
+`Disposable (X)` leads to Unloaded State when uses are exhausted; and
+`Non-Reloadable` changes Unloaded cancellation.
+
+These are useful candidates for a future relationship graph between Traits,
+States, Weapons, Equipment, Skills, and Ammunition. The later domain audits should
+validate the complete edge set before materializing such a graph.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits>
+- PDF: Infinity N5 V5.3, printed pages 174-175
