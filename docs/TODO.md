@@ -165,7 +165,7 @@ in `docs/releasing.md`.
   - [ ] Audit the wiki/PDF rules sections, using the wiki Main Sections structure as
     the traversal spine and the current PDF/FAQ material for stable citations:
     - [ ] Introduction.
-    - [ ] Basic Rules.
+    - [x] Basic Rules.
     - [ ] Game States and Glossary.
     - [ ] Skills and Equipment.
     - [ ] Combat.

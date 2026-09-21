@@ -85,28 +85,28 @@ Reference Charts are primarily a validation/completeness pass after the prose
 rules have been audited.
 
 - [ ] Introduction
-- [ ] Basic Rules
-  - [ ] Basic Rules overview: game elements, terminology/alignment, labels/traits,
+- [x] Basic Rules
+  - [x] Basic Rules overview: game elements, terminology/alignment, labels/traits,
     armies, game states, and game modes
-  - [ ] Open and Private Information
+  - [x] Open and Private Information
   - [x] Unit Profile — initial semantic extraction and N5 V5.3 PDF cross-check
-  - [ ] Army List
-  - [ ] Orders and the Order Pool
-  - [ ] Trooper Activation
-  - [ ] ARO: Automatic Reaction Order
-  - [ ] Order Expenditure Sequence
-  - [ ] Initiative and Deployment
-  - [ ] Game Sequence
-  - [ ] Loss of Lieutenant
-  - [ ] Silhouettes
-  - [ ] Line of Fire
-  - [ ] Zone of Control
-  - [ ] Zones, Bases and Silhouettes
-  - [ ] Coherency
-  - [ ] Distances and Measurements
-  - [ ] Replacing Game Elements
-  - [ ] Rolls
-  - [ ] Face to Face Rolls
+  - [x] Army List
+  - [x] Orders and the Order Pool
+  - [x] Trooper Activation
+  - [x] ARO: Automatic Reaction Order
+  - [x] Order Expenditure Sequence
+  - [x] Initiative and Deployment
+  - [x] Game Sequence
+  - [x] Loss of Lieutenant
+  - [x] Silhouettes
+  - [x] Line of Fire
+  - [x] Zone of Control
+  - [x] Zones, Bases and Silhouettes
+  - [x] Coherency
+  - [x] Distances and Measurements
+  - [x] Replacing Game Elements
+  - [x] Rolls
+  - [x] Face to Face Rolls
 - [ ] Game States and Glossary
 - [ ] Skills and Equipment
 - [ ] Combat
@@ -125,21 +125,111 @@ rules have been audited.
 
 ## Completed page notes
 
-### Basic Rules / Unit Profile
+### Basic Rules — section complete
 
-Status: initial semantic extraction complete.
+Status: core N5.3 wiki/PDF semantic extraction complete for the Basic Rules
+section. Embedded FAQ material was observed but not promoted into core findings;
+FAQ/errata semantics remain separately scoped under the source rules above.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Basic_Rules> and every Basic Rules page in
+  its navigation sequence, reviewed against the live N5.3 / FAQ v0.1 wiki.
+- PDF: Infinity N5 V5.3, printed pages 6-26.
+
+The section produced implementation-relevant findings in
+`rules-semantics.md` and future-facing findings in `rules-research.md`. The
+reconciliation pass also confirmed several existing InfinityDB boundaries and
+one presentation mismatch that should be handled later rather than fixed during
+this documentation audit.
+
+#### Basic Rules overview, information, and Army Lists
 
 Sources reviewed:
 
-- Wiki: <https://infinitythewiki.com/Unit_Profile>, reviewed against the live
-  N5.3 / FAQ v0.1 page.
-- PDF: Infinity N5 V5.3, printed pages 8-9.
+- <https://infinitythewiki.com/Basic_Rules>
+- <https://infinitythewiki.com/Open_and_Private_Information>
+- <https://infinitythewiki.com/Unit_Profile>
+- <https://infinitythewiki.com/Army_List>
+- PDF: Infinity N5 V5.3, printed pages 6-11.
 
-Findings promoted to `rules-semantics.md` cover Unit/Unit Profile/Trooper
-structure, common versus option-specific profile data, Trooper Characteristics,
-ISC, Attribute absence, VITA versus STR, AVA, Peripheral/Controller semantics,
-and profile notation.
+Promoted semantics cover the distinction between Labels and Traits, transient
+Game States, Army-List disclosure/privacy context, army-specific list membership
+and AVA, Cost/SWC context, and the Unit Profile findings already recorded by the
+initial pass.
 
-The Troop Type restrictions shown from the Unit Profile page are retained in
-`rules-research.md` until their broader restrictions-chart and application use
-are audited.
+The rules reinforce the current application-model boundary: a Unit can occur in
+multiple Army Lists with different list membership and AVA, while the logical
+Unit remains a cross-Army InfinityDB identity. Points and SWC also belong to the
+selectable option/occurrence context rather than the reusable loadout payload.
+
+#### Orders, activation, AROs, and game sequence
+
+Sources reviewed:
+
+- <https://infinitythewiki.com/Orders_and_the_Order_Pool>
+- <https://infinitythewiki.com/Trooper_Activation>
+- <https://infinitythewiki.com/ARO>
+- <https://infinitythewiki.com/Order_Expenditure_Sequence>
+- <https://infinitythewiki.com/Initiative_and_Deployment>
+- <https://infinitythewiki.com/Game_Sequence>
+- <https://infinitythewiki.com/Loss_of_Lieutenant>
+- PDF: Infinity N5 V5.3, printed pages 11-18.
+
+Promoted semantics separate Training from the Orders a loadout generates,
+distinguish static order-generation data from the runtime Order Pool, confirm
+the Basic Short/Short/Long Skill declaration categories used by the curated
+rules layer, and prevent dynamic Loss of Lieutenant effects from being mistaken
+for permanent profile characteristics.
+
+A concrete presentation mismatch was found during reconciliation:
+`src/infinity_db/web/static/unit.js` currently labels the `tactical` order symbol
+as `Tactical Awareness`. The rules define the symbol/profile fact as a
+**Tactical Order**; **Tactical Awareness** is the Special Skill that grants an
+additional Tactical Order. Keep the source order type and the granting Skill as
+separate concepts. This audit records the gap but deliberately does not change
+runtime code.
+
+#### Spatial concepts and measurement
+
+Sources reviewed:
+
+- <https://infinitythewiki.com/Silhouette>
+- <https://infinitythewiki.com/Line_of_Fire>
+- <https://infinitythewiki.com/Zone_of_Control>
+- <https://infinitythewiki.com/Zones,_Bases_and_Silhouettes>
+- <https://infinitythewiki.com/Coherency>
+- <https://infinitythewiki.com/Distances_and_Measurements>
+- <https://infinitythewiki.com/Replacing_Game_Elements>
+- PDF: Infinity N5 V5.3, printed pages 18-22.
+
+Promoted semantics establish that the `S` value identifies a Silhouette Template
+with defined geometry, that rules-table distances are expressed in inches, and
+that Coherency is a relationship mechanic centered on a context-defined
+Reference Trooper. Detailed LoF/ZoC/zone/replacement geometry remains research
+material until InfinityDB has a consumer for tabletop spatial rules.
+
+The measurement audit supports the existing separation between source units and
+presentation units. Infinity Army range data may be stored in source-native
+metric values while the rules describe tabletop measurements in inches; any
+conversion must therefore retain explicit source/unit context rather than
+reinterpreting a bare number.
+
+#### Rolls and profile modifiers
+
+Sources reviewed:
+
+- <https://infinitythewiki.com/Rolls>
+- <https://infinitythewiki.com/Face_to_Face_Rolls>
+- PDF: Infinity N5 V5.3, printed pages 23-26.
+
+Promoted semantics establish that parenthetical values beside a Skill, Weapon,
+or Equipment item are scoped to use of that item and that notations such as a
+plain MOD, `Attribute=value`, `PS=value`, Burst changes, ReRoll, Special Dice,
+Ammunition, Traits, and Saving-Roll changes have different meanings. They must
+not be normalized into one generic signed-modifier field. This directly supports
+the existing curated parameter-semantics approach and the Skill Modifiers UI.
+
+Normal/Face-to-Face resolution, Success Value limits, Criticals, and related
+procedural roll rules are recorded in `rules-research.md` for future rules/help
+features rather than modeled as static Army facts.
