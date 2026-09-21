@@ -41,6 +41,48 @@ def test_source_identity_manifest_contains_current_explicit_aliases() -> None:
     assert "intervention" in config.profile_identity_ignored_words
 
 
+def test_catalog_identity_groups_accept_numeric_or_slug_references(
+    identity_document: dict,
+) -> None:
+    identity_document["catalogs"]["skills"]["groups"] = [
+        {
+            "canonical_id": "camouflage-l1",
+            "source_ids": [19, "camouflage-l2"],
+            "reason": "Readable mixed-reference test",
+        }
+    ]
+
+    config = parse_identity_config(identity_document)
+
+    assert dict(
+        config.resolve_catalog_aliases(
+            "skills",
+            {19: "Camouflage L1", 20: "Camouflage L2"},
+        )
+    ) == {19: 19, 20: 19}
+
+
+def test_catalog_identity_slug_references_fail_closed_when_unknown_or_ambiguous(
+    identity_document: dict,
+) -> None:
+    identity_document["catalogs"]["skills"]["groups"] = [
+        {
+            "canonical_id": 19,
+            "source_ids": [19, "camouflage-l2"],
+        }
+    ]
+    config = parse_identity_config(identity_document)
+
+    with pytest.raises(IdentityConfigError, match="unknown skills slug"):
+        config.resolve_catalog_aliases("skills", {19: "Camouflage L1"})
+
+    with pytest.raises(IdentityConfigError, match="ambiguous skills slug"):
+        config.resolve_catalog_aliases(
+            "skills",
+            {19: "Camouflage L1", 20: "Camouflage L2", 21: "Camouflage-L2"},
+        )
+
+
 def test_reinforcement_prefixes_are_manifest_backed_identity_policy() -> None:
     config = load_identity_config()
 

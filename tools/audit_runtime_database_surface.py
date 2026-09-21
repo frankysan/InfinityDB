@@ -260,6 +260,7 @@ TABLE_POLICY["units"] = _policy(
 # helpers. validate() is intentionally excluded from the 0.6.1 serving surface.
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
+    "application_catalog_id",
     "application_id_for_slug",
     "application_slug",
     "snapshot_downloaded_on",
@@ -382,6 +383,10 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ("armies", lambda db: db.list_armies()),
         ("skill-extras", lambda db: db.list_skill_extras()),
         ("skills-list", lambda db: db.list_catalog_items("skills")),
+        (
+            "skill-application-id",
+            lambda db: db.application_catalog_id("skills", int(skill["id"])),
+        ),
         (
             "skill-slug-for-id",
             lambda db: db.application_slug("skills", int(skill["id"])),

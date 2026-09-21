@@ -55,25 +55,6 @@ def _merged_catalog_name(name: object) -> str:
     return _merged_skill_name(text)
 
 
-def _configured_catalog_group(
-    identity_config: IdentityConfig,
-    catalog: str,
-    item_id: int,
-    available_ids: Collection[int],
-) -> tuple[int, tuple[int, ...]] | None:
-    source_ids = tuple(
-        source_id
-        for source_id in identity_config.catalog_source_ids(catalog, item_id)
-        if source_id in available_ids
-    )
-    if not source_ids:
-        return None
-    canonical_id = identity_config.canonical_catalog_id(catalog, item_id)
-    if canonical_id not in source_ids:
-        canonical_id = min(source_ids)
-    return canonical_id, source_ids
-
-
 def _source_catalog_rows(connection: sqlite3.Connection, catalog: str) -> list[dict[str, Any]]:
     if catalog == "weapons":
         return _dict_rows(
@@ -103,29 +84,25 @@ def derive_application_catalogs(
     sources: list[dict[str, Any]] = []
     for catalog in CATALOGS:
         rows = _source_catalog_rows(connection, catalog)
-        rows_by_id = {row["id"]: row for row in rows}
-        available_ids = set(rows_by_id)
+        resolved_aliases = identity_config.resolve_catalog_aliases(
+            catalog, {int(row["id"]): row["name"] for row in rows}
+        )
         groups: dict[tuple[str, Any], list[dict[str, Any]]] = defaultdict(list)
-        explicit_groups: dict[tuple[str, Any], tuple[int, tuple[int, ...]]] = {}
         merge_key_for = _skill_merge_key if catalog == "skills" else _catalog_merge_key
         merged_name_for = _merged_skill_name if catalog == "skills" else _merged_catalog_name
         for row in rows:
-            configured = _configured_catalog_group(
-                identity_config, catalog, row["id"], available_ids
-            )
-            if configured is not None:
-                key = ("alias", configured[0])
-                explicit_groups[key] = configured
+            configured_canonical = resolved_aliases.get(row["id"])
+            if configured_canonical is not None:
+                key = ("alias", configured_canonical)
             else:
                 merge_key = merge_key_for(row["name"])
                 key = ("merge", merge_key) if merge_key is not None else ("id", row["id"])
             groups[key].append(row)
         for key in sorted(groups, key=lambda item: (item[0], str(item[1]))):
             group = sorted(groups[key], key=lambda row: row["id"])
-            configured = explicit_groups.get(key)
             canonical_id = (
-                configured[0]
-                if configured is not None
+                int(key[1])
+                if key[0] == "alias"
                 else min(row["id"] for row in group)
             )
             representative = next((row for row in group if row["id"] == canonical_id), group[0])

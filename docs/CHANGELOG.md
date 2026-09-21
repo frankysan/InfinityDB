@@ -20,7 +20,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 - Begin the public slug migration with Skills: Skill links and detail APIs now use
   readable domain-local slugs when available while existing numeric Skill URLs remain
-  valid for compatibility.
+  valid for compatibility. Catalog identity alias groups may now also be authored with
+  readable source-label slugs or numeric source IDs; unknown or ambiguous slugs fail
+  validation instead of being guessed.
 - Validate curated typed record IDs against the shared domain-slug grammar, and make
   Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
 - Make the Unit explorer's matching-unit statistic show the currently visible unique
@@ -35,8 +37,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 ### Fixed
 
 - Keep settings for the current browser session when persistent settings are
-  disabled, and show Team Operations-only units on Skill detail pages when that
-  optional-unit category is enabled.
+  disabled, show Team Operations-only units on Skill detail pages when that
+  optional-unit category is enabled, and use public Skill slugs for source variants
+  merged into curated application identities instead of falling back to numeric IDs.
 - Preserve the `+dev` browser display version in containerized development/test
   deployments without embedding Git metadata in the image. The API/package release
   version remains unchanged.

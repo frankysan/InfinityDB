@@ -38,7 +38,11 @@ from infinity_db.database.schema import (
     create_schema,
     quote,
 )
-from infinity_db.identities import REINFORCEMENT_UNIT_MATCHES_KEY, load_identity_config
+from infinity_db.identities import (
+    REINFORCEMENT_UNIT_MATCHES_KEY,
+    load_identity_config,
+    parse_identity_config,
+)
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
@@ -2588,6 +2592,66 @@ def test_application_domain_slugs_are_separate_from_source_slugs(
     skill_slug = database.application_slug("skills", skill["id"])
     assert skill_slug is not None
     assert database.application_id_for_slug("skills", skill_slug) == skill["id"]
+
+
+def test_application_catalog_aliases_accept_readable_slug_references(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 41, "name": "Mirrorball L1", "source_defined": True},
+            {"id": 42, "name": "Mirrorball L2", "source_defined": True},
+        ]
+    )
+    document = load_identity_config().document
+    document["catalogs"]["skills"]["groups"].append(
+        {
+            "canonical_id": "mirrorball-l1",
+            "source_ids": ["mirrorball-l1", "mirrorball-l2"],
+            "reason": "Readable slug-authored alias test",
+        }
+    )
+    config = parse_identity_config(document)
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path, identity_config=config)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("skills", 41) == 41
+    assert database.application_catalog_id("skills", 42) == 41
+    assert database.application_slug("skills", 41) == "mirrorball"
+
+
+def test_skill_catalog_resolves_source_variant_ids_before_attaching_public_slug(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 19, "name": "Camouflage L1", "source_defined": True},
+            {"id": 20, "name": "Camouflage L2", "source_defined": True},
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = 20
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+    catalog = SkillCatalog(database, None)
+
+    assert database.application_catalog_id("skills", 20) == 19
+    assert database.application_slug("skills", 19) == "camouflage"
+
+    raw_unit = database.get_unit(1)
+    assert raw_unit is not None
+    raw_skill = raw_unit["armies"][0]["profiles"][0]["skills"][0]
+    assert raw_skill["id"] == 20
+    assert "slug" not in raw_skill
+
+    enriched = catalog.enrich_unit(raw_unit)
+    skill = enriched["armies"][0]["profiles"][0]["skills"][0]
+    assert skill["id"] == 20
+    assert skill["slug"] == "camouflage"
 
 
 def test_skill_catalog_does_not_emit_numeric_only_slug_that_would_shadow_compatibility_route(

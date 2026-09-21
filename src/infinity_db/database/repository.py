@@ -1239,6 +1239,19 @@ class Database:
         return None if row is None else int(row["application_id"])
 
     @instance_lru_cache(maxsize=512)
+    def application_catalog_id(self, catalog: str, item_id: int) -> int | None:
+        """Resolve a source or application catalog ID to its application identity."""
+
+        if catalog not in {"skills", "equipment", "weapons"}:
+            raise ValueError(f"Unknown catalog: {catalog}")
+        if type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX:
+            raise ValueError(
+                "item_id must be an integer within SQLite's signed 64-bit range"
+            )
+        graph = self._application_catalog_graph(catalog)
+        return item_id if item_id in graph["items"] else graph["source_to_item"].get(item_id)
+
+    @instance_lru_cache(maxsize=512)
     def application_slug(self, domain: str, application_id: int) -> str | None:
         """Return the current domain-local slug for one application identity."""
 

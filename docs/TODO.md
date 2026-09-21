@@ -717,6 +717,11 @@ new correctness or reproducibility defect.
     reviewed overrides, aliases/redirects, and compatibility behavior; extend the
     registry only when a new canonical domain boundary (for example Peripheral
     entities/profiles) has been proven.
+  - [ ] Extend the numeric-or-slug authoring convention now used by catalog identity
+    alias groups to remaining maintained/curated JSON reference fields (for example
+    weapon source corrections, display-identity mappings, and rules `armyLinks`)
+    only after each owning build layer has a deterministic domain resolver. Keep
+    numeric references valid and make unknown/ambiguous slugs fail closed.
   Keep source numeric IDs/slugs as provenance/context references and application numeric
   IDs as developer/compatibility details rather than the long-term user-facing contract.
 

@@ -60,7 +60,12 @@ proved that the singular value is the correct game-wide fact.
   catalogs.
 - Explicit source-equivalent unit, army, skill, equipment, and weapon IDs are
   maintained in validated `config/identity/source-identities.json`
-  configuration. That policy also owns reinforcement-label prefixes used by
+  configuration. Catalog alias groups accept either positive numeric source IDs
+  or source-label slugs in `canonical_id` / `source_ids`; slug references are
+  resolved against the current source catalog before application grouping and
+  fail validation when unknown or ambiguous. These authoring slugs are source
+  references, not the later public `application_domain_slugs` identities. That
+  policy also owns reinforcement-label prefixes used by
   unit/profile identity normalization and backend profile display names. Generic
   duplicate/name matching remains implementation
   behavior rather than authored alias data; normalization now persists the
@@ -1757,8 +1762,12 @@ The materializer currently uses these source inputs:
 - `metadata_skills`, `metadata_equipment`, and `metadata_weapons` enrichment;
 - reviewed catalog alias groups from `config/identity/source-identities.json`.
 
-For each public catalog, explicit reviewed alias groups take precedence. Remaining
-source rows are grouped only by the existing deterministic label rules used by the
+For each public catalog, explicit reviewed alias groups take precedence. The
+authored `canonical_id` and `source_ids` entries may mix positive integer source
+IDs with lowercase domain-local slugs derived from source item labels. Slug
+resolution happens against source rows before grouping; an unknown slug or a slug
+owned by multiple source IDs is a build error rather than an implicit guess.
+Remaining source rows are grouped only by the existing deterministic label rules used by the
 application: numeric skill variants share the label with the numeric component
 removed, while Equipment/Weapon labels additionally allow the text before a
 colon to define the shared identity. The configured canonical ID is retained for

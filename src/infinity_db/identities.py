@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any
 
 from infinity_army_data.project_resources import maintained_config_path
+from infinity_db.domain_slugs import normalize_domain_slug, require_domain_slug
 
 IDENTITY_CONFIG_SCHEMA_VERSION = 2
 DEFAULT_IDENTITY_CONFIG = maintained_config_path("identity", "source-identities.json")
@@ -21,6 +22,17 @@ IDENTITY_CONFIG_METADATA_KEY = "identityConfig"
 IDENTITY_CONFIG_SHA256_METADATA_KEY = "identityConfigSha256"
 REINFORCEMENT_MATCH_METHOD = "normalized_unit_identity"
 REINFORCEMENT_UNIT_MATCHES_KEY = "reinforcementUnitMatches"
+
+
+IdentifierRef = int | str
+
+
+@dataclass(frozen=True)
+class CatalogAliasGroup:
+    """One authored catalog alias group before snapshot-local reference resolution."""
+
+    canonical_ref: IdentifierRef
+    source_refs: tuple[IdentifierRef, ...]
 
 
 class IdentityConfigError(ValueError):
@@ -37,6 +49,7 @@ class IdentityConfig:
     army_aliases: Mapping[int, int]
     canonical_faction_overrides: Mapping[int, int]
     catalog_aliases: Mapping[str, Mapping[int, int]]
+    catalog_alias_groups: Mapping[str, tuple[CatalogAliasGroup, ...]]
     word_aliases: Mapping[str, str]
     reinforcement_prefixes: tuple[str, ...]
     profile_identity_ignored_words: frozenset[str]
@@ -69,6 +82,69 @@ class IdentityConfig:
         if canonical_id is None:
             return ()
         return tuple(item_id for item_id, target in aliases.items() if target == canonical_id)
+
+    def resolve_catalog_aliases(
+        self, catalog: str, source_items: Mapping[int, object]
+    ) -> Mapping[int, int]:
+        """Resolve authored numeric/slug catalog references for one source snapshot."""
+
+        groups = self.catalog_alias_groups.get(catalog)
+        if groups is None:
+            raise IdentityConfigError(f"Unknown catalog: {catalog}")
+
+        slug_owners: dict[str, list[int]] = {}
+        for source_id, label in source_items.items():
+            slug = normalize_domain_slug(label)
+            if slug:
+                slug_owners.setdefault(slug, []).append(source_id)
+
+        def resolve(ref: IdentifierRef, context: str) -> int | None:
+            if isinstance(ref, int):
+                return ref if ref in source_items else None
+            owners = slug_owners.get(ref, [])
+            if not owners:
+                raise IdentityConfigError(
+                    f"{context} references unknown {catalog} slug {ref!r}"
+                )
+            if len(owners) > 1:
+                raise IdentityConfigError(
+                    f"{context} references ambiguous {catalog} slug {ref!r}; "
+                    f"matches source IDs {owners}. Use a numeric ID for this reference."
+                )
+            return owners[0]
+
+        aliases: dict[int, int] = {}
+        for index, group in enumerate(groups):
+            context = f"identity config.catalogs.{catalog}.groups[{index}]"
+            resolved_sources = [
+                source_id
+                for position, ref in enumerate(group.source_refs)
+                if (source_id := resolve(ref, f"{context}.source_ids[{position}]")) is not None
+            ]
+            if len(set(resolved_sources)) != len(resolved_sources):
+                raise IdentityConfigError(
+                    f"{context}.source_ids resolve to duplicate source IDs"
+                )
+            if not resolved_sources:
+                continue
+
+            canonical_id = resolve(group.canonical_ref, f"{context}.canonical_id")
+            if canonical_id is None:
+                canonical_id = min(resolved_sources)
+            if canonical_id not in resolved_sources:
+                raise IdentityConfigError(
+                    f"{context}.canonical_id must resolve to an entry in source_ids"
+                )
+
+            for source_id in resolved_sources:
+                if source_id in aliases:
+                    raise IdentityConfigError(
+                        f"identity config.catalogs.{catalog} source ID {source_id} "
+                        "belongs to more than one alias group"
+                    )
+                aliases[source_id] = canonical_id
+
+        return MappingProxyType(aliases)
 
 
 def strip_reinforcement_prefix(value: object, config: IdentityConfig) -> str:
@@ -181,7 +257,72 @@ def _positive_int(value: Any, context: str) -> int:
     return value
 
 
-def _alias_groups(value: Any, context: str) -> Mapping[int, int]:
+def _identifier_ref(value: Any, context: str) -> IdentifierRef:
+    if type(value) is int:
+        return _positive_int(value, context)
+    if isinstance(value, str):
+        try:
+            return require_domain_slug(value, context=context)
+        except ValueError as exc:
+            raise IdentityConfigError(str(exc)) from exc
+    raise IdentityConfigError(f"{context} must be a positive integer or domain-local slug")
+
+
+def _catalog_alias_groups(
+    value: Any, context: str
+) -> tuple[tuple[CatalogAliasGroup, ...], Mapping[int, int]]:
+    section = _object(value, context)
+    _only_keys(section, {"groups"}, context)
+    groups = section.get("groups")
+    if not isinstance(groups, list):
+        raise IdentityConfigError(f"{context}.groups must be an array")
+
+    parsed_groups: list[CatalogAliasGroup] = []
+    numeric_aliases: dict[int, int] = {}
+    for index, raw_group in enumerate(groups):
+        group_context = f"{context}.groups[{index}]"
+        group = _object(raw_group, group_context)
+        _only_keys(group, {"canonical_id", "source_ids", "reason"}, group_context)
+
+        canonical_ref = _identifier_ref(
+            group.get("canonical_id"), f"{group_context}.canonical_id"
+        )
+        source_refs = group.get("source_ids")
+        if not isinstance(source_refs, list) or len(source_refs) < 2:
+            raise IdentityConfigError(
+                f"{group_context}.source_ids must contain at least two identifiers"
+            )
+        parsed_refs = tuple(
+            _identifier_ref(ref, f"{group_context}.source_ids[{position}]")
+            for position, ref in enumerate(source_refs)
+        )
+        if len(set(parsed_refs)) != len(parsed_refs):
+            raise IdentityConfigError(f"{group_context}.source_ids contains duplicates")
+
+        reason = group.get("reason")
+        if reason is not None and (not isinstance(reason, str) or not reason.strip()):
+            raise IdentityConfigError(f"{group_context}.reason must be a non-empty string")
+
+        if all(type(ref) is int for ref in parsed_refs) and type(canonical_ref) is int:
+            numeric_sources = tuple(int(ref) for ref in parsed_refs)
+            canonical_id = int(canonical_ref)
+            if canonical_id not in numeric_sources:
+                raise IdentityConfigError(
+                    f"{group_context}.canonical_id must also appear in source_ids"
+                )
+            for source_id in numeric_sources:
+                if source_id in numeric_aliases:
+                    raise IdentityConfigError(
+                        f"{context} source ID {source_id} belongs to more than one alias group"
+                    )
+                numeric_aliases[source_id] = canonical_id
+
+        parsed_groups.append(CatalogAliasGroup(canonical_ref, parsed_refs))
+
+    return tuple(parsed_groups), MappingProxyType(numeric_aliases)
+
+
+def _numeric_alias_groups(value: Any, context: str) -> Mapping[int, int]:
     section = _object(value, context)
     _only_keys(section, {"groups"}, context)
     groups = section.get("groups")
@@ -288,8 +429,8 @@ def parse_identity_config(document: Any) -> IdentityConfig:
             f"{IDENTITY_CONFIG_SCHEMA_VERSION}"
         )
 
-    unit_aliases = _alias_groups(root.get("units"), "identity config.units")
-    army_aliases = _alias_groups(root.get("armies"), "identity config.armies")
+    unit_aliases = _numeric_alias_groups(root.get("units"), "identity config.units")
+    army_aliases = _numeric_alias_groups(root.get("armies"), "identity config.armies")
     canonical_faction_overrides = _id_overrides(
         root.get("canonical_faction_overrides"),
         "identity config.canonical_faction_overrides",
@@ -302,11 +443,17 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         raise IdentityConfigError(
             "identity config.catalogs is missing: " + ", ".join(sorted(missing))
         )
+    parsed_catalogs = {
+        catalog: _catalog_alias_groups(
+            catalogs[catalog], f"identity config.catalogs.{catalog}"
+        )
+        for catalog in CATALOG_NAMES
+    }
+    catalog_alias_groups = MappingProxyType(
+        {catalog: parsed_catalogs[catalog][0] for catalog in CATALOG_NAMES}
+    )
     catalog_aliases = MappingProxyType(
-        {
-            catalog: _alias_groups(catalogs[catalog], f"identity config.catalogs.{catalog}")
-            for catalog in CATALOG_NAMES
-        }
+        {catalog: parsed_catalogs[catalog][1] for catalog in CATALOG_NAMES}
     )
 
     name_normalization = _object(
@@ -369,6 +516,7 @@ def parse_identity_config(document: Any) -> IdentityConfig:
         army_aliases=army_aliases,
         canonical_faction_overrides=canonical_faction_overrides,
         catalog_aliases=catalog_aliases,
+        catalog_alias_groups=catalog_alias_groups,
         word_aliases=word_aliases,
         reinforcement_prefixes=tuple(reinforcement_prefixes),
         profile_identity_ignored_words=frozenset(parsed_ignored_words),

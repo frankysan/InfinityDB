@@ -78,7 +78,10 @@ class SkillCatalog:
         skill_id = item.get("id")
         if type(skill_id) is not int:
             return
-        slug = self.database.application_slug("skills", skill_id)
+        application_id = self.database.application_catalog_id("skills", skill_id)
+        if application_id is None:
+            return
+        slug = self.database.application_slug("skills", application_id)
         if slug is not None and not slug.isdigit():
             item["slug"] = slug
 
