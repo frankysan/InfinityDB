@@ -81,17 +81,20 @@ unselected. Only materialized source IDs that the repository actually accepts
 are exposed; unused metadata-only alias candidates are not advertised as valid
 filter references.
 
-### 3. Cross-domain API references need a consistent slug companion policy
+### 3. Cross-domain API references use an additive slug companion policy — closed
 
-Several payloads still expose numeric application/source references without the
-corresponding readable application identity. Examples that need review include
-Unit Army references such as `army_ids`, `main_army_id`, and `display_army_id`,
-Trait variant `item_id` references, and Skill Modifier `skill_id` references.
+Closed on 2026-09-21. Existing numeric fields remain intact for compatibility and
+provenance, while references that resolve to canonical application identities gain a
+routable slug companion. Scalar Unit Army references use `main_army_slug` and
+`display_army_slug`; structured Army references add `public_slug` because their existing
+`slug` is source/context data. Trait usage variants add `item_slug`, and Skill Modifier
+rows add `skill_slug`. Unit references embedded in these payloads continue to use
+`public_slug`.
 
-Numeric fields should remain for compatibility and provenance. Where such a
-field represents a canonical application identity with a stable slug, the API
-should also expose the slug or a structured reference that makes both forms
-available. Source/context-only IDs must not be relabeled as canonical slugs.
+The policy is deliberately additive and semantic rather than mechanical. Source/context-
+only IDs do not gain invented application slugs, and plural `army_ids` are already paired
+with the structured `armies` list whose entries now carry both numeric `id` and
+`public_slug`, avoiding a redundant positional `army_slugs` array.
 
 ### 4. Numeric-only slug candidates are marked resolved too early
 
@@ -160,7 +163,7 @@ Before starting the 0.6.2 release checklist:
    repository/detail lookups dual-ID where the domain supports stable slugs;
 2. **Closed:** canonicalize legacy grouped source-ID filters into preferred slug browser
    state;
-3. define and apply the cross-domain API slug-companion policy;
+3. **Closed:** define and apply the cross-domain API slug-companion policy;
 4. move numeric-shadow handling into the slug registry/resolver boundary;
 5. migrate the remaining maintained Weapon/display references after adding
    deterministic owning-layer resolvers;

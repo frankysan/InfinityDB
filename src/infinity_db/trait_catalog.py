@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.database.repository import Database
+from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
 
@@ -169,7 +170,13 @@ class TraitCatalog:
                 key = (variant["catalog"], variant["item_id"])
                 existing = variants_by_item.get(key)
                 if existing is None:
-                    variants_by_item[key] = deepcopy(variant)
+                    candidate = deepcopy(variant)
+                    slug = public_slug_for_reference(
+                        self.database, variant["catalog"], variant["item_id"]
+                    )
+                    if slug is not None:
+                        candidate["item_slug"] = slug
+                    variants_by_item[key] = candidate
                     continue
                 units = {unit["id"]: unit for unit in existing["units"]}
                 units.update({unit["id"]: unit for unit in variant["units"]})

@@ -2626,6 +2626,7 @@ def test_skill_catalog_adds_curated_distance_parameter_semantics(
     }
 
     extra = next(item for item in catalog.list_skill_extras() if item["skill_id"] == 74)
+    assert extra["skill_slug"] == "super-jump"
     assert extra["is_distance"] is True
     assert extra["parameter_semantics"] == {
         "kind": "distance",

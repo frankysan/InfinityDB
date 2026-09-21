@@ -178,7 +178,7 @@ def test_runtime_surface_audit_is_deterministic_and_read_only(tmp_path: Path) ->
 def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
     assert discover_runtime_database_methods(ROOT) == {
         "application_catalog_id",
-        "application_unit_id",
+        "application_domain_id",
         "application_slug",
         "get_catalog_item",
         "get_skill",

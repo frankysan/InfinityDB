@@ -15,6 +15,7 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from infinity_db import __display_version__, __version__
+from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import (
     attach_public_catalog_slug,
@@ -524,6 +525,7 @@ class Application:
             try:
                 payload = {"items": self.skill_catalog.list_skill_extras()}
                 payload = enrich_nested_unit_slugs(self.database, payload)
+                payload = enrich_army_references(self.database, payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -564,6 +566,7 @@ class Application:
                     payload = {"error": "Skill not found"}
                 else:
                     payload = enrich_nested_unit_slugs(self.database, payload)
+                    payload = enrich_army_references(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -585,6 +588,7 @@ class Application:
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
+                    payload = enrich_army_references(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -606,6 +610,7 @@ class Application:
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
+                    payload = enrich_army_references(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -622,6 +627,7 @@ class Application:
                     payload = {"error": "Trait not found"}
                 else:
                     payload = enrich_nested_unit_slugs(self.database, payload)
+                    payload = enrich_army_references(self.database, payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -631,9 +637,7 @@ class Application:
             try:
                 items = [dict(item) for item in self.database.list_armies()]
                 for item in items:
-                    slug = self.database.application_slug("armies", item["id"])
-                    if slug is not None and not slug.isdigit():
-                        item["public_slug"] = slug
+                    attach_public_army_slug(self.database, item)
                 payload = {"items": items}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read armies")
@@ -672,6 +676,7 @@ class Application:
                         **payload,
                         "items": enrich_unit_items(self.database, payload["items"]),
                     }
+                    payload = enrich_army_references(self.database, payload)
                 except ArmySelectionError as exc:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": str(exc)}
@@ -693,6 +698,7 @@ class Application:
                         frozenset({"equipment", "weapons"}),
                     )
                     attach_public_unit_slug(self.database, payload)
+                    payload = enrich_army_references(self.database, payload)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.database.repository import Database
+from infinity_db.domain_references import public_slug_for_reference
 
 
 def attach_public_unit_slug(database: Database, item: dict[str, Any]) -> None:
@@ -14,11 +15,8 @@ def attach_public_unit_slug(database: Database, item: dict[str, Any]) -> None:
     unit_id = item.get("id")
     if type(unit_id) is not int:
         return
-    application_id = database.application_unit_id(unit_id)
-    if application_id is None:
-        return
-    slug = database.application_slug("units", application_id)
-    if slug is not None and not slug.isdigit():
+    slug = public_slug_for_reference(database, "units", unit_id)
+    if slug is not None:
         item["public_slug"] = slug
 
 

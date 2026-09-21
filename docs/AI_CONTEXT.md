@@ -853,6 +853,12 @@ compatibility references remain unambiguous JSON integers.
   application numeric ID or the application Army public slug, normalize through one
   repository resolver, reject grouping-only identities after resolution, and prefer the
   public slug in browser query state while preserving numeric compatibility.
+- 2026-09-21: Cross-domain API references now follow an additive slug-companion policy.
+  Existing numeric fields remain stable; canonical application references gain readable
+  companions when routable. Unit Army scalar references use `main_army_slug` /
+  `display_army_slug`, structured Army references use `public_slug`, Trait usage variants
+  use `item_slug`, and Skill Modifier rows use `skill_slug`. Source/context-only IDs remain
+  numeric-only rather than being relabeled.
 - 2026-09-21: Trait public identity is aligned with the shared slug policy without
   duplicating curated rules identity into the Army database. Curated Traits already own
   stable typed IDs in `rules.db`; a simple `trait:<slug>` ID projects directly to the

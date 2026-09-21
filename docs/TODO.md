@@ -745,9 +745,11 @@ new correctness or reproducibility defect.
       application identity and preferred slug, including non-representative Skill/Equipment/
       Weapon source IDs such as TinBot variants. Catalog list payloads expose the materialized
       `source_ids` accepted for each application item so browser state can upgrade them.
-    - [ ] Define and apply an additive slug-companion policy for cross-domain API references
+    - [x] Define and apply an additive slug-companion policy for cross-domain API references
       that represent canonical application identities, while retaining numeric fields and
-      leaving source/context-only IDs explicitly numeric.
+      leaving source/context-only IDs explicitly numeric. Scalar references receive sibling
+      `*_slug` fields; structured Army references use `public_slug` where `slug` is already
+      source/context data.
     - [ ] Move numeric-shadow handling into the slug registry/resolver boundary so a
       `resolved` slug is always actually routable; consumers should not need repeated
       `slug.isdigit()` suppression.

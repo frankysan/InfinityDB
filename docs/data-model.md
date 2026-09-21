@@ -1806,11 +1806,17 @@ canonical application identity. Repository/API lookup boundaries, public routes,
 filters, cross-domain links, and other application-facing calls should accept either
 form. Producers should emit/prefer the slug for human-facing URLs, browser state, API
 references, and maintainable authored data, while retaining numeric IDs for backward
-compatibility, internal joins, provenance bridges, and deterministic fallback. For the
-application Skill/Equipment/Weapon catalogs, list representations expose the materialized
-`source_ids` that resolve to each application item. This alias set is part of the filter
-compatibility contract: legacy source-ID state can be recognized and rewritten to the
-preferred slug without treating unused metadata-only candidates as accepted references.
+compatibility, internal joins, provenance bridges, and deterministic fallback. API
+references are additive rather than substitutive: an existing canonical numeric reference
+keeps its numeric field and gains a slug companion when a routable application slug exists.
+Scalar references use a sibling `*_slug` field; structured Army/Unit references use
+`public_slug` where `slug` already means source/context data. Parallel numeric-ID arrays may
+use an existing structured reference list as their slug companion rather than duplicate a
+second positional array. Source/provenance-only IDs stay numeric-only. For the application
+Skill/Equipment/Weapon catalogs, list representations expose the materialized `source_ids`
+that resolve to each application item. This alias set is part of the filter compatibility
+contract: legacy source-ID state can be recognized and rewritten to the preferred slug
+without treating unused metadata-only candidates as accepted references.
 
 This contract applies to future domains as they are introduced. A new domain should not
 ship a consumer-specific numeric-only or slug-only lookup path when a stable dual

@@ -7,6 +7,7 @@ from typing import Any
 
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
+from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 
 UNCLASSIFIED_CATEGORY = {"name": "Unclassified", "source": None, "page": None}
@@ -168,7 +169,11 @@ class SkillCatalog:
         """Return source-typed distance extras with optional curated display semantics."""
         items = deepcopy(self.database.list_skill_extras())
         for item in items:
-            semantics = self._parameter_semantics_for_ids({int(item["skill_id"])})
+            skill_id = int(item["skill_id"])
+            slug = public_slug_for_reference(self.database, "skills", skill_id)
+            if slug is not None:
+                item["skill_slug"] = slug
+            semantics = self._parameter_semantics_for_ids({skill_id})
             if semantics is not None:
                 item["parameter_semantics"] = semantics
         return items

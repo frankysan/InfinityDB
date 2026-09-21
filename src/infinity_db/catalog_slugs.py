@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.database.repository import Database
+from infinity_db.domain_references import public_slug_for_reference
 
 
 def attach_public_catalog_slug(
@@ -18,11 +19,8 @@ def attach_public_catalog_slug(
     item_id = item.get("id")
     if type(item_id) is not int:
         return
-    application_id = database.application_catalog_id(catalog, item_id)
-    if application_id is None:
-        return
-    slug = database.application_slug(catalog, application_id)
-    if slug is not None and not slug.isdigit():
+    slug = public_slug_for_reference(database, catalog, item_id)
+    if slug is not None:
         item["slug"] = slug
 
 

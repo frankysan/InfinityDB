@@ -595,6 +595,12 @@ shadow the compatibility numeric namespace. Nested Unit payload references to Eq
 and Weapons expose the canonical application slug after resolving any source-variant ID
 through application catalog provenance; Unit references embedded in catalog, Trait, and
 Skill Modifier payloads expose `public_slug` after source/logical Unit identity resolution.
+Cross-domain API references follow the same additive rule: existing numeric fields stay
+unchanged, while canonical application references gain a readable companion when one is
+routable. Scalar Army fields use `main_army_slug` / `display_army_slug`; structured Army
+objects retain source/context `slug` and add `public_slug`; Trait usage variants add
+`item_slug`; and Skill Modifier rows add `skill_slug`. Source/provenance-only IDs are not
+relabeled as canonical slugs.
 This migration does not redirect numeric routes or declare derived slugs permanently
 frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
 behavior remain required before numeric routes are retired or redirected.

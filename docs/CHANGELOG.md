@@ -30,6 +30,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
   represented-but-unknown slug references rejected instead of guessed. Curated N5
   `armyLinks` for Skills, Equipment, and Weapons likewise use readable application
   slugs while numeric source references remain accepted for compatibility.
+- Add readable slug companions to canonical cross-domain API references without removing
+  existing numeric fields: Unit Army context exposes application Army slugs, Trait usage
+  variants expose catalog `item_slug`, and Skill Modifier rows expose `skill_slug`.
+  Source/provenance-only IDs remain numeric-only.
 - Validate curated typed record IDs against the shared domain-slug grammar, and make
   Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
 - Make the Unit explorer's matching-unit statistic show the currently visible unique

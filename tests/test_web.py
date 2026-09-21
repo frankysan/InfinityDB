@@ -299,6 +299,22 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     assert armies[901]["role"] == "grouping"
     assert armies[901]["playable"] is False
 
+    status, _, body = request(role_app, "/api/units")
+    assert status == 200
+    unit_payload = json.loads(body)["items"][0]
+    assert unit_payload["main_army_id"] == 101
+    assert unit_payload["main_army_slug"] == "main"
+    assert unit_payload["display_army_id"] == 101
+    assert unit_payload["display_army_slug"] == "main"
+    assert unit_payload["main_faction"]["public_slug"] == "main"
+    assert unit_payload["display_faction"]["public_slug"] == "main"
+    assert {army["id"]: army["public_slug"] for army in unit_payload["armies"]} == {
+        101: "main",
+        102: "sectorial",
+        901: "non-aligned",
+        902: "independent",
+    }
+
     for army_ref in ("901", "non-aligned"):
         status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
         assert status == 400
@@ -425,6 +441,10 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert unit["slug"] == "ranger-prototype"
     assert unit["public_slug"] == "ranger-prototype"
     assert {army["id"] for army in unit["armies"]} == {101, 201}
+    assert {army["id"]: army["public_slug"] for army in unit["armies"]} == {
+        101: "zulu-company",
+        201: "alpha-company",
+    }
     for army in unit["armies"]:
         assert army["profiles"][0]["type"] == "Line Trooper"
         assert army["profiles"][0]["classification"] == "Light Infantry"
@@ -1542,8 +1562,16 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                         "source_ids": [1],
                         "army_ids": [101, 201],
                         "armies": [
-                            {"id": 101, "name": "Zulu Company"},
-                            {"id": 201, "name": "Alpha Company"},
+                            {
+                                "id": 101,
+                                "name": "Zulu Company",
+                                "public_slug": "zulu-company",
+                            },
+                            {
+                                "id": 201,
+                                "name": "Alpha Company",
+                                "public_slug": "alpha-company",
+                            },
                         ],
                     }
                 ],
@@ -1621,6 +1649,8 @@ def test_trait_apis_compose_army_usage_with_curated_rules(
     payload = json.loads(body)
     assert payload["slug"] == "continuous-damage"
     assert payload["description"].startswith("After a failed Saving Roll")
+    assert payload["variants"][0]["item_id"] == 31
+    assert payload["variants"][0]["item_slug"] == "combi-rifle"
     assert payload["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4110"
 
 
