@@ -1058,7 +1058,12 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
     assert b"equipmentId: domainFilterIdentifier(equipmentId)" in body
     assert b"weaponId: domainFilterIdentifier(weaponId)" in body
     assert b"normalizeArmyFilterState(playableArmies)" in body
-    assert b'normalizeCatalogFilterState(equipment.items, "equipmentId")' in body
+    for call in (
+        b'normalizeCatalogFilterState(skills.items, "skillId")',
+        b'normalizeCatalogFilterState(equipment.items, "equipmentId")',
+        b'normalizeCatalogFilterState(weapons.items, "weaponId")',
+    ):
+        assert call in body
     assert b"candidate.source_ids?.some((sourceId) => String(sourceId) === current)" in body
 
 

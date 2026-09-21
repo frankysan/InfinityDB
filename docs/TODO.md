@@ -736,7 +736,7 @@ new correctness or reproducibility defect.
     separate application `public_slug`, accept either numeric Army IDs or public slugs in
     Unit-explorer/API Army filters, preserve source/application numeric compatibility, and
     prefer the public slug in generated browser state.
-  - [ ] **Close the dual-identifier consistency gaps found by the 2026-09-21 sanity audit.**
+  - [x] **Close the dual-identifier consistency gaps found by the 2026-09-21 sanity audit.**
     This work is a 0.6.2 release blocker; see
     `docs/dual-identifier-sanity.md` for evidence and scope.
     - [x] Centralize application-domain reference resolution so repository/detail lookups
@@ -760,9 +760,10 @@ new correctness or reproducibility defect.
       canonical source identity `1` numeric because it is provenance identity with no
       authoritative source-faction slug, and retain numeric authoring generally for
       ambiguity/provenance.
-    - [ ] Add project-wide invariant coverage proving numeric/slug equivalence, source-ID
+    - [x] Add project-wide invariant coverage proving numeric/slug equivalence, source-ID
       canonicalization, slug preference/fallback, and fail-closed unknown/ambiguous behavior
-      for every current domain where a stable slug exists; rerun the sanity audit afterward.
+      for every current domain where a stable slug exists; the sanity audit has been rerun
+      and is closed.
   - [ ] **0.6.2 release checkpoint.** After the dual-identifier sanity audit is fully closed,
     run the general release checklist in `docs/releasing.md` and release this
     public-identity/slug work as version 0.6.2. The project-wide documentation audit is a

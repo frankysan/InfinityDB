@@ -2,7 +2,7 @@
 
 ## Status
 
-**Open. The unresolved items in this audit block the planned 0.6.2 release.**
+**Closed on 2026-09-21. All six remediation items are complete and the planned 0.6.2 release may proceed to the normal release checklist.**
 
 This audit checks the project-wide application of InfinityDB's domain identifier
 contract after the initial public-slug migration. For a domain with a stable
@@ -52,7 +52,7 @@ the intended contract:
 - Trait public identity remains correctly owned by the rules/trait identity
   layer rather than being duplicated into `application_domain_slugs`.
 
-## Gaps to close before 0.6.2
+## Remediation results before 0.6.2
 
 ### 1. Repository lookup methods are consistently dual-ID — closed
 
@@ -125,21 +125,24 @@ slug. This is therefore an accepted numeric-only use, not an unfinished migratio
 The audit originally counted 18 candidates. Seventeen were safely migrated; the
 remaining provenance reference was reviewed and retained numerically by design.
 
-### 6. The contract lacks one project-wide invariant regression
+### 6. Project-wide dual-identifier invariant coverage — closed
 
-Existing tests cover individual routes and resolver behaviors, but there is no
-single contract suite that exercises the general rule across every registered
-application domain. Future domains could therefore implement only part of the
-contract without an obvious failure.
+Closed on 2026-09-21. The database contract tests now exercise every registered
+application-slug domain (Armies, Units, Skills, Equipment, and Weapons) through
+one shared matrix. They prove numeric/application and slug equivalence, accepted
+source-ID canonicalization, preferred public-slug resolution, numeric-shadow
+fallback, collision handling, and fail-closed unknown slugs. The matrix is tied
+to `APPLICATION_SLUG_DOMAINS`, so adding a new registered domain without adding
+contract evidence fails the test.
 
-Add parameterized/invariant coverage that proves, where applicable:
+Traits have separate invariant coverage because their `trait:<slug>` identity
+owns the public slug directly and there is no parallel numeric application ID.
+The browser contract test also requires all three catalog filters to use the
+legacy numeric source-ID canonicalization path, while catalog API coverage
+requires the accepted materialized `source_ids` needed by that path.
 
-- numeric application IDs and public slugs resolve to the same identity;
-- accepted source numeric IDs resolve to that same application identity;
-- generated public references prefer the slug when one is usable;
-- unavailable/colliding/numeric-shadow slugs fall back to numeric identity;
-- legacy numeric filter state canonicalizes to the preferred slug;
-- unknown or ambiguous slugs fail closed.
+The sanity audit was rerun after adding these regressions. No unresolved
+dual-identifier consistency gap remains in the current domain set.
 
 ## Accepted numeric-only uses
 

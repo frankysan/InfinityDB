@@ -47,6 +47,8 @@ from infinity_db.database.schema import (
     create_schema,
     quote,
 )
+from infinity_db.domain_references import public_slug_for_reference
+from infinity_db.domain_slugs import APPLICATION_SLUG_DOMAINS
 from infinity_db.identities import (
     REINFORCEMENT_UNIT_MATCHES_KEY,
     load_identity_config,
@@ -2984,6 +2986,188 @@ def test_weapon_slug_enrichment_does_not_emit_numeric_only_slug(
     assert weapon["id"] == 1
     assert "slug" not in weapon
     assert database.application_slug("weapons", 1) is None
+
+
+def test_dual_identifier_contract_canonicalizes_source_ids_and_prefers_public_slugs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    document = load_identity_config().document
+    document["units"]["groups"].append(
+        {
+            "canonical_id": 1,
+            "source_ids": [1, 2],
+            "reason": "Dual-identifier contract fixture",
+        }
+    )
+    document["armies"]["groups"].append(
+        {
+            "canonical_id": 201,
+            "source_ids": [201, 301],
+            "reason": "Dual-identifier contract fixture",
+        }
+    )
+
+    catalog_cases: dict[str, tuple[int, int]] = {}
+    for catalog in ("skills", "equipment", "weapons"):
+        rows = [
+            {
+                "id": 41,
+                "name": f"Contract {catalog.title()} L1",
+                "source_defined": True,
+            },
+            {
+                "id": 42,
+                "name": f"Contract {catalog.title()} L2",
+                "source_defined": True,
+            },
+        ]
+        if catalog == "weapons":
+            for row in rows:
+                row["category"] = "Uncategorized"
+        data["tables"][catalog].extend(rows)
+        document["catalogs"][catalog]["groups"].append(
+            {
+                "canonical_id": f"contract-{catalog}-l1",
+                "source_ids": [
+                    f"contract-{catalog}-l1",
+                    f"contract-{catalog}-l2",
+                ],
+                "reason": "Dual-identifier contract fixture",
+            }
+        )
+        catalog_cases[catalog] = (42, 41)
+
+    path = tmp_path / "dual-identifiers.sqlite3"
+    export_database(data, path, identity_config=parse_identity_config(document))
+    database = Database(path)
+
+    cases = {
+        "armies": (301, 201),
+        "units": (2, 1),
+        **catalog_cases,
+    }
+    assert set(cases) == set(APPLICATION_SLUG_DOMAINS)
+
+    for domain in APPLICATION_SLUG_DOMAINS:
+        source_id, application_id = cases[domain]
+        slug = database.application_slug(domain, application_id)
+        assert slug is not None
+        assert not slug.isdigit()
+        assert database.application_domain_id(domain, application_id) == application_id
+        assert database.application_domain_id(domain, source_id) == application_id
+        assert database.application_domain_id(domain, slug) == application_id
+        assert database.application_id_for_slug(domain, slug) == application_id
+        assert public_slug_for_reference(database, domain, source_id) == slug
+        assert public_slug_for_reference(database, domain, slug) == slug
+        assert database.application_domain_id(domain, "unknown-contract-slug") is None
+
+    for catalog, (source_id, application_id) in catalog_cases.items():
+        item = next(
+            item
+            for item in database.list_catalog_items(catalog)
+            if item["id"] == application_id
+        )
+        assert source_id in item["source_ids"]
+
+
+def test_dual_identifier_contract_unavailable_and_colliding_slugs_fail_closed(
+    tmp_path: Path, normalized: dict
+) -> None:
+    numeric = copy.deepcopy(normalized)
+    next(row for row in numeric["tables"]["army_lists"] if row["id"] == 101)["slug"] = "100"
+    next(row for row in numeric["tables"]["units"] if row["id"] == 1)["slug"] = "100"
+    for catalog in ("skills", "equipment", "weapons"):
+        numeric["tables"][catalog][0]["name"] = "100"
+
+    numeric_path = tmp_path / "numeric-shadow.sqlite3"
+    export_database(numeric, numeric_path)
+    numeric_database = Database(numeric_path)
+    numeric_ids = {
+        "armies": 101,
+        "units": 1,
+        "skills": 1,
+        "equipment": 1,
+        "weapons": 1,
+    }
+    assert set(numeric_ids) == set(APPLICATION_SLUG_DOMAINS)
+    for domain, application_id in numeric_ids.items():
+        assert numeric_database.application_domain_id(domain, application_id) == application_id
+        assert numeric_database.application_slug(domain, application_id) is None
+        assert public_slug_for_reference(numeric_database, domain, application_id) is None
+
+    collision = copy.deepcopy(normalized)
+    for army_id in (101, 201):
+        next(
+            row for row in collision["tables"]["army_lists"] if row["id"] == army_id
+        )["slug"] = "contract-collision"
+    for unit_id in (1, 2):
+        next(row for row in collision["tables"]["units"] if row["id"] == unit_id)[
+            "slug"
+        ] = "contract-collision"
+    for catalog in ("skills", "equipment", "weapons"):
+        collision["tables"][catalog][0]["name"] = "Contract Collision"
+        second = {
+            "id": 2,
+            "name": "Contract Collision",
+            "source_defined": True,
+        }
+        if catalog == "weapons":
+            second["category"] = "Uncategorized"
+        collision["tables"][catalog].append(second)
+
+    collision_path = tmp_path / "slug-collision.sqlite3"
+    export_database(collision, collision_path)
+    collision_database = Database(collision_path)
+    collision_ids = {
+        "armies": (101, 201),
+        "units": (1, 2),
+        "skills": (1, 2),
+        "equipment": (1, 2),
+        "weapons": (1, 2),
+    }
+    assert set(collision_ids) == set(APPLICATION_SLUG_DOMAINS)
+    for domain, application_ids in collision_ids.items():
+        assert collision_database.application_domain_id(
+            domain, "contract-collision"
+        ) is None
+        for application_id in application_ids:
+            assert collision_database.application_slug(domain, application_id) is None
+            assert (
+                public_slug_for_reference(collision_database, domain, application_id)
+                is None
+            )
+
+
+def test_dual_identifier_contract_traits_keep_slug_owned_identity(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Combi Rifle",
+            "properties": ["Continous Damage"],
+        }
+    ]
+    database_path = tmp_path / "trait-contract.sqlite3"
+    export_database(data, database_path)
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "trait-contract-rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    assert "traits" not in APPLICATION_SLUG_DOMAINS
+    trait = catalog.get_trait("continuous-damage")
+    assert trait is not None
+    assert trait["id"] == "continuous-damage"
+    assert trait["slug"] == "continuous-damage"
+    assert catalog.reference("Continous Damage")["slug"] == "continuous-damage"
+    assert catalog.get_trait("unknown-contract-trait") is None
+    assert catalog.reference("Not Present In Army Data")["slug"] is None
 
 
 def test_application_domain_slug_lookup_rejects_unknown_domains(
