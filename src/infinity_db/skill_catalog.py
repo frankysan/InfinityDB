@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 
@@ -74,16 +75,8 @@ class SkillCatalog:
         return dict(next(iter(values)))
 
     def _attach_public_slug(self, item: dict[str, Any]) -> None:
-        """Attach the additive public Skill slug when it cannot shadow a numeric route."""
-        skill_id = item.get("id")
-        if type(skill_id) is not int:
-            return
-        application_id = self.database.application_catalog_id("skills", skill_id)
-        if application_id is None:
-            return
-        slug = self.database.application_slug("skills", application_id)
-        if slug is not None and not slug.isdigit():
-            item["slug"] = slug
+        """Attach the additive public Skill slug when available."""
+        attach_public_catalog_slug(self.database, "skills", item)
 
     def _enrich_skill_item(self, item: dict[str, Any]) -> None:
         skill_id = item.get("id")

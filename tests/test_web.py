@@ -427,6 +427,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 21,
                 "name": "Medikit",
+                "slug": "medikit",
                 "quantity": 2,
                 "extras": [{"id": 42, "name": "Mimetism"}],
             }
@@ -453,6 +454,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 21,
                 "name": "Medikit",
+                "slug": "medikit",
                 "quantity": None,
                 "extras": [{"id": 42, "name": "Mimetism"}],
             }
@@ -1261,7 +1263,7 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
     assert b"function profileItems(items, catalog, fallbackLabel)" in body
-    assert b'const routeId = catalog === "skills" && item.slug ? item.slug : item.id;' in body
+    assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${catalog}/${encodeURIComponent(routeId)}`" in body
 
 
@@ -1379,7 +1381,7 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b"getCatalogItems(page)" in body
     assert b"fetch(" not in body
     assert b'["skills", "equipment", "weapons", "traits"].includes(page)' in body
-    assert b'const routeId = page === "skills" && item.slug ? item.slug : item.id;' in body
+    assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
 
 
@@ -1410,6 +1412,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "name": "Medikit",
             "wiki": "https://infinitythewiki.com/Medikit",
             "use_count": 1,
+            "slug": "medikit",
         },
         "weapons": {
             "id": 31,
@@ -1599,16 +1602,17 @@ def test_visible_unit_ids_api_matches_default_unit_listing(app: Callable) -> Non
 
 
 @pytest.mark.parametrize(
-    ("catalog", "item_id", "name"),
+    ("catalog", "item_id", "slug", "name"),
     [
-        ("equipment", 21, "Medikit"),
-        ("weapons", 31, "Combi Rifle"),
+        ("equipment", 21, "medikit", "Medikit"),
+        ("weapons", 31, None, "Combi Rifle"),
     ],
 )
 def test_equipment_and_weapon_details_are_served(
     app: Callable,
     catalog: str,
     item_id: int,
+    slug: str | None,
     name: str,
 ) -> None:
     status, headers, body = request(app, f"/{catalog}/{item_id}")
@@ -1623,7 +1627,19 @@ def test_equipment_and_weapon_details_are_served(
     assert payload["name"] == name
     if catalog == "equipment":
         assert payload["wiki"] == "https://infinitythewiki.com/Medikit"
+        assert payload["slug"] == slug
     assert payload["variants"][0]["units"][0]["id"] == 1
+
+    if slug is not None:
+        status, headers, body = request(app, f"/{catalog}/{slug}")
+        assert status == 200
+        assert headers["content-type"].startswith("text/html")
+        assert b"catalog-detail.js" in body
+
+        status, headers, slug_body = request(app, f"/api/{catalog}/{slug}")
+        assert status == 200
+        assert headers["content-type"].startswith("application/json")
+        assert json.loads(slug_body) == payload
 
 
 def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> None:

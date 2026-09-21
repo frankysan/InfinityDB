@@ -10,6 +10,10 @@ import pytest
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
 from infinity_army_data.weapon_profiles import weapon_profile_override
+from infinity_db.catalog_slugs import (
+    attach_public_catalog_slug,
+    enrich_nested_catalog_slugs,
+)
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database, raw_database_path
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
@@ -2666,6 +2670,59 @@ def test_skill_catalog_does_not_emit_numeric_only_slug_that_would_shadow_compati
     assert skill["id"] == 1
     assert "slug" not in skill
     assert Database(database_path).application_slug("skills", 1) == "100"
+
+
+def test_equipment_slug_enrichment_resolves_source_variant_ids(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"].extend(
+        [
+            {"id": 235, "name": "Proxy L1", "source_defined": True},
+            {"id": 244, "name": "Proxy L2", "source_defined": True},
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_equipment"]:
+        occurrence["item_id"] = 244
+    for occurrence in normalized["tables"]["option_equipment"]:
+        occurrence["item_id"] = 244
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("equipment", 244) == 235
+    assert database.application_slug("equipment", 235) == "proxy"
+
+    raw_unit = database.get_unit(1)
+    assert raw_unit is not None
+    raw_equipment = raw_unit["armies"][0]["profiles"][0]["equipment"][0]
+    assert raw_equipment["id"] == 244
+    assert "slug" not in raw_equipment
+
+    enriched = enrich_nested_catalog_slugs(
+        database,
+        raw_unit,
+        frozenset({"equipment"}),
+    )
+    equipment = enriched["armies"][0]["profiles"][0]["equipment"][0]
+    assert equipment["id"] == 244
+    assert equipment["slug"] == "proxy"
+
+
+def test_equipment_slug_enrichment_does_not_emit_numeric_only_slug(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"][0]["name"] = "100"
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    equipment = database.list_catalog_items("equipment")[0]
+    attach_public_catalog_slug(database, "equipment", equipment)
+
+    assert equipment["id"] == 1
+    assert "slug" not in equipment
+    assert database.application_slug("equipment", 1) == "100"
 
 
 def test_application_domain_slug_lookup_rejects_unknown_domains(

@@ -541,15 +541,16 @@ may seed application candidates but are not automatically promoted to permanent
 public identifiers. Repository helpers resolve only `resolved` registry entries
 bidirectionally between a domain-local slug and its current numeric application key.
 
-Skills are the first additive route consumer. Skill list/detail API payloads expose a
-resolved application `slug`, Skill links prefer that slug, and both `/skills/{slug}`
-and `/api/skills/{slug}` resolve through the registry. Existing numeric Skill routes
-remain supported unchanged. Numeric-only slug candidates are not emitted as route
-identifiers because they would shadow the compatibility numeric namespace. This
-first slice does not redirect numeric routes or declare the derived slug permanently
-frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
-behavior remain required before numeric routes are retired or redirected. Other
-registry domains remain numeric-only at the public route layer for now.
+Skills and Equipment are additive route consumers. Their list/detail API payloads
+expose a resolved application `slug`, browser links prefer that slug, and both
+`/{domain}/{slug}` and `/api/{domain}/{slug}` resolve through the registry. Existing
+numeric Skill and Equipment routes remain supported unchanged. Numeric-only slug
+candidates are not emitted as route identifiers because they would shadow the
+compatibility numeric namespace. This migration does not redirect numeric routes or
+declare the derived slug permanently frozen; per-domain freezing, reviewed overrides,
+aliases, and redirect/canonical-URL behavior remain required before numeric routes are
+retired or redirected. Armies, Units, and Weapons remain numeric-only at the public
+route layer for now.
 
 The current reviewed 2026-09-18 snapshot resolves all initial registry candidates:
 57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons
@@ -1049,10 +1050,10 @@ page consumes this endpoint.
 equivalent source labels where appropriate and include an ID, display name, and
 reference link when the metadata snapshot provides one.
 
-`GET /api/skills/{id-or-slug}`, `GET /api/equipment/{id}`, and
+`GET /api/skills/{id-or-slug}`, `GET /api/equipment/{id-or-slug}`, and
 `GET /api/weapons/{id}` return one catalog item and its distinct usage variants.
-Skill slugs are resolved through the application-domain slug registry; existing
-numeric Skill IDs remain accepted for compatibility.
+Skill and Equipment slugs are resolved through the application-domain slug registry;
+existing numeric IDs remain accepted for compatibility.
 Each variant includes the relevant extras and logical units that use it. Weapon
 details additionally include metadata weapon profiles, such as ammunition,
 traits, and range data, when present in the supplied metadata snapshot.

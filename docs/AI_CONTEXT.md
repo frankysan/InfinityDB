@@ -778,6 +778,14 @@ application-level identities.
   links and accepted by web/API detail routes while numeric routes remain valid.
   Numeric-only candidates stay on the numeric compatibility form, and no redirect or
   permanent slug-freeze promise is made until the later freezing/alias migration.
+- 2026-09-21: Equipment is the second additive public-route consumer of the
+  application-domain slug registry. Equipment catalog/detail API payloads and nested
+  Unit equipment references expose resolved non-numeric application slugs, browser
+  links prefer them, and `/equipment/{slug}` plus `/api/equipment/{slug}` resolve to
+  the canonical application Equipment identity. Numeric Equipment routes remain valid,
+  source-variant IDs are resolved through the application catalog provenance mapping
+  before slug lookup, and numeric-only slug candidates remain on the compatibility
+  numeric form. Weapons, Armies, and Units remain numeric-only publicly for now.
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
   rules authority, the pinned Wiki archive as discovery/secondary provenance,

@@ -16,6 +16,10 @@ from urllib.parse import parse_qs
 
 from infinity_db import __display_version__, __version__
 from infinity_db.catalog_rules import CatalogRules
+from infinity_db.catalog_slugs import (
+    attach_public_catalog_slug,
+    enrich_nested_catalog_slugs,
+)
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
@@ -54,6 +58,12 @@ CHARACTERISTIC_SYMBOL_PATH = re.compile(
 DOMAIN_ROUTE_IDENTIFIER = r"[a-z0-9]+(?:-[a-z0-9]+)*"
 SKILL_PAGE_PATH = re.compile(rf"/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 SKILL_API_PATH = re.compile(rf"/api/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+EQUIPMENT_PAGE_PATH = re.compile(
+    rf"/equipment/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
+EQUIPMENT_API_PATH = re.compile(
+    rf"/api/equipment/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
@@ -428,16 +438,30 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Skills", "/skills"), ("Details", None)),
                 catalog_tag="Reference data",
             )
-        elif match := re.fullmatch(r"/(equipment|weapons)/[0-9]+", path):
+        elif EQUIPMENT_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
             body = _page(
-                f"{match.group(1)}-detail.html",
-                active_page=match.group(1),
+                "equipment-detail.html",
+                active_page="equipment",
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
                     ("Database", "/"),
-                    (match.group(1).capitalize(), f"/{match.group(1)}"),
+                    ("Equipment", "/equipment"),
+                    ("Details", None),
+                ),
+                catalog_tag="Reference data",
+            )
+        elif re.fullmatch(r"/weapons/[0-9]+", path):
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "weapons-detail.html",
+                active_page="weapons",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(
+                    ("Database", "/"),
+                    ("Weapons", "/weapons"),
                     ("Details", None),
                 ),
                 catalog_tag="Reference data",
@@ -486,6 +510,9 @@ class Application:
                     if catalog == "skills"
                     else self.database.list_catalog_items(catalog)
                 )
+                if catalog == "equipment":
+                    for item in items:
+                        attach_public_catalog_slug(self.database, catalog, item)
                 payload = {"items": items}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read catalog")
@@ -519,16 +546,44 @@ class Application:
                 LOGGER.exception("Could not read skill")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The skill is unavailable. Please try again."}
-        elif match := re.fullmatch(r"/api/(equipment|weapons)/([0-9]+)", path):
+        elif match := EQUIPMENT_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = self.database.get_catalog_item(match.group(1), int(match.group(2)))
+                identifier = match.group("identifier")
+                item_id = (
+                    int(identifier)
+                    if identifier.isdigit()
+                    else self.database.application_id_for_slug("equipment", identifier)
+                )
+                payload = (
+                    None
+                    if item_id is None
+                    else self.database.get_catalog_item("equipment", item_id)
+                )
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Reference item not found"}
+                else:
+                    attach_public_catalog_slug(self.database, "equipment", payload)
+                    payload = self.trait_catalog.enrich_catalog_item(payload)
+                    payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
+            except ValueError as exc:
+                status = HTTPStatus.BAD_REQUEST
+                payload = {"error": str(exc)}
+            except (OSError, sqlite3.Error):
+                LOGGER.exception("Could not read reference item")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The reference item is unavailable. Please try again."}
+        elif match := re.fullmatch(r"/api/weapons/([0-9]+)", path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = self.database.get_catalog_item("weapons", int(match.group(1)))
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
                 else:
                     payload = self.trait_catalog.enrich_catalog_item(payload)
-                    payload = self.catalog_rules.enrich_catalog_item(match.group(1), payload)
+                    payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -600,6 +655,11 @@ class Application:
                 payload = self.database.get_unit(unit_id)
                 if payload is not None:
                     payload = self.skill_catalog.enrich_unit(payload)
+                    payload = enrich_nested_catalog_slugs(
+                        self.database,
+                        payload,
+                        frozenset({"equipment"}),
+                    )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

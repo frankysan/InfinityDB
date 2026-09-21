@@ -713,6 +713,9 @@ new correctness or reproducibility defect.
   - [x] Begin with Skills as an additive migration slice: expose resolved non-numeric
     Skill slugs in API payloads/browser links and accept both slug and numeric Skill
     detail routes without redirecting or retiring the compatibility form.
+  - [x] Extend the same additive migration contract to Equipment, including catalog
+    links and nested Unit payload references, while keeping numeric Equipment routes
+    valid and suppressing numeric-only slug candidates.
   - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
     reviewed overrides, aliases/redirects, and compatibility behavior; extend the
     registry only when a new canonical domain boundary (for example Peripheral

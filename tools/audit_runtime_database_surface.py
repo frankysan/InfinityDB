@@ -279,6 +279,7 @@ PROBED_DIRECT_METHODS = {
 }
 RUNTIME_MODULES = (
     "src/infinity_db/web/app.py",
+    "src/infinity_db/catalog_slugs.py",
     "src/infinity_db/skill_catalog.py",
     "src/infinity_db/trait_catalog.py",
 )
@@ -292,6 +293,8 @@ def _database_calls(path: Path) -> set[str]:
             continue
         owner = node.func.value
         if isinstance(owner, ast.Attribute) and owner.attr == "database":
+            calls.add(node.func.attr)
+        elif isinstance(owner, ast.Name) and owner.id == "database":
             calls.add(node.func.attr)
     return calls
 
