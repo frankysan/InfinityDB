@@ -188,7 +188,7 @@ in `docs/releasing.md`.
     - [x] Terrain and Scenery Structures.
     - [x] Triumph and Defeat.
     - [x] Setting up the Gaming Table.
-    - [ ] Scenarios.
+    - [x] Scenarios.
     - [ ] Quick Reference Charts as a validation/completeness pass.
     - [ ] Reinforcements, retaining its distinct rules scope.
     - [ ] ITS FAQ, retaining season/scenario scope rather than treating it as core rules.
@@ -490,6 +490,12 @@ work against that contract.
     Ammunition composition separate from Combined Saving Roll notation. Link
     state/Attribute/Saving-Roll effects explicitly instead of deriving them from
     Ammunition display names.
+  - [ ] Include scenario-defined catalog concepts needed for the general rules
+    reference, including scenario-only Skills, Equipment when present, contextual
+    roles such as Specialist Troop, and the scenario elements those concepts act
+    on. Preserve scenario/season scope and keep temporary effects out of static
+    Unit/Profile facts. This catalog coverage is in scope for 1.0; a complete
+    scenario library and scenario list/detail pages are not.
   - [ ] Store original, concise editorial summaries and structured facts (labels,
     requirements, effects, restrictions, related rules, and page locators),
     rather than bulk-extracting or serving copyrighted PDF text or artwork.
@@ -515,7 +521,7 @@ work against that contract.
   - [ ] Define an explicit source-precedence and effective-date policy. An on-screen
     answer must show its source date/version and never silently blend conflicting
     documents.
-- [ ] Build a versioned ITS reference library from material under
+- [ ] Post-1.0: build a versioned ITS reference library from material under
   `data/pdf/its/` and `data/pdf/legacy/`, keeping the current season distinct
   from archived seasons.
   - [ ] Keep season content isolated by season and effective date. A user choosing
@@ -525,7 +531,7 @@ work against that contract.
   - [ ] Treat the official Army app/site as the authority for army-list legality.
     InfinityDB may provide read-only explanation and planning support, but must
     label its snapshot/date and avoid claiming tournament validation.
-- [ ] Add ITS scenario list and detail pages backed by a curated seasonal data
+- [ ] Post-1.0: add ITS scenario list and detail pages backed by a curated seasonal data
   model, rather than PDF excerpts.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,

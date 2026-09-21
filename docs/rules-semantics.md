@@ -2196,3 +2196,113 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Setting_up_the_Gaming_Table>
 - Wiki: <https://infinitythewiki.com/Basic_Rules#Game_Modes>
 - PDF: Infinity N5 V5.3, printed pages 6 and 147-148
+
+## Scenarios
+
+### RS-SCN-SCOPE-001 — Scenario-defined catalog concepts do not require a full scenario library
+
+**Classification:** InfinityDB scope boundary derived from source-native scenario
+structure.
+
+The core Scenarios section contains a small introductory set, while additional
+missions exist outside that section. Some scenario pages define named Skills,
+roles, or game elements that are useful to InfinityDB's general catalog/reference
+experience even when the mission itself is not represented as a complete
+scenario record.
+
+For version 1.0, InfinityDB should cover those scenario-defined catalog concepts
+when they are needed to understand Skills, Equipment, States, Traits, or related
+reference material. It does not need complete scenario list/detail pages,
+objectives/scoring, maps, or a comprehensive core/ITS mission library to satisfy
+that requirement.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Scenarios>
+- PDF: Infinity N5 V5.3, printed pages 149-156
+
+### RS-SCN-SKILL-001 — Scenario-only Skills are scoped Skills, not profile facts
+
+**Classification:** source-native Skill semantics with an InfinityDB scope
+consequence.
+
+Domination defines **Hack Consoles** as a Short Skill with the Attack Label.
+Supplies defines **Pick Up Supply Boxes** as a Short Skill with the Attack Label.
+Their availability is created by the applicable scenario and its requirements;
+they are not Skills granted by an Army Unit Profile.
+
+InfinityDB should be able to represent such Skills in the rules-reference
+catalog with scenario provenance/scope, declaration category, Labels, and related
+concepts. They must not be added to the Army-derived Skill set of every Trooper
+who can satisfy the scenario's requirements.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Domination>
+- Wiki: <https://infinitythewiki.com/Supplies>
+- PDF: Infinity N5 V5.3, printed pages 151-154
+
+### RS-SCN-SPEC-001 — Specialist Troop is a scenario-scoped derived role
+
+**Classification:** source-native contextual relationship semantics.
+
+In Domination, Supplies, and Firefight, Specialist Troop eligibility is defined
+for the purposes of that scenario from existing Trooper facts: Doctor, Engineer,
+Forward Observer, Hacker, Paramedic, Specialist Operative, or Chain of Command.
+Those scenarios also restrict Doctors and Engineers from using Peripherals for
+Specialist-Troop tasks.
+
+InfinityDB should therefore treat **Specialist Troop** as a contextual role that
+can be derived for a selected scenario, not as another permanent Unit
+Characteristic or source Skill. Even when several scenarios share the same
+membership rule, the scenario scope must remain explicit so another mission or
+season can define it differently.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Domination>
+- Wiki: <https://infinitythewiki.com/Supplies>
+- Wiki: <https://infinitythewiki.com/Firefight>
+- PDF: Infinity N5 V5.3, printed pages 152, 154, and 156
+
+### RS-SCN-ELEM-001 — Scenario objective elements are not Trooper Equipment
+
+**Classification:** source-native domain distinction with an InfinityDB modeling
+consequence.
+
+Domination uses Consoles as scenario objective elements. Supplies uses Supply
+Boxes, which can be picked up and carried by Models. The fact that a Trooper can
+interact with or carry a scenario element does not make that element Equipment
+on the Trooper's Unit Profile.
+
+InfinityDB may need a rules-reference identity for an objective element so a
+scenario-only Skill or relationship can target it coherently. Such an identity
+should remain distinct from the Army Equipment catalog unless the source
+actually defines it as Equipment.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Domination>
+- Wiki: <https://infinitythewiki.com/Supplies>
+- PDF: Infinity N5 V5.3, printed pages 151-154
+
+### RS-SCN-OVERLAY-001 — Scenario special rules are scoped overlays on general rules
+
+**Classification:** source-native scope semantics with an InfinityDB provenance
+consequence.
+
+Firefight's Reinforced Tactical Link changes Lieutenant information and
+replacement/deployment behavior for that mission. Its Designated Landing Area
+modifies Combat Jump and Airborne Deployment behavior. These are scenario-local
+overlays: they do not change the canonical definitions of Lieutenant, Open/
+Private Information, Combat Jump, or the Airborne Deployment Label.
+
+Scenario-specific reference facts should therefore retain their mission (and,
+where applicable, season) scope and link to the general concepts they modify.
+InfinityDB must not rewrite static Unit/Profile data or the base-rule record to
+make a mission-local exception appear universal.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Firefight>
+- PDF: Infinity N5 V5.3, printed pages 155-156

@@ -227,7 +227,15 @@ rules have been audited.
   - [x] Symmetrical and Asymmetrical Deployment Zones
   - [x] Cross-section reconciliation: Game Modes, Deployment Zones, Terrain/
     Scenery, Cover, scenarios, and application boundaries
-- [ ] Scenarios
+- [x] Scenarios
+  - [x] Section scope and relationship to the wider scenario corpus
+  - [x] Annihilation
+  - [x] Domination: quadrants, Consoles, Hack Consoles, and Specialist Troops
+  - [x] Supplies: Supply Boxes, Pick Up Supply Boxes, and Specialist Troops
+  - [x] Firefight: Killing, Reinforced Tactical Link, Designated Landing Area,
+    and Specialist Troops
+  - [x] Cross-section reconciliation: scenario-only catalog concepts, contextual
+    roles/elements, scoped rule overlays, and the 1.0 scenario-library boundary
 - [ ] Quick Reference Charts
 - [ ] Reinforcements
 - [ ] ITS FAQ
@@ -1684,3 +1692,109 @@ No current application schema or runtime behavior needs to change:
 
 The section therefore adds only one implementation-relevant scope finding and
 two research/reference findings. No new implementation backlog item is warranted.
+
+### Scenarios — section complete
+
+Status: core N5 V5.3 semantic extraction complete for the introductory scenario
+section. The audit intentionally separates **scenario-defined catalog concepts**
+from a **complete scenario library**: the former are in scope where they improve
+InfinityDB's general reference coverage, while full scenario list/detail coverage
+is not a version-1.0 requirement.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Scenarios>, live N5.3 page.
+- Wiki: <https://infinitythewiki.com/Annihilation>, live N5.3 page.
+- Wiki: <https://infinitythewiki.com/Domination>, live N5.3 page.
+- Wiki: <https://infinitythewiki.com/Supplies>, currently carrying an N5.2 / FAQ
+  0.0.0 notice.
+- Wiki: <https://infinitythewiki.com/Firefight>, currently carrying an N5.2 / FAQ
+  0.0.0 notice.
+- PDF: Infinity N5 V5.3, printed pages 149-156.
+
+The V5.3 PDF is the edition baseline for Supplies and Firefight. Their
+implementation-relevant concepts were cross-checked against the current V5.3
+PDF rather than promoting the older wiki notice to source authority.
+
+#### The core Scenarios section is illustrative, not an exhaustive scenario corpus
+
+The Scenarios overview says the rulebook contains a small introductory set and
+points players to additional official content. The four core scenarios are
+Annihilation, Domination, Supplies, and Firefight.
+
+InfinityDB should therefore not treat this section as defining the complete
+Infinity scenario catalog. Auditing these pages is necessary to discover
+scenario-defined rules concepts and scope interactions, but completing a full
+core/ITS scenario library is separate product work and does not block 1.0.
+
+#### Scenario-defined Skills remain real reference concepts
+
+Domination defines **Hack Consoles** as a Short Skill with the Attack Label.
+Supplies defines **Pick Up Supply Boxes** as a Short Skill with the Attack Label.
+Neither action is an Army-profile Skill: availability comes from the selected
+scenario plus its requirements.
+
+These are nevertheless useful rules-reference identities. InfinityDB's 1.0
+catalog/reference completeness should be able to represent scenario-only Skills
+(and scenario-only Equipment when encountered) with explicit scope/provenance.
+They must not be inserted into a Trooper's static Army-derived Skill list merely
+because that Trooper can declare them in a particular mission.
+
+#### Specialist Troop is a scenario-scoped derived role
+
+Domination, Supplies, and Firefight define Specialist Troops for their own
+purposes using Doctors, Engineers, Forward Observers, Hackers, Paramedics,
+Specialist Operatives, and Troopers with Chain of Command. The scenarios also
+state that Doctors and Engineers cannot use Peripherals to perform tasks reserved
+for Specialist Troops.
+
+This makes **Specialist Troop** a contextual role derived from a scenario's rule
+set and the Trooper's existing catalog facts, not another permanent Unit
+Characteristic. The current core scenarios happen to share the same definition,
+but InfinityDB should preserve the scenario scope so later mission/season rules
+can differ without rewriting canonical Unit data.
+
+#### Scenario elements are distinct from Equipment
+
+Domination's Consoles and Supplies' Supply Boxes are mission objective/game
+elements. The scenario-defined Skills target or manipulate them, and Supply Boxes
+can be carried by Models, but those facts do not make the elements pieces of
+Trooper Equipment.
+
+A rules-reference implementation may need identities/relationships for such
+scenario elements so scenario-only Skills can be explained coherently. It should
+not force them into the Equipment catalog merely because they are interactive or
+carried. No separate scenario-specific Equipment identity was found in these
+four core scenarios; the 1.0 scope rule remains applicable when later sources do
+define one.
+
+#### Scenario special rules are scoped overlays, not canonical rewrites
+
+Firefight demonstrates why mission rules need explicit scope. **Reinforced
+Tactical Link** changes Lieutenant information/deployment behavior for that
+mission, while **Designated Landing Area** modifies Combat Jump and Airborne
+Deployment behavior on that table. These rules do not redefine Lieutenant,
+Combat Jump, Airborne Deployment, or Open/Private Information globally.
+
+The same principle applies to scenario scoring, Killed definitions, Domination
+checks, Supply Box control, minimum-VP end conditions, and similar procedures:
+they may be recorded for context or future mission pages, but they are session
+rules rather than canonical Unit/Profile facts.
+
+#### Application and version-1.0 reconciliation
+
+The current architecture can preserve this boundary without adding a full
+scenario model for 1.0:
+
+- add scenario-defined Skills/Equipment and other named catalog concepts to the
+  curated rules/reference layer when needed for general catalog completeness;
+- preserve explicit scenario (and later season) scope/provenance on those facts;
+- model Specialist Troop as a contextual relationship/derived role, not a static
+  Unit characteristic;
+- keep Consoles, Supply Boxes, and similar objective elements distinct from
+  Trooper Equipment; and
+- leave complete scenario identity, objectives/scoring, maps, deployment tables,
+  and scenario list/detail pages as post-1.0 product/reference work.
+
+This audit therefore creates a focused 1.0 catalog-coverage task rather than a
+requirement to implement the four core scenarios as browsable missions.

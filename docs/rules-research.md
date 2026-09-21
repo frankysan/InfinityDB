@@ -1054,3 +1054,46 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Setting_up_the_Gaming_Table#Symmetrical_and_Asymmetrical_Deployment_Zones>
 - PDF: Infinity N5 V5.3, printed page 148
+
+## Scenarios
+
+### RR-SCN-LIB-001 — The core rulebook scenarios are an introductory sample
+
+**Scope:** core N5 source scope and future product planning.
+
+The Scenarios overview describes the four included missions as a small set used
+to introduce scenario play and points to additional official content elsewhere.
+The core rulebook section is therefore not an authoritative inventory of all
+Infinity scenarios.
+
+A future scenario library can combine explicitly versioned core and seasonal
+sources, but completing that library is not required for InfinityDB 1.0. The
+current audit uses the four core scenarios primarily to discover scoped catalog
+concepts and cross-domain relationships.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Scenarios>
+- PDF: Infinity N5 V5.3, printed pages 149-156
+
+### RR-SCN-RUNTIME-001 — Mission scoring and objective resolution are session procedure
+
+**Scope:** core N5 scenario procedure.
+
+Annihilation's Killed scoring, Domination's quadrant control, Supplies' end-game
+Supply Box control, minimum-Victory-Point end conditions, and similar mission
+procedures depend on the selected scenario plus current table/State/session
+facts.
+
+These mechanics may be useful later for scenario detail pages or play aids, but
+they do not need to become a rules engine to support the 1.0 catalog/reference
+scope. The named Skills, contextual roles, and cross-domain concepts those
+procedures introduce can be curated independently.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Annihilation>
+- Wiki: <https://infinitythewiki.com/Domination>
+- Wiki: <https://infinitythewiki.com/Supplies>
+- Wiki: <https://infinitythewiki.com/Firefight>
+- PDF: Infinity N5 V5.3, printed pages 149-156

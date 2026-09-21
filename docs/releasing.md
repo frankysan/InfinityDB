@@ -21,9 +21,14 @@ the information understandable and navigable.
 
 ITS-specific rules, missions, season material, classifications, and tournament
 content are deliberately outside the 1.0 requirement unless they become necessary to
-interpret otherwise in-scope data. Final visual polish, every planned search/filter/
-comparison feature, exhaustive performance work, optional themes, deployment
-conveniences, and unrelated architectural refactors likewise do not block 1.0.
+interpret otherwise in-scope data. A complete core/ITS scenario library and scenario
+list/detail pages are likewise outside the 1.0 requirement. Scenario-specific Skills,
+Equipment, States, Traits, contextual roles, objective elements, or other named rules
+concepts remain in scope when they are needed to complete the general catalog/reference
+experience; preserve their scenario/season scope rather than requiring full mission
+modeling. Final visual polish, every planned search/filter/comparison feature,
+exhaustive performance work, optional themes, deployment conveniences, and unrelated
+architectural refactors likewise do not block 1.0.
 
 The 1.0 release gate requires:
 
