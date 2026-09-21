@@ -189,7 +189,7 @@ in `docs/releasing.md`.
     - [x] Triumph and Defeat.
     - [x] Setting up the Gaming Table.
     - [x] Scenarios.
-    - [ ] Quick Reference Charts as a validation/completeness pass.
+    - [x] Quick Reference Charts as a validation/completeness pass.
     - [ ] Reinforcements, retaining its distinct rules scope.
     - [ ] ITS FAQ, retaining season/scenario scope rather than treating it as core rules.
   - [ ] Reconcile implementation-relevant findings against Army/API fields, the
@@ -475,6 +475,10 @@ work against that contract.
     Program and Upgrade-Program relationships. Keep Hacking Area, Firewall,
     Supportware, and target/state effects as rules-derived semantics rather than
     inferring a complete hacking graph from Army Equipment names.
+    - [ ] Use the preserved structured Army `hack` metadata for exact Program
+      profile fields and generate the Hacking Device -> baseline Program matrix
+      from explicit source associations after semantic reconciliation; keep
+      Upgrade Programs distinct and cross-link Program targets/States/effects.
   - [ ] Reconcile the existing declaration-category records with the current N5
     V5.3 Skills and Equipment rules before expanding that dataset: remove stale
     category names/mappings, refresh printed-page citations, and generalize the
@@ -484,6 +488,10 @@ work against that contract.
     classification; `Regular`/`Irregular` remain Training semantics in InfinityDB.
     Validate authored category names against the canonical `skillTypes` vocabulary
     and resolve links against the correct Army catalog domain.
+    - [ ] Once reconciled, generate an Orders/AROs declaration matrix from these
+      cross-domain relationships and use it as a completeness check for missing,
+      invalid, or contradictory declaration categories rather than maintaining a
+      second hard-coded chart.
   - [ ] Model Ammunition rules as first-class cited identities and relationships.
     Distinguish the eleven base Ammunition types from source-defined combined
     forms, preserve component relationships for combined Ammunition, and keep
@@ -564,6 +572,16 @@ work against that contract.
     relevant states, ammunition, traits, and unit/loadout uses; make MOD scope
     explicit so profile annotations such as `(+1B)`, `(-3)`, `PH=`, rerolls,
     and Special Dice are not mistaken for universal unit statistics.
+  - [ ] Generate structured reference tables already preserved by Army metadata:
+    Martial Arts Levels, Booty results, and MetaChemistry results. Keep random
+    outcomes as deployment/session overlays, preserve conditional branches (for
+    example TAG versus other Troop Types), and cross-link resolvable outcomes to
+    canonical Skills, Equipment, Weapons, and Attributes without rewriting Unit
+    profiles.
+  - [ ] Model the finite V5.3 Restrictions Chart as explicit cross-domain
+    relationships (Troop Type/Training/Equipment/Skill -> restricted action or
+    Lieutenant eligibility) and expose it as contextual help/generated reference.
+    Do not generalize this into a full live-game action-legality engine.
 - [ ] Add a rules glossary and profile-notation help layer to unit details.
   - [ ] Explain the existing profile fields and symbols in context: training/order,
     troop type, classification, ISC, Hackable, Peripheral, equipment versus
@@ -605,6 +623,12 @@ work against that contract.
     composition and Combined Saving Rolls are separate rules operations. Validate
     the view against Army metadata; do not copy source charts wholesale into the
     application.
+  - [ ] Add a generated Deployables profile reference from Weapon/Equipment
+    metadata plus curated corrections: ARM/BTS/STR/S for the deployed object,
+    originating item/rule, and reverse Unit/loadout uses. Keep deployed-object
+    identity separate from the carrier and from catalog domain. Track the V5.3
+    Armed Turret S2 detailed-profile versus S1 quick-reference conflict explicitly
+    and do not silently choose the summary value without reviewed precedence.
 - [ ] Add optional play-aid pages for core procedures, distinct from the unit
   database: order expenditure/ARO sequence, modifiers, movement/combat
   resolution, command tokens, and Fireteam quick reference. Use concise cited

@@ -2306,3 +2306,169 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Firefight>
 - PDF: Infinity N5 V5.3, printed pages 155-156
+
+## Quick Reference Charts
+
+### RS-QR-PROJ-001 — Quick-reference charts are derived projections of owning rule facts
+
+**Classification:** source-native presentation structure with an InfinityDB
+architecture consequence.
+
+The N5 Quick Reference section reorganizes Weapon profiles, Ammunition effects,
+declaration categories, Hacking Programs, Skill tables, restrictions, Fireteam
+bonuses, and Retreat!/Loss of Lieutenant rules into compact charts. It does not
+define a second independent identity for those concepts.
+
+InfinityDB should likewise generate reference tables from canonical Army facts
+and curated semantic relationships where possible, rather than duplicate the
+same facts in chart-specific records. A chart may have its own column/order/view
+configuration, but its rows should remain projections of the owning entities and
+relationships.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Quick_Reference_Charts>
+- PDF: Infinity N5 V5.3, printed pages 176-195
+
+### RS-QR-WPN-001 — Weapon and Ammunition charts are unit-neutral profile projections
+
+**Classification:** source-native presentation structure with a generated-view
+consequence.
+
+The Weapon/Alternative Weapon charts project the same typed facts already
+identified by the Combat and Ammunition audits: mode, Range MODs, PS, Burst,
+Ammunition, Saving Roll Attribute/count, and Traits. The Ammunition summary
+projects the effects of Ammunition identities independently of Unit ownership.
+
+InfinityDB can therefore build unit-neutral, filterable Weapon/Ammunition views
+from imported Weapon metadata plus curated Ammunition/Trait semantics, while
+adding reverse links to Unit/loadout uses. The chart is a presentation of those
+facts, not a separate source of canonical Weapon identity.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Weapon_Chart>
+- Wiki: <https://infinitythewiki.com/Alternative_Weapon_Chart>
+- Wiki: <https://infinitythewiki.com/Ammunition_Summary_Chart>
+- PDF: Infinity N5 V5.3, printed pages 176-188 and 193
+
+### RS-QR-ACTION-001 — Orders/AROs is a cross-domain declaration-category matrix
+
+**Classification:** source-native relationship projection with a validation
+consequence.
+
+The Orders and AROs reference chart groups declarable actions by Basic Short,
+Short, Long, and ARO while identifying whether the action comes from Common/
+Special Skills, Hacking, or Equipment. Declaration category and owning catalog
+domain are therefore independent axes.
+
+After the existing N5 declaration-category reconciliation is complete,
+InfinityDB can generate this matrix from reviewed relationships. That generated
+view can also act as a completeness test: a declarable rule with no category, an
+invalid category, or a Skill-only link for an Equipment action becomes visible
+without maintaining a parallel hard-coded chart.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Orders_and_AROs_Reference_Chart>
+- PDF: Infinity N5 V5.3, printed page 191
+
+### RS-QR-HACK-001 — Hacking Program charts can be generated from explicit Program/Device data
+
+**Classification:** source-native structured metadata plus rules-derived
+relationship semantics.
+
+The Hacking Programs chart and Programs Loaded by Each Hacking Device matrix are
+two views of the Program model already established by the Combat audit. Army
+metadata also carries structured Hacking Program profile fields and explicit
+Device associations, which InfinityDB preserves in `metadata_hacking_programs`.
+
+InfinityDB should use that source structure for exact Program profile data while
+using reviewed rules identities/relationships to distinguish baseline Device
+Programs from Upgrade Programs. This produces a maintainable Hacking reference
+without inferring Program sets from Equipment display names.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Programs_Chart>
+- Wiki: <https://infinitythewiki.com/Hacking_Device>
+- PDF: Infinity N5 V5.3, printed pages 193-194
+- Source preservation: `src/infinity_army_data/metadata.py`
+
+### RS-QR-LOOKUP-001 — Source lookup tables can enrich Skill reference without becoming Unit facts
+
+**Classification:** source-native structured metadata with a runtime-scope
+consequence.
+
+Martial Arts, Booty, and MetaChemistry are presented as compact tables in Quick
+Reference. Army metadata already preserves their structured rows in
+`metadata_martial_arts`, `metadata_booty`, and `metadata_metachemistry`.
+
+These rows can support generated tables on the corresponding rule/Skill detail
+pages. Martial Arts rows describe the effects of explicit Levels; Booty and
+MetaChemistry rows describe random result outcomes. The latter may cross-link to
+Attributes, Skills, Equipment, or Weapons where reviewed, but the rolled outcome
+remains deployment/session state and must not be written back as a static Unit
+fact. Conditional outcomes such as TAG-versus-other-Troop-Type results must retain
+their predicate rather than be flattened into one value.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Martial_Arts_Chart>
+- Wiki: <https://infinitythewiki.com/Booty_Chart>
+- Wiki: <https://infinitythewiki.com/MetaChemistry_Chart>
+- PDF: Infinity N5 V5.3, printed page 192
+- Source preservation: `src/infinity_army_data/metadata.py`
+
+### RS-QR-REST-001 — The Restrictions Chart is a finite static relationship matrix, not an action engine
+
+**Classification:** source-native cross-domain restriction semantics.
+
+The V5.3 Restrictions Chart explicitly relates profile/rule facts to prohibited
+actions or roles: TAG, Motorcycle, Aerial, VH, REM, and Irregular each carry one
+or more listed restrictions involving Prone, Cautious Movement, Climb/ladders,
+upward Jump, or Lieutenant eligibility.
+
+These are useful explicit relationships for contextual reference and generated
+comparison/filter views. InfinityDB can link the affected Troop Type, Training,
+Equipment, or Skill to the restricted action/role without attempting to infer a
+complete `can declare X` result for arbitrary live game state. This closes the
+pending Troop-Type restrictions cross-check from `RR-BR-UP-001`.
+
+Sources:
+
+- PDF: Infinity N5 V5.3, printed page 194
+- Wiki cross-reference: <https://infinitythewiki.com/Unit_Profile#Trooper_Characteristics>
+
+### RS-QR-DEP-001 — Deployable defensive profiles belong to deployed objects, not carriers
+
+**Classification:** source-native profile relationship semantics with a
+presentation consequence.
+
+The page-195 Deployable Profiles chart provides ARM, BTS, STR, and S for deployed
+objects including Armed Turret, CrazyKoala, Cybermine, Dazer, Deployable
+Repeater, Disco Ball, Drop Bears, FastPanda, MadTraps, Mines, and WildParrot.
+Current Army Weapon/Equipment metadata already carries a `profile` field for many
+of these, and InfinityDB supplies reviewed corrections where source Mine profiles
+are omitted.
+
+A generated deployables reference should attach this defensive profile to the
+**deployed game element**, keep the originating Weapon/Equipment identity and
+carrier/loadout relationship separate, and cross-link the relevant rule and
+Unit uses. Deployables need not be forced into one catalog domain merely to share
+a profile table.
+
+The V5.3 sources currently conflict for Armed Turret Silhouette: its detailed
+profile on printed page 70 and the current wiki give **S2**, while the page-195
+Deployable Profiles summary gives **S1**. InfinityDB's existing curated Armed
+Turret profile follows the owning detailed rule (S2). Preserve this source
+discrepancy explicitly; do not overwrite the curated value from the summary
+chart without an official clarification/erratum or a reviewed precedence
+decision.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Armed_Turret>
+- PDF: Infinity N5 V5.3, printed pages 70 and 195
+- Source/correction boundary: `config/catalogs/weapon-overrides.json` and
+  `data/curated/rules/n5-core-v5.3.json`

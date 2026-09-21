@@ -236,7 +236,14 @@ rules have been audited.
     and Specialist Troops
   - [x] Cross-section reconciliation: scenario-only catalog concepts, contextual
     roles/elements, scoped rule overlays, and the 1.0 scenario-library boundary
-- [ ] Quick Reference Charts
+- [x] Quick Reference Charts
+  - [x] Weapon and Alternative Weapon Charts; Ammunition summary
+  - [x] Game sequence, Order expenditure, and Orders/AROs reference
+  - [x] Impetuous activation; Martial Arts, Booty, and MetaChemistry charts
+  - [x] Hacking Programs and Hacking Device/Program matrix
+  - [x] Restrictions, Retreat!/Loss of Lieutenant, and Fireteam bonus summaries
+  - [x] Deployable Profiles and cross-section completeness reconciliation
+  - [x] Data-generated chart/table opportunities and source-conflict review
 - [ ] Reinforcements
 - [ ] ITS FAQ
 - [ ] Final cross-section reconciliation and gap analysis
@@ -569,8 +576,9 @@ declaration help, Traits, or relationship targets, they belong in the rules
 reference layer.
 
 The current declaration categories were checked against both the prose rules and
-the page-191 Orders/AROs chart. The latter is used here only as a targeted
-consistency check; the complete Quick Reference Charts section remains pending.
+the page-191 Orders/AROs chart. The later completed Quick Reference Charts pass
+confirms that this chart is best treated as a generated cross-domain projection
+and a validation target for the declaration-category relationships.
 
 #### Special Skills inventory
 
@@ -1798,3 +1806,146 @@ scenario model for 1.0:
 
 This audit therefore creates a focused 1.0 catalog-coverage task rather than a
 requirement to implement the four core scenarios as browsable missions.
+
+### Quick Reference Charts — validation/completeness pass complete
+
+Status: N5 V5.3 Quick Reference Charts reviewed as a cross-section validation pass,
+with special attention to reference material that InfinityDB can generate from
+Army data plus curated rule relationships rather than maintain as copied static
+tables. The pass covers printed pages 176-195.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Quick_Reference_Charts> and the linked
+  Weapon/Alternative Weapon, Ammunition, Orders/AROs, Martial Arts, Booty,
+  MetaChemistry, Hacking Programs, Restrictions, Fireteam, and Retreat reference
+  pages, reviewed against the live N5.3 wiki where available.
+- PDF: Infinity N5 V5.3, printed pages 176-195.
+- Current Army metadata shape as preserved by `src/infinity_army_data/metadata.py`
+  and the normalized `metadata_*` tables, cross-checked against a recent source
+  metadata snapshot for hacking programs, Martial Arts, Booty, MetaChemistry, Weapons,
+  Equipment, and deployable profiles.
+
+#### Quick-reference tables are projections, not a second rules ontology
+
+The section mostly reorganizes concepts already defined by their owning rules:
+Weapon profiles, Ammunition effects, declaration categories, Hacking Programs,
+Skill levels/random tables, Fireteam bonuses, Retreat!/Loss of Lieutenant, and
+static restrictions. InfinityDB should treat those charts as validation targets
+and useful presentation patterns rather than author a second set of independent
+chart facts.
+
+Where the underlying facts already exist as Army metadata or curated semantic
+relationships, a reference table should be generated from those sources. That
+keeps detail pages, filters, cross-links, and quick-reference views consistent
+and lets a source update propagate without hand-editing parallel tables.
+
+#### Weapon and Ammunition reference is a natural generated view
+
+The printed Weapon Chart occupies pages 176-188 and is primarily a denormalized
+view of Weapon identity/mode, range MODs, PS, Burst, Ammunition, Saving Roll
+Attribute/count, and Traits. The Alternative Weapon Chart is another presentation
+of substantially the same underlying profile facts.
+
+InfinityDB already preserves those exact source profile fields and reverse Unit/
+loadout usage. Combined with curated Ammunition and Trait semantics, it can offer
+a filterable/generated reference that is more useful than reproducing the fixed
+chart: compare modes, filter by range/Ammunition/Trait, follow semantic links,
+and see which Units/loadouts actually use the item. The existing weapon-and-
+ammunition quick-reference backlog remains the correct implementation home.
+
+#### Orders/AROs can validate and then consume declaration-category data
+
+The page-191 Orders and AROs chart is a compact projection of declaration
+categories across Common Skills, Special Skills, Hacking Programs, and Equipment
+actions. It confirms that a generated declaration matrix is a useful consumer of
+the existing declaration-category reconciliation work.
+
+InfinityDB should not maintain a second hard-coded Orders/AROs table. Once current
+N5 categories and cross-domain action links are corrected, the same structured
+relationships can generate Basic Short/Short/Long/ARO reference views and expose
+links back to the owning Skill, Equipment item, Hacking Program, or scoped
+scenario action. This also provides an automated completeness check for missing
+or contradictory declaration categories.
+
+#### Army already carries several quick-reference datasets that the app does not expose
+
+The Army metadata importer already preserves structured `hack`, `martialArts`,
+`metachemistry`, and `booty` collections as normalized metadata tables. Current
+source metadata includes Hacking Program profile fields and explicit Device IDs,
+Martial Arts level MODs, and the complete Booty/MetaChemistry result rows.
+
+These are strong candidates for generated rule-reference tables rather than
+manually curated copies. Hacking Programs still need reviewed semantic identities
+and Device/Upgrade relationships before presentation; Martial Arts can render its
+level matrix from structured source rows; Booty and MetaChemistry can render their
+random-result tables while cross-linking resolvable Skills, Equipment, Weapons,
+and Attribute changes. The random results remain deployment/session outcomes, not
+static Unit facts.
+
+#### Restrictions Chart exposes a useful static relationship matrix
+
+The V5.3 Restrictions Chart on printed page 194 confirms a finite set of static
+profile/rule predicates: TAG, Motorcycle, Aerial, VH, REM, and Irregular each
+restrict specific actions or Lieutenant eligibility. This closes the pending
+Troop-Type cross-check from the initial Unit Profile research.
+
+These restrictions are a good fit for a generated relationship/reference matrix
+and contextual links from affected Troop Types/Training/Equipment/Skills. They do
+**not** justify a general action-legality engine: the useful fact is the explicit
+source-defined relationship, not an attempt to evaluate every declaration in a
+live game.
+
+#### Deployable Profiles reveal both a product gap and a source inconsistency
+
+Printed page 195 gathers ARM/BTS/STR/S profiles for Armed Turret, CrazyKoala,
+Cybermine, Dazer, Deployable Repeater, Disco Baller/Disco Ball, Drop Bears,
+FastPanda, MadTraps, Mines, and WildParrot. Current Army Weapon/Equipment metadata
+already carries structured `profile` values for many of these; InfinityDB also
+supplies reviewed source corrections for omitted Mine profiles, while Armed
+Turret has a richer curated special profile.
+
+That makes a generated **Deployables** reference a genuine InfinityDB opportunity:
+show the deployed object's defensive profile separately from the carrier/item,
+link it back to the Weapon/Equipment rule and Unit/loadout uses, and avoid forcing
+all deployables into a single catalog domain.
+
+The validation pass also found a source conflict that must not be silently
+normalized away: the V5.3 detailed Armed Turret profile on printed page 70 (and
+the current wiki page) gives **S2**, while the page-195 Deployable Profiles
+summary gives **S1**. InfinityDB's existing curated Armed Turret special profile
+uses S2 from the owning rule. Keep the discrepancy documented and require an
+official clarification/erratum or reviewed source-precedence decision before a
+generated deployable table claims the summary value as authoritative.
+
+#### Procedural summaries remain optional play aids
+
+Game Sequence, Order Expenditure, Impetuous activation, Retreat!/Loss of
+Lieutenant summaries, and similar charts mainly compress procedures already
+audited in their owning sections. They remain useful optional play-aid material,
+but do not become application schema merely because the rulebook presents them
+as charts. Fireteam Bonuses similarly belong with the rule-aware Fireteams
+feature, generated from curated general-rule semantics and kept separate from
+Army-local composition charts.
+
+#### Application reconciliation
+
+This pass produces concrete reference/product work without changing the core
+application model:
+
+- retain the existing generated Weapon/Ammunition quick-reference direction;
+- make a generated Orders/AROs matrix a consumer/validator of reconciled
+  declaration-category relationships;
+- expose structured Hacking Program/device, Martial Arts, Booty, and
+  MetaChemistry reference tables from preserved source metadata plus curated
+  semantics;
+- add a narrow static Restrictions relationship matrix rather than an action
+  legality engine;
+- add a Deployables reference/profile surface that preserves carrier/item versus
+  deployed-object identity and records the Armed Turret S1/S2 conflict; and
+- keep procedural charts in the optional play-aid layer.
+
+The Quick Reference Charts therefore serve their intended audit purpose: they
+validate prior findings, expose a small number of missed cross-domain gaps, and
+identify several places where InfinityDB's data-generated views can be more
+maintainable and navigable than copied static charts.

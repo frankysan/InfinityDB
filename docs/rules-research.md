@@ -42,17 +42,16 @@ The current Unit Profile wiki associates concrete restrictions with several
 Troop Types: TAG and VH cannot go Prone or declare Cautious Movement, while REM
 may not declare Cautious Movement or be chosen as Lieutenant.
 
-This may eventually support contextual help, rule-aware filtering, or validation
-of derived rule relationships. InfinityDB does not currently need these
-restrictions to interpret the imported `type` field, so they remain research-only
-until the Restrictions Chart and the affected rules are audited as a complete
-set.
+The completed Quick Reference pass confirms the full current Restrictions Chart
+and promotes the static cross-domain relationship pattern to `RS-QR-REST-001`.
+This entry remains as the provenance trail for why Troop Type restrictions were
+initially held back rather than inferred from the Unit Profile page alone.
 
-Source:
+Sources:
 
 - Wiki: <https://infinitythewiki.com/Unit_Profile#Trooper_Characteristics>, live
   N5.3 page
-- PDF cross-check: pending the Quick Reference / Restrictions Chart audit
+- PDF: Infinity N5 V5.3, printed page 194, Restrictions Chart
 
 ### RR-BR-UP-002 — Game-term thesaurus can span domains without creating entities
 
@@ -1097,3 +1096,79 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Supplies>
 - Wiki: <https://infinitythewiki.com/Firefight>
 - PDF: Infinity N5 V5.3, printed pages 149-156
+
+## Quick Reference Charts
+
+### RR-QR-PROC-001 — Procedure charts are presentation aids, not additional state models
+
+**Scope:** core N5 procedure/reference presentation.
+
+Game Sequence, Order Expenditure, Impetuous activation, Retreat!/Loss of
+Lieutenant summaries, and Fireteam bonus summaries compress procedures already
+defined by their owning rules. Their chart form does not create new canonical
+Unit/Profile facts or justify a parallel game-state engine.
+
+These are good candidates for optional generated/cited play aids where they help
+users navigate the rules, but the underlying facts should continue to live with
+their owning semantic concepts.
+
+Sources:
+
+- PDF: Infinity N5 V5.3, printed pages 189-195
+- Wiki: <https://infinitythewiki.com/Quick_Reference_Charts>
+
+### RR-QR-RANDOM-001 — Random lookup results are structured overlays, not imported profile mutations
+
+**Scope:** core N5 Skill lookup semantics.
+
+Booty and MetaChemistry result tables are particularly well suited to generated
+reference because Army metadata already carries their roll ranges and result
+text. Some results grant catalog items, some replace Attributes, and some branch
+on predicates such as TAG versus other Troop Types.
+
+A future structured parser/cross-link layer could make those outcomes navigable,
+but it should preserve the original result and condition and must not infer that
+a Unit permanently possesses a randomly available result. This refines the
+`profile overlay` research grouping in `RR-SE-PROFILE-001`.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Booty_Chart>
+- Wiki: <https://infinitythewiki.com/MetaChemistry_Chart>
+- PDF: Infinity N5 V5.3, printed page 192
+
+### RR-QR-TRANS-001 — Translation charts are alias/localization evidence, not separate rule identities
+
+**Scope:** current wiki reference tooling and future localization/search.
+
+The live Quick Reference navigation includes Translation Charts. Their useful
+architectural lesson is that localized names should resolve to the same scoped
+semantic identity rather than create language-specific duplicate rules.
+
+InfinityDB does not currently need a translation-chart product. Retain this as
+research for a future multilingual thesaurus/search layer, where canonical
+identity, language-specific display labels, historical aliases, and community
+terms can remain distinct provenance dimensions.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/Quick_Reference_Charts>
+
+### RR-QR-CONFLICT-001 — Summary charts can conflict with owning rules
+
+**Scope:** source-quality and precedence research.
+
+The V5.3 Quick Reference Deployable Profiles summary lists Armed Turret as S1,
+while the detailed Armed Turret profile on printed page 70 and the current wiki
+list S2. This is a concrete example of why Quick Reference must remain a
+validation source rather than automatically override the owning rule.
+
+Until Corvus Belli publishes a clarification/erratum or InfinityDB adopts a
+reviewed source-precedence resolution for this exact conflict, preserve both
+observations and present the detailed-rule S2 value currently used by the
+curated Armed Turret record with provenance.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Armed_Turret>
+- PDF: Infinity N5 V5.3, printed pages 70 and 195
