@@ -210,7 +210,9 @@ The detailed design and invariants are maintained in `docs/data-model.md`.
 The 0.6.1 runtime canonicalization/release gate is complete. Durable evidence,
 benchmarks, semantic classifications, and upgrade requirements are recorded in
 `docs/data-model.md` and `docs/CHANGELOG.md`; completed release checklists are not
-kept in this active backlog.
+kept in this active backlog. Every release follows the general checklist in
+`docs/releasing.md`, including its mandatory project-wide documentation audit; this
+backlog records only release-specific scope and gates.
 
 Milestone 2A canonicalization groundwork is complete; this section now contains
 only active Milestone 2B work. Durable counts, equivalence evidence, and benchmark
@@ -723,6 +725,14 @@ new correctness or reproducibility defect.
     application `public_slug` without reinterpreting the existing source/context
     `slug`, prefer it for browser Unit links, and accept both slug and numeric Unit
     detail routes.
+  - [ ] Finish the Trait public-identity alignment for this workstream: reconcile the
+    existing curated Trait slug identity with the shared domain-slug/public-route policy,
+    preserve stable curated Trait identities, and add regression coverage for the accepted
+    boundary rather than creating a parallel one-off slug scheme.
+  - [ ] **0.6.2 release checkpoint.** After the Trait alignment above is complete, run the
+    general release checklist in `docs/releasing.md` and release this public-identity/slug
+    work as version 0.6.2. The project-wide documentation audit is a release gate, not a
+    post-release cleanup task.
   - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
     reviewed overrides, aliases/redirects, and compatibility behavior; extend the
     registry only when a new canonical domain boundary (for example Peripheral

@@ -147,6 +147,8 @@ Detailed implementation history should remain available through Git history, arc
 
 Before finalizing a release, review the complete `Unreleased` section as a whole rather than only promoting individual accumulated entries. Merge overlapping entries, remove implementation-only details, and ensure the resulting release notes tell a concise and coherent story of the release.
 
+Before finalizing **any release**, follow the canonical checklist in `docs/releasing.md`. A project-wide documentation audit is a mandatory release gate: review the complete maintained documentation corpus, not only files changed since the previous release, and correct stale current-state claims before tagging. Version-specific release requirements may add gates but do not replace this process.
+
 - Update `docs/architecture.md` when changing architectural boundaries,
   engineering principles, or lasting design decisions.
 - Update `docs/data-model.md` when changing documented data semantics or

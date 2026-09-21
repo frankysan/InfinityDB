@@ -257,6 +257,8 @@ profile definitions, asset modes, reports, and exit codes.
 - [Data storage and provenance](data/README.md) — raw, curated, generated, and
   local processing artifacts.
 - [Development checks](docs/testing.md) — local and CI validation.
+- [Release process](docs/releasing.md) — mandatory release checklist and project-wide
+  documentation audit.
 - [Linux deployment](docs/deployment.md) — production deployment and updates.
 - [Server migration](docs/server-migration.md) — exact transfer and rebuild
   requirements.

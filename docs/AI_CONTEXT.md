@@ -588,6 +588,9 @@ application-level identities.
 - Keep `__version__` at the released value until an explicit release. While
   unreleased work exists, the browser footer uses `__display_version__` with
   the `+dev` suffix.
+- Every release follows the canonical `docs/releasing.md` checklist. A project-wide
+  documentation audit is a mandatory release gate and must review the complete maintained
+  documentation corpus rather than only the files touched by that release.
 
 ## Decision log
 
