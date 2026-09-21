@@ -1048,19 +1048,20 @@ Sources:
 - Wiki: <https://infinitythewiki.com/AI_Motorcycle>
 - PDF: Infinity N5 V5.3, printed pages 117 and 119
 
-### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment in the rules ontology
+### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
-**Classification:** source-native with a source/presentation-classification consequence.
+**Classification:** source-native with a presentation-encoding consequence.
 
 The Skills and Equipment chapter defines Cube and Cube 2.0 as Automatic
-Equipment. Army/Profile source data and the symbol publication layer may expose
-Cube through a characteristic-style icon/category, but that is a different
-classification purpose.
+Equipment. Infinity Army Unit Profiles do not list them alongside the textual
+Equipment entries; their presence is encoded only through the dedicated Cube or
+Cube 2.0 profile symbol.
 
-InfinityDB should preserve both pieces of information without treating the asset
-or upstream presentation category as the rules ontology. This is analogous to
-the earlier distinction between Training semantics and technical order-symbol
-organization.
+That symbol is therefore an Army presentation/source occurrence of the canonical
+Equipment concept, not evidence of a competing Army classification. InfinityDB
+should preserve the exact source-symbol occurrence and resolve it to the
+canonical Cube/Cube 2.0 Equipment identity rather than inventing a textual Army
+Equipment row or treating the symbol's asset grouping as a rules taxonomy.
 
 Sources:
 

@@ -671,11 +671,12 @@ The N5 V5.3 chapter defines 26 Equipment entries:
 `Motorcycle`, `Multispectral Visor`, `Nanoscreen`, `Repeater`, `SymbioMate`,
 `TinBot`, and `X-Visor`.
 
-The rules ontology does not always match the source/asset presentation
-classification. Most notably, Cube/Cube 2.0 are defined here as Automatic
-Equipment even though Army/profile presentation and the symbol pipeline expose
-Cube as a characteristic-style symbol. InfinityDB should preserve both facts:
-source/presentation categorization does not redefine the rules-domain concept.
+Cube/Cube 2.0 expose a source-presentation detail that InfinityDB must
+normalize correctly. They are Automatic Equipment in the rules, but Infinity
+Army Unit Profiles never list them in the textual Equipment block; their presence
+is encoded only by the dedicated Cube/Cube 2.0 profile symbol. InfinityDB should
+preserve that symbol occurrence and map it to the canonical Equipment identity.
+This is a presentation encoding, not a competing Army-versus-rules classification.
 
 Equipment can also expose actions. GizmoKit and MediKit are Equipment but their
 use is a **Short Skill**; Deactivator similarly appears as a Short Skill in the
@@ -2197,20 +2198,21 @@ model and backlog. The final finding set contains 127 implementation-relevant
 unique. The research set was re-reviewed against InfinityDB's catalog/reference
 boundary rather than promoted merely because a rule can be structured.
 
-#### Cross-source classifications must coexist instead of overwriting each other
+#### Source encodings and rules identities must be reconciled without rewriting provenance
 
-Several sections independently demonstrate that source presentation taxonomy and
-rules taxonomy answer different questions. `Regular`/`Irregular` can appear in
-Army skill-like structures while remaining Training semantics; Army exposes a
-`damage`-named weapon field while N5 calls the rules value PS; and Cube/Cube 2.0
-are presented through characteristic-style Army/UI data while the N5 rules define
-them as Automatic Equipment.
+Several sections independently demonstrate that source representation and rules
+semantics answer different questions. `Regular`/`Irregular` can appear in Army
+skill-like structures while remaining Training semantics, and Army exposes a
+`damage`-named weapon field while N5 calls the rules value PS. Cube/Cube 2.0 are
+a related but more specific presentation case: Army Unit Profiles encode them
+only as dedicated profile symbols, while the N5 rules define the represented
+concepts as Automatic Equipment.
 
-The canonical application model must preserve the original Army relationship and
+The canonical application model must preserve each original Army occurrence and
 provenance while allowing the rules layer to attach the correct semantic identity.
-The final pass found one backlog omission here: Cube/Cube 2.0 need explicit
-rules-Equipment cross-links/presentation without destructively moving their Army
-characteristic occurrences.
+For Cube/Cube 2.0, this means mapping the source symbol occurrence to canonical
+Equipment without inventing a textual Army Equipment entry. The final pass found
+that this source-encoding relationship needed to be explicit in the backlog.
 
 #### Publication identity, semantic identity, and applicability are separate axes
 

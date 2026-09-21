@@ -28,6 +28,11 @@ inventory. Use that inventory as groundwork for the broader web-app consistency
 audit. The durable version-1.0 acceptance criteria are maintained in
 `docs/releasing.md`.
 
+The next release target is **0.7.0 — rules-enriched catalog data**. Milestone 2B
+relationship/canonicalization work remains the foundation for that release; 0.7.0
+then applies the completed Wiki/PDF rules research to data InfinityDB already
+exposes, rather than opening a broad new product-domain milestone.
+
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
 application behavior during this work.
@@ -174,10 +179,11 @@ in `docs/releasing.md`.
     normalization-only structure, or unrepresented player information.
   - [ ] Add confirmed unrepresented player information to the 1.0 completeness
     backlog.
-  - [ ] Reconcile cross-source classification where the Army presentation shape and
-    rules ontology differ without rewriting source provenance. In particular, keep
-    Cube/Cube 2.0 Army characteristic occurrences intact while cross-linking and
-    presenting their N5 rules identity as Automatic Equipment.
+  - [ ] Reconcile source presentation encodings with canonical rules identities
+    without rewriting source provenance. In particular, Army Unit Profiles encode
+    Cube/Cube 2.0 only through their profile symbols rather than textual Equipment
+    entries; map those symbol occurrences to the canonical Automatic Equipment
+    identities while preserving the original symbol/source occurrence.
   - [ ] Do not treat unused tables/columns alone as proof of a completeness gap.
 
 Completion of every possible deduplication opportunity is **not** itself a
@@ -185,6 +191,84 @@ version-1.0 requirement. Canonicalization blocks 1.0 only where unresolved
 duplication prevents InfinityDB from establishing data correctness,
 distinguishing genuinely different player-relevant facts, or satisfying the
 documented completeness requirements.
+
+
+## Release target 0.7.0 — rules-enriched catalog data
+
+0.7.0 is the first semantic-enrichment release. Its goal is to make the data
+InfinityDB already exposes materially more informative by applying the completed
+N5.3 Wiki/PDF/FAQ research through the existing curated-rules infrastructure and
+canonical application relationships.
+
+The release is deliberately **not** a requirement to implement a complete rules
+engine, scenario library, live-game state model, or every possible standalone
+rules-reference catalog. Supporting rule identities may be added when they are
+needed to summarize, label, cite, or cross-link an already exposed item without
+requiring a new top-level browser surface in 0.7.0.
+
+- [ ] **Define and implement the structured enrichment contract for existing
+  catalog/application data.**
+  - [ ] Store original concise summaries rather than copied rulebook/wiki prose;
+    confirm publishing permissions plus attribution/linking requirements before
+    serving rule-derived editorial text.
+  - [ ] Store authoritative source links and provenance, including applicable
+    rulebook/publication version, printed PDF page when available, and Wiki links.
+  - [ ] Add reviewed semantic labels/classifications that help users interpret
+    existing data, including declaration/action type, Automatic/Short/Long/ARO
+    semantics, rule-domain identity, and typed Level/MOD/parameter meaning where
+    relevant.
+  - [ ] Represent reviewed related-item relationships explicitly rather than
+    deriving them from display-name matching; support reverse links where useful.
+  - [ ] Keep semantic identity, source publication provenance, and applicability
+    scope separate so core, annex, FAQ, season, or scenario material can enrich the
+    same canonical item without duplication or collection-load-order semantics.
+  - [ ] Make enrichment variant-aware: base rule knowledge may be inherited only
+    where valid, while exact Levels, MODs, typed parameters, and source variants
+    retain their own meaning and provenance.
+
+- [ ] **Systematically enrich the data currently available through InfinityDB.**
+  - [ ] Reconcile existing Skills, Equipment, Weapons, Traits, and relevant
+    Unit/Profile/loadout concepts against the completed rules audit; include
+    supporting Ammunition, State, Hacking, Fireteam, glossary, or scenario
+    identities only where required to explain or relate those existing items.
+  - [ ] Add cited summaries, rules links, user-facing labels, related catalog
+    items, relevant state/ammunition/trait relationships, and Unit/profile/loadout
+    usage links where the audited evidence supports them.
+  - [ ] Make profile/loadout annotations such as Levels, `(+1B)`, `(-3)`, `PH=`,
+    rerolls, and Special Dice explicit enough that an occurrence modifier is not
+    mistaken for a universal property of the base rule or Unit.
+  - [ ] Reconcile N5 weapon-profile presentation terminology with the current
+    Combat rules: preserve Army's source field/provenance while exposing the
+    rules-native Possibility of Survival (`PS`) label rather than presenting the
+    value as `DAM`, for both ranged and melee profiles where applicable.
+  - [ ] Normalize non-textual Army presentation encodings into canonical
+    relationships where appropriate. In particular, Unit Profiles never list Cube
+    or Cube 2.0 alongside textual Equipment; their dedicated symbols are the source
+    occurrence and must resolve to the canonical Cube/Cube 2.0 Automatic Equipment
+    identities without inventing a textual Army Equipment row.
+  - [ ] Surface the resulting enrichment through the existing API/detail/catalog
+    experiences; enrichment required for 0.7.0 must not remain available only in
+    curated JSON, `rules.db`, raw source data, or developer tooling.
+
+- [ ] **Use the audited research as a controlled coverage process.**
+  - [ ] Add a coverage report for currently exposed data that identifies missing
+    enrichment, ambiguous identity/variant mappings, unresolved related-item links,
+    and citations whose source version is stale or unreviewed.
+  - [ ] Classify every remaining gap explicitly as a 0.7.0 blocker, intentional
+    omission, supporting identity without a standalone UI, or later product work;
+    do not silently treat absence as complete coverage.
+  - [ ] Validate summaries/labels/relationships against the maintained rules
+    semantics and canonical Army relationships rather than independently hard-
+    coding a second ontology into the frontend.
+
+0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
+every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
+charts, saved-list guidance, organizer tooling, a live action-legality engine, or
+game/session state tracking. Those features may build on the same enrichment data
+later. The release is ready when every currently exposed catalog/application
+surface has been systematically reconciled with the relevant audited rules
+knowledge, useful reviewed enrichment is presented to users, and every remaining
+gap is explicitly classified.
 
 ## Army snapshot and symbol pipeline
 
@@ -433,17 +517,12 @@ work against that contract.
 
 ## Potential product features
 
-- [ ] Expand the existing versioned curated rules-reference infrastructure with
-  substantially broader N5 v5.3 coverage from
+- [ ] Post-0.7.0: expand the versioned curated rules-reference infrastructure
+  beyond the existing-data enrichment target with broader N5 v5.3 coverage from
   `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10).
   - [ ] Expand canonical rule identities across skills, equipment, ammunition,
     traits, states, Hacking Programs, Fireteam concepts, glossary terms, and other
     useful rule domains, retaining rulebook version and printed-page citation.
-  - [ ] Reconcile N5 weapon-profile presentation terminology with the current
-    Combat rules. Army metadata still exposes the source field as `damage`, but
-    N5 V5.3 defines that value as Possibility of Survival (PS); the web weapon
-    profile currently labels it `DAM`. Preserve source provenance while exposing
-    the rules-native `PS` term to users, and cover both ranged and melee profiles.
   - [ ] Add reviewed Hacking Program identities plus explicit Hacking Device ->
     Program and Upgrade-Program relationships. Keep Hacking Area, Firewall,
     Supportware, and target/state effects as rules-derived semantics rather than
@@ -495,15 +574,6 @@ work against that contract.
       `Request Reinforcements` can be explicitly classified outside Basic Short/
       Short/Long/ARO instead of being treated as incomplete or assigned a false
       category.
-  - [ ] Store original, concise editorial summaries and structured facts (labels,
-    requirements, effects, restrictions, related rules, and page locators),
-    rather than bulk-extracting or serving copyrighted PDF text or artwork.
-    Confirm permissions and attribution/linking requirements before publishing
-    any rule-derived prose.
-  - [ ] Add a coverage report that flags Army metadata items with no matching
-    reference entry, ambiguous names/levels/MOD variants, and entries whose
-    cited rulebook version is stale. A prior-version comparison is needed before
-    claiming a specific change between rulebook revisions.
 - [ ] Add a dated FAQ/errata layer to the existing rules-reference system from
   current material under `data/pdf/faq/`.
   - [ ] Model each ruling as a question, concise answer, rule/topic links,
@@ -561,12 +631,8 @@ work against that contract.
     replace the Online Tournament Manager.
   - [ ] Include setup aids from ITS documents while keeping organizer choices and
     local participant data clearly separate from official records.
-- [ ] Use curated rules coverage to complete the existing Skills, Equipment,
-  Weapons, Ammunition, and Traits reference experience.
-  - [ ] Add cited, concise summaries and cross-links between a rule, its variants,
-    relevant states, ammunition, traits, and unit/loadout uses; make MOD scope
-    explicit so profile annotations such as `(+1B)`, `(-3)`, `PH=`, rerolls,
-    and Special Dice are not mistaken for universal unit statistics.
+- [ ] Post-0.7.0: add generated rules-reference projections that build on the
+  enriched canonical data rather than duplicating its facts.
   - [ ] Generate structured reference tables already preserved by Army metadata:
     Martial Arts Levels, Booty results, and MetaChemistry results. Keep random
     outcomes as deployment/session overlays, preserve conditional branches (for

@@ -910,3 +910,21 @@ compatibility references remain unambiguous JSON integers.
   definitions attached somewhere, 41 names with multiple raw identities, three
   names with `mercs` variation, and 22 canonical loadout payloads with differing
   semantic attachment signatures.
+
+- 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
+  release.** Use the completed N5.3 Wiki/PDF/FAQ audit to enrich data InfinityDB
+  already exposes with concise original summaries, authoritative links/citations,
+  reviewed semantic labels, variant-aware meaning, and explicit related-catalog
+  relationships. Supporting rules identities may be added when needed to explain
+  an existing item without requiring a new standalone browser catalog. Keep
+  semantic identity, publication provenance, and applicability scope independent.
+  The 0.7.0 gate does not require a complete scenario/ITS library, rules engine,
+  live game-state model, organizer tooling, or standalone UI for every supporting
+  rules domain; remaining gaps must be classified explicitly rather than silently
+  treated as covered.
+- 2026-09-21: Cube and Cube 2.0 are canonical N5 Automatic Equipment whose Army
+  Unit Profile occurrence is encoded only by the dedicated Cube/Cube 2.0 symbols;
+  they are not listed in the profile's textual Equipment block. Treat this as a
+  source-presentation encoding, not an Army-versus-rules classification conflict.
+  Preserve the symbol/source occurrence and resolve it to the canonical Equipment
+  identity without inventing a textual source row.
