@@ -44,6 +44,20 @@ def _fixture_database(tmp_path: Path) -> Path:
         )
         _insert(connection, "logical_unit_sources", source_unit_id=1, logical_unit_id=10)
 
+        for army_id in (101, 102):
+            _insert(
+                connection,
+                "profile_payload_occurrences",
+                army_id=army_id,
+                unit_id=1,
+                group_id=1,
+                profile_id=1,
+                profile_payload_id=300,
+                position=1,
+                ava=1,
+                logo=None,
+            )
+
         for payload_id, army_id in ((100, 101), (101, 102)):
             _insert(
                 connection,
@@ -64,6 +78,30 @@ def _fixture_database(tmp_path: Path) -> Path:
                 option_id=2,
                 loadout_payload_id=payload_id,
                 position=2,
+                points=10,
+                swc=0,
+            )
+
+        _insert(
+            connection,
+            "loadout_payloads",
+            id=200,
+            logical_unit_id=10,
+            payload_sha256="200",
+            name="Parent loadout",
+            minis=1,
+            disabled=0,
+        )
+        for army_id in (101, 102):
+            _insert(
+                connection,
+                "loadout_payload_occurrences",
+                army_id=army_id,
+                unit_id=1,
+                group_id=1,
+                option_id=1,
+                loadout_payload_id=200,
+                position=1,
                 points=10,
                 swc=0,
             )
@@ -167,6 +205,22 @@ def test_relationship_audit_resolves_includes_and_exposes_context(tmp_path: Path
     assert report["includes"]["profile"]["crossLogicalTargetCount"] == 0
     assert report["includes"]["unitOption"]["multiPayloadTargetCount"] == 1
     assert report["includes"]["unitOption"]["multiLogicalTargetCount"] == 0
+    assert report["includes"]["profile"]["parentPayloadInvariance"] == {
+        "status": "contextual_variants",
+        "affectedCanonicalParentPayloadCount": 1,
+        "affectedCanonicalParentPayloadsWithMultipleOccurrences": 1,
+        "variantCanonicalParentPayloadCount": 1,
+        "unmappedParentRowCount": 0,
+        "unresolvedTargetRowCount": 0,
+    }
+    assert report["includes"]["loadout"]["parentPayloadInvariance"] == {
+        "status": "contextual_variants",
+        "affectedCanonicalParentPayloadCount": 1,
+        "affectedCanonicalParentPayloadsWithMultipleOccurrences": 1,
+        "variantCanonicalParentPayloadCount": 1,
+        "unmappedParentRowCount": 0,
+        "unresolvedTargetRowCount": 0,
+    }
 
 
 def test_relationship_audit_treats_peripheral_identity_as_diagnostic(tmp_path: Path) -> None:
@@ -184,6 +238,12 @@ def test_relationship_audit_treats_peripheral_identity_as_diagnostic(tmp_path: P
 def test_relationship_audit_details_preserve_evidence(tmp_path: Path) -> None:
     report = audit_database(_fixture_database(tmp_path), include_details=True)
 
+    profile = report["includes"]["profile"]["rows"][0]
+    assert profile["groupId"] == 1
+    assert profile["parentId"] == 1
+    loadout = report["includes"]["loadout"]["rows"][0]
+    assert loadout["groupId"] == 1
+    assert loadout["parentId"] == 1
     shared = report["includes"]["unitOption"]["rows"][0]
     assert shared["targetArmyIds"] == [101, 102]
     assert shared["targetPayloadIds"] == [100, 101]
@@ -193,6 +253,35 @@ def test_relationship_audit_details_preserve_evidence(tmp_path: Path) -> None:
             "name": "BOT",
             "mercs": 0,
             "rawIdentities": [{"armyId": 101, "id": 1001}, {"armyId": 102, "id": 2001}],
+        }
+    ]
+    profile_variants = report["includes"]["profile"]["parentPayloadInvariance"][
+        "variantParentPayloads"
+    ]
+    assert profile_variants == [
+        {
+            "parentPayloadId": 300,
+            "variants": [
+                {
+                    "signature": [
+                        {
+                            "position": 1,
+                            "targetPayloadId": 100,
+                            "quantity": 1,
+                            "raw": None,
+                        }
+                    ],
+                    "occurrences": [
+                        {"armyId": 101, "unitId": 1, "groupId": 1, "parentId": 1}
+                    ],
+                },
+                {
+                    "signature": [],
+                    "occurrences": [
+                        {"armyId": 102, "unitId": 1, "groupId": 1, "parentId": 1}
+                    ],
+                },
+            ],
         }
     ]
 
@@ -212,3 +301,4 @@ def test_relationship_audit_cli_writes_report(tmp_path: Path) -> None:
     assert main([str(database), "--output", str(output)]) == 0
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["format"] == "InfinityDB relationship semantics audit"
+    assert report["formatVersion"] == 2

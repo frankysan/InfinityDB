@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Audit deferred include/peripheral relationship semantics in InfinityDB."""
+"""Audit deferred include/peripheral relationship semantics in InfinityDB.
+
+Include analysis resolves canonical targets and tests whether relationships are
+invariant across source occurrences that share one canonical parent payload.
+"""
 
 from __future__ import annotations
 
@@ -13,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB relationship semantics audit"
-REPORT_FORMAT_VERSION = 1
+REPORT_FORMAT_VERSION = 2
 
 REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     "profile_includes": (
@@ -81,6 +85,16 @@ REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
         "position",
         "points",
         "swc",
+    ),
+    "profile_payload_occurrences": (
+        "army_id",
+        "unit_id",
+        "group_id",
+        "profile_id",
+        "profile_payload_id",
+        "position",
+        "ava",
+        "logo",
     ),
     "loadout_payloads": ("id", "logical_unit_id", "payload_sha256", "name", "minis", "disabled"),
     "logical_unit_sources": ("source_unit_id", "logical_unit_id"),
@@ -160,6 +174,34 @@ def _payload_targets(
     }
 
 
+def _profile_payload_parents(
+    connection: sqlite3.Connection,
+) -> dict[tuple[int, int, int, int], int]:
+    return {
+        (row["army_id"], row["unit_id"], row["group_id"], row["profile_id"]): row[
+            "profile_payload_id"
+        ]
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, profile_id, profile_payload_id "
+            "FROM profile_payload_occurrences"
+        )
+    }
+
+
+def _loadout_payload_parents(
+    connection: sqlite3.Connection,
+) -> dict[tuple[int, int, int, int], int]:
+    return {
+        (row["army_id"], row["unit_id"], row["group_id"], row["option_id"]): row[
+            "loadout_payload_id"
+        ]
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, option_id, loadout_payload_id "
+            "FROM loadout_payload_occurrences"
+        )
+    }
+
+
 def _source_logical_units(connection: sqlite3.Connection) -> dict[int, int]:
     return {
         row["source_unit_id"]: row["logical_unit_id"]
@@ -172,6 +214,7 @@ def _source_logical_units(connection: sqlite3.Connection) -> dict[int, int]:
 def _audit_contextual_includes(
     rows: Iterable[sqlite3.Row],
     *,
+    parent_id_field: str,
     targets: dict[tuple[int, int, int, int], tuple[int, int]],
     source_logical: dict[int, int],
     include_details: bool,
@@ -208,6 +251,8 @@ def _audit_contextual_includes(
                 {
                     "armyId": row["army_id"],
                     "unitId": row["unit_id"],
+                    "groupId": row["group_id"],
+                    "parentId": row[parent_id_field],
                     "position": row["position"],
                     "targetGroupId": row["target_group_id"],
                     "targetOptionId": row["target_option_id"],
@@ -227,6 +272,133 @@ def _audit_contextual_includes(
     }
     if include_details:
         result["rows"] = details
+    return result
+
+
+def _include_signature_item(
+    row: sqlite3.Row,
+    *,
+    targets: dict[tuple[int, int, int, int], tuple[int, int]],
+) -> tuple[Any, ...]:
+    target = targets.get(
+        (
+            row["army_id"],
+            row["unit_id"],
+            row["target_group_id"],
+            row["target_option_id"],
+        )
+    )
+    target_payload_id = target[0] if target is not None else None
+    return (row["position"], target_payload_id, row["quantity"], row["raw"])
+
+
+def _audit_parent_payload_invariance(
+    rows: Iterable[sqlite3.Row],
+    *,
+    parent_payloads: dict[tuple[int, int, int, int], int],
+    parent_id_field: str,
+    targets: dict[tuple[int, int, int, int], tuple[int, int]],
+    include_details: bool,
+) -> dict[str, Any]:
+    rows_by_parent: dict[tuple[int, int, int, int], list[sqlite3.Row]] = defaultdict(list)
+    for row in rows:
+        rows_by_parent[
+            (
+                row["army_id"],
+                row["unit_id"],
+                row["group_id"],
+                row[parent_id_field],
+            )
+        ].append(row)
+
+    affected_payload_ids = {
+        parent_payloads[parent_key]
+        for parent_key in rows_by_parent
+        if parent_key in parent_payloads
+    }
+    unmapped_parent_rows = sum(
+        len(parent_rows)
+        for parent_key, parent_rows in rows_by_parent.items()
+        if parent_key not in parent_payloads
+    )
+    signatures_by_payload: dict[int, dict[tuple[Any, ...], list[tuple[int, int, int, int]]]] = (
+        defaultdict(lambda: defaultdict(list))
+    )
+    unresolved_target_rows = 0
+    for parent_key, payload_id in parent_payloads.items():
+        if payload_id not in affected_payload_ids:
+            continue
+        parent_rows = sorted(rows_by_parent.get(parent_key, ()), key=lambda row: row["position"])
+        signature_items = tuple(
+            _include_signature_item(row, targets=targets) for row in parent_rows
+        )
+        unresolved_target_rows += sum(1 for item in signature_items if item[1] is None)
+        signatures_by_payload[payload_id][signature_items].append(parent_key)
+
+    payloads_with_multiple_occurrences = 0
+    variant_payload_ids: list[int] = []
+    for payload_id, signatures in signatures_by_payload.items():
+        occurrence_count = sum(len(keys) for keys in signatures.values())
+        if occurrence_count > 1:
+            payloads_with_multiple_occurrences += 1
+        if len(signatures) > 1:
+            variant_payload_ids.append(payload_id)
+
+    result: dict[str, Any] = {
+        "status": (
+            "unresolved_parents"
+            if unmapped_parent_rows
+            else "unresolved_targets"
+            if unresolved_target_rows
+            else "contextual_variants"
+            if variant_payload_ids
+            else "payload_invariant"
+        ),
+        "affectedCanonicalParentPayloadCount": len(signatures_by_payload),
+        "affectedCanonicalParentPayloadsWithMultipleOccurrences": (
+            payloads_with_multiple_occurrences
+        ),
+        "variantCanonicalParentPayloadCount": len(variant_payload_ids),
+        "unmappedParentRowCount": unmapped_parent_rows,
+        "unresolvedTargetRowCount": unresolved_target_rows,
+    }
+    if include_details:
+        variants: list[dict[str, Any]] = []
+        for payload_id in sorted(variant_payload_ids):
+            signatures = signatures_by_payload[payload_id]
+            variant_signatures: list[dict[str, Any]] = []
+            for signature, parent_keys in sorted(
+                signatures.items(), key=lambda item: repr(item[0])
+            ):
+                variant_signatures.append(
+                    {
+                        "signature": [
+                            {
+                                "position": item[0],
+                                "targetPayloadId": item[1],
+                                "quantity": item[2],
+                                "raw": item[3],
+                            }
+                            for item in signature
+                        ],
+                        "occurrences": [
+                            {
+                                "armyId": key[0],
+                                "unitId": key[1],
+                                "groupId": key[2],
+                                "parentId": key[3],
+                            }
+                            for key in sorted(parent_keys)
+                        ],
+                    }
+                )
+            variants.append(
+                {
+                    "parentPayloadId": payload_id,
+                    "variants": variant_signatures,
+                }
+            )
+        result["variantParentPayloads"] = variants
     return result
 
 
@@ -407,15 +579,21 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
         _validate_schema(connection)
         targets = _payload_targets(connection)
         source_logical = _source_logical_units(connection)
+        profile_rows = _fetch_rows(connection, "profile_includes")
+        loadout_rows = _fetch_rows(connection, "option_includes")
+        profile_parents = _profile_payload_parents(connection)
+        loadout_parents = _loadout_payload_parents(connection)
         includes = {
             "profile": _audit_contextual_includes(
-                _fetch_rows(connection, "profile_includes"),
+                profile_rows,
+                parent_id_field="profile_id",
                 targets=targets,
                 source_logical=source_logical,
                 include_details=include_details,
             ),
             "loadout": _audit_contextual_includes(
-                _fetch_rows(connection, "option_includes"),
+                loadout_rows,
+                parent_id_field="option_id",
                 targets=targets,
                 source_logical=source_logical,
                 include_details=include_details,
@@ -427,6 +605,20 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
                 include_details=include_details,
             ),
         }
+        includes["profile"]["parentPayloadInvariance"] = _audit_parent_payload_invariance(
+            profile_rows,
+            parent_payloads=profile_parents,
+            parent_id_field="profile_id",
+            targets=targets,
+            include_details=include_details,
+        )
+        includes["loadout"]["parentPayloadInvariance"] = _audit_parent_payload_invariance(
+            loadout_rows,
+            parent_payloads=loadout_parents,
+            parent_id_field="option_id",
+            targets=targets,
+            include_details=include_details,
+        )
         metadata = _metadata(connection)
         return {
             "format": REPORT_FORMAT,
@@ -449,7 +641,10 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Audit deferred include/peripheral relationship semantics."
+        description=(
+            "Audit deferred include/peripheral relationship semantics, including canonical "
+            "include-target resolution and parent-payload invariance."
+        )
     )
     parser.add_argument("database", type=Path, help="Path to infinity.db")
     parser.add_argument("--details", action="store_true", help="Include row-level evidence")
