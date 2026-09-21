@@ -838,3 +838,66 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Command_Tokens>
 - Wiki: <https://infinitythewiki.com/Counterintelligence>
 - PDF: Infinity N5 V5.3, printed pages 90 and 128-129
+
+## Movement
+
+### RR-MOV-ROUTE-001 — Movement routes are action-local geometry
+
+**Scope:** core N5.
+
+The Movement rules require an exact route and final location, and LoF/ARO
+interactions can depend on intermediate points along that route rather than only
+on the starting and ending positions. General Movement also applies rules for
+vaulting, base support, Silhouette contact, facing, and safe final placement.
+
+These concepts are useful glossary/play-aid context but are not stable Unit or
+profile relationships. InfinityDB does not need board coordinates, paths, or a
+movement resolver to explain the static MOV Attribute and movement-related
+Skills.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Moving_and_Measuring>
+- Wiki: <https://infinitythewiki.com/General_Movement_Rules>
+- PDF: Infinity N5 V5.3, printed pages 27-31
+
+### RR-MOV-CAUT-001 — Cautious Movement is contextual ARO suppression, not static eligibility
+
+**Scope:** core N5.
+
+Cautious Movement avoids enemy AROs only when its current-position conditions
+are satisfied. Its restrictions and checks reference LoF, ZoC, Hacking Area,
+Hackable, several Troop Types, Motorcycle/Aerial, Targeted State, and Hidden
+Deployment representation.
+
+Those cross-links may be useful for rule help, but they should not be condensed
+into a permanent `can_cautious_move` Unit flag. Actual availability depends on
+current representation, State, enemies, and board position.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Cautious_Movement>
+- PDF: Infinity N5 V5.3, printed pages 32-33
+
+### RR-MOV-SURFACE-001 — Surface/scenery semantics belong with tabletop context
+
+**Scope:** core N5 with a future Terrain/Scenery cross-section dependency.
+
+Movement distinguishes ordinary surfaces, vertical surfaces, stairs/ladders,
+vaultable obstacles, valid landing surfaces, and Silhouette-dependent height.
+Stairs and ladders can make vertical/diagonal scenery behave as a horizontal
+surface for Skills with the Movement Label, while Climb and Jump impose their
+own surface and trajectory rules.
+
+This vocabulary may later support terrain/scenery reference pages, but the
+Movement audit does not make scenery geometry part of canonical Unit data. The
+next Terrain and Scenery Structures pass should reuse these relationships rather
+than introduce a separate movement-geometry model.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Moving_and_Measuring>
+- Wiki: <https://infinitythewiki.com/General_Movement_Rules>
+- Wiki: <https://infinitythewiki.com/Climb>
+- Wiki: <https://infinitythewiki.com/Jump>
+- PDF: Infinity N5 V5.3, printed pages 27-35

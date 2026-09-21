@@ -194,7 +194,16 @@ rules have been audited.
   - [x] Coordinated Orders
   - [x] Cross-section interactions: Lieutenant, Counterintelligence, and NCO
   - [x] Application/session-boundary reconciliation
-- [ ] Movement
+- [x] Movement
+  - [x] Movement Module overview and MOV pair semantics
+  - [x] Moving and Measuring
+  - [x] Move
+  - [x] General Movement Rules
+  - [x] Cautious Movement
+  - [x] Climb
+  - [x] Jump
+  - [x] Cross-section reconciliation: Movement Label, Prone, Super-Jump,
+    Climbing Plus, source distance units, and application presentation
 - [ ] Terrain and Scenery Structures
 - [ ] Triumph and Defeat
 - [ ] Setting up the Gaming Table
@@ -1247,3 +1256,133 @@ The current separation is appropriate:
 The broader rules-reference/play-aid backlog already provides a suitable future
 home for concise Command Token and Coordinated Order guidance. This audit adds no
 separate rules-engine or session-model implementation requirement.
+
+### Movement — section complete
+
+Status: core N5.3 Movement Module semantic extraction complete. The pass keeps
+only movement semantics that help InfinityDB interpret profile Attributes,
+Skill/Label relationships, parameterized distances, and presentation units.
+Exact route geometry, ARO timing, and tabletop movement resolution remain
+reference context rather than an application movement engine.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Movement_Module>,
+  <https://infinitythewiki.com/Moving_and_Measuring>,
+  <https://infinitythewiki.com/Move>,
+  <https://infinitythewiki.com/General_Movement_Rules>,
+  <https://infinitythewiki.com/Cautious_Movement>,
+  <https://infinitythewiki.com/Climb>, and
+  <https://infinitythewiki.com/Jump>.
+- PDF: Infinity N5 V5.3, printed pages 27-35.
+- Cross-section rules used to interpret profile movement modifiers:
+  <https://infinitythewiki.com/Super-Jump>,
+  <https://infinitythewiki.com/Climbing_Plus>,
+  <https://infinitythewiki.com/Prone_State>, and
+  <https://infinitythewiki.com/Labels>.
+
+The live Movement Module, Moving and Measuring, Move, General Movement Rules,
+Climb, and Jump pages identify the current N5.3 rules. The Cautious Movement page
+currently carries an older N5.2 / FAQ v0.0.0 page notice; no N5.3-specific change
+is shown there, so its content was treated as an unchanged current rule while the
+N5 V5.3 PDF remains the edition baseline.
+
+#### MOV is an ordered profile pair, not a generic speed score
+
+The rules define the MOV Attribute as normally containing two values. The first
+value is used the first time the Trooper moves in an Order, and the second value
+is used for the second movement. `Move` makes that ordering explicit: the first
+Move uses the first MOV value and a second Move uses the second value.
+
+This confirms the semantic meaning of InfinityDB's existing `move_1` and
+`move_2` profile fields. They are an ordered pair and must not be sorted,
+averaged, or collapsed into one canonical movement number. A display such as
+`4-4` is compact notation for two positionally meaningful values.
+
+The rules express MOV in inches. Infinity Army source values retained by
+InfinityDB use their source-native metric representation, and the browser already
+converts those values using the project's shared 2.5 cm/inch convention. That is
+presentation conversion around preserved source data, not a change in the
+meaning of the MOV pair.
+
+#### Movement is a Label, not a declaration category
+
+`Movement` is a rules Label that can apply across Skills and AROs. Moving and
+Measuring is invoked when a Skill with the Movement Label is declared, while the
+declaration category (`Basic Short`, `Short`, `Long`, `ARO`, etc.) independently
+determines how that action consumes an Order.
+
+The distinction matters because different movement actions have different
+categories: Move is a Basic Short Skill, while ordinary Jump and Climb are Long
+Skills, and Special Skills such as Super-Jump and Climbing Plus can modify those
+categories or how movement is performed.
+
+InfinityDB's curated `movement` Label is therefore the correct kind of semantic
+vocabulary, but label membership and declaration category must remain separate
+relationships. Movement-like behavior should not be inferred merely from a
+Skill name or its declaration category.
+
+#### Parenthetical movement distances belong to the Skill occurrence
+
+The N5.3 Jump and Climb rules use the first MOV value plus a rules-defined bonus.
+For both ordinary Skills that bonus is normally 2 inches. If the relevant Skill
+is listed in the Unit Profile with a distance in round brackets, that listed
+distance replaces the normal 2-inch bonus; it is not a replacement for the
+Trooper's MOV Attribute or the total movement distance.
+
+Super-Jump further demonstrates why the exact relationship matters: the Special
+Skill changes how Jump can be declared, gives a different Long-Skill bonus, and
+can itself carry a profile distance affecting the Short-Skill Jump case.
+Climbing Plus similarly changes declaration and surface semantics without
+rewriting the underlying MOV values.
+
+This supports InfinityDB's existing rule-derived parameter-semantics boundary.
+A distance extra should remain attached to the Skill occurrence and be explained
+according to that Skill's semantics rather than promoted to a generic MOV
+modifier.
+
+#### MOV does not completely describe mobility
+
+A profile's MOV pair describes the base distance allowance used by movement
+rules, but it is not a complete measure of how the Trooper can traverse the
+table. Jump, Climb, Super-Jump, Climbing Plus, terrain/scenery geometry, States,
+and other rules can change available routes, declaration categories, movement
+distance, or usable surfaces without changing the stored MOV Attribute.
+
+InfinityDB should therefore present MOV as a profile Attribute and relate it to
+movement Skills where useful, rather than derive a universal `mobility` or
+`speed` value from MOV alone.
+
+#### Runtime geometry and Cautious Movement stay outside the catalog model
+
+Movement paths are declared action-local geometry. LoF and ARO opportunities can
+depend on points traversed along the route, and the general rules distinguish
+horizontal surfaces, vertical surfaces, vaulting, ladders, base support, and
+Silhouette-dependent obstacles.
+
+Cautious Movement is likewise a contextual procedure for avoiding AROs when its
+current-game requirements are met. Its restrictions reference otherwise useful
+catalog concepts such as Troop Type, Motorcycle/Aerial, Hackable, Hacking Area,
+and Targeted State, but those references do not establish an invariant
+`can_cautious_move` property on a Unit.
+
+Those procedural facts remain in `rules-research.md` for terminology and future
+play-aid context. They do not require movement-path, board-position, or action
+resolution tables in InfinityDB.
+
+#### Application reconciliation
+
+The existing application model already has the important static boundary:
+
+- canonical profile payloads retain ordered `move_1` / `move_2` values;
+- source metric values remain preserved while the browser can present inches;
+- Skill extras retain source association instead of becoming global profile
+  Attributes;
+- the curated rules vocabulary already has a `Movement` Label; and
+- States, table positions, movement routes, ARO opportunities, and terrain
+  geometry are not stored as canonical Unit facts.
+
+No schema or runtime change is required by this audit. Future rules-reference
+coverage can add reviewed Movement-label and Skill-parameter relationships where
+they improve profile help/search, without attempting to reproduce the Movement
+Module as executable rules.

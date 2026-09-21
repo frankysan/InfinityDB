@@ -184,7 +184,7 @@ in `docs/releasing.md`.
     - [x] Ammunition and Weaponry.
     - [x] Fireteams.
     - [x] Command.
-    - [ ] Movement.
+    - [x] Movement.
     - [ ] Terrain and Scenery Structures.
     - [ ] Triumph and Defeat.
     - [ ] Setting up the Gaming Table.

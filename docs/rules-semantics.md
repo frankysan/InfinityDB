@@ -1940,3 +1940,94 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Command_Tokens#Command_Tokens:_Operational_Use>
 - Wiki: <https://infinitythewiki.com/Fireteams_Chart>
 - PDF: Infinity N5 V5.3, printed page 129
+
+## Movement
+
+### RS-MOV-ATTR-001 — MOV is an ordered two-part movement allowance
+
+**Classification:** source-native with an InfinityDB persistence/presentation
+consequence.
+
+The MOV Attribute normally contains two positionally meaningful values. The
+first value is used the first time the Trooper moves in an Order; a second Move
+uses the second value. The rules express those values in inches.
+
+InfinityDB should preserve `move_1` and `move_2` as an ordered pair rather than
+collapse them into a single speed value. The current source-native metric
+storage and optional browser conversion to inches are representation choices
+around those facts; conversion must not change which value is first or second.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Movement_Module>
+- Wiki: <https://infinitythewiki.com/Move>
+- PDF: Infinity N5 V5.3, printed pages 27-29
+
+### RS-MOV-LABEL-001 — Movement is a cross-domain Label, not a declaration category
+
+**Classification:** source-native with a curated-data consequence.
+
+`Movement` classifies Skills/AROs whose use is movement. It is independent from
+the declaration category that determines Order expenditure. Move is a Basic
+Short Skill, ordinary Jump and Climb are Long Skills, and other rules can modify
+those categories while the action remains Movement.
+
+InfinityDB should keep the curated `movement` Label separate from
+`skill-declaration-category` facts. Label membership should be reviewed/cited
+rather than inferred from a Skill name or from Basic Short/Short/Long/ARO
+classification.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Moving_and_Measuring>
+- Wiki: <https://infinitythewiki.com/General_Movement_Rules>
+- Wiki: <https://infinitythewiki.com/Labels>
+- PDF: Infinity N5 V5.3, printed pages 27-31
+
+### RS-MOV-PARAM-001 — Parenthetical movement distances modify a Skill, not MOV itself
+
+**Classification:** source-native with a parsing/curated-parameter consequence.
+
+Ordinary Jump and Climb use the first MOV value plus a rules-defined bonus. In
+N5.3 that bonus is normally 2 inches. When the applicable Skill is listed in the
+Unit Profile with a distance in round brackets, the listed distance replaces
+that normal bonus; it is not the total movement distance and does not replace
+`move_1` or `move_2`.
+
+Super-Jump and Climbing Plus further modify how Jump/Climb can be declared and
+performed without rewriting the base MOV Attribute. InfinityDB should therefore
+keep a movement-distance extra attached to its Skill occurrence and describe it
+with Skill-specific parameter semantics rather than treating it as a generic
+profile-stat modifier.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Jump>
+- Wiki: <https://infinitythewiki.com/Climb>
+- Wiki: <https://infinitythewiki.com/Super-Jump>
+- Wiki: <https://infinitythewiki.com/Climbing_Plus>
+- PDF: Infinity N5 V5.3, printed pages 32-35
+
+### RS-MOV-CAP-001 — MOV is not a complete mobility classification
+
+**Classification:** InfinityDB-derived interpretation from source-native movement
+semantics.
+
+MOV provides the base movement allowances used by the rules, while Skills,
+States, and table geometry can change which routes/surfaces are available, how a
+movement action is declared, or how far a particular Jump/Climb can travel.
+Consequently two Troopers with the same MOV pair can have materially different
+movement capabilities.
+
+InfinityDB should present MOV as the source profile Attribute and relate relevant
+Skills/Equipment/States where useful. It should not infer a single authoritative
+`mobility` or `speed` score from MOV alone.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/General_Movement_Rules>
+- Wiki: <https://infinitythewiki.com/Jump>
+- Wiki: <https://infinitythewiki.com/Climb>
+- Wiki: <https://infinitythewiki.com/Super-Jump>
+- Wiki: <https://infinitythewiki.com/Climbing_Plus>
+- PDF: Infinity N5 V5.3, printed pages 27-35
