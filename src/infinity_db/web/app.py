@@ -64,6 +64,8 @@ EQUIPMENT_PAGE_PATH = re.compile(
 EQUIPMENT_API_PATH = re.compile(
     rf"/api/equipment/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
 )
+WEAPON_PAGE_PATH = re.compile(rf"/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+WEAPON_API_PATH = re.compile(rf"/api/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
@@ -452,7 +454,7 @@ class Application:
                 ),
                 catalog_tag="Reference data",
             )
-        elif re.fullmatch(r"/weapons/[0-9]+", path):
+        elif WEAPON_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
             body = _page(
                 "weapons-detail.html",
@@ -510,7 +512,7 @@ class Application:
                     if catalog == "skills"
                     else self.database.list_catalog_items(catalog)
                 )
-                if catalog == "equipment":
+                if catalog in {"equipment", "weapons"}:
                     for item in items:
                         attach_public_catalog_slug(self.database, catalog, item)
                 payload = {"items": items}
@@ -574,14 +576,25 @@ class Application:
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The reference item is unavailable. Please try again."}
-        elif match := re.fullmatch(r"/api/weapons/([0-9]+)", path):
+        elif match := WEAPON_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = self.database.get_catalog_item("weapons", int(match.group(1)))
+                identifier = match.group("identifier")
+                item_id = (
+                    int(identifier)
+                    if identifier.isdigit()
+                    else self.database.application_id_for_slug("weapons", identifier)
+                )
+                payload = (
+                    None
+                    if item_id is None
+                    else self.database.get_catalog_item("weapons", item_id)
+                )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
                 else:
+                    attach_public_catalog_slug(self.database, "weapons", payload)
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
             except ValueError as exc:
@@ -658,7 +671,7 @@ class Application:
                     payload = enrich_nested_catalog_slugs(
                         self.database,
                         payload,
-                        frozenset({"equipment"}),
+                        frozenset({"equipment", "weapons"}),
                     )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND

@@ -436,6 +436,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 31,
                 "name": "Combi Rifle",
+                "slug": "combi-rifle",
                 "quantity": None,
                 "extras": [{"id": 43, "name": "AP"}],
             }
@@ -463,6 +464,7 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
             {
                 "id": 31,
                 "name": "Combi Rifle",
+                "slug": "combi-rifle",
                 "quantity": 2,
                 "extras": [{"id": 43, "name": "AP"}],
             }
@@ -1417,6 +1419,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
         "weapons": {
             "id": 31,
             "name": "Combi Rifle",
+            "slug": "combi-rifle",
             "type": None,
             "category": "Rifles",
             "ammunition": None,
@@ -1605,7 +1608,7 @@ def test_visible_unit_ids_api_matches_default_unit_listing(app: Callable) -> Non
     ("catalog", "item_id", "slug", "name"),
     [
         ("equipment", 21, "medikit", "Medikit"),
-        ("weapons", 31, None, "Combi Rifle"),
+        ("weapons", 31, "combi-rifle", "Combi Rifle"),
     ],
 )
 def test_equipment_and_weapon_details_are_served(
@@ -1627,7 +1630,7 @@ def test_equipment_and_weapon_details_are_served(
     assert payload["name"] == name
     if catalog == "equipment":
         assert payload["wiki"] == "https://infinitythewiki.com/Medikit"
-        assert payload["slug"] == slug
+    assert payload["slug"] == slug
     assert payload["variants"][0]["units"][0]["id"] == 1
 
     if slug is not None:

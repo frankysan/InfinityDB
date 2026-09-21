@@ -18,9 +18,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
-- Continue the public slug migration across Skills and Equipment: catalog/unit links
-  and detail APIs use readable domain-local slugs when available while existing numeric
-  URLs remain valid for compatibility. Catalog identity alias groups may also be
+- Continue the public slug migration across Skills, Equipment, and Weapons: catalog/unit
+  links and detail APIs use readable domain-local slugs when available while existing
+  numeric URLs remain valid for compatibility. Catalog identity alias groups may also be
   authored with readable source-label slugs or numeric source IDs; unknown or ambiguous
   slugs fail validation instead of being guessed.
 - Validate curated typed record IDs against the shared domain-slug grammar, and make

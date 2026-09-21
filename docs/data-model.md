@@ -1810,14 +1810,16 @@ slugs may seed a candidate where useful, but they are not thereby promoted to a
 permanent public identity.
 
 Repository lookup can translate a `resolved` slug to/from the current numeric
-application key. Skills and Equipment are additive public consumers: their API
-payloads expose resolved non-numeric slugs, browser links prefer them, and detail
-web/API routes accept either that slug or the existing numeric application ID.
-Numeric-only candidates remain on numeric compatibility routes because the two forms
-would otherwise be ambiguous. No redirect or permanent-freeze promise is made by
-this transition; per-domain freezing, reviewed overrides, aliases, and canonical
-redirect behavior still precede retirement of numeric routes. Armies, Units, and
-Weapons remain numeric-only publicly. The current 2026-09-18 snapshot resolves all
+application key. Skills, Equipment, and Weapons are additive public consumers: their
+API payloads expose resolved non-numeric slugs, browser links prefer them, and detail
+web/API routes accept either that slug or the existing numeric application ID. Nested
+Unit Equipment and Weapon references resolve source-variant IDs through catalog
+provenance before exposing the canonical application slug. Numeric-only candidates
+remain on numeric compatibility routes because the two forms would otherwise be
+ambiguous. No redirect or permanent-freeze promise is made by this transition;
+per-domain freezing, reviewed overrides, aliases, and canonical redirect behavior
+still precede retirement of numeric routes. Armies and Units remain numeric-only
+publicly. The current 2026-09-18 snapshot resolves all
 1,042 initial identities
 (57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons)
 without collision or unavailable candidates; these counts are evidence only.

@@ -785,7 +785,15 @@ application-level identities.
   the canonical application Equipment identity. Numeric Equipment routes remain valid,
   source-variant IDs are resolved through the application catalog provenance mapping
   before slug lookup, and numeric-only slug candidates remain on the compatibility
-  numeric form. Weapons, Armies, and Units remain numeric-only publicly for now.
+  numeric form.
+- 2026-09-21: Weapons are the third additive public-route consumer of the same
+  application-domain slug registry. Weapon catalog/detail API payloads and nested Unit
+  weapon references expose resolved non-numeric application slugs, browser links prefer
+  them, and `/weapons/{slug}` plus `/api/weapons/{slug}` resolve to the canonical
+  application Weapon identity. Existing numeric Weapon routes remain valid, curated
+  source-variant IDs resolve through application catalog provenance before slug lookup,
+  and numeric-only candidates stay on the compatibility numeric form. Armies and Units
+  remain numeric-only publicly for now.
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
   rules authority, the pinned Wiki archive as discovery/secondary provenance,

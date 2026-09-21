@@ -716,6 +716,9 @@ new correctness or reproducibility defect.
   - [x] Extend the same additive migration contract to Equipment, including catalog
     links and nested Unit payload references, while keeping numeric Equipment routes
     valid and suppressing numeric-only slug candidates.
+  - [x] Extend the additive migration contract to Weapons, including catalog links,
+    detail API/web lookup, and nested Unit weapon references while retaining numeric
+    routes and resolving source-variant IDs through application catalog provenance.
   - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
     reviewed overrides, aliases/redirects, and compatibility behavior; extend the
     registry only when a new canonical domain boundary (for example Peripheral

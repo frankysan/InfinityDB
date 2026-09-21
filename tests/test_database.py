@@ -2725,6 +2725,69 @@ def test_equipment_slug_enrichment_does_not_emit_numeric_only_slug(
     assert database.application_slug("equipment", 1) == "100"
 
 
+def test_weapon_slug_enrichment_resolves_source_variant_ids(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["weapons"].extend(
+        [
+            {
+                "id": 226,
+                "name": "Armed Turret",
+                "source_defined": True,
+                "category": "Uncategorized",
+            },
+            {
+                "id": 228,
+                "name": "Armed Turret (MULTI Rifle)",
+                "source_defined": True,
+                "category": "Uncategorized",
+            },
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_weapons"]:
+        occurrence["item_id"] = 228
+    for occurrence in normalized["tables"]["option_weapons"]:
+        occurrence["item_id"] = 228
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    assert database.application_catalog_id("weapons", 228) == 226
+    assert database.application_slug("weapons", 226) == "armed-turret"
+
+    raw_unit = database.get_unit(1)
+    assert raw_unit is not None
+    raw_weapon = raw_unit["armies"][0]["profiles"][0]["weapons"][0]
+    assert raw_weapon["id"] == 228
+    assert "slug" not in raw_weapon
+
+    enriched = enrich_nested_catalog_slugs(
+        database,
+        raw_unit,
+        frozenset({"weapons"}),
+    )
+    weapon = enriched["armies"][0]["profiles"][0]["weapons"][0]
+    assert weapon["id"] == 228
+    assert weapon["slug"] == "armed-turret"
+
+
+def test_weapon_slug_enrichment_does_not_emit_numeric_only_slug(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["weapons"][0]["name"] = "100"
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+
+    weapon = database.list_catalog_items("weapons")[0]
+    attach_public_catalog_slug(database, "weapons", weapon)
+
+    assert weapon["id"] == 1
+    assert "slug" not in weapon
+    assert database.application_slug("weapons", 1) == "100"
+
+
 def test_application_domain_slug_lookup_rejects_unknown_domains(
     tmp_path: Path, normalized: dict
 ) -> None:
