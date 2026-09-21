@@ -937,14 +937,18 @@ Unit-list and general-profile surfaces may use the unit's derived display-factio
 colors as accents. Keep those accents within the shared token and gradient
 system so catalog-specific styling remains legible and consistent.
 
-Browser preferences are stored locally. The Settings sidebar section provides
-distance units, a default-off Developer mode, and a developer-only cache-bypass
-control; on compact screens it becomes a top-bar menu beside Navigation. New
-sidebar or top-bar menus should use this same inline-sidebar and
-compact-dropdown pattern. Developer mode sets `data-developer-mode` on the
-document root; use `.developer-only` for inline technical details and
-`.id-column` for table columns so they remain hidden in the player-facing view
-by default.
+Browser preferences are stored locally. User-selected distance-unit, optional-unit,
+Developer-mode, and cache-bypass values are stored in browser `sessionStorage`; values
+loaded from persistent cookies are mirrored there before use. Disabling persistent settings
+therefore does not reset them during the current tab/session. When the user enables
+**Remember settings** and accepts the cookie prompt, the same values are mirrored to
+one-year SameSite cookies for reuse in later browser sessions; disabling that option
+removes the persistent cookies without clearing the current session values. The Settings
+sidebar exposes those controls; on compact screens it becomes a top-bar menu beside
+Navigation. New sidebar or top-bar menus should use this same inline-sidebar and
+compact-dropdown pattern. Developer mode sets `data-developer-mode` on the document
+root; use `.developer-only` for inline technical details and `.id-column` for table
+columns so they remain hidden in the player-facing view by default.
 
 ## Required Army API metadata
 

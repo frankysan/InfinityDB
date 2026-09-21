@@ -45,7 +45,13 @@ function setSessionValue(name, value) {
 }
 
 function savedSetting(name) {
-  return isRememberingSettings() ? cookieValue(name) : sessionValue(name);
+  const session = sessionValue(name);
+  if (!isRememberingSettings()) return session;
+
+  const persistent = cookieValue(name);
+  if (persistent === undefined) return session;
+  setSessionValue(name, persistent);
+  return persistent;
 }
 
 function saveSetting(name, value) {

@@ -158,9 +158,9 @@ redesigned deliberately:
   quantities, and schema values;
 - fallback identifiers when no unambiguous routable slug exists.
 
-## Required closure order
+## Completed closure order
 
-Before starting the 0.6.2 release checklist:
+The remediation closed in this order before the 0.6.2 release checklist began:
 
 1. **Closed:** centralize application-domain reference resolution and make
    repository/detail lookups dual-ID where the domain supports stable slugs;
@@ -170,8 +170,8 @@ Before starting the 0.6.2 release checklist:
 4. **Closed:** move numeric-shadow handling into the slug registry/resolver boundary;
 5. **Closed:** migrate maintained Weapon/display references where the owning source
    identity has a deterministic slug, retaining provenance-only canonical faction ID 1;
-6. add project-wide dual-identifier invariant tests and rerun the sanity audit.
+6. **Closed:** add project-wide dual-identifier invariant tests and rerun the sanity audit.
 
-Only after those items are green should the normal release process in
-`docs/releasing.md` begin, including its separate project-wide documentation
-audit.
+All six items are green. The normal 0.6.2 release process continues in
+`docs/releasing.md`. The project-wide documentation audit completed on 2026-09-21;
+release validation and release-metadata steps remain.

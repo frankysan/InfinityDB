@@ -572,6 +572,11 @@ compatibility references remain unambiguous JSON integers.
   page documents retain the navigation/header/footer markers expected by
   `_page()`.
 - Shared menus use the inline-sidebar / compact-topbar pattern.
+- User-selected browser settings persist for the current tab/session through
+  `sessionStorage`; values loaded from persistent cookies must be mirrored into the session
+  store before use. The **Remember settings** consent path additionally mirrors values to
+  one-year SameSite cookies for later sessions; turning persistence off removes those
+  cookies but must not reset current-session choices.
 - `styles.css` is the design-system source of truth. Reuse established tokens,
   surfaces, table density, detail-group primitives, and badges rather than
   adding page-local equivalents.

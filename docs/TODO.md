@@ -764,10 +764,10 @@ new correctness or reproducibility defect.
       canonicalization, slug preference/fallback, and fail-closed unknown/ambiguous behavior
       for every current domain where a stable slug exists; the sanity audit has been rerun
       and is closed.
-  - [ ] **0.6.2 release checkpoint.** After the dual-identifier sanity audit is fully closed,
-    run the general release checklist in `docs/releasing.md` and release this
-    public-identity/slug work as version 0.6.2. The project-wide documentation audit is a
-    release gate, not a post-release cleanup task.
+  - [ ] **0.6.2 release checkpoint.** The dual-identifier sanity audit and the
+    2026-09-21 project-wide documentation audit are complete. Finish the remaining
+    general release checklist in `docs/releasing.md`, including release metadata and
+    validation, then release this public-identity/slug work as version 0.6.2.
   - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,
     reviewed overrides, aliases/redirects, and compatibility behavior; extend the
     registry only when a new canonical domain boundary (for example Peripheral
@@ -775,10 +775,9 @@ new correctness or reproducibility defect.
   - [x] Extend the numeric-or-slug authoring convention to curated rules `armyLinks`
     for Skills, Equipment, and Weapons. The maintained N5 collection now uses logical
     application-domain slugs while numeric source IDs remain accepted for compatibility.
-  - [ ] After the 0.6.2 blocker migration above, apply the same numeric-or-slug authoring
-    convention to future maintained JSON reference fields whenever their owning build layer
-    has a deterministic resolver. Keep numeric references valid and make unknown/ambiguous
-    slugs fail closed.
+  - [ ] Apply the same numeric-or-slug authoring convention to future maintained JSON
+    reference fields whenever their owning build layer has a deterministic resolver. Keep
+    numeric references valid and make unknown/ambiguous slugs fail closed.
   Keep source numeric IDs/slugs as provenance/context references and application numeric
   IDs as developer/compatibility details rather than the long-term user-facing contract.
 
