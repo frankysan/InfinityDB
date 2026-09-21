@@ -179,7 +179,16 @@ rules have been audited.
     Chest Mines, D-Charges, Disco Baller, Drop Bears, Mine Dispenser, Mines,
     Pitcher, Sepsitor, SymbioBomb, and WildParrot
   - [x] Army metadata/curated/application-model reconciliation
-- [ ] Fireteams
+- [x] Fireteams
+  - [x] Fireteams Module overview and Basic Rules
+  - [x] Fireteams Chart
+  - [x] Fireteam Integrity
+  - [x] Fireteams in the Active Turn
+  - [x] Fireteams in the Reactive Turn
+  - [x] Fireteam Bonuses / Fireteam Level
+  - [x] Fireteam Examples
+  - [x] Army Fireteam-chart representation reconciliation
+  - [x] Historical/community terminology: `Linkable` and `pure Fireteam`
 - [ ] Command
 - [ ] Movement
 - [ ] Terrain and Scenery Structures
@@ -923,3 +932,196 @@ logic.
 
 This audit does not change runtime data, curated rules records, or the web UI.
 It only records the semantic contract and the resulting focused backlog work.
+
+
+### Fireteams — section complete
+
+Status: core N5.3 wiki/PDF semantic extraction complete for the Fireteams Module.
+The audit intentionally focuses on chart structure, eligibility relationships,
+bonus-equivalence semantics, and terminology useful to InfinityDB rather than
+reproducing Fireteam activation and integrity procedures as a rules engine.
+
+Primary sources reviewed:
+
+- Wiki: <https://infinitythewiki.com/Infinity_Fireteams> and the linked Fireteams
+  pages (`Fireteams:_Basic_Rules`, `Fireteams_Chart`, `Fireteam_Integrity`,
+  Active/Reactive Turn, Bonuses, and Examples), reviewed against the live N5.3 /
+  FAQ v0.1 wiki.
+- PDF: Infinity N5 V5.3, printed pages 132-142.
+- FAQ: N5 FAQ v0.1, printed page 3, for Fireteam Type persistence and
+  formation-minimum clarification.
+- Historical terminology cross-check:
+  - Infinity Human Sphere N3, where `Linkable` appears as an official profile
+    descriptor.
+  - Infinity N4 Fireteams Annex / rules v2.1, where the official concept was
+    `Fireteam Composition Bonuses`; contemporary community usage commonly called
+    qualifying teams `pure Fireteams`.
+
+The section confirms that Infinity Army's current Fireteams Chart is the
+authoritative source for army/sectorial-specific composition. The rules explain
+how to interpret that chart; they do not replace it with one universal
+eligibility rule.
+
+#### Fireteam identity, Type, and Level
+
+N5 distinguishes at least three concepts that must not be collapsed:
+
+1. the **Fireteam** itself, a runtime group created from eligible Troopers;
+2. its **Type** (`Duo`, `Haris`, or `Core`), constrained by the Army's chart;
+3. its **Fireteam Level**, which determines bonuses from the number of members
+   treated as belonging to the same Unit for this purpose.
+
+The Type is not another name for the current member count. FAQ v0.1 explicitly
+clarifies that a Haris that loses a member remains a Haris rather than becoming
+a Duo. Fireteam Level, by contrast, is recalculated as membership changes.
+InfinityDB should therefore present Type and Level as separate concepts.
+
+The general creation sizes (Duo 2, Haris 3, Core 3-5) are defaults interpreted
+together with the Army's Fireteams Chart. They are formation semantics, not a
+reason to reject a later runtime Fireteam merely because it has lost members.
+
+#### Fireteams Chart as authoritative Army-local relationship data
+
+The current rules explicitly identify the Infinity Army app as the source of the
+official, up-to-date Fireteams Charts. The chart describes:
+
+- maximum simultaneous Fireteams by Type;
+- which Fireteam Types each named chart entry can create;
+- per-entry minimum/maximum composition constraints;
+- required-choice rows marked by an asterisk;
+- additional chart notes that can override the general Fireteam rules;
+- FTO restrictions to specific Unit Profile options;
+- Wildcard participation and per-Fireteam maximums; and
+- bracket/note terms used when determining Fireteam Level.
+
+These are **Army-local relationship/configuration facts**. They must not be
+promoted to universal properties of a logical Unit. The same Unit can have
+different Fireteam eligibility or restrictions in another Army/Sectorial, and a
+single Unit can expose only selected FTO options to a particular Fireteam.
+
+This fits InfinityDB's broader scope: retain the concrete Army-chart occurrence,
+then relate it to game-wide Unit/profile identities without erasing the
+army-specific rule.
+
+#### Formation constraints are not permanent membership invariants
+
+FAQ v0.1 clarifies that the minimum/required conditions in the Fireteams Chart
+apply when the Fireteam is created. Losing a Trooper that was required for
+formation does not by itself cancel the Fireteam. Likewise, Type persists after
+member loss.
+
+That distinction is important for data naming. A chart `min`, maximum, or
+required marker describes a **formation constraint**. It should not be exposed
+as an invariant assertion that every later valid state of the Fireteam must
+still contain that member/count.
+
+Current Army source data also shows multiple rows in the same chart entry with
+`required: true` and `min: 0`. This aligns with the official asterisk rule:
+at least one Trooper from the marked set must be selected. The normalized
+`required` boolean must therefore not be interpreted as "this individual row is
+always mandatory".
+
+#### FTO is option-level eligibility
+
+The chart's `FTO` notation has explicit option semantics: when a Unit is listed
+as FTO, only Unit Profile options whose option name carries FTO are eligible;
+when a specific variant such as FTO-2 is named, only that variant qualifies.
+
+InfinityDB currently resolves a normalized Fireteam member slug to a source Unit
+when possible while preserving the chart's name/comment/min/max/required fields.
+That is a useful provenance link but is not enough to prove option-level
+eligibility. A future canonical Fireteam relationship layer should resolve FTO
+against the applicable source option/loadout while keeping the original chart
+wording for audit and presentation.
+
+#### Wildcards and bracket terms are relationships, not Unit identity
+
+A Wildcard may participate in any Fireteam allowed by the chart, subject to its
+maximum. That is an Army-local eligibility relationship, not an intrinsic Unit
+Characteristic.
+
+Bracketed terms such as `(Morat)` or `(Fennec)` have a different purpose: for
+Fireteam Level calculations, members with the same bracket term are treated as
+belonging to the same Unit. This is **bonus-equivalence semantics only**. It does
+not make the underlying Units one canonical Unit and must not feed logical-Unit
+deduplication.
+
+This is especially important for InfinityDB because the source already preserves
+those bracket labels in Fireteam-member comments while logical Unit identity is
+owned by a separate canonicalization layer.
+
+#### Chart notes are rule-bearing data
+
+The Fireteams Chart rules state that additional chart conditions can take
+priority over the General Rules of Fireteams. Army `desc`/`obs` text is therefore
+not necessarily decorative presentation metadata. It may encode an
+army-specific eligibility or behavior exception.
+
+InfinityDB should preserve those notes losslessly and display them with the
+relevant Fireteam. Structured interpretation can be added only where a reviewed
+consumer needs it; free-text rule notes should not be guessed into executable
+logic.
+
+#### Chart eligibility versus runtime eligibility
+
+The chart answers which Troopers/options may be used to form a Fireteam, but the
+general rules also impose runtime restrictions based on current state and role:
+for example Marker, Isolated/Null, Suppressive Fire, Peripheral/Controller, and
+Coherency interactions.
+
+InfinityDB's catalog view should therefore describe **chart eligibility**, not
+claim that a listed Trooper can always join or remain in a Fireteam in every
+game state. The detailed runtime integrity/ARO/activation procedures remain
+research context rather than application-schema requirements.
+
+#### Terminology provenance: `Linkable` and `pure Fireteam`
+
+The terminology investigation resolves the two community terms flagged before
+this pass:
+
+- **`Linkable` has historical official provenance.** Human Sphere N3 used
+  `Linkable` directly in Unit/Profile material for Troopers able to participate
+  in Fireteams. Current N5 does not use it as the canonical eligibility field;
+  eligibility is expressed through the Army Fireteams Chart, including FTO,
+  Wildcards, min/max constraints, and notes. Modern community use of "linkable"
+  is therefore understandable shorthand, but a single `linkable=true` flag would
+  lose important N5 context.
+- **`pure Fireteam` is community shorthand rather than the current N5 term.**
+  N4 officially defined `Fireteam Composition Bonuses` for Fireteams composed
+  only of the same Unit (or chart-equivalent entries), and community discussion
+  widely called teams satisfying that condition "pure". N5.3 instead uses one
+  `Fireteam Level` based incrementally on the number of same-Unit/bracket-
+  equivalent members. The phrase remains useful for search/help, but should map
+  to current Fireteam-Level semantics rather than be presented as a current
+  rules-defined Fireteam Type.
+
+Both terms are retained in `rules-research.md` as provenance-aware thesaurus
+candidates. This is a case where InfinityDB should support the vocabulary users
+actually encounter without conflating historical/community language with the
+current official ontology.
+
+#### Application reconciliation
+
+The normalization layer already preserves the important source shape:
+
+- army-level Fireteam description and `fireteamChart.spec`;
+- named Fireteam rows and observations;
+- ordered Fireteam Type memberships;
+- member slug/name/comment, min/max, and `required`;
+- best-effort source Unit resolution plus explicit unresolved/ambiguous status.
+
+That is a good lossless starting point, but several fields need semantic
+interpretation before a first-class application Fireteam model is built:
+
+- `fireteamChart.spec` corresponds to chart Type-quantity limits and should not
+  remain an opaque presentation blob in the eventual application model;
+- FTO restrictions require option-level resolution, not only Unit resolution;
+- `required` may represent membership in a required-choice set rather than an
+  individually mandatory row;
+- bracket terms are Fireteam-Level equivalence labels, not canonical Unit aliases;
+- Wildcards are Army-local membership relations; and
+- descriptions/observations may carry rule overrides.
+
+The existing Fireteam feature and Milestone 2 relationship backlog now records
+those consequences. No runtime schema, normalization behavior, or UI was changed
+by this audit.

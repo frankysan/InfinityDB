@@ -1624,3 +1624,184 @@ Sources:
 - PDF: Infinity N5 V5.3, printed pages 63-67
 - Source model: normalized/metadata Ammunition tables and Weapon profile
   Ammunition references
+
+
+## Fireteams
+
+### RS-FT-CHART-001 — Infinity Army Fireteams Charts are the current composition authority
+
+**Classification:** source-native with an InfinityDB source-authority consequence.
+
+The N5 Fireteams rules explicitly state that the official, current Fireteams
+Charts are those shown in Infinity Army. The core rules define how to read and
+apply a chart, while the chart supplies army/sectorial-specific Fireteam
+composition.
+
+InfinityDB should therefore preserve and present imported Army Fireteam-chart
+data as the authority for current Unit/profile eligibility. Curated rules data
+may explain Fireteam concepts, but must not replace Army chart membership with
+a separately reconstructed eligibility list.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
+- PDF: Infinity N5 V5.3, printed page 133
+
+### RS-FT-BASE-001 — Fireteam Type and Fireteam Level are independent concepts
+
+**Classification:** source-native.
+
+`Duo`, `Haris`, and `Core` are Fireteam Types. Fireteam Level is a separate
+bonus tier determined from same-Unit / chart-equivalent membership. FAQ v0.1
+also clarifies that a Fireteam does not change Type merely because it loses
+members.
+
+InfinityDB must keep `type` and level/bonus composition separate. A current
+member count can contribute to Level and integrity, but it is not a replacement
+identity for the Fireteam Type.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams:_Basic_Rules>
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>, N5 FAQ v0.1
+- PDF: Infinity N5 V5.3, printed pages 132-135
+- FAQ: N5 FAQ v0.1, printed page 3
+
+### RS-FT-CHART-002 — Fireteam chart composition is Army-local contextual data
+
+**Classification:** source-native with an InfinityDB canonicalization consequence.
+
+A Fireteams Chart belongs to an Army or Sectorial and defines its permitted
+Fireteams, Types, composition limits, and exceptions. Fireteam eligibility is
+therefore contextual to that Army chart rather than an invariant property of a
+game-wide logical Unit.
+
+InfinityDB should attach canonical Unit/profile identities to the source chart
+occurrence without promoting that occurrence into universal Unit membership.
+This follows the same source-context boundary already used for army-specific AVA
+and other list-local facts.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
+- PDF: Infinity N5 V5.3, printed page 133
+- Source model: Army `fireteamChart`
+
+### RS-FT-CHART-003 — Fireteam min/required values are formation constraints
+
+**Classification:** source-native plus source-data interpretation.
+
+Fireteams Chart minimums, maximums, and required entries govern creation.
+FAQ v0.1 explicitly confirms that losing a Trooper required to form the
+Fireteam does not itself cancel the Fireteam; the minimum applies when the team
+is created.
+
+Observed Army chart data can mark several rows `required: true` while each has
+`min: 0`. This corresponds to the chart's asterisk rule requiring at least one
+member from the marked set, not every marked row individually.
+
+InfinityDB should model these as creation/formation constraints and required-
+choice membership rather than as permanent invariants or one-row mandatory
+flags.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>, N5 FAQ v0.1
+- PDF: Infinity N5 V5.3, printed page 133
+- FAQ: N5 FAQ v0.1, printed page 3
+- Source model: Army Fireteam member `min`, `max`, and `required`
+
+### RS-FT-FTO-001 — FTO eligibility belongs to Unit Profile options
+
+**Classification:** source-native with an InfinityDB relationship consequence.
+
+When a Fireteams Chart lists a Unit as `FTO`, only Unit Profile options carrying
+FTO in the option name can join that Fireteam. A more specific chart term such
+as `FTO-2` restricts eligibility to that specific option.
+
+A Fireteam member relation resolved only to a Unit identity is therefore
+insufficient to express all N5 eligibility. InfinityDB should preserve the
+source chart wording and, when materializing Fireteam relationships, resolve
+FTO restrictions against applicable source option/loadout identities.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
+- PDF: Infinity N5 V5.3, printed page 133
+
+### RS-FT-WILD-001 — Wildcard is an Army-local Fireteam eligibility relationship
+
+**Classification:** source-native relationship semantics.
+
+A Wildcard can join any Fireteam permitted by the applicable Army's chart,
+subject to the maximum shown for that Wildcard entry. `Wildcard` therefore
+describes a relationship between an Army chart entry and its Fireteams, not an
+intrinsic cross-Army Characteristic of the Unit.
+
+InfinityDB should keep Wildcard eligibility scoped to the source Army/chart and
+must not infer universal Fireteam eligibility from a Unit being a Wildcard in
+one context.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
+- PDF: Infinity N5 V5.3, printed pages 133 and 137
+
+### RS-FT-LEVEL-001 — Bracket terms define Fireteam-Level equivalence, not Unit identity
+
+**Classification:** source-native with an InfinityDB identity consequence.
+
+Fireteam Level is based on the number of members considered to belong to the
+same Unit. For this calculation, the rules also treat Troopers with the same
+term in brackets (or equivalent chart note) as belonging to the same Unit.
+
+This equivalence is scoped to Fireteam bonus calculation. A chart label such as
+`(Morat)` or `(Fennec)` must not merge the underlying Units in InfinityDB's
+logical-Unit layer or become a generic Unit alias. It is a Fireteam-context
+equivalence relationship.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteam_Bonuses>
+- Wiki: <https://infinitythewiki.com/Fireteam_Examples>
+- PDF: Infinity N5 V5.3, printed pages 135 and 138
+
+### RS-FT-NOTE-001 — Fireteam chart notes can override general Fireteam rules
+
+**Classification:** source-native with a source-preservation consequence.
+
+The Fireteams Chart rules explicitly allow additional conditions for creation or
+operation, and state that these notes take priority over the General Rules of
+Fireteams.
+
+Army Fireteam descriptions/observations are therefore potentially rule-bearing
+context rather than disposable display text. InfinityDB should preserve and
+surface them with the relevant chart entry. Structured interpretation should be
+reviewed and use-driven rather than inferred automatically from arbitrary note
+text.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
+- PDF: Infinity N5 V5.3, printed page 133
+- Source model: Army Fireteam chart `desc` / team `obs`
+
+### RS-FT-ELIG-001 — Chart eligibility and current runtime eligibility are different scopes
+
+**Classification:** source-native with an InfinityDB presentation consequence.
+
+A Fireteams Chart states which Troopers/options may form a Fireteam, while the
+general Fireteam rules can prevent otherwise chart-eligible Troopers from
+joining or remaining in one because of current State, representation, role, or
+other runtime conditions.
+
+InfinityDB should describe static/reference information as **Fireteam chart
+eligibility**. It should not claim that a listed Trooper is unconditionally
+"able to Fireteam" in every game state, nor should it try to derive current
+runtime membership from static Army data.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams:_Basic_Rules>
+- Wiki: <https://infinitythewiki.com/Fireteam_Integrity>
+- PDF: Infinity N5 V5.3, printed pages 132-134

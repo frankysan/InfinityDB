@@ -667,3 +667,113 @@ Sources:
 
 - Wiki: Ammunition and Weaponry named weapon pages
 - PDF: Infinity N5 V5.3, printed pages 69-74
+
+
+## Fireteams
+
+### RR-FT-RUNTIME-001 — Fireteam activation and integrity are runtime procedures
+
+**Scope:** core N5.
+
+Fireteam Leader selection, Coherency checks, Active-Turn shared activation,
+Reactive-Turn ARO coordination, member departure/rejoining, cancellation, and
+bonus recalculation all depend on current game actions and state.
+
+These rules explain why static chart eligibility must not be interpreted as
+current membership or guaranteed bonuses. Beyond that boundary, InfinityDB does
+not presently need to model the Fireteam procedure/state machine. Keep the
+details as reference context unless a future game-session or play-aid consumer
+requires them.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteam_Integrity>
+- Wiki: <https://infinitythewiki.com/Fireteams_in_the_Active_Turn>
+- Wiki: <https://infinitythewiki.com/Fireteams_in_the_Reactive_Turn>
+- PDF: Infinity N5 V5.3, printed pages 134-136
+
+### RR-FT-INFO-001 — Fireteam bonuses have game-time disclosure semantics
+
+**Scope:** core N5.
+
+The rules treat a Fireteam's bonuses as Private Information until a Skill that
+benefits from them is declared. This is disclosure state during a match, not a
+reason for InfinityDB to hide the public rules describing Fireteam Level or the
+Army chart itself.
+
+Revisit the distinction only if InfinityDB gains privacy-aware saved-list or
+game-session features.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteam_Bonuses>
+- Wiki: <https://infinitythewiki.com/Open_and_Private_Information>
+- PDF: Infinity N5 V5.3, printed page 136
+
+### RR-FT-TERM-001 — `Linkable` is historical official terminology and modern shorthand
+
+**Scope:** terminology provenance; historical N3 plus current community usage.
+
+`Linkable` was not merely fan terminology: official Human Sphere N3 profile
+material used `Linkable` as a descriptor for Troopers participating in
+Fireteams. Current N5 instead expresses eligibility through the Army Fireteams
+Chart, with Fireteam-specific membership, FTO restrictions, Wildcards,
+min/max/required conditions, and notes.
+
+The word remains common and useful shorthand in player discussion, but
+InfinityDB should not reintroduce it as a simple current-rule boolean. A
+thesaurus/search layer can map `linkable` to current Fireteam-chart eligibility
+while labeling the term's historical provenance.
+
+Sources:
+
+- Historical official PDF: Infinity Human Sphere N3, e.g.
+  <https://assets.infinitythegame.net/downloads/hsn3rules/en/v3.2/hsn3rules.pdf>
+  (`Linkable` in Unit/Profile material)
+- Current rules: <https://infinitythewiki.com/Fireteams_Chart>
+
+### RR-FT-TERM-002 — `pure Fireteam` is community shorthand rooted in N4 Composition Bonuses
+
+**Scope:** terminology provenance; N4/community usage versus current N5.
+
+N4 officially distinguished Fireteam Size Bonuses from **Fireteam Composition
+Bonuses**, with the latter requiring a Fireteam made only from the same Unit
+and/or chart entries identified as such. Contemporary player discourse widely
+called a Fireteam satisfying that composition condition a **pure Fireteam**.
+
+No current N5 rule term `pure Fireteam` was found in this audit. N5.3 instead
+uses a single **Fireteam Level** that increases with the number of same-Unit /
+bracket-equivalent members, so the old pure/impure binary is not a faithful
+current model.
+
+InfinityDB should retain `pure Fireteam` as a provenance-aware community alias
+for search/help and explain its relationship to historical Composition Bonuses
+and current Fireteam Level. It should not expose `Pure` as a current Fireteam
+Type or authoritative boolean.
+
+Sources:
+
+- Historical official N4 Fireteams Annex:
+  <https://downloads.corvusbelli.com/infinity/rules/rules-annex-eng.pdf>
+  (`Fireteam Composition Bonuses`)
+- Current N5: <https://infinitythewiki.com/Fireteam_Bonuses>
+- Community provenance example: Corvus Belli forum archived N4 discussion,
+  `Ridiculous Discovery Bonus for Pure Fireteams` (2022)
+
+### RR-FT-TYPE-001 — Fireteam creation sizes are useful reference vocabulary, not identity derivation
+
+**Scope:** core N5.
+
+The general rules define Duo, Haris, and Core creation sizes, while individual
+Army/Sectorial charts can modify Fireteam creation conditions and determine
+which Types a named Fireteam supports.
+
+Those defaults are useful glossary/help material. InfinityDB should nevertheless
+take Type eligibility from the imported Army chart and retain the FAQ distinction
+between Type and later member count, rather than deriving Type from count.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Fireteams:_Basic_Rules>
+- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
+- PDF: Infinity N5 V5.3, printed pages 132-133

@@ -113,6 +113,18 @@ in `docs/releasing.md`.
       relationships only after the source mapping and rules vocabulary are both validated.
   - [ ] Audit relation/dependency structures.
   - [ ] Audit Fireteam structures.
+    - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
+      preserve Fireteam type quotas, named Fireteams, type membership, min/max
+      formation constraints, required-choice pools, chart notes, FTO restrictions,
+      Wildcards, and bracketed Fireteam-Level equivalence terms without promoting
+      them to intrinsic logical-Unit facts.
+    - [ ] Resolve FTO eligibility to the applicable source option/loadout identity
+      rather than treating a Unit-level Fireteam member match as sufficient; retain
+      unresolved/ambiguous source wording instead of guessing.
+    - [ ] Interpret the source `required` flag as participation in the chart's
+      required-choice set where applicable, not as "every flagged row is mandatory",
+      and preserve chart notes because the rules allow them to override general
+      Fireteam rules.
   - [ ] Identify normalization-only link structures that do not constitute
     additional player-facing information.
   - [ ] Record any distinct player-relevant relationship not currently
@@ -170,7 +182,7 @@ in `docs/releasing.md`.
     - [x] Skills and Equipment.
     - [x] Combat.
     - [x] Ammunition and Weaponry.
-    - [ ] Fireteams.
+    - [x] Fireteams.
     - [ ] Command.
     - [ ] Movement.
     - [ ] Terrain and Scenery Structures.
@@ -568,6 +580,10 @@ work against that contract.
   - [ ] Pair it with concise general Fireteam rules while clearly separating general
     rules from army-specific chart exceptions and retaining Infinity Army as the
     current chart authority.
+  - [ ] Make historically/community-significant Fireteam vocabulary discoverable
+    without presenting it as current N5 terminology. In particular, map historical
+    official `Linkable` and community `pure Fireteam` usage to the current
+    chart-eligibility / Fireteam-Level concepts with provenance-aware aliases/help.
 - [ ] Add a Game States reference catalog and contextual state links.
   - [ ] Create cited state pages and link them from skills, equipment, weapon
     traits, and future Fireteam guidance.
