@@ -1071,8 +1071,8 @@ after a deployment or data refresh.
 
 ### `GET /api/version`
 
-Returns `{ "version": "0.6.1", "snapshot_revision": "..." }`. The browser uses
-it to detect application or imported-snapshot changes.
+Returns `{ "version": "<application version>", "snapshot_revision": "..." }`. The
+browser uses it to detect application or imported-snapshot changes.
 
 ### `GET /api/armies`
 

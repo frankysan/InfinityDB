@@ -22,12 +22,12 @@ def test_display_version_marks_an_unreleased_checkout_as_development(monkeypatch
 
 
 def test_display_version_prefers_explicit_runtime_value(monkeypatch) -> None:
-    monkeypatch.setenv("INFINITY_DB_DISPLAY_VERSION", "0.6.1+dev")
+    monkeypatch.setenv("INFINITY_DB_DISPLAY_VERSION", "custom-display-version")
     monkeypatch.setattr(
         infinity_army_data, "_source_checkout_has_unreleased_changes", lambda: False
     )
 
-    assert infinity_army_data._display_version() == "0.6.1+dev"
+    assert infinity_army_data._display_version() == "custom-display-version"
 
 
 def test_commits_after_the_version_tag_are_unreleased(monkeypatch, tmp_path) -> None:

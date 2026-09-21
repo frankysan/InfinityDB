@@ -5,68 +5,47 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+## [0.6.2] - 2026-09-21
+
 ### Added
 
-- Add a derived domain-local application slug registry for Armies, logical Units,
-  Skills, Equipment, and Weapons. The registry records deterministic candidates and
-  explicit resolved/collision/unavailable states without changing existing public
-  numeric routes or inventing order-dependent collision suffixes.
-- Separate server-rebuild and transferred-artifact deployment paths so a validated
-  database/symbol set cannot be accidentally replaced during deployment, and add an
-  isolated loopback-only test deployment with an explicit teardown command that cannot
-  expose its Caddy port to the LAN, target production, or prune production rollback images.
+- Add deterministic domain-local public slugs for Armies, logical Units, Skills,
+  Equipment, and Weapons. Numeric identifiers remain accepted for compatibility and
+  provenance, while ambiguous or colliding readable identifiers fail closed.
+- Add a loopback-only local deployment test path and explicitly separate server-rebuild
+  deployments from transferred, prevalidated database/asset deployments.
 
 ### Changed
 
-- Continue the public slug migration across Armies, Skills, Equipment, Weapons, logical
-  Units, and Traits: catalog/unit links, detail APIs, and Unit-explorer filters use readable
-  domain-local slugs when available while existing numeric references remain valid for
-  compatibility. Unit and Army payloads keep source/context `slug` separate and expose the
-  application navigation identity as `public_slug`; curated Trait routes remain anchored
-  to their stable rules identities instead of being
-  regenerated from display names. Catalog identity alias groups may also be
-  authored with readable source-label slugs or numeric source IDs; the maintained
-  Skill, Equipment, and Weapon groups now use readable slugs, with ambiguous or
-  represented-but-unknown slug references rejected instead of guessed. Curated N5
-  `armyLinks` for Skills, Equipment, and Weapons likewise use readable application
-  slugs while numeric source references remain accepted for compatibility.
-- Add readable slug companions to canonical cross-domain API references without removing
-  existing numeric fields: Unit Army context exposes application Army slugs, Trait usage
-  variants expose catalog `item_slug`, and Skill Modifier rows expose `skill_slug`.
-  Source/provenance-only IDs remain numeric-only.
-- Prefer readable source-label slugs in maintained Weapon category/correction config
-  and in the curated Army display target. Numeric references remain accepted for
-  compatibility, ambiguity, and provenance; canonical mercenary source identity `1`
-  intentionally remains numeric because it has no authoritative source-faction slug.
-- Validate curated typed record IDs against the shared domain-slug grammar, and make
-  Trait slug collisions fail closed instead of producing positional `-2`/`-3` IDs.
-- Make the Unit explorer's matching-unit statistic show the currently visible unique
-  units alongside the total available under the same Army/search/catalog filters, with
-  an expandable availability breakdown for standard and optional unit categories.
+- Use readable public slugs throughout browser links, catalog/detail APIs, Unit explorer
+  filters, maintained catalog identity configuration, and curated Army links where a
+  deterministic application identity exists. Stable curated Trait identities and
+  source/provenance-only numeric identifiers are unchanged.
+- Expose readable slug companions on canonical cross-domain API references while
+  retaining the existing numeric fields for compatibility.
+- Show the Unit explorer's currently visible unique-unit count alongside the total
+  available under the same filters, with an expandable availability breakdown.
 
 ### Upgrade notes
 
-- Rebuild generated Army databases after this change. The development schema is now
-  17 / compatibility revision 25; older generated `infinity.db` files are rejected.
+- Rebuild generated Army databases before deploying 0.6.2. Schema 17 / compatibility
+  revision 25 is intentionally incompatible with older generated `infinity.db` files;
+  there is no in-place database migration.
 
 ### Fixed
 
-- Make Unit explorer Skill, Equipment, and Weapon filters use readable public slugs
-  when available and resolve grouped catalog identities across all source variants,
-  fixing grouped filters such as TinBot returning no matching units. Accepted legacy
-  source-variant numeric filter URLs now canonicalize to the same readable slug and
-  selected option; numeric filter references remain valid for compatibility.
-- Keep settings for the current browser session when persistent settings are
-  disabled, show Team Operations-only units on Skill detail pages when that
-  optional-unit category is enabled, and use public Skill slugs for source variants
-  merged into curated application identities instead of falling back to numeric IDs.
+- Resolve grouped Skill, Equipment, and Weapon filters across all source variants,
+  including legacy numeric filter URLs, and canonicalize accepted references to their
+  readable public slug when available.
+- Preserve current-tab settings when persistent settings are disabled, include
+  Team Operations-only units on Skill detail pages when that optional category is
+  enabled, and keep merged Skill source variants on their application public slug.
 - Resolve maintained catalog identity slugs against the complete source metadata
-  catalog rather than only currently-used rows, and keep the reviewed spelling
-  `tinbot-neurocinetics` while preserving the upstream `Neourocinetics` typo only as
-  raw source provenance.
+  catalog, including represented-but-currently-unused source entries, and preserve the
+  reviewed TinBot Neurocinetics spelling while retaining the upstream typo only as raw
+  provenance.
 - Preserve the `+dev` browser display version in containerized development/test
-  deployments without embedding Git metadata in the image. The API/package release
-  version remains unchanged.
+  deployments without embedding Git metadata in the image.
 
 ## [0.6.1] - 2026-09-20
 

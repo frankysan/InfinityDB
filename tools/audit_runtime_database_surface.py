@@ -257,7 +257,7 @@ TABLE_POLICY["units"] = _policy(
 )
 
 # Database methods called directly by the web layer or the player-facing catalog
-# helpers. validate() is intentionally excluded from the 0.6.1 serving surface.
+# helpers. validate() is intentionally excluded from the audited serving surface.
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
     "application_catalog_id",
@@ -613,7 +613,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "Runtime surface: "
         f"{summary['surfaceCount']} probes | {summary['runtimeTableCount']} tables | "
         f"{summary['runtimeFieldCount']} fields | "
-        f"{summary['tableWithOpenIssueCount']} tables need 0.6.1 follow-up"
+        f"{summary['tableWithOpenIssueCount']} tables need follow-up"
     )
     return 0
 

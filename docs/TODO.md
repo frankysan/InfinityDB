@@ -404,10 +404,6 @@ work against that contract.
 
 ## Public-identifier follow-up
 
-- [ ] **0.6.2 release checkpoint.** The dual-identifier sanity audit and the
-  2026-09-21 project-wide documentation audit are complete. Finish the remaining
-  general release checklist in `docs/releasing.md`, including release metadata and
-  validation, then release the public-identity/slug work as version 0.6.2.
 - [ ] Before retiring or redirecting numeric routes, define and implement the
   per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
   compatibility policy documented as future work in `docs/architecture.md`.
