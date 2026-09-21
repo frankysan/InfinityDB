@@ -342,12 +342,19 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
 
 
 def test_unit_rule_filters_match_profiles_and_loadouts(app: Callable) -> None:
-    for parameter in ("skill_id=11", "equipment_id=21", "weapon_id=31"):
+    for parameter in (
+        "skill_id=11",
+        "equipment_id=21",
+        "weapon_id=31",
+        "skill_id=stealth",
+        "equipment_id=medikit",
+        "weapon_id=combi-rifle",
+    ):
         status, _, body = request(app, "/api/units", query=parameter)
         assert status == 200
         assert {item["id"] for item in json.loads(body)["items"]} == {1}
 
-    status, _, body = request(app, "/api/units", query="skill_id=11&weapon_id=31")
+    status, _, body = request(app, "/api/units", query="skill_id=stealth&weapon_id=combi-rifle")
     assert status == 200
     assert {item["id"] for item in json.loads(body)["items"]} == {1}
 
@@ -1010,6 +1017,17 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     status, headers, _ = request(app, "/api/armies")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+
+
+def test_unit_explorer_catalog_filters_prefer_public_slugs(app: Callable) -> None:
+    status, _, body = request(app, "/static/app.js")
+
+    assert status == 200
+    assert b"return item.slug || String(item.id);" in body
+    assert b"catalogFilterIdentifier(skillId)" in body
+    assert b"catalogFilterIdentifier(equipmentId)" in body
+    assert b"catalogFilterIdentifier(weaponId)" in body
+    assert b'normalizeCatalogFilterState(equipment.items, "equipmentId")' in body
 
 
 def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:

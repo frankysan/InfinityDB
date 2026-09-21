@@ -42,6 +42,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Fixed
 
+- Make Unit explorer Skill, Equipment, and Weapon filters use readable public slugs
+  when available and resolve grouped catalog identities across all source variants,
+  fixing grouped filters such as TinBot returning no matching units. Numeric filter
+  references remain valid for compatibility.
 - Keep settings for the current browser session when persistent settings are
   disabled, show Team Operations-only units on Skill detail pages when that
   optional-unit category is enabled, and use public Skill slugs for source variants

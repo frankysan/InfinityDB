@@ -729,8 +729,11 @@ new correctness or reproducibility defect.
     `trait:<slug>` IDs own stable public Trait slugs without duplicating rules identity
     into the Army-domain registry; uncurated Trait links reuse the collision-checked raw
     Trait catalog assignment rather than independently normalizing individual labels.
-  - [ ] **0.6.2 release checkpoint.** After the Trait alignment above is complete, run the
-    general release checklist in `docs/releasing.md` and release this public-identity/slug
+  - [x] Align Unit explorer Skill/Equipment/Weapon filters with the same public identity
+    contract: browser state prefers application slugs, numeric query values remain valid,
+    and grouped application identities match all of their materialized source variants.
+  - [ ] **0.6.2 release checkpoint.** After the public-identity alignment above is complete,
+    run the general release checklist in `docs/releasing.md` and release this public-identity/slug
     work as version 0.6.2. The project-wide documentation audit is a release gate, not a
     post-release cleanup task.
   - [ ] Before replacing or redirecting numeric routes, define per-domain slug freezing,

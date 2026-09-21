@@ -1828,7 +1828,11 @@ slugs, and detail web/API routes accept either the slug or the existing numeric
 application ID. Nested Unit Equipment and Weapon references resolve source-variant IDs
 through catalog provenance before exposing the canonical application slug, while Unit
 references embedded in other player-facing payloads resolve source Unit IDs to their
-logical Unit before exposing `public_slug`. Numeric-only candidates remain on numeric
+logical Unit before exposing `public_slug`. Unit-explorer Skill/Equipment/Weapon filter
+values likewise prefer these public slugs; numeric filter references remain accepted for
+compatibility. Repository filtering resolves either form to the application catalog
+identity and expands it across all materialized source members before matching canonical
+profile/loadout/unit-option occurrences. Numeric-only candidates remain on numeric
 compatibility routes because the two forms would otherwise be ambiguous. No redirect or
 permanent-freeze promise is made by this transition; per-domain freezing, reviewed
 overrides, aliases, and canonical redirect behavior still precede retirement of numeric

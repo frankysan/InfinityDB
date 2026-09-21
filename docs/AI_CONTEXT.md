@@ -823,6 +823,13 @@ compatibility references remain unambiguous JSON integers.
   valid. Source Unit references are resolved to their logical application Unit before
   slug lookup, numeric-only candidates remain on numeric compatibility URLs, and Armies
   remain numeric-only publicly for now.
+- 2026-09-21: Unit explorer Skill, Equipment, and Weapon filters are public-identity
+  consumers too. Browser filter option/state values prefer resolved application-domain
+  slugs and preserve numeric query values only for compatibility. Repository filtering
+  resolves either form to the logical application catalog identity, then expands that
+  identity to all materialized source IDs before matching canonical profile/loadout/unit-
+  option occurrences. A grouped filter must therefore match every represented variant
+  (for example any TinBot source variant) rather than only the numeric representative.
 - 2026-09-21: Trait public identity is aligned with the shared slug policy without
   duplicating curated rules identity into the Army database. Curated Traits already own
   stable typed IDs in `rules.db`; a simple `trait:<slug>` ID projects directly to the

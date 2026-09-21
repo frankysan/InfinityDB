@@ -330,16 +330,22 @@ def _canonical_usage_select(
     )
 
 
-def _canonical_filter_query(catalog: str) -> str:
-    """Return source-unit matches for one canonical profile/loadout catalog item."""
+def _canonical_filter_query(catalog: str, item_count: int) -> str:
+    """Return source-unit matches for one application catalog identity."""
+    if item_count < 1:
+        raise ValueError("item_count must be positive")
+    placeholders = ", ".join("?" for _ in range(item_count))
     return (
         "SELECT ppo.unit_id FROM profile_payload_occurrences AS ppo "
         f"JOIN profile_payload_{catalog} AS po "
-        "ON po.profile_payload_id = ppo.profile_payload_id WHERE po.item_id = ? "
+        "ON po.profile_payload_id = ppo.profile_payload_id "
+        f"WHERE po.item_id IN ({placeholders}) "
         "UNION SELECT lpo.unit_id FROM loadout_payload_occurrences AS lpo "
         f"JOIN loadout_payload_{catalog} AS lo "
-        "ON lo.loadout_payload_id = lpo.loadout_payload_id WHERE lo.item_id = ? "
-        f"UNION SELECT unit_id FROM unit_option_{catalog} WHERE item_id = ?"
+        "ON lo.loadout_payload_id = lpo.loadout_payload_id "
+        f"WHERE lo.item_id IN ({placeholders}) "
+        f"UNION SELECT unit_id FROM unit_option_{catalog} "
+        f"WHERE item_id IN ({placeholders})"
     )
 
 
@@ -1792,9 +1798,9 @@ class Database:
         self,
         army_id: int | None = None,
         search: str = "",
-        skill_id: int | None = None,
-        equipment_id: int | None = None,
-        weapon_id: int | None = None,
+        skill_id: int | str | None = None,
+        equipment_id: int | str | None = None,
+        weapon_id: int | str | None = None,
         limit: int = 50,
         offset: int = 0,
         mercs: bool = False,
@@ -1816,23 +1822,31 @@ class Database:
                 raise ArmySelectionError(
                     f"army_id {army_id} is a grouping-only identity, not a selectable army"
                 )
-        rule_filters = {
+        rule_filters: dict[str, int | str | None] = {
             "skills": skill_id,
             "equipment": equipment_id,
             "weapons": weapon_id,
         }
-        for name, item_id in rule_filters.items():
-            if item_id is not None and (
-                type(item_id) is not int or not 0 <= item_id <= SQLITE_INTEGER_MAX
-            ):
-                parameter = {
-                    "skills": "skill",
-                    "equipment": "equipment",
-                    "weapons": "weapon",
-                }[name]
-                raise ValueError(
-                    f"{parameter}_id must be an integer within SQLite's signed 64-bit range"
-                )
+        for name, item_ref in rule_filters.items():
+            parameter = {
+                "skills": "skill",
+                "equipment": "equipment",
+                "weapons": "weapon",
+            }[name]
+            if item_ref is None:
+                continue
+            if isinstance(item_ref, int) and not isinstance(item_ref, bool):
+                if not 0 <= item_ref <= SQLITE_INTEGER_MAX:
+                    raise ValueError(
+                        f"{parameter}_id must be an integer within SQLite's signed 64-bit range"
+                    )
+                continue
+            if isinstance(item_ref, str):
+                require_domain_slug(item_ref, context=f"{parameter}_id")
+                continue
+            raise ValueError(
+                f"{parameter}_id must be an integer or domain-local slug"
+            )
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -1855,15 +1869,30 @@ class Database:
             if enabled
         }
         matching_sources_by_rule: dict[str, set[int]] = {}
-        if any(item_id is not None for item_id in rule_filters.values()):
+        if any(item_ref is not None for item_ref in rule_filters.values()):
             with self._connect() as connection:
-                for catalog, item_id in rule_filters.items():
-                    if item_id is None:
+                for catalog, item_ref in rule_filters.items():
+                    if item_ref is None:
                         continue
-                    query = _canonical_filter_query(catalog)
+                    graph = self._application_catalog_graph(catalog)
+                    application_id = (
+                        self.application_catalog_id(catalog, item_ref)
+                        if isinstance(item_ref, int)
+                        else self.application_id_for_slug(catalog, item_ref)
+                    )
+                    source_ids = (
+                        ()
+                        if application_id is None
+                        else graph["source_ids_by_item"].get(application_id, ())
+                    )
+                    if not source_ids:
+                        matching_sources_by_rule[catalog] = set()
+                        continue
+                    query = _canonical_filter_query(catalog, len(source_ids))
+                    parameters = source_ids * 3
                     matching_sources_by_rule[catalog] = {
                         row["unit_id"]
-                        for row in connection.execute(query, (item_id, item_id, item_id))
+                        for row in connection.execute(query, parameters)
                     }
         graph = self._unit_graph()
         faction_groups = self._faction_groups()

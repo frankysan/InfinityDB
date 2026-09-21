@@ -21,6 +21,7 @@ from infinity_db.catalog_slugs import (
     enrich_nested_catalog_slugs,
 )
 from infinity_db.database import ArmySelectionError, Database
+from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
@@ -245,6 +246,22 @@ def _flag(params: dict, key: str) -> bool:
     return params[key][0] == "1"
 
 
+def _catalog_filter_identifier(params: dict, key: str) -> int | str | None:
+    """Parse one catalog filter as a numeric compatibility ID or public slug."""
+
+    if key not in params or params[key][0] == "":
+        return None
+    raw = params[key][0]
+    if raw.isdigit():
+        if len(raw) > 19:
+            raise ValueError(f"{key} must be a valid catalog identifier")
+        value = int(raw)
+        if value > 2**63 - 1:
+            raise ValueError(f"{key} must be a valid catalog identifier")
+        return value
+    return require_domain_slug(raw, context=key)
+
+
 def _unit_query(query: str) -> dict:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=14)
     for key, values in params.items():
@@ -275,9 +292,9 @@ def _unit_query(query: str) -> dict:
     return {
         "army_id": _integer(params, "army_id", None, 0, 2**63 - 1),
         "search": search,
-        "skill_id": _integer(params, "skill_id", None, 0, 2**63 - 1),
-        "equipment_id": _integer(params, "equipment_id", None, 0, 2**63 - 1),
-        "weapon_id": _integer(params, "weapon_id", None, 0, 2**63 - 1),
+        "skill_id": _catalog_filter_identifier(params, "skill_id"),
+        "equipment_id": _catalog_filter_identifier(params, "equipment_id"),
+        "weapon_id": _catalog_filter_identifier(params, "weapon_id"),
         "limit": _integer(params, "limit", 50, 1, 200),
         "offset": _integer(params, "offset", 0, 0, 2**63 - 1),
         "mercs": _flag(params, "mercs"),

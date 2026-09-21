@@ -46,6 +46,10 @@ function hasActiveFilters() {
   return state.armyId || state.search || state.skillId || state.equipmentId || state.weaponId;
 }
 
+function catalogFilterIdentifier(value) {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : "";
+}
+
 function readLocation() {
   const params = new URLSearchParams(window.location.search);
   const offset = Number(params.get("offset") || 0);
@@ -55,9 +59,9 @@ function readLocation() {
   const weaponId = params.get("weapon_id") || "";
   return {
     armyId: /^\d+$/.test(armyId) ? armyId : "",
-    skillId: /^\d+$/.test(skillId) ? skillId : "",
-    equipmentId: /^\d+$/.test(equipmentId) ? equipmentId : "",
-    weaponId: /^\d+$/.test(weaponId) ? weaponId : "",
+    skillId: catalogFilterIdentifier(skillId),
+    equipmentId: catalogFilterIdentifier(equipmentId),
+    weaponId: catalogFilterIdentifier(weaponId),
     search: (params.get("search") || "").trim().slice(0, 200),
     mercs: elements.mercs.checked,
     specops: elements.specops.checked,
@@ -146,9 +150,24 @@ function populateArmies(armies) {
   syncFilters();
 }
 
+function catalogFilterValue(item) {
+  return item.slug || String(item.id);
+}
+
+function normalizeCatalogFilterState(items, stateKey) {
+  const current = state[stateKey];
+  if (!current || !/^\d+$/.test(current)) return false;
+  const item = items.find((candidate) => String(candidate.id) === current);
+  if (!item) return false;
+  const replacement = catalogFilterValue(item);
+  if (replacement === current) return false;
+  state[stateKey] = replacement;
+  return true;
+}
+
 function populateCatalogFilter(element, items, label) {
   element.replaceChildren(new Option(`All ${label.toLowerCase()}`, ""));
-  for (const item of items) element.add(new Option(item.name, String(item.id)));
+  for (const item of items) element.add(new Option(item.name, catalogFilterValue(item)));
   element.disabled = false;
 }
 
@@ -232,10 +251,16 @@ async function load() {
       ]);
       if (currentRequest !== requestNumber) return;
       populateArmies(armies.items);
+      const normalizedCatalogFilters = [
+        normalizeCatalogFilterState(skills.items, "skillId"),
+        normalizeCatalogFilterState(equipment.items, "equipmentId"),
+        normalizeCatalogFilterState(weapons.items, "weaponId"),
+      ].some(Boolean);
       populateCatalogFilter(elements.skill, skills.items, "Skills");
       populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
       syncFilters();
+      if (normalizedCatalogFilters) writeLocation(true);
       armiesLoaded = true;
     }
     const data = await getUnits(state, signal);

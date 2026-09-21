@@ -1046,7 +1046,11 @@ total above illustrates the response shape.
   an empty list.
 - Optional `skill_id`, `equipment_id`, and `weapon_id` parameters narrow
   results to units with matching catalog items in a profile, loadout, or unit
-  option.
+  option. Each accepts the current application-domain slug or a legacy numeric
+  source/application ID. Filtering resolves the reference to the logical catalog
+  identity and matches every materialized source member of that identity, so grouped
+  items such as TinBot behave as one filter. The browser explorer writes slugs when
+  available and keeps numeric values only as compatibility fallbacks.
 - Unknown resources return 404; unsupported methods return 405; database read
   failures return 503 without exposing internal exception details.
 

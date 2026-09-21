@@ -2392,6 +2392,43 @@ def test_unit_loadout_read_path_uses_materialized_canonical_payloads(
     assert Database(path).get_unit(1) == expected
 
 
+def test_unit_catalog_filter_expands_logical_equipment_identity(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["equipment"] = [
+        {"id": 235, "name": "TinBot", "source_defined": True},
+        {"id": 244, "name": "TinBot: Discover", "source_defined": True},
+    ]
+    normalized["tables"]["metadata_equipment"] = [
+        {"id": 169, "name": "TinBot: Firewall", "wiki": None},
+        {"id": 188, "name": "TinBot: Neourocinetics", "wiki": None},
+        {"id": 193, "name": "TinBot (Albedo)", "wiki": None},
+        {"id": 235, "name": "TinBot", "wiki": None},
+        {"id": 244, "name": "TinBot: Discover", "wiki": None},
+        {"id": 247, "name": "TinBot: ECM Guided", "wiki": None},
+        {"id": 248, "name": "Tinbot (Repeater)", "wiki": None},
+    ]
+    for table in (
+        "army_equipment",
+        "profile_equipment",
+        "option_equipment",
+        "unit_option_equipment",
+    ):
+        for occurrence in normalized["tables"][table]:
+            occurrence["item_id"] = 244
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert database.application_catalog_id("equipment", 244) == 235
+    assert database.application_slug("equipment", 235) == "tinbot"
+    expected_ids = {1}
+    for equipment_ref in (244, 235, "tinbot"):
+        result = database.list_units(equipment_id=equipment_ref)
+        assert {item["id"] for item in result["items"]} == expected_ids
+
+
 def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
     tmp_path: Path, normalized: dict
 ) -> None:
