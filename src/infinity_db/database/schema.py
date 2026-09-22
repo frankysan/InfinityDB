@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 19
+SCHEMA_VERSION = 20
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 27
+DATABASE_COMPATIBILITY_VERSION = 28
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -499,6 +499,19 @@ DERIVED_TABLES = {
         ref("access_id", "application_peripheral_controller_access", "id"),
         ref("target_logical_unit_id", "logical_units", "id"),
     ),
+    "application_unit_constraints": table(
+        "army_id relation_id",
+        "position family min_count max_count is_group",
+        ref("army_id relation_id", "relations"),
+    ),
+    "application_unit_constraint_members": table(
+        "army_id relation_id relation_unit_id",
+        "position source_unit_id logical_unit_id",
+        ref("army_id relation_id", "application_unit_constraints"),
+        ref("army_id relation_id relation_unit_id", "relation_units"),
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
 }
 
 DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
@@ -594,6 +607,11 @@ INDEXES = (
         "application_peripheral_controller_targets_target",
         "application_peripheral_controller_targets",
         "target_logical_unit_id, access_id",
+    ),
+    (
+        "application_unit_constraint_members_logical",
+        "application_unit_constraint_members",
+        "logical_unit_id, army_id, relation_id, relation_unit_id",
     ),
 )
 

@@ -45,6 +45,7 @@ from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
 from .peripheral_relationships import materialize_peripheral_relationships
 from .profile_payloads import materialize_profile_payloads
+from .relation_constraints import materialize_relation_constraints
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -368,6 +369,7 @@ def export_database(
                 materialize_loadout_payloads(connection)
                 materialize_include_relationships(connection)
                 materialize_peripheral_relationships(connection, peripheral_identities)
+                materialize_relation_constraints(connection)
                 create_indexes(connection)
                 # The frontend database is an immutable snapshot. Persist planner
                 # statistics at build time so read-only connections make informed

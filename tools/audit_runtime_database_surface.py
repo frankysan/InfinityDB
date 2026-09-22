@@ -136,6 +136,17 @@ _register(
     ),
 )
 _register(
+    [
+        "application_unit_constraints",
+        "application_unit_constraint_members",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Materialized selector-free Army selection constraints preserve exact source member "
+        "context while resolving every eligible member to canonical logical-Unit identity."
+    ),
+)
+_register(
     ["logical_units"],
     CANONICAL,
     reason="Representative-backed logical-unit application values.",

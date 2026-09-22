@@ -31,20 +31,17 @@ Entries describe meaningful release outcomes rather than detailed implementation
   Unit details can now expose canonical embedded Peripheral attachments, standalone
   Unit-backed Peripheral type identity, and source-context Cyberplug access pools to canonical
   Unit targets without runtime dependence on curated source files.
-- Extend the canonical relationship audit to normalized relation/dependency structures and
-  Reinforcement Section context. The audit now resolves relation endpoints through logical-Unit
-  identity without discarding source-context selection constraints, reports unresolved
-  relation-only Unit references explicitly, verifies all ordinary-Army -> Reinforcement Section
-  parent links against the materialized application layer, classifies resolved relations into
-  same-logical cross-context exclusivity, cross-logical shared cardinality, single-logical
-  profile/dependency, and single-logical cardinality families before materialization, and reports
-  source `profile` selector coordinate ambiguity instead of promoting it to an invalid FK.
+- Extend canonical relation/dependency handling beyond audit-only data. InfinityDB now materializes
+  all 95 fully resolved selector-free Army selection constraints while preserving source occurrence
+  context and canonical Unit identity, including ordinary/Reinforcement exclusivity, cross-Unit
+  shared-cardinality rules, and Post-Human cardinality. Selector-bearing and unresolved relations
+  remain explicit source/context data until their Army grammar is independently resolved.
 
 ### Upgrade notes
 
-- Rebuild generated Army databases before deploying the next release. Schema 19 /
-  compatibility revision 27 retains materialized include relationships and adds the reviewed
-  Peripheral application relationship layer; there is no in-place database migration.
+- Rebuild generated Army databases before deploying the next release. Schema 20 /
+  compatibility revision 28 retains materialized include/Peripheral relationships and adds
+  selector-free Unit selection constraints; there is no in-place database migration.
 
 ## [0.6.2] - 2026-09-21
 

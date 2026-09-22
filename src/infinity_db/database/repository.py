@@ -45,6 +45,7 @@ from .application_domain_slugs import validate_application_domain_slugs
 from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .peripheral_relationships import validate_peripheral_relationships
+from .relation_constraints import validate_relation_constraints
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -971,6 +972,7 @@ class Database:
 
             validate_include_relationships(connection)
             validate_peripheral_relationships(connection)
+            validate_relation_constraints(connection)
 
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
@@ -2531,6 +2533,49 @@ class Database:
                 )
             ]
 
+            constraint_rows = connection.execute(
+                "SELECT c.army_id, c.relation_id, c.family, c.min_count, c.max_count, "
+                "c.is_group, m.relation_unit_id, m.source_unit_id, m.logical_unit_id, "
+                "lu.name, ds.slug "
+                "FROM application_unit_constraints AS c "
+                "JOIN application_unit_constraint_members AS m "
+                "ON m.army_id = c.army_id AND m.relation_id = c.relation_id "
+                "JOIN logical_units AS lu ON lu.id = m.logical_unit_id "
+                "LEFT JOIN application_domain_slugs AS ds "
+                "ON ds.domain = 'units' AND ds.application_id = m.logical_unit_id "
+                "WHERE EXISTS ("
+                "SELECT 1 FROM application_unit_constraint_members AS own "
+                "WHERE own.army_id = c.army_id AND own.relation_id = c.relation_id "
+                "AND own.logical_unit_id = ?) "
+                "ORDER BY c.army_id, c.relation_id, m.position, m.relation_unit_id",
+                (group["id"],),
+            ).fetchall()
+            selection_constraints: list[dict[str, Any]] = []
+            constraints_by_key: dict[tuple[int, int], dict[str, Any]] = {}
+            for row in constraint_rows:
+                key = (row["army_id"], row["relation_id"])
+                constraint = constraints_by_key.get(key)
+                if constraint is None:
+                    constraint = {
+                        "army_id": row["army_id"],
+                        "relation_id": row["relation_id"],
+                        "family": row["family"],
+                        "min_count": row["min_count"],
+                        "max_count": row["max_count"],
+                        "is_group": bool(row["is_group"]),
+                        "members": [],
+                    }
+                    constraints_by_key[key] = constraint
+                    selection_constraints.append(constraint)
+                constraint["members"].append(
+                    {
+                        "source_unit_id": row["source_unit_id"],
+                        "logical_unit_id": row["logical_unit_id"],
+                        "slug": row["slug"],
+                        "name": row["name"],
+                    }
+                )
+
             main_faction = faction_groups.get(group["main_army_id"])
             display_faction = faction_identities.get(group["display_army_id"])
             for army in armies:
@@ -2557,5 +2602,7 @@ class Database:
         }
         if peripheral_type_ids:
             result["peripheral_type_ids"] = peripheral_type_ids
+        if selection_constraints:
+            result["selection_constraints"] = selection_constraints
         return result
 

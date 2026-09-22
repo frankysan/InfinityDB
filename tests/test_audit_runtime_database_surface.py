@@ -113,14 +113,14 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
 
     assert report["summary"] == {
         "surfaceCount": 29,
-        "runtimeTableCount": 57,
-        "runtimeFieldCount": 232,
+        "runtimeTableCount": 59,
+        "runtimeFieldCount": 244,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 232,
+        "issue:none:fieldCount": 244,
         "role:canonical_application:fieldCount": 118,
-        "role:contextual_application:fieldCount": 91,
+        "role:contextual_application:fieldCount": 103,
         "role:intentional_source_representation:fieldCount": 23,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
