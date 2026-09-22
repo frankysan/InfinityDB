@@ -144,9 +144,14 @@ in `docs/releasing.md`.
         from the matched profile's explicit `Peripheral` Skill subtype. Keep distinct source
         names as distinct entities until separate evidence supports a shared entity/profile
         boundary.
-      - [ ] Resolve Unit-backed Peripheral occurrences (including standalone Servants and
-        Cyberplugs) to canonical identities and reviewed Controller relationships; same-Army
-        subtype co-occurrence remains evidence, not an automatic Controller mapping.
+      - [x] Resolve standalone Unit-backed Peripheral identities without creating a second
+        ontology: 17 source Unit IDs reuse 10 existing logical-Unit identities, with reviewed
+        Servant/Cyberplug type taken from the source `Peripheral` Skill subtype. Reinforcement
+        variants resolve through the existing logical-Unit identity layer.
+      - [ ] Resolve reviewed Controller -> Unit-backed Peripheral relationships. Same-Army
+        subtype co-occurrence remains evidence, not an automatic Controller mapping; the
+        current snapshot exposes no relation/dependency edge that selects Ranters versus
+        Puzzlers for Cyberplug-skilled Controllers.
   - [ ] Audit relation/dependency structures.
     - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as

@@ -975,3 +975,16 @@ compatibility references remain unambiguous JSON integers.
   source-presentation encoding, not an Army-versus-rules classification conflict.
   Preserve the symbol/source occurrence and resolve it to the canonical Equipment
   identity without inventing a textual source row.
+
+
+### Milestone 2B Peripheral identity boundary (2026-09-22)
+
+- Embedded Army `peripherals` rows use reviewed `peripheral:*` identities; current snapshot
+  coverage is 279/279 definitions -> 56 entities.
+- Standalone Unit-backed Peripherals must reuse existing logical-Unit identity rather than
+  creating parallel Peripheral entities. The reviewed contract v2 adds 17 source Unit mappings
+  -> 10 logical Units, including Reinforcement variants, with type taken from the source
+  `Peripheral` Skill subtype.
+- Concrete Cyberplug Controller links remain unresolved: Units 507/1884 can see same-Army
+  Ranters/Puzzlers candidates, but the current relation/dependency data does not select a
+  specific pairing. Same-Army co-occurrence is not sufficient to materialize a relationship.

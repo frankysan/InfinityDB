@@ -1,6 +1,6 @@
 {
   "format": "InfinityDB curated Peripheral identities",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "sources": [
     {
       "id": "army-json-20260918-204434",
@@ -4144,6 +4144,229 @@
         "status": "reviewed",
         "reviewedOn": "2026-09-22",
         "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    }
+  ],
+  "unitMappings": [
+    {
+      "id": "peripheral-unit-mapping:unit-37",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 37,
+      "sourceName": "PALBOTS",
+      "logicalUnitId": 37,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 37 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-161",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 161,
+      "sourceName": "YÁOZĂO",
+      "logicalUnitId": 161,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 161 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-192",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 192,
+      "sourceName": "YUDBOTS",
+      "logicalUnitId": 192,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 192 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-333",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 333,
+      "sourceName": "NASMAT Remotes",
+      "logicalUnitId": 333,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 333 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-425",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 425,
+      "sourceName": "ZONDBOTS",
+      "logicalUnitId": 425,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 425 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-526",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 526,
+      "sourceName": "SLAVE DRONES",
+      "logicalUnitId": 526,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 526 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-656",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 656,
+      "sourceName": "CHAKSA SERVANT",
+      "logicalUnitId": 656,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 656 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1581",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1581,
+      "sourceName": "Remontnikbot V-5 ELEKTRONIK",
+      "logicalUnitId": 1581,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1581 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1617",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1617,
+      "sourceName": "REINF. SLAVE DRONES",
+      "logicalUnitId": 526,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1617 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 526, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1650",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1650,
+      "sourceName": "REINF: PALBOTS",
+      "logicalUnitId": 37,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1650 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 37, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1664",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1664,
+      "sourceName": "REINF: NASMAT Remotes",
+      "logicalUnitId": 333,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1664 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 333, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1676",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1676,
+      "sourceName": "REINF: CHAKSA SERVANTS",
+      "logicalUnitId": 656,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1676 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 656, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1709",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1709,
+      "sourceName": "REINF: YÁOZĂO",
+      "logicalUnitId": 161,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1709 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 161, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1732",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1732,
+      "sourceName": "REINF: YUDBOTS",
+      "logicalUnitId": 192,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1732 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 192, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1746",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1746,
+      "sourceName": "REINF: ZONDBOTS",
+      "logicalUnitId": 425,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1746 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 425, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1885",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1885,
+      "sourceName": "SARTROIDS: RANTERS, Cyberplugged Attack Remotes",
+      "logicalUnitId": 1885,
+      "typeId": "rule:peripheral-type:cyberplug",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1885 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1886",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1886,
+      "sourceName": "SARTROIDS: PUZZLERS, Cyberplugged Attack Remotes",
+      "logicalUnitId": 1886,
+      "typeId": "rule:peripheral-type:cyberplug",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1886 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
       }
     }
   ]

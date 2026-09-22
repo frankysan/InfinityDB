@@ -13,7 +13,16 @@ from typing import Any
 from .peripheral_identities import PeripheralIdentityCurated, PeripheralIdentityError
 
 COVERAGE_FORMAT = "InfinityDB Peripheral identity coverage"
-COVERAGE_FORMAT_VERSION = 5
+COVERAGE_FORMAT_VERSION = 6
+
+_SOURCE_PERIPHERAL_SUBTYPE_TYPE_IDS = {
+    "servant": "rule:peripheral-type:servant",
+    "synchronized": "rule:peripheral-type:synchronized",
+    "control": "rule:peripheral-type:control",
+    "ancillary": "rule:peripheral-type:ancillary",
+    "cyberplug": "rule:peripheral-type:cyberplug",
+}
+
 
 _CONTROLLER_GRAPH_TABLES = frozenset(
     {
@@ -437,6 +446,14 @@ def _unit_backed_peripheral_evidence(
         int(row["id"]): str(row["name"])
         for row in connection.execute("SELECT id, name FROM units")
     }
+    logical_unit_ids: dict[int, int] = {}
+    if "logical_unit_sources" in _table_names(connection):
+        logical_unit_ids = {
+            int(row["source_unit_id"]): int(row["logical_unit_id"])
+            for row in connection.execute(
+                "SELECT source_unit_id, logical_unit_id FROM logical_unit_sources"
+            )
+        }
     availability = {
         (int(row["army_id"]), int(row["unit_id"])): row["availability_kind"]
         for row in connection.execute(
@@ -514,6 +531,7 @@ def _unit_backed_peripheral_evidence(
             "armyId": key[0],
             "unitId": key[1],
             "unitName": unit_names.get(key[1]),
+            "logicalUnitId": logical_unit_ids.get(key[1]),
             "availabilityKind": availability.get(key),
             "unitShape": "peripheral-only" if not other_profiles else "mixed-profile-unit",
             "peripheralProfileCount": len(peripheral_profiles),
@@ -543,10 +561,64 @@ def _unit_backed_peripheral_evidence(
         for label in labels:
             subtype_counts[str(label)] += 1
 
+    source_unit_occurrences: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    for item in evidence.values():
+        source_unit_occurrences[int(item["unitId"])].append(item)
+    source_units: list[dict[str, Any]] = []
+    for unit_id, occurrences in sorted(source_unit_occurrences.items()):
+        unit_names_for_id = sorted(
+            {str(item["unitName"]) for item in occurrences if item.get("unitName") is not None}
+        )
+        logical_ids = sorted(
+            {
+                int(item["logicalUnitId"])
+                for item in occurrences
+                if item.get("logicalUnitId") is not None
+            }
+        )
+        shapes = sorted({str(item["unitShape"]) for item in occurrences})
+        subtype_extras = sorted(
+            {
+                (int(extra["extraId"]), str(extra.get("label") or ""))
+                for item in occurrences
+                for extra in item["sourceSubtypeExtras"]
+            }
+        )
+        source_units.append(
+            {
+                "unitId": unit_id,
+                "unitName": unit_names_for_id[0] if len(unit_names_for_id) == 1 else None,
+                "logicalUnitId": logical_ids[0] if len(logical_ids) == 1 else None,
+                "unitShape": shapes[0] if len(shapes) == 1 else "mixed-source-shape",
+                "occurrenceCount": len(occurrences),
+                "armyIds": sorted(int(item["armyId"]) for item in occurrences),
+                "sourceSubtypeExtras": [
+                    {"extraId": extra_id, "label": label or None}
+                    for extra_id, label in subtype_extras
+                ],
+                "sourceSubtypeLabels": sorted(
+                    {
+                        str(label)
+                        for item in occurrences
+                        for label in item["sourceSubtypeLabels"]
+                    }
+                ),
+            }
+        )
+
+    peripheral_only_source_units = [
+        item for item in source_units if item["unitShape"] == "peripheral-only"
+    ]
     report: dict[str, Any] = {
         "status": "available",
         "sourceSkillIds": sorted(peripheral_skill_ids),
         "unitOccurrenceCount": len(evidence),
+        "sourceUnitCount": len(source_units),
+        "peripheralOnlySourceUnitCount": len(peripheral_only_source_units),
+        "peripheralOnlyLogicalUnitCount": len(
+            {item["logicalUnitId"] for item in peripheral_only_source_units}
+        ),
+        "sourceUnits": source_units,
         "peripheralOnlyUnitOccurrenceCount": sum(
             1 for item in evidence.values() if item["unitShape"] == "peripheral-only"
         ),
@@ -1264,6 +1336,84 @@ def audit_peripheral_identity_coverage(
     mapped_keys = set(mapping_by_key) & set(definitions)
     unmapped_rows = [row for key, row in definitions.items() if key not in mapped_keys]
 
+    unit_mappings_value = document.get("unitMappings")
+    unit_mappings = unit_mappings_value if isinstance(unit_mappings_value, list) else []
+    current_unit_mappings = [
+        mapping
+        for mapping in unit_mappings
+        if isinstance(mapping, dict) and mapping.get("sourceId") == source_id
+    ]
+    unit_mapping_by_id = {int(mapping["unitId"]): mapping for mapping in current_unit_mappings}
+    unit_mechanism = controller_graph.get("sourceMechanisms", {}).get(
+        "unitBackedPeripheralUnits", {}
+    )
+    source_units_value = unit_mechanism.get("sourceUnits", [])
+    source_units = source_units_value if isinstance(source_units_value, list) else []
+    standalone_units = {
+        int(item["unitId"]): item
+        for item in source_units
+        if isinstance(item, dict) and item.get("unitShape") == "peripheral-only"
+    }
+
+    stale_unit_mappings: list[dict[str, Any]] = []
+    unit_source_name_drift: list[dict[str, Any]] = []
+    unit_logical_identity_drift: list[dict[str, Any]] = []
+    unit_type_drift: list[dict[str, Any]] = []
+    for unit_id, mapping in sorted(unit_mapping_by_id.items()):
+        source_unit = standalone_units.get(unit_id)
+        if source_unit is None:
+            stale_unit_mappings.append(
+                {
+                    "mappingId": mapping.get("id"),
+                    "unitId": unit_id,
+                    "sourceName": mapping.get("sourceName"),
+                }
+            )
+            continue
+        if mapping.get("sourceName") != source_unit.get("unitName"):
+            unit_source_name_drift.append(
+                {
+                    "mappingId": mapping.get("id"),
+                    "unitId": unit_id,
+                    "expectedSourceName": mapping.get("sourceName"),
+                    "actualSourceName": source_unit.get("unitName"),
+                }
+            )
+        if mapping.get("logicalUnitId") != source_unit.get("logicalUnitId"):
+            unit_logical_identity_drift.append(
+                {
+                    "mappingId": mapping.get("id"),
+                    "unitId": unit_id,
+                    "expectedLogicalUnitId": mapping.get("logicalUnitId"),
+                    "actualLogicalUnitId": source_unit.get("logicalUnitId"),
+                }
+            )
+        labels = source_unit.get("sourceSubtypeLabels", [])
+        expected_type_ids = sorted(
+            {
+                _SOURCE_PERIPHERAL_SUBTYPE_TYPE_IDS[normalized]
+                for label in labels
+                if isinstance(label, str)
+                and (normalized := _normalized_review_name(label))
+                in _SOURCE_PERIPHERAL_SUBTYPE_TYPE_IDS
+            }
+        )
+        if len(expected_type_ids) != 1 or mapping.get("typeId") != expected_type_ids[0]:
+            unit_type_drift.append(
+                {
+                    "mappingId": mapping.get("id"),
+                    "unitId": unit_id,
+                    "expectedTypeId": mapping.get("typeId"),
+                    "sourceSubtypeLabels": labels,
+                    "sourceTypeCandidates": expected_type_ids,
+                }
+            )
+
+    mapped_unit_ids = set(unit_mapping_by_id) & set(standalone_units)
+    unmapped_unit_rows = [
+        item for unit_id, item in sorted(standalone_units.items()) if unit_id not in mapped_unit_ids
+    ]
+
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         groups[_normalized_review_name(row["sourceName"])].append(row)
@@ -1349,12 +1499,34 @@ def audit_peripheral_identity_coverage(
         if isinstance(profile, dict) and str(profile.get("id")) not in mapped_profile_ids
     )
 
-    invalid_count = len(stale_mappings) + len(source_name_drift)
+    invalid_count = (
+        len(stale_mappings)
+        + len(source_name_drift)
+        + len(stale_unit_mappings)
+        + len(unit_source_name_drift)
+        + len(unit_logical_identity_drift)
+        + len(unit_type_drift)
+    )
     unmapped_count = len(unmapped_rows)
+    unmapped_unit_count = len(unmapped_unit_rows)
     definition_count = len(rows)
-    status = "invalid" if invalid_count else ("complete" if unmapped_count == 0 else "needs-review")
+    status = (
+        "invalid"
+        if invalid_count
+        else (
+            "complete"
+            if unmapped_count == 0 and unmapped_unit_count == 0
+            else "needs-review"
+        )
+    )
     coverage_percent = 100.0 if definition_count == 0 else round(
         (len(mapped_keys) / definition_count) * 100.0, 2
+    )
+    standalone_unit_count = len(standalone_units)
+    unit_coverage_percent = (
+        100.0
+        if standalone_unit_count == 0
+        else round((len(mapped_unit_ids) / standalone_unit_count) * 100.0, 2)
     )
 
     report: dict[str, Any] = {
@@ -1377,18 +1549,37 @@ def audit_peripheral_identity_coverage(
             "repeatedNameGroupCount": repeated_name_group_count,
             "normalizedNameCollisionCount": normalized_name_collision_count,
         },
+        "unitBackedIdentities": {
+            "sourceUnitCount": standalone_unit_count,
+            "logicalUnitCount": len(
+                {
+                    item.get("logicalUnitId")
+                    for item in standalone_units.values()
+                    if item.get("logicalUnitId") is not None
+                }
+            ),
+            "mappedSourceUnitCount": len(mapped_unit_ids),
+            "unmappedSourceUnitCount": unmapped_unit_count,
+            "coveragePercent": unit_coverage_percent,
+        },
         "controllerGraph": controller_graph,
         "curated": {
             "entityCount": curated.entity_count,
             "profileCount": curated.profile_count,
             "mappingCount": curated.mapping_count,
+            "unitMappingCount": curated.unit_mapping_count,
             "currentSnapshotMappingCount": len(current_mappings),
+            "currentSnapshotUnitMappingCount": len(current_unit_mappings),
             "curatedOnlyEntityCount": len(curated_only_entities),
             "curatedOnlyProfileCount": len(curated_only_profiles),
         },
         "validation": {
             "staleMappingCount": len(stale_mappings),
             "sourceNameDriftCount": len(source_name_drift),
+            "staleUnitMappingCount": len(stale_unit_mappings),
+            "unitSourceNameDriftCount": len(unit_source_name_drift),
+            "unitLogicalIdentityDriftCount": len(unit_logical_identity_drift),
+            "unitTypeDriftCount": len(unit_type_drift),
             "status": "valid" if invalid_count == 0 else "invalid",
         },
         "reviewQueue": review_queue,
@@ -1396,6 +1587,11 @@ def audit_peripheral_identity_coverage(
     if include_details:
         report["validation"]["staleMappings"] = stale_mappings
         report["validation"]["sourceNameDrift"] = source_name_drift
+        report["validation"]["staleUnitMappings"] = stale_unit_mappings
+        report["validation"]["unitSourceNameDrift"] = unit_source_name_drift
+        report["validation"]["unitLogicalIdentityDrift"] = unit_logical_identity_drift
+        report["validation"]["unitTypeDrift"] = unit_type_drift
+        report["unitBackedIdentities"]["unmappedSourceUnits"] = unmapped_unit_rows
         report["curated"]["curatedOnlyEntities"] = curated_only_entities
         report["curated"]["curatedOnlyProfiles"] = curated_only_profiles
     return report

@@ -33,23 +33,28 @@ Acquisition tooling never writes or consumes this subtree; see
 
 ### Curated Peripheral identities
 
-`peripherals/army-identities.json` is the reviewed boundary between Army-local
-Peripheral definitions and future canonical application Peripheral identities. The
-contract is deliberately separate from both rules records and the display-identity
-contract. It pins the Army snapshot used as evidence and supports reviewed
-`peripheral:<slug>` entities, optional `peripheral-profile:<slug>` profiles, and
-explicit `peripheral-mapping:<slug>` mappings from `(sourceId, armyId, peripheralId)`
-plus the expected source name.
+`peripherals/army-identities.json` is the reviewed boundary between Army Peripheral
+source encodings and canonical application identity. The contract is deliberately separate
+from both rules records and the display-identity contract. It pins the Army snapshot used as
+evidence and supports two source mechanisms:
+
+- embedded `peripherals` rows resolve through reviewed `peripheral:<slug>` entities, optional
+  `peripheral-profile:<slug>` profiles, and `peripheral-mapping:<slug>` mappings keyed by
+  `(sourceId, armyId, peripheralId)`;
+- standalone Unit-backed Peripherals resolve through `peripheral-unit-mapping:<slug>` records
+  keyed by source-global Unit ID and reuse the existing `logical_units` identity instead of
+  creating duplicate `peripheral:*` entities.
 
 Canonical entities may reference one of the five curated N5.3 Peripheral-type rule
 IDs once type classification is independently reviewed. `typeId` is intentionally optional so
 source identity can be established before the rules type is known; when present it must be one
 of those five IDs. Profiles may declare only the reviewed `connected` or `autonomous` Cyberplug
 modes. Every accepted source mapping requires review date and reason, and an optional
-profile must belong to the mapped entity. Unknown fields fail closed; notably `mercs`
-is not accepted as identity data. The checked-in current-snapshot contract intentionally
-contains no entities or mappings yet: absence is explicit rather than replacing review
-with name matching.
+profile must belong to the mapped entity. Unit-backed mappings additionally pin the expected
+logical Unit and reviewed Peripheral type so source-name, logical-identity, or subtype drift
+fails closed. Unknown fields fail closed; notably `mercs` is not accepted as identity data.
+The checked-in current-snapshot contract contains 56 embedded entities, 279 embedded mappings,
+and 17 Unit-backed source mappings resolving to 10 logical Units.
 
 Validate the authored contract with:
 

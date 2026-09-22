@@ -129,7 +129,8 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
     print(f"Validated Peripheral identity contract: {args.input}")
     print(
         f"Entities: {curated.entity_count}; profiles: {curated.profile_count}; "
-        f"mappings: {curated.mapping_count}"
+        f"embedded mappings: {curated.mapping_count}; "
+        f"unit mappings: {curated.unit_mapping_count}"
     )
     if args.database is None:
         if args.output is not None:
@@ -149,6 +150,13 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         f"{definitions['mappedDefinitionCount']}/{definitions['definitionCount']} "
         f"mapped ({definitions['coveragePercent']}%); "
         f"{definitions['unmappedReviewGroupCount']} review groups"
+    )
+    unit_backed = report["unitBackedIdentities"]
+    print(
+        "Unit-backed Peripheral identity coverage: "
+        f"{unit_backed['mappedSourceUnitCount']}/{unit_backed['sourceUnitCount']} "
+        f"mapped ({unit_backed['coveragePercent']}%); "
+        f"{unit_backed['logicalUnitCount']} logical Units"
     )
     controller_graph = report["controllerGraph"]
     if controller_graph["status"] == "available":

@@ -394,11 +394,13 @@ contains `cyberplug` even when it has no embedded Peripheral attachment, and sur
 `Peripheral (Cyberplug)` Units plus raw `relations` / `relation_dependencies` adjacency as review
 evidence. Neither candidate set is promoted into a semantic Controller mapping automatically.
 
-Canonical entity identity and Peripheral type are therefore reviewed independently. A
-`peripheral:<slug>` entity may exist without `typeId`; once type evidence is sufficient,
-`typeId` may be added and must reference one of the five reviewed core Peripheral types. This
-prevents an otherwise defensible cross-Army identity decision from forcing an unsupported
-rules classification.
+Canonical entity identity and Peripheral type are therefore reviewed independently for the
+embedded mechanism. A `peripheral:<slug>` entity may exist without `typeId`; once type evidence
+is sufficient, `typeId` may be added and must reference one of the five reviewed core Peripheral
+types. Unit-backed Peripherals do **not** receive parallel `peripheral:*` entities: they already
+have canonical logical-Unit identity, so the curated contract records a reviewed source Unit ->
+logical Unit mapping plus Peripheral type. This prevents a second application ontology for the
+same Unit while still pinning the reviewed Peripheral semantics to source provenance.
 
 ## Facts that should remain prose or interaction references initially
 
@@ -462,12 +464,16 @@ constraints, profile-mode existence, and durable relationships.
    and its rules type is taken from the matched Army profile's explicit `Peripheral` Skill
    subtype extra. Distinct source names are not merged into shared entities/profiles in this
    pass, even when they look like loadout variants.
-8. **Complete the Unit-backed identity/controller relationship pass.** The audit now inventories
-   ordinary Unit-backed Peripheral occurrences with direct subtype evidence, including standalone
-   Servants and Cyberplugs, plus Cyberplug-skilled Controllers and same-Army subtype candidates.
-   Resolve those source occurrences to canonical Peripheral identities and explicit Controller
-   relationships without treating co-occurrence alone as proof.
-9. **Materialize curated-derived application relationships.** Join source
+8. **Resolve standalone Unit-backed identity — complete for the current snapshot.** The 17
+   source-global standalone Peripheral Unit IDs reuse 10 existing logical-Unit identities rather
+   than creating duplicate `peripheral:*` entities. Reviewed type comes directly from the Army
+   `Peripheral` Skill subtype; the seven Reinforcement variants resolve through the existing
+   logical-Unit identity normalization.
+9. **Resolve explicit Controller relationships.** Cyberplug-skilled Controllers and same-Army
+   Cyberplug Units are now known, but the current relation/dependency graph does not select a
+   specific Ranters/Puzzlers pairing. Do not promote same-Army co-occurrence into a Controller
+   relationship without reviewed game/source evidence.
+10. **Materialize curated-derived application relationships.** Join source
    Controller facts, reviewed identity mappings, and curated eligibility rules;
    preserve all provenance and then decide the `infinity.db`/API/UI surface for
    cross-army Peripheral questions.

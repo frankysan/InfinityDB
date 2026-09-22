@@ -49,6 +49,7 @@ def _document() -> dict:
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-22"},
             }
         ],
+        "unitMappings": [],
         "mappings": [
             {
                 "id": "peripheral-mapping:army-101-1",
@@ -74,12 +75,18 @@ def test_checked_in_peripheral_identity_contract_covers_embedded_snapshot() -> N
     assert curated.entity_count == 56
     assert curated.profile_count == 0
     assert curated.mapping_count == 279
+    assert curated.unit_mapping_count == 17
     assert curated.document["sources"][0]["id"] == "army-json-20260918-204434"
     entities = {item["id"]: item for item in curated.document["entities"]}
     assert entities["peripheral:crabbot"]["typeId"] == "rule:peripheral-type:ancillary"
     assert entities["peripheral:jackbot"]["typeId"] == "rule:peripheral-type:synchronized"
     assert entities["peripheral:moriarty"]["typeId"] == "rule:peripheral-type:servant"
     assert entities["peripheral:antipode"]["typeId"] == "rule:peripheral-type:control"
+    unit_mappings = {item["unitId"]: item for item in curated.document["unitMappings"]}
+    assert unit_mappings[526]["logicalUnitId"] == 526
+    assert unit_mappings[1617]["logicalUnitId"] == 526
+    assert unit_mappings[1885]["typeId"] == "rule:peripheral-type:cyberplug"
+    assert unit_mappings[1886]["typeId"] == "rule:peripheral-type:cyberplug"
 
 
 def test_peripheral_identity_contract_accepts_reviewed_entity_profile_and_mapping() -> None:
@@ -88,6 +95,7 @@ def test_peripheral_identity_contract_accepts_reviewed_entity_profile_and_mappin
     assert curated.entity_count == 1
     assert curated.profile_count == 1
     assert curated.mapping_count == 1
+    assert curated.unit_mapping_count == 0
     assert len(curated.content_sha256) == 64
 
 
@@ -148,6 +156,53 @@ def test_peripheral_identity_contract_rejects_duplicate_source_definition_mappin
     document["mappings"].append(duplicate)
 
     with pytest.raises(PeripheralIdentityError, match="duplicate source Peripheral identity"):
+        parse_peripheral_identity_curated(document)
+
+
+def test_peripheral_identity_contract_accepts_unit_backed_mapping() -> None:
+    document = _document()
+    document["unitMappings"] = [
+        {
+            "id": "peripheral-unit-mapping:unit-30",
+            "sourceId": "army-json-test",
+            "unitId": 30,
+            "sourceName": "Listed Cyberplug Peripheral",
+            "logicalUnitId": 30,
+            "typeId": "rule:peripheral-type:cyberplug",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed Unit-backed test mapping.",
+            },
+        }
+    ]
+
+    curated = parse_peripheral_identity_curated(document)
+
+    assert curated.unit_mapping_count == 1
+
+
+def test_peripheral_identity_contract_rejects_duplicate_unit_backed_mapping() -> None:
+    document = _document()
+    mapping = {
+        "id": "peripheral-unit-mapping:unit-30",
+        "sourceId": "army-json-test",
+        "unitId": 30,
+        "sourceName": "Listed Cyberplug Peripheral",
+        "logicalUnitId": 30,
+        "typeId": "rule:peripheral-type:cyberplug",
+        "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-09-22",
+            "reason": "Reviewed Unit-backed test mapping.",
+        },
+    }
+    duplicate = dict(mapping)
+    duplicate["id"] = "peripheral-unit-mapping:duplicate"
+    duplicate["review"] = dict(mapping["review"])
+    document["unitMappings"] = [mapping, duplicate]
+
+    with pytest.raises(PeripheralIdentityError, match="duplicate source Unit-backed"):
         parse_peripheral_identity_curated(document)
 
 
@@ -260,6 +315,9 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
             CREATE TABLE army_units (
                 army_id INTEGER, unit_id INTEGER, availability_kind TEXT
             );
+            CREATE TABLE logical_unit_sources (
+                source_unit_id INTEGER PRIMARY KEY, logical_unit_id INTEGER NOT NULL
+            );
             CREATE TABLE troop_types (id INTEGER PRIMARY KEY, name TEXT);
             CREATE TABLE profiles (
                 army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER,
@@ -329,6 +387,10 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
                 (101, 30, "source"),
                 (101, 40, "source"),
             ],
+        )
+        connection.executemany(
+            "INSERT INTO logical_unit_sources (source_unit_id, logical_unit_id) VALUES (?, ?)",
+            [(10, 10), (20, 20), (30, 30), (40, 40)],
         )
         connection.executemany(
             "INSERT INTO troop_types (id, name) VALUES (?, ?)",
@@ -527,6 +589,11 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
         "Cyberplug": 1,
         "Servant": 1,
     }
+    assert peripheral_units["sourceUnitCount"] == 2
+    assert peripheral_units["peripheralOnlySourceUnitCount"] == 2
+    assert peripheral_units["peripheralOnlyLogicalUnitCount"] == 2
+    assert report["unitBackedIdentities"]["sourceUnitCount"] == 2
+    assert report["unitBackedIdentities"]["mappedSourceUnitCount"] == 0
     listed = next(row for row in peripheral_units["units"] if row["unitId"] == 30)
     assert listed["unitShape"] == "peripheral-only"
     assert listed["selectableLoadoutCount"] == 1
@@ -592,3 +659,84 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
         "embeddedDisabledDefinitionCount": 1,
         "notMatchedDefinitionCount": 0,
     }
+
+
+def test_peripheral_identity_coverage_validates_unit_backed_mappings(tmp_path: Path) -> None:
+    document = _document()
+    document["unitMappings"] = [
+        {
+            "id": "peripheral-unit-mapping:unit-30",
+            "sourceId": "army-json-test",
+            "unitId": 30,
+            "sourceName": "Listed Cyberplug Peripheral",
+            "logicalUnitId": 30,
+            "typeId": "rule:peripheral-type:cyberplug",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed Cyberplug Unit-backed identity.",
+            },
+        },
+        {
+            "id": "peripheral-unit-mapping:unit-40",
+            "sourceId": "army-json-test",
+            "unitId": 40,
+            "sourceName": "Listed Servant Peripheral",
+            "logicalUnitId": 40,
+            "typeId": "rule:peripheral-type:servant",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed Servant Unit-backed identity.",
+            },
+        },
+    ]
+
+    report = audit_peripheral_identity_coverage(
+        parse_peripheral_identity_curated(document),
+        _controller_coverage_database(tmp_path),
+        rules_documents=_controller_rules_documents(),
+    )
+
+    assert report["unitBackedIdentities"] == {
+        "sourceUnitCount": 2,
+        "logicalUnitCount": 2,
+        "mappedSourceUnitCount": 2,
+        "unmappedSourceUnitCount": 0,
+        "coveragePercent": 100.0,
+        "unmappedSourceUnits": [],
+    }
+    assert report["validation"]["staleUnitMappingCount"] == 0
+    assert report["validation"]["unitSourceNameDriftCount"] == 0
+    assert report["validation"]["unitLogicalIdentityDriftCount"] == 0
+    assert report["validation"]["unitTypeDriftCount"] == 0
+
+
+def test_peripheral_identity_coverage_detects_unit_backed_drift(tmp_path: Path) -> None:
+    document = _document()
+    document["unitMappings"] = [
+        {
+            "id": "peripheral-unit-mapping:unit-30",
+            "sourceId": "army-json-test",
+            "unitId": 30,
+            "sourceName": "OLD NAME",
+            "logicalUnitId": 999,
+            "typeId": "rule:peripheral-type:servant",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Intentionally stale synthetic mapping.",
+            },
+        }
+    ]
+
+    report = audit_peripheral_identity_coverage(
+        parse_peripheral_identity_curated(document),
+        _controller_coverage_database(tmp_path),
+        rules_documents=_controller_rules_documents(),
+    )
+
+    assert report["status"] == "invalid"
+    assert report["validation"]["unitSourceNameDriftCount"] == 1
+    assert report["validation"]["unitLogicalIdentityDriftCount"] == 1
+    assert report["validation"]["unitTypeDriftCount"] == 1

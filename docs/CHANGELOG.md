@@ -15,7 +15,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
   source snapshot provenance. The current embedded source mechanism is fully reviewed for
   the pinned snapshot: 279 Army-local definitions resolve to 56 canonical Peripheral entities
   with source-native subtype classification, while distinct source names remain separate
-  unless stronger entity/profile evidence exists. Army `mercs` remains contextual data.
+  unless stronger entity/profile evidence exists. The standalone Unit-backed mechanism reuses
+  existing logical-Unit identity instead of creating duplicate Peripheral entities: 17 source
+  Unit IDs resolve to 10 logical Units with reviewed Servant/Cyberplug types. Army `mercs`
+  remains contextual data.
 - Extend Peripheral identity coverage to distinguish embedded Peripheral definitions from
   ordinary Unit-backed Peripherals identified by the source `Peripheral` Skill and its subtype
   extra, inventory Cyberplug-skilled Controllers even without embedded attachments, and expose

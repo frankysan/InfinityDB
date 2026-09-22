@@ -13,7 +13,7 @@ from infinity_army_data.project_resources import maintained_curated_path
 from .domain_slugs import validate_typed_domain_id
 
 PERIPHERAL_IDENTITY_FORMAT = "InfinityDB curated Peripheral identities"
-PERIPHERAL_IDENTITY_FORMAT_VERSION = 1
+PERIPHERAL_IDENTITY_FORMAT_VERSION = 2
 DEFAULT_PERIPHERAL_IDENTITY_CURATED = maintained_curated_path(
     "peripherals", "army-identities.json"
 )
@@ -42,6 +42,7 @@ class PeripheralIdentityCurated:
     entity_count: int
     profile_count: int
     mapping_count: int
+    unit_mapping_count: int
 
     @property
     def document(self) -> dict[str, Any]:
@@ -138,7 +139,15 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
     """Validate the reviewed Army-Peripheral identity/mapping contract."""
     if not isinstance(document, dict):
         raise PeripheralIdentityError("Peripheral identity data must be an object")
-    allowed = {"format", "formatVersion", "sources", "entities", "profiles", "mappings"}
+    allowed = {
+        "format",
+        "formatVersion",
+        "sources",
+        "entities",
+        "profiles",
+        "mappings",
+        "unitMappings",
+    }
     unknown = set(document) - allowed
     if unknown:
         raise PeripheralIdentityError(
@@ -158,6 +167,9 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
     entities = _require_list(document.get("entities"), "Peripheral identity data.entities")
     profiles = _require_list(document.get("profiles"), "Peripheral identity data.profiles")
     mappings = _require_list(document.get("mappings"), "Peripheral identity data.mappings")
+    unit_mappings = _require_list(
+        document.get("unitMappings"), "Peripheral identity data.unitMappings"
+    )
 
     entity_ids: set[str] = set()
     for index, entity in enumerate(entities):
@@ -266,6 +278,54 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
                 )
         _validate_review(mapping.get("review"), f"{context}.review", reason_required=True)
 
+    unit_mapping_ids: set[str] = set()
+    unit_source_keys: set[tuple[str, int]] = set()
+    for index, mapping in enumerate(unit_mappings):
+        context = f"Peripheral identity data.unitMappings[{index}]"
+        if not isinstance(mapping, dict):
+            raise PeripheralIdentityError(f"{context} must be an object")
+        allowed_mapping = {
+            "id",
+            "sourceId",
+            "unitId",
+            "sourceName",
+            "logicalUnitId",
+            "typeId",
+            "review",
+        }
+        unknown_mapping = set(mapping) - allowed_mapping
+        if unknown_mapping:
+            raise PeripheralIdentityError(
+                f"{context} has unknown field(s): {', '.join(sorted(unknown_mapping))}"
+            )
+        mapping_id = _typed_id(
+            mapping.get("id"),
+            domain="peripheral-unit-mapping",
+            context=f"{context}.id",
+        )
+        if mapping_id in unit_mapping_ids:
+            raise PeripheralIdentityError(
+                f"{context}: duplicate Unit-backed mapping id {mapping_id!r}"
+            )
+        unit_mapping_ids.add(mapping_id)
+        source_id = mapping.get("sourceId")
+        if not isinstance(source_id, str) or source_id not in source_ids:
+            raise PeripheralIdentityError(f"{context}.sourceId must reference a declared source")
+        unit_id = _require_positive_int(mapping.get("unitId"), f"{context}.unitId")
+        source_key = (source_id, unit_id)
+        if source_key in unit_source_keys:
+            raise PeripheralIdentityError(
+                f"{context}: duplicate source Unit-backed Peripheral identity {source_key!r}"
+            )
+        unit_source_keys.add(source_key)
+        _require_string(mapping.get("sourceName"), f"{context}.sourceName")
+        _require_positive_int(mapping.get("logicalUnitId"), f"{context}.logicalUnitId")
+        if mapping.get("typeId") not in PERIPHERAL_TYPE_IDS:
+            raise PeripheralIdentityError(
+                f"{context}.typeId must reference a core Peripheral type"
+            )
+        _validate_review(mapping.get("review"), f"{context}.review", reason_required=True)
+
     document_json = _canonical_json(document)
     return PeripheralIdentityCurated(
         document_json=document_json,
@@ -273,6 +333,7 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
         entity_count=len(entities),
         profile_count=len(profiles),
         mapping_count=len(mappings),
+        unit_mapping_count=len(unit_mappings),
     )
 
 
