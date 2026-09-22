@@ -1599,38 +1599,89 @@ rows back through their occurrence maps; source-specific unit display names are
 reconstructed from canonical logical-unit fields plus explicit name aliases.
 Top-level `unit_option_*` occurrences stay source-contextual by design.
 
-The current role totals are **111 canonical-application fields**, **62 explicit
-contextual-application fields**, and **23 intentional-source fields**. The
-application Army tables now provide canonical identity/hierarchy and reviewed
-source mappings, while `application_catalog_items` /
-`application_catalog_sources` provide canonical application catalog identity and
-source-label provenance for Skills, Equipment, and Weapons.
-`army_lists.id`/`kind` remain intentional source representation only for the
-legacy API shape and reinforcement fallback. `metadata_factions`,
-`metadata_skills`, and `metadata_equipment` are no longer read by normal
-serving. **196 / 196 observed fields have no open semantic issue**.
+The current Milestone 2B trace covers **29 serving probes**, **62 tables**, and
+**269 distinct table-field pairs**. The role totals are **118 canonical-application
+fields**, **128 explicit contextual-application fields**, and **23 intentional-source
+fields**. The larger contextual total reflects the later materialized Peripheral,
+selection-constraint, and group-dependency relationships rather than a regression to
+legacy payload reads. All **269 / 269 observed fields have no open semantic issue**.
+
+The application Army tables provide canonical identity/hierarchy and reviewed source
+mappings, while `application_catalog_items` / `application_catalog_sources` provide
+canonical application catalog identity and source-label provenance for Skills,
+Equipment, and Weapons. `army_lists.id`/`kind` remain intentional source
+representation only for the legacy API shape and reinforcement fallback.
+`metadata_factions`, `metadata_skills`, and `metadata_equipment` are no longer read
+by normal serving.
 
 `army_units`, `profile_groups`, profile/loadout occurrence maps, logical-unit
-aliases/notes/source links, `metadata_ammunitions`, and `metadata_weapons` are
-recorded as explicit contextual application data. `unit_factions` is classified in the same runtime
-role because it remains source-backed relationship data, but semantically it is
-the broader game-wide declared-membership relation rather than Army-local
-availability. Top-level `unit_options` and their
-skill/equipment/weapon occurrences remain intentional source-context data under
-the previously accepted logical-unit design; they are not assumed redundant
-with profile/loadout payloads.
+aliases/notes/source links, `metadata_ammunitions`, `metadata_weapons`, and the
+reviewed relationship occurrence/source mappings are explicit contextual application
+data. `unit_factions` remains source-backed relationship data but semantically is the
+broader game-wide declared-membership relation rather than Army-local availability.
+Top-level `unit_options` and the currently served skill/equipment/weapon occurrences
+remain intentional source-context data under the accepted logical-unit design; they
+are not assumed redundant with profile/loadout payloads.
 
-The trace is equally useful for scope control. Normal serving currently does
-**not** read Fireteam tables, relation/dependency tables, profile/loadout
-includes or peripherals, `logical_unit_spectables`, or the other source-only
-collections outside the traced surface. Those structures remain important to
-Milestone 2B / 1.0 completeness, but they do not block 0.6.1 unless later work
-introduces a runtime dependency on them.
+The trace remains useful for scope control. Normal serving does **not** read the raw
+Fireteam chart tables, raw generic relation/dependency tables, legacy profile/loadout
+payload tables, normalization-only Army filter joins, or other source-only collections
+outside the traced surface. Canonical Peripheral and selection/dependency relationship
+tables are now read instead. Include relationships and `logical_unit_spectables` are
+materialized application data but remain outside the current serving probes because
+first-class presentation is still a later completeness task.
 
-The production counts above are evidence for this code/snapshot pair, not a
-permanent table-count contract. The audit fails on an unclassified newly-read
-table or an unprobed direct repository method so future runtime expansion becomes
-an explicit semantic decision.
+The production counts above are evidence for this code/snapshot pair, not a permanent
+table-count contract. The audit fails on an unclassified newly-read table or an
+unprobed direct repository method so future runtime expansion becomes an explicit
+semantic decision.
+
+### Milestone 2B application/raw database separation inventory
+
+`tools/audit_database_separation.py` combines the runtime serving-surface trace with
+the complete SQLite schema to classify every table currently written to
+`infinity.db`. The three storage roles are deliberately about the **application
+database boundary**, not about whether the underlying game data is important:
+
+- **canonical application** — application-owned identities/payloads and direct source
+  catalogs that currently are the canonical application representation;
+- **contextual application** — source/application mappings, occurrences, availability,
+  relationships, or intentionally source-shaped context still required by serving;
+- **source/provenance-only** — normalized source representation not read by normal
+  serving and therefore eligible to live only in `infinity.raw.db` once schema and
+  validation dependencies are removed.
+
+On the reviewed 2026-09-18 application database this inventory contains **115
+project tables** including `__infinity_metadata`: **28 canonical application**, **40
+contextual application**, and **47 source/provenance-only**. The 47 source-only tables
+contain 185,172 rows in this snapshot and no normal serving probe reads any of them.
+This class includes legacy profile/loadout source payloads, normalization-only filter
+joins and weapon-template storage, raw Fireteam/relation structures, and supplementary
+source collections that are not currently part of the application-serving model. A
+source-only classification is not a declaration that Fireteams or another construct
+lack player value; it means their current normalized source shape is not the
+application representation that should be deployed long-term.
+
+The existing `infinity.raw.db` sibling is already the lossless source/provenance store.
+It contains the same pinned build metadata as `infinity.db` plus exact JSON for every
+row from every normalized table actually imported. `imported_tables` preserves which
+normalized collections were present even when a table was empty. Existing exporter
+tests compare the archived JSON row-for-row with normalized input; the separation
+audit additionally verifies sibling metadata and archive structure when the raw file
+is available.
+
+Physical removal is intentionally a separate step. The current schema still contains
+**21 foreign-key references from retained tables into source-only candidates**, and
+`Database.validate()` still reads **13 source-only tables** on the production snapshot
+to compare canonical materializations against duplicated source rows. Those checks
+must be replaced with application-layer invariants or moved to build/raw validation
+before the duplicated tables disappear. Dropping the source tables while simply
+removing those validations would weaken the correctness contract and is not acceptable.
+
+SQLite `dbstat` attributes approximately **9.9 MiB**, or **55.72%** of the current
+18 MiB-class `infinity.db`, to the 47 source-only tables and their indexes. This is a
+useful physical-split estimate, not the semantic success criterion; correctness,
+traceability, and a self-contained runtime remain the acceptance requirements.
 
 ### Army/faction semantic boundary audit
 

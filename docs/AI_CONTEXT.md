@@ -1116,3 +1116,25 @@ compatibility references remain unambiguous JSON integers.
   relation/dependency constraints, and similar scoped links) remain semantic unless a separate audit
   proves otherwise. `tools/audit_normalization_links.py` is the deterministic evidence tool for
   this boundary.
+
+### Milestone 2B application/raw database separation boundary (2026-09-22)
+
+- `infinity.raw.db` is the existing lossless normalized Army source/provenance sibling; no second
+  raw artifact is planned. The exporter stores the same pinned metadata as `infinity.db` plus exact
+  JSON for every row from every normalized collection actually imported. `imported_tables` records
+  collection presence even when a normalized table is empty.
+- `tools/audit_database_separation.py` is the fail-closed inventory for the physical split. It
+  combines the complete schema with the normal-serving probe plan and classifies every current
+  frontend table as canonical application data, explicit contextual application data, or
+  source/provenance-only representation. A source-only classification is a storage-boundary claim,
+  not a claim that the underlying game concept lacks player value.
+- On the reviewed 2026-09-18 application database the current inventory is 28 canonical application
+  tables, 40 contextual application tables, and 47 source/provenance-only tables. Normal serving
+  reads 62 tables and reads none of the 47 source-only candidates. Those candidates plus indexes
+  occupy about 9.9 MiB / 55.72% of the current `infinity.db` file.
+- Do not physically drop those 47 tables yet. The retained schema still has 21 foreign-key
+  references into source-only candidates, and production `Database.validate()` still reads 13 of
+  them for canonical-vs-source cross-checks. Retarget/remove those foreign keys deliberately and
+  replace each validation with an application-layer invariant or build/raw validation before the
+  source table disappears. Storage reduction must never be achieved by weakening correctness or
+  traceability.

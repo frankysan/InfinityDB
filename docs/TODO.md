@@ -277,13 +277,30 @@ in `docs/releasing.md`.
   canonicalization.**
   This milestone refers to the existing `infinity.raw.db`; no additional
   lossless database artifact is planned.
-  - [ ] Treat `infinity.raw.db` as the complete lossless normalized Army source/
+  - [x] Treat `infinity.raw.db` as the complete lossless normalized Army source/
     provenance store, including source-local identities, source ordering,
     raw fallbacks, and acquisition/audit metadata required to reconstruct
-    the imported source.
-  - [ ] Inventory every remaining `infinity.db` table and repository/API query and
+    the imported source. The paired exporter already stores the exact JSON for
+    every imported normalized row plus the same pinned build metadata as the
+    application sibling; empty normalized tables remain represented by the
+    `imported_tables` metadata contract.
+  - [x] Inventory every remaining `infinity.db` table and repository/API query and
     classify it as canonical application data, explicit contextual application
-    data, or source/provenance-only data.
+    data, or source/provenance-only data. The current schema contains 28 canonical
+    application tables, 40 explicit contextual application tables, and 47
+    source/provenance-only normalized tables. Normal serving reads 62 tables and
+    none of the 47 source-only candidates. `tools/audit_database_separation.py`
+    fails closed if that boundary or the serving-surface probe coverage changes.
+    - [x] Record the physical-split blockers before removing any table. The current
+      schema has 21 retained foreign-key references into source-only candidates,
+      and `Database.validate()` still reads 13 source-only tables for canonical-vs-
+      source cross-checks on the production snapshot. Those validations must be
+      replaced with application-layer invariants or moved to build/raw validation,
+      not silently dropped.
+    - [x] Measure the current source-only footprint without treating size as the
+      semantic acceptance criterion. On the reviewed 2026-09-18 application DB,
+      candidate source-only tables plus their indexes occupy about 9.9 MiB,
+      55.72% of the current `infinity.db` file.
   - [ ] Move source/provenance-only normalized tables out of `infinity.db` only
     after canonical unit/profile/loadout/relationship/catalog replacements are
     proven complete and reconstruction/provenance tests cover the transition.

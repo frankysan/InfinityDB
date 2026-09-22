@@ -551,10 +551,19 @@ source-local/contextual relationships. Normal search/filter/catalog reverse read
 now expand canonical payload occurrences rather than traversing those legacy
 payload tables. Compatibility revision 19 also requires unit-oriented indexes on
 both canonical occurrence tables so this read-path split does not regress unit-detail
-query behavior. The physical removal of source-only tables from `infinity.db`
-remains a later design step after canonical unit, relationship, and catalog
-coverage is complete; `infinity.raw.db` is the intended long-term home for that
-lossless source representation.
+query behavior.
+
+Milestone 2B now has an explicit physical-storage inventory. The current frontend
+schema classifies 28 tables as canonical application data, 40 as explicit contextual
+application data, and 47 normalized tables as source/provenance-only representation.
+Normal serving reads none of those 47 source-only candidates; `infinity.raw.db` is
+the long-term home for that lossless source representation. Physical removal is
+still gated by schema and validation dependencies: retained tables currently carry
+21 foreign-key references into source-only candidates, and `Database.validate()`
+still reads 13 source-only tables on the reviewed production snapshot for
+canonical-vs-source cross-checks. Those dependencies must be replaced deliberately
+before the published frontend schema is reduced; the split must not weaken
+correctness or provenance just to reduce file size.
 
 ### General application-domain identifier contract
 
