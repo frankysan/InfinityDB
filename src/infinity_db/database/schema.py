@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 17
+SCHEMA_VERSION = 23
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 25
+DATABASE_COMPATIBILITY_VERSION = 31
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -438,9 +438,149 @@ DERIVED_TABLES = {
         ),
         ref("extra_id", "extras", "id"),
     ),
+    "profile_occurrence_includes": table(
+        "army_id unit_id group_id profile_id position",
+        "target_loadout_payload_id quantity raw",
+        ref(
+            "army_id unit_id group_id profile_id",
+            "profile_payload_occurrences",
+            "army_id unit_id group_id profile_id",
+        ),
+        ref("target_loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "loadout_occurrence_includes": table(
+        "army_id unit_id group_id option_id position",
+        "target_loadout_payload_id quantity raw",
+        ref(
+            "army_id unit_id group_id option_id",
+            "loadout_payload_occurrences",
+            "army_id unit_id group_id option_id",
+        ),
+        ref("target_loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "unit_option_include_targets": table(
+        "unit_id option_id position target_army_id",
+        "target_loadout_payload_id quantity raw",
+        ref("unit_id option_id", "unit_options"),
+        ref("target_army_id", "army_lists", "id"),
+        ref("target_loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "application_peripheral_entities": table(
+        "id",
+        "name type_id",
+    ),
+    "application_peripheral_profiles": table(
+        "id",
+        "entity_id name mode",
+        ref("entity_id", "application_peripheral_entities", "id"),
+    ),
+    "application_peripheral_sources": table(
+        "army_id peripheral_id",
+        "entity_id profile_id source_id source_name",
+        ref("army_id peripheral_id", "peripherals", "army_id id"),
+        ref("entity_id", "application_peripheral_entities", "id"),
+        ref("profile_id", "application_peripheral_profiles", "id"),
+    ),
+    "application_peripheral_unit_sources": table(
+        "source_unit_id",
+        "logical_unit_id type_id source_id source_name",
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "application_peripheral_controller_access": table(
+        "id",
+        "source_id controller_kind army_id unit_id group_id parent_id source_name "
+        "type_id relationship",
+        ref("army_id unit_id", "army_units"),
+    ),
+    "application_peripheral_controller_targets": table(
+        "access_id target_logical_unit_id",
+        "",
+        ref("access_id", "application_peripheral_controller_access", "id"),
+        ref("target_logical_unit_id", "logical_units", "id"),
+    ),
+    "application_unit_constraints": table(
+        "army_id relation_id",
+        "position family min_count max_count is_group",
+        ref("army_id relation_id", "relations"),
+    ),
+    "application_unit_constraint_members": table(
+        "army_id relation_id relation_unit_id",
+        "position source_unit_id logical_unit_id",
+        ref("army_id relation_id", "application_unit_constraints"),
+        ref("army_id relation_id relation_unit_id", "relation_units"),
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "application_unit_group_dependency_constraints": table(
+        "army_id relation_id",
+        "position min_count max_count is_group",
+        ref("army_id relation_id", "relations"),
+    ),
+    "application_unit_group_dependency_members": table(
+        "army_id relation_id relation_unit_id",
+        "position source_unit_id logical_unit_id group_id per_parent",
+        ref("army_id relation_id", "application_unit_group_dependency_constraints"),
+        ref("army_id relation_id relation_unit_id", "relation_units"),
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "application_unit_group_dependency_targets": table(
+        "army_id relation_id relation_unit_id dependency_id",
+        "position source_unit_id logical_unit_id group_id source_group_selector "
+        "min_count min_dependant options",
+        ref(
+            "army_id relation_id relation_unit_id",
+            "application_unit_group_dependency_members",
+        ),
+        ref(
+            "army_id relation_id relation_unit_id dependency_id",
+            "relation_dependencies",
+        ),
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
 }
 
+# Normalized source tables retained in the published application database.
+# Every derived application table is published; normalized tables omitted from
+# this set remain available only through the lossless raw archive after the
+# staging database has passed full source-to-canonical validation.
+PUBLISHED_SOURCE_TABLES = frozenset(
+    {
+        "army_lists",
+        "army_units",
+        "categories",
+        "characteristics",
+        "equipment",
+        "extras",
+        "metadata_ammunitions",
+        "metadata_weapons",
+        "option_peripherals",
+        "profile_groups",
+        "profile_peripherals",
+        "skills",
+        "troop_types",
+        "unit_factions",
+        "unit_option_equipment",
+        "unit_option_equipment_extras",
+        "unit_option_skill_extras",
+        "unit_option_skills",
+        "unit_option_weapon_extras",
+        "unit_option_weapons",
+        "unit_options",
+        "units",
+        "weapons",
+    }
+)
+
+SOURCE_ONLY_TABLES = frozenset(TABLES) - PUBLISHED_SOURCE_TABLES
 DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
+PUBLISHED_DATABASE_TABLES = {
+    name: definition
+    for name, definition in DATABASE_TABLES.items()
+    if name not in SOURCE_ONLY_TABLES
+}
 
 # Primary keys preserve the source hierarchy, which normally starts with
 # ``army_id``. The public read API also traverses the data by unit and performs
@@ -514,6 +654,41 @@ INDEXES = (
     ("unit_option_skills_item", "unit_option_skills", "item_id"),
     ("unit_option_equipment_item", "unit_option_equipment", "item_id"),
     ("unit_option_weapons_item", "unit_option_weapons", "item_id"),
+    (
+        "application_peripheral_sources_entity",
+        "application_peripheral_sources",
+        "entity_id, army_id, peripheral_id",
+    ),
+    (
+        "application_peripheral_unit_sources_logical",
+        "application_peripheral_unit_sources",
+        "logical_unit_id, source_unit_id",
+    ),
+    (
+        "application_peripheral_controller_access_unit",
+        "application_peripheral_controller_access",
+        "unit_id, army_id, group_id, parent_id",
+    ),
+    (
+        "application_peripheral_controller_targets_target",
+        "application_peripheral_controller_targets",
+        "target_logical_unit_id, access_id",
+    ),
+    (
+        "application_unit_constraint_members_logical",
+        "application_unit_constraint_members",
+        "logical_unit_id, army_id, relation_id, relation_unit_id",
+    ),
+    (
+        "application_unit_group_dependency_members_logical",
+        "application_unit_group_dependency_members",
+        "logical_unit_id, army_id, relation_id, relation_unit_id",
+    ),
+    (
+        "application_unit_group_dependency_targets_logical",
+        "application_unit_group_dependency_targets",
+        "logical_unit_id, army_id, relation_id, relation_unit_id, dependency_id",
+    ),
 )
 
 
@@ -544,6 +719,7 @@ def create_schema(
     tables: dict[str, list[dict]],
     *,
     table_columns: Mapping[str, tuple[str, ...]] | None = None,
+    definitions: Mapping[str, Table] | None = None,
 ) -> None:
     """Create all tables, including empty ones, with deferred relational constraints.
 
@@ -557,7 +733,8 @@ def create_schema(
     connection.execute(
         f"CREATE TABLE {quote(METADATA_TABLE)} (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
     )
-    for name, definition in DATABASE_TABLES.items():
+    definitions = DATABASE_TABLES if definitions is None else definitions
+    for name, definition in definitions.items():
         columns = (
             table_columns[name]
             if table_columns is not None and name in table_columns
@@ -568,6 +745,8 @@ def create_schema(
         ]
         parts.append("PRIMARY KEY (" + ", ".join(map(quote, definition.key)) + ")")
         for reference in definition.references:
+            if reference.table not in definitions:
+                continue
             parts.append(
                 "FOREIGN KEY (" + ", ".join(map(quote, reference.fields)) + ") "
                 "REFERENCES "
@@ -580,8 +759,11 @@ def create_schema(
         connection.execute(f"CREATE TABLE {quote(name)} ({', '.join(parts)})")
 
 
-def create_indexes(connection: sqlite3.Connection) -> None:
+def create_indexes(
+    connection: sqlite3.Connection, *, table_names: Collection[str] | None = None
+) -> None:
     """Create read-path indexes after data loading completes."""
+    table_names = set(DATABASE_TABLES) if table_names is None else set(table_names)
     connection.execute("CREATE INDEX units_name ON units(name COLLATE NOCASE, id)")
     connection.execute("CREATE INDEX army_units_unit ON army_units(unit_id, army_id)")
     connection.execute(
@@ -641,4 +823,7 @@ def create_indexes(connection: sqlite3.Connection) -> None:
         "ON loadout_payload_occurrences(loadout_payload_id)"
     )
     for index_name, table_name, columns in INDEXES:
-        connection.execute(f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})")
+        if table_name in table_names:
+            connection.execute(
+                f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})"
+            )

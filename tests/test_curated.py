@@ -430,3 +430,159 @@ def test_army_links_accept_numeric_ids_and_catalog_slugs(tmp_path: Path) -> None
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="lowercase ASCII slug"):
         load_curated_document(path)
+
+
+def test_skill_records_allow_no_rules_labels(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"][0]["labelIds"] = []
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    assert load_curated_document(path)["records"][0]["labelIds"] == []
+
+
+def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"].extend(
+        [
+            {
+                "id": "skill:doctor",
+                "kind": "skill",
+                "name": "Doctor",
+                "summary": "Doctor skill.",
+                "facts": {"typeId": "automatic"},
+                "labelIds": [],
+                "citations": [{"sourceId": "n5-core-v5.3", "page": 90}],
+            },
+            {
+                "id": "skill:engineer",
+                "kind": "skill",
+                "name": "Engineer",
+                "summary": "Engineer skill.",
+                "facts": {"typeId": "automatic"},
+                "labelIds": [],
+                "citations": [{"sourceId": "n5-core-v5.3", "page": 91}],
+            },
+            {
+                "id": "skill:peripheral",
+                "kind": "skill",
+                "name": "Peripheral",
+                "summary": "Peripheral skill.",
+                "facts": {"typeId": "automatic"},
+                "labelIds": [],
+                "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+            },
+            {
+                "id": "rule:peripheral-type:servant",
+                "kind": "rule",
+                "name": "Peripheral (Servant)",
+                "summary": "Servant type.",
+                "facts": {
+                    "category": "peripheral-type",
+                    "controllerEligibility": {
+                        "anyOf": [
+                            {"hasSkill": "skill:doctor"},
+                            {"hasSkill": "skill:engineer"},
+                        ]
+                    },
+                    "maxPerController": 2,
+                    "operatingDistance": "unlimited",
+                },
+                "relatedRecords": ["skill:peripheral"],
+                "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+            },
+        ]
+    )
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    loaded = load_curated_document(path)
+    servant = next(
+        record for record in loaded["records"] if record["id"] == "rule:peripheral-type:servant"
+    )
+    assert servant["facts"]["maxPerController"] == 2
+
+    source_servant = next(
+        record for record in document["records"]
+        if record["id"] == "rule:peripheral-type:servant"
+    )
+    source_servant["facts"]["controllerEligibility"] = {"status": "unknown"}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must be 'not-stated'"):
+        load_curated_document(path)
+
+
+def test_peripheral_type_rejects_unknown_controller_skill(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"].extend(
+        [
+            {
+                "id": "skill:peripheral",
+                "kind": "skill",
+                "name": "Peripheral",
+                "summary": "Peripheral skill.",
+                "facts": {"typeId": "automatic"},
+                "labelIds": [],
+                "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+            },
+            {
+                "id": "rule:peripheral-type:cyberplug",
+                "kind": "rule",
+                "name": "Peripheral (Cyberplug)",
+                "summary": "Cyberplug type.",
+                "facts": {
+                    "category": "peripheral-type",
+                    "controllerEligibility": {"hasSkill": "skill:missing"},
+                    "profileModes": ["connected", "autonomous"],
+                },
+                "relatedRecords": ["skill:peripheral"],
+                "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+            },
+        ]
+    )
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unknown skill 'skill:missing'"):
+        load_curated_document(path)
+
+
+def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:doctor"]["facts"]["typeId"] == "short-skill"
+    assert records["skill:engineer"]["facts"]["typeId"] == "short-skill"
+    assert records["skill:cyberplug"]["facts"]["typeId"] == "automatic"
+    assert records["skill:peripheral"]["facts"]["typeId"] == "automatic"
+    assert records["skill:doctor"]["armyLinks"] == [{"entity": "skill", "id": "doctor"}]
+
+    peripheral_types = {
+        record_id: record
+        for record_id, record in records.items()
+        if record.get("facts", {}).get("category") == "peripheral-type"
+    }
+    assert set(peripheral_types) == {
+        "rule:peripheral-type:servant",
+        "rule:peripheral-type:synchronized",
+        "rule:peripheral-type:control",
+        "rule:peripheral-type:ancillary",
+        "rule:peripheral-type:cyberplug",
+    }
+    assert peripheral_types["rule:peripheral-type:servant"]["facts"][
+        "controllerEligibility"
+    ] == {
+        "anyOf": [
+            {"hasSkill": "skill:doctor"},
+            {"hasSkill": "skill:engineer"},
+        ]
+    }
+    assert peripheral_types["rule:peripheral-type:cyberplug"]["facts"]["profileModes"] == [
+        "connected",
+        "autonomous",
+    ]
+    assert all(
+        "skill:peripheral" in record["relatedRecords"]
+        for record in peripheral_types.values()
+    )

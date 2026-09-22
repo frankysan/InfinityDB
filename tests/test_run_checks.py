@@ -53,6 +53,10 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         sys.executable,
         "-m",
         "pytest",
+        "-n",
+        "auto",
+        "--dist",
+        "worksteal",
         "tests/test_cli.py",
         "-m",
         "not full_assets",
@@ -104,6 +108,10 @@ def test_test_stage_can_include_full_asset_tests() -> None:
         sys.executable,
         "-m",
         "pytest",
+        "-n",
+        "auto",
+        "--dist",
+        "worksteal",
         "-m",
         "full_assets or not full_assets",
         "-q",
@@ -114,6 +122,82 @@ def test_asset_mode_defaults_to_auto() -> None:
     args = run_checks.build_parser().parse_args(["--stage", "test"])
 
     assert args.assets == "auto"
+
+
+def test_test_workers_default_is_resolved_by_the_test_stage() -> None:
+    args = run_checks.build_parser().parse_args(["--stage", "test"])
+
+    assert args.test_workers is None
+    assert run_checks.DEFAULT_TEST_WORKERS == "auto"
+
+
+def test_test_stage_can_enable_xdist_workers() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",),
+        [],
+        build_source=None,
+        test_workers="4",
+    )
+
+    assert stage.command == (
+        sys.executable,
+        "-m",
+        "pytest",
+        "-n",
+        "4",
+        "--dist",
+        "worksteal",
+        "-m",
+        "not full_assets",
+        "-q",
+    )
+
+
+def test_test_stage_can_force_serial_execution() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",),
+        [],
+        build_source=None,
+        test_workers="0",
+    )
+
+    assert stage.command == (
+        sys.executable,
+        "-m",
+        "pytest",
+        "-m",
+        "not full_assets",
+        "-q",
+    )
+
+
+def test_test_workers_require_test_stage(capsys: pytest.CaptureFixture[str]) -> None:
+    result = run_checks.main(["--stage", "lint", "--test-workers", "2"])
+
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "--test-workers requires the test stage" in capsys.readouterr().err
+
+
+def test_default_parallel_test_workers_require_xdist(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(run_checks.importlib.util, "find_spec", lambda name: None)
+
+    result = run_checks.main(["--stage", "test", "--assets", "off"])
+
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "pytest-xdist is required" in capsys.readouterr().err
+
+
+def test_parallel_test_workers_require_xdist(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(run_checks.importlib.util, "find_spec", lambda name: None)
+
+    result = run_checks.main(["--stage", "test", "--assets", "off", "--test-workers", "2"])
+
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "pytest-xdist is required" in capsys.readouterr().err
 
 
 def test_lint_stage_uses_project_defaults_without_targets() -> None:

@@ -3511,6 +3511,399 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
             }
+        },
+        {
+            "id": "skill:doctor",
+            "kind": "skill",
+            "name": "Doctor",
+            "summary": "A Short Special Skill associated with VITA recovery and Peripheral (Servant) controller eligibility.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "doctor"
+                }
+            ],
+            "relatedRecords": [
+                "rule:peripheral-type:servant"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 90,
+                    "section": "Doctor"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "skill:engineer",
+            "kind": "skill",
+            "name": "Engineer",
+            "summary": "A Short Special Skill associated with STR recovery and Peripheral (Servant) controller eligibility.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "engineer"
+                }
+            ],
+            "relatedRecords": [
+                "rule:peripheral-type:servant"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 91,
+                    "section": "Engineer"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "skill:cyberplug",
+            "kind": "skill",
+            "name": "Cyberplug",
+            "summary": "An Automatic Special Skill that grants access to Peripheral (Cyberplug) troopers.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "cyberplug"
+                }
+            ],
+            "relatedRecords": [
+                "rule:peripheral-type:cyberplug"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 90,
+                    "section": "Cyberplug"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "skill:peripheral",
+            "kind": "skill",
+            "name": "Peripheral",
+            "summary": "An Automatic Special Skill defining common Controller/Peripheral behavior and the five core Peripheral types.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "peripheral"
+                }
+            ],
+            "relatedRecords": [
+                "rule:peripheral-type:servant",
+                "rule:peripheral-type:synchronized",
+                "rule:peripheral-type:control",
+                "rule:peripheral-type:ancillary",
+                "rule:peripheral-type:cyberplug"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 108,
+                    "section": "Peripheral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "rule:peripheral-type:servant",
+            "kind": "rule",
+            "name": "Peripheral (Servant)",
+            "summary": "A Peripheral type controlled by a Doctor or Engineer, with unlimited operating distance and a maximum of two per Controller.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "peripheral-type",
+                "controllerEligibility": {
+                    "anyOf": [
+                        {
+                            "hasSkill": "skill:doctor"
+                        },
+                        {
+                            "hasSkill": "skill:engineer"
+                        }
+                    ]
+                },
+                "maxPerController": 2,
+                "operatingDistance": "unlimited"
+            },
+            "relatedRecords": [
+                "skill:peripheral",
+                "skill:doctor",
+                "skill:engineer"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 108,
+                    "section": "Peripheral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "rule:peripheral-type:synchronized",
+            "kind": "rule",
+            "name": "Peripheral (Synchronized)",
+            "summary": "A Peripheral type whose operation depends on its Controller and Coherency; the core type rule states no generic Controller-eligibility predicate.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "peripheral-type",
+                "controllerEligibility": {
+                    "status": "not-stated"
+                }
+            },
+            "relatedRecords": [
+                "skill:peripheral"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 108,
+                    "section": "Peripheral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "rule:peripheral-type:control",
+            "kind": "rule",
+            "name": "Peripheral (Control)",
+            "summary": "A Peripheral type with unlimited operating distance and a maximum of three per Controller; the core type rule states no generic Controller-eligibility predicate.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "peripheral-type",
+                "controllerEligibility": {
+                    "status": "not-stated"
+                },
+                "maxPerController": 3,
+                "operatingDistance": "unlimited"
+            },
+            "relatedRecords": [
+                "skill:peripheral"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 108,
+                    "section": "Peripheral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "rule:peripheral-type:ancillary",
+            "kind": "rule",
+            "name": "Peripheral (Ancillary)",
+            "summary": "A Peripheral type with unlimited operating distance that starts undeployed; the core type rule states no generic Controller-eligibility predicate.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "peripheral-type",
+                "controllerEligibility": {
+                    "status": "not-stated"
+                },
+                "operatingDistance": "unlimited"
+            },
+            "relatedRecords": [
+                "skill:peripheral"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 108,
+                    "section": "Peripheral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
+        },
+        {
+            "id": "rule:peripheral-type:cyberplug",
+            "kind": "rule",
+            "name": "Peripheral (Cyberplug)",
+            "summary": "A Peripheral type granted by Cyberplug, with unlimited operating distance, a maximum of two per Controller, and Connected/Autonomous operating profiles.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "peripheral-type",
+                "controllerEligibility": {
+                    "hasSkill": "skill:cyberplug"
+                },
+                "maxPerController": 2,
+                "operatingDistance": "unlimited",
+                "profileModes": [
+                    "connected",
+                    "autonomous"
+                ]
+            },
+            "relatedRecords": [
+                "skill:peripheral",
+                "skill:cyberplug"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 108,
+                    "section": "Peripheral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22"
+            }
         }
     ]
 }

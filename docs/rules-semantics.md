@@ -5,9 +5,31 @@ have a known use in InfinityDB's data interpretation, normalization, validation,
 relationships, querying/filtering, or presentation work.
 
 It is not a replacement rules reference and must not become a copy of the
-rulebook. Detailed audit coverage belongs in `rules-audit.md`; verified findings
-that do not yet have a concrete InfinityDB consumer belong in
-`rules-research.md`.
+rulebook. Verified findings that do not yet have a concrete InfinityDB consumer
+belong in `rules-research.md`.
+
+## Audited source baseline
+
+The initial systematic rules audit completed on 2026-09-21. It reviewed the N5
+V5.3 core rules (`data/pdf/rules/n5-rules-v5-3-en.pdf`), N5 FAQ v0.1
+(`data/pdf/faq/n5-faqs-v0-1-en.pdf`), the pinned English Wiki snapshot
+`wiki-en-20260918-130233`, the official Reinforcements Extra as a separate annex
+scope, and relevant ITS/FAQ material without silently merging season/scenario
+content into core rules.
+
+That pass produced 127 implementation-relevant `RS-*` findings retained in this
+file and 62 verified `RR-*` findings retained in `rules-research.md`. The detailed
+page-by-page audit ledger was intentionally retired after completion; Git history
+retains it. Future rules-version audits should establish a new explicit source
+baseline and update these maintained semantic/research records rather than revive
+an indefinitely growing process log.
+
+Source handling remains: prefer current official material when it supersedes an
+older local copy; use Wiki pages for traversal/canonical page identity and PDFs for
+stable edition/page citations; keep core, FAQ/errata, Reinforcements, ITS, and
+historical scopes explicit; and preserve discrepancies rather than silently
+combining them. Infinity Army remains authoritative for current list data and
+availability while rules sources explain semantics.
 
 ## Classification contract
 

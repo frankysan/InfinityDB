@@ -11,8 +11,8 @@ def test_availability_semantics_are_explicit_schema_fields() -> None:
     assert "source_role" in TABLES["units"].fields
     assert "display_army_id" in TABLES["units"].fields
     assert "availability_kind" in TABLES["army_units"].fields
-    assert SCHEMA_VERSION == 17
-    assert DATABASE_COMPATIBILITY_VERSION == 25
+    assert SCHEMA_VERSION == 23
+    assert DATABASE_COMPATIBILITY_VERSION == 31
 
 
 def test_logical_unit_identity_is_frontend_derived_schema() -> None:
@@ -25,6 +25,17 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
         "application_catalog_items",
         "application_catalog_sources",
         "application_domain_slugs",
+        "application_peripheral_entities",
+        "application_peripheral_profiles",
+        "application_peripheral_sources",
+        "application_peripheral_unit_sources",
+        "application_peripheral_controller_access",
+        "application_peripheral_controller_targets",
+        "application_unit_constraints",
+        "application_unit_constraint_members",
+        "application_unit_group_dependency_constraints",
+        "application_unit_group_dependency_members",
+        "application_unit_group_dependency_targets",
         "logical_units",
         "logical_unit_sources",
         "logical_unit_aliases",
@@ -49,6 +60,9 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
         "loadout_payload_equipment_extras",
         "loadout_payload_weapons",
         "loadout_payload_weapon_extras",
+        "profile_occurrence_includes",
+        "loadout_occurrence_includes",
+        "unit_option_include_targets",
     } == set(DERIVED_TABLES)
     assert set(DATABASE_TABLES) == set(TABLES) | set(DERIVED_TABLES)
     assert DERIVED_TABLES["application_armies"].key == ("id",)
@@ -98,4 +112,27 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
         "unit_id",
         "group_id",
         "option_id",
+    )
+
+
+def test_include_relationships_are_frontend_derived_schema() -> None:
+    assert DERIVED_TABLES["profile_occurrence_includes"].key == (
+        "army_id",
+        "unit_id",
+        "group_id",
+        "profile_id",
+        "position",
+    )
+    assert DERIVED_TABLES["loadout_occurrence_includes"].key == (
+        "army_id",
+        "unit_id",
+        "group_id",
+        "option_id",
+        "position",
+    )
+    assert DERIVED_TABLES["unit_option_include_targets"].key == (
+        "unit_id",
+        "option_id",
+        "position",
+        "target_army_id",
     )

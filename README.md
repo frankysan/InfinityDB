@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.6.2** (2026-09-21).
+Current release: **0.6.3** (2026-09-22).
 
 ## Guiding principles
 
@@ -44,6 +44,28 @@ Current release: **0.6.2** (2026-09-21).
 For the technical meaning of imported and InfinityDB-derived concepts, see the
 [data model](docs/data-model.md). Architectural boundaries and design decisions
 are documented in [architecture](docs/architecture.md).
+
+## Roadmap to 1.0
+
+The current direction is deliberately incremental:
+
+- **0.7.x — Rules & context:** enrich existing catalog/application data with concise
+  rules summaries, official references, classifications, and reviewed semantic
+  relationships.
+- **0.8.x — Connect the game:** expose first-class relationships such as Fireteams,
+  Peripherals/Controllers, linked profiles/includes, selection/dependency constraints,
+  Reinforcement parentage, and useful cross-army navigation.
+- **0.9.x — Complete & polish:** close the remaining player-data/presentation gaps and
+  improve search, navigation, mobile behavior, accessibility, and theming on the way
+  to the final completeness audit.
+- **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
+  InfinityDB has a maintained representation and a meaningful, usable place in the
+  web reference.
+
+In short: **0.6 builds the foundation → 0.7 adds context → 0.8 connects the data →
+0.9 closes the gaps → 1.0 completes the reference.** Exact minor-release scope may
+move as audits discover dependencies; the durable 1.0 gate is defined in
+[release process](docs/releasing.md).
 
 ## Requirements and setup
 
@@ -242,6 +264,17 @@ python tools/run_checks.py --stage lint src/infinity_army_data/availability.py t
 python tools/run_checks.py --profile code --report
 ```
 
+Test stages use `pytest-xdist` automatic worker selection by default. Use a
+fixed worker count when needed, or force serial execution for debugging:
+
+```powershell
+python tools/run_checks.py --stage test --test-workers 4
+python tools/run_checks.py --stage test --test-workers 0
+```
+
+See [development checks](docs/testing.md) for worker-selection guidance and the
+measured serial/parallel baseline.
+
 Requested stages continue after a failure by default; add `--fail-fast` to stop
 at the first failure. See [development checks](docs/testing.md) for stage and
 profile definitions, asset modes, reports, and exit codes.
@@ -252,8 +285,10 @@ profile definitions, asset modes, reports, and exit codes.
   boundaries, current architecture, and accepted design direction.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
-- [Peripheral curated-data design](docs/peripheral-curated-data-design.md) —
-  active Milestone 2B rules, identity, and relationship design.
+- [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
+  concrete InfinityDB consumer.
+- [Rules research](docs/rules-research.md) — verified source findings retained for possible
+  future reference or product work.
 - [Data storage and provenance](data/README.md) — raw, curated, generated, and
   local processing artifacts.
 - [Development checks](docs/testing.md) — local and CI validation.

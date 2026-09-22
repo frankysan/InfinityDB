@@ -1,0 +1,4459 @@
+{
+  "format": "InfinityDB curated Peripheral identities",
+  "formatVersion": 3,
+  "sources": [
+    {
+      "id": "army-json-20260918-204434",
+      "kind": "army-snapshot",
+      "artifact": "JSON 20260918-204434.zip",
+      "sha256": "858309ea44b6a07f0aadb7bf2856d6c0dfdcb75dbe587b85997ed46c4780e3a3",
+      "acquiredAt": "2026-09-18T20:44:34+02:00",
+      "authority": "primary"
+    }
+  ],
+  "entities": [
+    {
+      "id": "peripheral:antipode",
+      "name": "ANTIPODE",
+      "typeId": "rule:peripheral-type:control",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:auxbot",
+      "name": "AUXBOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:auxbot-1",
+      "name": "AUXBOT_1",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:auxbot-2",
+      "name": "AUXBOT_2",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:auxbot-3",
+      "name": "AUXBOT_3",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:auxbot-3b",
+      "name": "AUXBOT_3B",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:bambabot-1",
+      "name": "BAMBABOT-1",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:bambabot-2",
+      "name": "BAMBABOT-2",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:batard",
+      "name": "BÂTARD",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:chaksa-peripheral",
+      "name": "CHAKSA PERIPHERAL",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:chaksa-peripheral-a",
+      "name": "CHAKSA PERIPHERAL A",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:chaksa-peripheral-b",
+      "name": "CHAKSA PERIPHERAL B",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:crabbot",
+      "name": "CRABBOT",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:devabot",
+      "name": "DEVABOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:devabot-charybdis",
+      "name": "DEVABOT CHARYBDIS",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:drumbot-1",
+      "name": "DRUMBOT_1",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:drumbot-2",
+      "name": "DRUMBOT_2",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:drumbot-3",
+      "name": "DRUMBOT_3",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:drumbot-4",
+      "name": "DRUMBOT_4",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:drumbot-5",
+      "name": "DRUMBOT_5",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:go-bot",
+      "name": "GO-BOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:jackbot",
+      "name": "JACKBOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:jandab",
+      "name": "JANDAB",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:k-9-antipode",
+      "name": "K-9 ANTIPODE",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:karkata",
+      "name": "KARKATA",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:kiranbot",
+      "name": "KIRANBOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:kiranbot-1",
+      "name": "KIRANBOT 1",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:kiranbot-2",
+      "name": "KIRANBOT 2",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:kiss",
+      "name": "KISS!",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:kiss-repeater",
+      "name": "KISS! (Repeater)",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:kobaruto",
+      "name": "KOBARUTO",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:kydoimos",
+      "name": "KYDOIMOS",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:minimus",
+      "name": "MINIMUS",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:moriarty",
+      "name": "MORIARTY",
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:mutan-symbiobeast",
+      "name": "MUTAN SYMBIOBEAST",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:nasmat-a2",
+      "name": "NASMAT A2",
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:pupnik",
+      "name": "PUPNIK",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:rakdron",
+      "name": "RAKDRON",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:rb-235-samodelkin",
+      "name": "RB-235 SAMODELKIN",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:robbybot",
+      "name": "ROBBYBOT",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:scindron",
+      "name": "SCINDRON",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:shangdiao",
+      "name": "SHÀNGDIÀO",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:sharvara-k-9",
+      "name": "SHARVARA_K-9",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:sidebot",
+      "name": "SIDEBOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:siriusbot",
+      "name": "SIRIUSBOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:skurgot",
+      "name": "SKURGOT",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:staldron",
+      "name": "STALDRON",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:surda-symbiobeast",
+      "name": "SURDA SYMBIOBEAST",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:sync-preta",
+      "name": "SYNC PRETA",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:taigha-sync",
+      "name": "TAIGHA SYNC",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:turtlemek",
+      "name": "TURTLEMEK",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:well-sync",
+      "name": "Π-WELL SYNC",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:yudbot-b",
+      "name": "YUDBOT-B",
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:zetbot",
+      "name": "ZETBOT",
+      "typeId": "rule:peripheral-type:ancillary",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:zondcat",
+      "name": "ZONDCAT",
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "id": "peripheral:zondmate",
+      "name": "ZONDMATE",
+      "typeId": "rule:peripheral-type:synchronized",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    }
+  ],
+  "profiles": [],
+  "mappings": [
+    {
+      "id": "peripheral-mapping:army-101-311",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 311,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-312",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 312,
+      "sourceName": "DRUMBOT_1",
+      "entityId": "peripheral:drumbot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-313",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 313,
+      "sourceName": "DRUMBOT_2",
+      "entityId": "peripheral:drumbot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-314",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 314,
+      "sourceName": "DRUMBOT_3",
+      "entityId": "peripheral:drumbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-315",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 315,
+      "sourceName": "DRUMBOT_4",
+      "entityId": "peripheral:drumbot-4",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-316",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 316,
+      "sourceName": "DRUMBOT_5",
+      "entityId": "peripheral:drumbot-5",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-317",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 317,
+      "sourceName": "MINIMUS",
+      "entityId": "peripheral:minimus",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-318",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 318,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-319",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 319,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-320",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 320,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-321",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 321,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-101-322",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 101,
+      "peripheralId": 322,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-250",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 250,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-251",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 251,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-252",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 252,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-253",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 253,
+      "sourceName": "AUXBOT",
+      "entityId": "peripheral:auxbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-254",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 254,
+      "sourceName": "DEVABOT CHARYBDIS",
+      "entityId": "peripheral:devabot-charybdis",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-255",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 255,
+      "sourceName": "SHARVARA_K-9",
+      "entityId": "peripheral:sharvara-k-9",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-256",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 256,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-257",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 257,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-102-258",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 102,
+      "peripheralId": 258,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-206",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 206,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-207",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 207,
+      "sourceName": "AUXBOT",
+      "entityId": "peripheral:auxbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-208",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 208,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-209",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 209,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-210",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 210,
+      "sourceName": "AUXBOT_2",
+      "entityId": "peripheral:auxbot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-211",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 211,
+      "sourceName": "SHARVARA_K-9",
+      "entityId": "peripheral:sharvara-k-9",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-212",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 212,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-213",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 213,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-103-214",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 103,
+      "peripheralId": 214,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-288",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 288,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-289",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 289,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-290",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 290,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-291",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 291,
+      "sourceName": "AUXBOT_1",
+      "entityId": "peripheral:auxbot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-292",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 292,
+      "sourceName": "AUXBOT_2",
+      "entityId": "peripheral:auxbot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-293",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 293,
+      "sourceName": "MINIMUS",
+      "entityId": "peripheral:minimus",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-294",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 294,
+      "sourceName": "DEVABOT",
+      "entityId": "peripheral:devabot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-295",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 295,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-296",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 296,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-104-297",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 104,
+      "peripheralId": 297,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-105-135",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 105,
+      "peripheralId": 135,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-105-136",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 105,
+      "peripheralId": 136,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-105-137",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 105,
+      "peripheralId": 137,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-105-138",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 105,
+      "peripheralId": 138,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-105-139",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 105,
+      "peripheralId": 139,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-105-140",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 105,
+      "peripheralId": 140,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-106-232",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 106,
+      "peripheralId": 232,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-106-233",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 106,
+      "peripheralId": 233,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-106-234",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 106,
+      "peripheralId": 234,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-106-235",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 106,
+      "peripheralId": 235,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-106-236",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 106,
+      "peripheralId": 236,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-106-237",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 106,
+      "peripheralId": 237,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-45",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 45,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-46",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 46,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-47",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 47,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-48",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 48,
+      "sourceName": "MINIMUS",
+      "entityId": "peripheral:minimus",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-49",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 49,
+      "sourceName": "DRUMBOT_1",
+      "entityId": "peripheral:drumbot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-50",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 50,
+      "sourceName": "DRUMBOT_2",
+      "entityId": "peripheral:drumbot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-51",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 51,
+      "sourceName": "DRUMBOT_3",
+      "entityId": "peripheral:drumbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-52",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 52,
+      "sourceName": "DRUMBOT_4",
+      "entityId": "peripheral:drumbot-4",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-53",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 53,
+      "sourceName": "DRUMBOT_5",
+      "entityId": "peripheral:drumbot-5",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-54",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 54,
+      "sourceName": "SHARVARA_K-9",
+      "entityId": "peripheral:sharvara-k-9",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-55",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 55,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-56",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 56,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-107-57",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 107,
+      "peripheralId": 57,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-199-18",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 199,
+      "peripheralId": 18,
+      "sourceName": "CRABBOT",
+      "entityId": "peripheral:crabbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-201-58",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 201,
+      "peripheralId": 58,
+      "sourceName": "SHÀNGDIÀO",
+      "entityId": "peripheral:shangdiao",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-201-59",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 201,
+      "peripheralId": 59,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-201-60",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 201,
+      "peripheralId": 60,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-201-61",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 201,
+      "peripheralId": 61,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-202-238",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 202,
+      "peripheralId": 238,
+      "sourceName": "DEVABOT",
+      "entityId": "peripheral:devabot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-202-239",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 202,
+      "peripheralId": 239,
+      "sourceName": "SHÀNGDIÀO",
+      "entityId": "peripheral:shangdiao",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-202-240",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 202,
+      "peripheralId": 240,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-202-241",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 202,
+      "peripheralId": 241,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-202-242",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 202,
+      "peripheralId": 242,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-204-327",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 204,
+      "peripheralId": 327,
+      "sourceName": "SHÀNGDIÀO",
+      "entityId": "peripheral:shangdiao",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-204-328",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 204,
+      "peripheralId": 328,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-204-329",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 204,
+      "peripheralId": 329,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-204-330",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 204,
+      "peripheralId": 330,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-205-122",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 205,
+      "peripheralId": 122,
+      "sourceName": "SHÀNGDIÀO",
+      "entityId": "peripheral:shangdiao",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-205-123",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 205,
+      "peripheralId": 123,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-205-124",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 205,
+      "peripheralId": 124,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-205-125",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 205,
+      "peripheralId": 125,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-301-137",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 301,
+      "peripheralId": 137,
+      "sourceName": "ANTIPODE",
+      "entityId": "peripheral:antipode",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Control) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-301-138",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 301,
+      "peripheralId": 138,
+      "sourceName": "RB-235 SAMODELKIN",
+      "entityId": "peripheral:rb-235-samodelkin",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-301-139",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 301,
+      "peripheralId": 139,
+      "sourceName": "K-9 ANTIPODE",
+      "entityId": "peripheral:k-9-antipode",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-301-140",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 301,
+      "peripheralId": 140,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-301-141",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 301,
+      "peripheralId": 141,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-301-142",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 301,
+      "peripheralId": 142,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-302-68",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 302,
+      "peripheralId": 68,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-302-69",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 302,
+      "peripheralId": 69,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-302-70",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 302,
+      "peripheralId": 70,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-303-116",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 303,
+      "peripheralId": 116,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-303-117",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 303,
+      "peripheralId": 117,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-303-118",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 303,
+      "peripheralId": 118,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-304-111",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 304,
+      "peripheralId": 111,
+      "sourceName": "K-9 ANTIPODE",
+      "entityId": "peripheral:k-9-antipode",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-304-112",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 304,
+      "peripheralId": 112,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-304-113",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 304,
+      "peripheralId": 113,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-304-114",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 304,
+      "peripheralId": 114,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-305-76",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 305,
+      "peripheralId": 76,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-305-77",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 305,
+      "peripheralId": 77,
+      "sourceName": "K-9 ANTIPODE",
+      "entityId": "peripheral:k-9-antipode",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-305-78",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 305,
+      "peripheralId": 78,
+      "sourceName": "ANTIPODE",
+      "entityId": "peripheral:antipode",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Control) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-305-79",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 305,
+      "peripheralId": 79,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-305-80",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 305,
+      "peripheralId": 80,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-306-96",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 306,
+      "peripheralId": 96,
+      "sourceName": "RB-235 SAMODELKIN",
+      "entityId": "peripheral:rb-235-samodelkin",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-306-97",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 306,
+      "peripheralId": 97,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-306-98",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 306,
+      "peripheralId": 98,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-306-99",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 306,
+      "peripheralId": 99,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-401-88",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 401,
+      "peripheralId": 88,
+      "sourceName": "JANDAB",
+      "entityId": "peripheral:jandab",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-401-89",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 401,
+      "peripheralId": 89,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-401-90",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 401,
+      "peripheralId": 90,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-401-91",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 401,
+      "peripheralId": 91,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-402-100",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 402,
+      "peripheralId": 100,
+      "sourceName": "JANDAB",
+      "entityId": "peripheral:jandab",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-402-101",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 402,
+      "peripheralId": 101,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-402-102",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 402,
+      "peripheralId": 102,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-402-103",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 402,
+      "peripheralId": 103,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-403-104",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 403,
+      "peripheralId": 104,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-403-105",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 403,
+      "peripheralId": 105,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-403-106",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 403,
+      "peripheralId": 106,
+      "sourceName": "JANDAB",
+      "entityId": "peripheral:jandab",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-403-107",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 403,
+      "peripheralId": 107,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-404-123",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 404,
+      "peripheralId": 123,
+      "sourceName": "JANDAB",
+      "entityId": "peripheral:jandab",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-404-124",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 404,
+      "peripheralId": 124,
+      "sourceName": "NASMAT A2",
+      "entityId": "peripheral:nasmat-a2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Servant) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-404-125",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 404,
+      "peripheralId": 125,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-404-126",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 404,
+      "peripheralId": 126,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-404-127",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 404,
+      "peripheralId": 127,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-499-45",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 499,
+      "peripheralId": 45,
+      "sourceName": "NASMAT A2",
+      "entityId": "peripheral:nasmat-a2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Servant) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-1",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 1,
+      "sourceName": "PUPNIK",
+      "entityId": "peripheral:pupnik",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-2",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 2,
+      "sourceName": "ROBBYBOT",
+      "entityId": "peripheral:robbybot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-3",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 3,
+      "sourceName": "BAMBABOT-1",
+      "entityId": "peripheral:bambabot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-4",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 4,
+      "sourceName": "BAMBABOT-2",
+      "entityId": "peripheral:bambabot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-5",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 5,
+      "sourceName": "ZONDMATE",
+      "entityId": "peripheral:zondmate",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-6",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 6,
+      "sourceName": "Π-WELL SYNC",
+      "entityId": "peripheral:well-sync",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-7",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 7,
+      "sourceName": "GO-BOT",
+      "entityId": "peripheral:go-bot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-8",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 8,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-9",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 9,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-501-10",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 501,
+      "peripheralId": 10,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-67",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 67,
+      "sourceName": "ROBBYBOT",
+      "entityId": "peripheral:robbybot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-68",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 68,
+      "sourceName": "ZONDCAT",
+      "entityId": "peripheral:zondcat",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Servant) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-69",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 69,
+      "sourceName": "BAMBABOT-1",
+      "entityId": "peripheral:bambabot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-70",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 70,
+      "sourceName": "BAMBABOT-2",
+      "entityId": "peripheral:bambabot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-71",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 71,
+      "sourceName": "MORIARTY",
+      "entityId": "peripheral:moriarty",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Servant) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-72",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 72,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-73",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 73,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-502-74",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 502,
+      "peripheralId": 74,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-503-183",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 503,
+      "peripheralId": 183,
+      "sourceName": "GO-BOT",
+      "entityId": "peripheral:go-bot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-503-184",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 503,
+      "peripheralId": 184,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-503-185",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 503,
+      "peripheralId": 185,
+      "sourceName": "Π-WELL SYNC",
+      "entityId": "peripheral:well-sync",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-503-186",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 503,
+      "peripheralId": 186,
+      "sourceName": "ROBBYBOT",
+      "entityId": "peripheral:robbybot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-503-187",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 503,
+      "peripheralId": 187,
+      "sourceName": "PUPNIK",
+      "entityId": "peripheral:pupnik",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-503-188",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 503,
+      "peripheralId": 188,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-503-189",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 503,
+      "peripheralId": 189,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-504-122",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 504,
+      "peripheralId": 122,
+      "sourceName": "ROBBYBOT",
+      "entityId": "peripheral:robbybot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-504-123",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 504,
+      "peripheralId": 123,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-504-124",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 504,
+      "peripheralId": 124,
+      "sourceName": "ZONDMATE",
+      "entityId": "peripheral:zondmate",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-504-125",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 504,
+      "peripheralId": 125,
+      "sourceName": "GO-BOT",
+      "entityId": "peripheral:go-bot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-504-126",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 504,
+      "peripheralId": 126,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-504-127",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 504,
+      "peripheralId": 127,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-599-49",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 599,
+      "peripheralId": 49,
+      "sourceName": "ROBBYBOT",
+      "entityId": "peripheral:robbybot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-601-143",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 601,
+      "peripheralId": 143,
+      "sourceName": "SCINDRON",
+      "entityId": "peripheral:scindron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-601-144",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 601,
+      "peripheralId": 144,
+      "sourceName": "STALDRON",
+      "entityId": "peripheral:staldron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-601-145",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 601,
+      "peripheralId": 145,
+      "sourceName": "KISS! (Repeater)",
+      "entityId": "peripheral:kiss-repeater",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-601-146",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 601,
+      "peripheralId": 146,
+      "sourceName": "KISS!",
+      "entityId": "peripheral:kiss",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-601-147",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 601,
+      "peripheralId": 147,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-601-148",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 601,
+      "peripheralId": 148,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-601-149",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 601,
+      "peripheralId": 149,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-602-85",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 602,
+      "peripheralId": 85,
+      "sourceName": "RAKDRON",
+      "entityId": "peripheral:rakdron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-602-86",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 602,
+      "peripheralId": 86,
+      "sourceName": "SKURGOT",
+      "entityId": "peripheral:skurgot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-602-87",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 602,
+      "peripheralId": 87,
+      "sourceName": "SYNC PRETA",
+      "entityId": "peripheral:sync-preta",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-602-88",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 602,
+      "peripheralId": 88,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-602-89",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 602,
+      "peripheralId": 89,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-602-90",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 602,
+      "peripheralId": 90,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-603-91",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 603,
+      "peripheralId": 91,
+      "sourceName": "TAIGHA SYNC",
+      "entityId": "peripheral:taigha-sync",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-603-92",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 603,
+      "peripheralId": 92,
+      "sourceName": "SCINDRON",
+      "entityId": "peripheral:scindron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-603-93",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 603,
+      "peripheralId": 93,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-603-94",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 603,
+      "peripheralId": 94,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-603-95",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 603,
+      "peripheralId": 95,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-604-60",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 604,
+      "peripheralId": 60,
+      "sourceName": "SCINDRON",
+      "entityId": "peripheral:scindron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-604-61",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 604,
+      "peripheralId": 61,
+      "sourceName": "STALDRON",
+      "entityId": "peripheral:staldron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-604-62",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 604,
+      "peripheralId": 62,
+      "sourceName": "KISS! (Repeater)",
+      "entityId": "peripheral:kiss-repeater",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-604-63",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 604,
+      "peripheralId": 63,
+      "sourceName": "KISS!",
+      "entityId": "peripheral:kiss",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-604-64",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 604,
+      "peripheralId": 64,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-604-65",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 604,
+      "peripheralId": 65,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-604-66",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 604,
+      "peripheralId": 66,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-605-177",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 605,
+      "peripheralId": 177,
+      "sourceName": "KISS! (Repeater)",
+      "entityId": "peripheral:kiss-repeater",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-605-178",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 605,
+      "peripheralId": 178,
+      "sourceName": "STALDRON",
+      "entityId": "peripheral:staldron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-605-179",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 605,
+      "peripheralId": 179,
+      "sourceName": "KYDOIMOS",
+      "entityId": "peripheral:kydoimos",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-605-180",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 605,
+      "peripheralId": 180,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-605-181",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 605,
+      "peripheralId": 181,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-605-182",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 605,
+      "peripheralId": 182,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-699-57",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 699,
+      "peripheralId": 57,
+      "sourceName": "STALDRON",
+      "entityId": "peripheral:staldron",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-11",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 11,
+      "sourceName": "KARKATA",
+      "entityId": "peripheral:karkata",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-12",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 12,
+      "sourceName": "DEVABOT",
+      "entityId": "peripheral:devabot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-13",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 13,
+      "sourceName": "MINIMUS",
+      "entityId": "peripheral:minimus",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-14",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 14,
+      "sourceName": "KIRANBOT 1",
+      "entityId": "peripheral:kiranbot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-15",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 15,
+      "sourceName": "KIRANBOT 2",
+      "entityId": "peripheral:kiranbot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-16",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 16,
+      "sourceName": "SHARVARA_K-9",
+      "entityId": "peripheral:sharvara-k-9",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-17",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 17,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-18",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 18,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-701-19",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 701,
+      "peripheralId": 19,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-702-56",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 702,
+      "peripheralId": 56,
+      "sourceName": "DEVABOT CHARYBDIS",
+      "entityId": "peripheral:devabot-charybdis",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-702-57",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 702,
+      "peripheralId": 57,
+      "sourceName": "KIRANBOT 1",
+      "entityId": "peripheral:kiranbot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-702-58",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 702,
+      "peripheralId": 58,
+      "sourceName": "KIRANBOT 2",
+      "entityId": "peripheral:kiranbot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-702-59",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 702,
+      "peripheralId": 59,
+      "sourceName": "KARKATA",
+      "entityId": "peripheral:karkata",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-702-60",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 702,
+      "peripheralId": 60,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-702-61",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 702,
+      "peripheralId": 61,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-702-62",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 702,
+      "peripheralId": 62,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-2",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 2,
+      "sourceName": "KIRANBOT 1",
+      "entityId": "peripheral:kiranbot-1",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-3",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 3,
+      "sourceName": "KIRANBOT 2",
+      "entityId": "peripheral:kiranbot-2",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-4",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 4,
+      "sourceName": "KARKATA",
+      "entityId": "peripheral:karkata",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-5",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 5,
+      "sourceName": "SHARVARA_K-9",
+      "entityId": "peripheral:sharvara-k-9",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-6",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 6,
+      "sourceName": "DEVABOT",
+      "entityId": "peripheral:devabot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-7",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 7,
+      "sourceName": "MINIMUS",
+      "entityId": "peripheral:minimus",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-8",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 8,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-9",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 9,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-703-10",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 703,
+      "peripheralId": 10,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-799-1",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 799,
+      "peripheralId": 1,
+      "sourceName": "KIRANBOT",
+      "entityId": "peripheral:kiranbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-124",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 124,
+      "sourceName": "CHAKSA PERIPHERAL A",
+      "entityId": "peripheral:chaksa-peripheral-a",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-125",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 125,
+      "sourceName": "CHAKSA PERIPHERAL B",
+      "entityId": "peripheral:chaksa-peripheral-b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-126",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 126,
+      "sourceName": "CHAKSA PERIPHERAL",
+      "entityId": "peripheral:chaksa-peripheral",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-127",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 127,
+      "sourceName": "SURDA SYMBIOBEAST",
+      "entityId": "peripheral:surda-symbiobeast",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-128",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 128,
+      "sourceName": "MUTAN SYMBIOBEAST",
+      "entityId": "peripheral:mutan-symbiobeast",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-129",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 129,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-130",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 130,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-801-131",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 801,
+      "peripheralId": 131,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-899-63",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 899,
+      "peripheralId": 63,
+      "sourceName": "CHAKSA PERIPHERAL",
+      "entityId": "peripheral:chaksa-peripheral",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-901-70",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 901,
+      "peripheralId": 70,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-901-71",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 901,
+      "peripheralId": 71,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-901-72",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 901,
+      "peripheralId": 72,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-902-117",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 902,
+      "peripheralId": 117,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-902-118",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 902,
+      "peripheralId": 118,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-902-119",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 902,
+      "peripheralId": 119,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-902-120",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 902,
+      "peripheralId": 120,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-902-121",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 902,
+      "peripheralId": 121,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-904-110",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 904,
+      "peripheralId": 110,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-904-111",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 904,
+      "peripheralId": 111,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-904-112",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 904,
+      "peripheralId": 112,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-905-101",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 905,
+      "peripheralId": 101,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-905-102",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 905,
+      "peripheralId": 102,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-905-103",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 905,
+      "peripheralId": 103,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-908-1",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 908,
+      "peripheralId": 1,
+      "sourceName": "JANDAB",
+      "entityId": "peripheral:jandab",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-908-2",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 908,
+      "peripheralId": 2,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-908-3",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 908,
+      "peripheralId": 3,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-908-4",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 908,
+      "peripheralId": 4,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-909-64",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 909,
+      "peripheralId": 64,
+      "sourceName": "AUXBOT_3",
+      "entityId": "peripheral:auxbot-3",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-909-65",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 909,
+      "peripheralId": 65,
+      "sourceName": "AUXBOT_3B",
+      "entityId": "peripheral:auxbot-3b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-909-66",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 909,
+      "peripheralId": 66,
+      "sourceName": "SHÀNGDIÀO",
+      "entityId": "peripheral:shangdiao",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-909-67",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 909,
+      "peripheralId": 67,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-909-68",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 909,
+      "peripheralId": 68,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-909-69",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 909,
+      "peripheralId": 69,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-179",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 179,
+      "sourceName": "ZETBOT",
+      "entityId": "peripheral:zetbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-180",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 180,
+      "sourceName": "SIRIUSBOT",
+      "entityId": "peripheral:siriusbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-181",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 181,
+      "sourceName": "SIDEBOT",
+      "entityId": "peripheral:sidebot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-182",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 182,
+      "sourceName": "YUDBOT-B",
+      "entityId": "peripheral:yudbot-b",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Servant) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-183",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 183,
+      "sourceName": "DEVABOT",
+      "entityId": "peripheral:devabot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-184",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 184,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-185",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 185,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1001-186",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1001,
+      "peripheralId": 186,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1002-95",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1002,
+      "peripheralId": 95,
+      "sourceName": "SIDEBOT",
+      "entityId": "peripheral:sidebot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1002-96",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1002,
+      "peripheralId": 96,
+      "sourceName": "DEVABOT",
+      "entityId": "peripheral:devabot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1002-97",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1002,
+      "peripheralId": 97,
+      "sourceName": "ZETBOT",
+      "entityId": "peripheral:zetbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1002-98",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1002,
+      "peripheralId": 98,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1002-99",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1002,
+      "peripheralId": 99,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1002-100",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1002,
+      "peripheralId": 100,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1003-139",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1003,
+      "peripheralId": 139,
+      "sourceName": "ZETBOT",
+      "entityId": "peripheral:zetbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1003-140",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1003,
+      "peripheralId": 140,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1003-141",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1003,
+      "peripheralId": 141,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1003-142",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1003,
+      "peripheralId": 142,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1101-26",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1101,
+      "peripheralId": 26,
+      "sourceName": "KOBARUTO",
+      "entityId": "peripheral:kobaruto",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1101-27",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1101,
+      "peripheralId": 27,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1101-28",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1101,
+      "peripheralId": 28,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1101-29",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1101,
+      "peripheralId": 29,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1102-167",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1102,
+      "peripheralId": 167,
+      "sourceName": "KOBARUTO",
+      "entityId": "peripheral:kobaruto",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1102-168",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1102,
+      "peripheralId": 168,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1102-169",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1102,
+      "peripheralId": 169,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1102-170",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1102,
+      "peripheralId": 170,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1103-187",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1103,
+      "peripheralId": 187,
+      "sourceName": "KOBARUTO",
+      "entityId": "peripheral:kobaruto",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1103-188",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1103,
+      "peripheralId": 188,
+      "sourceName": "JACKBOT",
+      "entityId": "peripheral:jackbot",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1103-189",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1103,
+      "peripheralId": 189,
+      "sourceName": "TURTLEMEK",
+      "entityId": "peripheral:turtlemek",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Ancillary) via source skill 243."
+      }
+    },
+    {
+      "id": "peripheral-mapping:army-1103-190",
+      "sourceId": "army-json-20260918-204434",
+      "armyId": 1103,
+      "peripheralId": 190,
+      "sourceName": "BÂTARD",
+      "entityId": "peripheral:batard",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Exact-name source definition reviewed against matched Army profile evidence encoding Peripheral (Synchronized) via source skill 243."
+      }
+    }
+  ],
+  "unitMappings": [
+    {
+      "id": "peripheral-unit-mapping:unit-37",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 37,
+      "sourceName": "PALBOTS",
+      "logicalUnitId": 37,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 37 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-161",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 161,
+      "sourceName": "YÁOZĂO",
+      "logicalUnitId": 161,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 161 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-192",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 192,
+      "sourceName": "YUDBOTS",
+      "logicalUnitId": 192,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 192 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-333",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 333,
+      "sourceName": "NASMAT Remotes",
+      "logicalUnitId": 333,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 333 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-425",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 425,
+      "sourceName": "ZONDBOTS",
+      "logicalUnitId": 425,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 425 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-526",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 526,
+      "sourceName": "SLAVE DRONES",
+      "logicalUnitId": 526,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 526 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-656",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 656,
+      "sourceName": "CHAKSA SERVANT",
+      "logicalUnitId": 656,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 656 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1581",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1581,
+      "sourceName": "Remontnikbot V-5 ELEKTRONIK",
+      "logicalUnitId": 1581,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1581 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1617",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1617,
+      "sourceName": "REINF. SLAVE DRONES",
+      "logicalUnitId": 526,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1617 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 526, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1650",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1650,
+      "sourceName": "REINF: PALBOTS",
+      "logicalUnitId": 37,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1650 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 37, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1664",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1664,
+      "sourceName": "REINF: NASMAT Remotes",
+      "logicalUnitId": 333,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1664 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 333, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1676",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1676,
+      "sourceName": "REINF: CHAKSA SERVANTS",
+      "logicalUnitId": 656,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1676 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 656, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1709",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1709,
+      "sourceName": "REINF: YÁOZĂO",
+      "logicalUnitId": 161,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1709 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 161, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1732",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1732,
+      "sourceName": "REINF: YUDBOTS",
+      "logicalUnitId": 192,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1732 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 192, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1746",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1746,
+      "sourceName": "REINF: ZONDBOTS",
+      "logicalUnitId": 425,
+      "typeId": "rule:peripheral-type:servant",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1746 as a Unit-backed Peripheral; InfinityDB's maintained reinforcement identity normalization resolves it to logical Unit 425, and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1885",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1885,
+      "sourceName": "SARTROIDS: RANTERS, Cyberplugged Attack Remotes",
+      "logicalUnitId": 1885,
+      "typeId": "rule:peripheral-type:cyberplug",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1885 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    },
+    {
+      "id": "peripheral-unit-mapping:unit-1886",
+      "sourceId": "army-json-20260918-204434",
+      "unitId": 1886,
+      "sourceName": "SARTROIDS: PUZZLERS, Cyberplugged Attack Remotes",
+      "logicalUnitId": 1886,
+      "typeId": "rule:peripheral-type:cyberplug",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Reviewed source Unit 1886 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    }
+  ],
+  "controllerAccess": [
+    {
+      "id": "peripheral-controller-access:army-601-unit-507-group-1-option-6",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 601,
+      "unitId": 507,
+      "groupId": 1,
+      "parentId": 6,
+      "sourceName": "MED-TECH OBSIDON",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
+      }
+    },
+    {
+      "id": "peripheral-controller-access:army-605-unit-507-group-1-option-7",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 605,
+      "unitId": 507,
+      "groupId": 1,
+      "parentId": 7,
+      "sourceName": "MED-TECH OBSIDON",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
+      }
+    },
+    {
+      "id": "peripheral-controller-access:army-605-unit-1884-group-1-option-1",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 605,
+      "unitId": 1884,
+      "groupId": 1,
+      "parentId": 1,
+      "sourceName": "GEARHEAD",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
+      }
+    },
+    {
+      "id": "peripheral-controller-access:army-605-unit-1884-group-1-option-2",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 605,
+      "unitId": 1884,
+      "groupId": 1,
+      "parentId": 2,
+      "sourceName": "GEARHEAD",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
+      }
+    }
+  ]
+}

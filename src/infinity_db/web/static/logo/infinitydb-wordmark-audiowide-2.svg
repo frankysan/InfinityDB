@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="177.38728mm"
+   height="32.57209mm"
+   viewBox="0 0 177.38728 32.57209"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   sodipodi:docname="infinitydb-wordmark-audiowide-2.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.51981271"
+     inkscape:cx="277.02285"
+     inkscape:cy="-4.8094245"
+     inkscape:window-width="2560"
+     inkscape:window-height="1369"
+     inkscape:window-x="3432"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient31"
+       id="linearGradient32"
+       x1="416.60886"
+       y1="847.12006"
+       x2="701.35663"
+       y2="847.12006"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.88712461,0,0,0.88712461,470.52555,-68.551644)" />
+    <linearGradient
+       id="linearGradient31"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#d8efbd;stop-opacity:1;"
+         offset="0"
+         id="stop31" />
+      <stop
+         style="stop-color:#94be75;stop-opacity:1;"
+         offset="1"
+         id="stop32" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-10.29788,-125.89557)">
+    <g
+       id="g40"
+       transform="matrix(0.20008521,0,0,0.19995217,-31.390733,2.2446725)"
+       style="stroke-width:1.3228">
+      <text
+         xml:space="preserve"
+         style="font-size:166.78px;font-family:Audiowide;-inkscape-font-specification:Audiowide;letter-spacing:-6.20987px;writing-mode:lr-tb;direction:ltr;fill:url(#linearGradient32);fill-opacity:0.942186;fill-rule:nonzero;stroke:#223b31;stroke-width:9.99899;stroke-dasharray:none;stroke-opacity:1"
+         x="827.97571"
+         y="741.33844"
+         id="text31"
+         transform="scale(1.0018549,0.99814854)"><tspan
+           sodipodi:role="line"
+           id="tspan31"
+           x="827.97571"
+           y="741.33844"
+           style="letter-spacing:-6.20987px;fill:url(#linearGradient32);fill-rule:nonzero;stroke:#223b31;stroke-width:9.99899;stroke-dasharray:none;stroke-opacity:1">DB</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:164px;font-family:Audiowide;-inkscape-font-specification:Audiowide;letter-spacing:-4.5px;writing-mode:lr-tb;direction:ltr;fill:#f1f4ec;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:9.99899;stroke-dasharray:none;stroke-opacity:1"
+         x="196.10234"
+         y="743.74512"
+         id="text38"><tspan
+           sodipodi:role="line"
+           x="196.10234"
+           y="743.74512"
+           id="tspan39"
+           style="letter-spacing:-4.5px;stroke-width:9.99899">Infinity</tspan></text>
+    </g>
+  </g>
+</svg>

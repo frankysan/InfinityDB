@@ -285,6 +285,35 @@ def materialize_application_armies(
     return model
 
 
+def validate_application_army_integrity(connection: sqlite3.Connection) -> None:
+    """Validate the self-contained application Army graph without source catalogs."""
+
+    invalid_army = connection.execute(
+        "SELECT 1 FROM application_armies AS aa "
+        "LEFT JOIN application_army_sources AS aas "
+        "ON aas.application_army_id = aa.id "
+        "WHERE aa.role NOT IN (?, ?, ?, ?, ?, ?) "
+        "OR aa.playable NOT IN (0, 1) "
+        "OR aas.source_army_id IS NULL "
+        "OR NOT EXISTS ("
+        "SELECT 1 FROM application_army_sources AS preferred "
+        "WHERE preferred.application_army_id = aa.id "
+        "AND preferred.source_army_id = aa.preferred_source_id"
+        ") LIMIT 1",
+        tuple(sorted(ARMY_ROLES)),
+    ).fetchone()
+    invalid_reinforcement = connection.execute(
+        "SELECT 1 FROM application_army_reinforcement_parents AS rp "
+        "JOIN application_armies AS reinforcement "
+        "ON reinforcement.id = rp.reinforcement_army_id "
+        "WHERE reinforcement.role != ? LIMIT 1",
+        (ARMY_ROLE_REINFORCEMENT,),
+    ).fetchone()
+    if invalid_army is not None or invalid_reinforcement is not None:
+        raise ValueError(
+            "Database has invalid application Army graph; rebuild the database"
+        )
+
 def validate_application_armies(
     connection: sqlite3.Connection,
     identity_config: IdentityConfig,

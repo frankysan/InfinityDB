@@ -93,8 +93,15 @@ def test_build_creates_verified_json_and_queryable_database(
     with sqlite3.connect(output_dir / "infinity.db") as connection:
         assert connection.execute("SELECT id, name FROM units").fetchall() == [(17, "Test Ranger")]
         assert connection.execute("SELECT COUNT(*) FROM army_units").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM profile_payload_occurrences"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'profiles'"
+        ).fetchone() is None
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
+    with sqlite3.connect(output_dir / "infinity.raw.db") as raw_connection:
+        assert raw_connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 2
 
 
 def test_separate_merge_normalize_export_commands(
@@ -218,6 +225,29 @@ def test_build_rules_command_defaults_to_curated_rules() -> None:
     args = parser.parse_args(["build-rules", "--output", "rules.db"])
     assert args.input == Path("data/curated/rules")
     assert args.output == Path("rules.db")
+
+
+def test_validate_peripheral_identities_command_defaults_to_curated_contract() -> None:
+    parser = build_parser()
+    args = parser.parse_args(["validate-peripheral-identities"])
+    assert args.input == Path("data/curated/peripherals/army-identities.json")
+    assert args.database is None
+    assert args.output is None
+
+
+def test_validate_peripheral_identities_command_accepts_coverage_database() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "validate-peripheral-identities",
+            "--database",
+            "data/generated/infinity.db",
+            "--output",
+            "reports/peripheral-coverage.json",
+        ]
+    )
+    assert args.database == Path("data/generated/infinity.db")
+    assert args.output == Path("reports/peripheral-coverage.json")
 
 
 def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str]) -> None:

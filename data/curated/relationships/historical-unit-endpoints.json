@@ -1,0 +1,110 @@
+{
+  "format": "InfinityDB reviewed historical relation endpoints",
+  "formatVersion": 1,
+  "snapshotArchiveSha256": "858309ea44b6a07f0aadb7bf2856d6c0dfdcb75dbe587b85997ed46c4780e3a3",
+  "sources": [
+    {
+      "id": "infinity-army-backup-n4",
+      "kind": "archived-army-json",
+      "title": "Infinity Army N4 backup",
+      "url": "https://github.com/massayoshi/infinity-army-backup/tree/39cce8d7800313a84db7d3684a425cc783439b28/n4",
+      "authority": "secondary-archive"
+    },
+    {
+      "id": "infinity-army-tools",
+      "kind": "historical-tooling",
+      "title": "Infinity Army Tools historical Unit-name edge cases",
+      "url": "https://github.com/cwoac/Infinity-Army-Tools/blob/d5212ce4bd483f16afba263478ef0e079c43c8d4/Core/src/main/java/net/codersoffortune/infinity/Util.java",
+      "authority": "secondary"
+    }
+  ],
+  "endpoints": [
+    {
+      "sourceUnitId": 165,
+      "name": "Sun Tze v.2 (Marksman Leader)",
+      "status": "retired-historical-unit",
+      "evidence": [
+        {
+          "sourceId": "infinity-army-backup-n4",
+          "path": "n4/yu-jing/units/sun-tze-v-2.json"
+        },
+        {
+          "sourceId": "infinity-army-tools"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "sourceUnitId": 613,
+      "name": "Achilles",
+      "status": "retired-historical-unit",
+      "evidence": [
+        {
+          "sourceId": "infinity-army-backup-n4",
+          "path": "n4/aleph/units/achilles.json"
+        },
+        {
+          "sourceId": "infinity-army-tools"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "sourceUnitId": 749,
+      "name": "Achilles v2 (Corintian Armor)",
+      "status": "retired-historical-unit",
+      "evidence": [
+        {
+          "sourceId": "infinity-army-backup-n4",
+          "path": "n4/aleph/units/achilles-v2-corintian-armor.json"
+        },
+        {
+          "sourceId": "infinity-army-tools"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "sourceUnitId": 1503,
+      "name": "Boarding Action Cadmus-Naish Agent Sheskiin",
+      "status": "retired-historical-unit",
+      "evidence": [
+        {
+          "sourceId": "infinity-army-backup-n4",
+          "path": "n4/combined-army/units/boarding-action-cadmus-naish-agent-sheskiin.json"
+        },
+        {
+          "sourceId": "infinity-army-tools"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    },
+    {
+      "sourceUnitId": 1509,
+      "name": "Imperial Agent Adil Mehmut, Special Division",
+      "status": "retired-historical-unit",
+      "evidence": [
+        {
+          "sourceId": "infinity-army-backup-n4",
+          "path": "n4/yu-jing/units/imperial-agent-adil-mehmut-special-division.json"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22"
+      }
+    }
+  ]
+}

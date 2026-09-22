@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "0.6.2"
+version = "0.6.3"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -18,6 +18,7 @@ server = [
 ]
 dev = [
   "pytest>=8.0",
+  "pytest-xdist>=3.8,<4",
   "ruff>=0.12",
   "pyright[nodejs]>=1.1.414,<1.2",
 ]
@@ -51,6 +52,9 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 ]
 "share/infinity-db/data/curated/identities" = [
   "data/curated/identities/army-display.json",
+]
+"share/infinity-db/data/curated/peripherals" = [
+  "data/curated/peripherals/army-identities.json",
 ]
 
 [tool.setuptools.package-data]

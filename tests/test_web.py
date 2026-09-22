@@ -17,11 +17,26 @@ import pytest
 
 from infinity_army_data.merge import make_source, merge_sources
 from infinity_army_data.normalize import normalize_master
-from infinity_db import __display_version__
+from infinity_db import __display_version__, __version__
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
+from infinity_db.database.publication import (
+    PUBLISHED_CONTENT_SHA256_KEY,
+    published_content_sha256,
+)
 from infinity_db.rules_database import export_rules_database
 from infinity_db.web import create_app
+
+
+def _refresh_published_content_checksum(path: Path) -> None:
+    """Refresh build-integrity metadata after intentional fixture mutation."""
+
+    with sqlite3.connect(path) as connection:
+        checksum = published_content_sha256(connection)
+        connection.execute(
+            "UPDATE __infinity_metadata SET value = ? WHERE key = ?",
+            (json.dumps(checksum), PUBLISHED_CONTENT_SHA256_KEY),
+        )
 
 
 def request(
@@ -118,8 +133,8 @@ def assert_css_rule(
     )
 
 
-@pytest.fixture
-def app(tmp_path: Path) -> Callable:
+@pytest.fixture(scope="module")
+def app_database_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
     shared = {
         "id": 1,
         "name": "Alpha Ranger",
@@ -226,8 +241,15 @@ def app(tmp_path: Path) -> Callable:
         {"id": 21, "name": "Medikit", "wiki": "https://infinitythewiki.com/Medikit"}
     ]
     normalized["_meta"]["snapshotDownloadedOn"] = "2026-09-10"
-    database_path = tmp_path / "infinity.db"
+    database_path = tmp_path_factory.mktemp("web-app") / "infinity.db"
     export_database(normalized, database_path)
+    return database_path
+
+
+@pytest.fixture
+def app(tmp_path: Path, app_database_template: Path) -> Callable:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
     return create_app(database_path)
 
 
@@ -615,13 +637,13 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/traits"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
-    assert b'data-app-version="0.6.2"' in body
+    assert f'data-app-version="{__version__}"'.encode() in body
     assert b'data-snapshot-revision="' in body
-    assert b"/static/version-check.js?v=0.6.2" in body
+    assert f"/static/version-check.js?v={__version__}".encode() in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
-        assert asset.endswith("?v=0.6.2")
+        assert asset.endswith(f"?v={__version__}")
         status, headers, body = request(app, asset)
         assert status == 200
         assert body
@@ -657,7 +679,7 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert status == 200
     assert headers["cache-control"] == "no-store"
     version = json.loads(body)
-    assert version["version"] == "0.6.2"
+    assert version["version"] == __version__
     assert len(version["snapshot_revision"]) == 64
     assert int(version["snapshot_revision"], 16) >= 0
 
@@ -857,8 +879,14 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     status, _, body = request(app, "/units")
 
     assert status == 200
-    assert b'<script type="module" src="/static/navigation.js?v=0.6.2"></script>' in body
-    assert b'<script type="module" src="/static/page-navigation.js?v=0.6.2"></script>' in body
+    assert (
+        f'<script type="module" src="/static/navigation.js?v={__version__}"></script>'.encode()
+        in body
+    )
+    assert (
+        f'<script type="module" src="/static/page-navigation.js?v={__version__}"></script>'.encode()
+        in body
+    )
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body
@@ -971,7 +999,7 @@ def test_army_symbol_is_served(app: Callable) -> None:
 
 
 def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -> None:
-    status, headers, _ = request(app, "/static/styles.css?v=0.6.2")
+    status, headers, _ = request(app, f"/static/styles.css?v={__version__}")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
 
@@ -986,7 +1014,7 @@ def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> Non
     assert status == 200
     assert body
     etag = headers["etag"]
-    assert etag.startswith('"0.6.2-')
+    assert etag.startswith(f'"{__version__}-')
 
     status, conditional_headers, conditional_body = request(
         app,
@@ -1021,6 +1049,7 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
             "UPDATE logical_units SET name = ? WHERE representative_unit_id = ?",
             ("Updated Ranger", 1),
         )
+    _refresh_published_content_checksum(rebuilt_database)
     rebuilt_app = create_app(rebuilt_database)
 
     rebuilt_status, rebuilt_headers, rebuilt_body = request(rebuilt_app, "/api/armies")
@@ -1030,16 +1059,16 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
-    status, headers, body = request(app, "/static/unit.js?v=0.6.2")
+    status, headers, body = request(app, f"/static/unit.js?v={__version__}")
 
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
-    assert b'from "./api.js?v=0.6.2"' in body
-    assert b'from "./preferences.js?v=0.6.2"' in body
+    assert f'from "./api.js?v={__version__}"'.encode() in body
+    assert f'from "./preferences.js?v={__version__}"'.encode() in body
 
-    status, _, body = request(app, "/static/api.js?v=0.6.2")
+    status, _, body = request(app, f"/static/api.js?v={__version__}")
     assert status == 200
-    assert b'import("./preferences.js?v=0.6.2")' in body
+    assert f'import("./preferences.js?v={__version__}")'.encode() in body
     assert b'cache: "no-store"' in body
 
     status, headers, _ = request(app, "/api/armies")
@@ -1618,6 +1647,7 @@ def test_trait_apis_compose_army_usage_with_curated_rules(
             (1, 31, "BS", "Combi Rifle", json.dumps(["Continous Damage", "Disposable (2)"])),
         )
         connection.commit()
+    _refresh_published_content_checksum(app.database.path)
 
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"

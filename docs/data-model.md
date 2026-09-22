@@ -847,11 +847,14 @@ The following stay outside the reusable payload:
 - `profile_includes` — references to army/unit-local loadout identities;
 - `profile_peripherals` — references to army-local peripheral identities.
 
-Includes and peripherals are intentionally deferred because their numeric target
-identities are contextual. They remain losslessly available through the current
-source tables until the related entities have canonical identities of their own.
-They must not be dropped merely because they are outside the first reusable
-payload.
+Includes and peripherals remain outside reusable profile payload identity because
+their attachment is contextual to a source occurrence. Include targets now resolve
+through the canonical loadout-payload layer and are materialized separately in
+`profile_occurrence_includes`, preserving the exact Profile occurrence while replacing
+source-local target coordinates with the canonical target payload identity. Peripheral
+attachments were deliberately deferred from this first profile-payload boundary; the later
+reviewed Peripheral layer now materializes canonical attachments and Controller access while
+keeping their source occurrence context separate from reusable profile payload identity.
 
 The 16 residual contextual variants identified by the classification audit are
 therefore handled conservatively: WIP, characteristic, or skill differences
@@ -934,8 +937,10 @@ The materializer and database validation enforce all of the following:
 - AVA and logo retain their source occurrence values rather than being selected
   from a representative row;
 - profile-group context remains attached through the source occurrence key;
-- includes and peripherals remain available through their existing contextual
-  source relationships until their own canonicalization stage;
+- profile includes remain occurrence-scoped in `profile_occurrence_includes`, with
+  each target resolved to a canonical loadout payload; peripheral attachments remain
+  available through their contextual source relationships until their own
+  canonicalization stage;
 - current source and raw tables are not rewritten or made lossy;
 - non-null `raw` fallback content participates in payload equality and can never
   be silently discarded;
@@ -1088,7 +1093,7 @@ Observed relationship behavior is:
 | skills | 6,330 | 1,594 | 2 | 2 | Two genuine contextual skill/extra differences. |
 | equipment | 2,798 | 457 | 1 | 0 | The only same-source variation is representation-only. |
 | weapons | 52,554 | 11,526 | 12 | 8 | Four differences are representation-only; eight retain source-shape/content differences for later classification. |
-| includes | 949 | — | 0 | 0 | Stable for repeated source loadout keys, but the target remains source-local. |
+| includes | 949 | — | 0 | 0 | Source coordinates are stable for repeated source loadout keys; the later relationship layer resolves the target canonically while retaining occurrence scope. |
 | peripherals | 818 | — | 111 | 111 | Raw army-local IDs differ widely; resolving the target definition reduces this to seven contextual variants. |
 
 The weapon source also contains one non-null raw fallback template (`{}`),
@@ -1160,7 +1165,7 @@ The following stay outside the reusable payload:
   same-source variation;
 - profile-group membership/classification — context inherited from the source
   occurrence;
-- `option_includes` — references to source-local loadout coordinates;
+- `option_includes` — source occurrence attachments whose source-local target coordinates are resolved separately by the derived include relationship layer;
 - `option_peripherals` — references to army-local peripheral identities.
 
 Points and SWC are separated explicitly rather than forcing their three observed
@@ -1170,13 +1175,18 @@ when those gameplay relationships differ, the first canonical model represents
 that as a distinct payload variant rather than inventing a finer-grained delta
 system prematurely.
 
-Includes and peripherals remain losslessly available through the source tables
-until their target entities have stronger canonical identities. In particular,
-the diagnostic peripheral comparison by `name + mercs` is evidence that raw
-army-local IDs overstate variation; it is **not** yet sufficient to define a
-canonical peripheral key. The seven remaining peripheral-context variations,
-including `TURTLEMEK` `mercs` differences, must therefore remain explicit source
-context.
+Includes no longer depend on source-local target coordinates for application meaning.
+`loadout_occurrence_includes` preserves each source Loadout occurrence as the parent
+context while resolving the target to a canonical loadout payload. Top-level
+`unit_option_includes` remain source-context relationships, but
+`unit_option_include_targets` expands each shared include across the Army contexts in
+which its target occurs and records the corresponding canonical loadout payload.
+Peripherals remain losslessly available through the source tables until their reviewed
+identity model is complete. In particular, the diagnostic peripheral comparison by
+`name + mercs` is evidence that raw army-local IDs overstate variation; it is **not**
+yet sufficient to define a canonical peripheral key. The seven remaining
+peripheral-context variations, including `TURTLEMEK` `mercs` differences, must
+therefore remain explicit source context.
 
 The 16 candidate-payload variants among repeated source-loadout keys are retained
 conservatively: one exact equipment representation variant, one order-generation
@@ -1250,8 +1260,9 @@ shape and logical-source merge behavior:
 - points and SWC remain attached to their exact source occurrence;
 - order, skill, equipment, weapon, extra, `raw`, and exact representation
   differences continue to split payloads;
-- profile-group context, includes, and peripherals remain recoverable from the
-  occurrence/source side;
+- profile-group context and peripherals remain recoverable from the
+  occurrence/source side; include attachments remain occurrence-scoped while their
+  targets resolve to canonical loadout payloads;
 - source `loadout_options` and nested `option_*` rows remain lossless and
   reconstructable;
 - no army-local peripheral ID is promoted to cross-Army canonical identity by
@@ -1311,9 +1322,10 @@ performance guarantees or schema invariants. Query-plan regression tests require
 the canonical occurrence tables to use their unit-oriented indexes because unit
 detail assembly filters them by source unit.
 
-Canonical include/peripheral identities, representation normalization, and
-eventual movement of lossless source-only tables to `infinity.raw.db` remain
-separate evidence-driven decisions.
+Peripheral identity, further representation normalization, and eventual movement
+of lossless source-only tables to `infinity.raw.db` remain separate
+evidence-driven decisions. Include target identity is now resolved by the derived
+occurrence relationship layer without promoting the attachment into payload identity.
 
 ### Logical-unit payload semantic classification audit
 
@@ -1508,7 +1520,7 @@ dedicated audit may canonicalize repeated option payloads if there is enough
 evidence, but that is not part of the canonical logical-unit row.
 
 Source-specific faction/main/display derivations, `unit_factions`, and
-`army_units` remain deferred relationship context. The canonical row carries
+`army_units` were deliberately deferred from this logical-unit payload boundary. The canonical row carries
 the representative-backed values needed by current list/detail presentation,
 while the subsequent relationship audit owns the lossless model for the
 source-specific relationships.
@@ -1587,38 +1599,157 @@ rows back through their occurrence maps; source-specific unit display names are
 reconstructed from canonical logical-unit fields plus explicit name aliases.
 Top-level `unit_option_*` occurrences stay source-contextual by design.
 
-The current role totals are **111 canonical-application fields**, **62 explicit
-contextual-application fields**, and **23 intentional-source fields**. The
-application Army tables now provide canonical identity/hierarchy and reviewed
-source mappings, while `application_catalog_items` /
-`application_catalog_sources` provide canonical application catalog identity and
-source-label provenance for Skills, Equipment, and Weapons.
-`army_lists.id`/`kind` remain intentional source representation only for the
-legacy API shape and reinforcement fallback. `metadata_factions`,
-`metadata_skills`, and `metadata_equipment` are no longer read by normal
-serving. **196 / 196 observed fields have no open semantic issue**.
+The current Milestone 2B trace covers **29 serving probes**, **62 tables**, and
+**269 distinct table-field pairs**. The role totals are **118 canonical-application
+fields**, **128 explicit contextual-application fields**, and **23 intentional-source
+fields**. The larger contextual total reflects the later materialized Peripheral,
+selection-constraint, and group-dependency relationships rather than a regression to
+legacy payload reads. All **269 / 269 observed fields have no open semantic issue**.
+
+The application Army tables provide canonical identity/hierarchy and reviewed source
+mappings, while `application_catalog_items` / `application_catalog_sources` provide
+canonical application catalog identity and source-label provenance for Skills,
+Equipment, and Weapons. `army_lists.id`/`kind` remain intentional source
+representation only for the legacy API shape and reinforcement fallback.
+`metadata_factions`, `metadata_skills`, and `metadata_equipment` are no longer read
+by normal serving.
 
 `army_units`, `profile_groups`, profile/loadout occurrence maps, logical-unit
-aliases/notes/source links, `metadata_ammunitions`, and `metadata_weapons` are
-recorded as explicit contextual application data. `unit_factions` is classified in the same runtime
-role because it remains source-backed relationship data, but semantically it is
-the broader game-wide declared-membership relation rather than Army-local
-availability. Top-level `unit_options` and their
-skill/equipment/weapon occurrences remain intentional source-context data under
-the previously accepted logical-unit design; they are not assumed redundant
-with profile/loadout payloads.
+aliases/notes/source links, `metadata_ammunitions`, `metadata_weapons`, and the
+reviewed relationship occurrence/source mappings are explicit contextual application
+data. `unit_factions` remains source-backed relationship data but semantically is the
+broader game-wide declared-membership relation rather than Army-local availability.
+Top-level `unit_options` and the currently served skill/equipment/weapon occurrences
+remain intentional source-context data under the accepted logical-unit design; they
+are not assumed redundant with profile/loadout payloads.
 
-The trace is equally useful for scope control. Normal serving currently does
-**not** read Fireteam tables, relation/dependency tables, profile/loadout
-includes or peripherals, `logical_unit_spectables`, or the other source-only
-collections outside the traced surface. Those structures remain important to
-Milestone 2B / 1.0 completeness, but they do not block 0.6.1 unless later work
-introduces a runtime dependency on them.
+The trace remains useful for scope control. Normal serving does **not** read the raw
+Fireteam chart tables, raw generic relation/dependency tables, legacy profile/loadout
+payload tables, normalization-only Army filter joins, or other source-only collections
+outside the traced surface. Canonical Peripheral and selection/dependency relationship
+tables are now read instead. Include relationships and `logical_unit_spectables` are
+materialized application data but remain outside the current serving probes because
+first-class presentation is still a later completeness task.
 
-The production counts above are evidence for this code/snapshot pair, not a
-permanent table-count contract. The audit fails on an unclassified newly-read
-table or an unprobed direct repository method so future runtime expansion becomes
-an explicit semantic decision.
+The production counts above are evidence for this code/snapshot pair, not a permanent
+table-count contract. The audit fails on an unclassified newly-read table or an
+unprobed direct repository method so future runtime expansion becomes an explicit
+semantic decision.
+
+### Milestone 2B application/raw database separation inventory
+
+`tools/audit_database_separation.py` combines the runtime serving-surface trace with
+the complete SQLite schema to classify every table currently written to
+`infinity.db`. The three storage roles are deliberately about the **application
+database boundary**, not about whether the underlying game data is important:
+
+- **canonical application** — application-owned identities/payloads and direct source
+  catalogs that currently are the canonical application representation;
+- **contextual application** — source/application mappings, occurrences, availability,
+  relationships, or intentionally source-shaped context still required by serving;
+- **source/provenance-only** — normalized source representation not read by normal
+  serving and therefore eligible to live only in `infinity.raw.db` once schema and
+  validation dependencies are removed.
+
+On the reviewed 2026-09-18 application database this inventory contains **115
+project tables** including `__infinity_metadata`: **28 canonical application**, **40
+contextual application**, and **47 source/provenance-only**. The 47 source-only tables
+contain 185,172 rows in this snapshot and no normal serving probe reads any of them.
+This class includes legacy profile/loadout source payloads, normalization-only filter
+joins and weapon-template storage, raw Fireteam/relation structures, and supplementary
+source collections that are not currently part of the application-serving model. A
+source-only classification is not a declaration that Fireteams or another construct
+lack player value; it means their current normalized source shape is not the
+application representation that should be deployed long-term.
+
+Schema 23 / compatibility revision 31 completes the physical split. Export now uses
+three database roles during one build:
+
+1. a temporary **relational staging database** containing the complete normalized source
+   schema plus all derived application tables;
+2. `infinity.raw.db`, which contains all 70 queryable normalized source tables plus
+   `__infinity_raw_rows` with the exact JSON for every imported normalized row; and
+3. the published `infinity.db`, which contains only `__infinity_metadata` plus the 67
+   retained application tables.
+
+All source-to-canonical validation runs against staging before publication. The 47
+source/provenance-only normalized tables are then omitted from `infinity.db`; foreign
+keys whose targets exist only in raw storage are omitted from the published schema,
+while retained-to-retained foreign keys remain intact. Normal `Database.validate()`
+therefore has **zero** raw-only table reads. Validation that requires duplicated source
+rows remains a build-time staging check rather than being discarded.
+
+The raw sibling and application database retain identical pinned build metadata.
+`published_tables` and `source_only_tables` make the storage boundary explicit, while
+`imported_tables` preserves source collection presence even when a normalized table is
+empty. The separation audit verifies that each relational raw table has the same row
+count as its exact lossless-row representation, that the published schema contains no
+source-only table or foreign-key dependency, and that normal serving never reads raw
+storage.
+
+Because removing duplicated source rows also removes some runtime ability to re-derive
+materialized values independently, the exporter records a deterministic SHA-256 over
+the complete published application-table contents after full staging validation.
+Runtime validation checks this hash in addition to intrinsic application invariants and
+SQLite integrity. This is a corruption/drift guard, not a replacement for the stronger
+source-semantic staging checks.
+
+Before the split, SQLite `dbstat` attributed approximately **9.9 MiB**, or **55.72%**
+of the reviewed 18 MiB-class `infinity.db`, to the 47 now-raw-only tables and their
+indexes. The rebuilt production application database confirms that estimate: the same
+reviewed snapshot fell from **18,108,416 bytes (17.27 MiB)** to **8,138,752 bytes
+(7.76 MiB)**, a reduction of **9,969,664 bytes (9.51 MiB / 55.06%)**. Correctness,
+traceability, and runtime independence remain the acceptance criteria rather than
+storage reduction alone.
+
+### Milestone 2B source-to-presentation completeness inventory
+
+`tools/audit_source_presentation.py` is the maintained Army-source completeness
+baseline established at the end of Milestone 2B. It enumerates every normalized Army
+source table and field from the schema and assigns both a semantic-provenance category
+and one of the maintained presentation states: explicitly presented, implicitly
+represented, operationally consumed, redundant source representation, normalization-
+only structure, or unrepresented player information. The audit fails closed if the
+normalized source schema gains a table/field without a maintained classification.
+
+The schema released in 0.6.3 contains **70 source tables / 441 source
+fields**. This is deliberately a semantic inventory rather than a count of runtime
+SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canonical
+application facts may live in derived tables, and a fact may be preserved in the API
+without yet having a usable browser presentation.
+
+The first complete pass records **10 confirmed gap families** for later roadmap work:
+
+- Fireteam chart/type/member relationships;
+- profile/loadout/top-level Unit-option include relationships;
+- Peripheral attachments and Controller access pools;
+- selection constraints and profile-group dependencies;
+- Reinforcement Section parentage;
+- broader source-declared faction membership distinct from concrete Army availability;
+- source-attributed Unit notes;
+- top-level composite Unit options;
+- Structure-versus-Wounds vitality labeling; and
+- structured Hacking Program, Martial Arts, Booty, and MetaChemistry reference data.
+
+The reviewed production application database provides concrete evidence for the gaps
+that already have an application representation: **1,273** canonical include edges,
+**818** loadout Peripheral occurrences plus **8** Controller-target edges, **96** Unit
+selection constraints, **14** profile-group dependency constraints, **46**
+Reinforcement-parent links, **2,094** declared faction memberships, **30**
+source-attributed Unit-note occurrences, **18** top-level Unit options, and **299**
+canonical profile payloads marked `is_structure`. Fireteams and the structured lookup
+metadata remain raw-archive/source-model gaps rather than application-row gaps.
+
+Two preserved constructs remain an explicit semantic review queue instead of being
+forced into a premature 1.0 requirement: **30** opaque `spectables` occurrences and
+the meaning/presentation of loadout `disabled` / `minis` (currently **155** disabled
+canonical loadout payloads and **34** with `minis = 0`). The source information stays
+preserved while their correct player-facing interpretation is reviewed.
+
+The inventory records storage/presentation gaps; it does not redefine release scope.
+Rules-context work belongs to 0.7.x, connected relationship presentation to 0.8.x, and
+remaining presentation/scope cleanup to 0.9.x. The final source-by-source acceptance
+audit in `docs/releasing.md` remains the authoritative 1.0 gate.
 
 ### Army/faction semantic boundary audit
 
@@ -1744,28 +1875,154 @@ entities are already visible in the UI.
 #### Current Milestone 2B relationship evidence
 
 The read-only audits against the 2026-09-18 Army snapshot establish a clean
-starting point without yet changing runtime schema. Include targets resolve
-completely through the canonical loadout/profile occurrence layer: 2/2 profile
-includes, 949/949 loadout includes, and 35/35 shared unit-option includes resolve
-with no missing targets, raw fallbacks, cross-logical-unit targets, or ambiguous
-shared targets. The resolved profile/loadout includes point to 1 and 101 distinct
-canonical target payloads respectively. This is sufficient evidence to design
-canonical include relationships without inventing target identity.
+include-target boundary. All 2 profile includes, 949 loadout includes, and 35 shared
+unit-option includes resolve through the canonical loadout occurrence layer with no
+missing targets, raw fallbacks, or cross-logical-unit targets. Profile includes are
+currently invariant across the one affected repeated canonical Profile payload, while
+Loadout includes are not: 23 of 186 affected canonical Loadout payloads have different
+include signatures across source occurrences, including presence/absence, target, or
+quantity differences. The shared unit-option rows resolve unambiguously in the audited
+snapshot, but their target source option can still acquire different canonical payloads
+when Army-contextual loadout semantics differ.
 
-Peripherals require a separate boundary. The same snapshot has 279 army-local
-definitions / 56 names and 818 resolved loadout attachments, with no profile
-attachments and no definition-only rows. All 279 definitions are referenced by at
-least one loadout attachment. Forty-one names span multiple raw identities and
-three names vary in source `mercs` context. Most importantly, 22 repeated
-canonical loadout payloads have different semantic Peripheral attachment
-signatures (32 differ when representation/context fields are included). Therefore
-Peripheral attachment cannot yet be moved blindly onto the canonical loadout
-payload, and name remains only a diagnostic grouping candidate until the separate
-reviewed source-to-Peripheral identity/profile mapping is defined.
+Schema version 23 / compatibility revision 31 retains the schema-18 include
+relationships without promoting the attachment into reusable payload identity:
 
-Controller eligibility is not represented by these Army relationships and must
-enter through reviewed curated rules data. The current design for that rules side
-is documented in `docs/peripheral-curated-data-design.md`.
+- `profile_occurrence_includes` keeps the exact Profile occurrence as parent context and
+  resolves each included target to `loadout_payloads.id`;
+- `loadout_occurrence_includes` does the same for Loadout occurrences, preserving the
+  contextual variation demonstrated by the audit; and
+- `unit_option_include_targets` keeps the source-context Unit option relationship and
+  expands it by target Army occurrence so each Army context points at the canonical
+  loadout payload that actually applies there.
+
+This split is intentionally conservative. Current Profile invariance is evidence about
+the audited snapshot, not a permanent schema invariant: a Profile can retain the same
+canonical payload while the included Loadout acquires an Army-contextual payload
+variant. Source-local target coordinates remain provenance in the retained source/raw
+representation; application relationships use canonical target identities while keeping
+all contextual parent attachment, quantity, and raw fallback data explicit.
+
+Peripherals use a separate reviewed identity/relationship layer because Army combines
+several source mechanisms. The pinned 2026-09-18 snapshot has 279 embedded army-local
+definitions resolved to 56 reviewed `peripheral:*` entities, plus 17 standalone
+Unit-backed source IDs resolved through the existing logical-Unit layer to 10 logical
+Units. Unit-backed type comes from the source `Peripheral` Skill subtype rather than a
+parallel Peripheral entity namespace.
+
+Schema 23 retains the schema-19 reviewed Peripheral layer in the application database rather
+than leaving
+it in build-time curated JSON only:
+
+- `application_peripheral_entities` / `application_peripheral_profiles` store canonical
+  reviewed embedded identities used by the selected snapshot;
+- `application_peripheral_sources` resolves exact `(army_id, peripheral_id)` source
+  definitions to those canonical identities;
+- `application_peripheral_unit_sources` records reviewed source-Unit -> logical-Unit
+  Peripheral typing without duplicating logical Unit identity; and
+- `application_peripheral_controller_access` plus
+  `application_peripheral_controller_targets` preserve source-context Controller
+  occurrences and their canonical Unit-backed access pools.
+
+The current Cyberplug relationship is an access pool, not fixed ownership: four reviewed
+loadout occurrences in Armies 601/605 each target the canonical Sartroid Ranters and
+Puzzlers logical Units available in that Army context, for eight materialized edges.
+There are no source relation/dependency edges selecting one Sartroid for one Controller.
+The full reviewed contract and hash are pinned into database metadata; database validation
+reconstructs these rows against the retained Army source context and fails on source-name,
+logical-identity, subtype, Controller, or target-pool drift. Repository Unit details expose
+canonical embedded attachments, Unit-backed type IDs, and Controller access targets without
+reading `data/curated/` at runtime. Rules semantics remain separately cited in `rules.db`;
+`infinity.db` stores only the reviewed application relationship IDs needed to join them.
+
+#### Generic relation/dependency evidence
+
+The Milestone 2B relationship audit now resolves the normalized `relations`,
+`relation_units`, and `relation_dependencies` graph against logical-Unit identity before any
+application schema is designed. In the pinned 2026-09-18 snapshot the graph contains 126
+relations, 250 member rows, and 14 dependency rows. Of those relations, 118 resolve every
+member/dependency Unit endpoint canonically. Eight contain relation-only placeholder endpoints
+whose five Unit IDs (`165`, `613`, `749`, `1503`, and `1509`) have no ordinary Unit definition
+in the selected snapshot. Independent archived Army evidence identifies them as retired
+Sun Tze v.2 (Marksman Leader), Achilles, Achilles v2 (Corintian Armor), Boarding Action
+Cadmus-Naish Agent Sheskiin, and Imperial Agent Adil Mehmut (Special Division), respectively.
+All 14 dependency Unit endpoints resolve.
+
+Canonical identity does not make these rows redundant. Ninety-seven fully resolved relations
+have a single logical-Unit endpoint set, but many are source-context constraints between ordinary
+and Reinforcement representations of the same logical Unit or between profile-level forms.
+Twenty-one fully resolved relations span multiple logical Units and therefore encode shared
+selection/quota structure directly. The source also uses 39 member profile selectors, five
+`perParent` values, 14 dependency profile selectors, three dependency group selectors, one
+`min`/`minDependant` pair, and one explicit options selector. These selectors remain Army-local
+source semantics until independently reviewed; they are not promoted to canonical Unit facts.
+
+The same audit verifies the already materialized Reinforcement Section relationship separately.
+The 12 source reinforcement-list records reconcile to 11 application Reinforcement identities
+(the reviewed 998/999 source alias collapses to application identity 999), and all 46 ordinary
+Army -> Reinforcement Section parent links are present in
+`application_army_reinforcement_parents` with zero missing or unexpected edges. Application
+`role = reinforcement` therefore remains a selectable Section/pool context, not evidence that
+the Section is an independently legal Army List.
+
+The resolved graph now has four reviewed structural families. Eighty-one relations are
+`same-logical-cross-context-exclusive`: multiple source occurrences map to one logical Unit and
+form an exactly-one selection constraint, predominantly ordinary/Reinforcement context pairs.
+Twenty-one are `cross-logical-shared-cardinality`: two or more logical Units participate in one
+shared choice/quota range, with any profile selectors retained on the member. Fourteen are
+`single-logical-profile-dependency`: one logical Unit carries source-local profile/per-parent/
+dependency selectors. Two are `single-logical-cardinality`: a one-Unit pool with a cardinality
+range and no profile/dependency selector (currently the Post-Human 2..3 relation). The eight
+relations containing those historical endpoints form a reviewed fifth family,
+`reviewed-stale-source-relation`. The evidence identifies the retired source endpoint itself; it
+does not assert logical equivalence with the current relation partner. Because each historical
+endpoint has no current Army/profile/loadout occurrence, these constraints are current-selection
+no-ops and are deliberately not materialized as application Unit constraints. Any future snapshot
+that still references these IDs must be reviewed again before this stale classification is reused.
+
+This classification is intentionally relation-level. Ninety-five of the 118 resolved relations
+are selector-free; 23 carry one or more member/dependency selectors. The source field named
+`profile` is demonstrably not one stable normalized foreign-key coordinate: current values can
+match only a profile-group ID, only a profile ID, only an option ID, or several domains at once
+when their numeric coordinates overlap. The audit reports these candidate-domain matches only as
+diagnostics and deliberately does not select one interpretation.
+
+Schema 23 materializes 96 fully resolved selection-safe constraints while preserving both canonical
+and source-context identity. `application_unit_constraints` keeps the exact Army/relation context,
+structural family, group flag, and source min/max cardinality. Its
+`application_unit_constraint_members` rows retain each source relation-member occurrence and
+`source_unit_id` while also resolving that occurrence to `logical_unit_id`. This is required for the
+81 same-logical cross-context exclusivity constraints: collapsing those members to one logical Unit
+alone would erase which ordinary/Reinforcement source occurrences the exactly-one rule constrains.
+The materialized set contains those 81 constraints, 13 cross-logical shared-cardinality constraints,
+and two single-logical cardinality constraints, for 197 member rows. Twelve cross-logical rows are
+selector-free; the thirteenth is the Jaan Staar/Kiiutan shared max-1 relation. Its source `profile=1`
+selectors are roster-selection-equivalent because both Units have exactly one selectable profile
+group, selector 1 names the selectable active profile in that group, and the inactive Symbiont Armor
+profile is not independently selectable. The selector remains source provenance; the application
+constraint expresses only the equivalent whole-Unit max-1 rule. Unit detail reads expose these as
+`selection_constraints` with canonical member names/slugs and retained source Unit IDs.
+
+Fourteen of the 23 selector-bearing resolved relations have a narrower deterministic contract. In
+those same-logical dependency relations, both the member and dependency source fields named
+`profile` resolve to existing Army-local profile-group coordinates for the same logical Unit.
+Schema 23 retains them through `application_unit_group_dependency_constraints`,
+`application_unit_group_dependency_members`, and
+`application_unit_group_dependency_targets`. The application rows retain Army/relation context,
+source Unit and canonical logical-Unit identity, the resolved profile-group IDs, relation
+cardinality, `perParent`, the dependency's separate source `group` selector, `min`,
+`minDependant`, and validated dependency option IDs. Unit detail reads expose the result as
+`group_dependencies`. The auxiliary source fields are preserved context, not promoted to intrinsic
+logical-Unit properties.
+
+The other eight cross-Unit selector-bearing relations remain source/context data by design. Seven
+repeat the Traktor Mul / Dozer / Kuryer grouping across Army contexts, but their `profile` values do
+not resolve consistently to one selectable coordinate domain and Kuryer is not even an Army member
+in five of those contexts. The Yu Jing Kuang Shi / Celestial Guard row similarly references a
+non-member Celestial Guard source Unit while Kuang Shi's actual Monitor requirement is already
+represented by the deterministic same-Unit group dependency. Neither pattern is promoted to a
+whole-Unit application constraint. The separate eight relations with retired historical source placeholders remain reviewed
+stale-source constraints and are not materialized as current selection constraints.
 
 ### Application catalog identity and metadata context
 
@@ -1968,18 +2225,22 @@ rather than in source parsing.
 
 ## SQLite storage
 
-`infinity_db.database` imports every normalized table with its original field
-names, declared primary keys, and foreign keys. Nested arrays and objects use
-JSON text. The frontend `infinity.db` contains only queryable columns. Its
-sibling `infinity.raw.db` contains `__infinity_raw_rows`, preserving each exact
-normalized record (including absent versus null fields) for development use.
-Both databases retain `__infinity_metadata`; the schema defines empty frontend
-tables so API queries do not depend on a particular snapshot containing every
-kind of record. The metadata also stores the validated source-identity
-configuration and its canonical hash copied from normalized provenance, making
-the identity policy part of the immutable database snapshot and allowing
-tampering, incomplete provenance, or conflicting explicit export policy to fail
-validation.
+`infinity_db.database` first imports every normalized table into a temporary
+relational staging database with its original field names, declared primary keys,
+and foreign keys. Nested arrays and objects use JSON text. After full source-to-
+canonical validation succeeds, the exporter writes two permanent siblings: the
+self-contained application `infinity.db` and the lossless source/provenance
+`infinity.raw.db`.
+
+The raw sibling contains all normalized source tables as queryable relational tables
+and `__infinity_raw_rows`, preserving each exact normalized record (including absent
+versus null fields). The application sibling contains only retained application
+source/context tables plus derived canonical tables; source-only normalized tables are
+physically absent. Both databases retain identical `__infinity_metadata`. Metadata
+stores the validated source-identity configuration and canonical hash, the published/
+raw table boundary, snapshot provenance, and the deterministic published-content hash.
+This makes identity and publication policy part of the immutable snapshot and lets
+incomplete provenance, incompatible schema, or post-build content drift fail closed.
 
 When an Army database is built from a ZIP snapshot, normalized `_meta` and both
 database siblings retain `snapshotArchiveSha256`: the SHA-256 of that exact ZIP.
@@ -2008,22 +2269,19 @@ derived frontend tables so generated application structure cannot be supplied as
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 17 and the application
-compatibility revision is 25. Imports build temporary sibling files, check
+records its schema version. The current schema version is 23 and the application
+compatibility revision is 31. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
 planner statistics in the immutable snapshot.
 
-**Design direction:** while canonicalization is in progress, `infinity.db`
-intentionally contains both derived application tables and lossless normalized
-source tables needed by remaining runtime/provenance paths. After canonical unit,
-relationship, and catalog coverage is complete, source/provenance-only normalized
-tables should move exclusively to `infinity.raw.db`. Normal repository/API/web
-serving should then require only the self-contained canonical `infinity.db`
-(alongside `rules.db` and assets), with `infinity.raw.db` retained as a build and
-audit artifact. The split must preserve canonical-to-source traceability and is
-not justified by file-size reduction alone.
+The physical application/raw split is now part of the generated-database contract.
+Normal repository/API/web serving requires only the self-contained `infinity.db`
+(alongside `rules.db` and assets); it never opens `infinity.raw.db`. The raw sibling is
+a build/audit/reconstruction artifact containing queryable normalized source tables and
+exact row JSON. Canonical-to-source traceability remains in application mappings and
+source coordinates, with the full source representation preserved in raw storage.
 
 ## Snapshot provenance and human annotations
 
@@ -2295,3 +2553,101 @@ but the presence of an army-list identity does not by itself make that identity
 independently playable. Metadata-only factions never create army lists or unit
 memberships. Metadata weapon IDs can repeat for different modes, so their table
 uses source position as its key.
+
+### Fireteam chart semantic evidence
+
+The Milestone 2B Fireteam audit treats Army Fireteam Charts as Army-local
+relationship/configuration data rather than logical-Unit identity. Against the pinned
+2026-09-18 snapshot, the normalized database contains 58 source charts, 272 named Fireteams,
+444 Fireteam-type memberships, and 1,261 member rows. The source chart structure already
+preserves team names, type memberships, member names/slugs/comments, min/max constraints,
+`required`, chart observations, the Army-level chart description, and raw `fireteam_spec`.
+No new canonical-entity table is justified by this audit alone.
+
+The chart `spec` remains contextual. Its current values use `0` for unavailable, `256` for
+unlimited, and other positive values for finite maximum counts. Reinforcement Sections prove
+that the Section's own `spec` cannot be interpreted as a standalone legality rule: 29
+Reinforcement Section type memberships occur where that Section's raw spec value is zero.
+The 12 source Reinforcement charts reconcile to 11 application Reinforcement Sections and 46
+ordinary-parent links. Across 134 playable parent/type contexts, nine combinations are blocked
+by the selected parent's type quota; all nine are CORE in the vanilla PanOceania, Yu Jing,
+Ariadna, Haqqislam, Nomads, Combined Army, Aleph, O-12, and JSA parents. Reinforcement member
+eligibility and parent-Army type/count limits therefore remain separate context, and Main-Section
+and Reinforcement-Section member pools must not be merged.
+
+Fireteam member identity is finer than a Unit foreign key. The source resolver currently yields
+1,246 Army-local member matches plus 15 non-local/unresolved rows (14 unresolved and one global).
+Eight Fireteams contain two distinct member rows that resolve to the same source Unit, including
+Scylla/Charybdis, Kuang Shi/Celestial Guard Monitor, Scarface/Cordelia Turner,
+Coyote/BambaDroid, and Zoe/Pi-Well. Those rows demonstrate that subgroup/profile/loadout wording
+can carry player-relevant identity after Unit resolution. The 15 source-link anomalies remain
+explicit audit findings; they are not guessed into new source aliases by the Fireteam audit.
+
+FTO is resolved against Army-local loadout options, not against Unit identity alone. Of 197
+FTO-bearing chart-member rows, 195 deterministically identify one or more matching Army-local FTO
+loadouts. Generic `FTO` accepts matching numbered variants such as `FTO-2`, while a numbered
+marker requires that variant; the audit also normalizes Army's current `REINF.`/`REF.` wording
+only for comparison. Two source anomalies remain explicit: Ank's `ARJUNA REINF. FTO` chart row
+resolves by its source slug only to the ordinary Arjuna Unit even though the Reinforcement Army
+contains a separate Arjuna Unit with FTO options, and Melek's `KORSAN REINF.` chart row carries
+an `FTO` comment while its Reinforcement Unit has no FTO-marked loadout option. Neither case is
+silently repaired by inference.
+
+The other Fireteam fields remain contextual by rule. There are 219 `required=true` member rows
+across 84 teams; the flag denotes participation in a required-choice pool rather than making every
+flagged row individually mandatory, and only one such row also has a positive `min`, so `required`
+and min/max stay independent. Fifty-two Wildcard teams across 51 source Armies have zero Fireteam
+type memberships, confirming that Wildcard is Army-local cross-team eligibility rather than a
+Fireteam type. Bracketed Fireteam-Level wording appears on 406 member rows (453 label references,
+146 distinct labels) and remains equivalence/presentation context rather than logical-Unit aliasing.
+One Army-level Fireteam description and four team observations are rule-bearing source text and
+must remain verbatim because chart notes can specialize the general Fireteam rules.
+
+`tools/audit_fireteam_semantics.py` records these boundaries deterministically and reports future
+snapshot drift in chart shape, member resolution, FTO option matching, Reinforcement parent/type
+context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. The
+audit does not yet introduce a first-class Fireteam repository/API/browser model; that presentation
+question belongs to the remaining 1.0 relationship-completeness work.
+
+#### Normalization-only link semantic evidence
+
+The Milestone 2B normalization-link audit distinguishes relational storage shape from actual
+player-facing relationships. Against the pinned 2026-09-18 snapshot, eight normalized
+`army_*` filter-catalog tables contain 15,072 Army-to-catalog rows: `army_categories`,
+`army_characteristics`, `army_troop_types`, `army_equipment`, `army_skills`, `army_weapons`,
+`army_ammunition`, and `army_extras`. These rows flatten each source Army document's
+`filters.*` lookup arrays. Their Army/catalog endpoints, source order, and `mercs`/`specops`/
+`teamops` flags describe the source application's filter/index presentation; they do not assert
+an independent gameplay relationship such as Army ownership of a Skill, Weapon, Equipment item,
+or characteristic. They remain required for lossless source reconstruction, but InfinityDB does
+not need a dedicated player-facing representation of these joins to satisfy 1.0 completeness.
+
+A second normalization-only link exists inside the source option-weapon representation. The
+current database stores 52,554 `option_weapons` occurrence rows through 490 shared
+`option_weapon_templates`. All occurrences resolve a template and all templates are referenced.
+Only the synthetic template identity (`option_weapon_templates.id`) and the corresponding
+`option_weapons.template_id` edge are normalization/storage machinery. The rejoined source
+occurrence still carries meaningful option-to-weapon attachment, source position, weapon ID,
+display order, quantity, and any raw fallback; those facts are not classified as normalization-
+only.
+
+This classification deliberately excludes canonicalization/provenance mappings from the
+"normalization-only" bucket. `application_army_sources`, `application_catalog_sources`,
+`logical_unit_sources`, `profile_payload_occurrences`, `loadout_payload_occurrences`,
+`application_peripheral_sources`, and `application_peripheral_unit_sources` connect source
+identity/evidence to InfinityDB application abstractions. The link itself is not an additional
+gameplay relationship, but it preserves traceability and, for several occurrence/source tables,
+contextual values such as AVA/logo, points/SWC, source labels, or reviewed type evidence. Any
+future frontend/`infinity.raw.db` split must therefore preserve equivalent provenance/context
+rather than treating those links as disposable relational noise.
+
+Semantic attachment tables remain outside this classification. A Skill/Equipment/Weapon extra
+attached to a particular occurrence, an include target, Unit faction/list membership, Peripheral
+relationship, Fireteam membership, relation/dependency edge, or application selection constraint
+continues to encode a meaningful scoped relationship even when normalization represents it through
+a join table. The presence of a link table alone is never evidence that its contents are
+normalization-only.
+
+`tools/audit_normalization_links.py` records this boundary deterministically and fails when the
+maintained schema assumptions drift. The audit is classification evidence for completeness and the
+later raw/application database split; it does not itself remove tables or change runtime serving.

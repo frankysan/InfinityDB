@@ -72,6 +72,35 @@ because it validates the asset set before enabling them. Hermetic web tests use
 project-owned temporary SVG fixtures to retain coverage of dynamic SVG serving
 without redistributing third-party artwork.
 
+## Parallel pytest execution
+
+The check runner uses `pytest-xdist` with automatic worker selection by default
+for every test stage. Benchmarking on the primary Windows development machine
+reduced the complete 687-test run from 59.67 seconds serially to 14.13 seconds
+with `auto`; four fixed workers took 19.41 seconds.
+
+```powershell
+# Default: let pytest-xdist choose from the available physical CPU cores
+python tools/run_checks.py --stage test
+
+# Explicit fixed worker count
+python tools/run_checks.py --stage test --test-workers 4
+
+# Explicit serial/debugging mode
+python tools/run_checks.py --stage test --test-workers 0
+```
+
+Parallel runs use xdist's `worksteal` scheduler so the relatively expensive
+database tests can be rebalanced instead of pinning an entire large test module
+to one worker. `pytest-xdist` is part of the `dev` dependency set. Serial mode
+remains available for debugging ordering, isolation, or concurrency-sensitive
+failures.
+
+The web tests build one template SQLite database per module, then copy that
+template into each test's temporary directory before creating the application.
+This preserves mutation isolation while avoiding a full normalize/export cycle
+for every web test.
+
 ## Targeted checks
 
 Positional targets are forwarded to pytest and Ruff. They are deliberately not
@@ -120,20 +149,23 @@ the exact container contract and the equivalent manual command.
 
 ## Continuous integration
 
-The `Source checks` GitHub Actions workflow is configured to run the normal check runner on
-clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests,
-pushes to `main`, and manual dispatch, plus a Linux Python 3.14 compatibility
-leg:
+The `Source checks` GitHub Actions workflow runs the check runner on clean
+Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests, pushes
+to `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. The
+Ubuntu/Python 3.11 leg owns the complete source gate (`--all`); the compatibility
+legs run pytest plus both database-build stages. This avoids repeating Ruff and
+Pyright on every operating system while preserving cross-platform runtime/build
+coverage.
 
-```text
-python tools/run_checks.py --all --assets off \
-  --build-source tests/fixtures/deployment-smoke
-```
+Hosted Windows Actions explicitly uses `--test-workers 0`. Parallel pytest is
+still the local default, but `auto` regressed severely on the hosted Windows
+runner while the serial suite remained stable. Linux and macOS CI continue to
+use automatic xdist worker selection.
 
 Each source-check leg installs both the development and symbol Python dependency
-sets. This makes Pyright and the real fontTools/tinycss2/cssselect2/Pillow
-integration fixtures part of required CI without requiring external renderers or
-third-party artwork.
+sets. This keeps the real fontTools/tinycss2/cssselect2/Pillow integration
+fixtures in required CI without requiring external renderers or third-party
+artwork. Ruff and Pyright run on the primary Ubuntu/Python 3.11 leg.
 
 The synthetic deployment fixture is the explicit Army build input because clean
 source checkouts intentionally contain no real raw Army snapshot. This workflow

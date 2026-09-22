@@ -137,7 +137,8 @@ config/                      = maintained project/domain knowledge
 raw source data              = immutable external input
 data/manifests/snapshots/    = generated acquisition provenance
 data/curated/rules/          = source-controlled human-reviewed rules data
-data/curated/identities/     = source-controlled reviewed identity relationships
+data/curated/identities/     = source-controlled reviewed presentation identities
+data/curated/peripherals/    = reviewed Army-to-Peripheral identity mappings
 data/curated/snapshot-notes/ = source-controlled human snapshot annotations
 data/generated/              = reproducible database/JSON build output
 ```
@@ -151,7 +152,12 @@ code that interprets them.
 information derived from identified external sources and retains source
 provenance. `data/curated/rules/` is consumed by the rules-database build, while
 `data/curated/identities/` contains reviewed source-derived presentation
-relationships consumed during Army normalization. `data/curated/snapshot-notes/`
+relationships consumed during Army normalization. `data/curated/peripherals/` owns
+the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed
+Peripheral occurrences to canonical application identities. It is consumed during Army
+database export when its pinned snapshot provenance matches the normalized source; the
+validated contract is copied into database metadata and runtime queries consume only the
+materialized application tables, not the working-tree curated JSON. `data/curated/snapshot-notes/`
 is a separate human-annotation contract and is not an application input.
 
 This is not a requirement to make every constant configurable. Values that
@@ -473,8 +479,11 @@ representative-backed logical-unit fields plus source-attributed alias/note/
 profile and loadout payload layers extend the same principle from **identity
 deduplication** to **semantic payload deduplication** for unit-detail data.
 Application Army identities and application catalog identities extend the model
-further into Army/faction presentation and rule-reference catalog serving.
-Canonicalizing wider relationships remains the next semantic stage.
+further into Army/faction presentation and rule-reference catalog serving. Milestone 2B
+completed the next relationship/storage boundary: include targets, reviewed Peripheral
+relationships, selection-safe Unit constraints, and profile-group dependencies are
+materialized; Fireteams and remaining source/context relationships stay explicit until
+their later application presentation/model is justified.
 
 Runtime-performance evidence for this work is collected separately from semantic
 acceptance. `tools/benchmark_runtime.py` measures representative repository read
@@ -526,21 +535,34 @@ Schema version 12 introduced the derived canonical-profile layer, and schema
 version 13 added the corresponding canonical-loadout layer beside the lossless
 source tables. Build-time materialization scopes reusable payloads to an existing
 `logical_unit` and keeps source/Army context on one-to-one occurrence relations:
-profile AVA/logo and loadout points/SWC remain contextual, while source-local
-includes/peripherals remain in their lossless source relationships while
-Milestone 2B applies the completed relationship/Peripheral audits to choose their
-canonical relationship and identity boundaries.
+profile AVA/logo and loadout points/SWC remain contextual. Schema version 18 adds
+the first broader relationship materialization: Profile and Loadout include
+attachments remain occurrence-scoped, while their target endpoint resolves to a
+canonical loadout payload. Shared top-level Unit-option includes likewise retain
+their source parent but resolve the target separately for each Army occurrence.
+Reviewed Peripheral identity and relationship data are now materialized separately:
+embedded source definitions map to canonical Peripheral entities, Unit-backed Peripherals
+reuse logical-Unit identity, and source-context Cyberplug Controller access pools retain
+their Army provenance.
 
 Unit-detail repository reads now consume both canonical payload layers. Source
-profile/loadout tables remain available for provenance, validation, and deferred
-source-local/contextual relationships. Normal search/filter/catalog reverse reads
-now expand canonical payload occurrences rather than traversing those legacy
-payload tables. Compatibility revision 19 also requires unit-oriented indexes on
-both canonical occurrence tables so this read-path split does not regress unit-detail
-query behavior. The physical removal of source-only tables from `infinity.db`
-remains a later design step after canonical unit, relationship, and catalog
-coverage is complete; `infinity.raw.db` is the intended long-term home for that
-lossless source representation.
+profile/loadout tables remain available in `infinity.raw.db` and build staging for
+provenance, source-semantic validation, and deferred source-local/contextual
+relationships; they are no longer part of the published application database. Normal
+search/filter/catalog reverse reads expand canonical payload occurrences rather than
+traversing those legacy payload tables. Compatibility revision 19 also requires
+unit-oriented indexes on both canonical occurrence tables so this read-path split does not
+regress unit-detail query behavior.
+
+Milestone 2B now has a physical application/raw storage split. The logical inventory
+still classifies 28 tables as canonical application data, 40 as explicit contextual
+application data, and 47 normalized tables as source/provenance-only representation,
+but those 47 tables no longer ship in `infinity.db`. Export builds a complete temporary
+relational staging database, runs all source-to-canonical validation there, writes the
+normalized source schema plus exact lossless rows to `infinity.raw.db`, then publishes
+only the retained application schema. Foreign keys whose targets are raw-only are
+omitted from the published schema; retained-to-retained constraints remain enforced.
+Normal serving and runtime validation have no dependency on `infinity.raw.db`.
 
 ### General application-domain identifier contract
 
@@ -639,11 +661,17 @@ The current reviewed 2026-09-18 snapshot resolves all initial registry candidate
 (1,042 identities total), with no collisions or unavailable candidates. These counts
 are snapshot evidence rather than permanent invariants.
 
-The Peripheral rules/identity work must use this project-wide identity architecture
-rather than introduce a one-off slug scheme. It must not infer a canonical
-`peripheral:*` or `peripheral-profile:*` identity merely from an Army label; those
-domains become valid only after the reviewed Army-definition-to-entity mapping proves
-the corresponding entity/profile boundary.
+The Peripheral rules/identity work uses this project-wide identity architecture rather
+than a one-off slug scheme. The rules side is represented in the existing curated v3
+rules collection: Doctor, Engineer, Cyberplug, and Peripheral are canonical Skill records
+and the five N5.3 Peripheral types are validated `rule` records with explicit controller-
+eligibility facts. The separate `data/curated/peripherals/army-identities.json` contract
+owns reviewed `peripheral:*` identities for embedded Army Peripheral definitions, reviewed
+source-Unit mappings onto existing logical Units for Unit-backed Peripherals, and
+source-context Cyberplug Controller access pools. Schema 19 consumes the contract only
+when its pinned snapshot hash matches, stores the contract/hash in database metadata, and
+materializes canonical application relationships so runtime repository reads never infer
+identity from Army labels or open curated JSON.
 
 ## Snapshot acquisition and provenance
 
@@ -714,7 +742,10 @@ Army directory / ZIP
        + pinned identity document / SHA-256
     -> SQLite importer
        + revalidated pinned identity provenance
-    -> infinity.db + infinity.raw.db
+    -> full relational staging DB
+       -> source/canonical consistency validation
+       -> infinity.raw.db (normalized source + exact rows)
+       -> infinity.db (self-contained application schema)
     -> repository -> HTTP API -> browser UI
 
 PDF / wiki research sources
@@ -1035,11 +1066,11 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 17 and database compatibility revision
-25; it rejects incompatible databases with a rebuild
-instruction. The importer builds
-a lean frontend database and a lossless sibling raw archive, creates read-path
-indexes after loading, and persists SQLite planner statistics. Migration of
+application database has schema version 23 and database compatibility revision
+31; it rejects incompatible databases with a rebuild instruction. The importer
+validates a complete relational staging database, publishes a self-contained
+application database and a lossless sibling raw archive, creates read-path indexes
+after loading, and persists SQLite planner statistics. Migration of
 persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 

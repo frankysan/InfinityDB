@@ -174,6 +174,87 @@ def _validate_weapon_special_profile(profile: object, context: str) -> None:
     _require_string(profile["ccWeapon"], "ccWeapon", context)
 
 
+
+def _validate_controller_eligibility(value: object, context: str) -> set[str]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: must be an object")
+    if set(value) == {"status"}:
+        if value["status"] != "not-stated":
+            raise ValueError(f"{context}.status: must be 'not-stated'")
+        return set()
+    if set(value) == {"hasSkill"}:
+        skill_id = value["hasSkill"]
+        validate_typed_domain_id(
+            skill_id, expected_domain="skill", context=f"{context}.hasSkill"
+        )
+        return {skill_id}
+    if set(value) == {"anyOf"}:
+        values = value["anyOf"]
+        if not isinstance(values, list) or len(values) < 2:
+            raise ValueError(f"{context}.anyOf: must contain at least two predicates")
+        result: set[str] = set()
+        for index, predicate in enumerate(values):
+            if not isinstance(predicate, dict) or set(predicate) != {"hasSkill"}:
+                raise ValueError(
+                    f"{context}.anyOf[{index}]: only 'hasSkill' predicates are supported"
+                )
+            skill_id = predicate["hasSkill"]
+            validate_typed_domain_id(
+                skill_id,
+                expected_domain="skill",
+                context=f"{context}.anyOf[{index}].hasSkill",
+            )
+            if skill_id in result:
+                raise ValueError(f"{context}.anyOf[{index}]: duplicate skill {skill_id!r}")
+            result.add(skill_id)
+        return result
+    raise ValueError(
+        f"{context}: must contain exactly 'status', 'hasSkill', or 'anyOf'"
+    )
+
+
+def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
+    if not isinstance(facts, dict):
+        raise ValueError(f"{context}: Peripheral type 'facts' must be an object")
+    allowed = {
+        "category",
+        "controllerEligibility",
+        "maxPerController",
+        "operatingDistance",
+        "profileModes",
+    }
+    unknown = set(facts) - allowed
+    if unknown:
+        raise ValueError(
+            f"{context}: Peripheral type facts have unsupported fields {sorted(unknown)}"
+        )
+    required = {"category", "controllerEligibility"}
+    missing = required - set(facts)
+    if missing:
+        raise ValueError(f"{context}: Peripheral type facts missing fields {sorted(missing)}")
+    if facts["category"] != "peripheral-type":
+        raise ValueError(f"{context}.category: must be 'peripheral-type'")
+    skill_ids = _validate_controller_eligibility(
+        facts["controllerEligibility"], f"{context}.controllerEligibility"
+    )
+    if "maxPerController" in facts:
+        _require_positive_int(facts["maxPerController"], "maxPerController", context)
+    if "operatingDistance" in facts and facts["operatingDistance"] != "unlimited":
+        raise ValueError(f"{context}.operatingDistance: only 'unlimited' is supported")
+    if "profileModes" in facts:
+        modes = facts["profileModes"]
+        if (
+            not isinstance(modes, list)
+            or not modes
+            or any(mode not in {"connected", "autonomous"} for mode in modes)
+            or len(set(modes)) != len(modes)
+        ):
+            raise ValueError(
+                f"{context}.profileModes: must be a unique non-empty subset of "
+                "['connected', 'autonomous']"
+            )
+    return skill_ids
+
 def load_curated_document(path: Path) -> dict[str, Any]:
     """Load and validate one curated JSON document.
 
@@ -286,6 +367,8 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             )
 
     record_ids: set[str] = set()
+    record_kind_by_id: dict[str, str] = {}
+    peripheral_type_skill_refs: dict[str, set[str]] = {}
     for index, record in enumerate(records):
         context = f"records[{index}]"
         if not isinstance(record, dict):
@@ -333,6 +416,17 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         f"{context}: skill parameter semantics 'positiveSign' must be one of "
                         "'preserve', 'omit', or 'force'"
                     )
+        if record["kind"] == "rule":
+            facts = record.get("facts")
+            if isinstance(facts, dict) and facts.get("category") == "peripheral-type":
+                related = record.get("relatedRecords")
+                if not isinstance(related, list) or "skill:peripheral" not in related:
+                    raise ValueError(
+                        f"{context}: Peripheral type must relate to 'skill:peripheral'"
+                    )
+                peripheral_type_skill_refs[record["id"]] = _validate_peripheral_type_facts(
+                    facts, f"{context}.facts"
+                )
         if record["kind"] == "trait":
             facts = record.get("facts")
             if facts is not None:
@@ -405,8 +499,10 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 )
         if record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")
-            if not isinstance(record_labels, list) or not record_labels:
-                raise ValueError(f"{context}: '{record['kind']}' requires non-empty 'labelIds'")
+            if not isinstance(record_labels, list):
+                raise ValueError(f"{context}: '{record['kind']}' requires a 'labelIds' array")
+            if record["kind"] == "state" and not record_labels:
+                raise ValueError(f"{context}: 'state' requires non-empty 'labelIds'")
             if any(label_id not in label_ids for label_id in record_labels):
                 raise ValueError(f"{context}: 'labelIds' must reference labels")
         if "armyLinks" in record and not isinstance(record["armyLinks"], list):
@@ -414,6 +510,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         if record["id"] in record_ids:
             raise ValueError(f"{context}: duplicate record id {record['id']!r}")
         record_ids.add(record["id"])
+        record_kind_by_id[record["id"]] = record["kind"]
         for citation_index, citation in enumerate(record["citations"]):
             ref_context = f"{context}.citations[{citation_index}]"
             if not isinstance(citation, dict):
@@ -434,5 +531,13 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 raise ValueError(f"{link_context}: requires 'id' or 'name'")
             if "id" in link:
                 _validate_army_link_id(link["entity"], link["id"], link_context)
+
+    for record_id, skill_refs in peripheral_type_skill_refs.items():
+        for skill_id in skill_refs:
+            if record_kind_by_id.get(skill_id) != "skill":
+                raise ValueError(
+                    f"Peripheral type {record_id!r} controller eligibility references "
+                    f"unknown skill {skill_id!r}"
+                )
 
     return document

@@ -37,11 +37,12 @@ from infinity_db.database.repository import (
 from infinity_db.database.schema import (
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
-    DATABASE_TABLES,
     INDEXES,
     METADATA_TABLE,
+    PUBLISHED_DATABASE_TABLES,
     RAW_ROWS_TABLE,
     ROW_JSON,
+    SOURCE_ONLY_TABLES,
     TABLES,
     create_indexes,
     create_schema,
@@ -178,16 +179,27 @@ def normalized() -> dict:
     return data
 
 
-def test_database_preserves_every_normalized_table_and_field(
+def test_database_splits_lossless_source_from_published_application_data(
     tmp_path: Path, normalized: dict
 ) -> None:
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
     Database(path).validate()
     assert set(normalized["tables"]) == set(TABLES)
+
     archive = sqlite3.connect(raw_database_path(path))
     connection = sqlite3.connect(path)
     try:
+        application_tables = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master "
+                "WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
+            )
+        }
+        assert set(PUBLISHED_DATABASE_TABLES) <= application_tables
+        assert SOURCE_ONLY_TABLES.isdisjoint(application_tables)
+
         for name, source_rows in normalized["tables"].items():
             stored_rows = archive.execute(
                 f"SELECT {quote(ROW_JSON)} FROM {quote(RAW_ROWS_TABLE)} "
@@ -195,12 +207,32 @@ def test_database_preserves_every_normalized_table_and_field(
                 (name,),
             ).fetchall()
             assert [json.loads(row[0]) for row in stored_rows] == source_rows
-            columns = {row[1] for row in connection.execute(f"PRAGMA table_info({quote(name)})")}
-            assert {field for row in source_rows for field in row} <= columns
-            assert ROW_JSON not in columns
-        assert connection.execute(
-            "SELECT army_id, ava FROM profiles ORDER BY army_id"
-        ).fetchall() == [(101, "T"), (201, 1)]
+            if name in PUBLISHED_DATABASE_TABLES:
+                columns = {
+                    row[1]
+                    for row in connection.execute(
+                        f"PRAGMA table_info({quote(name)})"
+                    )
+                }
+                assert {field for row in source_rows for field in row} <= columns
+                assert ROW_JSON not in columns
+
+        assert json.loads(
+            connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = 'published_tables'"
+            ).fetchone()[0]
+        ) == list(PUBLISHED_DATABASE_TABLES)
+        assert json.loads(
+            connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = 'source_only_tables'"
+            ).fetchone()[0]
+        ) == sorted(SOURCE_ONLY_TABLES)
+        assert json.loads(
+            archive.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = 'source_only_tables'"
+            ).fetchone()[0]
+        ) == sorted(SOURCE_ONLY_TABLES)
+
         assert json.loads(
             connection.execute("SELECT future_field FROM skills WHERE id = 1").fetchone()[0]
         ) == {"value": [1, None]}
@@ -218,6 +250,7 @@ def test_database_preserves_every_normalized_table_and_field(
             (REINFORCEMENT_UNIT_MATCHES_KEY,),
         ).fetchone()[0]
         assert json.loads(reinforcement_matches) == []
+
         assert connection.execute(
             "SELECT id, representative_unit_id FROM logical_units ORDER BY id"
         ).fetchall() == [(1, 1), (2, 2), (3, 3)]
@@ -226,12 +259,10 @@ def test_database_preserves_every_normalized_table_and_field(
             "ORDER BY source_unit_id"
         ).fetchall() == [(1, 1), (2, 2), (3, 3)]
         assert connection.execute(
-            "SELECT id, logical_unit_id, name, ava "
-            "FROM ("
             "SELECT pp.id, pp.logical_unit_id, pp.name, ppo.ava "
             "FROM profile_payloads AS pp "
-            "JOIN profile_payload_occurrences AS ppo ON ppo.profile_payload_id = pp.id"
-            ") ORDER BY ava"
+            "JOIN profile_payload_occurrences AS ppo ON ppo.profile_payload_id = pp.id "
+            "ORDER BY ppo.ava"
         ).fetchall() == [(1, 1, "Trooper", 1), (1, 1, "Trooper", "T")]
         assert connection.execute(
             "SELECT army_id, unit_id, group_id, profile_id, profile_payload_id, ava, logo "
@@ -240,9 +271,7 @@ def test_database_preserves_every_normalized_table_and_field(
             (101, 1, 1, 1, 1, "T", None),
             (201, 1, 1, 1, 1, 1, None),
         ]
-        assert connection.execute(
-            "SELECT COUNT(*) FROM profile_payloads"
-        ).fetchone()[0] == 1
+        assert connection.execute("SELECT COUNT(*) FROM profile_payloads").fetchone()[0] == 1
         for table in (
             "profile_payload_characteristics",
             "profile_payload_skills",
@@ -255,16 +284,17 @@ def test_database_preserves_every_normalized_table_and_field(
             assert connection.execute(
                 f"SELECT COUNT(*) FROM {quote(table)}"
             ).fetchone()[0] == 1
-        source_skill_raw = connection.execute(
-            "SELECT raw FROM profile_skills WHERE army_id = 101"
-        ).fetchone()[0]
+        source_skill_raw = next(
+            row["raw"]
+            for row in normalized["tables"]["profile_skills"]
+            if row["army_id"] == 101
+        )
         payload_skill_raw = connection.execute(
             "SELECT raw FROM profile_payload_skills"
         ).fetchone()[0]
-        assert json.loads(payload_skill_raw) == json.loads(source_skill_raw)
-        assert connection.execute(
-            "SELECT COUNT(*) FROM loadout_payloads"
-        ).fetchone()[0] == 1
+        assert json.loads(payload_skill_raw) == source_skill_raw
+
+        assert connection.execute("SELECT COUNT(*) FROM loadout_payloads").fetchone()[0] == 1
         assert connection.execute(
             "SELECT army_id, points, swc FROM loadout_payload_occurrences ORDER BY army_id"
         ).fetchall() == [(101, 10, "0.5"), (201, 10, "0.5")]
@@ -281,39 +311,55 @@ def test_database_preserves_every_normalized_table_and_field(
             assert connection.execute(
                 f"SELECT COUNT(*) FROM {quote(table)}"
             ).fetchone()[0] == 1
-        source_loadout_skill_raw = connection.execute(
-            "SELECT raw FROM option_skills WHERE army_id = 101"
-        ).fetchone()[0]
+        assert connection.execute(
+            "SELECT COUNT(*) FROM profile_occurrence_includes"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_occurrence_includes"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM unit_option_include_targets"
+        ).fetchone()[0] == 2
+        source_loadout_skill_raw = next(
+            row["raw"]
+            for row in normalized["tables"]["option_skills"]
+            if row["army_id"] == 101
+        )
         payload_loadout_skill_raw = connection.execute(
             "SELECT raw FROM loadout_payload_skills"
         ).fetchone()[0]
-        assert json.loads(payload_loadout_skill_raw) == json.loads(source_loadout_skill_raw)
-        assert any(
-            row[1] == "logical_unit_sources_logical"
-            for row in connection.execute("PRAGMA index_list(logical_unit_sources)")
-        )
-        assert any(
-            row[1] == "logical_units_name"
-            for row in connection.execute("PRAGMA index_list(logical_units)")
-        )
-        assert any(
-            row[1] == "logical_unit_aliases_value"
-            for row in connection.execute("PRAGMA index_list(logical_unit_aliases)")
-        )
+        assert json.loads(payload_loadout_skill_raw) == source_loadout_skill_raw
+
         indexes = {
             row[1]
-            for table_name in DATABASE_TABLES
+            for table_name in PUBLISHED_DATABASE_TABLES
             for row in connection.execute(f"PRAGMA index_list({quote(table_name)})")
         }
-        assert {index_name for index_name, _, _ in INDEXES} <= indexes
+        assert {
+            index_name
+            for index_name, table_name, _ in INDEXES
+            if table_name in PUBLISHED_DATABASE_TABLES
+        } <= indexes
         assert connection.execute("SELECT COUNT(*) FROM sqlite_stat1").fetchone()[0] > 0
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
         connection.execute("PRAGMA foreign_keys = ON")
         with pytest.raises(sqlite3.IntegrityError), connection:
-            connection.execute("UPDATE profiles SET army_id = 404 WHERE army_id = 101")
+            connection.execute("UPDATE army_units SET army_id = 404 WHERE army_id = 101")
     finally:
         connection.close()
         archive.close()
+
+
+def test_published_database_validates_without_raw_sibling(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    raw_database_path(path).unlink()
+
+    Database(path).validate()
+    assert Database(path).list_armies()
 
 
 def _query_plan(connection: sqlite3.Connection, sql: str, parameters: tuple[object, ...]) -> str:
@@ -326,7 +372,7 @@ def _query_plan(connection: sqlite3.Connection, sql: str, parameters: tuple[obje
     [
         (index_name, table_name)
         for index_name, table_name, _ in INDEXES
-        if index_name.endswith("_unit")
+        if index_name.endswith("_unit") and table_name in PUBLISHED_DATABASE_TABLES
     ],
 )
 def test_unit_detail_queries_use_unit_indexes(
@@ -352,7 +398,7 @@ def test_unit_detail_queries_use_unit_indexes(
     [
         (index_name, table_name)
         for index_name, table_name, _ in INDEXES
-        if index_name.endswith("_item") and table_name != "option_weapon_templates"
+        if index_name.endswith("_item") and table_name in PUBLISHED_DATABASE_TABLES
     ],
 )
 def test_catalog_detail_queries_use_item_indexes(
@@ -369,54 +415,6 @@ def test_catalog_detail_queries_use_item_indexes(
             (1, 2),
         )
         assert index_name in plan
-    finally:
-        connection.close()
-
-
-def test_weapon_catalog_detail_uses_template_lookup_indexes(
-    tmp_path: Path, normalized: dict
-) -> None:
-    """A weapon reverse lookup must start at its item template, not all occurrences."""
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
-    connection = sqlite3.connect(path)
-    try:
-        # The regular fixture is deliberately tiny, so SQLite quite reasonably
-        # scans it. Add unrelated weapon templates and occurrences to model the
-        # high-volume production path this index pair protects.
-        template_ids = [f"query-plan-template-{position}" for position in range(1_000)]
-        connection.executemany(
-            "INSERT INTO option_weapon_templates (id, item_id) VALUES (?, ?)",
-            [(template_id, 2) for template_id in template_ids],
-        )
-        connection.executemany(
-            "INSERT INTO option_weapons "
-            "(occurrence_id, army_id, unit_id, group_id, option_id, position, template_id) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [
-                (
-                    f"query-plan-occurrence-{position}",
-                    101,
-                    1,
-                    1,
-                    1,
-                    position + 10_000,
-                    template_id,
-                )
-                for position, template_id in enumerate(template_ids)
-            ],
-        )
-        connection.execute("ANALYZE")
-        plan = _query_plan(
-            connection,
-            "SELECT o.occurrence_id "
-            "FROM option_weapon_templates AS t "
-            "JOIN option_weapons AS o ON o.template_id = t.id "
-            "WHERE t.item_id IN (?)",
-            (1,),
-        )
-        assert "option_weapon_templates_item" in plan
-        assert "option_weapons_template" in plan
     finally:
         connection.close()
 
@@ -2167,22 +2165,23 @@ def test_profile_payload_materialization_is_deterministic(
         second_connection.close()
 
 
-def test_database_validation_rejects_invalid_profile_payload_context(
-    tmp_path: Path, normalized: dict
+def test_export_staging_rejects_invalid_profile_payload_context(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
-    connection = sqlite3.connect(path)
-    try:
+    from infinity_db.database import importer as database_importer
+
+    original = database_importer.materialize_profile_payloads
+
+    def corrupt(connection: sqlite3.Connection):
+        result = original(connection)
         connection.execute(
             "UPDATE profile_payload_occurrences SET ava = 'corrupt' WHERE army_id = 101"
         )
-        connection.commit()
-    finally:
-        connection.close()
+        return result
 
+    monkeypatch.setattr(database_importer, "materialize_profile_payloads", corrupt)
     with pytest.raises(ValueError, match="canonical profile payloads"):
-        Database(path).validate()
+        export_database(normalized, tmp_path / "army.sqlite3")
 
 
 def test_loadout_payload_materialization_preserves_context_and_payload_variants(
@@ -2305,6 +2304,9 @@ def test_loadout_payload_materialization_is_deterministic(
             "loadout_payload_equipment_extras",
             "loadout_payload_weapons",
             "loadout_payload_weapon_extras",
+            "profile_occurrence_includes",
+            "loadout_occurrence_includes",
+            "unit_option_include_targets",
         )
         for table in tables:
             left = first_connection.execute(
@@ -2319,22 +2321,128 @@ def test_loadout_payload_materialization_is_deterministic(
         second_connection.close()
 
 
-def test_database_validation_rejects_invalid_loadout_payload_context(
-    tmp_path: Path, normalized: dict
+def test_export_staging_rejects_invalid_loadout_payload_context(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    path = tmp_path / "army-loadouts.sqlite3"
-    export_database(normalized, path)
-    connection = sqlite3.connect(path)
-    try:
+    from infinity_db.database import importer as database_importer
+
+    original = database_importer.materialize_loadout_payloads
+
+    def corrupt(connection: sqlite3.Connection):
+        result = original(connection)
         connection.execute(
             "UPDATE loadout_payload_occurrences SET points = 999 WHERE army_id = 101"
         )
-        connection.commit()
+        return result
+
+    monkeypatch.setattr(database_importer, "materialize_loadout_payloads", corrupt)
+    with pytest.raises(ValueError, match="canonical loadout payloads"):
+        export_database(normalized, tmp_path / "army.sqlite3")
+
+
+def test_include_relationships_materialize_with_evidence_based_parent_scope(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "include-relationships.sqlite3"
+    export_database(normalized, path)
+
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT army_id, unit_id, group_id, profile_id, position, "
+            "target_loadout_payload_id, quantity, raw "
+            "FROM profile_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [
+            (101, 1, 1, 1, 1, 1, 1, None),
+            (201, 1, 1, 1, 1, 1, 1, None),
+        ]
+        assert connection.execute(
+            "SELECT army_id, unit_id, group_id, option_id, position, "
+            "target_loadout_payload_id, quantity, raw "
+            "FROM loadout_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [
+            (101, 1, 1, 1, 1, 1, 1, None),
+            (201, 1, 1, 1, 1, 1, 1, None),
+        ]
+        assert connection.execute(
+            "SELECT unit_id, option_id, position, target_army_id, "
+            "target_loadout_payload_id, quantity, raw "
+            "FROM unit_option_include_targets ORDER BY target_army_id"
+        ).fetchall() == [
+            (1, 1, 1, 101, 1, 1, None),
+            (1, 1, 1, 201, 1, 1, None),
+        ]
     finally:
         connection.close()
 
-    with pytest.raises(ValueError, match="canonical loadout payloads"):
-        Database(path).validate()
+
+def test_loadout_include_relationships_preserve_contextual_variants(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    row = next(
+        row for row in data["tables"]["option_includes"] if row["army_id"] == 201
+    )
+    row["quantity"] = 2
+
+    path = tmp_path / "contextual-includes.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT army_id, quantity FROM loadout_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [(101, 1), (201, 2)]
+    finally:
+        connection.close()
+
+
+def test_profile_include_relationships_preserve_contextual_target_variants(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    next(
+        row for row in data["tables"]["option_orders"] if row["army_id"] == 201
+    )["total_count"] = 2
+
+    path = tmp_path / "contextual-profile-includes.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT army_id, target_loadout_payload_id "
+            "FROM profile_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [(101, 1), (201, 2)]
+        assert connection.execute(
+            "SELECT target_army_id, target_loadout_payload_id "
+            "FROM unit_option_include_targets ORDER BY target_army_id"
+        ).fetchall() == [(101, 1), (201, 2)]
+    finally:
+        connection.close()
+
+
+def test_export_staging_rejects_invalid_materialized_include_relationship(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from infinity_db.database import importer as database_importer
+
+    original = database_importer.materialize_include_relationships
+
+    def corrupt(connection: sqlite3.Connection):
+        result = original(connection)
+        connection.execute(
+            "UPDATE loadout_occurrence_includes SET quantity = 2 WHERE army_id = 201"
+        )
+        return result
+
+    monkeypatch.setattr(database_importer, "materialize_include_relationships", corrupt)
+    with pytest.raises(ValueError, match="contextual loadout includes"):
+        export_database(normalized, tmp_path / "army.sqlite3")
 
 
 def test_unit_profile_read_path_uses_materialized_canonical_payloads(
@@ -2347,41 +2455,24 @@ def test_unit_profile_read_path_uses_materialized_canonical_payloads(
 
     connection = sqlite3.connect(path)
     try:
-        profile_occurrence_ids = [
+        tables = {
             row[0]
             for row in connection.execute(
-                "SELECT occurrence_id FROM profile_skills WHERE unit_id = 1 "
-                "UNION SELECT occurrence_id FROM profile_equipment WHERE unit_id = 1 "
-                "UNION SELECT occurrence_id FROM profile_weapons WHERE unit_id = 1"
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
             )
-        ]
-        if profile_occurrence_ids:
-            placeholders = ", ".join("?" for _ in profile_occurrence_ids)
-            for table in (
-                "profile_skill_extras",
-                "profile_equipment_extras",
-                "profile_weapon_extras",
-            ):
-                connection.execute(
-                    f"DELETE FROM {quote(table)} WHERE occurrence_id IN ({placeholders})",
-                    profile_occurrence_ids,
-                )
-        for table in (
+        }
+        assert {
+            "profiles",
             "profile_characteristics",
             "profile_skills",
             "profile_equipment",
             "profile_weapons",
-        ):
-            connection.execute(f"DELETE FROM {quote(table)} WHERE unit_id = 1")
-        connection.execute(
-            "UPDATE profiles SET name = 'source-only mutation', wip = 99, ava = 99 "
-            "WHERE unit_id = 1"
-        )
-        connection.commit()
+        }.isdisjoint(tables)
     finally:
         connection.close()
 
     assert Database(path).get_unit(1) == expected
+
 
 def test_unit_loadout_read_path_uses_materialized_canonical_payloads(
     tmp_path: Path, normalized: dict
@@ -2393,38 +2484,20 @@ def test_unit_loadout_read_path_uses_materialized_canonical_payloads(
 
     connection = sqlite3.connect(path)
     try:
-        loadout_occurrence_ids = [
+        tables = {
             row[0]
             for row in connection.execute(
-                "SELECT occurrence_id FROM option_skills WHERE unit_id = 1 "
-                "UNION SELECT occurrence_id FROM option_equipment WHERE unit_id = 1 "
-                "UNION SELECT occurrence_id FROM option_weapons WHERE unit_id = 1"
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
             )
-        ]
-        if loadout_occurrence_ids:
-            placeholders = ", ".join("?" for _ in loadout_occurrence_ids)
-            for table in (
-                "option_skill_extras",
-                "option_equipment_extras",
-                "option_weapon_extras",
-            ):
-                connection.execute(
-                    f"DELETE FROM {quote(table)} WHERE occurrence_id IN ({placeholders})",
-                    loadout_occurrence_ids,
-                )
-        for table in (
+        }
+        assert {
+            "loadout_options",
             "option_characteristics",
             "option_orders",
             "option_skills",
             "option_equipment",
             "option_weapons",
-        ):
-            connection.execute(f"DELETE FROM {quote(table)} WHERE unit_id = 1")
-        connection.execute(
-            "UPDATE loadout_options SET name = 'source-only mutation', points = 999, "
-            "swc = '99', minis = 99, disabled = 1 WHERE unit_id = 1"
-        )
-        connection.commit()
+        }.isdisjoint(tables)
     finally:
         connection.close()
 
@@ -2495,39 +2568,20 @@ def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
 
     connection = sqlite3.connect(path)
     try:
-        connection.execute("UPDATE units SET name = 'source-only unit mutation'")
-        connection.execute("UPDATE profiles SET name = 'source-only profile mutation'")
-        connection.execute("UPDATE loadout_options SET name = 'source-only loadout mutation'")
-        connection.execute("UPDATE skills SET name = 'source-only skill mutation'")
-        connection.execute("UPDATE equipment SET name = 'source-only equipment mutation'")
+        connection.execute("UPDATE units SET name = 'context mutation'")
+        connection.execute("UPDATE skills SET name = 'context skill mutation'")
+        connection.execute("UPDATE equipment SET name = 'context equipment mutation'")
         connection.execute(
-            "UPDATE weapons SET name = 'source-only weapon mutation', "
-            "category = 'source-only category'"
+            "UPDATE weapons SET name = 'context weapon mutation', "
+            "category = 'context category'"
         )
-        connection.execute(
-            "UPDATE metadata_skills SET name = 'source-only skill metadata mutation', "
-            "wiki = 'source-only-skill-wiki'"
-        )
-        connection.execute(
-            "UPDATE metadata_equipment SET name = 'source-only equipment metadata mutation', "
-            "wiki = 'source-only-equipment-wiki'"
-        )
-        for table in (
-            "profile_skill_extras",
-            "profile_equipment_extras",
-            "profile_weapon_extras",
-            "option_skill_extras",
-            "option_equipment_extras",
-            "option_weapon_extras",
-            "profile_skills",
-            "profile_equipment",
-            "profile_weapons",
-            "option_skills",
-            "option_equipment",
-            "option_weapons",
-            "option_weapon_templates",
-        ):
-            connection.execute(f"DELETE FROM {quote(table)}")
+        tables = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            )
+        }
+        assert SOURCE_ONLY_TABLES.isdisjoint(tables)
         connection.commit()
     finally:
         connection.close()
@@ -2545,6 +2599,24 @@ def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
     assert database.get_skill(1) == expected["skill"]
     assert database.get_catalog_item("equipment", 1) == expected["equipment_detail"]
     assert database.get_catalog_item("weapons", 1) == expected["weapon_detail"]
+
+
+def test_database_validation_rejects_published_content_drift(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            "UPDATE unit_factions SET faction_id = 999 WHERE unit_id = 1"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(ValueError, match="published application content"):
+        Database(path).validate()
 
 
 def test_database_with_different_compatibility_revision_requires_rebuild(
@@ -3181,3 +3253,90 @@ def test_application_domain_slug_lookup_rejects_unknown_domains(
         database.application_slug("profiles", 1)
     with pytest.raises(ValueError, match="Unknown slug domain"):
         database.application_id_for_slug("profiles", "trooper")
+
+
+def test_database_materializes_and_exposes_reviewed_embedded_peripheral(
+    tmp_path: Path, normalized: dict
+) -> None:
+    from infinity_db.peripheral_identities import parse_peripheral_identity_curated
+
+    data = copy.deepcopy(normalized)
+    data["_meta"]["snapshotArchiveSha256"] = "a" * 64
+    curated = parse_peripheral_identity_curated(
+        {
+            "format": "InfinityDB curated Peripheral identities",
+            "formatVersion": 3,
+            "sources": [
+                {
+                    "id": "army-json-test",
+                    "kind": "army-snapshot",
+                    "artifact": "JSON test.zip",
+                    "sha256": "a" * 64,
+                    "acquiredAt": "2026-09-22T06:00:00+02:00",
+                    "authority": "primary",
+                }
+            ],
+            "entities": [
+                {
+                    "id": "peripheral:drone",
+                    "name": "Drone",
+                    "typeId": "rule:peripheral-type:servant",
+                    "review": {"status": "reviewed", "reviewedOn": "2026-09-22"},
+                }
+            ],
+            "profiles": [],
+            "mappings": [
+                {
+                    "id": "peripheral-mapping:army-101-1",
+                    "sourceId": "army-json-test",
+                    "armyId": 101,
+                    "peripheralId": 1,
+                    "sourceName": "Drone",
+                    "entityId": "peripheral:drone",
+                    "review": {
+                        "status": "reviewed",
+                        "reviewedOn": "2026-09-22",
+                        "reason": "Reviewed test mapping.",
+                    },
+                }
+            ],
+            "unitMappings": [],
+            "controllerAccess": [],
+        }
+    )
+    path = tmp_path / "army.sqlite3"
+
+    export_database(data, path, peripheral_identities=curated)
+
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT id, name, type_id FROM application_peripheral_entities"
+        ).fetchall() == [
+            ("peripheral:drone", "Drone", "rule:peripheral-type:servant")
+        ]
+        assert connection.execute(
+            "SELECT army_id, peripheral_id, entity_id FROM application_peripheral_sources"
+        ).fetchall() == [(101, 1, "peripheral:drone")]
+    finally:
+        connection.close()
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    first_army = next(army for army in details["armies"] if army["id"] == 101)
+    assert first_army["profiles"][0]["peripherals"] == [
+        {
+            "id": "peripheral:drone",
+            "name": "Drone",
+            "type_id": "rule:peripheral-type:servant",
+            "quantity": 1,
+        }
+    ]
+    assert first_army["loadouts"][0]["peripherals"] == [
+        {
+            "id": "peripheral:drone",
+            "name": "Drone",
+            "type_id": "rule:peripheral-type:servant",
+            "quantity": 1,
+        }
+    ]

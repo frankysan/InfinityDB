@@ -20,22 +20,38 @@ history retains implementation detail.
 
 ## Current milestone
 
-**Milestone 2B — continue the canonical application model and advance 1.0
-completeness.** Continue semantic coverage beyond the runtime surface completed
-for 0.6.1: broader relationships and source-only catalog/metadata structures,
-the `infinity.raw.db` separation, and the source-to-presentation completeness
-inventory. Use that inventory as groundwork for the broader web-app consistency
-audit. The durable version-1.0 acceptance criteria are maintained in
-`docs/releasing.md`.
-
-The next release target is **0.7.0 — rules-enriched catalog data**. Milestone 2B
-relationship/canonicalization work remains the foundation for that release; 0.7.0
-then applies the completed Wiki/PDF rules research to data InfinityDB already
-exposes, rather than opening a broad new product-domain milestone.
+The current milestone is **0.7.0 — rules-enriched catalog data**, which applies the
+completed Wiki/PDF/FAQ research to data InfinityDB already exposes. Milestone 2B
+shipped in 0.6.3; its durable canonical-relationship, storage-boundary, and
+source-to-presentation conclusions are maintained in `docs/data-model.md` and
+`docs/CHANGELOG.md`.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
 application behavior during this work.
+
+## Release roadmap through 1.0
+
+This roadmap describes product direction, not a rigid promise that every item will
+land in the named minor release. Detailed implementation work remains in the
+sections below and the durable 1.0 acceptance gate remains in `docs/releasing.md`.
+
+- **0.7.x — Rules & context.** Enrich the existing catalogs and application data with
+  concise rules summaries, official references, classifications, variant-aware
+  semantics, and reviewed related-item links.
+- **0.8.x — Connect the game.** Turn the relationship graph into first-class user
+  features: Fireteams, Peripheral/Controller links, profile/loadout includes,
+  selection/dependency relationships, Reinforcement parentage, and useful cross-army
+  navigation. Prefer connected views over duplicating the same facts in new silos.
+- **0.9.x — Complete & polish.** Use the completeness inventory and consistency audit
+  to close remaining player-facing gaps, then improve search/navigation, mobile
+  behavior, accessibility, themes, and overall presentation without redefining the
+  1.0 data-completeness gate.
+- **1.0.0 — Player data-complete.** Every useful in-scope game datum from the supported
+  sources has a maintained structured representation and a usable web presentation.
+
+The concise public framing is: **0.6 built the foundation → 0.7 adds context → 0.8
+connects the data → 0.9 closes the gaps → 1.0 completes the reference.**
 
 ## Deferred performance and storage experiments
 
@@ -95,104 +111,6 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-### Active Milestone 2B work
-
-This section contains only active Milestone 2B work. The completed 0.6.1
-canonicalization evidence, benchmarks, classifications, and upgrade requirements
-remain in `docs/data-model.md` and `docs/CHANGELOG.md`; release procedure belongs
-in `docs/releasing.md`.
-
-- [ ] **Audit relationships after entity canonicalization.**
-  - [ ] Revisit includes and distinguish visible endpoint data from the independently
-    meaningful relationship between those endpoints; use the clean target-resolution audit
-    as evidence before materializing canonical include relationships.
-  - [ ] Complete the Peripheral rules/identity work described in
-    `docs/peripheral-curated-data-design.md`.
-    - [ ] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
-      Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; do not
-      create a parallel Peripheral rules loader/database.
-    - [ ] Design a separate reviewed source-to-Peripheral identity/mapping contract; do not
-      overload the current display-identity contract or write Wiki/rules knowledge into Army
-      source tables.
-    - [ ] Materialize curated-derived controller-eligibility and cross-army Peripheral
-      relationships only after the source mapping and rules vocabulary are both validated.
-  - [ ] Audit relation/dependency structures.
-    - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
-      as contextual source/application data. Treat `role = reinforcement` rows as
-      selectable catalog Section/pool contexts, not independently legal Army
-      Lists, and retain section-specific profile/AVA occurrence provenance.
-  - [ ] Audit Fireteam structures.
-    - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
-      preserve Fireteam type quotas, named Fireteams, type membership, min/max
-      formation constraints, required-choice pools, chart notes, FTO restrictions,
-      Wildcards, and bracketed Fireteam-Level equivalence terms without promoting
-      them to intrinsic logical-Unit facts.
-    - [ ] Resolve FTO eligibility to the applicable source option/loadout identity
-      rather than treating a Unit-level Fireteam member match as sufficient; retain
-      unresolved/ambiguous source wording instead of guessing.
-    - [ ] Interpret the source `required` flag as participation in the chart's
-      required-choice set where applicable, not as "every flagged row is mandatory",
-      and preserve chart notes because the rules allow them to override general
-      Fireteam rules.
-    - [ ] For Reinforcement Fireteams, retain both the Reinforcement Section chart
-      context and the selected parent Army's permitted Fireteam Types/counts; do
-      not mix Main-Section and Reinforcement-Section member eligibility.
-  - [ ] Identify normalization-only link structures that do not constitute
-    additional player-facing information.
-  - [ ] Record any distinct player-relevant relationship not currently
-    presentable by the application as a 1.0 completeness gap.
-
-- [ ] **Separate lossless source storage from the application database after
-  canonicalization.**
-  This milestone refers to the existing `infinity.raw.db`; no additional
-  lossless database artifact is planned.
-  - [ ] Treat `infinity.raw.db` as the complete lossless normalized Army source/
-    provenance store, including source-local identities, source ordering,
-    raw fallbacks, and acquisition/audit metadata required to reconstruct
-    the imported source.
-  - [ ] Inventory every remaining `infinity.db` table and repository/API query and
-    classify it as canonical application data, explicit contextual application
-    data, or source/provenance-only data.
-  - [ ] Move source/provenance-only normalized tables out of `infinity.db` only
-    after canonical unit/profile/loadout/relationship/catalog replacements are
-    proven complete and reconstruction/provenance tests cover the transition.
-  - [ ] Make normal repository/API/web serving independent of `infinity.raw.db`;
-    production runtime should require the self-contained canonical `infinity.db`
-    plus the existing rules database/assets, while `infinity.raw.db` remains
-    a build/audit artifact.
-  - [ ] Preserve traceability from every canonical fact and contextual occurrence
-    back to supporting raw/source records after the physical database split.
-  - [ ] Document the rebuild/migration boundary and verify that removing the
-    duplicated source representation reduces physical application-database size
-    without using storage savings as the semantic acceptance criterion.
-
-- [ ] **Maintain a source-to-presentation completeness inventory while
-  canonicalizing.**
-  - [ ] Trace relevant original Army JSON constructs through normalization,
-    canonical application meaning, repository/API representation, and web
-    presentation.
-  - [ ] Record the semantic-provenance category and canonical documentation
-    location for every source-derived fact, InfinityDB abstraction, and
-    presentation convenience encountered by the inventory.
-  - [ ] Classify each construct as explicitly presented, implicitly represented,
-    operationally consumed, redundant source representation,
-    normalization-only structure, or unrepresented player information.
-  - [ ] Add confirmed unrepresented player information to the 1.0 completeness
-    backlog.
-  - [ ] Reconcile source presentation encodings with canonical rules identities
-    without rewriting source provenance. In particular, Army Unit Profiles encode
-    Cube/Cube 2.0 only through their profile symbols rather than textual Equipment
-    entries; map those symbol occurrences to the canonical Automatic Equipment
-    identities while preserving the original symbol/source occurrence.
-  - [ ] Do not treat unused tables/columns alone as proof of a completeness gap.
-
-Completion of every possible deduplication opportunity is **not** itself a
-version-1.0 requirement. Canonicalization blocks 1.0 only where unresolved
-duplication prevents InfinityDB from establishing data correctness,
-distinguishing genuinely different player-relevant facts, or satisfying the
-documented completeness requirements.
-
-
 ## Release target 0.7.0 — rules-enriched catalog data
 
 0.7.0 is the first semantic-enrichment release. Its goal is to make the data
@@ -246,6 +164,10 @@ requiring a new top-level browser surface in 0.7.0.
     or Cube 2.0 alongside textual Equipment; their dedicated symbols are the source
     occurrence and must resolve to the canonical Cube/Cube 2.0 Automatic Equipment
     identities without inventing a textual Army Equipment row.
+  - [ ] Consume Army's structured Hacking Program, Martial Arts, Booty, and
+    MetaChemistry reference rows through maintained application/rules models instead
+    of leaving them available only in the raw archive; preserve random-result and
+    Device/program semantics rather than flattening them into Unit facts.
   - [ ] Surface the resulting enrichment through the existing API/detail/catalog
     experiences; enrichment required for 0.7.0 must not remain available only in
     curated JSON, `rules.db`, raw source data, or developer tooling.
@@ -269,6 +191,54 @@ later. The release is ready when every currently exposed catalog/application
 surface has been systematically reconciled with the relevant audited rules
 knowledge, useful reviewed enrichment is presented to users, and every remaining
 gap is explicitly classified.
+
+## Release direction 0.8.0 — connected game relationships
+
+0.8.0 should make InfinityDB's already modeled relationships directly useful to
+players. The likely focus is first-class Fireteam browsing, Peripheral/Controller
+navigation, profile/loadout include links, selection/dependency constraints,
+Reinforcement Section parentage, and cross-army relationship discovery. Exact scope
+should be chosen after 0.7.0 so the UI builds on stable canonical/rules semantics
+rather than duplicating source-specific interpretations.
+
+The Milestone 2B completeness inventory currently makes these relationship families
+explicit 0.8.x candidates:
+
+- [ ] Add first-class Fireteam chart browsing/presentation from the audited source
+  semantics rather than exposing raw chart rows directly.
+- [ ] Present canonical Peripheral attachments and Controller access pools with
+  navigable links between Controllers and Peripheral targets.
+- [ ] Present profile/loadout/top-level Unit-option include relationships.
+- [ ] Present selection constraints and profile-group dependency relationships in a
+  way that explains the restriction without turning InfinityDB into a legality engine.
+- [ ] Present Reinforcement Section parentage and broader declared faction membership
+  as navigable cross-Army relationships distinct from concrete list availability.
+
+0.8.0 should not become an army-list legality engine or live game-state model.
+
+## Release direction 0.9.0 — completeness and polish
+
+0.9.0 should convert the completeness inventory into a release-hardening pass:
+close remaining in-scope player-data/presentation gaps, complete the end-to-end web
+consistency audit, and improve the experience around search, navigation, mobile use,
+accessibility, and themes. Work that is valuable but explicitly outside the 1.0 gate
+may still ship here when it does not displace completeness work.
+
+The Milestone 2B inventory also records non-relationship presentation gaps for this
+release-hardening pass:
+
+- [ ] Present source-attributed Unit notes, including meaningful variant-specific notes
+  that do not belong only to the representative source Unit.
+- [ ] Resolve and present the semantics of the 18 current top-level composite
+  `unit_options` rather than using their names only for search/catalog support.
+- [ ] Carry profile `is_structure` through the API/browser so vitality is labelled
+  correctly as W or STR instead of always using W.
+- [ ] Review opaque `spectables` and loadout `disabled` / `minis` semantics, then either
+  present the in-scope information or document why it is deliberately outside 1.0.
+
+The release should leave 1.0 primarily as the final source-by-source completeness
+verification and resolution of any remaining material correctness gaps, not as a
+large new feature milestone.
 
 ## Army snapshot and symbol pipeline
 
@@ -506,8 +476,11 @@ work against that contract.
 - [ ] Split the growing pytest stage into marker-based local sections (for example
   data/model, web/API, build/ingestion, operations/tooling, and assets) so
   developers can run the relevant slice during iteration. Keep the complete suite
-  as the authoritative final gate; the 2026-09-20 local full run is 606 tests and
-  takes roughly 73 seconds on the primary development machine.
+  as the authoritative final gate. Parallel pytest execution now defaults to
+  `--test-workers auto` after the primary Windows benchmark reduced the 687-test
+  stage from 59.67 s serially to 14.13 s; the shared web fixture also no longer
+  rebuilds its database per test. Retain marker-based slices as the complementary
+  fast-iteration path for focused development.
 
 ## Public-identifier follow-up
 

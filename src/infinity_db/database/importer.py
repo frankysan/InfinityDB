@@ -32,20 +32,30 @@ from ..identities import (
     load_identity_config,
     parse_identity_metadata,
 )
+from ..peripheral_identities import (
+    PeripheralIdentityCurated,
+    peripheral_identity_metadata,
+)
 from .application_armies import materialize_application_armies
 from .application_catalogs import materialize_application_catalogs
 from .application_domain_slugs import materialize_application_domain_slugs
+from .include_relationships import materialize_include_relationships
 from .loadout_payloads import materialize_loadout_payloads
 from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
+from .peripheral_relationships import materialize_peripheral_relationships
 from .profile_payloads import materialize_profile_payloads
+from .publication import PUBLISHED_CONTENT_SHA256_KEY, published_content_sha256
+from .relation_constraints import materialize_relation_constraints
+from .relation_group_dependencies import materialize_relation_group_dependencies
 from .schema import (
-    APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
     METADATA_TABLE,
+    PUBLISHED_DATABASE_TABLES,
     RAW_ROWS_TABLE,
     ROW_JSON,
+    SOURCE_ONLY_TABLES,
     TABLES,
     columns_for,
     create_indexes,
@@ -230,6 +240,8 @@ def snapshot_metadata(
     data: dict[str, Any],
     identity_config: IdentityConfig,
     reinforcement_matches: Mapping[int, int] | None = None,
+    *,
+    peripheral_identities: PeripheralIdentityCurated | None = None,
 ) -> dict[str, Any]:
     """Return the metadata persisted with both database siblings."""
     metadata = {key: value for key, value in data.items() if key != "tables"}
@@ -238,7 +250,11 @@ def snapshot_metadata(
         data, identity_config, reinforcement_matches
     )
     metadata["imported_tables"] = list(data["tables"])
+    metadata["published_tables"] = list(PUBLISHED_DATABASE_TABLES)
+    metadata["source_only_tables"] = sorted(SOURCE_ONLY_TABLES)
     metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+    if peripheral_identities is not None:
+        metadata.update(peripheral_identity_metadata(peripheral_identities))
     return metadata
 
 
@@ -249,10 +265,16 @@ def create_raw_archive(
     *,
     metadata: Mapping[str, Any] | None = None,
 ) -> None:
-    """Store lossless normalized records outside the frontend database."""
-    connection.execute(f"PRAGMA application_id = {APPLICATION_ID}")
-    connection.execute(
-        f"CREATE TABLE {quote(METADATA_TABLE)} (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
+    """Store lossless rows plus queryable normalized source tables outside the app DB."""
+
+    table_columns = {
+        name: columns_for(name, rows) for name, rows in data["tables"].items()
+    }
+    create_schema(
+        connection,
+        data["tables"],
+        table_columns=table_columns,
+        definitions=TABLES,
     )
     connection.execute(
         f"CREATE TABLE {quote(RAW_ROWS_TABLE)} ("
@@ -266,6 +288,15 @@ def create_raw_archive(
         f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
         [(key, json_text(value)) for key, value in metadata.items()],
     )
+    for name, rows in data["tables"].items():
+        columns = table_columns[name]
+        fields = ", ".join(map(quote, columns))
+        placeholders = ", ".join("?" for _ in columns)
+        insert_batched(
+            connection,
+            f"INSERT INTO {quote(name)} ({fields}) VALUES ({placeholders})",
+            (tuple(sql_value(row.get(field)) for field in columns) for row in rows),
+        )
     insert_batched(
         connection,
         f"INSERT INTO {quote(RAW_ROWS_TABLE)} (table_name, row_position, {quote(ROW_JSON)}) "
@@ -278,34 +309,101 @@ def create_raw_archive(
     )
 
 
-def export_database(
-    data: dict[str, Any], path: Path, *, identity_config: IdentityConfig | None = None
-) -> None:
-    """Replace ``path`` only after the complete normalized import passes validation.
+def _database_columns(
+    connection: sqlite3.Connection, table_names: Iterable[str]
+) -> dict[str, tuple[str, ...]]:
+    return {
+        name: tuple(
+            str(row[1])
+            for row in connection.execute(f"PRAGMA table_info({quote(name)})")
+        )
+        for name in table_names
+    }
 
-    The frontend database contains queryable normalized columns only. A sibling
-    ``.raw`` database preserves exact normalized rows, including absent versus
-    null fields, for development use. If normalized data already pins an identity
-    policy, export validates and preserves that exact policy; otherwise it falls
-    back to an explicitly supplied policy or the authored project manifest.
+
+def _publish_application_database(
+    staging_path: Path,
+    destination: Path,
+    data: dict[str, Any],
+    metadata: Mapping[str, Any],
+) -> None:
+    """Copy validated application tables from the full relational staging database."""
+
+    staging = sqlite3.connect(staging_path)
+    try:
+        table_columns = _database_columns(staging, PUBLISHED_DATABASE_TABLES)
+    finally:
+        staging.close()
+
+    connection = sqlite3.connect(destination)
+    try:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute("ATTACH DATABASE ? AS staging", (str(staging_path),))
+        with connection:
+            create_schema(
+                connection,
+                data["tables"],
+                table_columns=table_columns,
+                definitions=PUBLISHED_DATABASE_TABLES,
+            )
+            insert_batched(
+                connection,
+                f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
+                [(key, json_text(value)) for key, value in metadata.items()],
+            )
+            for name in PUBLISHED_DATABASE_TABLES:
+                connection.execute(
+                    f"INSERT INTO {quote(name)} SELECT * FROM staging.{quote(name)}"
+                )
+            create_indexes(connection, table_names=PUBLISHED_DATABASE_TABLES)
+            connection.execute("ANALYZE")
+        violation = connection.execute("PRAGMA foreign_key_check").fetchone()
+        if violation is not None:
+            raise ValueError(f"Published database contains broken foreign keys: {tuple(violation)}")
+    finally:
+        connection.close()
+
+
+def export_database(
+    data: dict[str, Any],
+    path: Path,
+    *,
+    identity_config: IdentityConfig | None = None,
+    peripheral_identities: PeripheralIdentityCurated | None = None,
+) -> None:
+    """Validate the full normalized model, then publish application and raw siblings.
+
+    Export first builds a complete relational staging database and runs every
+    source-to-canonical consistency check against it. Only after that succeeds is
+    the self-contained application subset copied into ``path``. The sibling raw
+    database preserves exact normalized rows, including absent versus null fields,
+    for development, audit, and reconstruction use.
     """
     table_columns = validate_input(data)
     identity_config = resolve_identity_config(data, identity_config)
     logical_identity = resolve_logical_unit_identity(data, identity_config)
-    metadata = snapshot_metadata(data, identity_config, logical_identity.reinforcement_matches)
+    metadata = snapshot_metadata(
+        data,
+        identity_config,
+        logical_identity.reinforcement_matches,
+        peripheral_identities=peripheral_identities,
+    )
     path = Path(path)
     archive_path = raw_database_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, filename = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
-    os.close(descriptor)
-    temporary = Path(filename)
-    archive_descriptor, archive_filename = tempfile.mkstemp(
-        prefix=f".{archive_path.name}.", suffix=".tmp", dir=path.parent
-    )
-    os.close(archive_descriptor)
-    archive_temporary = Path(archive_filename)
+
+    def temporary_path(target: Path) -> Path:
+        descriptor, filename = tempfile.mkstemp(
+            prefix=f".{target.name}.", suffix=".tmp", dir=path.parent
+        )
+        os.close(descriptor)
+        return Path(filename)
+
+    staging_temporary = temporary_path(path.with_name(f"{path.name}.staging"))
+    published_temporary = temporary_path(path)
+    archive_temporary = temporary_path(archive_path)
     try:
-        connection = sqlite3.connect(temporary)
+        connection = sqlite3.connect(staging_temporary)
         try:
             connection.execute("PRAGMA foreign_keys = ON")
             with connection:
@@ -347,28 +445,53 @@ def export_database(
                 materialize_application_domain_slugs(connection)
                 materialize_profile_payloads(connection)
                 materialize_loadout_payloads(connection)
+                materialize_include_relationships(connection)
+                materialize_peripheral_relationships(connection, peripheral_identities)
+                materialize_relation_constraints(connection)
+                materialize_relation_group_dependencies(connection)
                 create_indexes(connection)
-                # The frontend database is an immutable snapshot. Persist planner
-                # statistics at build time so read-only connections make informed
-                # join-order choices without request-time analysis.
                 connection.execute("ANALYZE")
+                metadata[PUBLISHED_CONTENT_SHA256_KEY] = published_content_sha256(connection)
+                connection.execute(
+                    f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
+                    (
+                        PUBLISHED_CONTENT_SHA256_KEY,
+                        json_text(metadata[PUBLISHED_CONTENT_SHA256_KEY]),
+                    ),
+                )
         except (sqlite3.IntegrityError, OverflowError) as exc:
             raise ValueError(f"Invalid normalized database data: {exc}") from exc
         finally:
             connection.close()
+
         from .repository import Database
 
-        Database(temporary).validate()
+        # Full source-to-canonical validation happens before source-only relational
+        # tables are excluded from the published application database.
+        Database(staging_temporary).validate(source_consistency=True)
+
         archive_connection = sqlite3.connect(archive_temporary)
         try:
+            archive_connection.execute("PRAGMA foreign_keys = ON")
             with archive_connection:
-                create_raw_archive(archive_connection, data, identity_config, metadata=metadata)
+                create_raw_archive(
+                    archive_connection, data, identity_config, metadata=metadata
+                )
             if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Raw archive integrity check failed")
+            if archive_connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+                raise ValueError("Raw archive contains broken foreign keys")
         finally:
             archive_connection.close()
+
+        _publish_application_database(
+            staging_temporary, published_temporary, data, metadata
+        )
+        Database(published_temporary).validate()
+
         os.replace(archive_temporary, archive_path)
-        os.replace(temporary, path)
+        os.replace(published_temporary, path)
     finally:
-        temporary.unlink(missing_ok=True)
+        staging_temporary.unlink(missing_ok=True)
+        published_temporary.unlink(missing_ok=True)
         archive_temporary.unlink(missing_ok=True)

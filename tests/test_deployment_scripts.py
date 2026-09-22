@@ -61,3 +61,11 @@ def test_deploy_bakes_display_version_into_container_image() -> None:
     assert "INFINITY_DB_DISPLAY_VERSION=${INFINITY_DB_DISPLAY_VERSION}" in dockerfile
     assert 'os.environ.get("INFINITY_DB_DISPLAY_VERSION", "").strip()' in verifier
     assert "Browser footer does not show built display version" in verifier
+
+
+def test_docker_build_copies_curated_wheel_data_inputs() -> None:
+    dockerfile = _read("Dockerfile")
+
+    assert "COPY data/curated/identities /app/data/curated/identities" in dockerfile
+    assert "COPY data/curated/peripherals /app/data/curated/peripherals" in dockerfile
+    assert "rm -rf /app/config /app/data/curated" in dockerfile

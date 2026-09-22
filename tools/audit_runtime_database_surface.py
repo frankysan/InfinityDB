@@ -113,6 +113,52 @@ _register(
     ),
 )
 _register(
+    ["application_peripheral_entities", "application_peripheral_profiles"],
+    CANONICAL,
+    reason=(
+        "Reviewed canonical Peripheral application identity used by normal Unit-detail "
+        "serving."
+    ),
+)
+_register(
+    [
+        "application_peripheral_sources",
+        "application_peripheral_unit_sources",
+        "application_peripheral_controller_access",
+        "application_peripheral_controller_targets",
+        "profile_peripherals",
+        "option_peripherals",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Reviewed or source-context Peripheral relationships preserve exact Army/profile/"
+        "loadout occurrence context while resolving canonical application targets."
+    ),
+)
+_register(
+    [
+        "application_unit_constraints",
+        "application_unit_constraint_members",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Materialized selector-free Army selection constraints preserve exact source member "
+        "context while resolving every eligible member to canonical logical-Unit identity."
+    ),
+)
+_register(
+    [
+        "application_unit_group_dependency_constraints",
+        "application_unit_group_dependency_members",
+        "application_unit_group_dependency_targets",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Materialized same-logical Army profile-group dependencies preserve exact Army/Unit/"
+        "group coordinates while resolving source Unit endpoints to canonical logical identity."
+    ),
+)
+_register(
     ["logical_units"],
     CANONICAL,
     reason="Representative-backed logical-unit application values.",

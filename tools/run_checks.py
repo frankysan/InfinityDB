@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import os
 import shlex
 import subprocess
@@ -34,6 +35,7 @@ PROFILES = {
     "data": ("build", "rules"),
     "all": STAGE_ORDER,
 }
+DEFAULT_TEST_WORKERS = "auto"
 DEFAULT_LINT_TARGETS = (
     "src/infinity_db",
     "src/infinity_army_data",
@@ -137,6 +139,15 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--test-workers",
+        default=None,
+        metavar="N|auto",
+        help=(
+            "Run pytest through pytest-xdist with N workers or automatic CPU-based "
+            "worker selection. Test stages default to auto; use 0 for serial execution."
+        ),
+    )
+    parser.add_argument(
         "--report",
         nargs="?",
         const=True,
@@ -170,12 +181,15 @@ def stage_definitions(
     *,
     build_source: Path | None,
     include_full_assets: bool = False,
+    test_workers: str = DEFAULT_TEST_WORKERS,
 ) -> list[Stage]:
     python = sys.executable
     stages: list[Stage] = []
     for name in stage_names:
         if name == "test":
             command = [python, "-m", "pytest"]
+            if test_workers != "0":
+                command.extend(("-n", test_workers, "--dist", "worksteal"))
             if targets:
                 command.extend(targets)
             marker = "full_assets or not full_assets" if include_full_assets else "not full_assets"
@@ -318,6 +332,26 @@ def main(argv: list[str] | None = None) -> int:
         stage_names = selected_stage_names(args)
         if args.build_source is not None and "build" not in stage_names:
             build_parser().error("--build-source requires the build stage")
+        if args.test_workers is not None and "test" not in stage_names:
+            build_parser().error("--test-workers requires the test stage")
+        test_workers = (
+            args.test_workers
+            if args.test_workers is not None
+            else (DEFAULT_TEST_WORKERS if "test" in stage_names else "0")
+        )
+        if test_workers != "auto":
+            try:
+                worker_count = int(test_workers)
+            except ValueError:
+                build_parser().error("--test-workers must be 0, auto, or a positive integer")
+            if worker_count < 0:
+                build_parser().error("--test-workers must be 0, auto, or a positive integer")
+            test_workers = str(worker_count)
+        if test_workers != "0" and importlib.util.find_spec("xdist") is None:
+            raise ValueError(
+                "pytest-xdist is required for parallel test execution; "
+                "install the project dev dependencies"
+            )
         asset_selection = (
             select_asset_mode(args.assets, STATIC_ROOT) if "test" in stage_names else None
         )
@@ -328,6 +362,7 @@ def main(argv: list[str] | None = None) -> int:
             include_full_assets=bool(
                 asset_selection is not None and asset_selection.include_full_assets
             ),
+            test_workers=test_workers,
         )
     except SystemExit as exc:
         exit_code = exc.code

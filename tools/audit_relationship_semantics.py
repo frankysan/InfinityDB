@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Audit deferred include/peripheral relationship semantics in InfinityDB."""
+"""Audit deferred include/peripheral relationship semantics in InfinityDB.
+
+Include analysis resolves canonical targets and tests whether relationships are
+invariant across source occurrences that share one canonical parent payload.
+"""
 
 from __future__ import annotations
 
@@ -13,7 +17,17 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB relationship semantics audit"
-REPORT_FORMAT_VERSION = 1
+REPORT_FORMAT_VERSION = 6
+
+DEFAULT_HISTORICAL_RELATION_ENDPOINTS = (
+    Path(__file__).resolve().parents[1]
+    / "data"
+    / "curated"
+    / "relationships"
+    / "historical-unit-endpoints.json"
+)
+HISTORICAL_ENDPOINT_FORMAT = "InfinityDB reviewed historical relation endpoints"
+HISTORICAL_ENDPOINT_FORMAT_VERSION = 1
 
 REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     "profile_includes": (
@@ -82,14 +96,154 @@ REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
         "points",
         "swc",
     ),
+    "profile_payload_occurrences": (
+        "army_id",
+        "unit_id",
+        "group_id",
+        "profile_id",
+        "profile_payload_id",
+        "position",
+        "ava",
+        "logo",
+    ),
     "loadout_payloads": ("id", "logical_unit_id", "payload_sha256", "name", "minis", "disabled"),
     "logical_unit_sources": ("source_unit_id", "logical_unit_id"),
+    "army_units": ("army_id", "unit_id"),
+    "profile_groups": ("army_id", "unit_id", "group_id"),
+    "profiles": ("army_id", "unit_id", "group_id", "profile_id", "ava"),
+    "loadout_options": ("army_id", "unit_id", "group_id", "option_id", "disabled"),
+
+    "relations": ("army_id", "relation_id", "position", "min_count", "max_count", "is_group"),
+    "relation_units": (
+        "army_id",
+        "relation_id",
+        "relation_unit_id",
+        "position",
+        "unit_id",
+        "profile_id",
+        "per_parent",
+    ),
+    "relation_dependencies": (
+        "army_id", "relation_id", "relation_unit_id", "dependency_id", "position",
+        "unit_id", "profile_id", "group_id", "min_count", "min_dependant", "options", "raw",
+    ),
+    "units": ("id", "name", "source_defined", "source_role"),
+    "army_lists": ("id", "name", "kind", "reinforcement_id"),
+    "application_armies": ("id", "name", "role", "playable"),
+    "application_army_sources": ("application_army_id", "source_army_id"),
+    "application_army_reinforcement_parents": ("reinforcement_army_id", "parent_army_id"),
     "__infinity_metadata": ("key", "value"),
 }
 
 
 class RelationshipSemanticsAuditError(ValueError):
     """Raised when the selected database cannot be audited safely."""
+
+
+def _load_historical_relation_endpoints(
+    path: Path,
+) -> tuple[dict[int, dict[str, Any]], str]:
+    if not path.is_file():
+        raise RelationshipSemanticsAuditError(
+            f"Historical relation endpoint review does not exist: {path}"
+        )
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RelationshipSemanticsAuditError(
+            f"Could not load historical relation endpoint review {path}: {exc}"
+        ) from exc
+    if not isinstance(document, dict):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review must be a JSON object"
+        )
+    if document.get("format") != HISTORICAL_ENDPOINT_FORMAT:
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review has an unsupported format"
+        )
+    if document.get("formatVersion") != HISTORICAL_ENDPOINT_FORMAT_VERSION:
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review has an unsupported formatVersion"
+        )
+    snapshot_sha256 = document.get("snapshotArchiveSha256")
+    if (
+        not isinstance(snapshot_sha256, str)
+        or len(snapshot_sha256) != 64
+        or any(character not in "0123456789abcdef" for character in snapshot_sha256)
+    ):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review requires a lowercase snapshot SHA-256"
+        )
+
+    sources = document.get("sources")
+    if not isinstance(sources, list):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review sources must be a list"
+        )
+    source_ids: set[str] = set()
+    for source in sources:
+        if not isinstance(source, dict) or not isinstance(source.get("id"), str):
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint review contains an invalid source"
+            )
+        source_id = source["id"]
+        if source_id in source_ids:
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint review repeats source id {source_id!r}"
+            )
+        source_ids.add(source_id)
+
+    endpoints = document.get("endpoints")
+    if not isinstance(endpoints, list):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review endpoints must be a list"
+        )
+    by_source_id: dict[int, dict[str, Any]] = {}
+    for endpoint in endpoints:
+        if not isinstance(endpoint, dict):
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint review contains a non-object endpoint"
+            )
+        source_unit_id = endpoint.get("sourceUnitId")
+        name = endpoint.get("name")
+        status = endpoint.get("status")
+        evidence = endpoint.get("evidence")
+        review = endpoint.get("review")
+        if type(source_unit_id) is not int or source_unit_id <= 0:
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint sourceUnitId must be a positive integer"
+            )
+        if source_unit_id in by_source_id:
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint review repeats Unit id {source_unit_id}"
+            )
+        if not isinstance(name, str) or not name.strip():
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} requires a name"
+            )
+        if status != "retired-historical-unit":
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} has unsupported status {status!r}"
+            )
+        if not isinstance(evidence, list) or not evidence:
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} requires evidence"
+            )
+        for item in evidence:
+            if not isinstance(item, dict) or item.get("sourceId") not in source_ids:
+                raise RelationshipSemanticsAuditError(
+                    f"Historical relation endpoint {source_unit_id} has invalid evidence"
+                )
+        if (
+            not isinstance(review, dict)
+            or review.get("status") != "reviewed"
+            or not isinstance(review.get("reviewedOn"), str)
+        ):
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} is not reviewed"
+            )
+        by_source_id[source_unit_id] = endpoint
+    return by_source_id, snapshot_sha256
 
 
 def _columns(connection: sqlite3.Connection, table: str) -> set[str]:
@@ -160,6 +314,34 @@ def _payload_targets(
     }
 
 
+def _profile_payload_parents(
+    connection: sqlite3.Connection,
+) -> dict[tuple[int, int, int, int], int]:
+    return {
+        (row["army_id"], row["unit_id"], row["group_id"], row["profile_id"]): row[
+            "profile_payload_id"
+        ]
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, profile_id, profile_payload_id "
+            "FROM profile_payload_occurrences"
+        )
+    }
+
+
+def _loadout_payload_parents(
+    connection: sqlite3.Connection,
+) -> dict[tuple[int, int, int, int], int]:
+    return {
+        (row["army_id"], row["unit_id"], row["group_id"], row["option_id"]): row[
+            "loadout_payload_id"
+        ]
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, option_id, loadout_payload_id "
+            "FROM loadout_payload_occurrences"
+        )
+    }
+
+
 def _source_logical_units(connection: sqlite3.Connection) -> dict[int, int]:
     return {
         row["source_unit_id"]: row["logical_unit_id"]
@@ -172,6 +354,7 @@ def _source_logical_units(connection: sqlite3.Connection) -> dict[int, int]:
 def _audit_contextual_includes(
     rows: Iterable[sqlite3.Row],
     *,
+    parent_id_field: str,
     targets: dict[tuple[int, int, int, int], tuple[int, int]],
     source_logical: dict[int, int],
     include_details: bool,
@@ -208,6 +391,8 @@ def _audit_contextual_includes(
                 {
                     "armyId": row["army_id"],
                     "unitId": row["unit_id"],
+                    "groupId": row["group_id"],
+                    "parentId": row[parent_id_field],
                     "position": row["position"],
                     "targetGroupId": row["target_group_id"],
                     "targetOptionId": row["target_option_id"],
@@ -227,6 +412,133 @@ def _audit_contextual_includes(
     }
     if include_details:
         result["rows"] = details
+    return result
+
+
+def _include_signature_item(
+    row: sqlite3.Row,
+    *,
+    targets: dict[tuple[int, int, int, int], tuple[int, int]],
+) -> tuple[Any, ...]:
+    target = targets.get(
+        (
+            row["army_id"],
+            row["unit_id"],
+            row["target_group_id"],
+            row["target_option_id"],
+        )
+    )
+    target_payload_id = target[0] if target is not None else None
+    return (row["position"], target_payload_id, row["quantity"], row["raw"])
+
+
+def _audit_parent_payload_invariance(
+    rows: Iterable[sqlite3.Row],
+    *,
+    parent_payloads: dict[tuple[int, int, int, int], int],
+    parent_id_field: str,
+    targets: dict[tuple[int, int, int, int], tuple[int, int]],
+    include_details: bool,
+) -> dict[str, Any]:
+    rows_by_parent: dict[tuple[int, int, int, int], list[sqlite3.Row]] = defaultdict(list)
+    for row in rows:
+        rows_by_parent[
+            (
+                row["army_id"],
+                row["unit_id"],
+                row["group_id"],
+                row[parent_id_field],
+            )
+        ].append(row)
+
+    affected_payload_ids = {
+        parent_payloads[parent_key]
+        for parent_key in rows_by_parent
+        if parent_key in parent_payloads
+    }
+    unmapped_parent_rows = sum(
+        len(parent_rows)
+        for parent_key, parent_rows in rows_by_parent.items()
+        if parent_key not in parent_payloads
+    )
+    signatures_by_payload: dict[int, dict[tuple[Any, ...], list[tuple[int, int, int, int]]]] = (
+        defaultdict(lambda: defaultdict(list))
+    )
+    unresolved_target_rows = 0
+    for parent_key, payload_id in parent_payloads.items():
+        if payload_id not in affected_payload_ids:
+            continue
+        parent_rows = sorted(rows_by_parent.get(parent_key, ()), key=lambda row: row["position"])
+        signature_items = tuple(
+            _include_signature_item(row, targets=targets) for row in parent_rows
+        )
+        unresolved_target_rows += sum(1 for item in signature_items if item[1] is None)
+        signatures_by_payload[payload_id][signature_items].append(parent_key)
+
+    payloads_with_multiple_occurrences = 0
+    variant_payload_ids: list[int] = []
+    for payload_id, signatures in signatures_by_payload.items():
+        occurrence_count = sum(len(keys) for keys in signatures.values())
+        if occurrence_count > 1:
+            payloads_with_multiple_occurrences += 1
+        if len(signatures) > 1:
+            variant_payload_ids.append(payload_id)
+
+    result: dict[str, Any] = {
+        "status": (
+            "unresolved_parents"
+            if unmapped_parent_rows
+            else "unresolved_targets"
+            if unresolved_target_rows
+            else "contextual_variants"
+            if variant_payload_ids
+            else "payload_invariant"
+        ),
+        "affectedCanonicalParentPayloadCount": len(signatures_by_payload),
+        "affectedCanonicalParentPayloadsWithMultipleOccurrences": (
+            payloads_with_multiple_occurrences
+        ),
+        "variantCanonicalParentPayloadCount": len(variant_payload_ids),
+        "unmappedParentRowCount": unmapped_parent_rows,
+        "unresolvedTargetRowCount": unresolved_target_rows,
+    }
+    if include_details:
+        variants: list[dict[str, Any]] = []
+        for payload_id in sorted(variant_payload_ids):
+            signatures = signatures_by_payload[payload_id]
+            variant_signatures: list[dict[str, Any]] = []
+            for signature, parent_keys in sorted(
+                signatures.items(), key=lambda item: repr(item[0])
+            ):
+                variant_signatures.append(
+                    {
+                        "signature": [
+                            {
+                                "position": item[0],
+                                "targetPayloadId": item[1],
+                                "quantity": item[2],
+                                "raw": item[3],
+                            }
+                            for item in signature
+                        ],
+                        "occurrences": [
+                            {
+                                "armyId": key[0],
+                                "unitId": key[1],
+                                "groupId": key[2],
+                                "parentId": key[3],
+                            }
+                            for key in sorted(parent_keys)
+                        ],
+                    }
+                )
+            variants.append(
+                {
+                    "parentPayloadId": payload_id,
+                    "variants": variant_signatures,
+                }
+            )
+        result["variantParentPayloads"] = variants
     return result
 
 
@@ -398,24 +710,757 @@ def _audit_peripherals(
     return result
 
 
-def audit_database(path: Path, *, include_details: bool = False) -> dict[str, Any]:
+def _relation_shape_key(
+    row: sqlite3.Row, member_count: int, dependency_count: int
+) -> tuple[Any, ...]:
+    return (
+        row["min_count"],
+        row["max_count"],
+        row["is_group"],
+        member_count,
+        dependency_count,
+    )
+
+
+def _relation_cardinality_kind(min_count: int | None, max_count: int | None) -> str:
+    if min_count == 1 and max_count == 1:
+        return "exactly-one"
+    if max_count is None:
+        return "minimum-only"
+    if min_count == max_count:
+        return "exact-count"
+    return "bounded-range"
+
+
+def _relation_semantic_family(
+    relation: sqlite3.Row,
+    members: list[sqlite3.Row],
+    dependencies_by_member: dict[tuple[int, int, int], list[sqlite3.Row]],
+    logical_ids: list[int | None],
+    dependency_logical_ids: list[int | None],
+) -> str:
+    endpoints = logical_ids + dependency_logical_ids
+    if any(value is None for value in endpoints):
+        return "unresolved-source-endpoint"
+
+    distinct_logical_ids = {value for value in endpoints if value is not None}
+    if len(distinct_logical_ids) > 1:
+        return "cross-logical-shared-cardinality"
+
+    has_selectors_or_dependencies = False
+    for member in members:
+        key = (member["army_id"], member["relation_id"], member["relation_unit_id"])
+        if (
+            member["profile_id"] is not None
+            or member["per_parent"] is not None
+            or dependencies_by_member[key]
+        ):
+            has_selectors_or_dependencies = True
+            break
+
+    source_unit_ids = {member["unit_id"] for member in members}
+    if (
+        len(members) >= 2
+        and len(source_unit_ids) >= 2
+        and not has_selectors_or_dependencies
+        and not relation["is_group"]
+        and relation["min_count"] == 1
+        and relation["max_count"] == 1
+    ):
+        return "same-logical-cross-context-exclusive"
+    if has_selectors_or_dependencies:
+        return "single-logical-profile-dependency"
+    return "single-logical-cardinality"
+
+
+def _selector_candidate_domains(
+    selector: int | None,
+    unit_id: int,
+    *,
+    group_ids_by_unit: dict[int, set[int]],
+    profile_ids_by_unit: dict[int, set[int]],
+    option_ids_by_unit: dict[int, set[int]],
+) -> list[str]:
+    if selector is None:
+        return []
+    domains: list[str] = []
+    if selector in group_ids_by_unit.get(unit_id, set()):
+        domains.append("profile-group-id")
+    if selector in profile_ids_by_unit.get(unit_id, set()):
+        domains.append("profile-id")
+    if selector in option_ids_by_unit.get(unit_id, set()):
+        domains.append("option-id")
+    return domains
+
+
+def _selector_domain_key(domains: list[str]) -> str:
+    return "+".join(domains) if domains else "no-coordinate-match"
+
+
+def _selection_equivalent_profile_selectors(
+    connection: sqlite3.Connection,
+    *,
+    army_id: int,
+    members: list[sqlite3.Row],
+    dependencies_by_member: dict[tuple[int, int, int], list[sqlite3.Row]],
+) -> bool:
+    """Return whether cross-Unit profile selectors are neutral to roster selection."""
+    for member in members:
+        member_key = (army_id, int(member["relation_id"]), int(member["relation_unit_id"]))
+        selector = member["profile_id"]
+        if (
+            member["per_parent"] is not None
+            or dependencies_by_member[member_key]
+            or type(selector) is not int
+        ):
+            return False
+        unit_id = int(member["unit_id"])
+        if connection.execute(
+            "SELECT 1 FROM army_units WHERE army_id = ? AND unit_id = ? LIMIT 1",
+            (army_id, unit_id),
+        ).fetchone() is None:
+            return False
+        groups = [
+            int(row[0])
+            for row in connection.execute(
+                "SELECT group_id FROM profile_groups "
+                "WHERE army_id = ? AND unit_id = ? ORDER BY group_id",
+                (army_id, unit_id),
+            )
+        ]
+        if len(groups) != 1:
+            return False
+        group_id = groups[0]
+        profile = connection.execute(
+            "SELECT ava FROM profiles "
+            "WHERE army_id = ? AND unit_id = ? AND group_id = ? AND profile_id = ?",
+            (army_id, unit_id, group_id, selector),
+        ).fetchone()
+        if profile is None or (profile[0] is not None and int(profile[0]) < 0):
+            return False
+        selectable_groups = {
+            int(row[0])
+            for row in connection.execute(
+                "SELECT DISTINCT group_id FROM loadout_options "
+                "WHERE army_id = ? AND unit_id = ? AND COALESCE(disabled, 0) = 0",
+                (army_id, unit_id),
+            )
+        }
+        if selectable_groups != {group_id}:
+            return False
+    return True
+
+
+def _validate_historical_relation_endpoint_state(
+    connection: sqlite3.Connection,
+    *,
+    source_unit_id: int,
+    unit_rows: dict[int, sqlite3.Row],
+    source_logical: dict[int, int],
+) -> None:
+    unit = unit_rows.get(source_unit_id)
+    if unit is None:
+        raise RelationshipSemanticsAuditError(
+            f"Reviewed historical relation Unit {source_unit_id} is absent from units"
+        )
+    if bool(unit["source_defined"]):
+        raise RelationshipSemanticsAuditError(
+            f"Reviewed historical relation Unit {source_unit_id} is source-defined again"
+        )
+    if source_unit_id in source_logical:
+        raise RelationshipSemanticsAuditError(
+            f"Reviewed historical relation Unit {source_unit_id} has a logical Unit mapping"
+        )
+
+    current_tables = (
+        "army_units",
+        "profile_groups",
+        "profiles",
+        "loadout_options",
+        "profile_payload_occurrences",
+        "loadout_payload_occurrences",
+    )
+    for table in current_tables:
+        if connection.execute(
+            f'SELECT 1 FROM "{table}" WHERE unit_id = ? LIMIT 1',
+            (source_unit_id,),
+        ).fetchone() is not None:
+            raise RelationshipSemanticsAuditError(
+                f"Reviewed historical relation Unit {source_unit_id} is current in {table}"
+            )
+
+
+def _audit_relation_structures(
+    connection: sqlite3.Connection,
+    *,
+    source_logical: dict[int, int],
+    historical_endpoints: dict[int, dict[str, Any]],
+    historical_snapshot_sha256: str,
+    database_snapshot_sha256: str | None,
+    include_details: bool,
+) -> dict[str, Any]:
+    relation_rows = _fetch_rows(connection, "relations")
+    member_rows = _fetch_rows(connection, "relation_units")
+    dependency_rows = _fetch_rows(connection, "relation_dependencies")
+    unit_rows = {row["id"]: row for row in _fetch_rows(connection, "units")}
+    army_names = {row["id"]: row["name"] for row in _fetch_rows(connection, "army_lists")}
+    group_ids_by_unit: dict[int, set[int]] = defaultdict(set)
+    profile_ids_by_unit: dict[int, set[int]] = defaultdict(set)
+    option_ids_by_unit: dict[int, set[int]] = defaultdict(set)
+    for row in _fetch_rows(connection, "profile_payload_occurrences"):
+        group_ids_by_unit[row["unit_id"]].add(row["group_id"])
+        profile_ids_by_unit[row["unit_id"]].add(row["profile_id"])
+    for row in _fetch_rows(connection, "loadout_payload_occurrences"):
+        option_ids_by_unit[row["unit_id"]].add(row["option_id"])
+    for row in _fetch_rows(connection, "profile_groups"):
+        group_ids_by_unit[row["unit_id"]].add(row["group_id"])
+    for row in _fetch_rows(connection, "profiles"):
+        profile_ids_by_unit[row["unit_id"]].add(row["profile_id"])
+    for row in _fetch_rows(connection, "loadout_options"):
+        option_ids_by_unit[row["unit_id"]].add(row["option_id"])
+
+    members_by_relation: dict[tuple[int, int], list[sqlite3.Row]] = defaultdict(list)
+    for row in member_rows:
+        members_by_relation[(row["army_id"], row["relation_id"])].append(row)
+    dependencies_by_member: dict[tuple[int, int, int], list[sqlite3.Row]] = defaultdict(list)
+    for row in dependency_rows:
+        dependencies_by_member[
+            (row["army_id"], row["relation_id"], row["relation_unit_id"])
+        ].append(row)
+
+    unresolved_member_rows = [row for row in member_rows if row["unit_id"] not in source_logical]
+    unresolved_dependency_rows = [
+        row for row in dependency_rows if row["unit_id"] not in source_logical
+    ]
+    source_placeholder_member_rows = [
+        row
+        for row in member_rows
+        if row["unit_id"] in unit_rows and not unit_rows[row["unit_id"]]["source_defined"]
+    ]
+    referenced_source_unit_ids = {row["unit_id"] for row in member_rows + dependency_rows}
+    reviewed_historical_source_ids = referenced_source_unit_ids & historical_endpoints.keys()
+    if reviewed_historical_source_ids:
+        if database_snapshot_sha256 != historical_snapshot_sha256:
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint review is bound to snapshot "
+                f"{historical_snapshot_sha256}, not {database_snapshot_sha256!r}"
+            )
+        for source_unit_id in sorted(reviewed_historical_source_ids):
+            _validate_historical_relation_endpoint_state(
+                connection,
+                source_unit_id=source_unit_id,
+                unit_rows=unit_rows,
+                source_logical=source_logical,
+            )
+    reviewed_historical_member_rows = [
+        row for row in unresolved_member_rows if row["unit_id"] in reviewed_historical_source_ids
+    ]
+    unreviewed_member_rows = [
+        row
+        for row in unresolved_member_rows
+        if row["unit_id"] not in reviewed_historical_source_ids
+    ]
+    reviewed_historical_dependency_rows = [
+        row
+        for row in unresolved_dependency_rows
+        if row["unit_id"] in reviewed_historical_source_ids
+    ]
+    unreviewed_dependency_rows = [
+        row
+        for row in unresolved_dependency_rows
+        if row["unit_id"] not in reviewed_historical_source_ids
+    ]
+
+    shape_counts: dict[tuple[Any, ...], int] = defaultdict(int)
+    fully_resolved = 0
+    unresolved_relations = 0
+    reviewed_stale_relations = 0
+    unreviewed_relations = 0
+    single_logical = 0
+    cross_logical = 0
+    details: list[dict[str, Any]] = []
+    signatures: dict[tuple[Any, ...], set[int]] = defaultdict(set)
+    semantic_family_counts: dict[str, int] = defaultdict(int)
+    cardinality_kind_counts: dict[str, int] = defaultdict(int)
+    member_selector_domain_counts: dict[str, int] = defaultdict(int)
+    dependency_selector_domain_counts: dict[str, int] = defaultdict(int)
+    selector_free_resolved = 0
+    selector_bearing_resolved = 0
+    cross_logical_selector_bearing = 0
+    selection_equivalent_cross_logical_selectors = 0
+    source_only_cross_logical_selectors = 0
+
+    for relation in relation_rows:
+        key = (relation["army_id"], relation["relation_id"])
+        members = sorted(members_by_relation.get(key, ()), key=lambda row: row["position"] or 0)
+        dependency_count = sum(
+            len(
+                dependencies_by_member[
+                    (row["army_id"], row["relation_id"], row["relation_unit_id"])
+                ]
+            )
+            for row in members
+        )
+        shape_counts[_relation_shape_key(relation, len(members), dependency_count)] += 1
+        logical_ids = [source_logical.get(row["unit_id"]) for row in members]
+        dependency_logical_ids = [
+            source_logical.get(dep["unit_id"])
+            for member in members
+            for dep in dependencies_by_member[
+                (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            ]
+        ]
+        resolved = all(value is not None for value in logical_ids + dependency_logical_ids)
+        relation_unresolved_source_ids = {
+            member["unit_id"] for member in members if member["unit_id"] not in source_logical
+        }
+        relation_unresolved_source_ids.update(
+            dep["unit_id"]
+            for member in members
+            for dep in dependencies_by_member[
+                (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            ]
+            if dep["unit_id"] not in source_logical
+        )
+        reviewed_stale_relation = bool(relation_unresolved_source_ids) and (
+            relation_unresolved_source_ids <= reviewed_historical_source_ids
+        )
+        if reviewed_stale_relation:
+            semantic_family = "reviewed-stale-source-relation"
+        else:
+            semantic_family = _relation_semantic_family(
+                relation,
+                members,
+                dependencies_by_member,
+                logical_ids,
+                dependency_logical_ids,
+            )
+        cardinality_kind = _relation_cardinality_kind(
+            relation["min_count"], relation["max_count"]
+        )
+        semantic_family_counts[semantic_family] += 1
+        cardinality_kind_counts[cardinality_kind] += 1
+        relation_has_selectors = any(
+            member["profile_id"] is not None
+            or member["per_parent"] is not None
+            or dependencies_by_member[
+                (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            ]
+            for member in members
+        )
+        if resolved and relation_has_selectors:
+            selector_bearing_resolved += 1
+        elif resolved:
+            selector_free_resolved += 1
+        if resolved:
+            fully_resolved += 1
+            distinct = set(logical_ids + dependency_logical_ids)
+            if len(distinct) == 1:
+                single_logical += 1
+            elif len(distinct) > 1:
+                cross_logical += 1
+        else:
+            unresolved_relations += 1
+            if reviewed_stale_relation:
+                reviewed_stale_relations += 1
+            else:
+                unreviewed_relations += 1
+
+        selector_disposition: str | None = None
+        distinct_endpoint_ids = {
+            value for value in logical_ids + dependency_logical_ids if value is not None
+        }
+        if resolved and relation_has_selectors and len(distinct_endpoint_ids) > 1:
+            cross_logical_selector_bearing += 1
+            if _selection_equivalent_profile_selectors(
+                connection,
+                army_id=int(relation["army_id"]),
+                members=members,
+                dependencies_by_member=dependencies_by_member,
+            ):
+                selection_equivalent_cross_logical_selectors += 1
+                selector_disposition = "selection-equivalent-unit-constraint"
+            else:
+                source_only_cross_logical_selectors += 1
+                selector_disposition = "source-context-only"
+
+        signature_members: list[tuple[Any, ...]] = []
+        detail_members: list[dict[str, Any]] = []
+        for member in members:
+            member_key = (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            deps = sorted(dependencies_by_member[member_key], key=lambda row: row["position"] or 0)
+            canonical_unit = source_logical.get(member["unit_id"])
+            member_selector_domains = _selector_candidate_domains(
+                member["profile_id"],
+                member["unit_id"],
+                group_ids_by_unit=group_ids_by_unit,
+                profile_ids_by_unit=profile_ids_by_unit,
+                option_ids_by_unit=option_ids_by_unit,
+            )
+            if member["profile_id"] is not None:
+                member_selector_domain_counts[_selector_domain_key(member_selector_domains)] += 1
+            signature_deps = tuple(
+                (
+                    source_logical.get(dep["unit_id"]),
+                    dep["unit_id"] if source_logical.get(dep["unit_id"]) is None else None,
+                    dep["profile_id"],
+                    dep["group_id"],
+                    dep["min_count"],
+                    dep["min_dependant"],
+                    dep["options"],
+                    dep["raw"],
+                )
+                for dep in deps
+            )
+            signature_members.append(
+                (
+                    canonical_unit,
+                    member["unit_id"] if canonical_unit is None else None,
+                    member["profile_id"],
+                    member["per_parent"],
+                    signature_deps,
+                )
+            )
+            for dep in deps:
+                if dep["profile_id"] is not None:
+                    dependency_selector_domains = _selector_candidate_domains(
+                        dep["profile_id"],
+                        dep["unit_id"],
+                        group_ids_by_unit=group_ids_by_unit,
+                        profile_ids_by_unit=profile_ids_by_unit,
+                        option_ids_by_unit=option_ids_by_unit,
+                    )
+                    dependency_selector_domain_counts[
+                        _selector_domain_key(dependency_selector_domains)
+                    ] += 1
+            if include_details:
+                unit = unit_rows.get(member["unit_id"])
+                detail_members.append(
+                    {
+                        "relationUnitId": member["relation_unit_id"],
+                        "sourceUnitId": member["unit_id"],
+                        "sourceUnitName": unit["name"] if unit is not None else None,
+                        "sourceDefined": (
+                            bool(unit["source_defined"]) if unit is not None else None
+                        ),
+                        "logicalUnitId": canonical_unit,
+                        "reviewedHistoricalEndpoint": historical_endpoints.get(
+                            member["unit_id"]
+                        ),
+                        "profileSelector": member["profile_id"],
+                        "profileSelectorCandidateDomains": member_selector_domains,
+                        "perParent": member["per_parent"],
+                        "dependencies": [
+                            {
+                                "sourceUnitId": dep["unit_id"],
+                                "logicalUnitId": source_logical.get(dep["unit_id"]),
+                                "reviewedHistoricalEndpoint": historical_endpoints.get(
+                                    dep["unit_id"]
+                                ),
+                                "profileSelector": dep["profile_id"],
+                                "profileSelectorCandidateDomains": _selector_candidate_domains(
+                                    dep["profile_id"],
+                                    dep["unit_id"],
+                                    group_ids_by_unit=group_ids_by_unit,
+                                    profile_ids_by_unit=profile_ids_by_unit,
+                                    option_ids_by_unit=option_ids_by_unit,
+                                ),
+                                "groupSelector": dep["group_id"],
+                                "minCount": dep["min_count"],
+                                "minDependant": dep["min_dependant"],
+                                "options": dep["options"],
+                                "raw": dep["raw"],
+                            }
+                            for dep in deps
+                        ],
+                    }
+                )
+        signatures[
+            (
+                relation["min_count"],
+                relation["max_count"],
+                relation["is_group"],
+                tuple(signature_members),
+            )
+        ].add(relation["army_id"])
+        if include_details:
+            details.append(
+                {
+                    "armyId": relation["army_id"],
+                    "armyName": army_names.get(relation["army_id"]),
+                    "relationId": relation["relation_id"],
+                    "minCount": relation["min_count"],
+                    "maxCount": relation["max_count"],
+                    "isGroup": bool(relation["is_group"]),
+                    "resolution": (
+                        "complete"
+                        if resolved
+                        else (
+                            "reviewed_stale_source_relation"
+                            if reviewed_stale_relation
+                            else "unresolved_source_endpoint"
+                        )
+                    ),
+                    "semanticFamily": semantic_family,
+                    "unresolvedSourceUnitIds": sorted(relation_unresolved_source_ids),
+                    "cardinalityKind": cardinality_kind,
+                    "crossLogicalSelectorDisposition": selector_disposition,
+                    "canonicalLogicalUnitIds": sorted(
+                        value
+                        for value in set(logical_ids + dependency_logical_ids)
+                        if value is not None
+                    ),
+                    "members": detail_members,
+                }
+            )
+
+    repeated_signatures = [armies for armies in signatures.values() if len(armies) > 1]
+    result: dict[str, Any] = {
+        "relationCount": len(relation_rows),
+        "memberCount": len(member_rows),
+        "dependencyCount": len(dependency_rows),
+        "fullyResolvedRelationCount": fully_resolved,
+        "canonicalUnresolvedRelationCount": unresolved_relations,
+        "reviewedStaleRelationCount": reviewed_stale_relations,
+        "unresolvedRelationCount": unreviewed_relations,
+        "singleLogicalEndpointSetRelationCount": single_logical,
+        "crossLogicalEndpointSetRelationCount": cross_logical,
+        "historicalEndpointReview": {
+            "declaredSourceUnitIds": sorted(historical_endpoints),
+            "referencedReviewedSourceUnitIds": sorted(reviewed_historical_source_ids),
+            "snapshotArchiveSha256": historical_snapshot_sha256,
+        },
+        "memberEndpointResolution": {
+            "resolvedCount": len(member_rows) - len(unresolved_member_rows),
+            "canonicalUnresolvedCount": len(unresolved_member_rows),
+            "reviewedHistoricalCount": len(reviewed_historical_member_rows),
+            "unresolvedCount": len(unreviewed_member_rows),
+            "canonicalUnresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unresolved_member_rows}
+            ),
+            "reviewedHistoricalSourceUnitIds": sorted(
+                {row["unit_id"] for row in reviewed_historical_member_rows}
+            ),
+            "unresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unreviewed_member_rows}
+            ),
+            "sourcePlaceholderRowCount": len(source_placeholder_member_rows),
+        },
+        "dependencyEndpointResolution": {
+            "resolvedCount": len(dependency_rows) - len(unresolved_dependency_rows),
+            "canonicalUnresolvedCount": len(unresolved_dependency_rows),
+            "reviewedHistoricalCount": len(reviewed_historical_dependency_rows),
+            "unresolvedCount": len(unreviewed_dependency_rows),
+            "canonicalUnresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unresolved_dependency_rows}
+            ),
+            "reviewedHistoricalSourceUnitIds": sorted(
+                {row["unit_id"] for row in reviewed_historical_dependency_rows}
+            ),
+            "unresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unreviewed_dependency_rows}
+            ),
+        },
+        "semanticClassification": {
+            "classifiedResolvedRelationCount": fully_resolved,
+            "reviewedStaleRelationCount": semantic_family_counts.get(
+                "reviewed-stale-source-relation", 0
+            ),
+            "unresolvedRelationCount": semantic_family_counts.get(
+                "unresolved-source-endpoint", 0
+            ),
+            "selectorFreeResolvedRelationCount": selector_free_resolved,
+            "selectorBearingResolvedRelationCount": selector_bearing_resolved,
+            "crossLogicalSelectorBearingRelationCount": cross_logical_selector_bearing,
+            "selectionEquivalentCrossLogicalSelectorRelationCount": (
+                selection_equivalent_cross_logical_selectors
+            ),
+            "sourceOnlyCrossLogicalSelectorRelationCount": source_only_cross_logical_selectors,
+            "familyCounts": dict(sorted(semantic_family_counts.items())),
+            "cardinalityKindCounts": dict(sorted(cardinality_kind_counts.items())),
+            "interpretation": (
+                "Resolved source relations separate into four application-semantic families: "
+                "same-logical cross-context exclusivity, cross-logical shared cardinality, "
+                "single-logical profile/dependency constraints, and single-logical cardinality "
+                "constraints. Selectors remain contextual fields on the relation/member rather "
+                "than facts on the logical Unit. Independently reviewed retired source endpoints "
+                "form a fifth historical/stale family and are not materialized as current Unit "
+                "constraints; unreviewed source endpoints remain explicitly unresolved. "
+                "Cross-logical profile selectors are materialization-safe only when every member "
+                "has one selectable profile group and the selector names a selectable profile in "
+                "that group; other "
+                "cross-logical selectors remain source-context-only."
+            ),
+        },
+        "profileSelectorCoordinateCandidates": {
+            "member": dict(sorted(member_selector_domain_counts.items())),
+            "dependency": dict(sorted(dependency_selector_domain_counts.items())),
+            "interpretation": (
+                "Army's source field is named profile, but its numeric values do not map to one "
+                "stable normalized coordinate domain. The audit therefore reports mechanical "
+                "matches against known profile-group, profile, and option IDs without choosing "
+                "one interpretation. These candidates are diagnostic only."
+            ),
+        },
+        "selectors": {
+            "memberProfileSelectorCount": sum(row["profile_id"] is not None for row in member_rows),
+            "memberPerParentCount": sum(row["per_parent"] is not None for row in member_rows),
+            "dependencyProfileSelectorCount": sum(
+                row["profile_id"] is not None for row in dependency_rows
+            ),
+            "dependencyGroupSelectorCount": sum(
+                row["group_id"] is not None for row in dependency_rows
+            ),
+            "dependencyMinCountCount": sum(
+                row["min_count"] is not None for row in dependency_rows
+            ),
+            "dependencyMinDependantCount": sum(
+                row["min_dependant"] is not None for row in dependency_rows
+            ),
+            "dependencyOptionsCount": sum(row["options"] is not None for row in dependency_rows),
+            "dependencyRawFallbackCount": sum(_raw_present(row["raw"]) for row in dependency_rows),
+        },
+        "shapeCounts": [
+            {
+                "minCount": key[0],
+                "maxCount": key[1],
+                "isGroup": bool(key[2]),
+                "memberCount": key[3],
+                "dependencyCount": key[4],
+                "relationCount": value,
+            }
+            for key, value in sorted(shape_counts.items(), key=lambda item: repr(item[0]))
+        ],
+        "canonicalSignatureCount": len(signatures),
+        "canonicalSignaturesRepeatedAcrossArmies": len(repeated_signatures),
+        "interpretation": (
+            "Relation rows are source-context selection/composition constraints. Canonicalizing "
+            "member Unit identities does not make a relation redundant: same-logical endpoint "
+            "sets can still constrain ordinary versus Reinforcement occurrences or profile-level "
+            "forms. The semantic-family classification is structural and preserves every source "
+            "selector; it does not promote profile/group/options/perParent/min/minDependant fields "
+            "to logical-Unit facts."
+        ),
+    }
+    if include_details:
+        result["relations"] = details
+    return result
+
+
+def _audit_reinforcement_sections(
+    connection: sqlite3.Connection, *, include_details: bool
+) -> dict[str, Any]:
+    army_rows = _fetch_rows(connection, "army_lists")
+    application_armies = {row["id"]: row for row in _fetch_rows(connection, "application_armies")}
+    source_to_application = {
+        row["source_army_id"]: row["application_army_id"]
+        for row in _fetch_rows(connection, "application_army_sources")
+    }
+    materialized = {
+        (row["reinforcement_army_id"], row["parent_army_id"])
+        for row in _fetch_rows(connection, "application_army_reinforcement_parents")
+    }
+    expected: set[tuple[int, int]] = set()
+    unresolved: list[dict[str, int]] = []
+    details: list[dict[str, Any]] = []
+    for row in army_rows:
+        reinforcement_source = row["reinforcement_id"]
+        if row["kind"] == "reinforcement" or reinforcement_source is None:
+            continue
+        parent_application = source_to_application.get(row["id"])
+        reinforcement_application = source_to_application.get(reinforcement_source)
+        if parent_application is None or reinforcement_application is None:
+            unresolved.append(
+                {"parentSourceArmyId": row["id"], "reinforcementSourceArmyId": reinforcement_source}
+            )
+            continue
+        edge = (reinforcement_application, parent_application)
+        expected.add(edge)
+        if include_details:
+            details.append(
+                {
+                    "parentSourceArmyId": row["id"],
+                    "parentApplicationArmyId": parent_application,
+                    "reinforcementSourceArmyId": reinforcement_source,
+                    "reinforcementApplicationArmyId": reinforcement_application,
+                    "materialized": edge in materialized,
+                }
+            )
+    missing = expected - materialized
+    unexpected = materialized - expected
+    reinforcement_apps = [
+        row for row in application_armies.values() if row["role"] == "reinforcement"
+    ]
+    role_mismatch = [
+        row["id"]
+        for row in reinforcement_apps
+        if not row["playable"]
+    ]
+    result: dict[str, Any] = {
+        "sourceReinforcementSectionCount": sum(row["kind"] == "reinforcement" for row in army_rows),
+        "applicationReinforcementSectionCount": len(reinforcement_apps),
+        "sourceParentLinkCount": sum(
+            row["kind"] != "reinforcement" and row["reinforcement_id"] is not None
+            for row in army_rows
+        ),
+        "expectedCanonicalParentLinkCount": len(expected),
+        "materializedCanonicalParentLinkCount": len(materialized),
+        "missingCanonicalParentLinkCount": len(missing),
+        "unexpectedCanonicalParentLinkCount": len(unexpected),
+        "unresolvedSourceMappingCount": len(unresolved),
+        "nonSelectableReinforcementApplicationCount": len(role_mismatch),
+        "interpretation": (
+            "Application role=reinforcement represents a selectable Reinforcement Section/pool "
+            "attached to one or more ordinary Army contexts, not an independently legal Army "
+            "List. Source list/profile/AVA occurrences remain contextual evidence."
+        ),
+    }
+    if include_details:
+        result["parentLinks"] = details
+        result["missingCanonicalParentLinks"] = [
+            {"reinforcementArmyId": edge[0], "parentArmyId": edge[1]}
+            for edge in sorted(missing)
+        ]
+        result["unexpectedCanonicalParentLinks"] = [
+            {"reinforcementArmyId": edge[0], "parentArmyId": edge[1]}
+            for edge in sorted(unexpected)
+        ]
+        result["unresolvedSourceMappings"] = unresolved
+    return result
+
+
+def audit_database(
+    path: Path,
+    *,
+    include_details: bool = False,
+    historical_relation_endpoints_path: Path = DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
+) -> dict[str, Any]:
     if not path.is_file():
         raise RelationshipSemanticsAuditError(f"Database does not exist: {path}")
+    historical_endpoints, historical_snapshot_sha256 = (
+        _load_historical_relation_endpoints(historical_relation_endpoints_path)
+    )
     connection = sqlite3.connect(path)
     connection.row_factory = sqlite3.Row
     try:
         _validate_schema(connection)
         targets = _payload_targets(connection)
         source_logical = _source_logical_units(connection)
+        profile_rows = _fetch_rows(connection, "profile_includes")
+        loadout_rows = _fetch_rows(connection, "option_includes")
+        profile_parents = _profile_payload_parents(connection)
+        loadout_parents = _loadout_payload_parents(connection)
         includes = {
             "profile": _audit_contextual_includes(
-                _fetch_rows(connection, "profile_includes"),
+                profile_rows,
+                parent_id_field="profile_id",
                 targets=targets,
                 source_logical=source_logical,
                 include_details=include_details,
             ),
             "loadout": _audit_contextual_includes(
-                _fetch_rows(connection, "option_includes"),
+                loadout_rows,
+                parent_id_field="option_id",
                 targets=targets,
                 source_logical=source_logical,
                 include_details=include_details,
@@ -427,6 +1472,20 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
                 include_details=include_details,
             ),
         }
+        includes["profile"]["parentPayloadInvariance"] = _audit_parent_payload_invariance(
+            profile_rows,
+            parent_payloads=profile_parents,
+            parent_id_field="profile_id",
+            targets=targets,
+            include_details=include_details,
+        )
+        includes["loadout"]["parentPayloadInvariance"] = _audit_parent_payload_invariance(
+            loadout_rows,
+            parent_payloads=loadout_parents,
+            parent_id_field="option_id",
+            targets=targets,
+            include_details=include_details,
+        )
         metadata = _metadata(connection)
         return {
             "format": REPORT_FORMAT,
@@ -440,6 +1499,17 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
             },
             "includes": includes,
             "peripherals": _audit_peripherals(connection, include_details=include_details),
+            "relations": _audit_relation_structures(
+                connection,
+                source_logical=source_logical,
+                historical_endpoints=historical_endpoints,
+                historical_snapshot_sha256=historical_snapshot_sha256,
+                database_snapshot_sha256=metadata.get("snapshotArchiveSha256"),
+                include_details=include_details,
+            ),
+            "reinforcementSections": _audit_reinforcement_sections(
+                connection, include_details=include_details
+            ),
         }
     except sqlite3.Error as exc:
         raise RelationshipSemanticsAuditError(f"Could not audit {path}: {exc}") from exc
@@ -449,18 +1519,31 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Audit deferred include/peripheral relationship semantics."
+        description=(
+            "Audit deferred relationship semantics, including canonical include-target resolution, "
+            "relation/dependency endpoint resolution, and Reinforcement-section context."
+        )
     )
     parser.add_argument("database", type=Path, help="Path to infinity.db")
     parser.add_argument("--details", action="store_true", help="Include row-level evidence")
     parser.add_argument("--output", type=Path, help="Write the JSON report to this path")
+    parser.add_argument(
+        "--historical-relation-endpoints",
+        type=Path,
+        default=DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
+        help="Reviewed relation-only historical Unit endpoint evidence",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        report = audit_database(args.database, include_details=args.details)
+        report = audit_database(
+            args.database,
+            include_details=args.details,
+            historical_relation_endpoints_path=args.historical_relation_endpoints,
+        )
     except RelationshipSemanticsAuditError as exc:
         raise SystemExit(str(exc)) from exc
     payload = json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n"

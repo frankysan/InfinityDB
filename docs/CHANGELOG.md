@@ -5,6 +5,57 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+_No unreleased changes._
+
+## [0.6.3] - 2026-09-22
+
+### Added
+
+- Add reviewed N5.3 rules records for Doctor, Engineer, Cyberplug, Peripheral, and
+  all five Peripheral types, including validated controller-eligibility and
+  Connected/Autonomous profile-mode facts.
+- Add canonical Peripheral identity and relationship data across both embedded and
+  ordinary Unit-backed source mechanisms. InfinityDB now preserves reviewed subtype
+  identity, canonical attachments, standalone Unit-backed Peripheral identity, and
+  Cyberplug Controller access pools without inventing unsupported ownership links.
+- Materialize occurrence-scoped Profile, Loadout, and top-level Unit-option include
+  relationships, plus 96 selection-safe Unit constraints and 14 deterministic
+  same-Unit profile-group dependency relationships. Selector-ambiguous source rows
+  remain explicit source/context data rather than being guessed into canonical rules.
+- Add deterministic semantic audits for relationships, Fireteams, normalization-only
+  link storage, application/raw database separation, and source-to-presentation
+  completeness. The maintained Army completeness inventory covers all 70 normalized
+  source tables / 441 fields and fails closed when a new source construct has not been
+  classified.
+
+### Changed
+
+- Physically separate generated Army storage: `infinity.db` now publishes only the
+  self-contained application schema, while `infinity.raw.db` owns the complete
+  queryable normalized source schema plus exact lossless row JSON. Full
+  source-to-canonical checks run against a temporary relational staging database
+  before publication, and runtime validation no longer depends on raw-only tables.
+  On the reviewed production snapshot the application database decreased from
+  18,108,416 bytes (17.27 MiB) to 8,138,752 bytes (7.76 MiB), a 55.06% reduction.
+- Speed up development validation by reusing a template web-test database and running
+  pytest through `pytest-xdist` by default. The primary local Windows benchmark dropped
+  the complete 687-test stage from 59.67 seconds serially to 14.13 seconds with
+  automatic worker selection.
+- Tune hosted source CI independently from the local default: Ubuntu/Python 3.11 remains
+  the full tests/lint/type/build/rules gate, compatibility matrix legs retain runtime/
+  data checks, and hosted Windows runs pytest serially. The measured workflow recovered
+  from 11:36 to 1:25 after this change.
+- Consolidate completed one-off design/audit documents into maintained architecture,
+  data-model, rules-semantics, rules-research, backlog, and changelog references, and
+  define the public roadmap direction through 1.0.
+
+### Upgrade notes
+
+- Rebuild generated Army databases before deploying 0.6.3. Schema 23 / compatibility
+  revision 31 introduces the physical application/raw database split while retaining
+  materialized include/Peripheral relationships, selection-safe Unit constraints, and
+  reviewed profile-group dependencies; there is no in-place database migration.
+
 ## [0.6.2] - 2026-09-21
 
 ### Added

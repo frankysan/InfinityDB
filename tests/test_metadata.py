@@ -11,7 +11,7 @@ import pytest
 from infinity_army_data.metadata import MetadataError, decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.cli import main
-from infinity_db.database import Database, export_database
+from infinity_db.database import Database, export_database, raw_database_path
 
 
 def metadata_source() -> dict:
@@ -197,8 +197,12 @@ def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> No
         }
     ]
     with sqlite3.connect(path) as connection:
-        assert connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
         assert connection.execute("SELECT COUNT(*) FROM metadata_weapons").fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'metadata_factions'"
+        ).fetchone() is None
+    with sqlite3.connect(raw_database_path(path)) as raw_connection:
+        assert raw_connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
 
 
 def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Path) -> None:
@@ -442,7 +446,8 @@ def test_build_discovers_required_sidecar_metadata(
     assert "Skipped non-Army JSON files: metadata.json" not in capsys.readouterr().err
     with sqlite3.connect(output / "infinity.db") as connection:
         assert connection.execute("SELECT name FROM army_lists").fetchone()[0] == "Official First"
-        assert connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
+    with sqlite3.connect(output / "infinity.raw.db") as raw_connection:
+        assert raw_connection.execute("SELECT COUNT(*) FROM metadata_factions").fetchone()[0] == 2
 
 
 def test_build_rejects_a_source_without_metadata(tmp_path: Path) -> None:

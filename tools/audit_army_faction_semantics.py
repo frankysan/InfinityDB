@@ -10,12 +10,13 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.application_armies import derive_application_armies
+from infinity_db.database.paths import raw_database_path
 from infinity_db.database.repository import Database, identity_config_from_connection
 
 FORMAT = "InfinityDB army/faction semantic audit"
 FORMAT_VERSION = 2
 
-REQUIRED_FIELDS: dict[str, set[str]] = {
+SOURCE_REQUIRED_FIELDS: dict[str, set[str]] = {
     "factions": {
         "id",
         "has_army_list",
@@ -27,6 +28,9 @@ REQUIRED_FIELDS: dict[str, set[str]] = {
     "army_units": {"army_id", "unit_id", "availability_kind"},
     "unit_factions": {"unit_id", "faction_id"},
     "units": {"id", "canonical_faction_id", "source_defined", "source_role"},
+}
+
+APPLICATION_REQUIRED_FIELDS: dict[str, set[str]] = {
     "application_armies": {
         "id",
         "name",
@@ -184,8 +188,10 @@ def _connect(path: Path) -> sqlite3.Connection:
     return connection
 
 
-def _check_schema(connection: sqlite3.Connection) -> None:
-    for table, required in REQUIRED_FIELDS.items():
+def _check_schema(
+    connection: sqlite3.Connection, required_fields: dict[str, set[str]]
+) -> None:
+    for table, required in required_fields.items():
         columns = {row["name"] for row in connection.execute(f"PRAGMA table_info({table})")}
         missing = required - columns
         if missing:
@@ -201,22 +207,37 @@ def _rows(connection: sqlite3.Connection, table: str) -> list[dict[str, Any]]:
 def audit_database(path: Path) -> dict[str, Any]:
     """Return a deterministic semantic report for the current Army/faction boundary."""
     path = Path(path)
+    source_path = raw_database_path(path)
     Database(path).validate()
-    with _connect(path) as connection:
-        _check_schema(connection)
-        identity_config = identity_config_from_connection(connection)
-        army_lists = {row["id"]: row for row in _rows(connection, "army_lists")}
-        metadata = {row["id"]: row for row in _rows(connection, "metadata_factions")}
-        faction_rows = _rows(connection, "factions")
-        army_units = _rows(connection, "army_units")
-        unit_factions = _rows(connection, "unit_factions")
-        units = [row for row in _rows(connection, "units") if row["source_defined"] == 1]
-        materialized_armies = _rows(connection, "application_armies")
-        materialized_sources = _rows(connection, "application_army_sources")
-        materialized_reinforcement_parents = _rows(
-            connection, "application_army_reinforcement_parents"
+    if not source_path.is_file():
+        raise ArmyFactionAuditError(f"Raw source sibling does not exist: {source_path}")
+
+    with _connect(source_path) as source_connection:
+        _check_schema(source_connection, SOURCE_REQUIRED_FIELDS)
+        identity_config = identity_config_from_connection(source_connection)
+        army_lists = {row["id"]: row for row in _rows(source_connection, "army_lists")}
+        metadata = {
+            row["id"]: row for row in _rows(source_connection, "metadata_factions")
+        }
+        faction_rows = _rows(source_connection, "factions")
+        army_units = _rows(source_connection, "army_units")
+        unit_factions = _rows(source_connection, "unit_factions")
+        units = [
+            row
+            for row in _rows(source_connection, "units")
+            if row["source_defined"] == 1
+        ]
+        source_derived_model = derive_application_armies(
+            source_connection, identity_config
         )
-        source_derived_model = derive_application_armies(connection, identity_config)
+
+    with _connect(path) as application_connection:
+        _check_schema(application_connection, APPLICATION_REQUIRED_FIELDS)
+        materialized_armies = _rows(application_connection, "application_armies")
+        materialized_sources = _rows(application_connection, "application_army_sources")
+        materialized_reinforcement_parents = _rows(
+            application_connection, "application_army_reinforcement_parents"
+        )
 
     army_ids = set(army_lists)
     metadata_ids = set(metadata)

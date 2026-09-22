@@ -17,6 +17,11 @@ from .curated import load_curated_directory, load_curated_document
 from .database import export_database, raw_database_path
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
+from .peripheral_identities import (
+    load_peripheral_identity_curated,
+    peripheral_identity_source_for_snapshot,
+)
+from .peripheral_identity_coverage import audit_peripheral_identity_coverage
 from .rules_database import export_rules_database
 from .source_anomalies import (
     load_source_anomaly_baseline,
@@ -27,6 +32,7 @@ from .source_anomalies import (
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
+DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
 
 def _validate_source_anomaly_baseline(source: Path) -> None:
@@ -47,7 +53,18 @@ def _validate_source_anomaly_baseline(source: Path) -> None:
 def _export(source: Path, destination: Path) -> None:
     with source.open(encoding="utf-8") as handle:
         normalized = json.load(handle)
-    export_database(normalized, destination)
+    peripheral_identities = load_peripheral_identity_curated()
+    normalized_meta = normalized.get("_meta")
+    snapshot_sha256 = (
+        normalized_meta.get("snapshotArchiveSha256")
+        if isinstance(normalized_meta, dict)
+        else None
+    )
+    if peripheral_identity_source_for_snapshot(peripheral_identities, snapshot_sha256) is None:
+        peripheral_identities = None
+    export_database(
+        normalized, destination, peripheral_identities=peripheral_identities
+    )
     print(f"Database ready: {destination}")
     print(f"Raw archive ready: {raw_database_path(destination)}")
 
@@ -121,6 +138,73 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
+    curated = load_peripheral_identity_curated(args.input)
+    print(f"Validated Peripheral identity contract: {args.input}")
+    print(
+        f"Entities: {curated.entity_count}; profiles: {curated.profile_count}; "
+        f"embedded mappings: {curated.mapping_count}; "
+        f"unit mappings: {curated.unit_mapping_count}; "
+        f"controller access: {curated.controller_access_count}"
+    )
+    if args.database is None:
+        if args.output is not None:
+            raise ValueError("--output requires --database")
+        return 0
+
+    report = audit_peripheral_identity_coverage(
+        curated,
+        args.database,
+        include_details=True,
+        rules_documents=load_curated_directory(DEFAULT_CURATED_RULES),
+    )
+    definitions = report["definitions"]
+    validation = report["validation"]
+    print(
+        "Peripheral identity coverage: "
+        f"{definitions['mappedDefinitionCount']}/{definitions['definitionCount']} "
+        f"mapped ({definitions['coveragePercent']}%); "
+        f"{definitions['unmappedReviewGroupCount']} review groups"
+    )
+    unit_backed = report["unitBackedIdentities"]
+    print(
+        "Unit-backed Peripheral identity coverage: "
+        f"{unit_backed['mappedSourceUnitCount']}/{unit_backed['sourceUnitCount']} "
+        f"mapped ({unit_backed['coveragePercent']}%); "
+        f"{unit_backed['logicalUnitCount']} logical Units"
+    )
+    controller_access = report["controllerAccess"]
+    print(
+        "Peripheral controller access coverage: "
+        f"{controller_access['mappedControllerOccurrenceCount']}/"
+        f"{controller_access['sourceControllerOccurrenceCount']} mapped; "
+        f"{controller_access['eligibleEdgeCount']} canonical access edges"
+    )
+    controller_graph = report["controllerGraph"]
+    if controller_graph["status"] == "available":
+        print(
+            "Peripheral controller evidence: "
+            f"{controller_graph['attachmentCount']} attachments across "
+            f"{controller_graph['controllerCount']} controller occurrences; "
+            f"{len(controller_graph['evaluableTypeIds'])} rule-backed type predicates"
+        )
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
+        print(f"Coverage report: {args.output}")
+    if validation["status"] != "valid":
+        print(
+            "ERROR: Peripheral identity mappings do not match the selected Army snapshot "
+            f"({validation['staleMappingCount']} stale; "
+            f"{validation['sourceNameDriftCount']} name drift).",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
 def _port(value: str) -> int:
     port = int(value)
     if not 1 <= port <= 65535:
@@ -169,6 +253,25 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
     p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
     p_rules.set_defaults(func=cmd_build_rules)
+
+    p_peripherals = sub.add_parser(
+        "validate-peripheral-identities",
+        help="Validate reviewed Army-Peripheral identity mappings",
+    )
+    p_peripherals.add_argument(
+        "input", nargs="?", type=Path, default=DEFAULT_PERIPHERAL_IDENTITIES
+    )
+    p_peripherals.add_argument(
+        "--database",
+        type=Path,
+        help="Compare mappings with an exact Army database snapshot and report coverage",
+    )
+    p_peripherals.add_argument(
+        "--output",
+        type=Path,
+        help="Write the detailed snapshot coverage/review queue as JSON",
+    )
+    p_peripherals.set_defaults(func=cmd_validate_peripheral_identities)
     return parser
 
 

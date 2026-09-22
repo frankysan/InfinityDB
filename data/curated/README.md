@@ -7,16 +7,18 @@ provenance under `data/manifests/`.
 
 ## Current curated data
 
-`rules/` contains validated rules-reference collections consumed by
-`infinity-db build-rules`. `identities/` contains reviewed source-derived
-presentation relationships consumed during Army normalization. These categories
-have separate schemas and loaders; neither loader treats arbitrary JSON from the
-other curated categories as valid input. Curated identifiers are stable
-project/domain identities. `armyLinks` are cross-domain references rather than curated
-record identities: Skill, Equipment, and Weapon links may use either a positive numeric
-source ID or the owning application-domain slug, with slugs preferred in maintained
-rules data. Numeric references remain valid for compatibility, provenance, and explicit
-disambiguation.
+- `rules/` contains validated rules-reference collections consumed by `infinity-db build-rules`.
+- `identities/` contains reviewed source-derived presentation relationships consumed
+  during Army normalization.
+- `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
+- `relationships/` contains snapshot-bound review evidence for source relationship
+  endpoints that cannot be resolved from the current Army snapshot alone. These categories
+  have separate schemas and loaders; no loader treats arbitrary JSON from another
+  curated category as valid input. Curated identifiers are stable project/domain identities.
+- `armyLinks` are cross-domain references rather than curated record identities: Skill,
+  Equipment, and Weapon links may use either a positive numeric source ID or the owning
+  application-domain slug, with slugs preferred in maintained rules data. Numeric references
+  remain valid for compatibility, provenance, and explicit disambiguation.
 
 The sections below document the implemented `curated/rules/` contract.
 
@@ -28,6 +30,76 @@ notes associated with immutable snapshots by SHA-256. Those notes remain
 separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
+
+### Curated Peripheral identities
+
+`peripherals/army-identities.json` is the reviewed boundary between Army Peripheral
+source encodings and canonical application identity. The contract is deliberately separate
+from both rules records and the display-identity contract. It pins the Army snapshot used as
+evidence and supports two source mechanisms:
+
+- embedded `peripherals` rows resolve through reviewed `peripheral:<slug>` entities, optional
+  `peripheral-profile:<slug>` profiles, and `peripheral-mapping:<slug>` mappings keyed by
+  `(sourceId, armyId, peripheralId)`;
+- standalone Unit-backed Peripherals resolve through `peripheral-unit-mapping:<slug>` records
+  keyed by source-global Unit ID and reuse the existing `logical_units` identity instead of
+  creating duplicate `peripheral:*` entities;
+- reviewed Controller access pools resolve through
+  `peripheral-controller-access:<slug>` records keyed to an exact source Controller
+  profile/loadout occurrence and point to canonical logical Unit IDs. `access-pool` means
+  eligibility/selection, not fixed ownership of one Peripheral by one Controller.
+
+Canonical entities may reference one of the five curated N5.3 Peripheral-type rule
+IDs once type classification is independently reviewed. `typeId` is intentionally optional so
+source identity can be established before the rules type is known; when present it must be one
+of those five IDs. Profiles may declare only the reviewed `connected` or `autonomous` Cyberplug
+modes. Every accepted source mapping requires review date and reason, and an optional
+profile must belong to the mapped entity. Unit-backed mappings additionally pin the expected
+logical Unit and reviewed Peripheral type so source-name, logical-identity, or subtype drift
+fails closed. Controller access additionally pins source occurrence name, reviewed Peripheral
+type, and the complete canonical target pool so source/controller/target drift fails closed.
+Unknown fields fail closed; notably `mercs` is not accepted as identity data. The checked-in
+current-snapshot contract contains 56 embedded entities, 279 embedded mappings, 17 Unit-backed
+source mappings resolving to 10 logical Units, and four reviewed Cyberplug Controller access
+pools targeting two canonical logical Units.
+
+Validate the authored contract with:
+
+```powershell
+infinity-db validate-peripheral-identities
+```
+
+During mapping review, validate it against the exact generated Army snapshot and write the
+deterministic coverage/review queue with:
+
+```powershell
+infinity-db validate-peripheral-identities --database data/generated/infinity.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
+```
+
+The snapshot-bound pass requires the database SHA-256 provenance to match exactly one
+declared curated source. Incomplete mapping coverage is reported as review work rather than
+a validation failure; stale coordinates or exact source-name drift are invalid. Candidate
+name normalization (Unicode NFC, collapsed whitespace, and case-folding) is used only to
+group the review queue and never creates identity automatically.
+
+The current reviewed identity/access contract is complete for the pinned snapshot. The next
+Milestone 2B step is to materialize these curated-derived relationships into the application
+database/API without collapsing their source-context provenance.
+
+### Reviewed historical relation endpoints
+
+`relationships/historical-unit-endpoints.json` records independent historical evidence for
+relation-referenced Army Unit IDs that are placeholders in the current snapshot. It is an audit
+review contract, not a logical-Unit alias file and not a runtime application input. The current
+contract identifies retired Unit IDs 165, 613, 749, 1503, and 1509 and pins the review to the
+2026-09-18 Army snapshot SHA-256.
+
+`tools/audit_relationship_semantics.py` uses the file only when one of those IDs is referenced by
+a relation. Before classifying the relation as `reviewed-stale-source-relation`, the audit verifies
+that the pinned snapshot matches and that the endpoint remains a source placeholder with no
+logical-Unit mapping, Army roster row, profile, loadout, or payload occurrence. Any drift fails
+closed for renewed review. Historical names provide provenance for the stale endpoint; they never
+imply equivalence with a current Unit or cause a current application constraint to be materialized.
 
 ### Curated display identities
 
@@ -181,6 +253,21 @@ needs display behavior that Army source data does not encode. The current schema
 supports `{"kind": "distance", "positiveSign": "preserve|omit|force"}`. This
 field does not decide whether an Army extra is a distance: imported
 `extras.type == "DISTANCE"` remains authoritative for that source semantic.
+
+Skill records always carry a `labelIds` array, but it may be empty when the reviewed
+rule does not assign any maintained rules Label. States still require at least one
+Label. Do not invent a Label merely to satisfy serialization.
+
+Peripheral types remain ordinary `rule` records in this same collection. A Peripheral
+type uses `facts.category = "peripheral-type"` and a validated
+`controllerEligibility` object. The supported first-phase grammar is an explicit
+`{"status": "not-stated"}`, one `{"hasSkill": "skill:<id>"}` predicate, or an
+`{"anyOf": [...]}` list containing two or more `hasSkill` predicates. Optional
+structured facts currently cover positive `maxPerController`, reviewed
+`operatingDistance: "unlimited"`, and the Cyberplug `connected` / `autonomous`
+profile modes. Eligibility references must resolve to Skill records in the same
+collection. These facts describe rules semantics only; they do not map Army-local
+Peripheral definitions to canonical Peripheral entities.
 
 Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
 parameter value is part of the Army text, for example `Disposable (2)` mapping

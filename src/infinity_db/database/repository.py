@@ -39,16 +39,23 @@ from infinity_db.identities import (
 from .application_armies import (
     ARMY_ROLE_REINFORCEMENT,
     validate_application_armies,
+    validate_application_army_integrity,
 )
 from .application_catalogs import validate_application_catalogs
 from .application_domain_slugs import validate_application_domain_slugs
+from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
+from .peripheral_relationships import validate_peripheral_relationships
+from .publication import PUBLISHED_CONTENT_SHA256_KEY, published_content_sha256
+from .relation_constraints import validate_relation_constraints
+from .relation_group_dependencies import validate_relation_group_dependencies
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
     DATABASE_COMPATIBILITY_VERSION,
     DATABASE_TABLES,
     METADATA_TABLE,
+    PUBLISHED_DATABASE_TABLES,
     SCHEMA_VERSION,
     quote,
 )
@@ -803,14 +810,23 @@ class Database:
                 identities[source_id] = identity
         return identities
 
-    def validate(self) -> None:
-        """Reject missing, unrelated, unsupported, incomplete, or corrupt databases."""
+    def validate(self, *, source_consistency: bool = False) -> None:
+        """Reject missing, unrelated, unsupported, incomplete, or corrupt databases.
+
+        Normal runtime validation uses only the self-contained published application
+        schema. Export staging additionally enables ``source_consistency`` so every
+        canonical/materialized layer is cross-checked against the full normalized
+        relational source before publication.
+        """
         with self._connect() as connection:
             application_id = connection.execute("PRAGMA application_id").fetchone()[0]
             version = connection.execute("PRAGMA user_version").fetchone()[0]
             if application_id != APPLICATION_ID or version != SCHEMA_VERSION:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
-            for name, definition in DATABASE_TABLES.items():
+            required_tables = (
+                DATABASE_TABLES if source_consistency else PUBLISHED_DATABASE_TABLES
+            )
+            for name, definition in required_tables.items():
                 columns = {
                     row["name"] for row in connection.execute(f"PRAGMA table_info({quote(name)})")
                 }
@@ -845,7 +861,9 @@ class Database:
                     "rebuild the database"
                 )
             identity_config = identity_config_from_connection(connection)
-            validate_application_armies(connection, identity_config)
+            validate_application_army_integrity(connection)
+            if source_consistency:
+                validate_application_armies(connection, identity_config)
             validate_application_catalogs(connection, identity_config)
             validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(
@@ -883,9 +901,6 @@ class Database:
                 )
             _validate_logical_unit_payloads(connection)
 
-            source_profile_count = connection.execute(
-                "SELECT COUNT(*) FROM profiles"
-            ).fetchone()[0]
             profile_occurrence_count = connection.execute(
                 "SELECT COUNT(*) FROM profile_payload_occurrences"
             ).fetchone()[0]
@@ -903,31 +918,37 @@ class Database:
                 "JOIN logical_unit_sources AS lus ON lus.source_unit_id = ppo.unit_id "
                 "WHERE pp.logical_unit_id != lus.logical_unit_id LIMIT 1"
             ).fetchone()
-            invalid_profile_context = connection.execute(
-                "SELECT 1 FROM profile_payload_occurrences AS ppo "
-                "JOIN profiles AS p "
-                "ON p.army_id = ppo.army_id "
-                "AND p.unit_id = ppo.unit_id "
-                "AND p.group_id = ppo.group_id "
-                "AND p.profile_id = ppo.profile_id "
-                "WHERE NOT (ppo.position IS p.position) "
-                "OR NOT (ppo.ava IS p.ava) "
-                "OR NOT (ppo.logo IS p.logo) LIMIT 1"
-            ).fetchone()
+            invalid_profile_source = None
+            if source_consistency:
+                source_profile_count = connection.execute(
+                    "SELECT COUNT(*) FROM profiles"
+                ).fetchone()[0]
+                invalid_profile_context = connection.execute(
+                    "SELECT 1 FROM profile_payload_occurrences AS ppo "
+                    "JOIN profiles AS p "
+                    "ON p.army_id = ppo.army_id "
+                    "AND p.unit_id = ppo.unit_id "
+                    "AND p.group_id = ppo.group_id "
+                    "AND p.profile_id = ppo.profile_id "
+                    "WHERE NOT (ppo.position IS p.position) "
+                    "OR NOT (ppo.ava IS p.ava) "
+                    "OR NOT (ppo.logo IS p.logo) LIMIT 1"
+                ).fetchone()
+                if source_profile_count != profile_occurrence_count:
+                    invalid_profile_source = True
+            else:
+                invalid_profile_context = None
             if (
-                source_profile_count != profile_occurrence_count
-                or unsupported_payload is not None
+                unsupported_payload is not None
                 or invalid_profile_logical_unit is not None
                 or invalid_profile_context is not None
+                or invalid_profile_source is not None
             ):
                 raise ValueError(
                     "Database has invalid materialized canonical profile payloads; "
                     "rebuild the database"
                 )
 
-            source_loadout_count = connection.execute(
-                "SELECT COUNT(*) FROM loadout_options"
-            ).fetchone()[0]
             loadout_occurrence_count = connection.execute(
                 "SELECT COUNT(*) FROM loadout_payload_occurrences"
             ).fetchone()[0]
@@ -945,25 +966,60 @@ class Database:
                 "JOIN logical_unit_sources AS lus ON lus.source_unit_id = lpo.unit_id "
                 "WHERE lp.logical_unit_id != lus.logical_unit_id LIMIT 1"
             ).fetchone()
-            invalid_loadout_context = connection.execute(
-                "SELECT 1 FROM loadout_payload_occurrences AS lpo "
-                "JOIN loadout_options AS o "
-                "ON o.army_id = lpo.army_id "
-                "AND o.unit_id = lpo.unit_id "
-                "AND o.group_id = lpo.group_id "
-                "AND o.option_id = lpo.option_id "
-                "WHERE NOT (lpo.position IS o.position) "
-                "OR NOT (lpo.points IS o.points) "
-                "OR NOT (lpo.swc IS o.swc) LIMIT 1"
-            ).fetchone()
+            invalid_loadout_source = None
+            if source_consistency:
+                source_loadout_count = connection.execute(
+                    "SELECT COUNT(*) FROM loadout_options"
+                ).fetchone()[0]
+                invalid_loadout_context = connection.execute(
+                    "SELECT 1 FROM loadout_payload_occurrences AS lpo "
+                    "JOIN loadout_options AS o "
+                    "ON o.army_id = lpo.army_id "
+                    "AND o.unit_id = lpo.unit_id "
+                    "AND o.group_id = lpo.group_id "
+                    "AND o.option_id = lpo.option_id "
+                    "WHERE NOT (lpo.position IS o.position) "
+                    "OR NOT (lpo.points IS o.points) "
+                    "OR NOT (lpo.swc IS o.swc) LIMIT 1"
+                ).fetchone()
+                if source_loadout_count != loadout_occurrence_count:
+                    invalid_loadout_source = True
+            else:
+                invalid_loadout_context = None
             if (
-                source_loadout_count != loadout_occurrence_count
-                or unsupported_loadout_payload is not None
+                unsupported_loadout_payload is not None
                 or invalid_loadout_logical_unit is not None
                 or invalid_loadout_context is not None
+                or invalid_loadout_source is not None
             ):
                 raise ValueError(
                     "Database has invalid materialized canonical loadout payloads; "
+                    "rebuild the database"
+                )
+
+            if source_consistency:
+                validate_include_relationships(connection)
+                validate_peripheral_relationships(connection)
+                validate_relation_constraints(connection)
+                validate_relation_group_dependencies(connection)
+
+            checksum_row = connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                (PUBLISHED_CONTENT_SHA256_KEY,),
+            ).fetchone()
+            try:
+                expected_checksum = json.loads(checksum_row["value"]) if checksum_row else None
+            except (json.JSONDecodeError, TypeError) as exc:
+                raise ValueError(
+                    "Database has invalid published content checksum metadata"
+                ) from exc
+            if (
+                not isinstance(expected_checksum, str)
+                or len(expected_checksum) != 64
+                or published_content_sha256(connection) != expected_checksum
+            ):
+                raise ValueError(
+                    "Database published application content does not match its validated checksum; "
                     "rebuild the database"
                 )
 
@@ -2237,6 +2293,40 @@ class Database:
                 profile_item = merged_profiles.get(profile_key) if profile_key is not None else None
                 if profile_item is not None:
                     profile_item["characteristics"].append({"name": characteristic["name"]})
+            profile_peripheral_rows = connection.execute(
+                "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, "
+                "a.entity_id, e.name, e.type_id, p.quantity "
+                "FROM profile_peripherals AS p "
+                "JOIN application_peripheral_sources AS a "
+                "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
+                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                f"WHERE p.unit_id IN ({placeholders}) "
+                "ORDER BY p.army_id, p.group_id, p.profile_id, p.position, p.unit_id",
+                source_ids,
+            )
+            for peripheral in profile_peripheral_rows:
+                profile_key = profile_merge_keys_by_source.get(
+                    (
+                        peripheral["unit_id"],
+                        peripheral["army_id"],
+                        peripheral["group_id"],
+                        peripheral["profile_id"],
+                    )
+                )
+                profile_item = (
+                    merged_profiles.get(profile_key) if profile_key is not None else None
+                )
+                if profile_item is not None:
+                    append_unique_item(
+                        profile_item.setdefault("peripherals", []),
+                        {
+                            "id": peripheral["entity_id"],
+                            "name": peripheral["name"],
+                            "type_id": peripheral["type_id"],
+                            "quantity": peripheral["quantity"],
+                        },
+                    )
+
             loadout_rows = connection.execute(
                 "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, lp.name, "
                 "lpo.points, lpo.swc, lp.minis, lp.disabled "
@@ -2398,11 +2488,212 @@ class Database:
                                 "extras": extras_by_occurrence.get(occurrence_key, []),
                             },
                         )
+            loadout_peripheral_rows = connection.execute(
+                "SELECT p.unit_id, p.army_id, p.group_id, p.option_id, "
+                "a.entity_id, e.name, e.type_id, p.quantity "
+                "FROM option_peripherals AS p "
+                "JOIN application_peripheral_sources AS a "
+                "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
+                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                f"WHERE p.unit_id IN ({placeholders}) "
+                "ORDER BY p.army_id, p.group_id, p.option_id, p.position, p.unit_id",
+                source_ids,
+            )
+            for peripheral in loadout_peripheral_rows:
+                loadout_key = loadout_keys_by_source.get(
+                    (
+                        peripheral["unit_id"],
+                        peripheral["army_id"],
+                        peripheral["group_id"],
+                        peripheral["option_id"],
+                    )
+                )
+                loadout_item = (
+                    loadout_items.get(loadout_key) if loadout_key is not None else None
+                )
+                if loadout_item is not None:
+                    append_unique_item(
+                        loadout_item.setdefault("peripherals", []),
+                        {
+                            "id": peripheral["entity_id"],
+                            "name": peripheral["name"],
+                            "type_id": peripheral["type_id"],
+                            "quantity": peripheral["quantity"],
+                        },
+                    )
+
+            access_rows = connection.execute(
+                "SELECT a.id, a.controller_kind, a.army_id, a.unit_id, a.group_id, "
+                "a.parent_id, a.type_id, a.relationship, t.target_logical_unit_id, "
+                "lu.name AS target_name, ds.slug AS target_slug "
+                "FROM application_peripheral_controller_access AS a "
+                "JOIN application_peripheral_controller_targets AS t ON t.access_id = a.id "
+                "JOIN logical_units AS lu ON lu.id = t.target_logical_unit_id "
+                "LEFT JOIN application_domain_slugs AS ds "
+                "ON ds.domain = 'units' AND ds.application_id = t.target_logical_unit_id "
+                f"WHERE a.unit_id IN ({placeholders}) "
+                "ORDER BY a.army_id, a.unit_id, a.group_id, a.parent_id, "
+                "a.id, t.target_logical_unit_id",
+                source_ids,
+            )
+            access_items: dict[str, dict[str, Any]] = {}
+            for access in access_rows:
+                access_item = access_items.get(access["id"])
+                if access_item is None:
+                    access_item = {
+                        "id": access["id"],
+                        "type_id": access["type_id"],
+                        "relationship": access["relationship"],
+                        "targets": [],
+                    }
+                    access_items[access["id"]] = access_item
+                    source_key = (
+                        access["unit_id"],
+                        access["army_id"],
+                        access["group_id"],
+                        access["parent_id"],
+                    )
+                    if access["controller_kind"] == "profile":
+                        merge_key = profile_merge_keys_by_source.get(source_key)
+                        parent_item = (
+                            merged_profiles.get(merge_key) if merge_key is not None else None
+                        )
+                    else:
+                        merge_key = loadout_keys_by_source.get(source_key)
+                        parent_item = (
+                            loadout_items.get(merge_key) if merge_key is not None else None
+                        )
+                    if parent_item is not None:
+                        parent_item.setdefault("peripheral_access", []).append(access_item)
+                access_item["targets"].append(
+                    {
+                        "id": access["target_logical_unit_id"],
+                        "slug": access["target_slug"],
+                        "name": access["target_name"],
+                    }
+                )
+
+            peripheral_type_ids = [
+                row[0]
+                for row in connection.execute(
+                    "SELECT DISTINCT type_id FROM application_peripheral_unit_sources "
+                    "WHERE logical_unit_id = ? ORDER BY type_id",
+                    (group["id"],),
+                )
+            ]
+
+            constraint_rows = connection.execute(
+                "SELECT c.army_id, c.relation_id, c.family, c.min_count, c.max_count, "
+                "c.is_group, m.relation_unit_id, m.source_unit_id, m.logical_unit_id, "
+                "lu.name, ds.slug "
+                "FROM application_unit_constraints AS c "
+                "JOIN application_unit_constraint_members AS m "
+                "ON m.army_id = c.army_id AND m.relation_id = c.relation_id "
+                "JOIN logical_units AS lu ON lu.id = m.logical_unit_id "
+                "LEFT JOIN application_domain_slugs AS ds "
+                "ON ds.domain = 'units' AND ds.application_id = m.logical_unit_id "
+                "WHERE EXISTS ("
+                "SELECT 1 FROM application_unit_constraint_members AS own "
+                "WHERE own.army_id = c.army_id AND own.relation_id = c.relation_id "
+                "AND own.logical_unit_id = ?) "
+                "ORDER BY c.army_id, c.relation_id, m.position, m.relation_unit_id",
+                (group["id"],),
+            ).fetchall()
+            selection_constraints: list[dict[str, Any]] = []
+            constraints_by_key: dict[tuple[int, int], dict[str, Any]] = {}
+            for row in constraint_rows:
+                key = (row["army_id"], row["relation_id"])
+                constraint = constraints_by_key.get(key)
+                if constraint is None:
+                    constraint = {
+                        "army_id": row["army_id"],
+                        "relation_id": row["relation_id"],
+                        "family": row["family"],
+                        "min_count": row["min_count"],
+                        "max_count": row["max_count"],
+                        "is_group": bool(row["is_group"]),
+                        "members": [],
+                    }
+                    constraints_by_key[key] = constraint
+                    selection_constraints.append(constraint)
+                constraint["members"].append(
+                    {
+                        "source_unit_id": row["source_unit_id"],
+                        "logical_unit_id": row["logical_unit_id"],
+                        "slug": row["slug"],
+                        "name": row["name"],
+                    }
+                )
+
+            dependency_rows = connection.execute(
+                "SELECT c.army_id, c.relation_id, c.min_count, c.max_count, c.is_group, "
+                "m.relation_unit_id, m.source_unit_id, m.logical_unit_id, "
+                "m.group_id AS member_group_id, m.per_parent, "
+                "t.dependency_id, t.source_unit_id AS dependency_source_unit_id, "
+                "t.logical_unit_id AS dependency_logical_unit_id, "
+                "t.group_id AS dependency_group_id, t.source_group_selector, "
+                "t.min_count AS dependency_min_count, "
+                "t.min_dependant AS dependency_min_dependant, t.options "
+                "FROM application_unit_group_dependency_constraints AS c "
+                "JOIN application_unit_group_dependency_members AS m "
+                "ON m.army_id = c.army_id AND m.relation_id = c.relation_id "
+                "JOIN application_unit_group_dependency_targets AS t "
+                "ON t.army_id = m.army_id AND t.relation_id = m.relation_id "
+                "AND t.relation_unit_id = m.relation_unit_id "
+                "WHERE m.logical_unit_id = ? OR t.logical_unit_id = ? "
+                "ORDER BY c.army_id, c.relation_id, m.position, m.relation_unit_id, "
+                "t.position, t.dependency_id",
+                (group["id"], group["id"]),
+            ).fetchall()
+            group_dependencies: list[dict[str, Any]] = []
+            dependencies_by_relation: dict[tuple[int, int], dict[str, Any]] = {}
+            members_by_key: dict[tuple[int, int, int], dict[str, Any]] = {}
+            for row in dependency_rows:
+                relation_key = (row["army_id"], row["relation_id"])
+                relation = dependencies_by_relation.get(relation_key)
+                if relation is None:
+                    relation = {
+                        "army_id": row["army_id"],
+                        "relation_id": row["relation_id"],
+                        "min_count": row["min_count"],
+                        "max_count": row["max_count"],
+                        "is_group": bool(row["is_group"]),
+                        "members": [],
+                    }
+                    dependencies_by_relation[relation_key] = relation
+                    group_dependencies.append(relation)
+                member_key = (
+                    row["army_id"],
+                    row["relation_id"],
+                    row["relation_unit_id"],
+                )
+                member = members_by_key.get(member_key)
+                if member is None:
+                    member = {
+                        "source_unit_id": row["source_unit_id"],
+                        "logical_unit_id": row["logical_unit_id"],
+                        "group_id": row["member_group_id"],
+                        "per_parent": row["per_parent"],
+                        "dependencies": [],
+                    }
+                    members_by_key[member_key] = member
+                    relation["members"].append(member)
+                target = {
+                    "source_unit_id": row["dependency_source_unit_id"],
+                    "logical_unit_id": row["dependency_logical_unit_id"],
+                    "group_id": row["dependency_group_id"],
+                    "source_group_selector": row["source_group_selector"],
+                    "min_count": row["dependency_min_count"],
+                    "min_dependant": row["dependency_min_dependant"],
+                    "options": json.loads(row["options"]) if row["options"] else None,
+                }
+                member["dependencies"].append(target)
+
             main_faction = faction_groups.get(group["main_army_id"])
             display_faction = faction_identities.get(group["display_army_id"])
             for army in armies:
                 del army["_occurrence_key"]
-        return {
+        result = {
             "id": group["id"],
             "name": group["name"],
             "isc": group["isc"],
@@ -2422,4 +2713,11 @@ class Database:
             "source_ids": source_ids,
             "armies": armies,
         }
+        if peripheral_type_ids:
+            result["peripheral_type_ids"] = peripheral_type_ids
+        if selection_constraints:
+            result["selection_constraints"] = selection_constraints
+        if group_dependencies:
+            result["group_dependencies"] = group_dependencies
+        return result
 
