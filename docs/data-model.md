@@ -1696,9 +1696,60 @@ source-semantic staging checks.
 
 Before the split, SQLite `dbstat` attributed approximately **9.9 MiB**, or **55.72%**
 of the reviewed 18 MiB-class `infinity.db`, to the 47 now-raw-only tables and their
-indexes. That remains the pre-split estimate; the rebuilt production-size measurement
-is recorded separately once generated locally. Correctness, traceability, and runtime
-independence remain the acceptance criteria rather than storage reduction alone.
+indexes. The rebuilt production application database confirms that estimate: the same
+reviewed snapshot fell from **18,108,416 bytes (17.27 MiB)** to **8,138,752 bytes
+(7.76 MiB)**, a reduction of **9,969,664 bytes (9.51 MiB / 55.06%)**. Correctness,
+traceability, and runtime independence remain the acceptance criteria rather than
+storage reduction alone.
+
+### Milestone 2B source-to-presentation completeness inventory
+
+`tools/audit_source_presentation.py` is the maintained Army-source completeness
+baseline established at the end of Milestone 2B. It enumerates every normalized Army
+source table and field from the schema and assigns both a semantic-provenance category
+and one of the maintained presentation states: explicitly presented, implicitly
+represented, operationally consumed, redundant source representation, normalization-
+only structure, or unrepresented player information. The audit fails closed if the
+normalized source schema gains a table/field without a maintained classification.
+
+The schema reviewed for the 0.6.3 candidate contains **70 source tables / 441 source
+fields**. This is deliberately a semantic inventory rather than a count of runtime
+SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canonical
+application facts may live in derived tables, and a fact may be preserved in the API
+without yet having a usable browser presentation.
+
+The first complete pass records **10 confirmed gap families** for later roadmap work:
+
+- Fireteam chart/type/member relationships;
+- profile/loadout/top-level Unit-option include relationships;
+- Peripheral attachments and Controller access pools;
+- selection constraints and profile-group dependencies;
+- Reinforcement Section parentage;
+- broader source-declared faction membership distinct from concrete Army availability;
+- source-attributed Unit notes;
+- top-level composite Unit options;
+- Structure-versus-Wounds vitality labeling; and
+- structured Hacking Program, Martial Arts, Booty, and MetaChemistry reference data.
+
+The reviewed production application database provides concrete evidence for the gaps
+that already have an application representation: **1,273** canonical include edges,
+**818** loadout Peripheral occurrences plus **8** Controller-target edges, **96** Unit
+selection constraints, **14** profile-group dependency constraints, **46**
+Reinforcement-parent links, **2,094** declared faction memberships, **30**
+source-attributed Unit-note occurrences, **18** top-level Unit options, and **299**
+canonical profile payloads marked `is_structure`. Fireteams and the structured lookup
+metadata remain raw-archive/source-model gaps rather than application-row gaps.
+
+Two preserved constructs remain an explicit semantic review queue instead of being
+forced into a premature 1.0 requirement: **30** opaque `spectables` occurrences and
+the meaning/presentation of loadout `disabled` / `minis` (currently **155** disabled
+canonical loadout payloads and **34** with `minis = 0`). The source information stays
+preserved while their correct player-facing interpretation is reviewed.
+
+The inventory records storage/presentation gaps; it does not redefine release scope.
+Rules-context work belongs to 0.7.x, connected relationship presentation to 0.8.x, and
+remaining presentation/scope cleanup to 0.9.x. The final source-by-source acceptance
+audit in `docs/releasing.md` remains the authoritative 1.0 gate.
 
 ### Army/faction semantic boundary audit
 

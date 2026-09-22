@@ -966,9 +966,9 @@ compatibility references remain unambiguous JSON integers.
   candidates plus raw relation/dependency adjacency remain review evidence rather than automatic
   Controller mappings.
 
-- 2026-09-22: **Release direction through 1.0.** Milestone 2B is a 0.6.3 candidate
-  if its canonical-relationship, raw/application split, and completeness-inventory work
-  closes as one validated increment. 0.7.x adds rules/context to existing data; 0.8.x
+- 2026-09-22: **Release direction through 1.0.** Milestone 2B is complete and forms
+  the 0.6.3 candidate: canonical relationships, the raw/application split, and the
+  Army completeness inventory are validated. 0.7.x adds rules/context to existing data; 0.8.x
   exposes connected game relationships; 0.9.x closes remaining player-facing gaps and
   focuses on search/navigation/mobile/accessibility/themes; 1.0.0 is the player-data-
   complete reference gate defined in `docs/releasing.md`. Minor-release scope is directional,
@@ -1140,7 +1140,25 @@ compatibility references remain unambiguous JSON integers.
   re-derived without raw source tables.
 - `tools/audit_database_separation.py` fails closed if the published table inventory,
   raw relational/lossless equivalence, metadata pairing, runtime surface, foreign-key
-  boundary, or runtime-validation independence drifts. The pre-split production estimate
-  attributed about 9.9 MiB / 55.72% of the old `infinity.db` to the 47 now-raw-only tables;
-  record the rebuilt production size separately rather than treating storage savings as
-  the semantic acceptance criterion.
+  boundary, or runtime-validation independence drifts. The rebuilt reviewed production
+  database confirms the storage estimate: `infinity.db` fell from 18,108,416 to
+  8,138,752 bytes, a 55.06% reduction. Storage savings remain evidence rather than the
+  semantic acceptance criterion.
+
+### Milestone 2B source-to-presentation completeness boundary (2026-09-22)
+
+- `tools/audit_source_presentation.py` is the maintained Army source-to-presentation
+  inventory. It covers all 70 normalized source tables / 441 source fields and assigns
+  semantic-provenance plus presentation-status classifications; schema growth must fail
+  closed until new source constructs are reviewed.
+- The first complete pass records 10 confirmed gap families: Fireteams, includes,
+  Peripheral/Controller links, selection/dependency relationships, Reinforcement parentage,
+  declared faction membership, source-attributed Unit notes, top-level composite Unit
+  options, Structure/Wounds labeling, and structured Hacking/Martial Arts/Booty/
+  MetaChemistry reference data. Their roadmap homes are 0.7.x, 0.8.x, and 0.9.x rather
+  than Milestone 2B implementation.
+- Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
+  preserve the source values and do not invent presentation semantics before the domain
+  meaning/scope is resolved.
+- Milestone 2B is therefore complete and forms the 0.6.3 release candidate. The next
+  required work is normal release preparation, not further canonicalization.

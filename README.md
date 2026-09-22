@@ -49,9 +49,9 @@ are documented in [architecture](docs/architecture.md).
 
 The current direction is deliberately incremental:
 
-- **0.6.3 candidate — Milestone 2B:** finish the canonical relationship/application
-  groundwork, the `infinity.raw.db` separation, and the source-to-presentation
-  completeness inventory if that work closes as one coherent releasable increment.
+- **0.6.3 candidate — Milestone 2B:** the canonical relationship/application
+  groundwork, `infinity.raw.db` separation, and source-to-presentation completeness
+  inventory are complete; normal release preparation remains.
 - **0.7.x — Rules & context:** enrich existing catalog/application data with concise
   rules summaries, official references, classifications, and reviewed semantic
   relationships.

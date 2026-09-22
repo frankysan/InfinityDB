@@ -479,11 +479,11 @@ representative-backed logical-unit fields plus source-attributed alias/note/
 profile and loadout payload layers extend the same principle from **identity
 deduplication** to **semantic payload deduplication** for unit-detail data.
 Application Army identities and application catalog identities extend the model
-further into Army/faction presentation and rule-reference catalog serving. Broader
-relationship canonicalization is now active Milestone 2B work: include targets, reviewed
-Peripheral relationships, selection-safe Unit constraints, and profile-group dependencies
-are materialized, while Fireteams and remaining source/context relationships stay explicit
-until their application presentation/model is justified.
+further into Army/faction presentation and rule-reference catalog serving. Milestone 2B
+completed the next relationship/storage boundary: include targets, reviewed Peripheral
+relationships, selection-safe Unit constraints, and profile-group dependencies are
+materialized; Fireteams and remaining source/context relationships stay explicit until
+their later application presentation/model is justified.
 
 Runtime-performance evidence for this work is collected separately from semantic
 acceptance. `tools/benchmark_runtime.py` measures representative repository read

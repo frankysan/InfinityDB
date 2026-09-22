@@ -5,8 +5,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
-Candidate release: **0.6.3** if Milestone 2B closes as one coherent validated
-canonical-relationship/completeness increment.
+Candidate release: **0.6.3**. Milestone 2B is complete; normal release preparation
+and release-gate validation remain.
 
 ### Added
 
@@ -46,6 +46,10 @@ canonical-relationship/completeness increment.
 - Add deterministic semantic audits for relation/dependency structures, Fireteam charts, and
   normalization-only link storage so current source anomalies and non-player-facing joins remain
   explicit instead of being guessed into application semantics.
+- Add a maintained source-to-presentation completeness audit covering all 70 normalized
+  Army source tables / 441 fields. The first full pass records 10 confirmed player-facing
+  gap families and two explicit semantic-review items, with future work assigned to the
+  0.7.x rules/context, 0.8.x connected-relationship, and 0.9.x completeness directions.
 
 ### Changed
 
@@ -54,6 +58,9 @@ canonical-relationship/completeness increment.
   normalized source schema plus exact lossless row JSON. Full source-to-canonical checks
   run against a temporary relational staging database before publication, and runtime
   validation no longer depends on raw-only tables.
+  On the reviewed production snapshot the rebuilt application database decreased from
+  18,108,416 bytes (17.27 MiB) to 8,138,752 bytes (7.76 MiB), a 55.06% reduction,
+  closely matching the pre-split storage audit while preserving the same source snapshot.
 - Speed up development validation by reusing a template web-test database and running
   pytest through `pytest-xdist` by default. The primary local Windows benchmark dropped
   the complete 687-test stage from 59.67 seconds serially to 14.13 seconds with automatic
