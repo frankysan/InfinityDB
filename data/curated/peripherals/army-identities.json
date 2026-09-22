@@ -1,6 +1,6 @@
 {
   "format": "InfinityDB curated Peripheral identities",
-  "formatVersion": 2,
+  "formatVersion": 3,
   "sources": [
     {
       "id": "army-json-20260918-204434",
@@ -4367,6 +4367,92 @@
         "status": "reviewed",
         "reviewedOn": "2026-09-22",
         "reason": "Reviewed source Unit 1886 as a standalone Unit-backed Peripheral; its canonical logical Unit identity is reused and the Army Peripheral Skill subtype supplies the reviewed type."
+      }
+    }
+  ],
+  "controllerAccess": [
+    {
+      "id": "peripheral-controller-access:army-601-unit-507-group-1-option-6",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 601,
+      "unitId": 507,
+      "groupId": 1,
+      "parentId": 6,
+      "sourceName": "MED-TECH OBSIDON",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
+      }
+    },
+    {
+      "id": "peripheral-controller-access:army-605-unit-507-group-1-option-7",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 605,
+      "unitId": 507,
+      "groupId": 1,
+      "parentId": 7,
+      "sourceName": "MED-TECH OBSIDON",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
+      }
+    },
+    {
+      "id": "peripheral-controller-access:army-605-unit-1884-group-1-option-1",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 605,
+      "unitId": 1884,
+      "groupId": 1,
+      "parentId": 1,
+      "sourceName": "GEARHEAD",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
+      }
+    },
+    {
+      "id": "peripheral-controller-access:army-605-unit-1884-group-1-option-2",
+      "sourceId": "army-json-20260918-204434",
+      "controllerKind": "loadout",
+      "armyId": 605,
+      "unitId": 1884,
+      "groupId": 1,
+      "parentId": 2,
+      "sourceName": "GEARHEAD",
+      "typeId": "rule:peripheral-type:cyberplug",
+      "targetLogicalUnitIds": [
+        1885,
+        1886
+      ],
+      "relationship": "access-pool",
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-09-22",
+        "reason": "Cyberplug grants access to same-Army Peripheral (Cyberplug) Units; Army exposes Ranters and Puzzlers as the available Cyberplug pool."
       }
     }
   ]

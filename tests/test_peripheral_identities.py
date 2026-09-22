@@ -49,6 +49,7 @@ def _document() -> dict:
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-22"},
             }
         ],
+        "controllerAccess": [],
         "unitMappings": [],
         "mappings": [
             {
@@ -76,6 +77,7 @@ def test_checked_in_peripheral_identity_contract_covers_embedded_snapshot() -> N
     assert curated.profile_count == 0
     assert curated.mapping_count == 279
     assert curated.unit_mapping_count == 17
+    assert curated.controller_access_count == 4
     assert curated.document["sources"][0]["id"] == "army-json-20260918-204434"
     entities = {item["id"]: item for item in curated.document["entities"]}
     assert entities["peripheral:crabbot"]["typeId"] == "rule:peripheral-type:ancillary"
@@ -87,6 +89,25 @@ def test_checked_in_peripheral_identity_contract_covers_embedded_snapshot() -> N
     assert unit_mappings[1617]["logicalUnitId"] == 526
     assert unit_mappings[1885]["typeId"] == "rule:peripheral-type:cyberplug"
     assert unit_mappings[1886]["typeId"] == "rule:peripheral-type:cyberplug"
+    controller_access = curated.document["controllerAccess"]
+    assert len(controller_access) == 4
+    assert {
+        (
+            item["armyId"],
+            item["unitId"],
+            item["groupId"],
+            item["parentId"],
+        )
+        for item in controller_access
+    } == {
+        (601, 507, 1, 6),
+        (605, 507, 1, 7),
+        (605, 1884, 1, 1),
+        (605, 1884, 1, 2),
+    }
+    assert all(
+        item["targetLogicalUnitIds"] == [1885, 1886] for item in controller_access
+    )
 
 
 def test_peripheral_identity_contract_accepts_reviewed_entity_profile_and_mapping() -> None:
@@ -96,6 +117,7 @@ def test_peripheral_identity_contract_accepts_reviewed_entity_profile_and_mappin
     assert curated.profile_count == 1
     assert curated.mapping_count == 1
     assert curated.unit_mapping_count == 0
+    assert curated.controller_access_count == 0
     assert len(curated.content_sha256) == 64
 
 
@@ -113,6 +135,76 @@ def test_peripheral_identity_contract_rejects_unknown_type_when_present() -> Non
     document["entities"][0]["typeId"] = "rule:peripheral-type:unknown"
 
     with pytest.raises(PeripheralIdentityError, match="typeId"):
+        parse_peripheral_identity_curated(document)
+
+
+def test_peripheral_identity_contract_accepts_reviewed_controller_access_pool() -> None:
+    document = _document()
+    document["unitMappings"] = [
+        {
+            "id": "peripheral-unit-mapping:unit-30",
+            "sourceId": "army-json-test",
+            "unitId": 30,
+            "sourceName": "Listed Cyberplug Peripheral",
+            "logicalUnitId": 30,
+            "typeId": "rule:peripheral-type:cyberplug",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed synthetic Cyberplug Unit-backed identity.",
+            },
+        }
+    ]
+    document["controllerAccess"] = [
+        {
+            "id": "peripheral-controller-access:army-101-unit-20-group-1-option-1",
+            "sourceId": "army-json-test",
+            "controllerKind": "loadout",
+            "armyId": 101,
+            "unitId": 20,
+            "groupId": 1,
+            "parentId": 1,
+            "sourceName": "Cyberplug Loadout",
+            "typeId": "rule:peripheral-type:cyberplug",
+            "targetLogicalUnitIds": [30],
+            "relationship": "access-pool",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed synthetic Cyberplug access pool.",
+            },
+        }
+    ]
+
+    curated = parse_peripheral_identity_curated(document)
+
+    assert curated.controller_access_count == 1
+
+
+def test_peripheral_identity_contract_rejects_duplicate_controller_access_targets() -> None:
+    document = _document()
+    document["controllerAccess"] = [
+        {
+            "id": "peripheral-controller-access:army-101-unit-20-group-1-option-1",
+            "sourceId": "army-json-test",
+            "controllerKind": "loadout",
+            "armyId": 101,
+            "unitId": 20,
+            "groupId": 1,
+            "parentId": 1,
+            "sourceName": "Cyberplug Loadout",
+            "typeId": "rule:peripheral-type:cyberplug",
+            "targetLogicalUnitIds": [30, 30],
+            "relationship": "access-pool",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Intentionally invalid synthetic access pool.",
+            },
+        }
+    ]
+
+    with pytest.raises(PeripheralIdentityError, match="must not contain duplicates"):
         parse_peripheral_identity_curated(document)
 
 
@@ -617,6 +709,7 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
         {
             "unitId": 30,
             "unitName": "Listed Cyberplug Peripheral",
+            "logicalUnitId": 30,
             "sourceSubtypeExtras": [{"extraId": 374, "label": "Cyberplug"}],
         }
     ]
@@ -710,6 +803,151 @@ def test_peripheral_identity_coverage_validates_unit_backed_mappings(tmp_path: P
     assert report["validation"]["unitSourceNameDriftCount"] == 0
     assert report["validation"]["unitLogicalIdentityDriftCount"] == 0
     assert report["validation"]["unitTypeDriftCount"] == 0
+
+
+def test_peripheral_identity_coverage_validates_reviewed_controller_access_pool(
+    tmp_path: Path,
+) -> None:
+    document = _document()
+    document["unitMappings"] = [
+        {
+            "id": "peripheral-unit-mapping:unit-30",
+            "sourceId": "army-json-test",
+            "unitId": 30,
+            "sourceName": "Listed Cyberplug Peripheral",
+            "logicalUnitId": 30,
+            "typeId": "rule:peripheral-type:cyberplug",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed Cyberplug Unit-backed identity.",
+            },
+        },
+        {
+            "id": "peripheral-unit-mapping:unit-40",
+            "sourceId": "army-json-test",
+            "unitId": 40,
+            "sourceName": "Listed Servant Peripheral",
+            "logicalUnitId": 40,
+            "typeId": "rule:peripheral-type:servant",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed Servant Unit-backed identity.",
+            },
+        },
+    ]
+    document["controllerAccess"] = [
+        {
+            "id": "peripheral-controller-access:army-101-unit-20-group-1-option-1",
+            "sourceId": "army-json-test",
+            "controllerKind": "loadout",
+            "armyId": 101,
+            "unitId": 20,
+            "groupId": 1,
+            "parentId": 1,
+            "sourceName": "Cyberplug Loadout",
+            "typeId": "rule:peripheral-type:cyberplug",
+            "targetLogicalUnitIds": [30],
+            "relationship": "access-pool",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed synthetic Cyberplug access pool.",
+            },
+        },
+        {
+            "id": "peripheral-controller-access:army-101-unit-20-group-1-option-2",
+            "sourceId": "army-json-test",
+            "controllerKind": "loadout",
+            "armyId": 101,
+            "unitId": 20,
+            "groupId": 1,
+            "parentId": 2,
+            "sourceName": "Cyberplug Unattached",
+            "typeId": "rule:peripheral-type:cyberplug",
+            "targetLogicalUnitIds": [30],
+            "relationship": "access-pool",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Reviewed synthetic Cyberplug access pool.",
+            },
+        },
+    ]
+
+    report = audit_peripheral_identity_coverage(
+        parse_peripheral_identity_curated(document),
+        _controller_coverage_database(tmp_path),
+        rules_documents=_controller_rules_documents(),
+    )
+
+    assert report["controllerAccess"] == {
+        "sourceControllerOccurrenceCount": 2,
+        "mappedControllerOccurrenceCount": 2,
+        "unmappedControllerOccurrenceCount": 0,
+        "targetLogicalUnitCount": 1,
+        "eligibleEdgeCount": 2,
+        "relationship": "access-pool",
+        "interpretation": report["controllerAccess"]["interpretation"],
+        "unmappedControllers": [],
+    }
+    assert report["validation"]["staleControllerAccessCount"] == 0
+    assert report["validation"]["controllerSourceNameDriftCount"] == 0
+    assert report["validation"]["controllerTypeDriftCount"] == 0
+    assert report["validation"]["controllerTargetPoolDriftCount"] == 0
+
+
+def test_peripheral_identity_coverage_detects_controller_access_pool_drift(
+    tmp_path: Path,
+) -> None:
+    document = _document()
+    document["unitMappings"] = [
+        {
+            "id": "peripheral-unit-mapping:unit-40",
+            "sourceId": "army-json-test",
+            "unitId": 40,
+            "sourceName": "Listed Servant Peripheral",
+            "logicalUnitId": 999,
+            "typeId": "rule:peripheral-type:servant",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Intentionally stale synthetic Unit-backed identity.",
+            },
+        }
+    ]
+    document["controllerAccess"] = [
+        {
+            "id": "peripheral-controller-access:army-101-unit-20-group-1-option-1",
+            "sourceId": "army-json-test",
+            "controllerKind": "loadout",
+            "armyId": 101,
+            "unitId": 20,
+            "groupId": 1,
+            "parentId": 1,
+            "sourceName": "OLD NAME",
+            "typeId": "rule:peripheral-type:servant",
+            "targetLogicalUnitIds": [999],
+            "relationship": "access-pool",
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-22",
+                "reason": "Intentionally stale synthetic access pool.",
+            },
+        }
+    ]
+
+    report = audit_peripheral_identity_coverage(
+        parse_peripheral_identity_curated(document),
+        _controller_coverage_database(tmp_path),
+        rules_documents=_controller_rules_documents(),
+    )
+
+    assert report["status"] == "invalid"
+    assert report["validation"]["controllerSourceNameDriftCount"] == 1
+    assert report["validation"]["controllerTypeDriftCount"] == 1
+    assert report["validation"]["controllerTargetPoolDriftCount"] == 1
 
 
 def test_peripheral_identity_coverage_detects_unit_backed_drift(tmp_path: Path) -> None:

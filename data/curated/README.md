@@ -43,7 +43,11 @@ evidence and supports two source mechanisms:
   `(sourceId, armyId, peripheralId)`;
 - standalone Unit-backed Peripherals resolve through `peripheral-unit-mapping:<slug>` records
   keyed by source-global Unit ID and reuse the existing `logical_units` identity instead of
-  creating duplicate `peripheral:*` entities.
+  creating duplicate `peripheral:*` entities;
+- reviewed Controller access pools resolve through
+  `peripheral-controller-access:<slug>` records keyed to an exact source Controller
+  profile/loadout occurrence and point to canonical logical Unit IDs. `access-pool` means
+  eligibility/selection, not fixed ownership of one Peripheral by one Controller.
 
 Canonical entities may reference one of the five curated N5.3 Peripheral-type rule
 IDs once type classification is independently reviewed. `typeId` is intentionally optional so
@@ -52,9 +56,12 @@ of those five IDs. Profiles may declare only the reviewed `connected` or `autono
 modes. Every accepted source mapping requires review date and reason, and an optional
 profile must belong to the mapped entity. Unit-backed mappings additionally pin the expected
 logical Unit and reviewed Peripheral type so source-name, logical-identity, or subtype drift
-fails closed. Unknown fields fail closed; notably `mercs` is not accepted as identity data.
-The checked-in current-snapshot contract contains 56 embedded entities, 279 embedded mappings,
-and 17 Unit-backed source mappings resolving to 10 logical Units.
+fails closed. Controller access additionally pins source occurrence name, reviewed Peripheral
+type, and the complete canonical target pool so source/controller/target drift fails closed.
+Unknown fields fail closed; notably `mercs` is not accepted as identity data. The checked-in
+current-snapshot contract contains 56 embedded entities, 279 embedded mappings, 17 Unit-backed
+source mappings resolving to 10 logical Units, and four reviewed Cyberplug Controller access
+pools targeting two canonical logical Units.
 
 Validate the authored contract with:
 
@@ -75,8 +82,9 @@ a validation failure; stale coordinates or exact source-name drift are invalid. 
 name normalization (Unicode NFC, collapsed whitespace, and case-folding) is used only to
 group the review queue and never creates identity automatically.
 
-The next Milestone 2B step is to populate reviewed mappings from that queue and only then
-materialize cross-Army Peripheral relationships.
+The current reviewed identity/access contract is complete for the pinned snapshot. The next
+Milestone 2B step is to materialize these curated-derived relationships into the application
+database/API without collapsing their source-context provenance.
 
 ### Curated display identities
 

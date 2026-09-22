@@ -13,7 +13,7 @@ from typing import Any
 from .peripheral_identities import PeripheralIdentityCurated, PeripheralIdentityError
 
 COVERAGE_FORMAT = "InfinityDB Peripheral identity coverage"
-COVERAGE_FORMAT_VERSION = 6
+COVERAGE_FORMAT_VERSION = 7
 
 _SOURCE_PERIPHERAL_SUBTYPE_TYPE_IDS = {
     "servant": "rule:peripheral-type:servant",
@@ -887,6 +887,13 @@ def _cyberplug_controller_inventory(
         controller["peripheralUnitRelationCandidateCount"] = len(links)
         same_army = cyberplug_units_by_army.get(controller["armyId"], [])
         controller["sameArmyCyberplugPeripheralCandidateCount"] = len(same_army)
+        controller["sameArmyCyberplugTargetLogicalUnitIds"] = sorted(
+            {
+                int(item["logicalUnitId"])
+                for item in same_army
+                if type(item.get("logicalUnitId")) is int
+            }
+        )
         same_army_candidate_count += len(same_army)
         if include_details:
             controller["peripheralUnitRelationCandidates"] = links
@@ -894,6 +901,7 @@ def _cyberplug_controller_inventory(
                 {
                     "unitId": item["unitId"],
                     "unitName": item["unitName"],
+                    "logicalUnitId": item.get("logicalUnitId"),
                     "sourceSubtypeExtras": item["sourceSubtypeExtras"],
                 }
                 for item in same_army
@@ -932,7 +940,11 @@ def _audit_controller_graph(
     *,
     rules_documents: Iterable[tuple[Path, dict[str, Any]]] | None,
     include_details: bool,
-) -> tuple[dict[str, Any], dict[tuple[int, int], dict[str, Any]]]:
+) -> tuple[
+    dict[str, Any],
+    dict[tuple[int, int], dict[str, Any]],
+    list[dict[str, Any]],
+]:
     missing_tables = sorted(_CONTROLLER_GRAPH_TABLES - _table_names(connection))
     if missing_tables:
         return (
@@ -944,6 +956,7 @@ def _audit_controller_graph(
                 ),
             },
             {},
+            [],
         )
 
     rule_skill_slugs, type_predicates = _army_skill_slug_by_rule_id(rules_documents)
@@ -1206,7 +1219,7 @@ def _audit_controller_graph(
             }
             for key in sorted(controllers)
         ]
-    return report, definition_evidence
+    return report, definition_evidence, cyberplug_controllers
 
 
 def _aggregate_group_controller_evidence(
@@ -1276,7 +1289,11 @@ def audit_peripheral_identity_coverage(
                     "SELECT army_id, id, name, mercs FROM peripherals ORDER BY army_id, id"
                 )
             ]
-            controller_graph, definition_controller_evidence = _audit_controller_graph(
+            (
+                controller_graph,
+                definition_controller_evidence,
+                cyberplug_controller_occurrences,
+            ) = _audit_controller_graph(
                 connection,
                 {(row["armyId"], row["peripheralId"]): row for row in rows},
                 rules_documents=rules_documents,
@@ -1414,6 +1431,105 @@ def audit_peripheral_identity_coverage(
         item for unit_id, item in sorted(standalone_units.items()) if unit_id not in mapped_unit_ids
     ]
 
+    controller_access_value = document.get("controllerAccess")
+    controller_access = (
+        controller_access_value if isinstance(controller_access_value, list) else []
+    )
+    current_controller_access = [
+        access
+        for access in controller_access
+        if isinstance(access, dict) and access.get("sourceId") == source_id
+    ]
+    controller_access_by_key = {
+        (
+            str(access["controllerKind"]),
+            int(access["armyId"]),
+            int(access["unitId"]),
+            int(access["groupId"]),
+            int(access["parentId"]),
+        ): access
+        for access in current_controller_access
+    }
+    observed_controller_by_key = {
+        (
+            str(controller["controllerKind"]),
+            int(controller["armyId"]),
+            int(controller["unitId"]),
+            int(controller["groupId"]),
+            int(controller["parentId"]),
+        ): controller
+        for controller in cyberplug_controller_occurrences
+    }
+
+    stale_controller_access: list[dict[str, Any]] = []
+    controller_source_name_drift: list[dict[str, Any]] = []
+    controller_type_drift: list[dict[str, Any]] = []
+    controller_target_pool_drift: list[dict[str, Any]] = []
+    for key, access in sorted(controller_access_by_key.items()):
+        controller = observed_controller_by_key.get(key)
+        if controller is None:
+            stale_controller_access.append(
+                {
+                    "accessId": access.get("id"),
+                    "controllerKind": key[0],
+                    "armyId": key[1],
+                    "unitId": key[2],
+                    "groupId": key[3],
+                    "parentId": key[4],
+                    "sourceName": access.get("sourceName"),
+                }
+            )
+            continue
+        if access.get("sourceName") != controller.get("controllerName"):
+            controller_source_name_drift.append(
+                {
+                    "accessId": access.get("id"),
+                    "armyId": key[1],
+                    "unitId": key[2],
+                    "groupId": key[3],
+                    "parentId": key[4],
+                    "expectedSourceName": access.get("sourceName"),
+                    "actualSourceName": controller.get("controllerName"),
+                }
+            )
+        if access.get("typeId") != "rule:peripheral-type:cyberplug":
+            controller_type_drift.append(
+                {
+                    "accessId": access.get("id"),
+                    "armyId": key[1],
+                    "unitId": key[2],
+                    "groupId": key[3],
+                    "parentId": key[4],
+                    "expectedTypeId": access.get("typeId"),
+                    "actualTypeId": "rule:peripheral-type:cyberplug",
+                }
+            )
+        actual_target_ids = list(controller.get("sameArmyCyberplugTargetLogicalUnitIds", []))
+        expected_target_ids = sorted(
+            int(value)
+            for value in access.get("targetLogicalUnitIds", [])
+            if type(value) is int
+        )
+        if expected_target_ids != actual_target_ids:
+            controller_target_pool_drift.append(
+                {
+                    "accessId": access.get("id"),
+                    "armyId": key[1],
+                    "unitId": key[2],
+                    "groupId": key[3],
+                    "parentId": key[4],
+                    "expectedTargetLogicalUnitIds": expected_target_ids,
+                    "actualTargetLogicalUnitIds": actual_target_ids,
+                }
+            )
+
+    mapped_controller_keys = set(controller_access_by_key) & set(observed_controller_by_key)
+    unmapped_controller_rows = [
+        controller
+        for key, controller in sorted(observed_controller_by_key.items())
+        if key not in mapped_controller_keys
+    ]
+
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         groups[_normalized_review_name(row["sourceName"])].append(row)
@@ -1506,16 +1622,25 @@ def audit_peripheral_identity_coverage(
         + len(unit_source_name_drift)
         + len(unit_logical_identity_drift)
         + len(unit_type_drift)
+        + len(stale_controller_access)
+        + len(controller_source_name_drift)
+        + len(controller_type_drift)
+        + len(controller_target_pool_drift)
     )
     unmapped_count = len(unmapped_rows)
     unmapped_unit_count = len(unmapped_unit_rows)
+    unmapped_controller_count = len(unmapped_controller_rows)
     definition_count = len(rows)
     status = (
         "invalid"
         if invalid_count
         else (
             "complete"
-            if unmapped_count == 0 and unmapped_unit_count == 0
+            if (
+                unmapped_count == 0
+                and unmapped_unit_count == 0
+                and unmapped_controller_count == 0
+            )
             else "needs-review"
         )
     )
@@ -1562,14 +1687,40 @@ def audit_peripheral_identity_coverage(
             "unmappedSourceUnitCount": unmapped_unit_count,
             "coveragePercent": unit_coverage_percent,
         },
+        "controllerAccess": {
+            "sourceControllerOccurrenceCount": len(observed_controller_by_key),
+            "mappedControllerOccurrenceCount": len(mapped_controller_keys),
+            "unmappedControllerOccurrenceCount": unmapped_controller_count,
+            "targetLogicalUnitCount": len(
+                {
+                    int(target_id)
+                    for access in current_controller_access
+                    for target_id in access.get("targetLogicalUnitIds", [])
+                    if type(target_id) is int
+                }
+            ),
+            "eligibleEdgeCount": sum(
+                len(access.get("targetLogicalUnitIds", []))
+                for access in current_controller_access
+            ),
+            "relationship": "access-pool",
+            "interpretation": (
+                "Reviewed Cyberplug Controller relationships are selection/access pools, not "
+                "fixed Controller-to-Peripheral ownership. Each source-context Controller "
+                "occurrence targets the canonical logical Units that Army exposes in the same "
+                "Army context with Peripheral (Cyberplug)."
+            ),
+        },
         "controllerGraph": controller_graph,
         "curated": {
             "entityCount": curated.entity_count,
             "profileCount": curated.profile_count,
             "mappingCount": curated.mapping_count,
             "unitMappingCount": curated.unit_mapping_count,
+            "controllerAccessCount": curated.controller_access_count,
             "currentSnapshotMappingCount": len(current_mappings),
             "currentSnapshotUnitMappingCount": len(current_unit_mappings),
+            "currentSnapshotControllerAccessCount": len(current_controller_access),
             "curatedOnlyEntityCount": len(curated_only_entities),
             "curatedOnlyProfileCount": len(curated_only_profiles),
         },
@@ -1580,6 +1731,10 @@ def audit_peripheral_identity_coverage(
             "unitSourceNameDriftCount": len(unit_source_name_drift),
             "unitLogicalIdentityDriftCount": len(unit_logical_identity_drift),
             "unitTypeDriftCount": len(unit_type_drift),
+            "staleControllerAccessCount": len(stale_controller_access),
+            "controllerSourceNameDriftCount": len(controller_source_name_drift),
+            "controllerTypeDriftCount": len(controller_type_drift),
+            "controllerTargetPoolDriftCount": len(controller_target_pool_drift),
             "status": "valid" if invalid_count == 0 else "invalid",
         },
         "reviewQueue": review_queue,
@@ -1591,7 +1746,12 @@ def audit_peripheral_identity_coverage(
         report["validation"]["unitSourceNameDrift"] = unit_source_name_drift
         report["validation"]["unitLogicalIdentityDrift"] = unit_logical_identity_drift
         report["validation"]["unitTypeDrift"] = unit_type_drift
+        report["validation"]["staleControllerAccess"] = stale_controller_access
+        report["validation"]["controllerSourceNameDrift"] = controller_source_name_drift
+        report["validation"]["controllerTypeDrift"] = controller_type_drift
+        report["validation"]["controllerTargetPoolDrift"] = controller_target_pool_drift
         report["unitBackedIdentities"]["unmappedSourceUnits"] = unmapped_unit_rows
+        report["controllerAccess"]["unmappedControllers"] = unmapped_controller_rows
         report["curated"]["curatedOnlyEntities"] = curated_only_entities
         report["curated"]["curatedOnlyProfiles"] = curated_only_profiles
     return report

@@ -148,10 +148,12 @@ in `docs/releasing.md`.
         ontology: 17 source Unit IDs reuse 10 existing logical-Unit identities, with reviewed
         Servant/Cyberplug type taken from the source `Peripheral` Skill subtype. Reinforcement
         variants resolve through the existing logical-Unit identity layer.
-      - [ ] Resolve reviewed Controller -> Unit-backed Peripheral relationships. Same-Army
-        subtype co-occurrence remains evidence, not an automatic Controller mapping; the
-        current snapshot exposes no relation/dependency edge that selects Ranters versus
-        Puzzlers for Cyberplug-skilled Controllers.
+      - [x] Resolve reviewed Controller -> Unit-backed Peripheral relationships for the
+        current Cyberplug source mechanism. Cyberplug is an access-pool relationship rather
+        than fixed ownership: the four Cyberplug-capable loadout occurrences in Armies 601/605
+        each target the canonical Ranters/Puzzlers logical Units available in that Army
+        context. Keep relation/dependency rows as separate provenance; the current snapshot
+        exposes no edge selecting one Sartroid for one Controller.
   - [ ] Audit relation/dependency structures.
     - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as

@@ -13,7 +13,7 @@ from infinity_army_data.project_resources import maintained_curated_path
 from .domain_slugs import validate_typed_domain_id
 
 PERIPHERAL_IDENTITY_FORMAT = "InfinityDB curated Peripheral identities"
-PERIPHERAL_IDENTITY_FORMAT_VERSION = 2
+PERIPHERAL_IDENTITY_FORMAT_VERSION = 3
 DEFAULT_PERIPHERAL_IDENTITY_CURATED = maintained_curated_path(
     "peripherals", "army-identities.json"
 )
@@ -43,6 +43,7 @@ class PeripheralIdentityCurated:
     profile_count: int
     mapping_count: int
     unit_mapping_count: int
+    controller_access_count: int
 
     @property
     def document(self) -> dict[str, Any]:
@@ -147,6 +148,7 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
         "profiles",
         "mappings",
         "unitMappings",
+        "controllerAccess",
     }
     unknown = set(document) - allowed
     if unknown:
@@ -169,6 +171,9 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
     mappings = _require_list(document.get("mappings"), "Peripheral identity data.mappings")
     unit_mappings = _require_list(
         document.get("unitMappings"), "Peripheral identity data.unitMappings"
+    )
+    controller_access = _require_list(
+        document.get("controllerAccess"), "Peripheral identity data.controllerAccess"
     )
 
     entity_ids: set[str] = set()
@@ -280,6 +285,7 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
 
     unit_mapping_ids: set[str] = set()
     unit_source_keys: set[tuple[str, int]] = set()
+    unit_mapping_types_by_logical_id: dict[int, set[str]] = {}
     for index, mapping in enumerate(unit_mappings):
         context = f"Peripheral identity data.unitMappings[{index}]"
         if not isinstance(mapping, dict):
@@ -319,12 +325,110 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
             )
         unit_source_keys.add(source_key)
         _require_string(mapping.get("sourceName"), f"{context}.sourceName")
-        _require_positive_int(mapping.get("logicalUnitId"), f"{context}.logicalUnitId")
-        if mapping.get("typeId") not in PERIPHERAL_TYPE_IDS:
+        logical_unit_id = _require_positive_int(
+            mapping.get("logicalUnitId"), f"{context}.logicalUnitId"
+        )
+        type_id = mapping.get("typeId")
+        if type_id not in PERIPHERAL_TYPE_IDS:
             raise PeripheralIdentityError(
                 f"{context}.typeId must reference a core Peripheral type"
             )
+        unit_mapping_types_by_logical_id.setdefault(logical_unit_id, set()).add(str(type_id))
         _validate_review(mapping.get("review"), f"{context}.review", reason_required=True)
+
+    controller_access_ids: set[str] = set()
+    controller_access_keys: set[tuple[str, str, int, int, int, int, str]] = set()
+    for index, access in enumerate(controller_access):
+        context = f"Peripheral identity data.controllerAccess[{index}]"
+        if not isinstance(access, dict):
+            raise PeripheralIdentityError(f"{context} must be an object")
+        allowed_access = {
+            "id",
+            "sourceId",
+            "controllerKind",
+            "armyId",
+            "unitId",
+            "groupId",
+            "parentId",
+            "sourceName",
+            "typeId",
+            "targetLogicalUnitIds",
+            "relationship",
+            "review",
+        }
+        unknown_access = set(access) - allowed_access
+        if unknown_access:
+            raise PeripheralIdentityError(
+                f"{context} has unknown field(s): {', '.join(sorted(unknown_access))}"
+            )
+        access_id = _typed_id(
+            access.get("id"),
+            domain="peripheral-controller-access",
+            context=f"{context}.id",
+        )
+        if access_id in controller_access_ids:
+            raise PeripheralIdentityError(
+                f"{context}: duplicate Controller access id {access_id!r}"
+            )
+        controller_access_ids.add(access_id)
+        source_id = access.get("sourceId")
+        if not isinstance(source_id, str) or source_id not in source_ids:
+            raise PeripheralIdentityError(f"{context}.sourceId must reference a declared source")
+        controller_kind = access.get("controllerKind")
+        if controller_kind not in {"profile", "loadout"}:
+            raise PeripheralIdentityError(
+                f"{context}.controllerKind must be 'profile' or 'loadout'"
+            )
+        army_id = _require_positive_int(access.get("armyId"), f"{context}.armyId")
+        unit_id = _require_positive_int(access.get("unitId"), f"{context}.unitId")
+        group_id = _require_positive_int(access.get("groupId"), f"{context}.groupId")
+        parent_id = _require_positive_int(access.get("parentId"), f"{context}.parentId")
+        type_id = access.get("typeId")
+        if type_id not in PERIPHERAL_TYPE_IDS:
+            raise PeripheralIdentityError(
+                f"{context}.typeId must reference a core Peripheral type"
+            )
+        source_key = (
+            source_id,
+            controller_kind,
+            army_id,
+            unit_id,
+            group_id,
+            parent_id,
+            str(type_id),
+        )
+        if source_key in controller_access_keys:
+            raise PeripheralIdentityError(
+                f"{context}: duplicate source Controller access identity {source_key!r}"
+            )
+        controller_access_keys.add(source_key)
+        _require_string(access.get("sourceName"), f"{context}.sourceName")
+        if access.get("relationship") != "access-pool":
+            raise PeripheralIdentityError(
+                f"{context}.relationship must be 'access-pool'"
+            )
+        target_ids = _require_list(
+            access.get("targetLogicalUnitIds"), f"{context}.targetLogicalUnitIds"
+        )
+        if not target_ids:
+            raise PeripheralIdentityError(
+                f"{context}.targetLogicalUnitIds must contain at least one logical Unit"
+            )
+        normalized_target_ids = [
+            _require_positive_int(value, f"{context}.targetLogicalUnitIds[{target_index}]")
+            for target_index, value in enumerate(target_ids)
+        ]
+        if len(set(normalized_target_ids)) != len(normalized_target_ids):
+            raise PeripheralIdentityError(
+                f"{context}.targetLogicalUnitIds must not contain duplicates"
+            )
+        for target_id in normalized_target_ids:
+            if str(type_id) not in unit_mapping_types_by_logical_id.get(target_id, set()):
+                raise PeripheralIdentityError(
+                    f"{context}.targetLogicalUnitIds references logical Unit {target_id} "
+                    f"without a reviewed Unit-backed mapping for type {type_id!r}"
+                )
+        _validate_review(access.get("review"), f"{context}.review", reason_required=True)
 
     document_json = _canonical_json(document)
     return PeripheralIdentityCurated(
@@ -334,6 +438,7 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
         profile_count=len(profiles),
         mapping_count=len(mappings),
         unit_mapping_count=len(unit_mappings),
+        controller_access_count=len(controller_access),
     )
 
 

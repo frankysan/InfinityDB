@@ -130,7 +130,8 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
     print(
         f"Entities: {curated.entity_count}; profiles: {curated.profile_count}; "
         f"embedded mappings: {curated.mapping_count}; "
-        f"unit mappings: {curated.unit_mapping_count}"
+        f"unit mappings: {curated.unit_mapping_count}; "
+        f"controller access: {curated.controller_access_count}"
     )
     if args.database is None:
         if args.output is not None:
@@ -157,6 +158,13 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         f"{unit_backed['mappedSourceUnitCount']}/{unit_backed['sourceUnitCount']} "
         f"mapped ({unit_backed['coveragePercent']}%); "
         f"{unit_backed['logicalUnitCount']} logical Units"
+    )
+    controller_access = report["controllerAccess"]
+    print(
+        "Peripheral controller access coverage: "
+        f"{controller_access['mappedControllerOccurrenceCount']}/"
+        f"{controller_access['sourceControllerOccurrenceCount']} mapped; "
+        f"{controller_access['eligibleEdgeCount']} canonical access edges"
     )
     controller_graph = report["controllerGraph"]
     if controller_graph["status"] == "available":

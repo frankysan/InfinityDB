@@ -469,10 +469,14 @@ constraints, profile-mode existence, and durable relationships.
    than creating duplicate `peripheral:*` entities. Reviewed type comes directly from the Army
    `Peripheral` Skill subtype; the seven Reinforcement variants resolve through the existing
    logical-Unit identity normalization.
-9. **Resolve explicit Controller relationships.** Cyberplug-skilled Controllers and same-Army
-   Cyberplug Units are now known, but the current relation/dependency graph does not select a
-   specific Ranters/Puzzlers pairing. Do not promote same-Army co-occurrence into a Controller
-   relationship without reviewed game/source evidence.
+9. **Resolve explicit Controller relationships — complete for the current Cyberplug source
+   mechanism.** The reviewed relationship is an `access-pool`, not fixed ownership. Cyberplug
+   grants a qualifying Controller access to the same-Army Unit-backed `Peripheral (Cyberplug)`
+   pool, while the type rule separately supplies the maximum-per-Controller constraint. For the
+   pinned snapshot this yields four source-context Controller loadouts and two canonical targets
+   (Sartroid Ranters/Puzzlers), for eight reviewed access edges. The source relation/dependency
+   graph contributes no pairing edge and therefore remains separate provenance rather than being
+   interpreted as ownership.
 10. **Materialize curated-derived application relationships.** Join source
    Controller facts, reviewed identity mappings, and curated eligibility rules;
    preserve all provenance and then decide the `infinity.db`/API/UI surface for

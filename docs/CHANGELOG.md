@@ -22,8 +22,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Extend Peripheral identity coverage to distinguish embedded Peripheral definitions from
   ordinary Unit-backed Peripherals identified by the source `Peripheral` Skill and its subtype
   extra, inventory Cyberplug-skilled Controllers even without embedded attachments, and expose
-  same-Army subtype candidates plus raw relation/dependency adjacency as review evidence without
-  inferring Controller mappings.
+  same-Army subtype candidates plus raw relation/dependency adjacency as review evidence. The
+  reviewed current-snapshot Cyberplug relationship is now captured explicitly as an access pool:
+  four qualifying Controller loadout occurrences resolve to the two canonical Sartroid
+  Ranters/Puzzlers logical Units, producing eight validated access edges without inventing fixed
+  Controller ownership.
 
 ### Upgrade notes
 

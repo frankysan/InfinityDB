@@ -988,3 +988,11 @@ compatibility references remain unambiguous JSON integers.
 - Concrete Cyberplug Controller links remain unresolved: Units 507/1884 can see same-Army
   Ranters/Puzzlers candidates, but the current relation/dependency data does not select a
   specific pairing. Same-Army co-occurrence is not sufficient to materialize a relationship.
+- 2026-09-22: Reviewed Cyberplug Controller relationships are access/selection pools, not fixed
+  Controller ownership. The current Army snapshot contains four Cyberplug-capable loadout
+  occurrences (Med-Tech Obsidon in Armies 601/605 and two Gearhead options in Army 605), and the
+  same Army contexts expose Sartroid Ranters/Puzzlers as the two Unit-backed
+  `Peripheral (Cyberplug)` logical Units. The source relation/dependency tables contain no edge
+  assigning a specific Sartroid to a specific Controller. Curated Peripheral identity format v3
+  therefore records reviewed `controllerAccess` pools from source-context Controller occurrences
+  to canonical logical Units and validates Controller name/type/target-pool drift separately.
