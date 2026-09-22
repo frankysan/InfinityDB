@@ -938,13 +938,18 @@ compatibility references remain unambiguous JSON integers.
   modes are only `connected`/`autonomous`; `mercs` is rejected as identity data. The
   checked-in current-snapshot contract contains zero mappings intentionally. Population
   and coverage review must happen before any derived application relationship is built.
-- 2026-09-22: Peripheral type review now uses a second structural signal in addition to
-  Controller eligibility: same-Army profile/loadout presentation. Cyberplug Peripherals can
-  be exposed alongside ordinary selectable Units, so a matching group with an enabled loadout
-  is positive Cyberplug review evidence. Disabled-only embedded Peripheral profile groups also
-  occur for other Peripheral types and are therefore non-diagnostic; absence of selectable
-  exposure does not rule Cyberplug out. This evidence remains review-only and never creates an
-  identity mapping automatically.
+- 2026-09-22: Peripheral source review distinguishes two Army mechanisms. The `peripherals`
+  catalog plus explicit attachments and hidden disabled profile groups is the embedded mechanism;
+  the 2026-09-18 snapshot has all 279 definitions in that form, so same-name enabled/disabled
+  matching is not a Cyberplug discriminator. Independently listed Peripherals instead appear as
+  ordinary `army_units` whose profiles explicitly carry the Army `Peripheral` Skill. The Skill's
+  source extra is direct subtype evidence: extra 41 is `Servant` and extra 374 is `Cyberplug`.
+  Slave Drones (unit 526) and Reinforcement Slave Drones (unit 1617) prove that selectable
+  Unit-backed Peripherals are not Cyberplug-exclusive; Sartroid Ranters/Puzzlers (1885/1886)
+  expose the Cyberplug subtype and Connected/Autonomous profiles through the same Unit-catalog
+  mechanism. Cyberplug-skilled Controllers are audited independently, and same-Army subtype
+  candidates plus raw relation/dependency adjacency remain review evidence rather than automatic
+  Controller mappings.
 
 - 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
   release.** Use the completed N5.3 Wiki/PDF/FAQ audit to enrich data InfinityDB

@@ -14,6 +14,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Add a separate reviewed Army-Peripheral identity contract and validator, pinned to
   source snapshot provenance and intentionally empty until entity/profile mappings are
   individually reviewed; Army labels and `mercs` are not promoted into canonical identity.
+- Extend Peripheral identity coverage to distinguish embedded Peripheral definitions from
+  ordinary Unit-backed Peripherals identified by the source `Peripheral` Skill and its subtype
+  extra, inventory Cyberplug-skilled Controllers even without embedded attachments, and expose
+  same-Army subtype candidates plus raw relation/dependency adjacency as review evidence without
+  inferring Controller mappings.
 
 ### Upgrade notes
 

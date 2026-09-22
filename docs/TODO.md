@@ -130,10 +130,15 @@ in `docs/releasing.md`.
         rule-stated Servant/Cyberplug eligibility predicates. Treat those results as review
         evidence, never automatic type classification; keep types with no generic predicate
         unevaluated.
-      - [x] Add same-Army profile/loadout presentation evidence for Peripheral review. Treat
-        an enabled/selectable matching group as positive Cyberplug evidence, keep disabled-only
-        embedded Peripheral profiles non-diagnostic, and allow canonical entity identity to be
-        reviewed before `typeId` is known.
+      - [x] Characterize same-Army name-matched profile/loadout presentation for embedded
+        Peripheral definitions. The current snapshot proves all 279 definitions are carried by
+        disabled embedded groups, so do not use that mechanism as Cyberplug evidence.
+      - [x] Audit the second Army source mechanism used by independently listed Peripherals:
+        inventory ordinary `army_units` whose profiles explicitly carry the Army `Peripheral`
+        Skill, preserve its source subtype extra (`Servant`, `Cyberplug`, etc.), inventory every
+        Cyberplug-skilled Controller even when no embedded Peripheral is attached, and report
+        same-Army subtype candidates plus raw relation/dependency adjacency as review evidence
+        without interpreting Controller mappings automatically.
       - [ ] Populate the reviewed mappings for the current snapshot until every source
         definition is either resolved to a canonical entity/profile or explicitly retained
         as unresolved review work.

@@ -13,17 +13,20 @@ from typing import Any
 from .peripheral_identities import PeripheralIdentityCurated, PeripheralIdentityError
 
 COVERAGE_FORMAT = "InfinityDB Peripheral identity coverage"
-COVERAGE_FORMAT_VERSION = 3
+COVERAGE_FORMAT_VERSION = 5
 
 _CONTROLLER_GRAPH_TABLES = frozenset(
     {
         "units",
+        "army_units",
         "profiles",
         "loadout_options",
         "profile_peripherals",
         "option_peripherals",
         "profile_skills",
+        "profile_skill_extras",
         "option_skills",
+        "extras",
         "skills",
         "application_catalog_sources",
         "application_domain_slugs",
@@ -185,12 +188,11 @@ def _army_list_presentation_by_definition(
     *,
     include_details: bool,
 ) -> dict[tuple[int, int], dict[str, Any]]:
-    """Report same-Army profile-group exposure without treating names as identity.
+    """Report same-Army name-matched profile groups without treating names as identity.
 
-    A selectable matching profile/loadout is positive review evidence for Cyberplug
-    because Cyberplug Peripherals can be exposed alongside ordinary Army-list units.
-    Disabled-only embedded groups are deliberately kept separate because Army also
-    uses those to carry otherwise non-selectable Peripheral profiles.
+    The 2026-09-18 snapshot showed that all audited ``peripherals`` definitions resolve to
+    disabled embedded groups through this mechanism.  It therefore characterizes the embedded
+    source representation; it is not a discriminator for independently listed Cyberplug Units.
     """
     groups: dict[tuple[int, int, int], dict[str, Any]] = {}
     unit_names = {
@@ -298,13 +300,8 @@ def _army_list_presentation_by_definition(
     return result
 
 
-def _controller_skill_maps(connection: sqlite3.Connection) -> tuple[
-    dict[tuple[int, int, int, int], set[str]],
-    dict[tuple[int, int, int, int], set[str]],
-    dict[tuple[int, int, int], list[set[str]]],
-    dict[int, str],
-]:
-    source_skill_slug = {
+def _source_skill_slug_map(connection: sqlite3.Connection) -> dict[int, str]:
+    return {
         int(row["source_item_id"]): str(row["slug"])
         for row in connection.execute(
             "SELECT acs.source_item_id, ads.slug "
@@ -314,6 +311,15 @@ def _controller_skill_maps(connection: sqlite3.Connection) -> tuple[
             "WHERE acs.catalog = 'skills' AND ads.status = 'resolved' AND ads.slug IS NOT NULL"
         )
     }
+
+
+def _controller_skill_maps(connection: sqlite3.Connection) -> tuple[
+    dict[tuple[int, int, int, int], set[str]],
+    dict[tuple[int, int, int, int], set[str]],
+    dict[tuple[int, int, int], list[set[str]]],
+    dict[int, str],
+]:
+    source_skill_slug = _source_skill_slug_map(connection)
     skill_names = {
         int(row["id"]): str(row["name"])
         for row in connection.execute("SELECT id, name FROM skills")
@@ -358,6 +364,494 @@ def _controller_skill_maps(connection: sqlite3.Connection) -> tuple[
         group_profile_skill_sets[key].append(set(profile_skills.get(profile_key, set())))
 
     return profile_skills, option_skills, group_profile_skill_sets, skill_names
+
+
+
+_RELATION_GRAPH_TABLES = frozenset({"relations", "relation_units", "relation_dependencies"})
+
+
+def _unit_backed_peripheral_evidence(
+    connection: sqlite3.Connection,
+    profile_skills: Mapping[tuple[int, int, int, int], set[str]],
+    option_skills: Mapping[tuple[int, int, int, int], set[str]],
+    group_profile_skill_sets: Mapping[tuple[int, int, int], list[set[str]]],
+    *,
+    include_details: bool,
+) -> tuple[dict[str, Any], dict[tuple[int, int], dict[str, Any]]]:
+    """Inventory ordinary Army Units whose profiles explicitly carry Peripheral Skill.
+
+    The Army source represents these as ordinary selectable Units, independently from the
+    ``peripherals`` attachment catalog.  The Peripheral Skill's source ``extra`` value is a
+    first-class subtype label (for example Servant or Cyberplug), so the audit preserves it
+    directly rather than attempting to infer subtype from Troop Type or unit names.
+    """
+    source_skill_slug = _source_skill_slug_map(connection)
+    peripheral_skill_ids = {
+        item_id for item_id, slug in source_skill_slug.items() if slug == "peripheral"
+    }
+    if not peripheral_skill_ids:
+        return (
+            {
+                "status": "unavailable",
+                "reason": "No resolved Army Skill catalog item for Peripheral was found.",
+                "sourceSkillIds": [],
+            },
+            {},
+        )
+
+    extra_names = {
+        int(row["id"]): str(row["name"] or "")
+        for row in connection.execute("SELECT id, name FROM extras")
+    }
+    extras_by_occurrence: dict[int, list[int]] = defaultdict(list)
+    for row in connection.execute(
+        "SELECT occurrence_id, position, extra_id FROM profile_skill_extras "
+        "ORDER BY occurrence_id, position"
+    ):
+        extras_by_occurrence[int(row["occurrence_id"])].append(int(row["extra_id"]))
+
+    peripheral_by_profile: dict[tuple[int, int, int, int], list[dict[str, Any]]] = defaultdict(list)
+    for row in connection.execute(
+        "SELECT occurrence_id, army_id, unit_id, group_id, profile_id, item_id "
+        "FROM profile_skills ORDER BY army_id, unit_id, group_id, profile_id, position"
+    ):
+        item_id = int(row["item_id"])
+        if item_id not in peripheral_skill_ids:
+            continue
+        key = (
+            int(row["army_id"]),
+            int(row["unit_id"]),
+            int(row["group_id"]),
+            int(row["profile_id"]),
+        )
+        extra_ids = extras_by_occurrence.get(int(row["occurrence_id"]), [])
+        peripheral_by_profile[key].append(
+            {
+                "sourceSkillId": item_id,
+                "extraIds": extra_ids,
+                "extraLabels": [extra_names.get(extra_id) for extra_id in extra_ids],
+            }
+        )
+
+    unit_names = {
+        int(row["id"]): str(row["name"])
+        for row in connection.execute("SELECT id, name FROM units")
+    }
+    availability = {
+        (int(row["army_id"]), int(row["unit_id"])): row["availability_kind"]
+        for row in connection.execute(
+            "SELECT army_id, unit_id, availability_kind FROM army_units"
+        )
+    }
+    profiles_by_unit: dict[tuple[int, int], list[dict[str, Any]]] = defaultdict(list)
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, profile_id, name, type_id FROM profiles "
+        "ORDER BY army_id, unit_id, group_id, profile_id"
+    ):
+        key = (int(row["army_id"]), int(row["unit_id"]))
+        profile_key = (*key, int(row["group_id"]), int(row["profile_id"]))
+        peripheral_occurrences = peripheral_by_profile.get(profile_key, [])
+        profiles_by_unit[key].append(
+            {
+                "groupId": int(row["group_id"]),
+                "profileId": int(row["profile_id"]),
+                "name": str(row["name"] or ""),
+                "typeId": row["type_id"],
+                "skillSlugs": sorted(profile_skills.get(profile_key, set())),
+                "peripheralSkillOccurrences": peripheral_occurrences,
+            }
+        )
+
+    loadouts_by_unit: dict[tuple[int, int], list[dict[str, Any]]] = defaultdict(list)
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, option_id, name, disabled FROM loadout_options "
+        "ORDER BY army_id, unit_id, group_id, option_id"
+    ):
+        key = (int(row["army_id"]), int(row["unit_id"]))
+        option_key = (*key, int(row["group_id"]), int(row["option_id"]))
+        direct = set(option_skills.get(option_key, set()))
+        candidate_sets = [
+            direct | profile_set
+            for profile_set in group_profile_skill_sets.get(
+                (key[0], key[1], int(row["group_id"])), []
+            )
+        ] or [direct]
+        loadouts_by_unit[key].append(
+            {
+                "groupId": int(row["group_id"]),
+                "optionId": int(row["option_id"]),
+                "name": str(row["name"] or ""),
+                "disabled": bool(row["disabled"]),
+                "directSkillSlugs": sorted(direct),
+                "candidateEffectiveSkillSets": [sorted(value) for value in candidate_sets],
+            }
+        )
+
+    evidence: dict[tuple[int, int], dict[str, Any]] = {}
+    for key, profiles in sorted(profiles_by_unit.items()):
+        peripheral_profiles = [
+            profile for profile in profiles if profile["peripheralSkillOccurrences"]
+        ]
+        if not peripheral_profiles:
+            continue
+        other_profiles = [
+            profile for profile in profiles if not profile["peripheralSkillOccurrences"]
+        ]
+        loadouts = loadouts_by_unit.get(key, [])
+        source_extras = sorted(
+            {
+                (extra_id, extra_names.get(extra_id))
+                for profile in peripheral_profiles
+                for occurrence in profile["peripheralSkillOccurrences"]
+                for extra_id in occurrence["extraIds"]
+            },
+            key=lambda item: item[0],
+        )
+        subtype_labels = sorted(
+            {label for _extra_id, label in source_extras if isinstance(label, str) and label}
+        )
+        item: dict[str, Any] = {
+            "armyId": key[0],
+            "unitId": key[1],
+            "unitName": unit_names.get(key[1]),
+            "availabilityKind": availability.get(key),
+            "unitShape": "peripheral-only" if not other_profiles else "mixed-profile-unit",
+            "peripheralProfileCount": len(peripheral_profiles),
+            "otherProfileCount": len(other_profiles),
+            "loadoutCount": len(loadouts),
+            "selectableLoadoutCount": sum(1 for loadout in loadouts if not loadout["disabled"]),
+            "sourceSubtypeExtras": [
+                {"extraId": extra_id, "label": label} for extra_id, label in source_extras
+            ],
+            "sourceSubtypeLabels": subtype_labels,
+            "hasCyberplugSubtype": any(
+                _normalized_review_name(label) == "cyberplug" for label in subtype_labels
+            ),
+            "hasServantSubtype": any(
+                _normalized_review_name(label) == "servant" for label in subtype_labels
+            ),
+        }
+        if include_details:
+            item["peripheralProfiles"] = peripheral_profiles
+            item["otherProfiles"] = other_profiles
+            item["loadouts"] = loadouts
+        evidence[key] = item
+
+    subtype_counts: dict[str, int] = defaultdict(int)
+    for item in evidence.values():
+        labels = item["sourceSubtypeLabels"] or ["<unlabeled>"]
+        for label in labels:
+            subtype_counts[str(label)] += 1
+
+    report: dict[str, Any] = {
+        "status": "available",
+        "sourceSkillIds": sorted(peripheral_skill_ids),
+        "unitOccurrenceCount": len(evidence),
+        "peripheralOnlyUnitOccurrenceCount": sum(
+            1 for item in evidence.values() if item["unitShape"] == "peripheral-only"
+        ),
+        "mixedProfileUnitOccurrenceCount": sum(
+            1 for item in evidence.values() if item["unitShape"] == "mixed-profile-unit"
+        ),
+        "withSelectableLoadoutCount": sum(
+            1 for item in evidence.values() if item["selectableLoadoutCount"] > 0
+        ),
+        "cyberplugSubtypeUnitOccurrenceCount": sum(
+            1 for item in evidence.values() if item["hasCyberplugSubtype"]
+        ),
+        "servantSubtypeUnitOccurrenceCount": sum(
+            1 for item in evidence.values() if item["hasServantSubtype"]
+        ),
+        "sourceSubtypeOccurrenceCounts": dict(sorted(subtype_counts.items())),
+        "interpretation": (
+            "These are ordinary Army-unit occurrences whose profiles explicitly carry the "
+            "Army Peripheral Skill. The Skill's source extra is preserved as direct subtype "
+            "evidence (for example Servant or Cyberplug). This proves that the Unit-catalog "
+            "mechanism is not Cyberplug-exclusive: Servant Units can use it too. Source subtype "
+            "labels are evidence for reviewed rules mapping; they do not by themselves create "
+            "canonical Peripheral identity relationships."
+        ),
+    }
+    if include_details:
+        report["units"] = [evidence[key] for key in sorted(evidence)]
+    return report, evidence
+
+
+def _relation_adjacency(connection: sqlite3.Connection) -> dict[str, Any]:
+    missing = sorted(_RELATION_GRAPH_TABLES - _table_names(connection))
+    if missing:
+        return {"status": "unavailable", "missingTables": missing, "edges": []}
+
+    relation_meta = {
+        (int(row["army_id"]), int(row["relation_id"])): {
+            "minCount": row["min_count"],
+            "maxCount": row["max_count"],
+            "isGroup": bool(row["is_group"]),
+        }
+        for row in connection.execute(
+            "SELECT army_id, relation_id, min_count, max_count, is_group FROM relations"
+        )
+    }
+    relation_units = {
+        (
+            int(row["army_id"]),
+            int(row["relation_id"]),
+            int(row["relation_unit_id"]),
+        ): row
+        for row in connection.execute(
+            "SELECT army_id, relation_id, relation_unit_id, unit_id, profile_id, per_parent "
+            "FROM relation_units"
+        )
+    }
+    edges: list[dict[str, Any]] = []
+    for row in connection.execute(
+        "SELECT army_id, relation_id, relation_unit_id, dependency_id, unit_id, profile_id, "
+        "group_id, min_count, min_dependant, options, raw FROM relation_dependencies "
+        "ORDER BY army_id, relation_id, relation_unit_id, dependency_id"
+    ):
+        owner_key = (
+            int(row["army_id"]),
+            int(row["relation_id"]),
+            int(row["relation_unit_id"]),
+        )
+        owner = relation_units.get(owner_key)
+        if owner is None or owner["unit_id"] is None or row["unit_id"] is None:
+            continue
+        edge = {
+            "armyId": int(row["army_id"]),
+            "relationId": int(row["relation_id"]),
+            "relationUnitId": int(row["relation_unit_id"]),
+            "dependencyId": int(row["dependency_id"]),
+            "fromUnitId": int(owner["unit_id"]),
+            "fromProfileId": owner["profile_id"],
+            "perParent": owner["per_parent"],
+            "toUnitId": int(row["unit_id"]),
+            "toProfileId": row["profile_id"],
+            "toGroupId": row["group_id"],
+            "minCount": row["min_count"],
+            "minDependant": row["min_dependant"],
+            "options": row["options"],
+            "raw": row["raw"],
+            "relation": relation_meta.get((int(row["army_id"]), int(row["relation_id"]))),
+        }
+        edges.append(edge)
+    return {"status": "available", "edgeCount": len(edges), "edges": edges}
+
+
+def _cyberplug_controller_inventory(
+    connection: sqlite3.Connection,
+    profile_skills: Mapping[tuple[int, int, int, int], set[str]],
+    option_skills: Mapping[tuple[int, int, int, int], set[str]],
+    group_profile_skill_sets: Mapping[tuple[int, int, int], list[set[str]]],
+    embedded_controllers: Mapping[tuple[str, int, int, int, int], dict[str, Any]],
+    peripheral_units: Mapping[tuple[int, int], dict[str, Any]],
+    relation_graph: Mapping[str, Any],
+    *,
+    include_details: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Inventory every Cyberplug-skilled Controller, including unattached occurrences."""
+    unit_names = {
+        int(row["id"]): str(row["name"])
+        for row in connection.execute("SELECT id, name FROM units")
+    }
+    profile_names = {
+        (
+            int(row["army_id"]),
+            int(row["unit_id"]),
+            int(row["group_id"]),
+            int(row["profile_id"]),
+        ): str(row["name"] or "")
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, profile_id, name FROM profiles"
+        )
+    }
+    option_names = {
+        (
+            int(row["army_id"]),
+            int(row["unit_id"]),
+            int(row["group_id"]),
+            int(row["option_id"]),
+        ): str(row["name"] or "")
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, option_id, name FROM loadout_options"
+        )
+    }
+
+    controllers: list[dict[str, Any]] = []
+    for key, skills in sorted(profile_skills.items()):
+        if "cyberplug" not in skills:
+            continue
+        controller_key = ("profile", *key)
+        embedded = embedded_controllers.get(controller_key, {}).get("peripherals", [])
+        controllers.append(
+            {
+                "controllerKind": "profile",
+                "armyId": key[0],
+                "unitId": key[1],
+                "unitName": unit_names.get(key[1]),
+                "groupId": key[2],
+                "parentId": key[3],
+                "controllerName": profile_names.get(key, ""),
+                "cyberplugSkillEvidence": "direct",
+                "directSkillSlugs": sorted(skills),
+                "candidateEffectiveSkillSets": [sorted(skills)],
+                "embeddedPeripherals": embedded,
+            }
+        )
+
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, option_id FROM loadout_options "
+        "ORDER BY army_id, unit_id, group_id, option_id"
+    ):
+        key = (
+            int(row["army_id"]),
+            int(row["unit_id"]),
+            int(row["group_id"]),
+            int(row["option_id"]),
+        )
+        direct = set(option_skills.get(key, set()))
+        candidate_sets = [
+            direct | profile_set
+            for profile_set in group_profile_skill_sets.get(key[:3], [])
+        ] or [direct]
+        matching_sets = sum(1 for skills in candidate_sets if "cyberplug" in skills)
+        if not matching_sets:
+            continue
+        if "cyberplug" in direct:
+            origin = "direct"
+        elif matching_sets == len(candidate_sets):
+            origin = "profile-inherited"
+        else:
+            origin = "ambiguous-profile-context"
+        controller_key = ("loadout", *key)
+        embedded = embedded_controllers.get(controller_key, {}).get("peripherals", [])
+        controllers.append(
+            {
+                "controllerKind": "loadout",
+                "armyId": key[0],
+                "unitId": key[1],
+                "unitName": unit_names.get(key[1]),
+                "groupId": key[2],
+                "parentId": key[3],
+                "controllerName": option_names.get(key, ""),
+                "cyberplugSkillEvidence": origin,
+                "directSkillSlugs": sorted(direct),
+                "candidateEffectiveSkillSets": [sorted(skills) for skills in candidate_sets],
+                "embeddedPeripherals": embedded,
+            }
+        )
+
+    cyberplug_peripheral_units = {
+        key: value
+        for key, value in peripheral_units.items()
+        if value.get("hasCyberplugSubtype") is True
+    }
+    peripheral_keys = set(cyberplug_peripheral_units)
+    relation_candidates: list[dict[str, Any]] = []
+    relation_edges = (
+        relation_graph.get("edges", [])
+        if relation_graph.get("status") == "available"
+        else []
+    )
+    controller_unit_keys = {(item["armyId"], item["unitId"]) for item in controllers}
+    seen_paths: set[tuple[int, int, int, int, int]] = set()
+    for edge in relation_edges:
+        army_id = int(edge["armyId"])
+        forward = (army_id, int(edge["fromUnitId"])) in controller_unit_keys and (
+            army_id,
+            int(edge["toUnitId"]),
+        ) in peripheral_keys
+        reverse = (army_id, int(edge["toUnitId"])) in controller_unit_keys and (
+            army_id,
+            int(edge["fromUnitId"]),
+        ) in peripheral_keys
+        if not forward and not reverse:
+            continue
+        controller_unit_id = int(edge["fromUnitId"] if forward else edge["toUnitId"])
+        peripheral_unit_id = int(edge["toUnitId"] if forward else edge["fromUnitId"])
+        path_key = (
+            army_id,
+            int(edge["relationId"]),
+            int(edge["relationUnitId"]),
+            controller_unit_id,
+            peripheral_unit_id,
+        )
+        if path_key in seen_paths:
+            continue
+        seen_paths.add(path_key)
+        relation_candidates.append(
+            {
+                "armyId": army_id,
+                "controllerUnitId": controller_unit_id,
+                "controllerUnitName": unit_names.get(controller_unit_id),
+                "peripheralUnitId": peripheral_unit_id,
+                "peripheralUnitName": unit_names.get(peripheral_unit_id),
+                "direction": (
+                    "relation-member-to-dependency"
+                    if forward
+                    else "dependency-to-relation-member"
+                ),
+                "relationId": edge["relationId"],
+                "relationUnitId": edge["relationUnitId"],
+                "dependencyId": edge["dependencyId"],
+                "relation": edge.get("relation"),
+                "rawEdge": edge if include_details else None,
+            }
+        )
+    if not include_details:
+        for item in relation_candidates:
+            item.pop("rawEdge", None)
+
+    links_by_controller: dict[tuple[int, int], list[dict[str, Any]]] = defaultdict(list)
+    for link in relation_candidates:
+        links_by_controller[(link["armyId"], link["controllerUnitId"])].append(link)
+    cyberplug_units_by_army: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    for (army_id, _unit_id), item in sorted(cyberplug_peripheral_units.items()):
+        cyberplug_units_by_army[army_id].append(item)
+
+    same_army_candidate_count = 0
+    for controller in controllers:
+        links = links_by_controller.get((controller["armyId"], controller["unitId"]), [])
+        controller["peripheralUnitRelationCandidateCount"] = len(links)
+        same_army = cyberplug_units_by_army.get(controller["armyId"], [])
+        controller["sameArmyCyberplugPeripheralCandidateCount"] = len(same_army)
+        same_army_candidate_count += len(same_army)
+        if include_details:
+            controller["peripheralUnitRelationCandidates"] = links
+            controller["sameArmyCyberplugPeripheralCandidates"] = [
+                {
+                    "unitId": item["unitId"],
+                    "unitName": item["unitName"],
+                    "sourceSubtypeExtras": item["sourceSubtypeExtras"],
+                }
+                for item in same_army
+            ]
+
+    report: dict[str, Any] = {
+        "status": "available",
+        "occurrenceCount": len(controllers),
+        "unitOccurrenceCount": len(controller_unit_keys),
+        "withEmbeddedPeripheralAttachmentCount": sum(
+            1 for item in controllers if item["embeddedPeripherals"]
+        ),
+        "withoutEmbeddedPeripheralAttachmentCount": sum(
+            1 for item in controllers if not item["embeddedPeripherals"]
+        ),
+        "relationCandidateCount": len(relation_candidates),
+        "sameArmyCyberplugPeripheralCandidateCount": same_army_candidate_count,
+        "interpretation": (
+            "This inventories every Controller occurrence whose observed effective Skill context "
+            "contains Cyberplug, including occurrences with no row in the embedded Peripheral "
+            "attachment tables. Unit-backed Peripheral profiles whose source Peripheral subtype is "
+            "Cyberplug are surfaced as same-Army review candidates; relation/dependency "
+            "adjacency is "
+            "reported separately when present. Neither candidate set is interpreted as a semantic "
+            "Controller-to-Peripheral link without curated review."
+        ),
+    }
+    if include_details:
+        report["controllers"] = controllers
+    return report, controllers, relation_candidates
 
 
 def _audit_controller_graph(
@@ -411,9 +905,17 @@ def _audit_controller_graph(
         )
     }
 
-    army_list_presentation = _army_list_presentation_by_definition(
+    embedded_presentation = _army_list_presentation_by_definition(
         connection, definitions, include_details=include_details
     )
+    peripheral_unit_report, peripheral_unit_evidence = _unit_backed_peripheral_evidence(
+        connection,
+        profile_skills,
+        option_skills,
+        group_profile_skill_sets,
+        include_details=include_details,
+    )
+    relation_graph = _relation_adjacency(connection)
 
     attachment_evidence: list[dict[str, Any]] = []
     controllers: dict[tuple[str, int, int, int, int], dict[str, Any]] = {}
@@ -537,13 +1039,26 @@ def _audit_controller_graph(
                 }
             ),
             "typeEligibility": type_summary,
-            "armyListPresentation": army_list_presentation.get(
+            "embeddedPresentation": embedded_presentation.get(
                 key,
                 {"status": "not-matched", "matchingGroupCount": 0, "selectableGroupCount": 0},
             ),
         }
         if include_details:
             definition_evidence[key]["controllers"] = attachments
+
+    cyberplug_report, cyberplug_controllers, relation_candidates = (
+        _cyberplug_controller_inventory(
+            connection,
+            profile_skills,
+            option_skills,
+            group_profile_skill_sets,
+            controllers,
+            peripheral_unit_evidence,
+            relation_graph,
+            include_details=include_details,
+        )
+    )
 
     report: dict[str, Any] = {
         "status": "available",
@@ -556,38 +1071,59 @@ def _audit_controller_graph(
             1 for value in definition_evidence.values() if not value["attachmentCount"]
         ),
         "evaluableTypeIds": sorted(type_predicates),
-        "armyListPresentation": {
-            "selectableDefinitionCount": sum(
-                1
-                for value in army_list_presentation.values()
-                if value["status"] == "selectable"
-            ),
-            "embeddedDisabledDefinitionCount": sum(
-                1
-                for value in army_list_presentation.values()
-                if value["status"] == "embedded-disabled"
-            ),
-            "notMatchedDefinitionCount": sum(
-                1
-                for value in army_list_presentation.values()
-                if value["status"] == "not-matched"
-            ),
-            "interpretation": (
-                "A same-Army matching profile group with at least one enabled/selectable loadout "
-                "is strong structural evidence to review the definition as Peripheral (Cyberplug). "
-                "Disabled-only embedded profile groups are used for other Peripheral types too and "
-                "are not Cyberplug evidence. Absence of selectable exposure does not rule "
-                "Cyberplug out."
-            ),
+        "sourceMechanisms": {
+            "embeddedDefinitions": {
+                "definitionCount": len(definitions),
+                "attachmentCount": len(attachment_evidence),
+                "matchingEnabledGroupCount": sum(
+                    1 for value in embedded_presentation.values() if value["status"] == "selectable"
+                ),
+                "embeddedDisabledDefinitionCount": sum(
+                    1
+                    for value in embedded_presentation.values()
+                    if value["status"] == "embedded-disabled"
+                ),
+                "notMatchedDefinitionCount": sum(
+                    1
+                    for value in embedded_presentation.values()
+                    if value["status"] == "not-matched"
+                ),
+                "interpretation": (
+                    "Rows from the Army peripherals table and their explicit profile/loadout "
+                    "attachments form the embedded Peripheral mechanism. Same-name profile-group "
+                    "matching only describes how those embedded definitions are carried; it is not "
+                    "Cyberplug type evidence."
+                ),
+            },
+            "unitBackedPeripheralUnits": peripheral_unit_report,
+            "cyberplugControllers": cyberplug_report,
+            "relationDependencyEvidence": {
+                "status": relation_graph.get("status"),
+                "edgeCount": relation_graph.get("edgeCount", 0),
+                "cyberplugPeripheralCandidateCount": len(relation_candidates),
+                "missingTables": relation_graph.get("missingTables", []),
+                "interpretation": (
+                    "Source relation/dependency edges are reported as raw adjacency only. A path "
+                    "between a Cyberplug-skilled Controller Unit and a Unit-backed Peripheral "
+                    "whose source subtype is Cyberplug is a review candidate, not an inferred "
+                    "semantic identity or Controller link."
+                ),
+            },
         },
         "interpretation": (
             "Controller eligibility is a necessary-condition check only. A 'consistent' result "
             "supports review for that type but does not establish Peripheral type identity. "
-            "Core types whose controller eligibility is not stated are intentionally not evaluated."
+            "Core types whose controller eligibility is not stated are intentionally not "
+            "evaluated. "
+            "Unit-backed Peripheral review uses the explicit Army Peripheral Skill and its source "
+            "subtype extra; it does not infer Peripheral identity from Troop Type or unit names."
         ),
         "definitionEvidence": [definition_evidence[key] for key in sorted(definition_evidence)],
     }
     if include_details:
+        report["sourceMechanisms"]["relationDependencyEvidence"][
+            "cyberplugPeripheralCandidates"
+        ] = relation_candidates
         report["controllerToPeripherals"] = [
             {
                 **controllers[key],
@@ -626,15 +1162,15 @@ def _aggregate_group_controller_evidence(
                 counts[status] += int(type_counts.get(status, 0))
         type_summary[type_id] = counts
     presentation_statuses = [
-        item.get("armyListPresentation", {}).get("status", "not-matched") for item in evidence
+        item.get("embeddedPresentation", {}).get("status", "not-matched") for item in evidence
     ]
     return {
         "attachedDefinitionCount": sum(1 for item in evidence if item.get("attachmentCount", 0)),
         "definitionOnlyCount": sum(1 for item in evidence if not item.get("attachmentCount", 0)),
         "attachmentCount": sum(int(item.get("attachmentCount", 0)) for item in evidence),
         "typeEligibility": type_summary,
-        "armyListPresentation": {
-            "selectableDefinitionCount": presentation_statuses.count("selectable"),
+        "embeddedPresentation": {
+            "matchingEnabledDefinitionCount": presentation_statuses.count("selectable"),
             "embeddedDisabledDefinitionCount": presentation_statuses.count("embedded-disabled"),
             "notMatchedDefinitionCount": presentation_statuses.count("not-matched"),
         },

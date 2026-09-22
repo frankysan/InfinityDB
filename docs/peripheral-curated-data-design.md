@@ -365,15 +365,31 @@ profile Skill set in the same group together with loadout-local Skills and repor
 results as `ambiguous`. Synchronized, Control, and Ancillary remain unevaluated because the
 reviewed core rules state no generic Controller-eligibility predicate for those types.
 
-The coverage pass also checks same-Army presentation from the opposite direction. A Peripheral
-label that matches a profile/loadout group with at least one enabled loadout is reported as
-`selectable`; this is strong structural evidence for reviewing the definition as Peripheral
-(Cyberplug), because Cyberplug Peripherals can be exposed alongside ordinary Army-list Units.
-This signal must distinguish selectable exposure from mere embedded profile data: Army also
-retains disabled-only Peripheral profile groups for other types, so `embedded-disabled` is not
-Cyberplug evidence. `not-matched` is likewise not negative evidence because selectable exposure
-is permitted, not required. Name matching remains a review locator only and never creates the
-canonical mapping by itself.
+The coverage pass now distinguishes two separate Army source mechanisms instead of trying to
+infer Cyberplug from same-name profile groups:
+
+- the `peripherals` catalog plus explicit profile/loadout attachments and hidden disabled profile
+  groups is the **embedded Peripheral mechanism**; and
+- ordinary `army_units` occurrences whose profiles explicitly carry the Army `Peripheral` Skill
+  are a separate **Unit-catalog Peripheral mechanism**. The Skill's source `extra` value is direct
+  subtype evidence rather than display decoration.
+
+The v3 coverage run on the 2026-09-18 snapshot proved why this separation is necessary: all 279
+`peripherals` definitions matched disabled embedded groups and none matched an enabled group.
+That same-name check therefore describes how embedded definitions are carried; it is not
+Cyberplug evidence. Follow-up source review also disproved the initial Troop-Type hypothesis:
+there is no Troop Type named `Peripheral` in the normalized catalog. Instead, source Skill 243
+(`Peripheral`) carries subtype extras. Extra 41 is explicitly named `Servant`; extra 374 is
+explicitly named `Cyberplug`. Slave Drones (unit 526) and Reinforcement Slave Drones (1617) carry
+`Peripheral (Servant)`, while Sartroid Ranters/Puzzlers (1885/1886) carry
+`Peripheral (Cyberplug)` and expose Connected/Autonomous profiles. Therefore selectable
+Unit-backed Peripherals are not Cyberplug-exclusive.
+
+The v5 audit inventories Unit-backed Peripheral occurrences from the explicit Skill, preserves
+their source subtype extras, inventories every Controller occurrence whose effective Skill context
+contains `cyberplug` even when it has no embedded Peripheral attachment, and surfaces same-Army
+`Peripheral (Cyberplug)` Units plus raw `relations` / `relation_dependencies` adjacency as review
+evidence. Neither candidate set is promoted into a semantic Controller mapping automatically.
 
 Canonical entity identity and Peripheral type are therefore reviewed independently. A
 `peripheral:<slug>` entity may exist without `typeId`; once type evidence is sufficient,
@@ -401,9 +417,11 @@ constraints, profile-mode existence, and durable relationships.
 3. Synchronized, Control, and Ancillary do not state a generic Controller-
    eligibility predicate in the reviewed base rule.
 4. Connected/Autonomous proves distinct operating profiles for Cyberplug but does
-   not identify which Army payloads represent those profiles. Selectable same-Army
-   profile/loadout exposure is now a positive Cyberplug review signal, while disabled-only
-   embedded profile groups and absence of exposure are explicitly non-diagnostic.
+   not identify which Army payloads represent those profiles. The embedded `peripherals`
+   mechanism cannot answer that question: all 279 current definitions resolve through hidden
+   disabled groups. Cyberplug review must instead inspect ordinary Army Units carrying
+   `Peripheral (Cyberplug)`, Cyberplug-skilled Controllers, and their same-Army/source-relationship
+   evidence.
 5. The identity-mapping curated category now has an explicit contract and repository
    location under `data/curated/peripherals/`; it remains independent of display identity.
    The unresolved work is evidence-backed population and coverage, not schema location.
@@ -439,10 +457,12 @@ constraints, profile-mode existence, and durable relationships.
    evidence implemented, population pending.** The snapshot-bound validator reports unmapped
    definitions, stale/name-drifted mappings, curated-only targets, repeated-name groups, a
    deterministic review queue, Peripheral -> Controller attachments, Controller -> Peripheral
-   attachments, rule-backed Servant/Cyberplug eligibility consistency, and selectable-vs-disabled
-   same-Army profile exposure as independent Cyberplug review evidence. Reconcile the 279
-   audited source definitions against explicit canonical entities/profiles and leave unresolved
-   cases explicit rather than guessing.
+   attachments, rule-backed Servant/Cyberplug eligibility consistency, the embedded Peripheral
+   presentation path, ordinary Unit-backed Peripheral occurrences with source subtype extras,
+   Cyberplug-skilled Controllers with or without embedded attachments, same-Army subtype
+   candidates, and raw relation/dependency adjacency as independent review evidence. Reconcile
+   both source mechanisms against explicit canonical
+   entities/profiles and leave unresolved cases explicit rather than guessing.
 8. **Materialize curated-derived application relationships.** Join source
    Controller facts, reviewed identity mappings, and curated eligibility rules;
    preserve all provenance and then decide the `infinity.db`/API/UI surface for

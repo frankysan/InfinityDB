@@ -252,8 +252,13 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
         connection.executescript(
             """
             CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE army_units (
+                army_id INTEGER, unit_id INTEGER, availability_kind TEXT
+            );
+            CREATE TABLE troop_types (id INTEGER PRIMARY KEY, name TEXT);
             CREATE TABLE profiles (
-                army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER, name TEXT
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER,
+                name TEXT, type_id INTEGER
             );
             CREATE TABLE loadout_options (
                 army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER,
@@ -268,19 +273,37 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
                 position INTEGER, item_id INTEGER, quantity INTEGER
             );
             CREATE TABLE profile_skills (
-                army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER,
-                item_id INTEGER
+                occurrence_id INTEGER, army_id INTEGER, unit_id INTEGER, group_id INTEGER,
+                profile_id INTEGER, position INTEGER, item_id INTEGER
+            );
+            CREATE TABLE profile_skill_extras (
+                occurrence_id INTEGER, position INTEGER, extra_id INTEGER
             );
             CREATE TABLE option_skills (
                 army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER,
                 item_id INTEGER
             );
             CREATE TABLE skills (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE extras (id INTEGER PRIMARY KEY, name TEXT);
             CREATE TABLE application_catalog_sources (
                 catalog TEXT, application_item_id INTEGER, source_item_id INTEGER
             );
             CREATE TABLE application_domain_slugs (
                 domain TEXT, application_id INTEGER, slug TEXT, status TEXT
+            );
+            CREATE TABLE relations (
+                army_id INTEGER, relation_id INTEGER, min_count INTEGER,
+                max_count INTEGER, is_group INTEGER
+            );
+            CREATE TABLE relation_units (
+                army_id INTEGER, relation_id INTEGER, relation_unit_id INTEGER,
+                unit_id INTEGER, profile_id INTEGER, per_parent INTEGER
+            );
+            CREATE TABLE relation_dependencies (
+                army_id INTEGER, relation_id INTEGER, relation_unit_id INTEGER,
+                dependency_id INTEGER, unit_id INTEGER, profile_id INTEGER,
+                group_id INTEGER, min_count INTEGER, min_dependant INTEGER,
+                options TEXT, raw TEXT
             );
             """
         )
@@ -289,18 +312,33 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
             [
                 (10, "Doctor Controller"),
                 (20, "Cyberplug Controller"),
-                (30, "Selectable Peripheral Unit"),
-                (40, "Embedded Peripheral Unit"),
+                (30, "Listed Cyberplug Peripheral"),
+                (40, "Listed Servant Peripheral"),
             ],
         )
         connection.executemany(
-            "INSERT INTO profiles (army_id, unit_id, group_id, profile_id, name) "
-            "VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO army_units (army_id, unit_id, availability_kind) VALUES (?, ?, ?)",
             [
-                (101, 10, 1, 1, "Doctor Profile"),
-                (101, 20, 1, 1, "Cyberplug Profile"),
-                (101, 30, 1, 1, "UNMAPPED"),
-                (101, 40, 1, 1, "EXAMPLE"),
+                (101, 10, "source"),
+                (101, 20, "source"),
+                (101, 30, "source"),
+                (101, 40, "source"),
+            ],
+        )
+        connection.executemany(
+            "INSERT INTO troop_types (id, name) VALUES (?, ?)",
+            [(1, "Line Troops")],
+        )
+        connection.executemany(
+            "INSERT INTO profiles (army_id, unit_id, group_id, profile_id, name, type_id) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                (101, 10, 1, 1, "Doctor Profile", 1),
+                (101, 10, 2, 1, "EXAMPLE", 1),
+                (101, 20, 1, 1, "Cyberplug Profile", 1),
+                (101, 20, 2, 1, "UNMAPPED", 1),
+                (101, 30, 1, 1, "Listed Cyberplug Peripheral", 1),
+                (101, 40, 1, 1, "Listed Servant Peripheral", 1),
             ],
         )
         connection.executemany(
@@ -308,9 +346,12 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
             "(army_id, unit_id, group_id, option_id, name, disabled) "
             "VALUES (?, ?, ?, ?, ?, ?)",
             [
+                (101, 10, 2, 1, "EXAMPLE", 1),
                 (101, 20, 1, 1, "Cyberplug Loadout", 0),
-                (101, 30, 1, 1, "UNMAPPED", 0),
-                (101, 40, 1, 1, "EXAMPLE", 1),
+                (101, 20, 1, 2, "Cyberplug Unattached", 0),
+                (101, 20, 2, 1, "UNMAPPED", 1),
+                (101, 30, 1, 1, "Listed Cyberplug Peripheral", 0),
+                (101, 40, 1, 1, "Listed Servant Peripheral", 0),
             ],
         )
         connection.execute(
@@ -327,27 +368,63 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
         )
         connection.executemany(
             "INSERT INTO skills (id, name) VALUES (?, ?)",
-            [(10, "Doctor"), (20, "Cyberplug")],
+            [(10, "Doctor"), (20, "Cyberplug"), (30, "Peripheral")],
         )
-        connection.execute(
-            "INSERT INTO profile_skills (army_id, unit_id, group_id, profile_id, item_id) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (101, 10, 1, 1, 10),
+        connection.executemany(
+            "INSERT INTO profile_skills "
+            "(occurrence_id, army_id, unit_id, group_id, profile_id, position, item_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [
+                (1, 101, 10, 1, 1, 1, 10),
+                (2, 101, 30, 1, 1, 1, 30),
+                (3, 101, 40, 1, 1, 1, 30),
+            ],
         )
-        connection.execute(
+        connection.executemany(
+            "INSERT INTO profile_skill_extras (occurrence_id, position, extra_id) "
+            "VALUES (?, ?, ?)",
+            [(2, 1, 374), (3, 1, 41)],
+        )
+        connection.executemany(
+            "INSERT INTO extras (id, name) VALUES (?, ?)",
+            [(41, "Servant"), (374, "Cyberplug")],
+        )
+        connection.executemany(
             "INSERT INTO option_skills (army_id, unit_id, group_id, option_id, item_id) "
             "VALUES (?, ?, ?, ?, ?)",
-            (101, 20, 1, 1, 20),
+            [(101, 20, 1, 1, 20), (101, 20, 1, 2, 20)],
         )
         connection.executemany(
             "INSERT INTO application_catalog_sources "
             "(catalog, application_item_id, source_item_id) VALUES (?, ?, ?)",
-            [("skills", 100, 10), ("skills", 200, 20)],
+            [("skills", 100, 10), ("skills", 200, 20), ("skills", 300, 30)],
         )
         connection.executemany(
             "INSERT INTO application_domain_slugs (domain, application_id, slug, status) "
             "VALUES (?, ?, ?, ?)",
-            [("skills", 100, "doctor", "resolved"), ("skills", 200, "cyberplug", "resolved")],
+            [
+                ("skills", 100, "doctor", "resolved"),
+                ("skills", 200, "cyberplug", "resolved"),
+                ("skills", 300, "peripheral", "resolved"),
+            ],
+        )
+        connection.execute(
+            "INSERT INTO relations (army_id, relation_id, min_count, max_count, is_group) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (101, 7, 1, 1, 0),
+        )
+        connection.execute(
+            "INSERT INTO relation_units "
+            "(army_id, relation_id, relation_unit_id, unit_id, profile_id, per_parent) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (101, 7, 1, 20, None, 0),
+        )
+        connection.execute(
+            "INSERT INTO relation_dependencies "
+            "(army_id, relation_id, relation_unit_id, dependency_id, unit_id, profile_id, "
+            "group_id, min_count, min_dependant, options, raw) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (101, 7, 1, 1, 30, None, None, 1, 1, None, "synthetic"),
         )
         connection.commit()
     finally:
@@ -429,12 +506,54 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
         "rule:peripheral-type:servant",
     ]
 
-    assert graph["armyListPresentation"] == {
-        "selectableDefinitionCount": 1,
-        "embeddedDisabledDefinitionCount": 1,
-        "notMatchedDefinitionCount": 2,
-        "interpretation": graph["armyListPresentation"]["interpretation"],
+    mechanisms = graph["sourceMechanisms"]
+    assert mechanisms["embeddedDefinitions"]["embeddedDisabledDefinitionCount"] == 2
+    assert mechanisms["embeddedDefinitions"]["notMatchedDefinitionCount"] == 2
+
+    peripheral_units = mechanisms["unitBackedPeripheralUnits"]
+    assert peripheral_units["status"] == "available"
+    assert peripheral_units["sourceSkillIds"] == [30]
+    assert peripheral_units["unitOccurrenceCount"] == 2
+    assert peripheral_units["peripheralOnlyUnitOccurrenceCount"] == 2
+    assert peripheral_units["mixedProfileUnitOccurrenceCount"] == 0
+    assert peripheral_units["cyberplugSubtypeUnitOccurrenceCount"] == 1
+    assert peripheral_units["servantSubtypeUnitOccurrenceCount"] == 1
+    assert peripheral_units["sourceSubtypeOccurrenceCounts"] == {
+        "Cyberplug": 1,
+        "Servant": 1,
     }
+    listed = next(row for row in peripheral_units["units"] if row["unitId"] == 30)
+    assert listed["unitShape"] == "peripheral-only"
+    assert listed["selectableLoadoutCount"] == 1
+    assert listed["sourceSubtypeExtras"] == [{"extraId": 374, "label": "Cyberplug"}]
+    servant = next(row for row in peripheral_units["units"] if row["unitId"] == 40)
+    assert servant["sourceSubtypeExtras"] == [{"extraId": 41, "label": "Servant"}]
+
+    cyberplug = mechanisms["cyberplugControllers"]
+    assert cyberplug["occurrenceCount"] == 2
+    assert cyberplug["withEmbeddedPeripheralAttachmentCount"] == 1
+    assert cyberplug["withoutEmbeddedPeripheralAttachmentCount"] == 1
+    assert cyberplug["relationCandidateCount"] == 1
+    assert cyberplug["sameArmyCyberplugPeripheralCandidateCount"] == 2
+    unattached = next(
+        row for row in cyberplug["controllers"] if row["controllerName"] == "Cyberplug Unattached"
+    )
+    assert unattached["embeddedPeripherals"] == []
+    assert unattached["peripheralUnitRelationCandidateCount"] == 1
+    assert unattached["sameArmyCyberplugPeripheralCandidateCount"] == 1
+    assert unattached["sameArmyCyberplugPeripheralCandidates"] == [
+        {
+            "unitId": 30,
+            "unitName": "Listed Cyberplug Peripheral",
+            "sourceSubtypeExtras": [{"extraId": 374, "label": "Cyberplug"}],
+        }
+    ]
+
+    relation_evidence = mechanisms["relationDependencyEvidence"]
+    assert relation_evidence["status"] == "available"
+    assert relation_evidence["cyberplugPeripheralCandidateCount"] == 1
+    assert relation_evidence["cyberplugPeripheralCandidates"][0]["controllerUnitId"] == 20
+    assert relation_evidence["cyberplugPeripheralCandidates"][0]["peripheralUnitId"] == 30
 
     evidence = {
         (row["armyId"], row["peripheralId"]): row for row in graph["definitionEvidence"]
@@ -443,13 +562,13 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
     assert example["typeEligibility"]["rule:peripheral-type:servant"]["consistent"] == 1
     assert example["typeEligibility"]["rule:peripheral-type:cyberplug"]["inconsistent"] == 1
     assert example["controllers"][0]["directSkillSlugs"] == ["doctor"]
-    assert example["armyListPresentation"]["status"] == "embedded-disabled"
+    assert example["embeddedPresentation"]["status"] == "embedded-disabled"
 
     unmapped = evidence[(101, 4)]
     assert unmapped["typeEligibility"]["rule:peripheral-type:cyberplug"]["consistent"] == 1
     assert unmapped["typeEligibility"]["rule:peripheral-type:servant"]["inconsistent"] == 1
-    assert unmapped["armyListPresentation"]["status"] == "selectable"
-    assert unmapped["armyListPresentation"]["matches"][0]["groupSelectableOptionCount"] == 1
+    assert unmapped["embeddedPresentation"]["status"] == "embedded-disabled"
+
     loadout_controller = next(
         row for row in graph["controllerToPeripherals"] if row["controllerKind"] == "loadout"
     )
@@ -463,8 +582,8 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
         review["controllerEvidence"]["typeEligibility"]["rule:peripheral-type:cyberplug"]
         == {"consistent": 1, "inconsistent": 0, "ambiguous": 0, "unknown": 0}
     )
-    assert review["controllerEvidence"]["armyListPresentation"] == {
-        "selectableDefinitionCount": 1,
-        "embeddedDisabledDefinitionCount": 0,
+    assert review["controllerEvidence"]["embeddedPresentation"] == {
+        "matchingEnabledDefinitionCount": 0,
+        "embeddedDisabledDefinitionCount": 1,
         "notMatchedDefinitionCount": 0,
     }
