@@ -938,6 +938,13 @@ compatibility references remain unambiguous JSON integers.
   modes are only `connected`/`autonomous`; `mercs` is rejected as identity data. The
   checked-in current-snapshot contract contains zero mappings intentionally. Population
   and coverage review must happen before any derived application relationship is built.
+- 2026-09-22: The first reviewed Peripheral identity population covers the entire embedded
+  `peripherals` mechanism for the pinned 2026-09-18 snapshot: all 279 definitions map to 56
+  canonical `peripheral:*` entities. The identity boundary is intentionally conservative: one
+  canonical entity per exact source-definition name, no cross-name merging, and no canonical
+  `peripheral-profile:*` records in this pass. Rules type is taken from the matched Army profile's
+  explicit `Peripheral` Skill subtype extra, not controller heuristics or display-name inference.
+  Unit-backed Peripheral identities and concrete Controller relationships remain a separate pass.
 - 2026-09-22: Peripheral source review distinguishes two Army mechanisms. The `peripherals`
   catalog plus explicit attachments and hidden disabled profile groups is the embedded mechanism;
   the 2026-09-18 snapshot has all 279 definitions in that form, so same-name enabled/disabled

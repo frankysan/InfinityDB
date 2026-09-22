@@ -256,8 +256,11 @@ Do not place reviewed Army-definition-to-entity mappings in
 use the separate `data/curated/peripherals/army-identities.json` contract validated by
 `infinity_db.peripheral_identities`. This does not overload the current
 `identities/army-display.json` presentation-identity contract. The checked-in contract
-is pinned to the audited Army snapshot but intentionally has no accepted entity/profile
-mappings until they are individually reviewed.
+is pinned to the audited Army snapshot and now resolves all 279 embedded Peripheral
+definitions to 56 reviewed canonical entities. The first population pass deliberately
+uses one canonical entity per exact source-definition name and does not merge distinct
+source names into shared entities/profiles without separate evidence. No canonical
+Peripheral profiles are created by this pass.
 
 Candidate matching may normalize Unicode NFC, trim and collapse whitespace, and
 case-fold for **reporting/review queues only**. Do not remove punctuation,
@@ -452,18 +455,19 @@ constraints, profile-mode existence, and durable relationships.
 6. **Design the separate reviewed Peripheral identity/mapping contract — complete.**
    `data/curated/peripherals/army-identities.json` defines reviewed canonical entity/profile
    IDs and exact snapshot-local source mappings, with fail-closed validation and no
-   automatic name promotion. The current checked-in mapping set is intentionally empty.
-7. **Populate the reviewed identity mappings — coverage gate and bidirectional Controller
-   evidence implemented, population pending.** The snapshot-bound validator reports unmapped
-   definitions, stale/name-drifted mappings, curated-only targets, repeated-name groups, a
-   deterministic review queue, Peripheral -> Controller attachments, Controller -> Peripheral
-   attachments, rule-backed Servant/Cyberplug eligibility consistency, the embedded Peripheral
-   presentation path, ordinary Unit-backed Peripheral occurrences with source subtype extras,
-   Cyberplug-skilled Controllers with or without embedded attachments, same-Army subtype
-   candidates, and raw relation/dependency adjacency as independent review evidence. Reconcile
-   both source mechanisms against explicit canonical
-   entities/profiles and leave unresolved cases explicit rather than guessing.
-8. **Materialize curated-derived application relationships.** Join source
+   automatic name promotion.
+7. **Populate the reviewed embedded-definition mappings — complete for the current
+   snapshot.** The v5 evidence resolves all 279 embedded definitions to 56 reviewed
+   canonical entities. Each exact source-definition name is kept as its own entity boundary,
+   and its rules type is taken from the matched Army profile's explicit `Peripheral` Skill
+   subtype extra. Distinct source names are not merged into shared entities/profiles in this
+   pass, even when they look like loadout variants.
+8. **Complete the Unit-backed identity/controller relationship pass.** The audit now inventories
+   ordinary Unit-backed Peripheral occurrences with direct subtype evidence, including standalone
+   Servants and Cyberplugs, plus Cyberplug-skilled Controllers and same-Army subtype candidates.
+   Resolve those source occurrences to canonical Peripheral identities and explicit Controller
+   relationships without treating co-occurrence alone as proof.
+9. **Materialize curated-derived application relationships.** Join source
    Controller facts, reviewed identity mappings, and curated eligibility rules;
    preserve all provenance and then decide the `infinity.db`/API/UI surface for
    cross-army Peripheral questions.

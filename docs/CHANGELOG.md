@@ -12,8 +12,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
   Connected/Autonomous profile-mode facts without inferring Army-local Peripheral
   identity.
 - Add a separate reviewed Army-Peripheral identity contract and validator, pinned to
-  source snapshot provenance and intentionally empty until entity/profile mappings are
-  individually reviewed; Army labels and `mercs` are not promoted into canonical identity.
+  source snapshot provenance. The current embedded source mechanism is fully reviewed for
+  the pinned snapshot: 279 Army-local definitions resolve to 56 canonical Peripheral entities
+  with source-native subtype classification, while distinct source names remain separate
+  unless stronger entity/profile evidence exists. Army `mercs` remains contextual data.
 - Extend Peripheral identity coverage to distinguish embedded Peripheral definitions from
   ordinary Unit-backed Peripherals identified by the source `Peripheral` Skill and its subtype
   extra, inventory Cyberplug-skilled Controllers even without embedded attachments, and expose

@@ -139,9 +139,14 @@ in `docs/releasing.md`.
         Cyberplug-skilled Controller even when no embedded Peripheral is attached, and report
         same-Army subtype candidates plus raw relation/dependency adjacency as review evidence
         without interpreting Controller mappings automatically.
-      - [ ] Populate the reviewed mappings for the current snapshot until every source
-        definition is either resolved to a canonical entity/profile or explicitly retained
-        as unresolved review work.
+      - [x] Populate the reviewed mappings for the current embedded-definition snapshot:
+        all 279 `peripherals` rows resolve to 56 canonical entities, with rules type taken
+        from the matched profile's explicit `Peripheral` Skill subtype. Keep distinct source
+        names as distinct entities until separate evidence supports a shared entity/profile
+        boundary.
+      - [ ] Resolve Unit-backed Peripheral occurrences (including standalone Servants and
+        Cyberplugs) to canonical identities and reviewed Controller relationships; same-Army
+        subtype co-occurrence remains evidence, not an automatic Controller mapping.
   - [ ] Audit relation/dependency structures.
     - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as

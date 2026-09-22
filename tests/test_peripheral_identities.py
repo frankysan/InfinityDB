@@ -68,13 +68,18 @@ def _document() -> dict:
     }
 
 
-def test_checked_in_peripheral_identity_contract_is_valid_and_unmapped() -> None:
+def test_checked_in_peripheral_identity_contract_covers_embedded_snapshot() -> None:
     curated = load_peripheral_identity_curated()
 
-    assert curated.entity_count == 0
+    assert curated.entity_count == 56
     assert curated.profile_count == 0
-    assert curated.mapping_count == 0
+    assert curated.mapping_count == 279
     assert curated.document["sources"][0]["id"] == "army-json-20260918-204434"
+    entities = {item["id"]: item for item in curated.document["entities"]}
+    assert entities["peripheral:crabbot"]["typeId"] == "rule:peripheral-type:ancillary"
+    assert entities["peripheral:jackbot"]["typeId"] == "rule:peripheral-type:synchronized"
+    assert entities["peripheral:moriarty"]["typeId"] == "rule:peripheral-type:servant"
+    assert entities["peripheral:antipode"]["typeId"] == "rule:peripheral-type:control"
 
 
 def test_peripheral_identity_contract_accepts_reviewed_entity_profile_and_mapping() -> None:
