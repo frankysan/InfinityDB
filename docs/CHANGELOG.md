@@ -5,80 +5,56 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
-Candidate release: **0.6.3**. Milestone 2B is complete; normal release preparation
-and release-gate validation remain.
+_No unreleased changes._
+
+## [0.6.3] - 2026-09-22
 
 ### Added
 
 - Add reviewed N5.3 rules records for Doctor, Engineer, Cyberplug, Peripheral, and
   all five Peripheral types, including validated controller-eligibility and
-  Connected/Autonomous profile-mode facts without inferring Army-local Peripheral
-  identity.
-- Add a separate reviewed Army-Peripheral identity contract and validator, pinned to
-  source snapshot provenance. The current embedded source mechanism is fully reviewed for
-  the pinned snapshot: 279 Army-local definitions resolve to 56 canonical Peripheral entities
-  with source-native subtype classification, while distinct source names remain separate
-  unless stronger entity/profile evidence exists. The standalone Unit-backed mechanism reuses
-  existing logical-Unit identity instead of creating duplicate Peripheral entities: 17 source
-  Unit IDs resolve to 10 logical Units with reviewed Servant/Cyberplug types. Army `mercs`
-  remains contextual data.
-- Extend Peripheral identity coverage to distinguish embedded Peripheral definitions from
-  ordinary Unit-backed Peripherals identified by the source `Peripheral` Skill and its subtype
-  extra, inventory Cyberplug-skilled Controllers even without embedded attachments, and expose
-  same-Army subtype candidates plus raw relation/dependency adjacency as review evidence. The
-  reviewed current-snapshot Cyberplug relationship is now captured explicitly as an access pool:
-  four qualifying Controller loadout occurrences resolve to the two canonical Sartroid
-  Ranters/Puzzlers logical Units, producing eight validated access edges without inventing fixed
-  Controller ownership.
-- Materialize reviewed Peripheral identity and relationship data into the application database.
-  Unit details can now expose canonical embedded Peripheral attachments, standalone
-  Unit-backed Peripheral type identity, and source-context Cyberplug access pools to canonical
-  Unit targets without runtime dependence on curated source files.
+  Connected/Autonomous profile-mode facts.
+- Add canonical Peripheral identity and relationship data across both embedded and
+  ordinary Unit-backed source mechanisms. InfinityDB now preserves reviewed subtype
+  identity, canonical attachments, standalone Unit-backed Peripheral identity, and
+  Cyberplug Controller access pools without inventing unsupported ownership links.
 - Materialize occurrence-scoped Profile, Loadout, and top-level Unit-option include
-  relationships with canonical loadout targets while preserving the exact source parent/context
-  and keeping include attachment outside reusable payload identity.
-- Extend canonical relation/dependency handling beyond audit-only data. InfinityDB now materializes
-  96 selection-safe Army constraints: all 95 selector-free constraints plus the Jaan Staar/Kiiutan
-  shared max-1 relation whose active-profile selectors are roster-selection-equivalent at Unit level.
-  The 14 deterministic same-Unit profile-group dependency relations remain separately materialized.
-  The seven Traktor Mul/Dozer/Kuryer rows and the Kuang Shi/Celestial Guard cross-source bridge stay
-  explicit source/context data because their overloaded selectors are not safe Unit-level semantics.
-- Add deterministic semantic audits for relation/dependency structures, Fireteam charts, and
-  normalization-only link storage so current source anomalies and non-player-facing joins remain
-  explicit instead of being guessed into application semantics.
-- Add a maintained source-to-presentation completeness audit covering all 70 normalized
-  Army source tables / 441 fields. The first full pass records 10 confirmed player-facing
-  gap families and two explicit semantic-review items, with future work assigned to the
-  0.7.x rules/context, 0.8.x connected-relationship, and 0.9.x completeness directions.
+  relationships, plus 96 selection-safe Unit constraints and 14 deterministic
+  same-Unit profile-group dependency relationships. Selector-ambiguous source rows
+  remain explicit source/context data rather than being guessed into canonical rules.
+- Add deterministic semantic audits for relationships, Fireteams, normalization-only
+  link storage, application/raw database separation, and source-to-presentation
+  completeness. The maintained Army completeness inventory covers all 70 normalized
+  source tables / 441 fields and fails closed when a new source construct has not been
+  classified.
 
 ### Changed
 
 - Physically separate generated Army storage: `infinity.db` now publishes only the
-  self-contained application schema, while `infinity.raw.db` owns the complete queryable
-  normalized source schema plus exact lossless row JSON. Full source-to-canonical checks
-  run against a temporary relational staging database before publication, and runtime
-  validation no longer depends on raw-only tables.
-  On the reviewed production snapshot the rebuilt application database decreased from
-  18,108,416 bytes (17.27 MiB) to 8,138,752 bytes (7.76 MiB), a 55.06% reduction,
-  closely matching the pre-split storage audit while preserving the same source snapshot.
+  self-contained application schema, while `infinity.raw.db` owns the complete
+  queryable normalized source schema plus exact lossless row JSON. Full
+  source-to-canonical checks run against a temporary relational staging database
+  before publication, and runtime validation no longer depends on raw-only tables.
+  On the reviewed production snapshot the application database decreased from
+  18,108,416 bytes (17.27 MiB) to 8,138,752 bytes (7.76 MiB), a 55.06% reduction.
 - Speed up development validation by reusing a template web-test database and running
   pytest through `pytest-xdist` by default. The primary local Windows benchmark dropped
-  the complete 687-test stage from 59.67 seconds serially to 14.13 seconds with automatic
-  worker selection.
+  the complete 687-test stage from 59.67 seconds serially to 14.13 seconds with
+  automatic worker selection.
 - Tune hosted source CI independently from the local default: Ubuntu/Python 3.11 remains
-  the full tests/lint/type/build/rules gate, compatibility matrix legs retain runtime/data
-  checks, and hosted Windows runs pytest serially after automatic xdist workers caused a
-  severe slowdown. The measured workflow recovered from 11:36 to 1:25 after this change.
-- Consolidate completed one-off design/audit documents into the maintained architecture,
-  data-model, rules-semantics, rules-research, backlog, and changelog references, and add
-  the public roadmap direction through 1.0.
+  the full tests/lint/type/build/rules gate, compatibility matrix legs retain runtime/
+  data checks, and hosted Windows runs pytest serially. The measured workflow recovered
+  from 11:36 to 1:25 after this change.
+- Consolidate completed one-off design/audit documents into maintained architecture,
+  data-model, rules-semantics, rules-research, backlog, and changelog references, and
+  define the public roadmap direction through 1.0.
 
 ### Upgrade notes
 
-- Rebuild generated Army databases before deploying the next release. Schema 23 /
-  compatibility revision 31 introduces the physical application/raw database split while
-  retaining materialized include/Peripheral relationships, selection-safe Unit constraints,
-  and reviewed profile-group dependencies; there is no in-place database migration.
+- Rebuild generated Army databases before deploying 0.6.3. Schema 23 / compatibility
+  revision 31 introduces the physical application/raw database split while retaining
+  materialized include/Peripheral relationships, selection-safe Unit constraints, and
+  reviewed profile-group dependencies; there is no in-place database migration.
 
 ## [0.6.2] - 2026-09-21
 

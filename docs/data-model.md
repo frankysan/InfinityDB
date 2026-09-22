@@ -1712,7 +1712,7 @@ represented, operationally consumed, redundant source representation, normalizat
 only structure, or unrepresented player information. The audit fails closed if the
 normalized source schema gains a table/field without a maintained classification.
 
-The schema reviewed for the 0.6.3 candidate contains **70 source tables / 441 source
+The schema released in 0.6.3 contains **70 source tables / 441 source
 fields**. This is deliberately a semantic inventory rather than a count of runtime
 SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canonical
 application facts may live in derived tables, and a fact may be preserved in the API

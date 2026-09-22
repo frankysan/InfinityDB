@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.6.2** (2026-09-21).
+Current release: **0.6.3** (2026-09-22).
 
 ## Guiding principles
 
@@ -49,9 +49,6 @@ are documented in [architecture](docs/architecture.md).
 
 The current direction is deliberately incremental:
 
-- **0.6.3 candidate — Milestone 2B:** the canonical relationship/application
-  groundwork, `infinity.raw.db` separation, and source-to-presentation completeness
-  inventory are complete; normal release preparation remains.
 - **0.7.x — Rules & context:** enrich existing catalog/application data with concise
   rules summaries, official references, classifications, and reviewed semantic
   relationships.

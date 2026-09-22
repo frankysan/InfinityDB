@@ -1,5 +1,8 @@
 """Tests for development version display behavior."""
 
+import tomllib
+from pathlib import Path
+
 import infinity_army_data
 
 
@@ -40,3 +43,11 @@ def test_version_tag_at_head_has_no_unreleased_commits(monkeypatch, tmp_path) ->
     monkeypatch.setattr(infinity_army_data, "_git_output", lambda *_: "0")
 
     assert not infinity_army_data._has_commits_after_version_tag(tmp_path)
+
+
+def test_project_metadata_matches_runtime_version() -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    with (project_root / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)["project"]
+
+    assert project["version"] == infinity_army_data.__version__

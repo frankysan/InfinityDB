@@ -966,9 +966,9 @@ compatibility references remain unambiguous JSON integers.
   candidates plus raw relation/dependency adjacency remain review evidence rather than automatic
   Controller mappings.
 
-- 2026-09-22: **Release direction through 1.0.** Milestone 2B is complete and forms
-  the 0.6.3 candidate: canonical relationships, the raw/application split, and the
-  Army completeness inventory are validated. 0.7.x adds rules/context to existing data; 0.8.x
+- 2026-09-22: **Release direction through 1.0.** Milestone 2B shipped in 0.6.3:
+  canonical relationships, the raw/application split, and the Army completeness
+  inventory are validated. 0.7.x adds rules/context to existing data; 0.8.x
   exposes connected game relationships; 0.9.x closes remaining player-facing gaps and
   focuses on search/navigation/mobile/accessibility/themes; 1.0.0 is the player-data-
   complete reference gate defined in `docs/releasing.md`. Minor-release scope is directional,
@@ -1160,5 +1160,5 @@ compatibility references remain unambiguous JSON integers.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
-- Milestone 2B is therefore complete and forms the 0.6.3 release candidate. The next
-  required work is normal release preparation, not further canonicalization.
+- Milestone 2B shipped in 0.6.3. The next active milestone is 0.7.0 rules-enriched
+  catalog data, not further canonicalization.

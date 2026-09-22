@@ -20,15 +20,11 @@ history retains implementation detail.
 
 ## Current milestone
 
-**Milestone 2B is complete and forms the 0.6.3 release candidate.** Canonical
-relationship coverage, the physical `infinity.raw.db` / application-database split,
-and the maintained Army source-to-presentation completeness inventory are now
-implemented and validated. The next step is normal 0.6.3 release preparation under
-`docs/releasing.md`; the broader web-app consistency audit remains later 0.9.x
-hardening work rather than a 0.6.3 blocker.
-
-The next planned minor release remains **0.7.0 — rules-enriched catalog data**,
-which applies the completed Wiki/PDF/FAQ research to data InfinityDB already exposes.
+The current milestone is **0.7.0 — rules-enriched catalog data**, which applies the
+completed Wiki/PDF/FAQ research to data InfinityDB already exposes. Milestone 2B
+shipped in 0.6.3; its durable canonical-relationship, storage-boundary, and
+source-to-presentation conclusions are maintained in `docs/data-model.md` and
+`docs/CHANGELOG.md`.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
@@ -40,9 +36,6 @@ This roadmap describes product direction, not a rigid promise that every item wi
 land in the named minor release. Detailed implementation work remains in the
 sections below and the durable 1.0 acceptance gate remains in `docs/releasing.md`.
 
-- **0.6.3 candidate — canonical relationships and completeness groundwork.** Milestone
-  2B is complete: canonical relationship coverage, the `infinity.raw.db` application/
-  provenance split, and the source-to-presentation completeness inventory are validated.
 - **0.7.x — Rules & context.** Enrich the existing catalogs and application data with
   concise rules summaries, official references, classifications, variant-aware
   semantics, and reviewed related-item links.
@@ -117,22 +110,6 @@ helps distinguish distinct player-relevant facts from repeated source
 representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
-
-### Milestone 2B closeout
-
-Milestone 2B has no remaining implementation items. Its durable relationship, storage,
-and completeness conclusions are maintained in `docs/data-model.md` and
-`docs/CHANGELOG.md`; release preparation belongs in `docs/releasing.md`. The maintained
-`tools/audit_source_presentation.py` inventory covers all 70 normalized Army source
-tables / 441 fields, records 10 confirmed player-facing gap families and two semantic-
-review items, and fails closed when the source schema gains an unclassified construct.
-Those gaps are carried forward under 0.7.x, 0.8.x, and 0.9.x below.
-
-Completion of every possible deduplication opportunity is **not** itself a
-version-1.0 requirement. Canonicalization blocks 1.0 only where unresolved
-duplication prevents InfinityDB from establishing data correctness,
-distinguishing genuinely different player-relevant facts, or satisfying the
-documented completeness requirements.
 
 ## Release target 0.7.0 — rules-enriched catalog data
 
