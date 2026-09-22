@@ -32,6 +32,10 @@ from ..identities import (
     load_identity_config,
     parse_identity_metadata,
 )
+from ..peripheral_identities import (
+    PeripheralIdentityCurated,
+    peripheral_identity_metadata,
+)
 from .application_armies import materialize_application_armies
 from .application_catalogs import materialize_application_catalogs
 from .application_domain_slugs import materialize_application_domain_slugs
@@ -39,6 +43,7 @@ from .include_relationships import materialize_include_relationships
 from .loadout_payloads import materialize_loadout_payloads
 from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
+from .peripheral_relationships import materialize_peripheral_relationships
 from .profile_payloads import materialize_profile_payloads
 from .schema import (
     APPLICATION_ID,
@@ -231,6 +236,8 @@ def snapshot_metadata(
     data: dict[str, Any],
     identity_config: IdentityConfig,
     reinforcement_matches: Mapping[int, int] | None = None,
+    *,
+    peripheral_identities: PeripheralIdentityCurated | None = None,
 ) -> dict[str, Any]:
     """Return the metadata persisted with both database siblings."""
     metadata = {key: value for key, value in data.items() if key != "tables"}
@@ -240,6 +247,8 @@ def snapshot_metadata(
     )
     metadata["imported_tables"] = list(data["tables"])
     metadata[DATABASE_COMPATIBILITY_KEY] = DATABASE_COMPATIBILITY_VERSION
+    if peripheral_identities is not None:
+        metadata.update(peripheral_identity_metadata(peripheral_identities))
     return metadata
 
 
@@ -280,7 +289,11 @@ def create_raw_archive(
 
 
 def export_database(
-    data: dict[str, Any], path: Path, *, identity_config: IdentityConfig | None = None
+    data: dict[str, Any],
+    path: Path,
+    *,
+    identity_config: IdentityConfig | None = None,
+    peripheral_identities: PeripheralIdentityCurated | None = None,
 ) -> None:
     """Replace ``path`` only after the complete normalized import passes validation.
 
@@ -293,7 +306,12 @@ def export_database(
     table_columns = validate_input(data)
     identity_config = resolve_identity_config(data, identity_config)
     logical_identity = resolve_logical_unit_identity(data, identity_config)
-    metadata = snapshot_metadata(data, identity_config, logical_identity.reinforcement_matches)
+    metadata = snapshot_metadata(
+        data,
+        identity_config,
+        logical_identity.reinforcement_matches,
+        peripheral_identities=peripheral_identities,
+    )
     path = Path(path)
     archive_path = raw_database_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -349,6 +367,7 @@ def export_database(
                 materialize_profile_payloads(connection)
                 materialize_loadout_payloads(connection)
                 materialize_include_relationships(connection)
+                materialize_peripheral_relationships(connection, peripheral_identities)
                 create_indexes(connection)
                 # The frontend database is an immutable snapshot. Persist planner
                 # statistics at build time so read-only connections make informed

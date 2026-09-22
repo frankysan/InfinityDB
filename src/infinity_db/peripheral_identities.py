@@ -14,6 +14,8 @@ from .domain_slugs import validate_typed_domain_id
 
 PERIPHERAL_IDENTITY_FORMAT = "InfinityDB curated Peripheral identities"
 PERIPHERAL_IDENTITY_FORMAT_VERSION = 3
+PERIPHERAL_IDENTITY_METADATA_KEY = "peripheralIdentityCurated"
+PERIPHERAL_IDENTITY_SHA256_METADATA_KEY = "peripheralIdentityCuratedSha256"
 DEFAULT_PERIPHERAL_IDENTITY_CURATED = maintained_curated_path(
     "peripherals", "army-identities.json"
 )
@@ -441,6 +443,45 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
         controller_access_count=len(controller_access),
     )
 
+
+def parse_peripheral_identity_metadata(
+    document: Any, content_sha256: Any
+) -> PeripheralIdentityCurated:
+    """Validate curated Peripheral identities loaded from database metadata."""
+    if not isinstance(content_sha256, str):
+        raise PeripheralIdentityError("Peripheral identity metadata hash must be a string")
+    curated = parse_peripheral_identity_curated(document)
+    if curated.content_sha256 != content_sha256:
+        raise PeripheralIdentityError(
+            "Peripheral identity metadata hash does not match its document"
+        )
+    return curated
+
+
+def peripheral_identity_metadata(curated: PeripheralIdentityCurated) -> dict[str, Any]:
+    """Return reviewed Peripheral provenance persisted with an application database."""
+    return {
+        PERIPHERAL_IDENTITY_METADATA_KEY: curated.document,
+        PERIPHERAL_IDENTITY_SHA256_METADATA_KEY: curated.content_sha256,
+    }
+
+
+def peripheral_identity_source_for_snapshot(
+    curated: PeripheralIdentityCurated, snapshot_sha256: object
+) -> str | None:
+    """Return the unique curated source ID matching one Army snapshot digest."""
+    if not isinstance(snapshot_sha256, str) or not snapshot_sha256:
+        return None
+    matches = [
+        source["id"]
+        for source in curated.document["sources"]
+        if str(source.get("sha256", "")).casefold() == snapshot_sha256.casefold()
+    ]
+    if len(matches) > 1:
+        raise PeripheralIdentityError(
+            "Peripheral identity data has multiple sources for the same Army snapshot"
+        )
+    return matches[0] if matches else None
 
 def load_peripheral_identity_curated(
     path: Path = DEFAULT_PERIPHERAL_IDENTITY_CURATED,

@@ -61,8 +61,8 @@ are diagnostic observations, not proof that name alone is canonical identity.
 | Peripheral base rule | Curated rules record | Defines common Controller/Peripheral behavior. |
 | Peripheral type | Curated rules record | The five types have materially different behavior and restrictions. |
 | Controller eligibility | Structured curated rule fact | Eligibility is a rules fact, not inferable from Army attachment tables. |
-| Peripheral entity | Future canonical application abstraction | An Army-local name/ID does not by itself prove global identity. |
-| Peripheral profile | Future canonical application abstraction plus curated semantics where needed | Connected/Autonomous and other profile distinctions must not be collapsed into entity identity. |
+| Peripheral entity | Reviewed canonical application identity | An Army-local name/ID does not by itself prove global identity; only reviewed mappings promote it. |
+| Peripheral profile | Optional reviewed canonical profile identity | Connected/Autonomous and other profile distinctions must not be collapsed into entity identity. |
 | Army Peripheral definition | Army source/context data | `(army_id, peripheral_id)` is source-local and list-contextual. |
 | Explicit attachment | Army source relationship | A profile/loadout can explicitly bring a Peripheral. |
 | Definition-only availability | Army source/context evidence | Presence without a normalized attachment is a distinct source mechanism, not proof of controller eligibility. |
@@ -280,7 +280,7 @@ FAQ ruling (curated) --clarifies--> base rule/type
 
 Army (source) --defines--> army-local Peripheral
 Army profile/loadout (source) --explicitly attaches--> army-local Peripheral
-reviewed identity mapping (future curated) --resolves--> canonical Peripheral entity
+reviewed identity mapping (curated) --resolves--> canonical Peripheral entity
 canonical Peripheral entity --uses--> Peripheral type
 canonical Peripheral entity --has--> Peripheral profile
 
@@ -290,9 +290,23 @@ application derivation --joins source Controller facts + curated rules-->
 
 Source edges retain exact source identity and context, including
 `(army_id, peripheral_id)`, position, quantity, `mercs`, raw fallback, and source
-provenance. Curated rules retain official-document provenance. Future reviewed
+provenance. Curated rules retain official-document provenance. Reviewed
 identity mappings retain their own evidence. A derived application relationship
 must not erase any of those layers.
+
+### Current application materialization
+
+Schema 19 consumes this reviewed contract during Army database export when the contract's
+source SHA-256 matches the normalized snapshot. The contract document/hash are pinned into
+`infinity.db` metadata, and materialized tables preserve embedded source mappings, reviewed
+Unit-backed logical-Unit types, and source-context Controller access pools. The repository
+reads those tables only; it does not open curated JSON at runtime. Database validation
+rechecks exact source names, logical-Unit resolution, Unit-backed subtype evidence, Cyberplug
+Controller occurrence/Skill evidence, and same-Army target-pool completeness.
+
+For the current snapshot, Cyberplug Controller access consists of four loadout occurrences
+and eight edges to the canonical Ranters/Puzzlers logical Units. This is an access/selection
+pool and must not be presented as fixed Controller ownership.
 
 ## Validation strategy
 

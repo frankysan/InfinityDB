@@ -27,12 +27,16 @@ Entries describe meaningful release outcomes rather than detailed implementation
   four qualifying Controller loadout occurrences resolve to the two canonical Sartroid
   Ranters/Puzzlers logical Units, producing eight validated access edges without inventing fixed
   Controller ownership.
+- Materialize reviewed Peripheral identity and relationship data into the application database.
+  Unit details can now expose canonical embedded Peripheral attachments, standalone
+  Unit-backed Peripheral type identity, and source-context Cyberplug access pools to canonical
+  Unit targets without runtime dependence on curated source files.
 
 ### Upgrade notes
 
-- Rebuild generated Army databases before deploying the next release. Schema 18 /
-  compatibility revision 26 adds materialized include relationships with canonical
-  loadout targets; there is no in-place database migration.
+- Rebuild generated Army databases before deploying the next release. Schema 19 /
+  compatibility revision 27 retains materialized include relationships and adds the reviewed
+  Peripheral application relationship layer; there is no in-place database migration.
 
 ## [0.6.2] - 2026-09-21
 

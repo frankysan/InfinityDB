@@ -978,3 +978,22 @@ def test_peripheral_identity_coverage_detects_unit_backed_drift(tmp_path: Path) 
     assert report["validation"]["unitSourceNameDriftCount"] == 1
     assert report["validation"]["unitLogicalIdentityDriftCount"] == 1
     assert report["validation"]["unitTypeDriftCount"] == 1
+
+
+def test_peripheral_identity_metadata_round_trips_and_rejects_hash_mismatch() -> None:
+    from infinity_db.peripheral_identities import (
+        parse_peripheral_identity_metadata,
+        peripheral_identity_metadata,
+    )
+
+    curated = parse_peripheral_identity_curated(_document())
+    metadata = peripheral_identity_metadata(curated)
+
+    restored = parse_peripheral_identity_metadata(
+        metadata["peripheralIdentityCurated"],
+        metadata["peripheralIdentityCuratedSha256"],
+    )
+    assert restored.content_sha256 == curated.content_sha256
+
+    with pytest.raises(PeripheralIdentityError, match="hash does not match"):
+        parse_peripheral_identity_metadata(curated.document, "0" * 64)

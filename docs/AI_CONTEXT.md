@@ -976,7 +976,6 @@ compatibility references remain unambiguous JSON integers.
   Preserve the symbol/source occurrence and resolve it to the canonical Equipment
   identity without inventing a textual source row.
 
-
 ### Milestone 2B Peripheral identity boundary (2026-09-22)
 
 - Embedded Army `peripherals` rows use reviewed `peripheral:*` identities; current snapshot
@@ -996,3 +995,14 @@ compatibility references remain unambiguous JSON integers.
   assigning a specific Sartroid to a specific Controller. Curated Peripheral identity format v3
   therefore records reviewed `controllerAccess` pools from source-context Controller occurrences
   to canonical logical Units and validates Controller name/type/target-pool drift separately.
+
+- 2026-09-22: Milestone 2B Peripheral identity/relationship research is now materialized in
+  the Army application database. Schema 19 / compatibility revision 27 pins the reviewed
+  Peripheral contract/hash into database metadata and persists 56 current embedded entities,
+  279 source-definition mappings, 17 Unit-backed source mappings to 10 logical Units, four
+  Cyberplug Controller access occurrences, and eight access-pool edges to canonical Ranters/
+  Puzzlers targets. Repository Unit details expose embedded Peripheral attachments,
+  Unit-backed `peripheral_type_ids`, and per-profile/loadout `peripheral_access` targets.
+  Runtime reads do not open `data/curated/peripherals`; database validation rechecks the
+  materialized rows against retained source context. Cyberplug access remains a selection pool,
+  never fixed ownership.

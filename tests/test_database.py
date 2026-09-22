@@ -3297,3 +3297,90 @@ def test_application_domain_slug_lookup_rejects_unknown_domains(
         database.application_slug("profiles", 1)
     with pytest.raises(ValueError, match="Unknown slug domain"):
         database.application_id_for_slug("profiles", "trooper")
+
+
+def test_database_materializes_and_exposes_reviewed_embedded_peripheral(
+    tmp_path: Path, normalized: dict
+) -> None:
+    from infinity_db.peripheral_identities import parse_peripheral_identity_curated
+
+    data = copy.deepcopy(normalized)
+    data["_meta"]["snapshotArchiveSha256"] = "a" * 64
+    curated = parse_peripheral_identity_curated(
+        {
+            "format": "InfinityDB curated Peripheral identities",
+            "formatVersion": 3,
+            "sources": [
+                {
+                    "id": "army-json-test",
+                    "kind": "army-snapshot",
+                    "artifact": "JSON test.zip",
+                    "sha256": "a" * 64,
+                    "acquiredAt": "2026-09-22T06:00:00+02:00",
+                    "authority": "primary",
+                }
+            ],
+            "entities": [
+                {
+                    "id": "peripheral:drone",
+                    "name": "Drone",
+                    "typeId": "rule:peripheral-type:servant",
+                    "review": {"status": "reviewed", "reviewedOn": "2026-09-22"},
+                }
+            ],
+            "profiles": [],
+            "mappings": [
+                {
+                    "id": "peripheral-mapping:army-101-1",
+                    "sourceId": "army-json-test",
+                    "armyId": 101,
+                    "peripheralId": 1,
+                    "sourceName": "Drone",
+                    "entityId": "peripheral:drone",
+                    "review": {
+                        "status": "reviewed",
+                        "reviewedOn": "2026-09-22",
+                        "reason": "Reviewed test mapping.",
+                    },
+                }
+            ],
+            "unitMappings": [],
+            "controllerAccess": [],
+        }
+    )
+    path = tmp_path / "army.sqlite3"
+
+    export_database(data, path, peripheral_identities=curated)
+
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT id, name, type_id FROM application_peripheral_entities"
+        ).fetchall() == [
+            ("peripheral:drone", "Drone", "rule:peripheral-type:servant")
+        ]
+        assert connection.execute(
+            "SELECT army_id, peripheral_id, entity_id FROM application_peripheral_sources"
+        ).fetchall() == [(101, 1, "peripheral:drone")]
+    finally:
+        connection.close()
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    first_army = next(army for army in details["armies"] if army["id"] == 101)
+    assert first_army["profiles"][0]["peripherals"] == [
+        {
+            "id": "peripheral:drone",
+            "name": "Drone",
+            "type_id": "rule:peripheral-type:servant",
+            "quantity": 1,
+        }
+    ]
+    assert first_army["loadouts"][0]["peripherals"] == [
+        {
+            "id": "peripheral:drone",
+            "name": "Drone",
+            "type_id": "rule:peripheral-type:servant",
+            "quantity": 1,
+        }
+    ]

@@ -1764,7 +1764,7 @@ quantity differences. The shared unit-option rows resolve unambiguously in the a
 snapshot, but their target source option can still acquire different canonical payloads
 when Army-contextual loadout semantics differ.
 
-Schema version 18 / compatibility revision 26 therefore materializes include
+Schema version 19 / compatibility revision 27 retains the schema-18 include
 relationships without promoting the attachment into reusable payload identity:
 
 - `profile_occurrence_includes` keeps the exact Profile occurrence as parent context and
@@ -1782,20 +1782,36 @@ variant. Source-local target coordinates remain provenance in the retained sourc
 representation; application relationships use canonical target identities while keeping
 all contextual parent attachment, quantity, and raw fallback data explicit.
 
-Peripherals require a separate boundary. The same snapshot has 279 army-local
-definitions / 56 names and 818 resolved loadout attachments, with no profile
-attachments and no definition-only rows. All 279 definitions are referenced by at
-least one loadout attachment. Forty-one names span multiple raw identities and
-three names vary in source `mercs` context. Most importantly, 22 repeated
-canonical loadout payloads have different semantic Peripheral attachment
-signatures (32 differ when representation/context fields are included). Therefore
-Peripheral attachment cannot yet be moved blindly onto the canonical loadout
-payload, and name remains only a diagnostic grouping candidate until the separate
-reviewed source-to-Peripheral identity/profile mapping is defined.
+Peripherals use a separate reviewed identity/relationship layer because Army combines
+several source mechanisms. The pinned 2026-09-18 snapshot has 279 embedded army-local
+definitions resolved to 56 reviewed `peripheral:*` entities, plus 17 standalone
+Unit-backed source IDs resolved through the existing logical-Unit layer to 10 logical
+Units. Unit-backed type comes from the source `Peripheral` Skill subtype rather than a
+parallel Peripheral entity namespace.
 
-Controller eligibility is not represented by these Army relationships and must
-enter through reviewed curated rules data. The current design for that rules side
-is documented in `docs/peripheral-curated-data-design.md`.
+Schema 19 materializes this reviewed layer in the frontend database rather than leaving
+it in build-time curated JSON only:
+
+- `application_peripheral_entities` / `application_peripheral_profiles` store canonical
+  reviewed embedded identities used by the selected snapshot;
+- `application_peripheral_sources` resolves exact `(army_id, peripheral_id)` source
+  definitions to those canonical identities;
+- `application_peripheral_unit_sources` records reviewed source-Unit -> logical-Unit
+  Peripheral typing without duplicating logical Unit identity; and
+- `application_peripheral_controller_access` plus
+  `application_peripheral_controller_targets` preserve source-context Controller
+  occurrences and their canonical Unit-backed access pools.
+
+The current Cyberplug relationship is an access pool, not fixed ownership: four reviewed
+loadout occurrences in Armies 601/605 each target the canonical Sartroid Ranters and
+Puzzlers logical Units available in that Army context, for eight materialized edges.
+There are no source relation/dependency edges selecting one Sartroid for one Controller.
+The full reviewed contract and hash are pinned into database metadata; database validation
+reconstructs these rows against the retained Army source context and fails on source-name,
+logical-identity, subtype, Controller, or target-pool drift. Repository Unit details expose
+canonical embedded attachments, Unit-backed type IDs, and Controller access targets without
+reading `data/curated/` at runtime. Rules semantics remain separately cited in `rules.db`;
+`infinity.db` stores only the reviewed application relationship IDs needed to join them.
 
 ### Application catalog identity and metadata context
 
@@ -2038,8 +2054,8 @@ derived frontend tables so generated application structure cannot be supplied as
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 18 and the application
-compatibility revision is 26. Imports build temporary sibling files, check
+records its schema version. The current schema version is 19 and the application
+compatibility revision is 27. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

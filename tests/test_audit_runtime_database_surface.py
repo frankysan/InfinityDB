@@ -113,14 +113,14 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
 
     assert report["summary"] == {
         "surfaceCount": 29,
-        "runtimeTableCount": 50,
-        "runtimeFieldCount": 200,
+        "runtimeTableCount": 57,
+        "runtimeFieldCount": 232,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 200,
-        "role:canonical_application:fieldCount": 115,
-        "role:contextual_application:fieldCount": 62,
+        "issue:none:fieldCount": 232,
+        "role:canonical_application:fieldCount": 118,
+        "role:contextual_application:fieldCount": 91,
         "role:intentional_source_representation:fieldCount": 23,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
@@ -154,6 +154,18 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "application_catalog_items", "name")["role"] == CANONICAL
     assert _field(report, "application_domain_slugs", "slug")["role"] == CANONICAL
     assert _field(report, "application_catalog_sources", "source_item_id")["role"] == CONTEXTUAL
+    assert _field(report, "application_peripheral_entities", "name")["role"] == CANONICAL
+    assert (
+        _field(report, "application_peripheral_sources", "peripheral_id")["role"]
+        == CONTEXTUAL
+    )
+    assert _field(report, "option_peripherals", "item_id")["role"] == CONTEXTUAL
+    assert (
+        _field(report, "application_peripheral_controller_targets", "target_logical_unit_id")[
+            "role"
+        ]
+        == CONTEXTUAL
+    )
     assert _field(report, "army_lists", "kind")["role"] == SOURCE
     assert "metadata_factions" not in observed_tables
     assert _field(report, "unit_options", "name")["role"] == SOURCE

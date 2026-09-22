@@ -17,7 +17,10 @@ from .curated import load_curated_directory, load_curated_document
 from .database import export_database, raw_database_path
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
-from .peripheral_identities import load_peripheral_identity_curated
+from .peripheral_identities import (
+    load_peripheral_identity_curated,
+    peripheral_identity_source_for_snapshot,
+)
 from .peripheral_identity_coverage import audit_peripheral_identity_coverage
 from .rules_database import export_rules_database
 from .source_anomalies import (
@@ -50,7 +53,18 @@ def _validate_source_anomaly_baseline(source: Path) -> None:
 def _export(source: Path, destination: Path) -> None:
     with source.open(encoding="utf-8") as handle:
         normalized = json.load(handle)
-    export_database(normalized, destination)
+    peripheral_identities = load_peripheral_identity_curated()
+    normalized_meta = normalized.get("_meta")
+    snapshot_sha256 = (
+        normalized_meta.get("snapshotArchiveSha256")
+        if isinstance(normalized_meta, dict)
+        else None
+    )
+    if peripheral_identity_source_for_snapshot(peripheral_identities, snapshot_sha256) is None:
+        peripheral_identities = None
+    export_database(
+        normalized, destination, peripheral_identities=peripheral_identities
+    )
     print(f"Database ready: {destination}")
     print(f"Raw archive ready: {raw_database_path(destination)}")
 

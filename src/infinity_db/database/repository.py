@@ -44,6 +44,7 @@ from .application_catalogs import validate_application_catalogs
 from .application_domain_slugs import validate_application_domain_slugs
 from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
+from .peripheral_relationships import validate_peripheral_relationships
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -969,6 +970,7 @@ class Database:
                 )
 
             validate_include_relationships(connection)
+            validate_peripheral_relationships(connection)
 
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
@@ -2240,6 +2242,40 @@ class Database:
                 profile_item = merged_profiles.get(profile_key) if profile_key is not None else None
                 if profile_item is not None:
                     profile_item["characteristics"].append({"name": characteristic["name"]})
+            profile_peripheral_rows = connection.execute(
+                "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, "
+                "a.entity_id, e.name, e.type_id, p.quantity "
+                "FROM profile_peripherals AS p "
+                "JOIN application_peripheral_sources AS a "
+                "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
+                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                f"WHERE p.unit_id IN ({placeholders}) "
+                "ORDER BY p.army_id, p.group_id, p.profile_id, p.position, p.unit_id",
+                source_ids,
+            )
+            for peripheral in profile_peripheral_rows:
+                profile_key = profile_merge_keys_by_source.get(
+                    (
+                        peripheral["unit_id"],
+                        peripheral["army_id"],
+                        peripheral["group_id"],
+                        peripheral["profile_id"],
+                    )
+                )
+                profile_item = (
+                    merged_profiles.get(profile_key) if profile_key is not None else None
+                )
+                if profile_item is not None:
+                    append_unique_item(
+                        profile_item.setdefault("peripherals", []),
+                        {
+                            "id": peripheral["entity_id"],
+                            "name": peripheral["name"],
+                            "type_id": peripheral["type_id"],
+                            "quantity": peripheral["quantity"],
+                        },
+                    )
+
             loadout_rows = connection.execute(
                 "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, lp.name, "
                 "lpo.points, lpo.swc, lp.minis, lp.disabled "
@@ -2401,11 +2437,105 @@ class Database:
                                 "extras": extras_by_occurrence.get(occurrence_key, []),
                             },
                         )
+            loadout_peripheral_rows = connection.execute(
+                "SELECT p.unit_id, p.army_id, p.group_id, p.option_id, "
+                "a.entity_id, e.name, e.type_id, p.quantity "
+                "FROM option_peripherals AS p "
+                "JOIN application_peripheral_sources AS a "
+                "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
+                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                f"WHERE p.unit_id IN ({placeholders}) "
+                "ORDER BY p.army_id, p.group_id, p.option_id, p.position, p.unit_id",
+                source_ids,
+            )
+            for peripheral in loadout_peripheral_rows:
+                loadout_key = loadout_keys_by_source.get(
+                    (
+                        peripheral["unit_id"],
+                        peripheral["army_id"],
+                        peripheral["group_id"],
+                        peripheral["option_id"],
+                    )
+                )
+                loadout_item = (
+                    loadout_items.get(loadout_key) if loadout_key is not None else None
+                )
+                if loadout_item is not None:
+                    append_unique_item(
+                        loadout_item.setdefault("peripherals", []),
+                        {
+                            "id": peripheral["entity_id"],
+                            "name": peripheral["name"],
+                            "type_id": peripheral["type_id"],
+                            "quantity": peripheral["quantity"],
+                        },
+                    )
+
+            access_rows = connection.execute(
+                "SELECT a.id, a.controller_kind, a.army_id, a.unit_id, a.group_id, "
+                "a.parent_id, a.type_id, a.relationship, t.target_logical_unit_id, "
+                "lu.name AS target_name, ds.slug AS target_slug "
+                "FROM application_peripheral_controller_access AS a "
+                "JOIN application_peripheral_controller_targets AS t ON t.access_id = a.id "
+                "JOIN logical_units AS lu ON lu.id = t.target_logical_unit_id "
+                "LEFT JOIN application_domain_slugs AS ds "
+                "ON ds.domain = 'units' AND ds.application_id = t.target_logical_unit_id "
+                f"WHERE a.unit_id IN ({placeholders}) "
+                "ORDER BY a.army_id, a.unit_id, a.group_id, a.parent_id, "
+                "a.id, t.target_logical_unit_id",
+                source_ids,
+            )
+            access_items: dict[str, dict[str, Any]] = {}
+            for access in access_rows:
+                access_item = access_items.get(access["id"])
+                if access_item is None:
+                    access_item = {
+                        "id": access["id"],
+                        "type_id": access["type_id"],
+                        "relationship": access["relationship"],
+                        "targets": [],
+                    }
+                    access_items[access["id"]] = access_item
+                    source_key = (
+                        access["unit_id"],
+                        access["army_id"],
+                        access["group_id"],
+                        access["parent_id"],
+                    )
+                    if access["controller_kind"] == "profile":
+                        merge_key = profile_merge_keys_by_source.get(source_key)
+                        parent_item = (
+                            merged_profiles.get(merge_key) if merge_key is not None else None
+                        )
+                    else:
+                        merge_key = loadout_keys_by_source.get(source_key)
+                        parent_item = (
+                            loadout_items.get(merge_key) if merge_key is not None else None
+                        )
+                    if parent_item is not None:
+                        parent_item.setdefault("peripheral_access", []).append(access_item)
+                access_item["targets"].append(
+                    {
+                        "id": access["target_logical_unit_id"],
+                        "slug": access["target_slug"],
+                        "name": access["target_name"],
+                    }
+                )
+
+            peripheral_type_ids = [
+                row[0]
+                for row in connection.execute(
+                    "SELECT DISTINCT type_id FROM application_peripheral_unit_sources "
+                    "WHERE logical_unit_id = ? ORDER BY type_id",
+                    (group["id"],),
+                )
+            ]
+
             main_faction = faction_groups.get(group["main_army_id"])
             display_faction = faction_identities.get(group["display_army_id"])
             for army in armies:
                 del army["_occurrence_key"]
-        return {
+        result = {
             "id": group["id"],
             "name": group["name"],
             "isc": group["isc"],
@@ -2425,4 +2555,7 @@ class Database:
             "source_ids": source_ids,
             "armies": armies,
         }
+        if peripheral_type_ids:
+            result["peripheral_type_ids"] = peripheral_type_ids
+        return result
 

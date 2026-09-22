@@ -107,7 +107,7 @@ in `docs/releasing.md`.
     meaningful relationship between those endpoints; materialize occurrence-scoped include
     relationships with canonical loadout targets without promoting contextual attachments
     into payload identity.
-  - [ ] Complete the Peripheral rules/identity work described in
+  - [x] Complete the Peripheral rules/identity work described in
     `docs/peripheral-curated-data-design.md`.
     - [x] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
       Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; keep
@@ -117,7 +117,7 @@ in `docs/releasing.md`.
       `data/curated/peripherals/`, with canonical entity/profile IDs, explicit Army snapshot
       coordinates, review evidence, and fail-closed validation; do not overload the display-
       identity contract or write Wiki/rules knowledge into Army source tables.
-    - [ ] Review and populate the source-to-Peripheral identity mappings for the current
+    - [x] Review and populate the source-to-Peripheral identity mappings for the current
       snapshot, then materialize curated-derived controller-eligibility and cross-army
       Peripheral relationships only after mapping coverage and rules vocabulary are both
       validated.
@@ -154,6 +154,10 @@ in `docs/releasing.md`.
         each target the canonical Ranters/Puzzlers logical Units available in that Army
         context. Keep relation/dependency rows as separate provenance; the current snapshot
         exposes no edge selecting one Sartroid for one Controller.
+      - [x] Materialize the reviewed Peripheral identity/relationship layer in `infinity.db`:
+        canonical embedded Peripheral mappings, reviewed Unit-backed logical-Unit types, and
+        source-context Controller access pools. Repository Unit details expose canonical
+        embedded attachments and Controller targets without reading curated JSON at runtime.
   - [ ] Audit relation/dependency structures.
     - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as
@@ -229,7 +233,6 @@ version-1.0 requirement. Canonicalization blocks 1.0 only where unresolved
 duplication prevents InfinityDB from establishing data correctness,
 distinguishing genuinely different player-relevant facts, or satisfying the
 documented completeness requirements.
-
 
 ## Release target 0.7.0 — rules-enriched catalog data
 

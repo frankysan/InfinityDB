@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 18
+SCHEMA_VERSION = 19
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 26
+DATABASE_COMPATIBILITY_VERSION = 27
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -465,6 +465,40 @@ DERIVED_TABLES = {
         ref("target_army_id", "army_lists", "id"),
         ref("target_loadout_payload_id", "loadout_payloads", "id"),
     ),
+    "application_peripheral_entities": table(
+        "id",
+        "name type_id",
+    ),
+    "application_peripheral_profiles": table(
+        "id",
+        "entity_id name mode",
+        ref("entity_id", "application_peripheral_entities", "id"),
+    ),
+    "application_peripheral_sources": table(
+        "army_id peripheral_id",
+        "entity_id profile_id source_id source_name",
+        ref("army_id peripheral_id", "peripherals", "army_id id"),
+        ref("entity_id", "application_peripheral_entities", "id"),
+        ref("profile_id", "application_peripheral_profiles", "id"),
+    ),
+    "application_peripheral_unit_sources": table(
+        "source_unit_id",
+        "logical_unit_id type_id source_id source_name",
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "application_peripheral_controller_access": table(
+        "id",
+        "source_id controller_kind army_id unit_id group_id parent_id source_name "
+        "type_id relationship",
+        ref("army_id unit_id", "army_units"),
+    ),
+    "application_peripheral_controller_targets": table(
+        "access_id target_logical_unit_id",
+        "",
+        ref("access_id", "application_peripheral_controller_access", "id"),
+        ref("target_logical_unit_id", "logical_units", "id"),
+    ),
 }
 
 DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
@@ -541,6 +575,26 @@ INDEXES = (
     ("unit_option_skills_item", "unit_option_skills", "item_id"),
     ("unit_option_equipment_item", "unit_option_equipment", "item_id"),
     ("unit_option_weapons_item", "unit_option_weapons", "item_id"),
+    (
+        "application_peripheral_sources_entity",
+        "application_peripheral_sources",
+        "entity_id, army_id, peripheral_id",
+    ),
+    (
+        "application_peripheral_unit_sources_logical",
+        "application_peripheral_unit_sources",
+        "logical_unit_id, source_unit_id",
+    ),
+    (
+        "application_peripheral_controller_access_unit",
+        "application_peripheral_controller_access",
+        "unit_id, army_id, group_id, parent_id",
+    ),
+    (
+        "application_peripheral_controller_targets_target",
+        "application_peripheral_controller_targets",
+        "target_logical_unit_id, access_id",
+    ),
 )
 
 

@@ -153,9 +153,11 @@ information derived from identified external sources and retains source
 provenance. `data/curated/rules/` is consumed by the rules-database build, while
 `data/curated/identities/` contains reviewed source-derived presentation
 relationships consumed during Army normalization. `data/curated/peripherals/` owns
-the independent reviewed mapping from Army-local Peripheral definitions to future
-canonical Peripheral entities/profiles; its checked-in contract is validated but is
-not yet consumed by Army normalization or runtime queries. `data/curated/snapshot-notes/`
+the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed
+Peripheral occurrences to canonical application identities. It is consumed during Army
+database export when its pinned snapshot provenance matches the normalized source; the
+validated contract is copied into database metadata and runtime queries consume only the
+materialized application tables, not the working-tree curated JSON. `data/curated/snapshot-notes/`
 is a separate human-annotation contract and is not an application input.
 
 This is not a requirement to make every constant configurable. Values that
@@ -650,10 +652,12 @@ than a one-off slug scheme. The rules side is represented in the existing curate
 rules collection: Doctor, Engineer, Cyberplug, and Peripheral are canonical Skill records
 and the five N5.3 Peripheral types are validated `rule` records with explicit controller-
 eligibility facts. The separate `data/curated/peripherals/army-identities.json` contract
-now defines how future reviewed `peripheral:*` / `peripheral-profile:*` identities are
-authored and tied to exact Army snapshot coordinates. The current contract is empty by
-design: InfinityDB still must not infer either identity merely from an Army label. Only
-explicit reviewed mappings may make those domains application identities.
+owns reviewed `peripheral:*` identities for embedded Army Peripheral definitions, reviewed
+source-Unit mappings onto existing logical Units for Unit-backed Peripherals, and
+source-context Cyberplug Controller access pools. Schema 19 consumes the contract only
+when its pinned snapshot hash matches, stores the contract/hash in database metadata, and
+materializes canonical application relationships so runtime repository reads never infer
+identity from Army labels or open curated JSON.
 
 ## Snapshot acquisition and provenance
 
@@ -1045,8 +1049,8 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 18 and database compatibility revision
-26; it rejects incompatible databases with a rebuild
+application database has schema version 19 and database compatibility revision
+27; it rejects incompatible databases with a rebuild
 instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of
