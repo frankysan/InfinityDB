@@ -31,6 +31,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
   Unit details can now expose canonical embedded Peripheral attachments, standalone
   Unit-backed Peripheral type identity, and source-context Cyberplug access pools to canonical
   Unit targets without runtime dependence on curated source files.
+- Extend the canonical relationship audit to normalized relation/dependency structures and
+  Reinforcement Section context. The audit now resolves relation endpoints through logical-Unit
+  identity without discarding source-context selection constraints, reports unresolved
+  relation-only Unit references explicitly, and verifies all ordinary-Army -> Reinforcement
+  Section parent links against the materialized application layer.
 
 ### Upgrade notes
 

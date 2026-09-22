@@ -1006,3 +1006,20 @@ compatibility references remain unambiguous JSON integers.
   Runtime reads do not open `data/curated/peripherals`; database validation rechecks the
   materialized rows against retained source context. Cyberplug access remains a selection pool,
   never fixed ownership.
+
+### Milestone 2B relation/dependency audit boundary (2026-09-22)
+
+- The schema-19 snapshot has 126 normalized relations, 250 relation members, and 14 dependency
+  rows. 118 relations resolve every Unit endpoint through logical-Unit identity; eight contain
+  one of five relation-only source placeholder IDs (165, 613, 749, 1503, 1509) and must remain
+  unresolved until independent evidence identifies them. Do not infer those identities from the
+  relation partner alone.
+- Same logical Unit is not evidence that a relation is normalization-only. Ninety-seven resolved
+  relations collapse to one logical-Unit endpoint set, including ordinary/Reinforcement selection
+  constraints that remain player-relevant after identity canonicalization. Twenty-one resolved
+  relations span multiple logical Units. Profile/group/options/perParent/min/minDependant
+  selectors remain source-local semantics pending review.
+- Reinforcement Section parent context is already complete in the application layer: 46/46
+  source ordinary-Army links materialize canonically with no missing or unexpected edges. The 12
+  source reinforcement lists reconcile to 11 application Reinforcement identities because the
+  reviewed 998/999 alias shares application identity 999.

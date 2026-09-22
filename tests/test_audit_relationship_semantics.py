@@ -42,7 +42,124 @@ def _fixture_database(tmp_path: Path) -> Path:
                 }
             ),
         )
-        _insert(connection, "logical_unit_sources", source_unit_id=1, logical_unit_id=10)
+        for source_unit_id, logical_unit_id in ((1, 10), (2, 10), (3, 30), (4, 40)):
+            _insert(
+                connection,
+                "logical_unit_sources",
+                source_unit_id=source_unit_id,
+                logical_unit_id=logical_unit_id,
+            )
+        for unit_id, name in ((1, "Alpha"), (2, "Alpha REINF"), (3, "Beta"), (4, "Gamma")):
+            _insert(
+                connection,
+                "units",
+                id=unit_id,
+                name=name,
+                source_defined=1,
+                source_role="standard",
+            )
+        _insert(connection, "army_lists", id=101, name="Army", kind="army", reinforcement_id=199)
+        _insert(
+            connection,
+            "army_lists",
+            id=199,
+            name="Reinforcement Pool",
+            kind="reinforcement",
+            reinforcement_id=None,
+        )
+        _insert(
+            connection,
+            "application_armies",
+            id=101,
+            name="Army",
+            role="main",
+            playable=1,
+        )
+        _insert(
+            connection,
+            "application_armies",
+            id=199,
+            name="Reinforcement Pool",
+            role="reinforcement",
+            playable=1,
+        )
+        _insert(
+            connection,
+            "application_army_sources",
+            application_army_id=101,
+            source_army_id=101,
+        )
+        _insert(
+            connection,
+            "application_army_sources",
+            application_army_id=199,
+            source_army_id=199,
+        )
+        _insert(
+            connection,
+            "application_army_reinforcement_parents",
+            reinforcement_army_id=199,
+            parent_army_id=101,
+        )
+        _insert(
+            connection,
+            "relations",
+            army_id=101,
+            relation_id=1,
+            position=1,
+            min_count=1,
+            max_count=1,
+            is_group=0,
+        )
+        for relation_unit_id, unit_id in ((1, 1), (2, 2)):
+            _insert(
+                connection,
+                "relation_units",
+                army_id=101,
+                relation_id=1,
+                relation_unit_id=relation_unit_id,
+                position=relation_unit_id,
+                unit_id=unit_id,
+                profile_id=None,
+                per_parent=None,
+            )
+        _insert(
+            connection,
+            "relations",
+            army_id=101,
+            relation_id=2,
+            position=2,
+            min_count=1,
+            max_count=2,
+            is_group=1,
+        )
+        _insert(
+            connection,
+            "relation_units",
+            army_id=101,
+            relation_id=2,
+            relation_unit_id=1,
+            position=1,
+            unit_id=3,
+            profile_id=2,
+            per_parent=1,
+        )
+        _insert(
+            connection,
+            "relation_dependencies",
+            army_id=101,
+            relation_id=2,
+            relation_unit_id=1,
+            dependency_id=1,
+            position=1,
+            unit_id=4,
+            profile_id=1,
+            group_id=2,
+            min_count=1,
+            min_dependant=2,
+            options="[7,8]",
+            raw=None,
+        )
 
         for army_id in (101, 102):
             _insert(
@@ -213,6 +330,12 @@ def test_relationship_audit_resolves_includes_and_exposes_context(tmp_path: Path
         "unmappedParentRowCount": 0,
         "unresolvedTargetRowCount": 0,
     }
+    assert report["relations"]["relationCount"] == 2
+    assert report["relations"]["singleLogicalEndpointSetRelationCount"] == 1
+    assert report["relations"]["crossLogicalEndpointSetRelationCount"] == 1
+    assert report["relations"]["dependencyCount"] == 1
+    assert report["reinforcementSections"]["missingCanonicalParentLinkCount"] == 0
+    assert report["reinforcementSections"]["materializedCanonicalParentLinkCount"] == 1
     assert report["includes"]["loadout"]["parentPayloadInvariance"] == {
         "status": "contextual_variants",
         "affectedCanonicalParentPayloadCount": 1,
@@ -247,6 +370,18 @@ def test_relationship_audit_details_preserve_evidence(tmp_path: Path) -> None:
     shared = report["includes"]["unitOption"]["rows"][0]
     assert shared["targetArmyIds"] == [101, 102]
     assert shared["targetPayloadIds"] == [100, 101]
+    relation = report["relations"]["relations"][1]
+    assert relation["armyId"] == 101
+    assert relation["members"][0]["logicalUnitId"] == 30
+    assert relation["members"][0]["dependencies"][0]["logicalUnitId"] == 40
+    reinforcement = report["reinforcementSections"]["parentLinks"][0]
+    assert reinforcement == {
+        "parentSourceArmyId": 101,
+        "parentApplicationArmyId": 101,
+        "reinforcementSourceArmyId": 199,
+        "reinforcementApplicationArmyId": 199,
+        "materialized": True,
+    }
     repeated = report["peripherals"]["repeatedCandidateDefinitions"]
     assert repeated == [
         {
@@ -301,4 +436,4 @@ def test_relationship_audit_cli_writes_report(tmp_path: Path) -> None:
     assert main([str(database), "--output", str(output)]) == 0
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["format"] == "InfinityDB relationship semantics audit"
-    assert report["formatVersion"] == 2
+    assert report["formatVersion"] == 3

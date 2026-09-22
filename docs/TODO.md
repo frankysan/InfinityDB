@@ -159,10 +159,23 @@ in `docs/releasing.md`.
         source-context Controller access pools. Repository Unit details expose canonical
         embedded attachments and Controller targets without reading curated JSON at runtime.
   - [ ] Audit relation/dependency structures.
-    - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
+    - [x] Inventory the current normalized relation/dependency graph after logical-Unit
+      canonicalization. The pinned snapshot contains 126 relations, 250 member rows, and
+      14 dependency rows. 118 relations resolve completely to canonical Unit identities;
+      eight retain unresolved source endpoints because five relation-referenced Unit IDs are
+      source placeholders without ordinary Unit definitions in this snapshot. Preserve those
+      unresolved IDs explicitly rather than guessing an identity.
+    - [x] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as
       selectable catalog Section/pool contexts, not independently legal Army
-      Lists, and retain section-specific profile/AVA occurrence provenance.
+      Lists, and retain section-specific profile/AVA occurrence provenance. The current
+      application layer reproduces all 46 source parent links with no missing or unexpected
+      canonical edges.
+    - [ ] Split the generic source relation graph into reviewed application semantics before
+      materialization: same-logical cross-context selection constraints, cross-logical shared
+      choice/quota constraints, and profile/dependency constraints must remain distinct. Keep
+      Army-local `profile`, `group`, `options`, `perParent`, `min`, and `minDependant` selectors
+      contextual until each selector's meaning is resolved; do not flatten them into Unit facts.
   - [ ] Audit Fireteam structures.
     - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
       preserve Fireteam type quotas, named Fireteams, type membership, min/max

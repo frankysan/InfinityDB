@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB relationship semantics audit"
-REPORT_FORMAT_VERSION = 2
+REPORT_FORMAT_VERSION = 3
 
 REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     "profile_includes": (
@@ -98,6 +98,20 @@ REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     ),
     "loadout_payloads": ("id", "logical_unit_id", "payload_sha256", "name", "minis", "disabled"),
     "logical_unit_sources": ("source_unit_id", "logical_unit_id"),
+
+    "relations": ("army_id", "relation_id", "position", "min_count", "max_count", "is_group"),
+    "relation_units": (
+        "army_id", "relation_id", "relation_unit_id", "position", "unit_id", "profile_id", "per_parent"
+    ),
+    "relation_dependencies": (
+        "army_id", "relation_id", "relation_unit_id", "dependency_id", "position",
+        "unit_id", "profile_id", "group_id", "min_count", "min_dependant", "options", "raw",
+    ),
+    "units": ("id", "name", "source_defined", "source_role"),
+    "army_lists": ("id", "name", "kind", "reinforcement_id"),
+    "application_armies": ("id", "name", "role", "playable"),
+    "application_army_sources": ("application_army_id", "source_army_id"),
+    "application_army_reinforcement_parents": ("reinforcement_army_id", "parent_army_id"),
     "__infinity_metadata": ("key", "value"),
 }
 
@@ -570,6 +584,304 @@ def _audit_peripherals(
     return result
 
 
+def _relation_shape_key(row: sqlite3.Row, member_count: int, dependency_count: int) -> tuple[Any, ...]:
+    return (
+        row["min_count"],
+        row["max_count"],
+        row["is_group"],
+        member_count,
+        dependency_count,
+    )
+
+
+def _audit_relation_structures(
+    connection: sqlite3.Connection,
+    *,
+    source_logical: dict[int, int],
+    include_details: bool,
+) -> dict[str, Any]:
+    relation_rows = _fetch_rows(connection, "relations")
+    member_rows = _fetch_rows(connection, "relation_units")
+    dependency_rows = _fetch_rows(connection, "relation_dependencies")
+    unit_rows = {row["id"]: row for row in _fetch_rows(connection, "units")}
+    army_names = {row["id"]: row["name"] for row in _fetch_rows(connection, "army_lists")}
+
+    members_by_relation: dict[tuple[int, int], list[sqlite3.Row]] = defaultdict(list)
+    for row in member_rows:
+        members_by_relation[(row["army_id"], row["relation_id"])].append(row)
+    dependencies_by_member: dict[tuple[int, int, int], list[sqlite3.Row]] = defaultdict(list)
+    for row in dependency_rows:
+        dependencies_by_member[
+            (row["army_id"], row["relation_id"], row["relation_unit_id"])
+        ].append(row)
+
+    unresolved_member_rows = [row for row in member_rows if row["unit_id"] not in source_logical]
+    unresolved_dependency_rows = [
+        row for row in dependency_rows if row["unit_id"] not in source_logical
+    ]
+    source_placeholder_member_rows = [
+        row
+        for row in member_rows
+        if row["unit_id"] in unit_rows and not unit_rows[row["unit_id"]]["source_defined"]
+    ]
+
+    shape_counts: dict[tuple[Any, ...], int] = defaultdict(int)
+    fully_resolved = 0
+    unresolved_relations = 0
+    single_logical = 0
+    cross_logical = 0
+    details: list[dict[str, Any]] = []
+    signatures: dict[tuple[Any, ...], set[int]] = defaultdict(set)
+
+    for relation in relation_rows:
+        key = (relation["army_id"], relation["relation_id"])
+        members = sorted(members_by_relation.get(key, ()), key=lambda row: row["position"] or 0)
+        dependency_count = sum(
+            len(dependencies_by_member[(row["army_id"], row["relation_id"], row["relation_unit_id"])])
+            for row in members
+        )
+        shape_counts[_relation_shape_key(relation, len(members), dependency_count)] += 1
+        logical_ids = [source_logical.get(row["unit_id"]) for row in members]
+        dependency_logical_ids = [
+            source_logical.get(dep["unit_id"])
+            for member in members
+            for dep in dependencies_by_member[
+                (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            ]
+        ]
+        resolved = all(value is not None for value in logical_ids + dependency_logical_ids)
+        if resolved:
+            fully_resolved += 1
+            distinct = set(logical_ids + dependency_logical_ids)
+            if len(distinct) == 1:
+                single_logical += 1
+            elif len(distinct) > 1:
+                cross_logical += 1
+        else:
+            unresolved_relations += 1
+
+        signature_members: list[tuple[Any, ...]] = []
+        detail_members: list[dict[str, Any]] = []
+        for member in members:
+            member_key = (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            deps = sorted(dependencies_by_member[member_key], key=lambda row: row["position"] or 0)
+            canonical_unit = source_logical.get(member["unit_id"])
+            signature_deps = tuple(
+                (
+                    source_logical.get(dep["unit_id"]),
+                    dep["unit_id"] if source_logical.get(dep["unit_id"]) is None else None,
+                    dep["profile_id"],
+                    dep["group_id"],
+                    dep["min_count"],
+                    dep["min_dependant"],
+                    dep["options"],
+                    dep["raw"],
+                )
+                for dep in deps
+            )
+            signature_members.append(
+                (
+                    canonical_unit,
+                    member["unit_id"] if canonical_unit is None else None,
+                    member["profile_id"],
+                    member["per_parent"],
+                    signature_deps,
+                )
+            )
+            if include_details:
+                unit = unit_rows.get(member["unit_id"])
+                detail_members.append(
+                    {
+                        "relationUnitId": member["relation_unit_id"],
+                        "sourceUnitId": member["unit_id"],
+                        "sourceUnitName": unit["name"] if unit is not None else None,
+                        "sourceDefined": bool(unit["source_defined"]) if unit is not None else None,
+                        "logicalUnitId": canonical_unit,
+                        "profileSelector": member["profile_id"],
+                        "perParent": member["per_parent"],
+                        "dependencies": [
+                            {
+                                "sourceUnitId": dep["unit_id"],
+                                "logicalUnitId": source_logical.get(dep["unit_id"]),
+                                "profileSelector": dep["profile_id"],
+                                "groupSelector": dep["group_id"],
+                                "minCount": dep["min_count"],
+                                "minDependant": dep["min_dependant"],
+                                "options": dep["options"],
+                                "raw": dep["raw"],
+                            }
+                            for dep in deps
+                        ],
+                    }
+                )
+        signatures[
+            (relation["min_count"], relation["max_count"], relation["is_group"], tuple(signature_members))
+        ].add(relation["army_id"])
+        if include_details:
+            details.append(
+                {
+                    "armyId": relation["army_id"],
+                    "armyName": army_names.get(relation["army_id"]),
+                    "relationId": relation["relation_id"],
+                    "minCount": relation["min_count"],
+                    "maxCount": relation["max_count"],
+                    "isGroup": bool(relation["is_group"]),
+                    "resolution": "complete" if resolved else "unresolved_source_endpoint",
+                    "canonicalLogicalUnitIds": sorted(
+                        value
+                        for value in set(logical_ids + dependency_logical_ids)
+                        if value is not None
+                    ),
+                    "members": detail_members,
+                }
+            )
+
+    repeated_signatures = [armies for armies in signatures.values() if len(armies) > 1]
+    result: dict[str, Any] = {
+        "relationCount": len(relation_rows),
+        "memberCount": len(member_rows),
+        "dependencyCount": len(dependency_rows),
+        "fullyResolvedRelationCount": fully_resolved,
+        "unresolvedRelationCount": unresolved_relations,
+        "singleLogicalEndpointSetRelationCount": single_logical,
+        "crossLogicalEndpointSetRelationCount": cross_logical,
+        "memberEndpointResolution": {
+            "resolvedCount": len(member_rows) - len(unresolved_member_rows),
+            "unresolvedCount": len(unresolved_member_rows),
+            "unresolvedSourceUnitIds": sorted({row["unit_id"] for row in unresolved_member_rows}),
+            "sourcePlaceholderRowCount": len(source_placeholder_member_rows),
+        },
+        "dependencyEndpointResolution": {
+            "resolvedCount": len(dependency_rows) - len(unresolved_dependency_rows),
+            "unresolvedCount": len(unresolved_dependency_rows),
+            "unresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unresolved_dependency_rows}
+            ),
+        },
+        "selectors": {
+            "memberProfileSelectorCount": sum(row["profile_id"] is not None for row in member_rows),
+            "memberPerParentCount": sum(row["per_parent"] is not None for row in member_rows),
+            "dependencyProfileSelectorCount": sum(
+                row["profile_id"] is not None for row in dependency_rows
+            ),
+            "dependencyGroupSelectorCount": sum(
+                row["group_id"] is not None for row in dependency_rows
+            ),
+            "dependencyMinCountCount": sum(
+                row["min_count"] is not None for row in dependency_rows
+            ),
+            "dependencyMinDependantCount": sum(
+                row["min_dependant"] is not None for row in dependency_rows
+            ),
+            "dependencyOptionsCount": sum(row["options"] is not None for row in dependency_rows),
+            "dependencyRawFallbackCount": sum(_raw_present(row["raw"]) for row in dependency_rows),
+        },
+        "shapeCounts": [
+            {
+                "minCount": key[0],
+                "maxCount": key[1],
+                "isGroup": bool(key[2]),
+                "memberCount": key[3],
+                "dependencyCount": key[4],
+                "relationCount": value,
+            }
+            for key, value in sorted(shape_counts.items(), key=lambda item: repr(item[0]))
+        ],
+        "canonicalSignatureCount": len(signatures),
+        "canonicalSignaturesRepeatedAcrossArmies": len(repeated_signatures),
+        "interpretation": (
+            "Relation rows are source-context selection/composition constraints. Canonicalizing "
+            "member Unit identities does not make a relation redundant: same-logical endpoint "
+            "sets can still constrain ordinary versus Reinforcement occurrences or profile-level "
+            "forms. Profile/group/options selectors remain source-local until their semantics are "
+            "resolved independently."
+        ),
+    }
+    if include_details:
+        result["relations"] = details
+    return result
+
+
+def _audit_reinforcement_sections(
+    connection: sqlite3.Connection, *, include_details: bool
+) -> dict[str, Any]:
+    army_rows = _fetch_rows(connection, "army_lists")
+    application_armies = {row["id"]: row for row in _fetch_rows(connection, "application_armies")}
+    source_to_application = {
+        row["source_army_id"]: row["application_army_id"]
+        for row in _fetch_rows(connection, "application_army_sources")
+    }
+    materialized = {
+        (row["reinforcement_army_id"], row["parent_army_id"])
+        for row in _fetch_rows(connection, "application_army_reinforcement_parents")
+    }
+    expected: set[tuple[int, int]] = set()
+    unresolved: list[dict[str, int]] = []
+    details: list[dict[str, Any]] = []
+    for row in army_rows:
+        reinforcement_source = row["reinforcement_id"]
+        if row["kind"] == "reinforcement" or reinforcement_source is None:
+            continue
+        parent_application = source_to_application.get(row["id"])
+        reinforcement_application = source_to_application.get(reinforcement_source)
+        if parent_application is None or reinforcement_application is None:
+            unresolved.append(
+                {"parentSourceArmyId": row["id"], "reinforcementSourceArmyId": reinforcement_source}
+            )
+            continue
+        edge = (reinforcement_application, parent_application)
+        expected.add(edge)
+        if include_details:
+            details.append(
+                {
+                    "parentSourceArmyId": row["id"],
+                    "parentApplicationArmyId": parent_application,
+                    "reinforcementSourceArmyId": reinforcement_source,
+                    "reinforcementApplicationArmyId": reinforcement_application,
+                    "materialized": edge in materialized,
+                }
+            )
+    missing = expected - materialized
+    unexpected = materialized - expected
+    reinforcement_apps = [row for row in application_armies.values() if row["role"] == "reinforcement"]
+    role_mismatch = [
+        row["id"]
+        for row in reinforcement_apps
+        if not row["playable"]
+    ]
+    result: dict[str, Any] = {
+        "sourceReinforcementSectionCount": sum(row["kind"] == "reinforcement" for row in army_rows),
+        "applicationReinforcementSectionCount": len(reinforcement_apps),
+        "sourceParentLinkCount": sum(
+            row["kind"] != "reinforcement" and row["reinforcement_id"] is not None
+            for row in army_rows
+        ),
+        "expectedCanonicalParentLinkCount": len(expected),
+        "materializedCanonicalParentLinkCount": len(materialized),
+        "missingCanonicalParentLinkCount": len(missing),
+        "unexpectedCanonicalParentLinkCount": len(unexpected),
+        "unresolvedSourceMappingCount": len(unresolved),
+        "nonSelectableReinforcementApplicationCount": len(role_mismatch),
+        "interpretation": (
+            "Application role=reinforcement represents a selectable Reinforcement Section/pool "
+            "attached to one or more ordinary Army contexts, not an independently legal Army "
+            "List. Source list/profile/AVA occurrences remain contextual evidence."
+        ),
+    }
+    if include_details:
+        result["parentLinks"] = details
+        result["missingCanonicalParentLinks"] = [
+            {"reinforcementArmyId": edge[0], "parentArmyId": edge[1]}
+            for edge in sorted(missing)
+        ]
+        result["unexpectedCanonicalParentLinks"] = [
+            {"reinforcementArmyId": edge[0], "parentArmyId": edge[1]}
+            for edge in sorted(unexpected)
+        ]
+        result["unresolvedSourceMappings"] = unresolved
+    return result
+
+
 def audit_database(path: Path, *, include_details: bool = False) -> dict[str, Any]:
     if not path.is_file():
         raise RelationshipSemanticsAuditError(f"Database does not exist: {path}")
@@ -632,6 +944,12 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
             },
             "includes": includes,
             "peripherals": _audit_peripherals(connection, include_details=include_details),
+            "relations": _audit_relation_structures(
+                connection, source_logical=source_logical, include_details=include_details
+            ),
+            "reinforcementSections": _audit_reinforcement_sections(
+                connection, include_details=include_details
+            ),
         }
     except sqlite3.Error as exc:
         raise RelationshipSemanticsAuditError(f"Could not audit {path}: {exc}") from exc
@@ -642,8 +960,8 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Audit deferred include/peripheral relationship semantics, including canonical "
-            "include-target resolution and parent-payload invariance."
+            "Audit deferred relationship semantics, including canonical include-target resolution, "
+            "relation/dependency endpoint resolution, and Reinforcement-section context."
         )
     )
     parser.add_argument("database", type=Path, help="Path to infinity.db")

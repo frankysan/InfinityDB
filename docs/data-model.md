@@ -1813,6 +1813,38 @@ canonical embedded attachments, Unit-backed type IDs, and Controller access targ
 reading `data/curated/` at runtime. Rules semantics remain separately cited in `rules.db`;
 `infinity.db` stores only the reviewed application relationship IDs needed to join them.
 
+#### Generic relation/dependency evidence
+
+The Milestone 2B relationship audit now resolves the normalized `relations`,
+`relation_units`, and `relation_dependencies` graph against logical-Unit identity before any
+application schema is designed. In the pinned 2026-09-18 snapshot the graph contains 126
+relations, 250 member rows, and 14 dependency rows. Of those relations, 118 resolve every
+member/dependency Unit endpoint canonically; eight retain unresolved member endpoints because
+Army references five Unit IDs (`165`, `613`, `749`, `1503`, and `1509`) that have no ordinary
+Unit definition in the selected snapshot. All 14 dependency Unit endpoints resolve.
+
+Canonical identity does not make these rows redundant. Ninety-seven fully resolved relations
+have a single logical-Unit endpoint set, but many are source-context constraints between ordinary
+and Reinforcement representations of the same logical Unit or between profile-level forms.
+Twenty-one fully resolved relations span multiple logical Units and therefore encode shared
+selection/quota structure directly. The source also uses 39 member profile selectors, five
+`perParent` values, 14 dependency profile selectors, three dependency group selectors, one
+`min`/`minDependant` pair, and one explicit options selector. These selectors remain Army-local
+source semantics until independently reviewed; they are not promoted to canonical Unit facts.
+
+The same audit verifies the already materialized Reinforcement Section relationship separately.
+The 12 source reinforcement-list records reconcile to 11 application Reinforcement identities
+(the reviewed 998/999 source alias collapses to application identity 999), and all 46 ordinary
+Army -> Reinforcement Section parent links are present in
+`application_army_reinforcement_parents` with zero missing or unexpected edges. Application
+`role = reinforcement` therefore remains a selectable Section/pool context, not evidence that
+the Section is an independently legal Army List.
+
+The next relation step must classify and materialize the three semantic families separately:
+same-logical cross-context selection constraints, cross-logical shared choice/quota constraints,
+and profile/dependency constraints. A single generic canonical relation table would preserve the
+source ambiguity instead of resolving it.
+
 ### Application catalog identity and metadata context
 
 `application_catalog_items` and `application_catalog_sources` are InfinityDB
