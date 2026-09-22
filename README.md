@@ -242,6 +242,16 @@ python tools/run_checks.py --stage lint src/infinity_army_data/availability.py t
 python tools/run_checks.py --profile code --report
 ```
 
+For a faster full pytest pass on a multicore development machine, opt into
+parallel workers and compare the reported duration against the serial default:
+
+```powershell
+python tools/run_checks.py --stage test --test-workers 4
+python tools/run_checks.py --stage test --test-workers auto
+```
+
+See [development checks](docs/testing.md) for worker-selection and benchmarking guidance.
+
 Requested stages continue after a failure by default; add `--fail-fast` to stop
 at the first failure. See [development checks](docs/testing.md) for stage and
 profile definitions, asset modes, reports, and exit codes.

@@ -118,8 +118,8 @@ def assert_css_rule(
     )
 
 
-@pytest.fixture
-def app(tmp_path: Path) -> Callable:
+@pytest.fixture(scope="module")
+def app_database_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
     shared = {
         "id": 1,
         "name": "Alpha Ranger",
@@ -226,8 +226,15 @@ def app(tmp_path: Path) -> Callable:
         {"id": 21, "name": "Medikit", "wiki": "https://infinitythewiki.com/Medikit"}
     ]
     normalized["_meta"]["snapshotDownloadedOn"] = "2026-09-10"
-    database_path = tmp_path / "infinity.db"
+    database_path = tmp_path_factory.mktemp("web-app") / "infinity.db"
     export_database(normalized, database_path)
+    return database_path
+
+
+@pytest.fixture
+def app(tmp_path: Path, app_database_template: Path) -> Callable:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
     return create_app(database_path)
 
 

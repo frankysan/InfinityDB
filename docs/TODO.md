@@ -609,8 +609,11 @@ work against that contract.
 - [ ] Split the growing pytest stage into marker-based local sections (for example
   data/model, web/API, build/ingestion, operations/tooling, and assets) so
   developers can run the relevant slice during iteration. Keep the complete suite
-  as the authoritative final gate; the 2026-09-20 local full run is 606 tests and
-  takes roughly 73 seconds on the primary development machine.
+  as the authoritative final gate. Parallel pytest execution is now available via
+  `run_checks.py --test-workers N|auto`, and the shared web fixture no longer
+  rebuilds its database per test; retain marker-based slices as the complementary
+  fast-iteration path after measuring the new baseline on the primary development
+  machine.
 
 ## Public-identifier follow-up
 

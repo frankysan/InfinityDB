@@ -72,6 +72,34 @@ because it validates the asset set before enabling them. Hermetic web tests use
 project-owned temporary SVG fixtures to retain coverage of dynamic SVG serving
 without redistributing third-party artwork.
 
+## Parallel pytest execution
+
+The check runner keeps pytest serial by default so the authoritative behavior is
+unchanged, but development environments may opt into `pytest-xdist` workers:
+
+```powershell
+# Fixed worker count; a good first comparison on the primary Windows machine
+python tools/run_checks.py --stage test --test-workers 4
+
+# Let pytest-xdist choose from the available physical CPU cores
+python tools/run_checks.py --stage test --test-workers auto
+
+# Explicit serial baseline
+python tools/run_checks.py --stage test --test-workers 0
+```
+
+Parallel runs use xdist's `worksteal` scheduler so the relatively expensive
+database tests can be rebalanced instead of pinning an entire large test module
+to one worker. `pytest-xdist` is part of the `dev` dependency set. Compare the
+reported test-stage duration on the same machine before changing the project
+default; worker-process startup and concurrent SQLite/file-system activity can
+make very high worker counts counterproductive.
+
+The web tests build one template SQLite database per module, then copy that
+template into each test's temporary directory before creating the application.
+This preserves mutation isolation while avoiding a full normalize/export cycle
+for every web test.
+
 ## Targeted checks
 
 Positional targets are forwarded to pytest and Ruff. They are deliberately not

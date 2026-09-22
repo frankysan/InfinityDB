@@ -97,6 +97,11 @@ and serves a read-only browser and same-origin HTTP API.
   browser-referenced subset derived from current mappings/endpoints. Direct
   pytest is hermetic by default. `auto` may fall back only when the asset tree
   is entirely absent, never when it is partial/corrupt.
+  `run_checks.py --test-workers N|auto` can opt the pytest stage into
+  pytest-xdist `worksteal` scheduling while serial execution remains the
+  authoritative default until Windows timing data justifies changing it. Web
+  tests build one template database per module and copy it per test so mutating
+  tests remain isolated without repeating normalization/export work.
 - GitHub `Source checks` is configured to run the hermetic project checks on clean Windows,
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
