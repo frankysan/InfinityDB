@@ -1053,3 +1053,32 @@ compatibility references remain unambiguous JSON integers.
   they are not canonicalized to current Units and are not materialized as current constraints.
   `data/curated/relationships/historical-unit-endpoints.json` pins that review to the 2026-09-18
   snapshot; relation-audit reuse fails closed on snapshot drift.
+
+### Milestone 2B Fireteam audit boundary (2026-09-22)
+
+- Fireteam Charts are Army-local relationship/configuration data, not intrinsic logical-Unit facts.
+  The pinned snapshot has 58 source charts, 272 teams, 444 type memberships, and 1,261 members.
+  Preserve team/type membership, min/max, `required`, member wording/comments, chart notes,
+  Wildcards, FTO restrictions, and bracketed Fireteam-Level equivalence in source Army context.
+- Raw Fireteam `spec` currently uses 0=unavailable, 256=unlimited, and other positive values as
+  finite maxima. Reinforcement Section specs cannot be used alone: 29 Section type memberships
+  occur with an own-spec value of zero. The 12 source Reinforcement charts collapse to 11
+  application Sections and 46 parent links; nine playable parent/type combinations are blocked by
+  the parent quota, all vanilla CORE cases. Keep Section member eligibility separate from the
+  selected parent Army's permitted type/count limits, and never merge Main/Reinforcement pools.
+- Unit resolution is too coarse for Fireteam member identity. The snapshot has 1,246 Army-local
+  member resolutions and 15 non-local/unresolved rows. Eight teams contain distinct member rows
+  resolving to the same source Unit (for example Scylla/Charybdis, Scarface/Cordelia, Zoe/Pi-Well),
+  proving subgroup/profile/loadout context can remain player-relevant after Unit canonicalization.
+- FTO eligibility must resolve against Army-local loadout options. 195/197 FTO-bearing member rows
+  resolve deterministically. Keep the two source anomalies explicit: Ank's Arjuna FTO row resolves
+  by source slug only to ordinary Arjuna context; Melek's Korsan row says FTO but the Reinforcement
+  Unit exposes no FTO-marked loadout. Do not invent either mapping. Generic FTO may match numbered
+  variants; explicit FTO-N requires that variant.
+- `required=true` denotes required-choice participation, not that every flagged member is mandatory.
+  There are 219 such rows across 84 teams; preserve min/max independently. Preserve the one Army
+  chart description and four team observations verbatim because chart notes can override/specialize
+  general rules. Wildcards (52 teams / 51 Armies) have no Fireteam type rows. Bracketed equivalence
+  wording appears on 406 member rows (453 references / 146 labels) and must not feed Unit identity.
+- `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this boundary.
+  First-class Fireteam repository/API/browser presentation remains a separate 1.0 completeness task.

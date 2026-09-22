@@ -203,22 +203,37 @@ in `docs/releasing.md`.
         reviewed stale-source constraints: none of those endpoints is selectable in the pinned
         snapshot, so do not alias them to current logical Units or materialize the relations as
         current application constraints.
-  - [ ] Audit Fireteam structures.
-    - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
+  - [x] Audit Fireteam structures. The pinned snapshot contains 58 source charts,
+    272 named teams, 444 type memberships, and 1,261 member rows. The normalized
+    representation already retains the required Army-local chart structure; the new
+    read-only Fireteam semantics audit records the semantic boundary and source gaps.
+    - [x] Treat Fireteam Charts as Army-local relationship/configuration data:
       preserve Fireteam type quotas, named Fireteams, type membership, min/max
       formation constraints, required-choice pools, chart notes, FTO restrictions,
       Wildcards, and bracketed Fireteam-Level equivalence terms without promoting
-      them to intrinsic logical-Unit facts.
-    - [ ] Resolve FTO eligibility to the applicable source option/loadout identity
+      them to intrinsic logical-Unit facts. Current evidence includes 52 Wildcard
+      teams with no Fireteam type membership and 406 member rows carrying bracketed
+      Fireteam-Level wording (453 references / 146 distinct labels).
+    - [x] Resolve FTO eligibility to the applicable source option/loadout identity
       rather than treating a Unit-level Fireteam member match as sufficient; retain
-      unresolved/ambiguous source wording instead of guessing.
-    - [ ] Interpret the source `required` flag as participation in the chart's
+      unresolved/ambiguous source wording instead of guessing. 195/197 FTO-bearing
+      rows resolve deterministically to Army-local loadout options. The two retained
+      source anomalies are Ank's Arjuna row, whose source slug resolves only to the
+      ordinary Arjuna context, and Melek's Korsan row, whose chart says FTO while the
+      selected Reinforcement Unit exposes no FTO-marked loadout option.
+    - [x] Interpret the source `required` flag as participation in the chart's
       required-choice set where applicable, not as "every flagged row is mandatory",
       and preserve chart notes because the rules allow them to override general
-      Fireteam rules.
-    - [ ] For Reinforcement Fireteams, retain both the Reinforcement Section chart
+      Fireteam rules. The snapshot has 219 required rows across 84 teams; only one
+      required row also has a positive `min`, so those dimensions stay independent.
+      One Army-level chart description and four team observations remain verbatim.
+    - [x] For Reinforcement Fireteams, retain both the Reinforcement Section chart
       context and the selected parent Army's permitted Fireteam Types/counts; do
-      not mix Main-Section and Reinforcement-Section member eligibility.
+      not mix Main-Section and Reinforcement-Section member eligibility. The 12
+      source Reinforcement charts reconcile to 11 application Sections and 46 parent
+      links. Across playable parent/type contexts, nine vanilla parent Armies block
+      Reinforcement CORE despite the Section chart containing CORE rows, confirming
+      that Section eligibility and parent quotas are separate constraints.
   - [ ] Identify normalization-only link structures that do not constitute
     additional player-facing information.
   - [ ] Record any distinct player-relevant relationship not currently

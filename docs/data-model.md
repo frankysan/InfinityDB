@@ -1899,8 +1899,8 @@ not resolve consistently to one selectable coordinate domain and Kuryer is not e
 in five of those contexts. The Yu Jing Kuang Shi / Celestial Guard row similarly references a
 non-member Celestial Guard source Unit while Kuang Shi's actual Monitor requirement is already
 represented by the deterministic same-Unit group dependency. Neither pattern is promoted to a
-whole-Unit application constraint. The separate eight relations with unresolved source placeholders
-also remain source/context data pending independent endpoint evidence.
+whole-Unit application constraint. The separate eight relations with retired historical source placeholders remain reviewed
+stale-source constraints and are not materialized as current selection constraints.
 
 ### Application catalog identity and metadata context
 
@@ -2430,3 +2430,58 @@ but the presence of an army-list identity does not by itself make that identity
 independently playable. Metadata-only factions never create army lists or unit
 memberships. Metadata weapon IDs can repeat for different modes, so their table
 uses source position as its key.
+
+#### Fireteam chart semantic evidence
+
+The Milestone 2B Fireteam audit treats Army Fireteam Charts as Army-local
+relationship/configuration data rather than logical-Unit identity. Against the pinned
+2026-09-18 snapshot, the normalized database contains 58 source charts, 272 named Fireteams,
+444 Fireteam-type memberships, and 1,261 member rows. The source chart structure already
+preserves team names, type memberships, member names/slugs/comments, min/max constraints,
+`required`, chart observations, the Army-level chart description, and raw `fireteam_spec`.
+No new canonical-entity table is justified by this audit alone.
+
+The chart `spec` remains contextual. Its current values use `0` for unavailable, `256` for
+unlimited, and other positive values for finite maximum counts. Reinforcement Sections prove
+that the Section's own `spec` cannot be interpreted as a standalone legality rule: 29
+Reinforcement Section type memberships occur where that Section's raw spec value is zero.
+The 12 source Reinforcement charts reconcile to 11 application Reinforcement Sections and 46
+ordinary-parent links. Across 134 playable parent/type contexts, nine combinations are blocked
+by the selected parent's type quota; all nine are CORE in the vanilla PanOceania, Yu Jing,
+Ariadna, Haqqislam, Nomads, Combined Army, Aleph, O-12, and JSA parents. Reinforcement member
+eligibility and parent-Army type/count limits therefore remain separate context, and Main-Section
+and Reinforcement-Section member pools must not be merged.
+
+Fireteam member identity is finer than a Unit foreign key. The source resolver currently yields
+1,246 Army-local member matches plus 15 non-local/unresolved rows (14 unresolved and one global).
+Eight Fireteams contain two distinct member rows that resolve to the same source Unit, including
+Scylla/Charybdis, Kuang Shi/Celestial Guard Monitor, Scarface/Cordelia Turner,
+Coyote/BambaDroid, and Zoe/Pi-Well. Those rows demonstrate that subgroup/profile/loadout wording
+can carry player-relevant identity after Unit resolution. The 15 source-link anomalies remain
+explicit audit findings; they are not guessed into new source aliases by the Fireteam audit.
+
+FTO is resolved against Army-local loadout options, not against Unit identity alone. Of 197
+FTO-bearing chart-member rows, 195 deterministically identify one or more matching Army-local FTO
+loadouts. Generic `FTO` accepts matching numbered variants such as `FTO-2`, while a numbered
+marker requires that variant; the audit also normalizes Army's current `REINF.`/`REF.` wording
+only for comparison. Two source anomalies remain explicit: Ank's `ARJUNA REINF. FTO` chart row
+resolves by its source slug only to the ordinary Arjuna Unit even though the Reinforcement Army
+contains a separate Arjuna Unit with FTO options, and Melek's `KORSAN REINF.` chart row carries
+an `FTO` comment while its Reinforcement Unit has no FTO-marked loadout option. Neither case is
+silently repaired by inference.
+
+The other Fireteam fields remain contextual by rule. There are 219 `required=true` member rows
+across 84 teams; the flag denotes participation in a required-choice pool rather than making every
+flagged row individually mandatory, and only one such row also has a positive `min`, so `required`
+and min/max stay independent. Fifty-two Wildcard teams across 51 source Armies have zero Fireteam
+type memberships, confirming that Wildcard is Army-local cross-team eligibility rather than a
+Fireteam type. Bracketed Fireteam-Level wording appears on 406 member rows (453 label references,
+146 distinct labels) and remains equivalence/presentation context rather than logical-Unit aliasing.
+One Army-level Fireteam description and four team observations are rule-bearing source text and
+must remain verbatim because chart notes can specialize the general Fireteam rules.
+
+`tools/audit_fireteam_semantics.py` records these boundaries deterministically and reports future
+snapshot drift in chart shape, member resolution, FTO option matching, Reinforcement parent/type
+context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. The
+audit does not yet introduce a first-class Fireteam repository/API/browser model; that presentation
+question belongs to the remaining 1.0 relationship-completeness work.
