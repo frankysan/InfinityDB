@@ -234,8 +234,15 @@ in `docs/releasing.md`.
       links. Across playable parent/type contexts, nine vanilla parent Armies block
       Reinforcement CORE despite the Section chart containing CORE rows, confirming
       that Section eligibility and parent quotas are separate constraints.
-  - [ ] Identify normalization-only link structures that do not constitute
-    additional player-facing information.
+  - [x] Identify normalization-only link structures that do not constitute
+    additional player-facing information. The current audit classifies the eight
+    `army_*` filter-catalog joins (15,072 rows) as source filter/index
+    normalization rather than gameplay relationships, and classifies only the
+    `option_weapon_templates.id` / `option_weapons.template_id` indirection as a
+    normalization-only storage link within source option-weapon occurrences. Keep
+    source-to-canonical identity mappings and profile/loadout occurrence-to-payload
+    links distinct: they add no separate gameplay relationship, but remain required
+    canonicalization/provenance infrastructure and may carry contextual deltas.
   - [ ] Record any distinct player-relevant relationship not currently
     presentable by the application as a 1.0 completeness gap.
 

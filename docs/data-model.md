@@ -2485,3 +2485,46 @@ snapshot drift in chart shape, member resolution, FTO option matching, Reinforce
 context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. The
 audit does not yet introduce a first-class Fireteam repository/API/browser model; that presentation
 question belongs to the remaining 1.0 relationship-completeness work.
+
+#### Normalization-only link semantic evidence
+
+The Milestone 2B normalization-link audit distinguishes relational storage shape from actual
+player-facing relationships. Against the pinned 2026-09-18 snapshot, eight normalized
+`army_*` filter-catalog tables contain 15,072 Army-to-catalog rows: `army_categories`,
+`army_characteristics`, `army_troop_types`, `army_equipment`, `army_skills`, `army_weapons`,
+`army_ammunition`, and `army_extras`. These rows flatten each source Army document's
+`filters.*` lookup arrays. Their Army/catalog endpoints, source order, and `mercs`/`specops`/
+`teamops` flags describe the source application's filter/index presentation; they do not assert
+an independent gameplay relationship such as Army ownership of a Skill, Weapon, Equipment item,
+or characteristic. They remain required for lossless source reconstruction, but InfinityDB does
+not need a dedicated player-facing representation of these joins to satisfy 1.0 completeness.
+
+A second normalization-only link exists inside the source option-weapon representation. The
+current database stores 52,554 `option_weapons` occurrence rows through 490 shared
+`option_weapon_templates`. All occurrences resolve a template and all templates are referenced.
+Only the synthetic template identity (`option_weapon_templates.id`) and the corresponding
+`option_weapons.template_id` edge are normalization/storage machinery. The rejoined source
+occurrence still carries meaningful option-to-weapon attachment, source position, weapon ID,
+display order, quantity, and any raw fallback; those facts are not classified as normalization-
+only.
+
+This classification deliberately excludes canonicalization/provenance mappings from the
+"normalization-only" bucket. `application_army_sources`, `application_catalog_sources`,
+`logical_unit_sources`, `profile_payload_occurrences`, `loadout_payload_occurrences`,
+`application_peripheral_sources`, and `application_peripheral_unit_sources` connect source
+identity/evidence to InfinityDB application abstractions. The link itself is not an additional
+gameplay relationship, but it preserves traceability and, for several occurrence/source tables,
+contextual values such as AVA/logo, points/SWC, source labels, or reviewed type evidence. Any
+future frontend/`infinity.raw.db` split must therefore preserve equivalent provenance/context
+rather than treating those links as disposable relational noise.
+
+Semantic attachment tables remain outside this classification. A Skill/Equipment/Weapon extra
+attached to a particular occurrence, an include target, Unit faction/list membership, Peripheral
+relationship, Fireteam membership, relation/dependency edge, or application selection constraint
+continues to encode a meaningful scoped relationship even when normalization represents it through
+a join table. The presence of a link table alone is never evidence that its contents are
+normalization-only.
+
+`tools/audit_normalization_links.py` records this boundary deterministically and fails when the
+maintained schema assumptions drift. The audit is classification evidence for completeness and the
+later raw/application database split; it does not itself remove tables or change runtime serving.

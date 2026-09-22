@@ -1082,3 +1082,22 @@ compatibility references remain unambiguous JSON integers.
   wording appears on 406 member rows (453 references / 146 labels) and must not feed Unit identity.
 - `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this boundary.
   First-class Fireteam repository/API/browser presentation remains a separate 1.0 completeness task.
+
+### Milestone 2B normalization-link boundary (2026-09-22)
+
+- Do not infer player-facing meaning from the existence of a join table. The eight source
+  `army_*` catalog joins flatten Army `filters.*` lookup/index arrays and are normalization-only
+  source-presentation structure. The pinned snapshot contains 15,072 such rows. Preserve them for
+  source fidelity, but their dedicated web presentation is not a completeness requirement.
+- The source `option_weapons` / `option_weapon_templates` split has one normalization-only storage
+  edge: synthetic template identity plus `template_id`. The 52,554 option-weapon occurrences reuse
+  490 templates with no dangling or unreferenced template rows. The rejoined option-to-weapon
+  occurrence remains semantic/source data and must stay reconstructable.
+- Source-to-canonical mappings and canonical payload-occurrence links are not independent gameplay
+  relationships, but do **not** classify them as disposable normalization. They preserve identity
+  evidence, traceability, and contextual deltas needed by the application model and by a future
+  frontend/`infinity.raw.db` split.
+- Attachment/relationship joins (extras, includes, Army/faction membership, Peripherals, Fireteams,
+  relation/dependency constraints, and similar scoped links) remain semantic unless a separate audit
+  proves otherwise. `tools/audit_normalization_links.py` is the deterministic evidence tool for
+  this boundary.
