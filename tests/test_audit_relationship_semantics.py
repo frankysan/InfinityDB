@@ -160,6 +160,64 @@ def _fixture_database(tmp_path: Path) -> Path:
             options="[7,8]",
             raw=None,
         )
+        _insert(
+            connection,
+            "relations",
+            army_id=101,
+            relation_id=3,
+            position=3,
+            min_count=1,
+            max_count=None,
+            is_group=1,
+        )
+        _insert(
+            connection,
+            "relation_units",
+            army_id=101,
+            relation_id=3,
+            relation_unit_id=1,
+            position=1,
+            unit_id=1,
+            profile_id=2,
+            per_parent=1,
+        )
+        _insert(
+            connection,
+            "relation_dependencies",
+            army_id=101,
+            relation_id=3,
+            relation_unit_id=1,
+            dependency_id=1,
+            position=1,
+            unit_id=2,
+            profile_id=1,
+            group_id=None,
+            min_count=None,
+            min_dependant=None,
+            options=None,
+            raw=None,
+        )
+        _insert(
+            connection,
+            "relations",
+            army_id=101,
+            relation_id=4,
+            position=4,
+            min_count=2,
+            max_count=3,
+            is_group=1,
+        )
+        _insert(
+            connection,
+            "relation_units",
+            army_id=101,
+            relation_id=4,
+            relation_unit_id=1,
+            position=1,
+            unit_id=1,
+            profile_id=None,
+            per_parent=None,
+        )
 
         for army_id in (101, 102):
             _insert(
@@ -330,10 +388,28 @@ def test_relationship_audit_resolves_includes_and_exposes_context(tmp_path: Path
         "unmappedParentRowCount": 0,
         "unresolvedTargetRowCount": 0,
     }
-    assert report["relations"]["relationCount"] == 2
-    assert report["relations"]["singleLogicalEndpointSetRelationCount"] == 1
+    assert report["relations"]["relationCount"] == 4
+    assert report["relations"]["singleLogicalEndpointSetRelationCount"] == 3
     assert report["relations"]["crossLogicalEndpointSetRelationCount"] == 1
-    assert report["relations"]["dependencyCount"] == 1
+    assert report["relations"]["dependencyCount"] == 2
+    assert report["relations"]["semanticClassification"]["familyCounts"] == {
+        "cross-logical-shared-cardinality": 1,
+        "same-logical-cross-context-exclusive": 1,
+        "single-logical-cardinality": 1,
+        "single-logical-profile-dependency": 1,
+    }
+    assert report["relations"]["semanticClassification"]["selectorFreeResolvedRelationCount"] == 2
+    assert report["relations"]["semanticClassification"]["selectorBearingResolvedRelationCount"] == 2
+    assert report["relations"]["profileSelectorCoordinateCandidates"] == {
+        "member": {"no-coordinate-match": 1, "option-id": 1},
+        "dependency": {"no-coordinate-match": 2},
+        "interpretation": (
+            "Army's source field is named profile, but its numeric values do not map to one "
+            "stable normalized coordinate domain. The audit therefore reports mechanical "
+            "matches against known profile-group, profile, and option IDs without choosing "
+            "one interpretation. These candidates are diagnostic only."
+        ),
+    }
     assert report["reinforcementSections"]["missingCanonicalParentLinkCount"] == 0
     assert report["reinforcementSections"]["materializedCanonicalParentLinkCount"] == 1
     assert report["includes"]["loadout"]["parentPayloadInvariance"] == {
@@ -370,10 +446,19 @@ def test_relationship_audit_details_preserve_evidence(tmp_path: Path) -> None:
     shared = report["includes"]["unitOption"]["rows"][0]
     assert shared["targetArmyIds"] == [101, 102]
     assert shared["targetPayloadIds"] == [100, 101]
-    relation = report["relations"]["relations"][1]
+    relations = report["relations"]["relations"]
+    assert relations[0]["semanticFamily"] == "same-logical-cross-context-exclusive"
+    assert relations[0]["cardinalityKind"] == "exactly-one"
+    relation = relations[1]
     assert relation["armyId"] == 101
+    assert relation["semanticFamily"] == "cross-logical-shared-cardinality"
     assert relation["members"][0]["logicalUnitId"] == 30
     assert relation["members"][0]["dependencies"][0]["logicalUnitId"] == 40
+    assert relations[2]["semanticFamily"] == "single-logical-profile-dependency"
+    assert relations[2]["cardinalityKind"] == "minimum-only"
+    assert relations[2]["members"][0]["profileSelectorCandidateDomains"] == ["option-id"]
+    assert relations[3]["semanticFamily"] == "single-logical-cardinality"
+    assert relations[3]["cardinalityKind"] == "bounded-range"
     reinforcement = report["reinforcementSections"]["parentLinks"][0]
     assert reinforcement == {
         "parentSourceArmyId": 101,
@@ -436,4 +521,4 @@ def test_relationship_audit_cli_writes_report(tmp_path: Path) -> None:
     assert main([str(database), "--output", str(output)]) == 0
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["format"] == "InfinityDB relationship semantics audit"
-    assert report["formatVersion"] == 3
+    assert report["formatVersion"] == 4

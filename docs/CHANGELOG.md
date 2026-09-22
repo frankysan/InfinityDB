@@ -34,8 +34,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Extend the canonical relationship audit to normalized relation/dependency structures and
   Reinforcement Section context. The audit now resolves relation endpoints through logical-Unit
   identity without discarding source-context selection constraints, reports unresolved
-  relation-only Unit references explicitly, and verifies all ordinary-Army -> Reinforcement
-  Section parent links against the materialized application layer.
+  relation-only Unit references explicitly, verifies all ordinary-Army -> Reinforcement Section
+  parent links against the materialized application layer, classifies resolved relations into
+  same-logical cross-context exclusivity, cross-logical shared cardinality, single-logical
+  profile/dependency, and single-logical cardinality families before materialization, and reports
+  source `profile` selector coordinate ambiguity instead of promoting it to an invalid FK.
 
 ### Upgrade notes
 

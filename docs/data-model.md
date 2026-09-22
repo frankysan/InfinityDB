@@ -1840,10 +1840,29 @@ Army -> Reinforcement Section parent links are present in
 `role = reinforcement` therefore remains a selectable Section/pool context, not evidence that
 the Section is an independently legal Army List.
 
-The next relation step must classify and materialize the three semantic families separately:
-same-logical cross-context selection constraints, cross-logical shared choice/quota constraints,
-and profile/dependency constraints. A single generic canonical relation table would preserve the
-source ambiguity instead of resolving it.
+The resolved graph now has four reviewed structural families. Eighty-one relations are
+`same-logical-cross-context-exclusive`: multiple source occurrences map to one logical Unit and
+form an exactly-one selection constraint, predominantly ordinary/Reinforcement context pairs.
+Twenty-one are `cross-logical-shared-cardinality`: two or more logical Units participate in one
+shared choice/quota range, with any profile selectors retained on the member. Fourteen are
+`single-logical-profile-dependency`: one logical Unit carries source-local profile/per-parent/
+dependency selectors. Two are `single-logical-cardinality`: a one-Unit pool with a cardinality
+range and no profile/dependency selector (currently the Post-Human 2..3 relation). The eight
+unresolved-placeholder relations remain an explicit fifth state rather than receiving an inferred
+family.
+
+This classification is intentionally relation-level. Ninety-five of the 118 resolved relations
+are selector-free; 23 carry one or more member/dependency selectors. The source field named
+`profile` is demonstrably not one stable normalized foreign-key coordinate: current values can
+match only a profile-group ID, only a profile ID, only an option ID, or several domains at once
+when their numeric coordinates overlap. The audit reports these candidate-domain matches only as
+diagnostics and deliberately does not select one interpretation.
+
+The classification therefore does not yet define the application schema for `profile`, `group`,
+`options`, `perParent`, `min`, or `minDependant`. Those selectors remain Army-local/contextual
+until their grammar is reviewed. Materialization may proceed family-by-family for selector-free
+constraints; a single generic canonical relation table would preserve the source ambiguity instead
+of resolving it.
 
 ### Application catalog identity and metadata context
 

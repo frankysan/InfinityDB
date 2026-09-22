@@ -171,11 +171,21 @@ in `docs/releasing.md`.
       Lists, and retain section-specific profile/AVA occurrence provenance. The current
       application layer reproduces all 46 source parent links with no missing or unexpected
       canonical edges.
-    - [ ] Split the generic source relation graph into reviewed application semantics before
-      materialization: same-logical cross-context selection constraints, cross-logical shared
-      choice/quota constraints, and profile/dependency constraints must remain distinct. Keep
+    - [x] Split the resolved generic source relation graph into reviewed structural semantics
+      before materialization. The current snapshot classifies 118 resolved relations as 81
+      same-logical cross-context exclusivity constraints, 21 cross-logical shared-cardinality
+      constraints, 14 single-logical profile/dependency constraints, and two single-logical
+      cardinality constraints. The eight unresolved relations remain explicit source-endpoint
+      gaps rather than being forced into a family.
+    - [ ] Resolve selector semantics and materialization contracts per relation family. Keep
       Army-local `profile`, `group`, `options`, `perParent`, `min`, and `minDependant` selectors
       contextual until each selector's meaning is resolved; do not flatten them into Unit facts.
+      The current source field named `profile` is not one stable normalized coordinate: across
+      member rows it can mechanically match profile-group IDs, profile IDs, option IDs, several
+      of those at once, or only an option ID. Treat it as an opaque source selector until the
+      Army grammar is independently established. Of the 118 resolved relations, 95 are selector-
+      free and 23 carry member/dependency selectors; selector-free families can be materialized
+      independently once their runtime representation is pinned.
   - [ ] Audit Fireteam structures.
     - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
       preserve Fireteam type quotas, named Fireteams, type membership, min/max

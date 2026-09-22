@@ -1023,3 +1023,15 @@ compatibility references remain unambiguous JSON integers.
   source ordinary-Army links materialize canonically with no missing or unexpected edges. The 12
   source reinforcement lists reconcile to 11 application Reinforcement identities because the
   reviewed 998/999 alias shares application identity 999.
+- The resolved relation graph now has an explicit structural semantic classification. Of 118
+  fully resolved relations, 81 are same-logical cross-context exactly-one constraints, 21 are
+  cross-logical shared-cardinality constraints, 14 are single-logical profile/dependency
+  constraints, and two are single-logical cardinality constraints (the current Post-Human
+  2..3 pool). The eight relations containing unresolved source placeholders stay unclassified.
+  This is a relation-level classification: member/dependency selectors remain contextual and do
+  not become logical-Unit facts.
+- Ninety-five resolved relations are selector-free; 23 carry member/dependency selectors. The
+  Army relation field named `profile` cannot currently be normalized as one foreign-key domain:
+  current values mechanically match profile-group IDs in some rows, profile IDs in others, option
+  IDs in others, and multiple domains where numeric coordinates overlap. Preserve it as an opaque
+  source selector until its grammar is resolved; do not rename it to a canonical profile FK.

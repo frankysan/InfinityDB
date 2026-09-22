@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB relationship semantics audit"
-REPORT_FORMAT_VERSION = 3
+REPORT_FORMAT_VERSION = 4
 
 REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     "profile_includes": (
@@ -594,6 +594,81 @@ def _relation_shape_key(row: sqlite3.Row, member_count: int, dependency_count: i
     )
 
 
+def _relation_cardinality_kind(min_count: int | None, max_count: int | None) -> str:
+    if min_count == 1 and max_count == 1:
+        return "exactly-one"
+    if max_count is None:
+        return "minimum-only"
+    if min_count == max_count:
+        return "exact-count"
+    return "bounded-range"
+
+
+def _relation_semantic_family(
+    relation: sqlite3.Row,
+    members: list[sqlite3.Row],
+    dependencies_by_member: dict[tuple[int, int, int], list[sqlite3.Row]],
+    logical_ids: list[int | None],
+    dependency_logical_ids: list[int | None],
+) -> str:
+    endpoints = logical_ids + dependency_logical_ids
+    if any(value is None for value in endpoints):
+        return "unresolved-source-endpoint"
+
+    distinct_logical_ids = {value for value in endpoints if value is not None}
+    if len(distinct_logical_ids) > 1:
+        return "cross-logical-shared-cardinality"
+
+    has_selectors_or_dependencies = False
+    for member in members:
+        key = (member["army_id"], member["relation_id"], member["relation_unit_id"])
+        if (
+            member["profile_id"] is not None
+            or member["per_parent"] is not None
+            or dependencies_by_member[key]
+        ):
+            has_selectors_or_dependencies = True
+            break
+
+    source_unit_ids = {member["unit_id"] for member in members}
+    if (
+        len(members) >= 2
+        and len(source_unit_ids) >= 2
+        and not has_selectors_or_dependencies
+        and not relation["is_group"]
+        and relation["min_count"] == 1
+        and relation["max_count"] == 1
+    ):
+        return "same-logical-cross-context-exclusive"
+    if has_selectors_or_dependencies:
+        return "single-logical-profile-dependency"
+    return "single-logical-cardinality"
+
+
+def _selector_candidate_domains(
+    selector: int | None,
+    unit_id: int,
+    *,
+    group_ids_by_unit: dict[int, set[int]],
+    profile_ids_by_unit: dict[int, set[int]],
+    option_ids_by_unit: dict[int, set[int]],
+) -> list[str]:
+    if selector is None:
+        return []
+    domains: list[str] = []
+    if selector in group_ids_by_unit.get(unit_id, set()):
+        domains.append("profile-group-id")
+    if selector in profile_ids_by_unit.get(unit_id, set()):
+        domains.append("profile-id")
+    if selector in option_ids_by_unit.get(unit_id, set()):
+        domains.append("option-id")
+    return domains
+
+
+def _selector_domain_key(domains: list[str]) -> str:
+    return "+".join(domains) if domains else "no-coordinate-match"
+
+
 def _audit_relation_structures(
     connection: sqlite3.Connection,
     *,
@@ -605,6 +680,14 @@ def _audit_relation_structures(
     dependency_rows = _fetch_rows(connection, "relation_dependencies")
     unit_rows = {row["id"]: row for row in _fetch_rows(connection, "units")}
     army_names = {row["id"]: row["name"] for row in _fetch_rows(connection, "army_lists")}
+    group_ids_by_unit: dict[int, set[int]] = defaultdict(set)
+    profile_ids_by_unit: dict[int, set[int]] = defaultdict(set)
+    option_ids_by_unit: dict[int, set[int]] = defaultdict(set)
+    for row in _fetch_rows(connection, "profile_payload_occurrences"):
+        group_ids_by_unit[row["unit_id"]].add(row["group_id"])
+        profile_ids_by_unit[row["unit_id"]].add(row["profile_id"])
+    for row in _fetch_rows(connection, "loadout_payload_occurrences"):
+        option_ids_by_unit[row["unit_id"]].add(row["option_id"])
 
     members_by_relation: dict[tuple[int, int], list[sqlite3.Row]] = defaultdict(list)
     for row in member_rows:
@@ -632,6 +715,12 @@ def _audit_relation_structures(
     cross_logical = 0
     details: list[dict[str, Any]] = []
     signatures: dict[tuple[Any, ...], set[int]] = defaultdict(set)
+    semantic_family_counts: dict[str, int] = defaultdict(int)
+    cardinality_kind_counts: dict[str, int] = defaultdict(int)
+    member_selector_domain_counts: dict[str, int] = defaultdict(int)
+    dependency_selector_domain_counts: dict[str, int] = defaultdict(int)
+    selector_free_resolved = 0
+    selector_bearing_resolved = 0
 
     for relation in relation_rows:
         key = (relation["army_id"], relation["relation_id"])
@@ -650,6 +739,26 @@ def _audit_relation_structures(
             ]
         ]
         resolved = all(value is not None for value in logical_ids + dependency_logical_ids)
+        semantic_family = _relation_semantic_family(
+            relation, members, dependencies_by_member, logical_ids, dependency_logical_ids
+        )
+        cardinality_kind = _relation_cardinality_kind(
+            relation["min_count"], relation["max_count"]
+        )
+        semantic_family_counts[semantic_family] += 1
+        cardinality_kind_counts[cardinality_kind] += 1
+        relation_has_selectors = any(
+            member["profile_id"] is not None
+            or member["per_parent"] is not None
+            or dependencies_by_member[
+                (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            ]
+            for member in members
+        )
+        if resolved and relation_has_selectors:
+            selector_bearing_resolved += 1
+        elif resolved:
+            selector_free_resolved += 1
         if resolved:
             fully_resolved += 1
             distinct = set(logical_ids + dependency_logical_ids)
@@ -666,6 +775,15 @@ def _audit_relation_structures(
             member_key = (member["army_id"], member["relation_id"], member["relation_unit_id"])
             deps = sorted(dependencies_by_member[member_key], key=lambda row: row["position"] or 0)
             canonical_unit = source_logical.get(member["unit_id"])
+            member_selector_domains = _selector_candidate_domains(
+                member["profile_id"],
+                member["unit_id"],
+                group_ids_by_unit=group_ids_by_unit,
+                profile_ids_by_unit=profile_ids_by_unit,
+                option_ids_by_unit=option_ids_by_unit,
+            )
+            if member["profile_id"] is not None:
+                member_selector_domain_counts[_selector_domain_key(member_selector_domains)] += 1
             signature_deps = tuple(
                 (
                     source_logical.get(dep["unit_id"]),
@@ -688,6 +806,18 @@ def _audit_relation_structures(
                     signature_deps,
                 )
             )
+            for dep in deps:
+                if dep["profile_id"] is not None:
+                    dependency_selector_domains = _selector_candidate_domains(
+                        dep["profile_id"],
+                        dep["unit_id"],
+                        group_ids_by_unit=group_ids_by_unit,
+                        profile_ids_by_unit=profile_ids_by_unit,
+                        option_ids_by_unit=option_ids_by_unit,
+                    )
+                    dependency_selector_domain_counts[
+                        _selector_domain_key(dependency_selector_domains)
+                    ] += 1
             if include_details:
                 unit = unit_rows.get(member["unit_id"])
                 detail_members.append(
@@ -698,12 +828,20 @@ def _audit_relation_structures(
                         "sourceDefined": bool(unit["source_defined"]) if unit is not None else None,
                         "logicalUnitId": canonical_unit,
                         "profileSelector": member["profile_id"],
+                        "profileSelectorCandidateDomains": member_selector_domains,
                         "perParent": member["per_parent"],
                         "dependencies": [
                             {
                                 "sourceUnitId": dep["unit_id"],
                                 "logicalUnitId": source_logical.get(dep["unit_id"]),
                                 "profileSelector": dep["profile_id"],
+                                "profileSelectorCandidateDomains": _selector_candidate_domains(
+                                    dep["profile_id"],
+                                    dep["unit_id"],
+                                    group_ids_by_unit=group_ids_by_unit,
+                                    profile_ids_by_unit=profile_ids_by_unit,
+                                    option_ids_by_unit=option_ids_by_unit,
+                                ),
                                 "groupSelector": dep["group_id"],
                                 "minCount": dep["min_count"],
                                 "minDependant": dep["min_dependant"],
@@ -727,6 +865,8 @@ def _audit_relation_structures(
                     "maxCount": relation["max_count"],
                     "isGroup": bool(relation["is_group"]),
                     "resolution": "complete" if resolved else "unresolved_source_endpoint",
+                    "semanticFamily": semantic_family,
+                    "cardinalityKind": cardinality_kind,
                     "canonicalLogicalUnitIds": sorted(
                         value
                         for value in set(logical_ids + dependency_logical_ids)
@@ -756,6 +896,38 @@ def _audit_relation_structures(
             "unresolvedCount": len(unresolved_dependency_rows),
             "unresolvedSourceUnitIds": sorted(
                 {row["unit_id"] for row in unresolved_dependency_rows}
+            ),
+        },
+        "semanticClassification": {
+            "classifiedResolvedRelationCount": sum(
+                count
+                for family, count in semantic_family_counts.items()
+                if family != "unresolved-source-endpoint"
+            ),
+            "unresolvedRelationCount": semantic_family_counts.get(
+                "unresolved-source-endpoint", 0
+            ),
+            "selectorFreeResolvedRelationCount": selector_free_resolved,
+            "selectorBearingResolvedRelationCount": selector_bearing_resolved,
+            "familyCounts": dict(sorted(semantic_family_counts.items())),
+            "cardinalityKindCounts": dict(sorted(cardinality_kind_counts.items())),
+            "interpretation": (
+                "Resolved source relations separate into four application-semantic families: "
+                "same-logical cross-context exclusivity, cross-logical shared cardinality, "
+                "single-logical profile/dependency constraints, and single-logical cardinality "
+                "constraints. Selectors remain contextual fields on the relation/member rather "
+                "than facts on the logical Unit. Unresolved source endpoints remain a fifth "
+                "explicit state and are not classified by inference."
+            ),
+        },
+        "profileSelectorCoordinateCandidates": {
+            "member": dict(sorted(member_selector_domain_counts.items())),
+            "dependency": dict(sorted(dependency_selector_domain_counts.items())),
+            "interpretation": (
+                "Army's source field is named profile, but its numeric values do not map to one "
+                "stable normalized coordinate domain. The audit therefore reports mechanical "
+                "matches against known profile-group, profile, and option IDs without choosing "
+                "one interpretation. These candidates are diagnostic only."
             ),
         },
         "selectors": {
@@ -793,8 +965,9 @@ def _audit_relation_structures(
             "Relation rows are source-context selection/composition constraints. Canonicalizing "
             "member Unit identities does not make a relation redundant: same-logical endpoint "
             "sets can still constrain ordinary versus Reinforcement occurrences or profile-level "
-            "forms. Profile/group/options selectors remain source-local until their semantics are "
-            "resolved independently."
+            "forms. The semantic-family classification is structural and preserves every source "
+            "selector; it does not promote profile/group/options/perParent/min/minDependant fields "
+            "to logical-Unit facts."
         ),
     }
     if include_details:
