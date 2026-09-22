@@ -179,21 +179,24 @@ in `docs/releasing.md`.
       gaps rather than being forced into a family.
     - [x] Materialize the 95 fully resolved selector-free relations as application selection
       constraints. Preserve Army/relation context, source member identity, canonical logical-Unit
-      identity, group semantics, and min/max cardinality. The current materialized set is 81
+      identity, group semantics, and min/max cardinality. The initial selector-free set is 81
       same-logical cross-context exclusivity constraints, 12 selector-free cross-logical shared-
       cardinality constraints, and two single-logical cardinality constraints (195 member rows).
       Unit detail reads expose these relationships without reading raw relation rows at request time.
-    - [ ] Resolve selector semantics and materialization contracts for the remaining selector-bearing
-      relations.
+    - [x] Resolve selector semantics and materialization contracts for the remaining selector-bearing
+      relations needed by the application layer.
       - [x] Materialize the 14 same-logical profile/dependency relations whose member/dependency
         `profile` selectors deterministically resolve to Army-local profile-group coordinates.
         Preserve relation cardinality plus `perParent`, dependency `group`, `min`, `minDependant`,
         and `options` context without promoting those source-local fields to logical-Unit facts.
         Unit detail reads expose these as `group_dependencies`.
-      - [ ] Resolve the remaining nine cross-Unit selector-bearing relations. The Traktor Mul /
-        Dozer / Kuryer rows and Jaan Staar / Kiiutan row do not yet establish one safe selector
-        domain from normalized coordinates alone; keep their `profile` values source-only until
-        their Army semantics are independently established.
+      - [x] Resolve the remaining nine cross-Unit selector-bearing relations without forcing one
+        selector domain. Jaan Staar / Kiiutan is roster-selection-equivalent at Unit level because
+        both members have one selectable profile group and selector `1` names the active profile;
+        materialize its shared max-1 constraint. Keep the seven Traktor Mul / Dozer / Kuryer rows
+        and the Kuang Shi / Celestial Guard cross-source bridge as explicit source/context data: their
+        selector coordinates are not consistently Unit-selection semantics and must not be promoted.
+        The application selection layer therefore contains 96 constraints / 197 members in total.
       - [ ] Resolve the eight unresolved-placeholder relations only after independent evidence
         identifies their source endpoints; do not infer identity from relation partners.
   - [ ] Audit Fireteam structures.

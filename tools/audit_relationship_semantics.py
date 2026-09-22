@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB relationship semantics audit"
-REPORT_FORMAT_VERSION = 4
+REPORT_FORMAT_VERSION = 5
 
 REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     "profile_includes": (
@@ -98,6 +98,10 @@ REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     ),
     "loadout_payloads": ("id", "logical_unit_id", "payload_sha256", "name", "minis", "disabled"),
     "logical_unit_sources": ("source_unit_id", "logical_unit_id"),
+    "army_units": ("army_id", "unit_id"),
+    "profile_groups": ("army_id", "unit_id", "group_id"),
+    "profiles": ("army_id", "unit_id", "group_id", "profile_id", "ava"),
+    "loadout_options": ("army_id", "unit_id", "group_id", "option_id", "disabled"),
 
     "relations": ("army_id", "relation_id", "position", "min_count", "max_count", "is_group"),
     "relation_units": (
@@ -669,6 +673,60 @@ def _selector_domain_key(domains: list[str]) -> str:
     return "+".join(domains) if domains else "no-coordinate-match"
 
 
+def _selection_equivalent_profile_selectors(
+    connection: sqlite3.Connection,
+    *,
+    army_id: int,
+    members: list[sqlite3.Row],
+    dependencies_by_member: dict[tuple[int, int, int], list[sqlite3.Row]],
+) -> bool:
+    """Return whether cross-Unit profile selectors are neutral to roster selection."""
+    for member in members:
+        member_key = (army_id, int(member["relation_id"]), int(member["relation_unit_id"]))
+        selector = member["profile_id"]
+        if (
+            member["per_parent"] is not None
+            or dependencies_by_member[member_key]
+            or type(selector) is not int
+        ):
+            return False
+        unit_id = int(member["unit_id"])
+        if connection.execute(
+            "SELECT 1 FROM army_units WHERE army_id = ? AND unit_id = ? LIMIT 1",
+            (army_id, unit_id),
+        ).fetchone() is None:
+            return False
+        groups = [
+            int(row[0])
+            for row in connection.execute(
+                "SELECT group_id FROM profile_groups "
+                "WHERE army_id = ? AND unit_id = ? ORDER BY group_id",
+                (army_id, unit_id),
+            )
+        ]
+        if len(groups) != 1:
+            return False
+        group_id = groups[0]
+        profile = connection.execute(
+            "SELECT ava FROM profiles "
+            "WHERE army_id = ? AND unit_id = ? AND group_id = ? AND profile_id = ?",
+            (army_id, unit_id, group_id, selector),
+        ).fetchone()
+        if profile is None or (profile[0] is not None and int(profile[0]) < 0):
+            return False
+        selectable_groups = {
+            int(row[0])
+            for row in connection.execute(
+                "SELECT DISTINCT group_id FROM loadout_options "
+                "WHERE army_id = ? AND unit_id = ? AND COALESCE(disabled, 0) = 0",
+                (army_id, unit_id),
+            )
+        }
+        if selectable_groups != {group_id}:
+            return False
+    return True
+
+
 def _audit_relation_structures(
     connection: sqlite3.Connection,
     *,
@@ -687,6 +745,12 @@ def _audit_relation_structures(
         group_ids_by_unit[row["unit_id"]].add(row["group_id"])
         profile_ids_by_unit[row["unit_id"]].add(row["profile_id"])
     for row in _fetch_rows(connection, "loadout_payload_occurrences"):
+        option_ids_by_unit[row["unit_id"]].add(row["option_id"])
+    for row in _fetch_rows(connection, "profile_groups"):
+        group_ids_by_unit[row["unit_id"]].add(row["group_id"])
+    for row in _fetch_rows(connection, "profiles"):
+        profile_ids_by_unit[row["unit_id"]].add(row["profile_id"])
+    for row in _fetch_rows(connection, "loadout_options"):
         option_ids_by_unit[row["unit_id"]].add(row["option_id"])
 
     members_by_relation: dict[tuple[int, int], list[sqlite3.Row]] = defaultdict(list)
@@ -721,6 +785,9 @@ def _audit_relation_structures(
     dependency_selector_domain_counts: dict[str, int] = defaultdict(int)
     selector_free_resolved = 0
     selector_bearing_resolved = 0
+    cross_logical_selector_bearing = 0
+    selection_equivalent_cross_logical_selectors = 0
+    source_only_cross_logical_selectors = 0
 
     for relation in relation_rows:
         key = (relation["army_id"], relation["relation_id"])
@@ -768,6 +835,24 @@ def _audit_relation_structures(
                 cross_logical += 1
         else:
             unresolved_relations += 1
+
+        selector_disposition: str | None = None
+        distinct_endpoint_ids = {
+            value for value in logical_ids + dependency_logical_ids if value is not None
+        }
+        if resolved and relation_has_selectors and len(distinct_endpoint_ids) > 1:
+            cross_logical_selector_bearing += 1
+            if _selection_equivalent_profile_selectors(
+                connection,
+                army_id=int(relation["army_id"]),
+                members=members,
+                dependencies_by_member=dependencies_by_member,
+            ):
+                selection_equivalent_cross_logical_selectors += 1
+                selector_disposition = "selection-equivalent-unit-constraint"
+            else:
+                source_only_cross_logical_selectors += 1
+                selector_disposition = "source-context-only"
 
         signature_members: list[tuple[Any, ...]] = []
         detail_members: list[dict[str, Any]] = []
@@ -867,6 +952,7 @@ def _audit_relation_structures(
                     "resolution": "complete" if resolved else "unresolved_source_endpoint",
                     "semanticFamily": semantic_family,
                     "cardinalityKind": cardinality_kind,
+                    "crossLogicalSelectorDisposition": selector_disposition,
                     "canonicalLogicalUnitIds": sorted(
                         value
                         for value in set(logical_ids + dependency_logical_ids)
@@ -909,6 +995,11 @@ def _audit_relation_structures(
             ),
             "selectorFreeResolvedRelationCount": selector_free_resolved,
             "selectorBearingResolvedRelationCount": selector_bearing_resolved,
+            "crossLogicalSelectorBearingRelationCount": cross_logical_selector_bearing,
+            "selectionEquivalentCrossLogicalSelectorRelationCount": (
+                selection_equivalent_cross_logical_selectors
+            ),
+            "sourceOnlyCrossLogicalSelectorRelationCount": source_only_cross_logical_selectors,
             "familyCounts": dict(sorted(semantic_family_counts.items())),
             "cardinalityKindCounts": dict(sorted(cardinality_kind_counts.items())),
             "interpretation": (
@@ -917,7 +1008,10 @@ def _audit_relation_structures(
                 "single-logical profile/dependency constraints, and single-logical cardinality "
                 "constraints. Selectors remain contextual fields on the relation/member rather "
                 "than facts on the logical Unit. Unresolved source endpoints remain a fifth "
-                "explicit state and are not classified by inference."
+                "explicit state and are not classified by inference. Cross-logical profile "
+                "selectors are materialization-safe only when every member has one selectable "
+                "profile group and the selector names a selectable profile in that group; other "
+                "cross-logical selectors remain source-context-only."
             ),
         },
         "profileSelectorCoordinateCandidates": {

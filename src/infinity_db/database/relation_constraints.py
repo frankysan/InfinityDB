@@ -1,4 +1,4 @@
-"""Materialize selector-free Army relation constraints onto canonical Unit identity."""
+"""Materialize selection-safe Army relation constraints onto canonical Unit identity."""
 
 from __future__ import annotations
 
@@ -55,10 +55,77 @@ def _family(
     return FAMILY_SINGLE_LOGICAL_CARDINALITY
 
 
+def _profile_selectors_are_selection_equivalent(
+    connection: sqlite3.Connection,
+    *,
+    army_id: int,
+    members: list[sqlite3.Row],
+    dependency_members: set[tuple[int, int, int]],
+) -> bool:
+    """Return whether source profile selectors are neutral at roster-selection level.
+
+    A selector is selection-equivalent to the whole Unit only when every member is
+    present in the Army, has exactly one profile group containing all selectable
+    loadouts, and the selector identifies a selectable profile in that group.
+    """
+    for member in members:
+        member_key = (
+            int(member["army_id"]),
+            int(member["relation_id"]),
+            int(member["relation_unit_id"]),
+        )
+        selector = member["profile_id"]
+        if (
+            member["per_parent"] is not None
+            or member_key in dependency_members
+            or type(selector) is not int
+        ):
+            return False
+
+        unit_id = int(member["unit_id"])
+        if connection.execute(
+            "SELECT 1 FROM army_units WHERE army_id = ? AND unit_id = ? LIMIT 1",
+            (army_id, unit_id),
+        ).fetchone() is None:
+            return False
+
+        groups = [
+            int(row[0])
+            for row in connection.execute(
+                "SELECT group_id FROM profile_groups "
+                "WHERE army_id = ? AND unit_id = ? ORDER BY group_id",
+                (army_id, unit_id),
+            )
+        ]
+        if len(groups) != 1:
+            return False
+        group_id = groups[0]
+
+        profile = connection.execute(
+            "SELECT ava FROM profiles "
+            "WHERE army_id = ? AND unit_id = ? AND group_id = ? AND profile_id = ?",
+            (army_id, unit_id, group_id, selector),
+        ).fetchone()
+        if profile is None or (profile[0] is not None and int(profile[0]) < 0):
+            return False
+
+        selectable_groups = {
+            int(row[0])
+            for row in connection.execute(
+                "SELECT DISTINCT group_id FROM loadout_options "
+                "WHERE army_id = ? AND unit_id = ? AND COALESCE(disabled, 0) = 0",
+                (army_id, unit_id),
+            )
+        }
+        if selectable_groups != {group_id}:
+            return False
+    return True
+
+
 def expected_relation_constraint_rows(
     connection: sqlite3.Connection,
 ) -> tuple[list[tuple[Any, ...]], list[tuple[Any, ...]]]:
-    """Return deterministic rows for fully resolved, selector-free source relations."""
+    """Return deterministic rows for fully resolved, selection-safe source relations."""
     previous_row_factory = connection.row_factory
     connection.row_factory = sqlite3.Row
     try:
@@ -82,17 +149,27 @@ def expected_relation_constraint_rows(
             members = members_by_relation.get(key, [])
             if not members:
                 continue
-            if any(
-                member["profile_id"] is not None
-                or member["per_parent"] is not None
-                or (
+            selector_free = all(
+                member["profile_id"] is None
+                and member["per_parent"] is None
+                and (
                     int(member["army_id"]),
                     int(member["relation_id"]),
                     int(member["relation_unit_id"]),
                 )
-                in dependency_members
+                not in dependency_members
                 for member in members
-            ):
+            )
+            selection_equivalent_selectors = (
+                not selector_free
+                and _profile_selectors_are_selection_equivalent(
+                    connection,
+                    army_id=int(relation["army_id"]),
+                    members=members,
+                    dependency_members=dependency_members,
+                )
+            )
+            if not selector_free and not selection_equivalent_selectors:
                 continue
             if any(int(member["unit_id"]) not in source_to_logical for member in members):
                 continue
@@ -129,7 +206,7 @@ def expected_relation_constraint_rows(
 
 
 def materialize_relation_constraints(connection: sqlite3.Connection) -> None:
-    """Populate canonical selector-free Unit-selection constraints."""
+    """Populate canonical selection-safe Unit-selection constraints."""
     constraints, members = expected_relation_constraint_rows(connection)
     connection.execute("DELETE FROM application_unit_constraint_members")
     connection.execute("DELETE FROM application_unit_constraints")
@@ -158,7 +235,7 @@ def _stored_rows(connection: sqlite3.Connection, table: str, fields: str) -> lis
 
 
 def validate_relation_constraints(connection: sqlite3.Connection) -> None:
-    """Fail closed when materialized selector-free constraints drift from source rows."""
+    """Fail closed when materialized selection-safe constraints drift from source rows."""
     expected_constraints, expected_members = expected_relation_constraint_rows(connection)
     actual_constraints = _stored_rows(
         connection,
@@ -172,6 +249,6 @@ def validate_relation_constraints(connection: sqlite3.Connection) -> None:
     )
     if actual_constraints != expected_constraints or actual_members != expected_members:
         raise ValueError(
-            "Database has invalid materialized selector-free Unit constraints; "
+            "Database has invalid materialized Unit selection constraints; "
             "rebuild the database"
         )

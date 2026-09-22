@@ -32,16 +32,17 @@ Entries describe meaningful release outcomes rather than detailed implementation
   Unit-backed Peripheral type identity, and source-context Cyberplug access pools to canonical
   Unit targets without runtime dependence on curated source files.
 - Extend canonical relation/dependency handling beyond audit-only data. InfinityDB now materializes
-  all 95 fully resolved selector-free Army selection constraints plus the 14 deterministic same-Unit
-  profile-group dependency relations, while preserving source occurrence/group context and canonical
-  Unit identity. The remaining cross-Unit selector-bearing and unresolved relations stay explicit
-  source/context data until their Army grammar is independently resolved.
+  96 selection-safe Army constraints: all 95 selector-free constraints plus the Jaan Staar/Kiiutan
+  shared max-1 relation whose active-profile selectors are roster-selection-equivalent at Unit level.
+  The 14 deterministic same-Unit profile-group dependency relations remain separately materialized.
+  The seven Traktor Mul/Dozer/Kuryer rows and the Kuang Shi/Celestial Guard cross-source bridge stay
+  explicit source/context data because their overloaded selectors are not safe Unit-level semantics.
 
 ### Upgrade notes
 
-- Rebuild generated Army databases before deploying the next release. Schema 21 /
-  compatibility revision 29 retains materialized include/Peripheral relationships and adds
-  selector-free Unit selection constraints plus reviewed profile-group dependencies; there is no in-place database migration.
+- Rebuild generated Army databases before deploying the next release. Schema 22 /
+  compatibility revision 30 retains materialized include/Peripheral relationships, selection-safe
+  Unit constraints, and reviewed profile-group dependencies; there is no in-place database migration.
 
 ## [0.6.2] - 2026-09-21
 

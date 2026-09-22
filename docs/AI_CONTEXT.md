@@ -997,7 +997,7 @@ compatibility references remain unambiguous JSON integers.
   to canonical logical Units and validates Controller name/type/target-pool drift separately.
 
 - 2026-09-22: Milestone 2B Peripheral identity/relationship research is now materialized in
-  the Army application database. Schema 21 / compatibility revision 29 retains the reviewed
+  the Army application database. Schema 22 / compatibility revision 30 retains the reviewed
   Peripheral contract/hash into database metadata and persists 56 current embedded entities,
   279 source-definition mappings, 17 Unit-backed source mappings to 10 logical Units, four
   Cyberplug Controller access occurrences, and eight access-pool edges to canonical Ranters/
@@ -1035,15 +1035,16 @@ compatibility references remain unambiguous JSON integers.
   current values mechanically match profile-group IDs in some rows, profile IDs in others, option
   IDs in others, and multiple domains where numeric coordinates overlap. Preserve it as an opaque
   source selector until its grammar is resolved; do not rename it to a canonical profile FK.
-- 2026-09-22: Schema 21 / compatibility revision 29 materializes the 95 fully resolved
-  selector-free relations as Army-context application selection constraints. The application layer
-  contains 81 same-logical cross-context exclusivity constraints, 12 selector-free cross-logical
-  shared-cardinality constraints, and two single-logical cardinality constraints, with 195 member
-  rows. Constraint members preserve both `source_unit_id` and canonical `logical_unit_id`; this is
-  required because logical identity collapse must not erase ordinary/Reinforcement exclusivity.
-  Unit detail reads expose these as `selection_constraints`. The 14 same-logical dependency
-  relations whose `profile` selectors unambiguously match Army-local profile-group coordinates are
-  additionally materialized as `group_dependencies`, preserving source relation cardinality,
-  `perParent`, dependency `group`, `min`, `minDependant`, and validated option selectors. The nine
-  cross-Unit selector-bearing relations and eight unresolved-placeholder relations remain
-  source/context data pending selector grammar/endpoint review.
+- 2026-09-22: Schema 22 / compatibility revision 30 materializes 96 fully resolved selection-safe
+  Army-context constraints. The application layer contains 81 same-logical cross-context
+  exclusivity constraints, 13 cross-logical shared-cardinality constraints, and two single-logical
+  cardinality constraints, with 197 member rows. The additional cross-logical row is Jaan Staar /
+  Kiiutan: both source selectors identify the selectable active profile in each Unit's only
+  selectable profile group, so the source max-1 relation is roster-selection-equivalent at Unit
+  level. Constraint members preserve both `source_unit_id` and canonical `logical_unit_id`. The 14
+  same-logical dependency relations whose `profile` selectors unambiguously match Army-local
+  profile-group coordinates remain materialized as `group_dependencies`, preserving source relation
+  cardinality, `perParent`, dependency `group`, `min`, `minDependant`, and validated option
+  selectors. Seven Traktor Mul / Dozer / Kuryer rows and the Kuang Shi / Celestial Guard bridge
+  remain source/context-only because their selector coordinates are not safe whole-Unit semantics.
+  The eight unresolved-placeholder relations remain pending independent endpoint evidence.

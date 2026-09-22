@@ -1764,7 +1764,7 @@ quantity differences. The shared unit-option rows resolve unambiguously in the a
 snapshot, but their target source option can still acquire different canonical payloads
 when Army-contextual loadout semantics differ.
 
-Schema version 21 / compatibility revision 29 retains the schema-18 include
+Schema version 22 / compatibility revision 30 retains the schema-18 include
 relationships without promoting the attachment into reusable payload identity:
 
 - `profile_occurrence_includes` keeps the exact Profile occurrence as parent context and
@@ -1789,7 +1789,7 @@ Unit-backed source IDs resolved through the existing logical-Unit layer to 10 lo
 Units. Unit-backed type comes from the source `Peripheral` Skill subtype rather than a
 parallel Peripheral entity namespace.
 
-Schema 21 retains the schema-19 reviewed Peripheral layer in the frontend database rather than leaving
+Schema 22 retains the schema-19 reviewed Peripheral layer in the frontend database rather than leaving
 it in build-time curated JSON only:
 
 - `application_peripheral_entities` / `application_peripheral_profiles` store canonical
@@ -1858,22 +1858,26 @@ match only a profile-group ID, only a profile ID, only an option ID, or several 
 when their numeric coordinates overlap. The audit reports these candidate-domain matches only as
 diagnostics and deliberately does not select one interpretation.
 
-Schema 21 materializes the 95 fully resolved selector-free constraints while preserving both
-canonical and source-context identity. `application_unit_constraints` keeps the exact Army/relation
-context, structural family, group flag, and source min/max cardinality. Its
+Schema 22 materializes 96 fully resolved selection-safe constraints while preserving both canonical
+and source-context identity. `application_unit_constraints` keeps the exact Army/relation context,
+structural family, group flag, and source min/max cardinality. Its
 `application_unit_constraint_members` rows retain each source relation-member occurrence and
 `source_unit_id` while also resolving that occurrence to `logical_unit_id`. This is required for the
 81 same-logical cross-context exclusivity constraints: collapsing those members to one logical Unit
 alone would erase which ordinary/Reinforcement source occurrences the exactly-one rule constrains.
-The current materialized set contains 81 same-logical exclusivity constraints, 12 selector-free
-cross-logical shared-cardinality constraints, and two single-logical cardinality constraints, for
-195 member rows. Unit detail reads expose these as `selection_constraints` with canonical member
-names/slugs and retained source Unit IDs.
+The materialized set contains those 81 constraints, 13 cross-logical shared-cardinality constraints,
+and two single-logical cardinality constraints, for 197 member rows. Twelve cross-logical rows are
+selector-free; the thirteenth is the Jaan Staar/Kiiutan shared max-1 relation. Its source `profile=1`
+selectors are roster-selection-equivalent because both Units have exactly one selectable profile
+group, selector 1 names the selectable active profile in that group, and the inactive Symbiont Armor
+profile is not independently selectable. The selector remains source provenance; the application
+constraint expresses only the equivalent whole-Unit max-1 rule. Unit detail reads expose these as
+`selection_constraints` with canonical member names/slugs and retained source Unit IDs.
 
 Fourteen of the 23 selector-bearing resolved relations have a narrower deterministic contract. In
 those same-logical dependency relations, both the member and dependency source fields named
 `profile` resolve to existing Army-local profile-group coordinates for the same logical Unit.
-Schema 21 materializes them through `application_unit_group_dependency_constraints`,
+Schema 22 retains them through `application_unit_group_dependency_constraints`,
 `application_unit_group_dependency_members`, and
 `application_unit_group_dependency_targets`. The application rows retain Army/relation context,
 source Unit and canonical logical-Unit identity, the resolved profile-group IDs, relation
@@ -1882,11 +1886,14 @@ cardinality, `perParent`, the dependency's separate source `group` selector, `mi
 `group_dependencies`. The auxiliary source fields are preserved context, not promoted to intrinsic
 logical-Unit properties.
 
-The remaining nine cross-Unit selector-bearing relations, plus the eight relations with unresolved
-source placeholders, remain source/context data only. In particular, the Traktor Mul / Dozer /
-Kuryer selector values and the Jaan Staar / Kiiutan selector values do not establish one safe
-normalized selector domain from the current snapshot alone. A single generic canonical relation
-table would preserve that source ambiguity instead of resolving it.
+The other eight cross-Unit selector-bearing relations remain source/context data by design. Seven
+repeat the Traktor Mul / Dozer / Kuryer grouping across Army contexts, but their `profile` values do
+not resolve consistently to one selectable coordinate domain and Kuryer is not even an Army member
+in five of those contexts. The Yu Jing Kuang Shi / Celestial Guard row similarly references a
+non-member Celestial Guard source Unit while Kuang Shi's actual Monitor requirement is already
+represented by the deterministic same-Unit group dependency. Neither pattern is promoted to a
+whole-Unit application constraint. The separate eight relations with unresolved source placeholders
+also remain source/context data pending independent endpoint evidence.
 
 ### Application catalog identity and metadata context
 
