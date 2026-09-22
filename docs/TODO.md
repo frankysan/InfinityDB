@@ -125,6 +125,11 @@ in `docs/releasing.md`.
         deterministic coverage/review queue that reports unmapped definitions, stale
         mappings, source-name drift, curated-only entities/profiles, repeated names, and
         normalization-only review collisions without promoting names into identity.
+      - [x] Add bidirectional Peripheral -> Controller and Controller -> Peripheral evidence
+        to the coverage report, and compare observed Controller Skill sets with only the
+        rule-stated Servant/Cyberplug eligibility predicates. Treat those results as review
+        evidence, never automatic type classification; keep types with no generic predicate
+        unevaluated.
       - [ ] Populate the reviewed mappings for the current snapshot until every source
         definition is either resolved to a canonical entity/profile or explicitly retained
         as unresolved review work.

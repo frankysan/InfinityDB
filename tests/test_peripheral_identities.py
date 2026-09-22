@@ -226,3 +226,197 @@ def test_peripheral_identity_coverage_rejects_wrong_snapshot(tmp_path: Path) -> 
         audit_peripheral_identity_coverage(
             curated, _coverage_database(tmp_path, snapshot_sha256="b" * 64)
         )
+
+
+def _controller_coverage_database(tmp_path: Path) -> Path:
+    path = _coverage_database(tmp_path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.executescript(
+            """
+            CREATE TABLE units (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE profiles (
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER, name TEXT
+            );
+            CREATE TABLE loadout_options (
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER, name TEXT
+            );
+            CREATE TABLE profile_peripherals (
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER,
+                position INTEGER, item_id INTEGER, quantity INTEGER
+            );
+            CREATE TABLE option_peripherals (
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER,
+                position INTEGER, item_id INTEGER, quantity INTEGER
+            );
+            CREATE TABLE profile_skills (
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER,
+                item_id INTEGER
+            );
+            CREATE TABLE option_skills (
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER,
+                item_id INTEGER
+            );
+            CREATE TABLE skills (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE application_catalog_sources (
+                catalog TEXT, application_item_id INTEGER, source_item_id INTEGER
+            );
+            CREATE TABLE application_domain_slugs (
+                domain TEXT, application_id INTEGER, slug TEXT, status TEXT
+            );
+            """
+        )
+        connection.executemany(
+            "INSERT INTO units (id, name) VALUES (?, ?)",
+            [(10, "Doctor Controller"), (20, "Cyberplug Controller")],
+        )
+        connection.executemany(
+            "INSERT INTO profiles (army_id, unit_id, group_id, profile_id, name) "
+            "VALUES (?, ?, ?, ?, ?)",
+            [(101, 10, 1, 1, "Doctor Profile"), (101, 20, 1, 1, "Cyberplug Profile")],
+        )
+        connection.execute(
+            "INSERT INTO loadout_options (army_id, unit_id, group_id, option_id, name) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (101, 20, 1, 1, "Cyberplug Loadout"),
+        )
+        connection.execute(
+            "INSERT INTO profile_peripherals "
+            "(army_id, unit_id, group_id, profile_id, position, item_id, quantity) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (101, 10, 1, 1, 1, 1, 1),
+        )
+        connection.execute(
+            "INSERT INTO option_peripherals "
+            "(army_id, unit_id, group_id, option_id, position, item_id, quantity) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (101, 20, 1, 1, 1, 4, 1),
+        )
+        connection.executemany(
+            "INSERT INTO skills (id, name) VALUES (?, ?)",
+            [(10, "Doctor"), (20, "Cyberplug")],
+        )
+        connection.execute(
+            "INSERT INTO profile_skills (army_id, unit_id, group_id, profile_id, item_id) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (101, 10, 1, 1, 10),
+        )
+        connection.execute(
+            "INSERT INTO option_skills (army_id, unit_id, group_id, option_id, item_id) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (101, 20, 1, 1, 20),
+        )
+        connection.executemany(
+            "INSERT INTO application_catalog_sources "
+            "(catalog, application_item_id, source_item_id) VALUES (?, ?, ?)",
+            [("skills", 100, 10), ("skills", 200, 20)],
+        )
+        connection.executemany(
+            "INSERT INTO application_domain_slugs (domain, application_id, slug, status) "
+            "VALUES (?, ?, ?, ?)",
+            [("skills", 100, "doctor", "resolved"), ("skills", 200, "cyberplug", "resolved")],
+        )
+        connection.commit()
+    finally:
+        connection.close()
+    return path
+
+
+def _controller_rules_documents() -> list[tuple[Path, dict]]:
+    return [
+        (
+            Path("synthetic-rules.json"),
+            {
+                "records": [
+                    {
+                        "id": "skill:doctor",
+                        "kind": "skill",
+                        "armyLinks": [{"entity": "skill", "id": "doctor"}],
+                    },
+                    {
+                        "id": "skill:engineer",
+                        "kind": "skill",
+                        "armyLinks": [{"entity": "skill", "id": "engineer"}],
+                    },
+                    {
+                        "id": "skill:cyberplug",
+                        "kind": "skill",
+                        "armyLinks": [{"entity": "skill", "id": "cyberplug"}],
+                    },
+                    {
+                        "id": "rule:peripheral-type:servant",
+                        "kind": "rule",
+                        "facts": {
+                            "category": "peripheral-type",
+                            "controllerEligibility": {
+                                "anyOf": [
+                                    {"hasSkill": "skill:doctor"},
+                                    {"hasSkill": "skill:engineer"},
+                                ]
+                            },
+                        },
+                    },
+                    {
+                        "id": "rule:peripheral-type:cyberplug",
+                        "kind": "rule",
+                        "facts": {
+                            "category": "peripheral-type",
+                            "controllerEligibility": {"hasSkill": "skill:cyberplug"},
+                        },
+                    },
+                    {
+                        "id": "rule:peripheral-type:synchronized",
+                        "kind": "rule",
+                        "facts": {
+                            "category": "peripheral-type",
+                            "controllerEligibility": {"status": "not-stated"},
+                        },
+                    },
+                ]
+            },
+        )
+    ]
+
+
+def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
+    tmp_path: Path,
+) -> None:
+    report = audit_peripheral_identity_coverage(
+        parse_peripheral_identity_curated(_document()),
+        _controller_coverage_database(tmp_path),
+        rules_documents=_controller_rules_documents(),
+    )
+
+    graph = report["controllerGraph"]
+    assert graph["status"] == "available"
+    assert graph["attachmentCount"] == 2
+    assert graph["controllerCount"] == 2
+    assert graph["evaluableTypeIds"] == [
+        "rule:peripheral-type:cyberplug",
+        "rule:peripheral-type:servant",
+    ]
+
+    evidence = {
+        (row["armyId"], row["peripheralId"]): row for row in graph["definitionEvidence"]
+    }
+    example = evidence[(101, 1)]
+    assert example["typeEligibility"]["rule:peripheral-type:servant"]["consistent"] == 1
+    assert example["typeEligibility"]["rule:peripheral-type:cyberplug"]["inconsistent"] == 1
+    assert example["controllers"][0]["directSkillSlugs"] == ["doctor"]
+
+    unmapped = evidence[(101, 4)]
+    assert unmapped["typeEligibility"]["rule:peripheral-type:cyberplug"]["consistent"] == 1
+    assert unmapped["typeEligibility"]["rule:peripheral-type:servant"]["inconsistent"] == 1
+    loadout_controller = next(
+        row for row in graph["controllerToPeripherals"] if row["controllerKind"] == "loadout"
+    )
+    assert loadout_controller["peripherals"] == [
+        {"peripheralId": 4, "peripheralName": "UNMAPPED", "quantity": 1}
+    ]
+
+    review = next(row for row in report["reviewQueue"] if row["normalizedName"] == "unmapped")
+    assert review["controllerEvidence"]["attachmentCount"] == 1
+    assert (
+        review["controllerEvidence"]["typeEligibility"]["rule:peripheral-type:cyberplug"]
+        == {"consistent": 1, "inconsistent": 0, "ambiguous": 0, "unknown": 0}
+    )

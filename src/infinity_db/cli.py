@@ -136,7 +136,12 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
             raise ValueError("--output requires --database")
         return 0
 
-    report = audit_peripheral_identity_coverage(curated, args.database, include_details=True)
+    report = audit_peripheral_identity_coverage(
+        curated,
+        args.database,
+        include_details=True,
+        rules_documents=load_curated_directory(DEFAULT_CURATED_RULES),
+    )
     definitions = report["definitions"]
     validation = report["validation"]
     print(
@@ -145,6 +150,14 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         f"mapped ({definitions['coveragePercent']}%); "
         f"{definitions['unmappedReviewGroupCount']} review groups"
     )
+    controller_graph = report["controllerGraph"]
+    if controller_graph["status"] == "available":
+        print(
+            "Peripheral controller evidence: "
+            f"{controller_graph['attachmentCount']} attachments across "
+            f"{controller_graph['controllerCount']} controller occurrences; "
+            f"{len(controller_graph['evaluableTypeIds'])} rule-backed type predicates"
+        )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(

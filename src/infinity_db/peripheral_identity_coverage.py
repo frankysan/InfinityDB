@@ -6,13 +6,29 @@ import json
 import sqlite3
 import unicodedata
 from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
 from .peripheral_identities import PeripheralIdentityCurated, PeripheralIdentityError
 
 COVERAGE_FORMAT = "InfinityDB Peripheral identity coverage"
-COVERAGE_FORMAT_VERSION = 1
+COVERAGE_FORMAT_VERSION = 2
+
+_CONTROLLER_GRAPH_TABLES = frozenset(
+    {
+        "units",
+        "profiles",
+        "loadout_options",
+        "profile_peripherals",
+        "option_peripherals",
+        "profile_skills",
+        "option_skills",
+        "skills",
+        "application_catalog_sources",
+        "application_domain_slugs",
+    }
+)
 
 
 def _normalized_review_name(value: str) -> str:
@@ -20,13 +36,17 @@ def _normalized_review_name(value: str) -> str:
     return " ".join(unicodedata.normalize("NFC", value).split()).casefold()
 
 
-def _require_peripheral_schema(connection: sqlite3.Connection) -> None:
-    tables = {
+def _table_names(connection: sqlite3.Connection) -> set[str]:
+    return {
         str(row[0])
         for row in connection.execute(
             "SELECT name FROM sqlite_master WHERE type = 'table'"
         ).fetchall()
     }
+
+
+def _require_peripheral_schema(connection: sqlite3.Connection) -> None:
+    tables = _table_names(connection)
     for table in ("__infinity_metadata", "peripherals"):
         if table not in tables:
             raise PeripheralIdentityError(
@@ -81,11 +101,393 @@ def _source_for_snapshot(document: dict[str, Any], snapshot_sha256: str) -> dict
     return matches[0]
 
 
+def _army_skill_slug_by_rule_id(
+    rules_documents: Iterable[tuple[Path, dict[str, Any]]] | None,
+) -> tuple[dict[str, str], dict[str, Any]]:
+    if rules_documents is None:
+        return {}, {}
+    records: dict[str, dict[str, Any]] = {}
+    for _path, document in rules_documents:
+        for record in document.get("records", []):
+            if isinstance(record, dict) and isinstance(record.get("id"), str):
+                records[record["id"]] = record
+
+    skill_slugs: dict[str, str] = {}
+    for record_id, record in records.items():
+        if record.get("kind") != "skill":
+            continue
+        links = record.get("armyLinks")
+        if not isinstance(links, list):
+            continue
+        slugs = {
+            link.get("id")
+            for link in links
+            if isinstance(link, dict)
+            and link.get("entity") == "skill"
+            and isinstance(link.get("id"), str)
+        }
+        if len(slugs) == 1:
+            skill_slugs[record_id] = str(next(iter(slugs)))
+
+    predicates: dict[str, Any] = {}
+    for record_id, record in records.items():
+        facts = record.get("facts")
+        if not isinstance(facts, dict) or facts.get("category") != "peripheral-type":
+            continue
+        eligibility = facts.get("controllerEligibility")
+        if isinstance(eligibility, dict) and eligibility.get("status") != "not-stated":
+            predicates[record_id] = eligibility
+    return skill_slugs, predicates
+
+
+def _evaluate_rule_eligibility(
+    expression: Any,
+    skill_slugs: set[str],
+    army_skill_slug_by_rule_id: Mapping[str, str],
+) -> bool | None:
+    if not isinstance(expression, dict):
+        return None
+    if "hasSkill" in expression:
+        required = army_skill_slug_by_rule_id.get(str(expression["hasSkill"]))
+        return required in skill_slugs if required is not None else None
+    if "anyOf" in expression:
+        children = expression["anyOf"]
+        if not isinstance(children, list):
+            return None
+        values = [
+            _evaluate_rule_eligibility(child, skill_slugs, army_skill_slug_by_rule_id)
+            for child in children
+        ]
+        if any(value is True for value in values):
+            return True
+        if all(value is False for value in values):
+            return False
+        return None
+    if "allOf" in expression:
+        children = expression["allOf"]
+        if not isinstance(children, list):
+            return None
+        values = [
+            _evaluate_rule_eligibility(child, skill_slugs, army_skill_slug_by_rule_id)
+            for child in children
+        ]
+        if any(value is False for value in values):
+            return False
+        if all(value is True for value in values):
+            return True
+        return None
+    return None
+
+
+def _controller_skill_maps(connection: sqlite3.Connection) -> tuple[
+    dict[tuple[int, int, int, int], set[str]],
+    dict[tuple[int, int, int, int], set[str]],
+    dict[tuple[int, int, int], list[set[str]]],
+    dict[int, str],
+]:
+    source_skill_slug = {
+        int(row["source_item_id"]): str(row["slug"])
+        for row in connection.execute(
+            "SELECT acs.source_item_id, ads.slug "
+            "FROM application_catalog_sources AS acs "
+            "JOIN application_domain_slugs AS ads "
+            "ON ads.domain = 'skills' AND ads.application_id = acs.application_item_id "
+            "WHERE acs.catalog = 'skills' AND ads.status = 'resolved' AND ads.slug IS NOT NULL"
+        )
+    }
+    skill_names = {
+        int(row["id"]): str(row["name"])
+        for row in connection.execute("SELECT id, name FROM skills")
+    }
+
+    profile_skills: dict[tuple[int, int, int, int], set[str]] = defaultdict(set)
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, profile_id, item_id FROM profile_skills"
+    ):
+        slug = source_skill_slug.get(int(row["item_id"]))
+        if slug is not None:
+            profile_key = (
+                int(row["army_id"]),
+                int(row["unit_id"]),
+                int(row["group_id"]),
+                int(row["profile_id"]),
+            )
+            profile_skills[profile_key].add(slug)
+
+    option_skills: dict[tuple[int, int, int, int], set[str]] = defaultdict(set)
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, option_id, item_id FROM option_skills"
+    ):
+        slug = source_skill_slug.get(int(row["item_id"]))
+        if slug is not None:
+            option_key = (
+                int(row["army_id"]),
+                int(row["unit_id"]),
+                int(row["group_id"]),
+                int(row["option_id"]),
+            )
+            option_skills[option_key].add(slug)
+
+    group_profile_skill_sets: dict[tuple[int, int, int], list[set[str]]] = defaultdict(list)
+    profile_rows = connection.execute(
+        "SELECT army_id, unit_id, group_id, profile_id FROM profiles "
+        "ORDER BY army_id, unit_id, group_id, profile_id"
+    )
+    for row in profile_rows:
+        key = (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]))
+        profile_key = (*key, int(row["profile_id"]))
+        group_profile_skill_sets[key].append(set(profile_skills.get(profile_key, set())))
+
+    return profile_skills, option_skills, group_profile_skill_sets, skill_names
+
+
+def _audit_controller_graph(
+    connection: sqlite3.Connection,
+    definitions: Mapping[tuple[int, int], dict[str, Any]],
+    *,
+    rules_documents: Iterable[tuple[Path, dict[str, Any]]] | None,
+    include_details: bool,
+) -> tuple[dict[str, Any], dict[tuple[int, int], dict[str, Any]]]:
+    missing_tables = sorted(_CONTROLLER_GRAPH_TABLES - _table_names(connection))
+    if missing_tables:
+        return (
+            {
+                "status": "unavailable",
+                "missingTables": missing_tables,
+                "reason": (
+                    "Controller evidence requires the normalized relationship/catalog tables."
+                ),
+            },
+            {},
+        )
+
+    rule_skill_slugs, type_predicates = _army_skill_slug_by_rule_id(rules_documents)
+    profile_skills, option_skills, group_profile_skill_sets, _skill_names = _controller_skill_maps(
+        connection
+    )
+    unit_names = {
+        int(row["id"]): str(row["name"])
+        for row in connection.execute("SELECT id, name FROM units")
+    }
+    profile_names = {
+        (
+            int(row["army_id"]),
+            int(row["unit_id"]),
+            int(row["group_id"]),
+            int(row["profile_id"]),
+        ): str(row["name"] or "")
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, profile_id, name FROM profiles"
+        )
+    }
+    option_names = {
+        (
+            int(row["army_id"]),
+            int(row["unit_id"]),
+            int(row["group_id"]),
+            int(row["option_id"]),
+        ): str(row["name"] or "")
+        for row in connection.execute(
+            "SELECT army_id, unit_id, group_id, option_id, name FROM loadout_options"
+        )
+    }
+
+    attachment_evidence: list[dict[str, Any]] = []
+    controllers: dict[tuple[str, int, int, int, int], dict[str, Any]] = {}
+    definition_attachments: dict[tuple[int, int], list[dict[str, Any]]] = defaultdict(list)
+
+    def add_attachment(kind: str, row: sqlite3.Row) -> None:
+        army_id = int(row["army_id"])
+        unit_id = int(row["unit_id"])
+        group_id = int(row["group_id"])
+        parent_field = "profile_id" if kind == "profile" else "option_id"
+        parent_id = int(row[parent_field])
+        definition_key = (army_id, int(row["item_id"]))
+        definition = definitions.get(definition_key)
+        parent_key = (army_id, unit_id, group_id, parent_id)
+        if kind == "profile":
+            candidate_skill_sets = [set(profile_skills.get(parent_key, set()))]
+            direct_skill_slugs = sorted(candidate_skill_sets[0])
+            controller_name = profile_names.get(parent_key, "")
+        else:
+            direct = set(option_skills.get(parent_key, set()))
+            profile_sets = group_profile_skill_sets.get((army_id, unit_id, group_id), [])
+            candidate_skill_sets = [
+                direct | profile_set for profile_set in profile_sets
+            ] or [direct]
+            direct_skill_slugs = sorted(direct)
+            controller_name = option_names.get(parent_key, "")
+
+        type_evidence: dict[str, str] = {}
+        for type_id, predicate in sorted(type_predicates.items()):
+            values = [
+                _evaluate_rule_eligibility(predicate, skills, rule_skill_slugs)
+                for skills in candidate_skill_sets
+            ]
+            known = [value for value in values if value is not None]
+            if not known:
+                status = "unknown"
+            elif all(value is True for value in known) and len(known) == len(values):
+                status = "consistent"
+            elif all(value is False for value in known) and len(known) == len(values):
+                status = "inconsistent"
+            else:
+                status = "ambiguous"
+            type_evidence[type_id] = status
+
+        evidence = {
+            "controllerKind": kind,
+            "armyId": army_id,
+            "unitId": unit_id,
+            "unitName": unit_names.get(unit_id),
+            "groupId": group_id,
+            "parentId": parent_id,
+            "controllerName": controller_name,
+            "peripheralId": int(row["item_id"]),
+            "peripheralName": definition.get("sourceName") if definition is not None else None,
+            "quantity": row["quantity"],
+            "directSkillSlugs": direct_skill_slugs,
+            "candidateEffectiveSkillSets": [sorted(skills) for skills in candidate_skill_sets],
+            "typeEligibility": type_evidence,
+        }
+        attachment_evidence.append(evidence)
+        definition_attachments[definition_key].append(evidence)
+        controller_key = (kind, army_id, unit_id, group_id, parent_id)
+        controller = controllers.setdefault(
+            controller_key,
+            {
+                "controllerKind": kind,
+                "armyId": army_id,
+                "unitId": unit_id,
+                "unitName": unit_names.get(unit_id),
+                "groupId": group_id,
+                "parentId": parent_id,
+                "controllerName": controller_name,
+                "directSkillSlugs": direct_skill_slugs,
+                "candidateEffectiveSkillSets": [sorted(skills) for skills in candidate_skill_sets],
+                "peripherals": [],
+            },
+        )
+        controller["peripherals"].append(
+            {
+                "peripheralId": int(row["item_id"]),
+                "peripheralName": definition.get("sourceName") if definition is not None else None,
+                "quantity": row["quantity"],
+            }
+        )
+
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, profile_id, item_id, quantity "
+        "FROM profile_peripherals ORDER BY army_id, unit_id, group_id, profile_id, position"
+    ):
+        add_attachment("profile", row)
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, option_id, item_id, quantity "
+        "FROM option_peripherals ORDER BY army_id, unit_id, group_id, option_id, position"
+    ):
+        add_attachment("loadout", row)
+
+    definition_evidence: dict[tuple[int, int], dict[str, Any]] = {}
+    for key, definition in sorted(definitions.items()):
+        attachments = definition_attachments.get(key, [])
+        type_summary: dict[str, dict[str, int]] = {}
+        for type_id in sorted(type_predicates):
+            counts = {"consistent": 0, "inconsistent": 0, "ambiguous": 0, "unknown": 0}
+            for evidence in attachments:
+                counts[evidence["typeEligibility"].get(type_id, "unknown")] += 1
+            type_summary[type_id] = counts
+        definition_evidence[key] = {
+            "armyId": key[0],
+            "peripheralId": key[1],
+            "sourceName": definition["sourceName"],
+            "attachmentCount": len(attachments),
+            "controllerCount": len(
+                {
+                    (
+                        item["controllerKind"],
+                        item["armyId"],
+                        item["unitId"],
+                        item["groupId"],
+                        item["parentId"],
+                    )
+                    for item in attachments
+                }
+            ),
+            "typeEligibility": type_summary,
+        }
+        if include_details:
+            definition_evidence[key]["controllers"] = attachments
+
+    report: dict[str, Any] = {
+        "status": "available",
+        "attachmentCount": len(attachment_evidence),
+        "controllerCount": len(controllers),
+        "attachedDefinitionCount": sum(
+            1 for value in definition_evidence.values() if value["attachmentCount"]
+        ),
+        "definitionOnlyCount": sum(
+            1 for value in definition_evidence.values() if not value["attachmentCount"]
+        ),
+        "evaluableTypeIds": sorted(type_predicates),
+        "interpretation": (
+            "Controller eligibility is a necessary-condition check only. A 'consistent' result "
+            "supports review for that type but does not establish Peripheral type identity. "
+            "Core types whose controller eligibility is not stated are intentionally not evaluated."
+        ),
+        "definitionEvidence": [definition_evidence[key] for key in sorted(definition_evidence)],
+    }
+    if include_details:
+        report["controllerToPeripherals"] = [
+            {
+                **controllers[key],
+                "peripherals": sorted(
+                    controllers[key]["peripherals"],
+                    key=lambda item: (item["peripheralName"] or "", item["peripheralId"]),
+                ),
+            }
+            for key in sorted(controllers)
+        ]
+    return report, definition_evidence
+
+
+def _aggregate_group_controller_evidence(
+    group_rows: list[dict[str, Any]],
+    definition_evidence: Mapping[tuple[int, int], dict[str, Any]],
+) -> dict[str, Any]:
+    evidence = [
+        definition_evidence.get((int(row["armyId"]), int(row["peripheralId"])))
+        for row in group_rows
+    ]
+    evidence = [item for item in evidence if item is not None]
+    type_ids = sorted(
+        {
+            type_id
+            for item in evidence
+            for type_id in item.get("typeEligibility", {})
+        }
+    )
+    type_summary: dict[str, dict[str, int]] = {}
+    for type_id in type_ids:
+        counts = {"consistent": 0, "inconsistent": 0, "ambiguous": 0, "unknown": 0}
+        for item in evidence:
+            type_counts = item.get("typeEligibility", {}).get(type_id, {})
+            for status in counts:
+                counts[status] += int(type_counts.get(status, 0))
+        type_summary[type_id] = counts
+    return {
+        "attachedDefinitionCount": sum(1 for item in evidence if item.get("attachmentCount", 0)),
+        "definitionOnlyCount": sum(1 for item in evidence if not item.get("attachmentCount", 0)),
+        "attachmentCount": sum(int(item.get("attachmentCount", 0)) for item in evidence),
+        "typeEligibility": type_summary,
+    }
+
+
 def audit_peripheral_identity_coverage(
     curated: PeripheralIdentityCurated,
     database: Path,
     *,
     include_details: bool = True,
+    rules_documents: Iterable[tuple[Path, dict[str, Any]]] | None = None,
 ) -> dict[str, Any]:
     """Compare reviewed mappings with one exact Army database snapshot."""
     database = Path(database)
@@ -107,6 +509,12 @@ def audit_peripheral_identity_coverage(
                     "SELECT army_id, id, name, mercs FROM peripherals ORDER BY army_id, id"
                 )
             ]
+            controller_graph, definition_controller_evidence = _audit_controller_graph(
+                connection,
+                {(row["armyId"], row["peripheralId"]): row for row in rows},
+                rules_documents=rules_documents,
+                include_details=include_details,
+            )
         finally:
             connection.close()
     except (OSError, sqlite3.Error, TypeError, ValueError) as exc:
@@ -212,6 +620,10 @@ def audit_peripheral_identity_coverage(
                 for entity_id, profile_id in reviewed_targets
             ],
         }
+        if definition_controller_evidence:
+            entry["controllerEvidence"] = _aggregate_group_controller_evidence(
+                group_rows, definition_controller_evidence
+            )
         if include_details:
             entry["unmappedDefinitions"] = unmapped
         review_queue.append(entry)
@@ -270,6 +682,7 @@ def audit_peripheral_identity_coverage(
             "repeatedNameGroupCount": repeated_name_group_count,
             "normalizedNameCollisionCount": normalized_name_collision_count,
         },
+        "controllerGraph": controller_graph,
         "curated": {
             "entityCount": curated.entity_count,
             "profileCount": curated.profile_count,

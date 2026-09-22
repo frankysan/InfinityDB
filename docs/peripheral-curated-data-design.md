@@ -348,6 +348,23 @@ Incomplete coverage is a normal `needs-review` state during population. Stale ma
 source-name drift make the snapshot validation invalid. Name grouping remains review
 evidence only and never creates or changes a canonical mapping.
 
+The same coverage pass also audits the relationship graph in both directions when the
+normalized controller tables are available:
+
+- each Army Peripheral definition -> every profile/loadout occurrence that explicitly
+  attaches it, including Controller Unit/profile/loadout identity and observed Skill slugs;
+- each Controller occurrence -> every explicitly attached Army Peripheral definition; and
+- the reviewed core `controllerEligibility` predicates -> a consistency check against each
+  Controller's candidate effective Skill sets.
+
+This typing evidence is deliberately asymmetric. `consistent` means the observed Controller
+satisfies a rule-stated necessary eligibility condition; it does **not** prove that the
+Peripheral has that type. `inconsistent` can rule out an evaluable type only when the
+Controller Skill context is complete. Loadout-level evidence therefore evaluates every
+profile Skill set in the same group together with loadout-local Skills and reports mixed
+results as `ambiguous`. Synchronized, Control, and Ancillary remain unevaluated because the
+reviewed core rules state no generic Controller-eligibility predicate for those types.
+
 ## Facts that should remain prose or interaction references initially
 
 Do not over-structure temporal rules merely because they mention Peripherals.
@@ -400,11 +417,13 @@ constraints, profile-mode existence, and durable relationships.
    `data/curated/peripherals/army-identities.json` defines reviewed canonical entity/profile
    IDs and exact snapshot-local source mappings, with fail-closed validation and no
    automatic name promotion. The current checked-in mapping set is intentionally empty.
-7. **Populate the reviewed identity mappings — coverage gate implemented, population
-   pending.** The snapshot-bound validator now reports unmapped definitions, stale/name-
-   drifted mappings, curated-only targets, repeated-name groups, and a deterministic review
-   queue. Reconcile the 279 audited source definitions against explicit canonical
-   entities/profiles and leave unresolved cases explicit rather than guessing.
+7. **Populate the reviewed identity mappings — coverage gate and bidirectional Controller
+   evidence implemented, population pending.** The snapshot-bound validator reports unmapped
+   definitions, stale/name-drifted mappings, curated-only targets, repeated-name groups, a
+   deterministic review queue, Peripheral -> Controller attachments, Controller -> Peripheral
+   attachments, and rule-backed Servant/Cyberplug eligibility consistency. Reconcile the 279
+   audited source definitions against explicit canonical entities/profiles and leave unresolved
+   cases explicit rather than guessing.
 8. **Materialize curated-derived application relationships.** Join source
    Controller facts, reviewed identity mappings, and curated eligibility rules;
    preserve all provenance and then decide the `infinity.db`/API/UI surface for
