@@ -86,6 +86,23 @@ def test_peripheral_identity_contract_accepts_reviewed_entity_profile_and_mappin
     assert len(curated.content_sha256) == 64
 
 
+def test_peripheral_identity_contract_allows_identity_before_type_classification() -> None:
+    document = _document()
+    del document["entities"][0]["typeId"]
+
+    curated = parse_peripheral_identity_curated(document)
+
+    assert curated.entity_count == 1
+
+
+def test_peripheral_identity_contract_rejects_unknown_type_when_present() -> None:
+    document = _document()
+    document["entities"][0]["typeId"] = "rule:peripheral-type:unknown"
+
+    with pytest.raises(PeripheralIdentityError, match="typeId"):
+        parse_peripheral_identity_curated(document)
+
+
 def test_peripheral_identity_contract_rejects_mercs_as_identity_data() -> None:
     document = _document()
     document["mappings"][0]["mercs"] = 1
@@ -239,7 +256,8 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
                 army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER, name TEXT
             );
             CREATE TABLE loadout_options (
-                army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER, name TEXT
+                army_id INTEGER, unit_id INTEGER, group_id INTEGER, option_id INTEGER,
+                name TEXT, disabled INTEGER
             );
             CREATE TABLE profile_peripherals (
                 army_id INTEGER, unit_id INTEGER, group_id INTEGER, profile_id INTEGER,
@@ -268,17 +286,32 @@ def _controller_coverage_database(tmp_path: Path) -> Path:
         )
         connection.executemany(
             "INSERT INTO units (id, name) VALUES (?, ?)",
-            [(10, "Doctor Controller"), (20, "Cyberplug Controller")],
+            [
+                (10, "Doctor Controller"),
+                (20, "Cyberplug Controller"),
+                (30, "Selectable Peripheral Unit"),
+                (40, "Embedded Peripheral Unit"),
+            ],
         )
         connection.executemany(
             "INSERT INTO profiles (army_id, unit_id, group_id, profile_id, name) "
             "VALUES (?, ?, ?, ?, ?)",
-            [(101, 10, 1, 1, "Doctor Profile"), (101, 20, 1, 1, "Cyberplug Profile")],
+            [
+                (101, 10, 1, 1, "Doctor Profile"),
+                (101, 20, 1, 1, "Cyberplug Profile"),
+                (101, 30, 1, 1, "UNMAPPED"),
+                (101, 40, 1, 1, "EXAMPLE"),
+            ],
         )
-        connection.execute(
-            "INSERT INTO loadout_options (army_id, unit_id, group_id, option_id, name) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (101, 20, 1, 1, "Cyberplug Loadout"),
+        connection.executemany(
+            "INSERT INTO loadout_options "
+            "(army_id, unit_id, group_id, option_id, name, disabled) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                (101, 20, 1, 1, "Cyberplug Loadout", 0),
+                (101, 30, 1, 1, "UNMAPPED", 0),
+                (101, 40, 1, 1, "EXAMPLE", 1),
+            ],
         )
         connection.execute(
             "INSERT INTO profile_peripherals "
@@ -396,6 +429,13 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
         "rule:peripheral-type:servant",
     ]
 
+    assert graph["armyListPresentation"] == {
+        "selectableDefinitionCount": 1,
+        "embeddedDisabledDefinitionCount": 1,
+        "notMatchedDefinitionCount": 2,
+        "interpretation": graph["armyListPresentation"]["interpretation"],
+    }
+
     evidence = {
         (row["armyId"], row["peripheralId"]): row for row in graph["definitionEvidence"]
     }
@@ -403,10 +443,13 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
     assert example["typeEligibility"]["rule:peripheral-type:servant"]["consistent"] == 1
     assert example["typeEligibility"]["rule:peripheral-type:cyberplug"]["inconsistent"] == 1
     assert example["controllers"][0]["directSkillSlugs"] == ["doctor"]
+    assert example["armyListPresentation"]["status"] == "embedded-disabled"
 
     unmapped = evidence[(101, 4)]
     assert unmapped["typeEligibility"]["rule:peripheral-type:cyberplug"]["consistent"] == 1
     assert unmapped["typeEligibility"]["rule:peripheral-type:servant"]["inconsistent"] == 1
+    assert unmapped["armyListPresentation"]["status"] == "selectable"
+    assert unmapped["armyListPresentation"]["matches"][0]["groupSelectableOptionCount"] == 1
     loadout_controller = next(
         row for row in graph["controllerToPeripherals"] if row["controllerKind"] == "loadout"
     )
@@ -420,3 +463,8 @@ def test_peripheral_identity_coverage_reports_bidirectional_controller_evidence(
         review["controllerEvidence"]["typeEligibility"]["rule:peripheral-type:cyberplug"]
         == {"consistent": 1, "inconsistent": 0, "ambiguous": 0, "unknown": 0}
     )
+    assert review["controllerEvidence"]["armyListPresentation"] == {
+        "selectableDefinitionCount": 1,
+        "embeddedDisabledDefinitionCount": 0,
+        "notMatchedDefinitionCount": 0,
+    }

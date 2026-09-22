@@ -130,6 +130,10 @@ in `docs/releasing.md`.
         rule-stated Servant/Cyberplug eligibility predicates. Treat those results as review
         evidence, never automatic type classification; keep types with no generic predicate
         unevaluated.
+      - [x] Add same-Army profile/loadout presentation evidence for Peripheral review. Treat
+        an enabled/selectable matching group as positive Cyberplug evidence, keep disabled-only
+        embedded Peripheral profiles non-diagnostic, and allow canonical entity identity to be
+        reviewed before `typeId` is known.
       - [ ] Populate the reviewed mappings for the current snapshot until every source
         definition is either resolved to a canonical entity/profile or explicitly retained
         as unresolved review work.

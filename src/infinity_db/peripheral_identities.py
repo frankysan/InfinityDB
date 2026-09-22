@@ -175,7 +175,7 @@ def parse_peripheral_identity_curated(document: Any) -> PeripheralIdentityCurate
             raise PeripheralIdentityError(f"{context}: duplicate entity id {entity_id!r}")
         entity_ids.add(entity_id)
         _require_string(entity.get("name"), f"{context}.name")
-        if entity.get("typeId") not in PERIPHERAL_TYPE_IDS:
+        if "typeId" in entity and entity.get("typeId") not in PERIPHERAL_TYPE_IDS:
             raise PeripheralIdentityError(f"{context}.typeId must reference a core Peripheral type")
         _validate_review(entity.get("review"), f"{context}.review", reason_required=False)
 

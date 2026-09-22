@@ -41,8 +41,10 @@ contract. It pins the Army snapshot used as evidence and supports reviewed
 explicit `peripheral-mapping:<slug>` mappings from `(sourceId, armyId, peripheralId)`
 plus the expected source name.
 
-Canonical entities must reference one of the five curated N5.3 Peripheral-type rule
-IDs. Profiles may declare only the reviewed `connected` or `autonomous` Cyberplug
+Canonical entities may reference one of the five curated N5.3 Peripheral-type rule
+IDs once type classification is independently reviewed. `typeId` is intentionally optional so
+source identity can be established before the rules type is known; when present it must be one
+of those five IDs. Profiles may declare only the reviewed `connected` or `autonomous` Cyberplug
 modes. Every accepted source mapping requires review date and reason, and an optional
 profile must belong to the mapped entity. Unknown fields fail closed; notably `mercs`
 is not accepted as identity data. The checked-in current-snapshot contract intentionally

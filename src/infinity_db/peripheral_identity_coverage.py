@@ -13,7 +13,7 @@ from typing import Any
 from .peripheral_identities import PeripheralIdentityCurated, PeripheralIdentityError
 
 COVERAGE_FORMAT = "InfinityDB Peripheral identity coverage"
-COVERAGE_FORMAT_VERSION = 2
+COVERAGE_FORMAT_VERSION = 3
 
 _CONTROLLER_GRAPH_TABLES = frozenset(
     {
@@ -179,6 +179,125 @@ def _evaluate_rule_eligibility(
     return None
 
 
+def _army_list_presentation_by_definition(
+    connection: sqlite3.Connection,
+    definitions: Mapping[tuple[int, int], dict[str, Any]],
+    *,
+    include_details: bool,
+) -> dict[tuple[int, int], dict[str, Any]]:
+    """Report same-Army profile-group exposure without treating names as identity.
+
+    A selectable matching profile/loadout is positive review evidence for Cyberplug
+    because Cyberplug Peripherals can be exposed alongside ordinary Army-list units.
+    Disabled-only embedded groups are deliberately kept separate because Army also
+    uses those to carry otherwise non-selectable Peripheral profiles.
+    """
+    groups: dict[tuple[int, int, int], dict[str, Any]] = {}
+    unit_names = {
+        int(row["id"]): str(row["name"])
+        for row in connection.execute("SELECT id, name FROM units")
+    }
+
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, profile_id, name FROM profiles "
+        "ORDER BY army_id, unit_id, group_id, profile_id"
+    ):
+        key = (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]))
+        group = groups.setdefault(
+            key,
+            {
+                "armyId": key[0],
+                "unitId": key[1],
+                "unitName": unit_names.get(key[1]),
+                "groupId": key[2],
+                "profileNames": [],
+                "loadoutOptions": [],
+            },
+        )
+        name = str(row["name"] or "")
+        if name:
+            group["profileNames"].append(name)
+
+    for row in connection.execute(
+        "SELECT army_id, unit_id, group_id, option_id, name, disabled "
+        "FROM loadout_options ORDER BY army_id, unit_id, group_id, option_id"
+    ):
+        key = (int(row["army_id"]), int(row["unit_id"]), int(row["group_id"]))
+        group = groups.setdefault(
+            key,
+            {
+                "armyId": key[0],
+                "unitId": key[1],
+                "unitName": unit_names.get(key[1]),
+                "groupId": key[2],
+                "profileNames": [],
+                "loadoutOptions": [],
+            },
+        )
+        group["loadoutOptions"].append(
+            {
+                "optionId": int(row["option_id"]),
+                "name": str(row["name"] or ""),
+                "disabled": bool(row["disabled"]),
+            }
+        )
+
+    by_army: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    for group in groups.values():
+        by_army[int(group["armyId"])].append(group)
+
+    result: dict[tuple[int, int], dict[str, Any]] = {}
+    for key, definition in sorted(definitions.items()):
+        target = _normalized_review_name(str(definition["sourceName"]))
+        matches: list[dict[str, Any]] = []
+        for group in by_army.get(key[0], []):
+            profile_matches = sorted(
+                name
+                for name in group["profileNames"]
+                if _normalized_review_name(name) == target
+            )
+            option_matches = [
+                option
+                for option in group["loadoutOptions"]
+                if option["name"] and _normalized_review_name(option["name"]) == target
+            ]
+            if not profile_matches and not option_matches:
+                continue
+            selectable = any(
+                not option["disabled"] for option in group["loadoutOptions"]
+            )
+            match = {
+                "unitId": group["unitId"],
+                "unitName": group["unitName"],
+                "groupId": group["groupId"],
+                "selectable": selectable,
+                "profileNameMatch": bool(profile_matches),
+                "loadoutNameMatch": bool(option_matches),
+            }
+            if include_details:
+                match["matchingProfileNames"] = profile_matches
+                match["matchingLoadoutOptions"] = option_matches
+                match["groupSelectableOptionCount"] = sum(
+                    1 for option in group["loadoutOptions"] if not option["disabled"]
+                )
+            matches.append(match)
+
+        if any(match["selectable"] for match in matches):
+            status = "selectable"
+        elif matches:
+            status = "embedded-disabled"
+        else:
+            status = "not-matched"
+        result[key] = {
+            "status": status,
+            "matchingGroupCount": len(matches),
+            "selectableGroupCount": sum(1 for match in matches if match["selectable"]),
+        }
+        if include_details:
+            result[key]["matches"] = matches
+    return result
+
+
 def _controller_skill_maps(connection: sqlite3.Connection) -> tuple[
     dict[tuple[int, int, int, int], set[str]],
     dict[tuple[int, int, int, int], set[str]],
@@ -291,6 +410,10 @@ def _audit_controller_graph(
             "SELECT army_id, unit_id, group_id, option_id, name FROM loadout_options"
         )
     }
+
+    army_list_presentation = _army_list_presentation_by_definition(
+        connection, definitions, include_details=include_details
+    )
 
     attachment_evidence: list[dict[str, Any]] = []
     controllers: dict[tuple[str, int, int, int, int], dict[str, Any]] = {}
@@ -414,6 +537,10 @@ def _audit_controller_graph(
                 }
             ),
             "typeEligibility": type_summary,
+            "armyListPresentation": army_list_presentation.get(
+                key,
+                {"status": "not-matched", "matchingGroupCount": 0, "selectableGroupCount": 0},
+            ),
         }
         if include_details:
             definition_evidence[key]["controllers"] = attachments
@@ -429,6 +556,30 @@ def _audit_controller_graph(
             1 for value in definition_evidence.values() if not value["attachmentCount"]
         ),
         "evaluableTypeIds": sorted(type_predicates),
+        "armyListPresentation": {
+            "selectableDefinitionCount": sum(
+                1
+                for value in army_list_presentation.values()
+                if value["status"] == "selectable"
+            ),
+            "embeddedDisabledDefinitionCount": sum(
+                1
+                for value in army_list_presentation.values()
+                if value["status"] == "embedded-disabled"
+            ),
+            "notMatchedDefinitionCount": sum(
+                1
+                for value in army_list_presentation.values()
+                if value["status"] == "not-matched"
+            ),
+            "interpretation": (
+                "A same-Army matching profile group with at least one enabled/selectable loadout "
+                "is strong structural evidence to review the definition as Peripheral (Cyberplug). "
+                "Disabled-only embedded profile groups are used for other Peripheral types too and "
+                "are not Cyberplug evidence. Absence of selectable exposure does not rule "
+                "Cyberplug out."
+            ),
+        },
         "interpretation": (
             "Controller eligibility is a necessary-condition check only. A 'consistent' result "
             "supports review for that type but does not establish Peripheral type identity. "
@@ -474,11 +625,19 @@ def _aggregate_group_controller_evidence(
             for status in counts:
                 counts[status] += int(type_counts.get(status, 0))
         type_summary[type_id] = counts
+    presentation_statuses = [
+        item.get("armyListPresentation", {}).get("status", "not-matched") for item in evidence
+    ]
     return {
         "attachedDefinitionCount": sum(1 for item in evidence if item.get("attachmentCount", 0)),
         "definitionOnlyCount": sum(1 for item in evidence if not item.get("attachmentCount", 0)),
         "attachmentCount": sum(int(item.get("attachmentCount", 0)) for item in evidence),
         "typeEligibility": type_summary,
+        "armyListPresentation": {
+            "selectableDefinitionCount": presentation_statuses.count("selectable"),
+            "embeddedDisabledDefinitionCount": presentation_statuses.count("embedded-disabled"),
+            "notMatchedDefinitionCount": presentation_statuses.count("not-matched"),
+        },
     }
 
 

@@ -933,10 +933,18 @@ compatibility references remain unambiguous JSON integers.
   `data/curated/peripherals/army-identities.json`, with its own validator/CLI. It owns
   reviewed `peripheral:*` entities, optional `peripheral-profile:*` records, exact
   `(sourceId, armyId, peripheralId)` mappings, expected source names, and review reasons.
-  Entity type references are restricted to the five curated Peripheral types; profile
+  Entity `typeId` is optional so reviewed cross-Army identity can precede rules-type
+  classification; when present it is restricted to the five curated Peripheral types. Profile
   modes are only `connected`/`autonomous`; `mercs` is rejected as identity data. The
   checked-in current-snapshot contract contains zero mappings intentionally. Population
   and coverage review must happen before any derived application relationship is built.
+- 2026-09-22: Peripheral type review now uses a second structural signal in addition to
+  Controller eligibility: same-Army profile/loadout presentation. Cyberplug Peripherals can
+  be exposed alongside ordinary selectable Units, so a matching group with an enabled loadout
+  is positive Cyberplug review evidence. Disabled-only embedded Peripheral profile groups also
+  occur for other Peripheral types and are therefore non-diagnostic; absence of selectable
+  exposure does not rule Cyberplug out. This evidence remains review-only and never creates an
+  identity mapping automatically.
 
 - 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
   release.** Use the completed N5.3 Wiki/PDF/FAQ audit to enrich data InfinityDB
