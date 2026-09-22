@@ -38,25 +38,25 @@ asset set when one is legitimately available.
 The `Source checks` GitHub Actions workflow is configured to run on pull requests, pushes to
 `main`, and manual dispatch. Its matrix covers clean Windows, Ubuntu/Linux, and
 macOS runners at Python 3.11, plus Linux at Python 3.14. Third-party graphical
-assets are absent, and each leg delegates the validation contract to
-`tools/run_checks.py` rather than duplicating the individual test/build commands
-in workflow YAML:
+assets are absent, and every leg delegates validation to `tools/run_checks.py`.
 
-```text
-python tools/run_checks.py --all --assets off \
-  --build-source tests/fixtures/deployment-smoke
-```
+The Ubuntu/Python 3.11 leg is the primary source gate and runs `--all`: pytest,
+Ruff, Pyright, Army database construction, and curated rules database
+construction. The Windows/Python 3.11, macOS/Python 3.11, and Ubuntu/Python 3.14
+compatibility legs run pytest plus the Army and rules build stages. This keeps
+platform/interpreter-sensitive behavior covered without redundantly repeating
+platform-independent lint and type checks four times.
+
+Hosted Windows Actions explicitly passes `--test-workers 0`; parallel pytest
+remains the normal local default. Automatic xdist worker selection caused a
+severe slowdown on the hosted Windows runner, whereas the serial hosted run was
+stable. Linux and macOS CI use automatic worker selection.
 
 The tracked synthetic Army fixture supplies the explicit clean-checkout input
 for the Army build stage; ordinary source archives intentionally do not contain a
-real `data/raw/` snapshot. Every matrix leg installs `.[dev,symbols]` and covers:
-
-- pytest hermetic tests, including synthetic integration against the real
-  fontTools, tinycss2/cssselect2, and Pillow Python dependencies;
-- Ruff across the maintained `src/`, `tests/`, and complete `tools/` trees;
-- Pyright type checking across maintained `src/`, `tools/`, and `tests/` code;
-- `infinity.db` / `infinity.raw.db` construction from the controlled fixture;
-- `rules.db` construction from tracked curated rules data.
+real `data/raw/` snapshot. Every matrix leg installs `.[dev,symbols]`, so the
+hermetic pytest coverage still exercises the real fontTools, tinycss2/cssselect2,
+and Pillow Python dependencies.
 
 Focused regression coverage for the maintained standalone tools is included in
 the hermetic suite. Routine validation of checked-in snapshot notes remains a

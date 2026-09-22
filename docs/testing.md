@@ -149,20 +149,23 @@ the exact container contract and the equivalent manual command.
 
 ## Continuous integration
 
-The `Source checks` GitHub Actions workflow is configured to run the normal check runner on
-clean Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests,
-pushes to `main`, and manual dispatch, plus a Linux Python 3.14 compatibility
-leg:
+The `Source checks` GitHub Actions workflow runs the check runner on clean
+Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests, pushes
+to `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. The
+Ubuntu/Python 3.11 leg owns the complete source gate (`--all`); the compatibility
+legs run pytest plus both database-build stages. This avoids repeating Ruff and
+Pyright on every operating system while preserving cross-platform runtime/build
+coverage.
 
-```text
-python tools/run_checks.py --all --assets off \
-  --build-source tests/fixtures/deployment-smoke
-```
+Hosted Windows Actions explicitly uses `--test-workers 0`. Parallel pytest is
+still the local default, but `auto` regressed severely on the hosted Windows
+runner while the serial suite remained stable. Linux and macOS CI continue to
+use automatic xdist worker selection.
 
 Each source-check leg installs both the development and symbol Python dependency
-sets. This makes Pyright and the real fontTools/tinycss2/cssselect2/Pillow
-integration fixtures part of required CI without requiring external renderers or
-third-party artwork.
+sets. This keeps the real fontTools/tinycss2/cssselect2/Pillow integration
+fixtures in required CI without requiring external renderers or third-party
+artwork. Ruff and Pyright run on the primary Ubuntu/Python 3.11 leg.
 
 The synthetic deployment fixture is the explicit Army build input because clean
 source checkouts intentionally contain no real raw Army snapshot. This workflow

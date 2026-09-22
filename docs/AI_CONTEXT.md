@@ -103,14 +103,17 @@ and serves a read-only browser and same-origin HTTP API.
   and 14.13 s with automatic worker selection. Web tests build one template
   database per module and copy it per test so mutating tests remain isolated
   without repeating normalization/export work.
-- GitHub `Source checks` is configured to run the hermetic project checks on clean Windows,
+- GitHub `Source checks` is configured to run hermetic checks on clean Windows,
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
   uses the tracked synthetic Army fixture rather than live acquisition or ignored
-  graphical assets. Each leg installs the symbol Python dependencies and runs
-  pytest, full-tree Ruff linting, and Pyright across `src/`, `tools/`, and
-  `tests/` through `run_checks.py`; VS Code is configured for workspace-wide
-  diagnostics. GitHub's active `Protect main` ruleset requires pull requests,
+  graphical assets. Ubuntu/Python 3.11 owns the complete pytest/Ruff/Pyright/
+  build/rules gate; the other matrix legs retain pytest plus Army/rules build
+  compatibility coverage without repeating lint/type checks. Hosted Windows
+  Actions explicitly uses serial pytest (`--test-workers 0`) because automatic
+  xdist workers caused a severe runner-specific slowdown; the local default
+  remains `auto`. VS Code is configured for workspace-wide diagnostics. GitHub's
+  active `Protect main` ruleset requires pull requests,
   resolved review threads, the four source-check matrix jobs,
   `deployment-smoke`, and `installed-wheel` to be current and passing before
   `main` can advance; it also blocks deletion/non-fast-forward updates and has no
