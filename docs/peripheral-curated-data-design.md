@@ -2,19 +2,22 @@
 
 ## Status
 
-This document is a Milestone 2B design direction. It does not describe a fully
-implemented Peripheral application model yet and does not authorize source-
-normalization, runtime-schema, API, or UI changes by itself.
+This document is a Milestone 2B design direction. The rules-side foundation is now
+implemented in the existing curated v3 rules pipeline: Doctor, Engineer, Cyberplug,
+and Peripheral have reviewed Skill records, the five N5.3 Peripheral types have
+reviewed rule records, and controller-eligibility/type facts are validated. The
+Army-definition-to-canonical-Peripheral mapping and derived application relationship
+layer remain unimplemented.
 
 The research established that Peripheral type, Controller association,
 controller eligibility, Peripheral identity, and (for Cyberplug) operating
 profiles are distinct concepts. Army data and rules data describe different
 parts of that model and must retain separate provenance.
 
-The first implementation phase should extend InfinityDB's existing
-`data/curated/rules/` -> `rules.db` pipeline. Do **not** introduce a parallel
+The first implementation phase extends InfinityDB's existing
+`data/curated/rules/` -> `rules.db` pipeline. It does **not** introduce a parallel
 Peripheral rules loader or a second rules database. Source-to-Peripheral-entity
-identity mappings are a later curated concern and must remain outside both Army
+identity mappings are a separate curated concern and must remain outside both Army
 source tables and the rules-reference contract.
 
 ## Evidence and authority
@@ -136,7 +139,7 @@ record kind is not required for the first phase; `kind: "rule"` plus a validated
 Peripheral-specific `facts` shape is sufficient unless implementation evidence
 shows otherwise.
 
-A representative shape is:
+The implemented shape follows this pattern:
 
 ```json
 {
@@ -162,9 +165,13 @@ A representative shape is:
 }
 ```
 
-This example is design direction, not yet an accepted serialized schema. Before
-adding records, extend the curated validator so the chosen Peripheral facts are
-validated explicitly rather than being arbitrary unchecked JSON.
+The curated validator now checks the Peripheral-specific fact shape explicitly:
+`category` is `peripheral-type`; controller eligibility is either `not-stated`, a
+single `hasSkill` predicate, or an `anyOf` list of `hasSkill` predicates; finite
+controller limits are positive integers; `operatingDistance` currently accepts the
+reviewed `unlimited` value; and Cyberplug profile modes are restricted to
+`connected`/`autonomous`. Eligibility skill references must resolve to Skill records
+in the same collection.
 
 For Synchronized, Control, and Ancillary, represent missing generic eligibility
 as an explicit status such as `{"status": "not-stated"}`. Do not encode an
@@ -245,11 +252,12 @@ entity or profile. Army-local IDs are contextual, repeated names are common, and
 `mercs` can vary independently.
 
 Do not place reviewed Army-definition-to-entity mappings in
-`data/curated/rules/`. They require a separate curated identity/mapping contract
-because they resolve source objects rather than rules semantics. The exact
-subtree and loader should be chosen during that phase; do not overload the
-current `identities/army-display.json` presentation-identity contract
-implicitly.
+`data/curated/rules/`. They resolve source objects rather than rules semantics and now
+use the separate `data/curated/peripherals/army-identities.json` contract validated by
+`infinity_db.peripheral_identities`. This does not overload the current
+`identities/army-display.json` presentation-identity contract. The checked-in contract
+is pinned to the audited Army snapshot but intentionally has no accepted entity/profile
+mappings until they are individually reviewed.
 
 Candidate matching may normalize Unicode NFC, trim and collapse whitespace, and
 case-fold for **reporting/review queues only**. Do not remove punctuation,
@@ -309,21 +317,24 @@ Because all initial controller-eligibility skill references can live in the same
 N5 core collection, first-phase referential validation need not solve arbitrary
 cross-collection dependency resolution.
 
-### Future source/entity mapping phase
+### Source/entity mapping phase
 
-A separate mapping validator should eventually fail closed for:
+The separate mapping validator now fails closed for the authored contract itself,
+including:
 
 - duplicate mapping IDs;
 - unknown canonical Peripheral entity/profile targets;
-- intended source definitions resolving to zero or multiple current source rows;
-- source-name normalization collisions;
-- changed source identity after a new snapshot;
+- duplicate explicit `(sourceId, armyId, peripheralId)` source mappings;
+- unknown canonical entity/profile targets or profiles attached to the wrong entity;
+- invalid canonical Peripheral-type references;
 - mappings without review/evidence metadata;
 - attempts to treat `mercs` as intrinsic Peripheral identity;
 - ambiguous Connected/Autonomous profile mapping.
 
-It should report source-only definitions and curated-only entities separately
-instead of silently discarding either side.
+Validation against the actual current Army rows is still the next phase. That population/
+coverage pass must detect expected source names that no longer match, source-only
+definitions, curated-only entities, and review-queue name collisions rather than silently
+discarding either side.
 
 ## Facts that should remain prose or interaction references initially
 
@@ -346,25 +357,23 @@ constraints, profile-mode existence, and durable relationships.
    eligibility predicate in the reviewed base rule.
 4. Connected/Autonomous proves distinct operating profiles for Cyberplug but does
    not identify which Army payloads, if any, represent those profiles.
-5. The future identity-mapping curated category needs an explicit contract and
-   repository location; the existing display-identity contract must not be
-   broadened accidentally.
+5. The identity-mapping curated category now has an explicit contract and repository
+   location under `data/curated/peripherals/`; it remains independent of display identity.
+   The unresolved work is evidence-backed population and coverage, not schema location.
 6. Source precedence/effective-date behavior for later FAQ revisions must remain
    explicit rather than relying on collection load order.
 
 ## Revised implementation sequence
 
-1. **Extend existing core curated skill coverage.** Add reviewed N5 v5.3 records
-   for Doctor, Engineer, Cyberplug, and Peripheral with current Army links and
-   primary PDF citations.
-2. **Define and validate the minimal Peripheral rules facts.** Add explicit
-   validation for the small controller-eligibility expression grammar and the
-   Peripheral-type facts needed by the five core type records. Avoid speculative
-   operators and avoid a new rules database schema unless required by evidence.
-3. **Curate the five Peripheral types in the existing N5 core rules collection.**
-   Use the N5 v5.3 PDF as primary evidence and the pinned Wiki snapshot as
-   optional secondary discovery/cross-link provenance. Do not add source/entity
-   mappings yet.
+1. **Extend existing core curated skill coverage — complete.** Doctor, Engineer,
+   Cyberplug, and Peripheral now have reviewed N5 v5.3 Skill records with current
+   Army links and primary PDF citations.
+2. **Define and validate the minimal Peripheral rules facts — complete.** The
+   curated v3 validator now owns the small controller-eligibility expression grammar
+   and Peripheral-type fact checks; no parallel rules schema/database was introduced.
+3. **Curate the five Peripheral types — complete.** Servant, Synchronized, Control,
+   Ancillary, and Cyberplug are reviewed records in the existing N5 core rules
+   collection. Source/entity mappings remain deliberately separate.
 4. **Keep FAQ clarifications separate.** When the dated FAQ layer is implemented,
    add relevant Peripheral rulings as `faq-ruling` records linked to the base
    rules; retain scenario scope on scenario-specific rulings.
@@ -375,10 +384,14 @@ constraints, profile-mode existence, and durable relationships.
    variation, zero global-option Peripheral warnings, and 22 canonical loadout
    payloads with differing semantic attachment signatures. These are snapshot
    evidence, not permanent cardinalities or a canonical identity rule.
-6. **Design the separate reviewed Peripheral identity/mapping contract.** Decide
-   canonical entity/profile boundaries and explicit source mappings only after
-   combining the Army audit evidence with the curated rules vocabulary.
-7. **Materialize curated-derived application relationships.** Join source
+6. **Design the separate reviewed Peripheral identity/mapping contract — complete.**
+   `data/curated/peripherals/army-identities.json` defines reviewed canonical entity/profile
+   IDs and exact snapshot-local source mappings, with fail-closed validation and no
+   automatic name promotion. The current checked-in mapping set is intentionally empty.
+7. **Populate the reviewed identity mappings.** Reconcile the 279 audited source
+   definitions against explicit canonical entities/profiles, report unresolved coverage,
+   and reject source-name drift or ambiguity rather than guessing.
+8. **Materialize curated-derived application relationships.** Join source
    Controller facts, reviewed identity mappings, and curated eligibility rules;
    preserve all provenance and then decide the `infinity.db`/API/UI surface for
    cross-army Peripheral questions.

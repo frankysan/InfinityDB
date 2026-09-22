@@ -5,6 +5,16 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+### Added
+
+- Add reviewed N5.3 rules records for Doctor, Engineer, Cyberplug, Peripheral, and
+  all five Peripheral types, including validated controller-eligibility and
+  Connected/Autonomous profile-mode facts without inferring Army-local Peripheral
+  identity.
+- Add a separate reviewed Army-Peripheral identity contract and validator, pinned to
+  source snapshot provenance and intentionally empty until entity/profile mappings are
+  individually reviewed; Army labels and `mercs` are not promoted into canonical identity.
+
 ### Upgrade notes
 
 - Rebuild generated Army databases before deploying the next release. Schema 18 /

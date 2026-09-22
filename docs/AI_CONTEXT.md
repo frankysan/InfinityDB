@@ -922,6 +922,21 @@ compatibility references remain unambiguous JSON integers.
   definitions attached somewhere, 41 names with multiple raw identities, three
   names with `mercs` variation, and 22 canonical loadout payloads with differing
   semantic attachment signatures.
+- 2026-09-22: The Peripheral rules-side foundation is implemented in that existing
+  curated v3 pipeline. Doctor and Engineer are reviewed `short-skill` records;
+  Cyberplug and Peripheral are reviewed `automatic` records; Servant, Synchronized,
+  Control, Ancillary, and Cyberplug are validated `peripheral-type` rule records.
+  Controller eligibility uses only the reviewed `not-stated`, `hasSkill`, and
+  `anyOf(hasSkill...)` grammar, with referenced Skills resolved inside the collection.
+  This deliberately does not canonicalize any Army-local Peripheral definition.
+- 2026-09-22: The separate Peripheral source-identity contract is now defined at
+  `data/curated/peripherals/army-identities.json`, with its own validator/CLI. It owns
+  reviewed `peripheral:*` entities, optional `peripheral-profile:*` records, exact
+  `(sourceId, armyId, peripheralId)` mappings, expected source names, and review reasons.
+  Entity type references are restricted to the five curated Peripheral types; profile
+  modes are only `connected`/`autonomous`; `mercs` is rejected as identity data. The
+  checked-in current-snapshot contract contains zero mappings intentionally. Population
+  and coverage review must happen before any derived application relationship is built.
 
 - 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
   release.** Use the completed N5.3 Wiki/PDF/FAQ audit to enrich data InfinityDB

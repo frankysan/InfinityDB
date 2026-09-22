@@ -9,9 +9,11 @@ provenance under `data/manifests/`.
 
 `rules/` contains validated rules-reference collections consumed by
 `infinity-db build-rules`. `identities/` contains reviewed source-derived
-presentation relationships consumed during Army normalization. These categories
-have separate schemas and loaders; neither loader treats arbitrary JSON from the
-other curated categories as valid input. Curated identifiers are stable
+presentation relationships consumed during Army normalization. `peripherals/`
+contains the separate reviewed Army-Peripheral identity/mapping contract; it is
+validated independently and is not yet a runtime Army import. These categories
+have separate schemas and loaders; no loader treats arbitrary JSON from another
+curated category as valid input. Curated identifiers are stable
 project/domain identities. `armyLinks` are cross-domain references rather than curated
 record identities: Skill, Equipment, and Weapon links may use either a positive numeric
 source ID or the owning application-domain slug, with slugs preferred in maintained
@@ -28,6 +30,33 @@ notes associated with immutable snapshots by SHA-256. Those notes remain
 separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
+
+### Curated Peripheral identities
+
+`peripherals/army-identities.json` is the reviewed boundary between Army-local
+Peripheral definitions and future canonical application Peripheral identities. The
+contract is deliberately separate from both rules records and the display-identity
+contract. It pins the Army snapshot used as evidence and supports reviewed
+`peripheral:<slug>` entities, optional `peripheral-profile:<slug>` profiles, and
+explicit `peripheral-mapping:<slug>` mappings from `(sourceId, armyId, peripheralId)`
+plus the expected source name.
+
+Canonical entities must reference one of the five curated N5.3 Peripheral-type rule
+IDs. Profiles may declare only the reviewed `connected` or `autonomous` Cyberplug
+modes. Every accepted source mapping requires review date and reason, and an optional
+profile must belong to the mapped entity. Unknown fields fail closed; notably `mercs`
+is not accepted as identity data. The checked-in current-snapshot contract intentionally
+contains no entities or mappings yet: absence is explicit rather than replacing review
+with name matching.
+
+Validate the contract with:
+
+```powershell
+infinity-db validate-peripheral-identities
+```
+
+The next Milestone 2B step is to populate reviewed mappings from the audited source
+definitions and only then materialize cross-Army Peripheral relationships.
 
 ### Curated display identities
 
@@ -181,6 +210,21 @@ needs display behavior that Army source data does not encode. The current schema
 supports `{"kind": "distance", "positiveSign": "preserve|omit|force"}`. This
 field does not decide whether an Army extra is a distance: imported
 `extras.type == "DISTANCE"` remains authoritative for that source semantic.
+
+Skill records always carry a `labelIds` array, but it may be empty when the reviewed
+rule does not assign any maintained rules Label. States still require at least one
+Label. Do not invent a Label merely to satisfy serialization.
+
+Peripheral types remain ordinary `rule` records in this same collection. A Peripheral
+type uses `facts.category = "peripheral-type"` and a validated
+`controllerEligibility` object. The supported first-phase grammar is an explicit
+`{"status": "not-stated"}`, one `{"hasSkill": "skill:<id>"}` predicate, or an
+`{"anyOf": [...]}` list containing two or more `hasSkill` predicates. Optional
+structured facts currently cover positive `maxPerController`, reviewed
+`operatingDistance: "unlimited"`, and the Cyberplug `connected` / `autonomous`
+profile modes. Eligibility references must resolve to Skill records in the same
+collection. These facts describe rules semantics only; they do not map Army-local
+Peripheral definitions to canonical Peripheral entities.
 
 Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
 parameter value is part of the Army text, for example `Disposable (2)` mapping

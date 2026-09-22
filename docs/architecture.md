@@ -137,7 +137,8 @@ config/                      = maintained project/domain knowledge
 raw source data              = immutable external input
 data/manifests/snapshots/    = generated acquisition provenance
 data/curated/rules/          = source-controlled human-reviewed rules data
-data/curated/identities/     = source-controlled reviewed identity relationships
+data/curated/identities/     = source-controlled reviewed presentation identities
+data/curated/peripherals/    = reviewed Army-to-Peripheral identity mappings
 data/curated/snapshot-notes/ = source-controlled human snapshot annotations
 data/generated/              = reproducible database/JSON build output
 ```
@@ -151,7 +152,10 @@ code that interprets them.
 information derived from identified external sources and retains source
 provenance. `data/curated/rules/` is consumed by the rules-database build, while
 `data/curated/identities/` contains reviewed source-derived presentation
-relationships consumed during Army normalization. `data/curated/snapshot-notes/`
+relationships consumed during Army normalization. `data/curated/peripherals/` owns
+the independent reviewed mapping from Army-local Peripheral definitions to future
+canonical Peripheral entities/profiles; its checked-in contract is validated but is
+not yet consumed by Army normalization or runtime queries. `data/curated/snapshot-notes/`
 is a separate human-annotation contract and is not an application input.
 
 This is not a requirement to make every constant configurable. Values that
@@ -641,11 +645,15 @@ The current reviewed 2026-09-18 snapshot resolves all initial registry candidate
 (1,042 identities total), with no collisions or unavailable candidates. These counts
 are snapshot evidence rather than permanent invariants.
 
-The Peripheral rules/identity work must use this project-wide identity architecture
-rather than introduce a one-off slug scheme. It must not infer a canonical
-`peripheral:*` or `peripheral-profile:*` identity merely from an Army label; those
-domains become valid only after the reviewed Army-definition-to-entity mapping proves
-the corresponding entity/profile boundary.
+The Peripheral rules/identity work uses this project-wide identity architecture rather
+than a one-off slug scheme. The rules side is represented in the existing curated v3
+rules collection: Doctor, Engineer, Cyberplug, and Peripheral are canonical Skill records
+and the five N5.3 Peripheral types are validated `rule` records with explicit controller-
+eligibility facts. The separate `data/curated/peripherals/army-identities.json` contract
+now defines how future reviewed `peripheral:*` / `peripheral-profile:*` identities are
+authored and tied to exact Army snapshot coordinates. The current contract is empty by
+design: InfinityDB still must not infer either identity merely from an Army label. Only
+explicit reviewed mappings may make those domains application identities.
 
 ## Snapshot acquisition and provenance
 

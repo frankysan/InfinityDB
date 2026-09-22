@@ -220,6 +220,12 @@ def test_build_rules_command_defaults_to_curated_rules() -> None:
     assert args.output == Path("rules.db")
 
 
+def test_validate_peripheral_identities_command_defaults_to_curated_contract() -> None:
+    parser = build_parser()
+    args = parser.parse_args(["validate-peripheral-identities"])
+    assert args.input == Path("data/curated/peripherals/army-identities.json")
+
+
 def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str]) -> None:
     with socket.socket() as occupied_socket:
         occupied_socket.bind(("127.0.0.1", 0))

@@ -109,14 +109,18 @@ in `docs/releasing.md`.
     into payload identity.
   - [ ] Complete the Peripheral rules/identity work described in
     `docs/peripheral-curated-data-design.md`.
-    - [ ] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
-      Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; do not
+    - [x] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
+      Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; keep
+      controller-eligibility facts validated in the existing rules contract and do not
       create a parallel Peripheral rules loader/database.
-    - [ ] Design a separate reviewed source-to-Peripheral identity/mapping contract; do not
-      overload the current display-identity contract or write Wiki/rules knowledge into Army
-      source tables.
-    - [ ] Materialize curated-derived controller-eligibility and cross-army Peripheral
-      relationships only after the source mapping and rules vocabulary are both validated.
+    - [x] Define a separate reviewed source-to-Peripheral identity/mapping contract under
+      `data/curated/peripherals/`, with canonical entity/profile IDs, explicit Army snapshot
+      coordinates, review evidence, and fail-closed validation; do not overload the display-
+      identity contract or write Wiki/rules knowledge into Army source tables.
+    - [ ] Review and populate the source-to-Peripheral identity mappings for the current
+      snapshot, then materialize curated-derived controller-eligibility and cross-army
+      Peripheral relationships only after mapping coverage and rules vocabulary are both
+      validated.
   - [ ] Audit relation/dependency structures.
     - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as

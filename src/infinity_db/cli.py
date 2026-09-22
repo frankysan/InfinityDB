@@ -17,6 +17,7 @@ from .curated import load_curated_directory, load_curated_document
 from .database import export_database, raw_database_path
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
+from .peripheral_identities import load_peripheral_identity_curated
 from .rules_database import export_rules_database
 from .source_anomalies import (
     load_source_anomaly_baseline,
@@ -27,6 +28,7 @@ from .source_anomalies import (
 DEFAULT_DATABASE = Path("data/generated/infinity.db")
 DEFAULT_RULES_DATABASE = Path("data/generated/rules.db")
 DEFAULT_CURATED_RULES = Path("data/curated/rules")
+DEFAULT_PERIPHERAL_IDENTITIES = Path("data/curated/peripherals/army-identities.json")
 
 
 def _validate_source_anomaly_baseline(source: Path) -> None:
@@ -121,6 +123,16 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
+    curated = load_peripheral_identity_curated(args.input)
+    print(f"Validated Peripheral identity contract: {args.input}")
+    print(
+        f"Entities: {curated.entity_count}; profiles: {curated.profile_count}; "
+        f"mappings: {curated.mapping_count}"
+    )
+    return 0
+
+
 def _port(value: str) -> int:
     port = int(value)
     if not 1 <= port <= 65535:
@@ -169,6 +181,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
     p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
     p_rules.set_defaults(func=cmd_build_rules)
+
+    p_peripherals = sub.add_parser(
+        "validate-peripheral-identities",
+        help="Validate reviewed Army-Peripheral identity mappings",
+    )
+    p_peripherals.add_argument(
+        "input", nargs="?", type=Path, default=DEFAULT_PERIPHERAL_IDENTITIES
+    )
+    p_peripherals.set_defaults(func=cmd_validate_peripheral_identities)
     return parser
 
 
