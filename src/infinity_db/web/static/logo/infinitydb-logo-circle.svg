@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">InfinityDB circular logo</title>
+
+  <defs>
+    <linearGradient id="ribbonFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0f4b5"/>
+      <stop offset="0.55" stop-color="#bcd890"/>
+      <stop offset="1" stop-color="#759f69"/>
+    </linearGradient>
+    <linearGradient id="ribbonSide" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#97bc7f"/>
+      <stop offset="0.48" stop-color="#668f63"/>
+      <stop offset="1" stop-color="#365c4d"/>
+    </linearGradient>
+    <radialGradient id="planetFill" cx="390" cy="735" r="760" fx="342" fy="676" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5ea177"/>
+      <stop offset="0.18" stop-color="#3c795c"/>
+      <stop offset="0.46" stop-color="#1b503e"/>
+      <stop offset="0.72" stop-color="#0b2d23"/>
+      <stop offset="1" stop-color="#03130e"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8efbd"/>
+      <stop offset="0.5" stop-color="#a8cd92"/>
+      <stop offset="1" stop-color="#527b5d"/>
+    </linearGradient>
+    <linearGradient id="nameFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f8e8"/>
+      <stop offset="1" stop-color="#dce9cf"/>
+    </linearGradient>
+    <linearGradient id="dbFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dff5b3"/>
+      <stop offset="1" stop-color="#86b974"/>
+    </linearGradient>
+    <filter id="rimGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <clipPath id="circleClip"><circle cx="512" cy="512" r="500"/></clipPath>
+
+<g clip-path="url(#circleClip)">
+  <circle cx="512" cy="512" r="500" fill="#0d2922"/>
+  <g transform="translate(12 36) scale(0.975 0.86)">
+      <path d="M 112 470 C 112 330 270 302 392 392 L 635 570 C 754 658 912 610 912 462 C 912 326 754 300 632 390 L 390 568 C 272 655 112 610 112 470" fill="none" stroke="url(#ribbonSide)" stroke-width="102" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 16)"/>
+      <path d="M 112 470 C 112 330 270 302 392 392 L 635 570 C 754 658 912 610 912 462 C 912 326 754 300 632 390 L 390 568 C 272 655 112 610 112 470" fill="none" stroke="url(#ribbonFace)" stroke-width="90" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  <g>
+      <ellipse cx="512" cy="1110" rx="575" ry="620" fill="url(#planetFill)"/>
+      <ellipse cx="512" cy="1110" rx="575" ry="620" fill="none" stroke="#d8efbd" stroke-opacity="0.32" stroke-width="12" filter="url(#rimGlow)"/>
+      <ellipse cx="512" cy="1110" rx="575" ry="620" fill="none" stroke="url(#rim)" stroke-width="4"/>
+    </g>
+</g>
+<circle cx="512" cy="512" r="492" fill="none" stroke="#8fcf70" stroke-width="8" opacity="0.92"/>
+<circle cx="512" cy="512" r="476" fill="none" stroke="#365c4d" stroke-width="10" opacity="0.72"/>
+</svg>

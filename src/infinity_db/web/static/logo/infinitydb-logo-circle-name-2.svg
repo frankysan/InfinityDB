@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1024"
+   height="1024"
+   viewBox="0 0 1024 1024"
+   role="img"
+   aria-labelledby="title"
+   version="1.1"
+   id="svg24"
+   sodipodi:docname="infinitydb-logo-circle-name-2.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview24"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.56982422"
+     inkscape:cx="581.75835"
+     inkscape:cy="434.34447"
+     inkscape:window-width="2560"
+     inkscape:window-height="1369"
+     inkscape:window-x="3432"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg24" />
+  <title
+     id="title">InfinityDB circular logo</title>
+  <defs
+     id="defs18">
+    <linearGradient
+       id="ribbonFace"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#e0f4b5"
+         id="stop1" />
+      <stop
+         offset="0.55"
+         stop-color="#bcd890"
+         id="stop2" />
+      <stop
+         offset="1"
+         stop-color="#759f69"
+         id="stop3" />
+    </linearGradient>
+    <linearGradient
+       id="ribbonSide"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#97bc7f"
+         id="stop4" />
+      <stop
+         offset="0.48"
+         stop-color="#668f63"
+         id="stop5" />
+      <stop
+         offset="1"
+         stop-color="#365c4d"
+         id="stop6" />
+    </linearGradient>
+    <radialGradient
+       id="planetFill"
+       cx="390"
+       cy="735"
+       r="760"
+       fx="342"
+       fy="676"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#5ea177"
+         id="stop7" />
+      <stop
+         offset="0.18"
+         stop-color="#3c795c"
+         id="stop8" />
+      <stop
+         offset="0.46"
+         stop-color="#1b503e"
+         id="stop9" />
+      <stop
+         offset="0.72"
+         stop-color="#0b2d23"
+         id="stop10" />
+      <stop
+         offset="1"
+         stop-color="#03130e"
+         id="stop11" />
+    </radialGradient>
+    <linearGradient
+       id="rim"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#d8efbd"
+         id="stop12" />
+      <stop
+         offset="0.5"
+         stop-color="#a8cd92"
+         id="stop13" />
+      <stop
+         offset="1"
+         stop-color="#527b5d"
+         id="stop14" />
+    </linearGradient>
+    <linearGradient
+       id="nameFill"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#f4f8e8"
+         id="stop15" />
+      <stop
+         offset="1"
+         stop-color="#dce9cf"
+         id="stop16" />
+    </linearGradient>
+    <linearGradient
+       id="dbFill"
+       x1="0"
+       y1="0"
+       x2="0"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#dff5b3"
+         id="stop17" />
+      <stop
+         offset="1"
+         stop-color="#86b974"
+         id="stop18" />
+    </linearGradient>
+    <filter
+       id="rimGlow"
+       x="-0.013565217"
+       y="-0.012580645"
+       width="1.0271304"
+       height="1.0251613">
+      <feGaussianBlur
+         stdDeviation="4"
+         id="feGaussianBlur18" />
+    </filter>
+    <linearGradient
+       id="nameFill-0"
+       x1="157.9422"
+       y1="1226.0344"
+       x2="157.9422"
+       y2="1425.8823"
+       gradientTransform="scale(1.7105001,0.58462434)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#f4f8e8"
+         id="stop15-9" />
+      <stop
+         offset="1"
+         stop-color="#dce9cf"
+         id="stop16-4" />
+    </linearGradient>
+    <linearGradient
+       id="dbFill-8"
+       x1="483.72685"
+       y1="923.9451"
+       x2="483.72685"
+       y2="1033.0158"
+       gradientTransform="scale(1.278485,0.78217581)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#dff5b3"
+         id="stop17-8" />
+      <stop
+         offset="1"
+         stop-color="#86b974"
+         id="stop18-2" />
+    </linearGradient>
+  </defs>
+  <clipPath
+     id="circleClip">
+    <circle
+       cx="512"
+       cy="512"
+       r="500"
+       id="circle18" />
+  </clipPath>
+  <g
+     clip-path="url(#circleClip)"
+     id="g23">
+    <circle
+       cx="512"
+       cy="512"
+       r="500"
+       fill="#0d2922"
+       id="circle19" />
+    <g
+       transform="translate(12 36) scale(0.975 0.86)"
+       id="g20">
+      <path
+         d="M 112 470 C 112 330 270 302 392 392 L 635 570 C 754 658 912 610 912 462 C 912 326 754 300 632 390 L 390 568 C 272 655 112 610 112 470"
+         fill="none"
+         stroke="url(#ribbonSide)"
+         stroke-width="102"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         transform="translate(0 16)"
+         id="path19" />
+      <path
+         d="M 112 470 C 112 330 270 302 392 392 L 635 570 C 754 658 912 610 912 462 C 912 326 754 300 632 390 L 390 568 C 272 655 112 610 112 470"
+         fill="none"
+         stroke="url(#ribbonFace)"
+         stroke-width="90"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         id="path20" />
+    </g>
+    <g
+       id="g22">
+      <ellipse
+         cx="512"
+         cy="1110"
+         rx="575"
+         ry="620"
+         fill="url(#planetFill)"
+         id="ellipse20" />
+      <ellipse
+         cx="512"
+         cy="1110"
+         rx="575"
+         ry="620"
+         fill="none"
+         stroke="#d8efbd"
+         stroke-opacity="0.32"
+         stroke-width="12"
+         filter="url(#rimGlow)"
+         id="ellipse21" />
+      <ellipse
+         cx="512"
+         cy="1110"
+         rx="575"
+         ry="620"
+         fill="none"
+         stroke="url(#rim)"
+         stroke-width="4"
+         id="ellipse22" />
+    </g>
+  </g>
+  <circle
+     cx="512"
+     cy="512"
+     r="492"
+     fill="none"
+     stroke="#8fcf70"
+     stroke-width="8"
+     opacity="0.92"
+     id="circle23"
+     style="display:inline" />
+  <circle
+     cx="512"
+     cy="512"
+     r="476"
+     fill="none"
+     stroke="#365c4d"
+     stroke-width="10"
+     opacity="0.72"
+     id="circle24" />
+  <text
+     xml:space="preserve"
+     style="font-weight:bold;font-size:13.6px;font-family:Sans;-inkscape-font-specification:'Sans, Bold';letter-spacing:-0.8px;writing-mode:lr-tb;direction:ltr;fill:#2f2f2f;fill-opacity:0.359129;stroke-width:7.55906;stroke-opacity:0.16445"
+     x="439.60925"
+     y="774.80035"
+     id="text24"><tspan
+       sodipodi:role="line"
+       id="tspan24"></tspan></text>
+  <g
+     id="wordmark"
+     style="font-weight:500;font-size:120px;font-family:Roboto, Arial, sans-serif;letter-spacing:-2;text-anchor:middle;stroke-width:0.646173"
+     aria-label="InfinityDB"
+     transform="matrix(1.5475721,0,0,1.5475721,-283.62398,-459.97751)">
+    <path
+       style="fill:url(#nameFill-0);stroke-width:0.646173"
+       d="M 284.92578,722.6875 V 808 h -14.76562 v -85.3125 z m 41.65234,32.34375 q -8.49609,0 -12.77343,7.73437 V 808 h -14.23828 v -63.39844 h 13.41796 l 0.46875,7.26563 q 6.97266,-8.4375 18.33985,-8.4375 9.14062,0 14.64844,5.27343 5.50781,5.27344 5.5664,17.98829 V 808 h -14.23828 v -41.13281 q 0,-6.5625 -2.87109,-9.19922 -2.8125,-2.63672 -8.32032,-2.63672 z m 68.42969,0.0586 H 382.52734 V 808 h -14.23828 v -52.91016 h -9.66797 v -10.48828 h 9.66797 v -4.21875 q 0.0586,-11.48437 6.85547,-17.51953 6.79688,-6.09375 18.75,-6.09375 4.62891,0 8.96484,1.05469 4.33594,0.99609 8.96485,2.46094 l -2.22656,11.71875 q -8.08594,-2.8125 -14.70704,-2.8125 -12.1289,0 -12.36328,10.95703 v 4.45312 h 12.48047 z M 418.5625,744.60156 V 808 h -14.23828 v -63.39844 z m 38.59766,10.42969 q -8.4961,0 -12.77344,7.73437 V 808 h -14.23828 v -63.39844 h 13.41797 l 0.46875,7.26563 q 6.97265,-8.4375 18.33984,-8.4375 9.14062,0 14.64844,5.27343 5.50781,5.27344 5.5664,17.98829 V 808 h -14.23828 v -41.13281 q 0,-6.5625 -2.87109,-9.19922 -2.8125,-2.63672 -8.32031,-2.63672 z m 37.90234,-26.95313 q 0,-3.28125 2.10937,-5.39062 2.16797,-2.16797 5.97657,-2.16797 3.80859,0 5.91797,2.16797 2.16796,2.10937 2.16796,5.39062 0,3.28125 -2.16796,5.44922 -2.10938,2.10938 -5.91797,2.10938 -3.8086,0 -5.97657,-2.10938 -2.10937,-2.16797 -2.10937,-5.44922 z m 15.11719,16.52344 V 808 h -14.23828 v -63.39844 z m 43,63.16406 q -4.10157,1.40625 -9.375,1.40625 -7.08985,0 -11.77735,-3.98437 -4.6289,-4.04297 -4.6289,-13.82813 v -36.26953 h -10.48828 v -10.48828 h 10.48828 v -15.41015 h 14.17968 v 15.41015 h 11.19141 v 10.48828 h -11.19141 v 35.44922 q 0,4.27735 1.81641,5.56641 1.875,1.23047 4.80469,1.23047 2.46094,0 4.98047,-0.58594 z m 33.5664,9.84375 q -1.28906,3.45704 -3.51562,7.14844 -2.22656,3.69141 -6.15235,6.26953 -3.86718,2.57813 -9.96093,2.57813 -2.8711,0 -6.85547,-0.9961 v -11.01562 l 2.69531,0.17578 q 5.27344,0 8.02734,-1.93359 2.75391,-1.875 4.33594,-6.6211 l 2.05078,-5.50781 -22.26562,-63.10547 h 15.41015 l 13.41797,43.06641 12.89063,-43.06641 H 612 Z"
+       id="path24" />
+    <path
+       style="font-weight:700;fill:url(#dbFill-8);stroke-width:0.646173"
+       d="m 618.4375,808 v -85.3125 h 26.30859 q 17.22657,0 28.06641,11.25 10.89844,11.25 10.89844,29.53125 v 3.80859 q 0,18.28125 -10.89844,29.53125 Q 661.97266,808 644.51172,808 Z m 17.63672,-71.07422 v 56.89453 h 8.4375 q 10.37109,0 15.76172,-6.73828 5.44922,-6.73828 5.5664,-19.27734 v -4.45313 q 0,-13.00781 -5.15625,-19.6289 -5.09765,-6.6211 -15.41015,-6.79688 z m 121.80859,45.9375 q 0,12.30469 -7.85156,18.69141 -7.85156,6.32812 -22.38281,6.44531 h -33.16407 v -85.3125 h 29.94141 q 14.82422,0 23.20313,5.68359 8.3789,5.6836 8.3789,17.63672 0,5.80078 -2.92969,10.66406 -2.92968,4.86329 -9.25781,7.38282 7.5,1.875 10.78125,7.26562 3.28125,5.39063 3.28125,11.54297 z m -45.76172,-45.9375 v 21.44531 h 12.30469 q 13.94531,0 13.94531,-10.54687 0,-10.66406 -13.35937,-10.89844 z m 28.1836,45.76172 q 0,-11.48438 -11.60157,-11.89453 h -16.58203 v 23.02734 h 15 q 6.73828,0 9.96094,-3.16406 3.22266,-3.16406 3.22266,-7.96875 z"
+       id="path25" />
+  </g>
+  <metadata
+     id="metadata24">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>InfinityDB circular logo</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

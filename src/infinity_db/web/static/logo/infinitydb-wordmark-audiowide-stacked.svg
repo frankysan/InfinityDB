@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="639.29144"
+   height="324.1973"
+   viewBox="0 0 639.29144 324.1973"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="infinitydb-wordmark-audiowide-stacked.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.9725"
+     inkscape:cx="324.93573"
+     inkscape:cy="142.41645"
+     inkscape:window-width="2560"
+     inkscape:window-height="1369"
+     inkscape:window-x="3432"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <title
+     id="title1">InfinityDB wordmark — Audiowide stacked</title>
+  <defs
+     id="defs3">
+    <style
+       id="style1"><![CDATA[
+      .main { font-family: 'Audiowide', sans-serif; font-size: 164px; font-weight: 400; letter-spacing: -3px; }
+      .db { font-family: 'Audiowide', sans-serif; font-size: 188px; font-weight: 400; letter-spacing: -3px; }
+    ]]></style>
+    <linearGradient
+       id="dbFill"
+       x1="246.57542"
+       y1="459.72058"
+       x2="439.69348"
+       y2="459.72058"
+       gradientTransform="matrix(1.4670531,0,0,0.68163857,0,-25.806641)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0%"
+         stop-color="#d8efbd"
+         id="stop1" />
+      <stop
+         offset="100%"
+         stop-color="#b9dc8c"
+         id="stop2" />
+    </linearGradient>
+    <filter
+       id="softGlow"
+       x="-0.027736897"
+       y="-0.057276414"
+       width="1.0554738"
+       height="1.1145528">
+      <feGaussianBlur
+         stdDeviation="7"
+         result="blur"
+         id="feGaussianBlur2" />
+      <feColorMatrix
+         in="blur"
+         type="matrix"
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.18 0"
+         result="glow"
+         id="feColorMatrix2" />
+      <feMerge
+         id="feMerge3">
+        <feMergeNode
+           in="glow"
+           id="feMergeNode2" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode3" />
+      </feMerge>
+    </filter>
+  </defs>
+  <g
+     text-anchor="middle"
+     filter="url(#softGlow)"
+     id="g4"
+     transform="translate(-181.43535,-110.43749)">
+    <text
+       class="main"
+       x="500"
+       y="250"
+       fill="#f1f4ec"
+       id="text3">Infinity</text>
+    <text
+       class="db"
+       x="500"
+       y="419.19336"
+       fill="url(#dbFill)"
+       id="text4"
+       style="fill:url(#dbFill)">DB</text>
+  </g>
+  <metadata
+     id="metadata4">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>InfinityDB wordmark — Audiowide stacked</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>
