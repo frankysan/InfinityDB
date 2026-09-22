@@ -46,6 +46,7 @@ from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .peripheral_relationships import validate_peripheral_relationships
 from .relation_constraints import validate_relation_constraints
+from .relation_group_dependencies import validate_relation_group_dependencies
 from .schema import (
     APPLICATION_ID,
     DATABASE_COMPATIBILITY_KEY,
@@ -973,6 +974,7 @@ class Database:
             validate_include_relationships(connection)
             validate_peripheral_relationships(connection)
             validate_relation_constraints(connection)
+            validate_relation_group_dependencies(connection)
 
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")
@@ -2576,6 +2578,70 @@ class Database:
                     }
                 )
 
+            dependency_rows = connection.execute(
+                "SELECT c.army_id, c.relation_id, c.min_count, c.max_count, c.is_group, "
+                "m.relation_unit_id, m.source_unit_id, m.logical_unit_id, "
+                "m.group_id AS member_group_id, m.per_parent, "
+                "t.dependency_id, t.source_unit_id AS dependency_source_unit_id, "
+                "t.logical_unit_id AS dependency_logical_unit_id, "
+                "t.group_id AS dependency_group_id, t.source_group_selector, "
+                "t.min_count AS dependency_min_count, "
+                "t.min_dependant AS dependency_min_dependant, t.options "
+                "FROM application_unit_group_dependency_constraints AS c "
+                "JOIN application_unit_group_dependency_members AS m "
+                "ON m.army_id = c.army_id AND m.relation_id = c.relation_id "
+                "JOIN application_unit_group_dependency_targets AS t "
+                "ON t.army_id = m.army_id AND t.relation_id = m.relation_id "
+                "AND t.relation_unit_id = m.relation_unit_id "
+                "WHERE m.logical_unit_id = ? OR t.logical_unit_id = ? "
+                "ORDER BY c.army_id, c.relation_id, m.position, m.relation_unit_id, "
+                "t.position, t.dependency_id",
+                (group["id"], group["id"]),
+            ).fetchall()
+            group_dependencies: list[dict[str, Any]] = []
+            dependencies_by_relation: dict[tuple[int, int], dict[str, Any]] = {}
+            members_by_key: dict[tuple[int, int, int], dict[str, Any]] = {}
+            for row in dependency_rows:
+                relation_key = (row["army_id"], row["relation_id"])
+                relation = dependencies_by_relation.get(relation_key)
+                if relation is None:
+                    relation = {
+                        "army_id": row["army_id"],
+                        "relation_id": row["relation_id"],
+                        "min_count": row["min_count"],
+                        "max_count": row["max_count"],
+                        "is_group": bool(row["is_group"]),
+                        "members": [],
+                    }
+                    dependencies_by_relation[relation_key] = relation
+                    group_dependencies.append(relation)
+                member_key = (
+                    row["army_id"],
+                    row["relation_id"],
+                    row["relation_unit_id"],
+                )
+                member = members_by_key.get(member_key)
+                if member is None:
+                    member = {
+                        "source_unit_id": row["source_unit_id"],
+                        "logical_unit_id": row["logical_unit_id"],
+                        "group_id": row["member_group_id"],
+                        "per_parent": row["per_parent"],
+                        "dependencies": [],
+                    }
+                    members_by_key[member_key] = member
+                    relation["members"].append(member)
+                target = {
+                    "source_unit_id": row["dependency_source_unit_id"],
+                    "logical_unit_id": row["dependency_logical_unit_id"],
+                    "group_id": row["dependency_group_id"],
+                    "source_group_selector": row["source_group_selector"],
+                    "min_count": row["dependency_min_count"],
+                    "min_dependant": row["dependency_min_dependant"],
+                    "options": json.loads(row["options"]) if row["options"] else None,
+                }
+                member["dependencies"].append(target)
+
             main_faction = faction_groups.get(group["main_army_id"])
             display_faction = faction_identities.get(group["display_army_id"])
             for army in armies:
@@ -2604,5 +2670,7 @@ class Database:
             result["peripheral_type_ids"] = peripheral_type_ids
         if selection_constraints:
             result["selection_constraints"] = selection_constraints
+        if group_dependencies:
+            result["group_dependencies"] = group_dependencies
         return result
 

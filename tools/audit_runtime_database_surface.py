@@ -147,6 +147,18 @@ _register(
     ),
 )
 _register(
+    [
+        "application_unit_group_dependency_constraints",
+        "application_unit_group_dependency_members",
+        "application_unit_group_dependency_targets",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Materialized same-logical Army profile-group dependencies preserve exact Army/Unit/"
+        "group coordinates while resolving source Unit endpoints to canonical logical identity."
+    ),
+)
+_register(
     ["logical_units"],
     CANONICAL,
     reason="Representative-backed logical-unit application values.",

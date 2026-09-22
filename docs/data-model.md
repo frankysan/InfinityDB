@@ -1764,7 +1764,7 @@ quantity differences. The shared unit-option rows resolve unambiguously in the a
 snapshot, but their target source option can still acquire different canonical payloads
 when Army-contextual loadout semantics differ.
 
-Schema version 20 / compatibility revision 28 retains the schema-18 include
+Schema version 21 / compatibility revision 29 retains the schema-18 include
 relationships without promoting the attachment into reusable payload identity:
 
 - `profile_occurrence_includes` keeps the exact Profile occurrence as parent context and
@@ -1789,7 +1789,7 @@ Unit-backed source IDs resolved through the existing logical-Unit layer to 10 lo
 Units. Unit-backed type comes from the source `Peripheral` Skill subtype rather than a
 parallel Peripheral entity namespace.
 
-Schema 20 retains the schema-19 reviewed Peripheral layer in the frontend database rather than leaving
+Schema 21 retains the schema-19 reviewed Peripheral layer in the frontend database rather than leaving
 it in build-time curated JSON only:
 
 - `application_peripheral_entities` / `application_peripheral_profiles` store canonical
@@ -1858,7 +1858,7 @@ match only a profile-group ID, only a profile ID, only an option ID, or several 
 when their numeric coordinates overlap. The audit reports these candidate-domain matches only as
 diagnostics and deliberately does not select one interpretation.
 
-Schema 20 materializes the 95 fully resolved selector-free constraints while preserving both
+Schema 21 materializes the 95 fully resolved selector-free constraints while preserving both
 canonical and source-context identity. `application_unit_constraints` keeps the exact Army/relation
 context, structural family, group flag, and source min/max cardinality. Its
 `application_unit_constraint_members` rows retain each source relation-member occurrence and
@@ -1870,11 +1870,23 @@ cross-logical shared-cardinality constraints, and two single-logical cardinality
 195 member rows. Unit detail reads expose these as `selection_constraints` with canonical member
 names/slugs and retained source Unit IDs.
 
-The remaining 23 fully resolved selector-bearing relations, plus the eight relations with unresolved
-source placeholders, remain source/context data only. The classification therefore still does not
-define the application schema for `profile`, `group`, `options`, `perParent`, `min`, or
-`minDependant`. Those selectors remain Army-local/contextual until their grammar is reviewed; a
-single generic canonical relation table would preserve the source ambiguity instead of resolving it.
+Fourteen of the 23 selector-bearing resolved relations have a narrower deterministic contract. In
+those same-logical dependency relations, both the member and dependency source fields named
+`profile` resolve to existing Army-local profile-group coordinates for the same logical Unit.
+Schema 21 materializes them through `application_unit_group_dependency_constraints`,
+`application_unit_group_dependency_members`, and
+`application_unit_group_dependency_targets`. The application rows retain Army/relation context,
+source Unit and canonical logical-Unit identity, the resolved profile-group IDs, relation
+cardinality, `perParent`, the dependency's separate source `group` selector, `min`,
+`minDependant`, and validated dependency option IDs. Unit detail reads expose the result as
+`group_dependencies`. The auxiliary source fields are preserved context, not promoted to intrinsic
+logical-Unit properties.
+
+The remaining nine cross-Unit selector-bearing relations, plus the eight relations with unresolved
+source placeholders, remain source/context data only. In particular, the Traktor Mul / Dozer /
+Kuryer selector values and the Jaan Staar / Kiiutan selector values do not establish one safe
+normalized selector domain from the current snapshot alone. A single generic canonical relation
+table would preserve that source ambiguity instead of resolving it.
 
 ### Application catalog identity and metadata context
 

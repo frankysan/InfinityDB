@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 20
+SCHEMA_VERSION = 21
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 28
+DATABASE_COMPATIBILITY_VERSION = 29
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -512,6 +512,34 @@ DERIVED_TABLES = {
         ref("source_unit_id", "units", "id"),
         ref("logical_unit_id", "logical_units", "id"),
     ),
+    "application_unit_group_dependency_constraints": table(
+        "army_id relation_id",
+        "position min_count max_count is_group",
+        ref("army_id relation_id", "relations"),
+    ),
+    "application_unit_group_dependency_members": table(
+        "army_id relation_id relation_unit_id",
+        "position source_unit_id logical_unit_id group_id per_parent",
+        ref("army_id relation_id", "application_unit_group_dependency_constraints"),
+        ref("army_id relation_id relation_unit_id", "relation_units"),
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "application_unit_group_dependency_targets": table(
+        "army_id relation_id relation_unit_id dependency_id",
+        "position source_unit_id logical_unit_id group_id source_group_selector "
+        "min_count min_dependant options",
+        ref(
+            "army_id relation_id relation_unit_id",
+            "application_unit_group_dependency_members",
+        ),
+        ref(
+            "army_id relation_id relation_unit_id dependency_id",
+            "relation_dependencies",
+        ),
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
 }
 
 DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
@@ -612,6 +640,16 @@ INDEXES = (
         "application_unit_constraint_members_logical",
         "application_unit_constraint_members",
         "logical_unit_id, army_id, relation_id, relation_unit_id",
+    ),
+    (
+        "application_unit_group_dependency_members_logical",
+        "application_unit_group_dependency_members",
+        "logical_unit_id, army_id, relation_id, relation_unit_id",
+    ),
+    (
+        "application_unit_group_dependency_targets_logical",
+        "application_unit_group_dependency_targets",
+        "logical_unit_id, army_id, relation_id, relation_unit_id, dependency_id",
     ),
 )
 

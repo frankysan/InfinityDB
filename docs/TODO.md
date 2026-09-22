@@ -183,15 +183,19 @@ in `docs/releasing.md`.
       same-logical cross-context exclusivity constraints, 12 selector-free cross-logical shared-
       cardinality constraints, and two single-logical cardinality constraints (195 member rows).
       Unit detail reads expose these relationships without reading raw relation rows at request time.
-    - [ ] Resolve selector semantics and materialization contracts for the remaining 23 fully
-      resolved selector-bearing relations. Keep Army-local `profile`, `group`, `options`,
-      `perParent`, `min`, and `minDependant` selectors contextual until each selector's meaning is
-      resolved; do not flatten them into Unit facts. The current source field named `profile` is not
-      one stable normalized coordinate: across member rows it can mechanically match profile-group
-      IDs, profile IDs, option IDs, several of those at once, or only an option ID. Treat it as an
-      opaque source selector until the Army grammar is independently established. The eight
-      unresolved-placeholder relations also remain source-only until their endpoint identities are
-      independently established.
+    - [ ] Resolve selector semantics and materialization contracts for the remaining selector-bearing
+      relations.
+      - [x] Materialize the 14 same-logical profile/dependency relations whose member/dependency
+        `profile` selectors deterministically resolve to Army-local profile-group coordinates.
+        Preserve relation cardinality plus `perParent`, dependency `group`, `min`, `minDependant`,
+        and `options` context without promoting those source-local fields to logical-Unit facts.
+        Unit detail reads expose these as `group_dependencies`.
+      - [ ] Resolve the remaining nine cross-Unit selector-bearing relations. The Traktor Mul /
+        Dozer / Kuryer rows and Jaan Staar / Kiiutan row do not yet establish one safe selector
+        domain from normalized coordinates alone; keep their `profile` values source-only until
+        their Army semantics are independently established.
+      - [ ] Resolve the eight unresolved-placeholder relations only after independent evidence
+        identifies their source endpoints; do not infer identity from relation partners.
   - [ ] Audit Fireteam structures.
     - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
       preserve Fireteam type quotas, named Fireteams, type membership, min/max
