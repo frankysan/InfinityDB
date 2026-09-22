@@ -609,11 +609,11 @@ work against that contract.
 - [ ] Split the growing pytest stage into marker-based local sections (for example
   data/model, web/API, build/ingestion, operations/tooling, and assets) so
   developers can run the relevant slice during iteration. Keep the complete suite
-  as the authoritative final gate. Parallel pytest execution is now available via
-  `run_checks.py --test-workers N|auto`, and the shared web fixture no longer
-  rebuilds its database per test; retain marker-based slices as the complementary
-  fast-iteration path after measuring the new baseline on the primary development
-  machine.
+  as the authoritative final gate. Parallel pytest execution now defaults to
+  `--test-workers auto` after the primary Windows benchmark reduced the 687-test
+  stage from 59.67 s serially to 14.13 s; the shared web fixture also no longer
+  rebuilds its database per test. Retain marker-based slices as the complementary
+  fast-iteration path for focused development.
 
 ## Public-identifier follow-up
 

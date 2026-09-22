@@ -74,26 +74,27 @@ without redistributing third-party artwork.
 
 ## Parallel pytest execution
 
-The check runner keeps pytest serial by default so the authoritative behavior is
-unchanged, but development environments may opt into `pytest-xdist` workers:
+The check runner uses `pytest-xdist` with automatic worker selection by default
+for every test stage. Benchmarking on the primary Windows development machine
+reduced the complete 687-test run from 59.67 seconds serially to 14.13 seconds
+with `auto`; four fixed workers took 19.41 seconds.
 
 ```powershell
-# Fixed worker count; a good first comparison on the primary Windows machine
+# Default: let pytest-xdist choose from the available physical CPU cores
+python tools/run_checks.py --stage test
+
+# Explicit fixed worker count
 python tools/run_checks.py --stage test --test-workers 4
 
-# Let pytest-xdist choose from the available physical CPU cores
-python tools/run_checks.py --stage test --test-workers auto
-
-# Explicit serial baseline
+# Explicit serial/debugging mode
 python tools/run_checks.py --stage test --test-workers 0
 ```
 
 Parallel runs use xdist's `worksteal` scheduler so the relatively expensive
 database tests can be rebalanced instead of pinning an entire large test module
-to one worker. `pytest-xdist` is part of the `dev` dependency set. Compare the
-reported test-stage duration on the same machine before changing the project
-default; worker-process startup and concurrent SQLite/file-system activity can
-make very high worker counts counterproductive.
+to one worker. `pytest-xdist` is part of the `dev` dependency set. Serial mode
+remains available for debugging ordering, isolation, or concurrency-sensitive
+failures.
 
 The web tests build one template SQLite database per module, then copy that
 template into each test's temporary directory before creating the application.
