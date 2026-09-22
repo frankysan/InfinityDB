@@ -526,10 +526,12 @@ Schema version 12 introduced the derived canonical-profile layer, and schema
 version 13 added the corresponding canonical-loadout layer beside the lossless
 source tables. Build-time materialization scopes reusable payloads to an existing
 `logical_unit` and keeps source/Army context on one-to-one occurrence relations:
-profile AVA/logo and loadout points/SWC remain contextual, while source-local
-includes/peripherals remain in their lossless source relationships while
-Milestone 2B applies the completed relationship/Peripheral audits to choose their
-canonical relationship and identity boundaries.
+profile AVA/logo and loadout points/SWC remain contextual. Schema version 18 adds
+the first broader relationship materialization: Profile and Loadout include
+attachments remain occurrence-scoped, while their target endpoint resolves to a
+canonical loadout payload. Shared top-level Unit-option includes likewise retain
+their source parent but resolve the target separately for each Army occurrence.
+Peripheral identity/attachment remains deferred to its reviewed mapping design.
 
 Unit-detail repository reads now consume both canonical payload layers. Source
 profile/loadout tables remain available for provenance, validation, and deferred
@@ -1035,8 +1037,8 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 17 and database compatibility revision
-25; it rejects incompatible databases with a rebuild
+application database has schema version 18 and database compatibility revision
+26; it rejects incompatible databases with a rebuild
 instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

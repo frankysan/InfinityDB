@@ -5,6 +5,12 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+### Upgrade notes
+
+- Rebuild generated Army databases before deploying the next release. Schema 18 /
+  compatibility revision 26 adds materialized include relationships with canonical
+  loadout targets; there is no in-place database migration.
+
 ## [0.6.2] - 2026-09-21
 
 ### Added

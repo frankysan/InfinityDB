@@ -103,9 +103,10 @@ remain in `docs/data-model.md` and `docs/CHANGELOG.md`; release procedure belong
 in `docs/releasing.md`.
 
 - [ ] **Audit relationships after entity canonicalization.**
-  - [ ] Revisit includes and distinguish visible endpoint data from the independently
-    meaningful relationship between those endpoints; use the clean target-resolution audit
-    as evidence before materializing canonical include relationships.
+  - [x] Revisit includes and distinguish visible endpoint data from the independently
+    meaningful relationship between those endpoints; materialize occurrence-scoped include
+    relationships with canonical loadout targets without promoting contextual attachments
+    into payload identity.
   - [ ] Complete the Peripheral rules/identity work described in
     `docs/peripheral-curated-data-design.md`.
     - [ ] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,

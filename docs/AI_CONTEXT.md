@@ -803,6 +803,18 @@ compatibility references remain unambiguous JSON integers.
   collision disambiguation. Apply this numeric-or-slug authoring convention to other
   maintained/curated JSON reference fields only where their owning layer can resolve
   the domain deterministically.
+- 2026-09-21: Milestone 2B include relationships now use canonical target identities
+  without assuming the attachment itself is payload-invariant. The production
+  relationship audit resolves all 2 Profile, 949 Loadout, and 35 shared Unit-option
+  includes, but 23/186 affected canonical Loadout payloads have contextual include
+  variants. A valid loadout target can also become a different canonical payload in a
+  different Army context even when the parent Profile payload remains identical. Schema
+  version 18 / compatibility revision 26 therefore materializes
+  `profile_occurrence_includes` and `loadout_occurrence_includes` as contextual parent
+  relationships whose targets are canonical loadout payloads, while
+  `unit_option_include_targets` expands the shared source relationship per target Army
+  occurrence. Source target coordinates remain provenance rather than application
+  identity.
 - 2026-09-21: Curated N5 `armyLinks` for Skills, Equipment, and Weapons now use
   readable application-domain slugs instead of opaque numeric source IDs. The curated
   v3 validator accepts either a positive integer or a domain slug for those entities,

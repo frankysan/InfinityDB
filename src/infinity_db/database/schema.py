@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 17
+SCHEMA_VERSION = 18
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 25
+DATABASE_COMPATIBILITY_VERSION = 26
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -437,6 +437,33 @@ DERIVED_TABLES = {
             "loadout_payload_id position",
         ),
         ref("extra_id", "extras", "id"),
+    ),
+    "profile_occurrence_includes": table(
+        "army_id unit_id group_id profile_id position",
+        "target_loadout_payload_id quantity raw",
+        ref(
+            "army_id unit_id group_id profile_id",
+            "profile_payload_occurrences",
+            "army_id unit_id group_id profile_id",
+        ),
+        ref("target_loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "loadout_occurrence_includes": table(
+        "army_id unit_id group_id option_id position",
+        "target_loadout_payload_id quantity raw",
+        ref(
+            "army_id unit_id group_id option_id",
+            "loadout_payload_occurrences",
+            "army_id unit_id group_id option_id",
+        ),
+        ref("target_loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "unit_option_include_targets": table(
+        "unit_id option_id position target_army_id",
+        "target_loadout_payload_id quantity raw",
+        ref("unit_id option_id", "unit_options"),
+        ref("target_army_id", "army_lists", "id"),
+        ref("target_loadout_payload_id", "loadout_payloads", "id"),
     ),
 }
 

@@ -847,11 +847,12 @@ The following stay outside the reusable payload:
 - `profile_includes` — references to army/unit-local loadout identities;
 - `profile_peripherals` — references to army-local peripheral identities.
 
-Includes and peripherals are intentionally deferred because their numeric target
-identities are contextual. They remain losslessly available through the current
-source tables until the related entities have canonical identities of their own.
-They must not be dropped merely because they are outside the first reusable
-payload.
+Includes and peripherals remain outside reusable profile payload identity because
+their attachment is contextual to a source occurrence. Include targets now resolve
+through the canonical loadout-payload layer and are materialized separately in
+`profile_occurrence_includes`, preserving the exact Profile occurrence while replacing
+source-local target coordinates with the canonical target payload identity. Peripheral
+attachments remain deferred pending their separate reviewed identity model.
 
 The 16 residual contextual variants identified by the classification audit are
 therefore handled conservatively: WIP, characteristic, or skill differences
@@ -934,8 +935,10 @@ The materializer and database validation enforce all of the following:
 - AVA and logo retain their source occurrence values rather than being selected
   from a representative row;
 - profile-group context remains attached through the source occurrence key;
-- includes and peripherals remain available through their existing contextual
-  source relationships until their own canonicalization stage;
+- profile includes remain occurrence-scoped in `profile_occurrence_includes`, with
+  each target resolved to a canonical loadout payload; peripheral attachments remain
+  available through their contextual source relationships until their own
+  canonicalization stage;
 - current source and raw tables are not rewritten or made lossy;
 - non-null `raw` fallback content participates in payload equality and can never
   be silently discarded;
@@ -1088,7 +1091,7 @@ Observed relationship behavior is:
 | skills | 6,330 | 1,594 | 2 | 2 | Two genuine contextual skill/extra differences. |
 | equipment | 2,798 | 457 | 1 | 0 | The only same-source variation is representation-only. |
 | weapons | 52,554 | 11,526 | 12 | 8 | Four differences are representation-only; eight retain source-shape/content differences for later classification. |
-| includes | 949 | — | 0 | 0 | Stable for repeated source loadout keys, but the target remains source-local. |
+| includes | 949 | — | 0 | 0 | Source coordinates are stable for repeated source loadout keys; the later relationship layer resolves the target canonically while retaining occurrence scope. |
 | peripherals | 818 | — | 111 | 111 | Raw army-local IDs differ widely; resolving the target definition reduces this to seven contextual variants. |
 
 The weapon source also contains one non-null raw fallback template (`{}`),
@@ -1160,7 +1163,7 @@ The following stay outside the reusable payload:
   same-source variation;
 - profile-group membership/classification — context inherited from the source
   occurrence;
-- `option_includes` — references to source-local loadout coordinates;
+- `option_includes` — source occurrence attachments whose source-local target coordinates are resolved separately by the derived include relationship layer;
 - `option_peripherals` — references to army-local peripheral identities.
 
 Points and SWC are separated explicitly rather than forcing their three observed
@@ -1170,13 +1173,18 @@ when those gameplay relationships differ, the first canonical model represents
 that as a distinct payload variant rather than inventing a finer-grained delta
 system prematurely.
 
-Includes and peripherals remain losslessly available through the source tables
-until their target entities have stronger canonical identities. In particular,
-the diagnostic peripheral comparison by `name + mercs` is evidence that raw
-army-local IDs overstate variation; it is **not** yet sufficient to define a
-canonical peripheral key. The seven remaining peripheral-context variations,
-including `TURTLEMEK` `mercs` differences, must therefore remain explicit source
-context.
+Includes no longer depend on source-local target coordinates for application meaning.
+`loadout_occurrence_includes` preserves each source Loadout occurrence as the parent
+context while resolving the target to a canonical loadout payload. Top-level
+`unit_option_includes` remain source-context relationships, but
+`unit_option_include_targets` expands each shared include across the Army contexts in
+which its target occurs and records the corresponding canonical loadout payload.
+Peripherals remain losslessly available through the source tables until their reviewed
+identity model is complete. In particular, the diagnostic peripheral comparison by
+`name + mercs` is evidence that raw army-local IDs overstate variation; it is **not**
+yet sufficient to define a canonical peripheral key. The seven remaining
+peripheral-context variations, including `TURTLEMEK` `mercs` differences, must
+therefore remain explicit source context.
 
 The 16 candidate-payload variants among repeated source-loadout keys are retained
 conservatively: one exact equipment representation variant, one order-generation
@@ -1250,8 +1258,9 @@ shape and logical-source merge behavior:
 - points and SWC remain attached to their exact source occurrence;
 - order, skill, equipment, weapon, extra, `raw`, and exact representation
   differences continue to split payloads;
-- profile-group context, includes, and peripherals remain recoverable from the
-  occurrence/source side;
+- profile-group context and peripherals remain recoverable from the
+  occurrence/source side; include attachments remain occurrence-scoped while their
+  targets resolve to canonical loadout payloads;
 - source `loadout_options` and nested `option_*` rows remain lossless and
   reconstructable;
 - no army-local peripheral ID is promoted to cross-Army canonical identity by
@@ -1311,9 +1320,10 @@ performance guarantees or schema invariants. Query-plan regression tests require
 the canonical occurrence tables to use their unit-oriented indexes because unit
 detail assembly filters them by source unit.
 
-Canonical include/peripheral identities, representation normalization, and
-eventual movement of lossless source-only tables to `infinity.raw.db` remain
-separate evidence-driven decisions.
+Peripheral identity, further representation normalization, and eventual movement
+of lossless source-only tables to `infinity.raw.db` remain separate
+evidence-driven decisions. Include target identity is now resolved by the derived
+occurrence relationship layer without promoting the attachment into payload identity.
 
 ### Logical-unit payload semantic classification audit
 
@@ -1744,13 +1754,33 @@ entities are already visible in the UI.
 #### Current Milestone 2B relationship evidence
 
 The read-only audits against the 2026-09-18 Army snapshot establish a clean
-starting point without yet changing runtime schema. Include targets resolve
-completely through the canonical loadout/profile occurrence layer: 2/2 profile
-includes, 949/949 loadout includes, and 35/35 shared unit-option includes resolve
-with no missing targets, raw fallbacks, cross-logical-unit targets, or ambiguous
-shared targets. The resolved profile/loadout includes point to 1 and 101 distinct
-canonical target payloads respectively. This is sufficient evidence to design
-canonical include relationships without inventing target identity.
+include-target boundary. All 2 profile includes, 949 loadout includes, and 35 shared
+unit-option includes resolve through the canonical loadout occurrence layer with no
+missing targets, raw fallbacks, or cross-logical-unit targets. Profile includes are
+currently invariant across the one affected repeated canonical Profile payload, while
+Loadout includes are not: 23 of 186 affected canonical Loadout payloads have different
+include signatures across source occurrences, including presence/absence, target, or
+quantity differences. The shared unit-option rows resolve unambiguously in the audited
+snapshot, but their target source option can still acquire different canonical payloads
+when Army-contextual loadout semantics differ.
+
+Schema version 18 / compatibility revision 26 therefore materializes include
+relationships without promoting the attachment into reusable payload identity:
+
+- `profile_occurrence_includes` keeps the exact Profile occurrence as parent context and
+  resolves each included target to `loadout_payloads.id`;
+- `loadout_occurrence_includes` does the same for Loadout occurrences, preserving the
+  contextual variation demonstrated by the audit; and
+- `unit_option_include_targets` keeps the source-context Unit option relationship and
+  expands it by target Army occurrence so each Army context points at the canonical
+  loadout payload that actually applies there.
+
+This split is intentionally conservative. Current Profile invariance is evidence about
+the audited snapshot, not a permanent schema invariant: a Profile can retain the same
+canonical payload while the included Loadout acquires an Army-contextual payload
+variant. Source-local target coordinates remain provenance in the retained source/raw
+representation; application relationships use canonical target identities while keeping
+all contextual parent attachment, quantity, and raw fallback data explicit.
 
 Peripherals require a separate boundary. The same snapshot has 279 army-local
 definitions / 56 names and 818 resolved loadout attachments, with no profile
@@ -2008,8 +2038,8 @@ derived frontend tables so generated application structure cannot be supplied as
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 17 and the application
-compatibility revision is 25. Imports build temporary sibling files, check
+records its schema version. The current schema version is 18 and the application
+compatibility revision is 26. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

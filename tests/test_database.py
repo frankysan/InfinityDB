@@ -281,6 +281,15 @@ def test_database_preserves_every_normalized_table_and_field(
             assert connection.execute(
                 f"SELECT COUNT(*) FROM {quote(table)}"
             ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT COUNT(*) FROM profile_occurrence_includes"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_occurrence_includes"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM unit_option_include_targets"
+        ).fetchone()[0] == 2
         source_loadout_skill_raw = connection.execute(
             "SELECT raw FROM option_skills WHERE army_id = 101"
         ).fetchone()[0]
@@ -2305,6 +2314,9 @@ def test_loadout_payload_materialization_is_deterministic(
             "loadout_payload_equipment_extras",
             "loadout_payload_weapons",
             "loadout_payload_weapon_extras",
+            "profile_occurrence_includes",
+            "loadout_occurrence_includes",
+            "unit_option_include_targets",
         )
         for table in tables:
             left = first_connection.execute(
@@ -2334,6 +2346,110 @@ def test_database_validation_rejects_invalid_loadout_payload_context(
         connection.close()
 
     with pytest.raises(ValueError, match="canonical loadout payloads"):
+        Database(path).validate()
+
+
+def test_include_relationships_materialize_with_evidence_based_parent_scope(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "include-relationships.sqlite3"
+    export_database(normalized, path)
+
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT army_id, unit_id, group_id, profile_id, position, "
+            "target_loadout_payload_id, quantity, raw "
+            "FROM profile_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [
+            (101, 1, 1, 1, 1, 1, 1, None),
+            (201, 1, 1, 1, 1, 1, 1, None),
+        ]
+        assert connection.execute(
+            "SELECT army_id, unit_id, group_id, option_id, position, "
+            "target_loadout_payload_id, quantity, raw "
+            "FROM loadout_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [
+            (101, 1, 1, 1, 1, 1, 1, None),
+            (201, 1, 1, 1, 1, 1, 1, None),
+        ]
+        assert connection.execute(
+            "SELECT unit_id, option_id, position, target_army_id, "
+            "target_loadout_payload_id, quantity, raw "
+            "FROM unit_option_include_targets ORDER BY target_army_id"
+        ).fetchall() == [
+            (1, 1, 1, 101, 1, 1, None),
+            (1, 1, 1, 201, 1, 1, None),
+        ]
+    finally:
+        connection.close()
+
+
+def test_loadout_include_relationships_preserve_contextual_variants(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    row = next(
+        row for row in data["tables"]["option_includes"] if row["army_id"] == 201
+    )
+    row["quantity"] = 2
+
+    path = tmp_path / "contextual-includes.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 1
+        assert connection.execute(
+            "SELECT army_id, quantity FROM loadout_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [(101, 1), (201, 2)]
+    finally:
+        connection.close()
+
+
+def test_profile_include_relationships_preserve_contextual_target_variants(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    next(
+        row for row in data["tables"]["option_orders"] if row["army_id"] == 201
+    )["total_count"] = 2
+
+    path = tmp_path / "contextual-profile-includes.sqlite3"
+    export_database(data, path)
+    connection = sqlite3.connect(path)
+    try:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM loadout_payloads"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT army_id, target_loadout_payload_id "
+            "FROM profile_occurrence_includes ORDER BY army_id"
+        ).fetchall() == [(101, 1), (201, 2)]
+        assert connection.execute(
+            "SELECT target_army_id, target_loadout_payload_id "
+            "FROM unit_option_include_targets ORDER BY target_army_id"
+        ).fetchall() == [(101, 1), (201, 2)]
+    finally:
+        connection.close()
+
+
+def test_database_validation_rejects_invalid_materialized_include_relationship(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "invalid-includes.sqlite3"
+    export_database(normalized, path)
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            "UPDATE loadout_occurrence_includes SET quantity = 2 WHERE army_id = 201"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(ValueError, match="contextual loadout includes"):
         Database(path).validate()
 
 
