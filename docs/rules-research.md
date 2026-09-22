@@ -63,9 +63,9 @@ Classification, ISC, Peripheral, and Controller. These terms can form the first
 seed of a game-term thesaurus even when no dedicated database domain is warranted
 for a term.
 
-Before implementing a thesaurus, the Game States and Glossary audit should
-establish the broader canonical vocabulary, aliases, relationships, and source
-coverage so the project does not build a second competing glossary structure.
+The completed Game States and Glossary audit established the broader canonical
+vocabulary and relationship boundaries. Any future thesaurus should reuse those
+audited semantics rather than introduce a second competing glossary structure.
 
 Sources:
 

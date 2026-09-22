@@ -479,8 +479,11 @@ representative-backed logical-unit fields plus source-attributed alias/note/
 profile and loadout payload layers extend the same principle from **identity
 deduplication** to **semantic payload deduplication** for unit-detail data.
 Application Army identities and application catalog identities extend the model
-further into Army/faction presentation and rule-reference catalog serving.
-Canonicalizing wider relationships remains the next semantic stage.
+further into Army/faction presentation and rule-reference catalog serving. Broader
+relationship canonicalization is now active Milestone 2B work: include targets, reviewed
+Peripheral relationships, selection-safe Unit constraints, and profile-group dependencies
+are materialized, while Fireteams and remaining source/context relationships stay explicit
+until their application presentation/model is justified.
 
 Runtime-performance evidence for this work is collected separately from semantic
 acceptance. `tools/benchmark_runtime.py` measures representative repository read
@@ -537,7 +540,10 @@ the first broader relationship materialization: Profile and Loadout include
 attachments remain occurrence-scoped, while their target endpoint resolves to a
 canonical loadout payload. Shared top-level Unit-option includes likewise retain
 their source parent but resolve the target separately for each Army occurrence.
-Peripheral identity/attachment remains deferred to its reviewed mapping design.
+Reviewed Peripheral identity and relationship data are now materialized separately:
+embedded source definitions map to canonical Peripheral entities, Unit-backed Peripherals
+reuse logical-Unit identity, and source-context Cyberplug Controller access pools retain
+their Army provenance.
 
 Unit-detail repository reads now consume both canonical payload layers. Source
 profile/loadout tables remain available for provenance, validation, and deferred
@@ -1049,8 +1055,8 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 19 and database compatibility revision
-27; it rejects incompatible databases with a rebuild
+application database has schema version 22 and database compatibility revision
+30; it rejects incompatible databases with a rebuild
 instruction. The importer builds
 a lean frontend database and a lossless sibling raw archive, creates read-path
 indexes after loading, and persists SQLite planner statistics. Migration of

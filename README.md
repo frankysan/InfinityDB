@@ -45,6 +45,31 @@ For the technical meaning of imported and InfinityDB-derived concepts, see the
 [data model](docs/data-model.md). Architectural boundaries and design decisions
 are documented in [architecture](docs/architecture.md).
 
+## Roadmap to 1.0
+
+The current direction is deliberately incremental:
+
+- **0.6.3 candidate — Milestone 2B:** finish the canonical relationship/application
+  groundwork, the `infinity.raw.db` separation, and the source-to-presentation
+  completeness inventory if that work closes as one coherent releasable increment.
+- **0.7.x — Rules & context:** enrich existing catalog/application data with concise
+  rules summaries, official references, classifications, and reviewed semantic
+  relationships.
+- **0.8.x — Connect the game:** expose first-class relationships such as Fireteams,
+  Peripherals/Controllers, linked profiles/includes, selection/dependency constraints,
+  Reinforcement parentage, and useful cross-army navigation.
+- **0.9.x — Complete & polish:** close the remaining player-data/presentation gaps and
+  improve search, navigation, mobile behavior, accessibility, and theming on the way
+  to the final completeness audit.
+- **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
+  InfinityDB has a maintained representation and a meaningful, usable place in the
+  web reference.
+
+In short: **0.6 builds the foundation → 0.7 adds context → 0.8 connects the data →
+0.9 closes the gaps → 1.0 completes the reference.** Exact minor-release scope may
+move as audits discover dependencies; the durable 1.0 gate is defined in
+[release process](docs/releasing.md).
+
 ## Requirements and setup
 
 Requires Python 3.11 or newer. The application uses only the Python standard
@@ -263,8 +288,10 @@ profile definitions, asset modes, reports, and exit codes.
   boundaries, current architecture, and accepted design direction.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
-- [Peripheral curated-data design](docs/peripheral-curated-data-design.md) —
-  active Milestone 2B rules, identity, and relationship design.
+- [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
+  concrete InfinityDB consumer.
+- [Rules research](docs/rules-research.md) — verified source findings retained for possible
+  future reference or product work.
 - [Data storage and provenance](data/README.md) — raw, curated, generated, and
   local processing artifacts.
 - [Development checks](docs/testing.md) — local and CI validation.

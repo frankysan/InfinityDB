@@ -5,6 +5,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+Candidate release: **0.6.3** if Milestone 2B closes as one coherent validated
+canonical-relationship/completeness increment.
+
 ### Added
 
 - Add reviewed N5.3 rules records for Doctor, Engineer, Cyberplug, Peripheral, and
@@ -31,12 +34,32 @@ Entries describe meaningful release outcomes rather than detailed implementation
   Unit details can now expose canonical embedded Peripheral attachments, standalone
   Unit-backed Peripheral type identity, and source-context Cyberplug access pools to canonical
   Unit targets without runtime dependence on curated source files.
+- Materialize occurrence-scoped Profile, Loadout, and top-level Unit-option include
+  relationships with canonical loadout targets while preserving the exact source parent/context
+  and keeping include attachment outside reusable payload identity.
 - Extend canonical relation/dependency handling beyond audit-only data. InfinityDB now materializes
   96 selection-safe Army constraints: all 95 selector-free constraints plus the Jaan Staar/Kiiutan
   shared max-1 relation whose active-profile selectors are roster-selection-equivalent at Unit level.
   The 14 deterministic same-Unit profile-group dependency relations remain separately materialized.
   The seven Traktor Mul/Dozer/Kuryer rows and the Kuang Shi/Celestial Guard cross-source bridge stay
   explicit source/context data because their overloaded selectors are not safe Unit-level semantics.
+- Add deterministic semantic audits for relation/dependency structures, Fireteam charts, and
+  normalization-only link storage so current source anomalies and non-player-facing joins remain
+  explicit instead of being guessed into application semantics.
+
+### Changed
+
+- Speed up development validation by reusing a template web-test database and running
+  pytest through `pytest-xdist` by default. The primary local Windows benchmark dropped
+  the complete 687-test stage from 59.67 seconds serially to 14.13 seconds with automatic
+  worker selection.
+- Tune hosted source CI independently from the local default: Ubuntu/Python 3.11 remains
+  the full tests/lint/type/build/rules gate, compatibility matrix legs retain runtime/data
+  checks, and hosted Windows runs pytest serially after automatic xdist workers caused a
+  severe slowdown. The measured workflow recovered from 11:36 to 1:25 after this change.
+- Consolidate completed one-off design/audit documents into the maintained architecture,
+  data-model, rules-semantics, rules-research, backlog, and changelog references, and add
+  the public roadmap direction through 1.0.
 
 ### Upgrade notes
 

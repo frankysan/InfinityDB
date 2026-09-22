@@ -17,9 +17,8 @@ model.
 - `docs/data-model.md` is authoritative for normalized data semantics and
   persistence structure.
 - `docs/rules-semantics.md` records audited, implementation-relevant game-rule
-  semantics. `docs/rules-audit.md` owns rules-source coverage/version tracking,
-  while `docs/rules-research.md` holds verified findings without a current
-  application consumer.
+  semantics and the maintained source/audit baseline. `docs/rules-research.md`
+  holds verified findings without a current application consumer.
 - This document records non-obvious constraints and decision history that are
   useful during implementation.
 - `README.md` is the user-facing project introduction, setup, and operations
@@ -967,6 +966,13 @@ compatibility references remain unambiguous JSON integers.
   candidates plus raw relation/dependency adjacency remain review evidence rather than automatic
   Controller mappings.
 
+- 2026-09-22: **Release direction through 1.0.** Milestone 2B is a 0.6.3 candidate
+  if its canonical-relationship, raw/application split, and completeness-inventory work
+  closes as one validated increment. 0.7.x adds rules/context to existing data; 0.8.x
+  exposes connected game relationships; 0.9.x closes remaining player-facing gaps and
+  focuses on search/navigation/mobile/accessibility/themes; 1.0.0 is the player-data-
+  complete reference gate defined in `docs/releasing.md`. Minor-release scope is directional,
+  while the 1.0 acceptance criteria are durable.
 - 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
   release.** Use the completed N5.3 Wiki/PDF/FAQ audit to enrich data InfinityDB
   already exposes with concise original summaries, authoritative links/citations,
@@ -1110,22 +1116,3 @@ compatibility references remain unambiguous JSON integers.
   relation/dependency constraints, and similar scoped links) remain semantic unless a separate audit
   proves otherwise. `tools/audit_normalization_links.py` is the deterministic evidence tool for
   this boundary.
-
-### 2026-09-22 relationship presentation completeness checkpoint
-
-- Milestone 2B's relationship audit is complete. A deterministic
-  `tools/audit_relationship_presentation.py` audit now records five confirmed 1.0 web-presentation
-  gap families without confusing missing presentation with missing data.
-- Database-only gaps: Fireteam chart relationships and occurrence-scoped Profile/Loadout/Unit-option
-  include relationships.
-- Repository/API-only gaps: canonical Unit selection/profile-group dependency constraints,
-  Peripheral attachments/type/access-pool relationships, and Reinforcement Section parentage.
-- The pinned 2026-09-18 snapshot evidence is: 272 Fireteams / 444 type memberships / 1,261 members;
-  2 Profile + 949 Loadout include occurrences plus 35 Unit-option include definitions expanding to
-  322 target contexts; 96 selection constraints / 197 members; 14 group-dependency constraints;
-  818 Loadout Peripheral attachments plus 4 Controller access records / 8 targets; and 46
-  Reinforcement Section -> parent Army edges across 11 Sections.
-- `unit_factions` remains meaningful source/context data but is not yet classified as a confirmed
-  1.0 presentation gap; its additional grouping semantics need the broader source-to-presentation
-  inventory. Source-specific notes, `spectables`, and top-level `unit_options` are likewise deferred
-  to that broader inventory because they are payload/context rather than relationship families.

@@ -28,14 +28,41 @@ inventory. Use that inventory as groundwork for the broader web-app consistency
 audit. The durable version-1.0 acceptance criteria are maintained in
 `docs/releasing.md`.
 
-The next release target is **0.7.0 — rules-enriched catalog data**. Milestone 2B
-relationship/canonicalization work remains the foundation for that release; 0.7.0
-then applies the completed Wiki/PDF rules research to data InfinityDB already
-exposes, rather than opening a broad new product-domain milestone.
+Milestone 2B is a **0.6.3 release candidate** if the remaining work closes as one
+coherent, validated increment. This is a candidate designation rather than a
+promise to cut 0.6.3 before the milestone is complete. The next planned minor
+release remains **0.7.0 — rules-enriched catalog data**, which applies the
+completed Wiki/PDF/FAQ research to data InfinityDB already exposes.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
 application behavior during this work.
+
+## Release roadmap through 1.0
+
+This roadmap describes product direction, not a rigid promise that every item will
+land in the named minor release. Detailed implementation work remains in the
+sections below and the durable 1.0 acceptance gate remains in `docs/releasing.md`.
+
+- **0.6.3 candidate — canonical relationships and completeness groundwork.** Finish
+  Milestone 2B: canonical relationship coverage, the `infinity.raw.db` application/
+  provenance split, and the source-to-presentation completeness inventory.
+- **0.7.x — Rules & context.** Enrich the existing catalogs and application data with
+  concise rules summaries, official references, classifications, variant-aware
+  semantics, and reviewed related-item links.
+- **0.8.x — Connect the game.** Turn the relationship graph into first-class user
+  features: Fireteams, Peripheral/Controller links, profile/loadout includes,
+  selection/dependency relationships, Reinforcement parentage, and useful cross-army
+  navigation. Prefer connected views over duplicating the same facts in new silos.
+- **0.9.x — Complete & polish.** Use the completeness inventory and consistency audit
+  to close remaining player-facing gaps, then improve search/navigation, mobile
+  behavior, accessibility, themes, and overall presentation without redefining the
+  1.0 data-completeness gate.
+- **1.0.0 — Player data-complete.** Every useful in-scope game datum from the supported
+  sources has a maintained structured representation and a usable web presentation.
+
+The concise public framing is: **0.6 built the foundation → 0.7 adds context → 0.8
+connects the data → 0.9 closes the gaps → 1.0 completes the reference.**
 
 ## Deferred performance and storage experiments
 
@@ -102,6 +129,150 @@ canonicalization evidence, benchmarks, classifications, and upgrade requirements
 remain in `docs/data-model.md` and `docs/CHANGELOG.md`; release procedure belongs
 in `docs/releasing.md`.
 
+- [ ] **Audit relationships after entity canonicalization.**
+  - [x] Revisit includes and distinguish visible endpoint data from the independently
+    meaningful relationship between those endpoints; materialize occurrence-scoped include
+    relationships with canonical loadout targets without promoting contextual attachments
+    into payload identity.
+  - [x] Complete the Peripheral rules/identity work now documented as current
+    architecture/data-model behavior.
+    - [x] Extend the existing curated-rules pipeline with reviewed Doctor, Engineer,
+      Cyberplug, and Peripheral skill records plus the five N5.3 Peripheral types; keep
+      controller-eligibility facts validated in the existing rules contract and do not
+      create a parallel Peripheral rules loader/database.
+    - [x] Define a separate reviewed source-to-Peripheral identity/mapping contract under
+      `data/curated/peripherals/`, with canonical entity/profile IDs, explicit Army snapshot
+      coordinates, review evidence, and fail-closed validation; do not overload the display-
+      identity contract or write Wiki/rules knowledge into Army source tables.
+    - [x] Review and populate the source-to-Peripheral identity mappings for the current
+      snapshot, then materialize curated-derived controller-eligibility and cross-army
+      Peripheral relationships only after mapping coverage and rules vocabulary are both
+      validated.
+      - [x] Validate the reviewed contract against the exact Army snapshot and emit a
+        deterministic coverage/review queue that reports unmapped definitions, stale
+        mappings, source-name drift, curated-only entities/profiles, repeated names, and
+        normalization-only review collisions without promoting names into identity.
+      - [x] Add bidirectional Peripheral -> Controller and Controller -> Peripheral evidence
+        to the coverage report, and compare observed Controller Skill sets with only the
+        rule-stated Servant/Cyberplug eligibility predicates. Treat those results as review
+        evidence, never automatic type classification; keep types with no generic predicate
+        unevaluated.
+      - [x] Characterize same-Army name-matched profile/loadout presentation for embedded
+        Peripheral definitions. The current snapshot proves all 279 definitions are carried by
+        disabled embedded groups, so do not use that mechanism as Cyberplug evidence.
+      - [x] Audit the second Army source mechanism used by independently listed Peripherals:
+        inventory ordinary `army_units` whose profiles explicitly carry the Army `Peripheral`
+        Skill, preserve its source subtype extra (`Servant`, `Cyberplug`, etc.), inventory every
+        Cyberplug-skilled Controller even when no embedded Peripheral is attached, and report
+        same-Army subtype candidates plus raw relation/dependency adjacency as review evidence
+        without interpreting Controller mappings automatically.
+      - [x] Populate the reviewed mappings for the current embedded-definition snapshot:
+        all 279 `peripherals` rows resolve to 56 canonical entities, with rules type taken
+        from the matched profile's explicit `Peripheral` Skill subtype. Keep distinct source
+        names as distinct entities until separate evidence supports a shared entity/profile
+        boundary.
+      - [x] Resolve standalone Unit-backed Peripheral identities without creating a second
+        ontology: 17 source Unit IDs reuse 10 existing logical-Unit identities, with reviewed
+        Servant/Cyberplug type taken from the source `Peripheral` Skill subtype. Reinforcement
+        variants resolve through the existing logical-Unit identity layer.
+      - [x] Resolve reviewed Controller -> Unit-backed Peripheral relationships for the
+        current Cyberplug source mechanism. Cyberplug is an access-pool relationship rather
+        than fixed ownership: the four Cyberplug-capable loadout occurrences in Armies 601/605
+        each target the canonical Ranters/Puzzlers logical Units available in that Army
+        context. Keep relation/dependency rows as separate provenance; the current snapshot
+        exposes no edge selecting one Sartroid for one Controller.
+      - [x] Materialize the reviewed Peripheral identity/relationship layer in `infinity.db`:
+        canonical embedded Peripheral mappings, reviewed Unit-backed logical-Unit types, and
+        source-context Controller access pools. Repository Unit details expose canonical
+        embedded attachments and Controller targets without reading curated JSON at runtime.
+  - [x] Audit relation/dependency structures.
+    - [x] Inventory the current normalized relation/dependency graph after logical-Unit
+      canonicalization. The pinned snapshot contains 126 relations, 250 member rows, and
+      14 dependency rows. 118 relations resolve completely to canonical Unit identities;
+      eight contain relation-only historical source endpoints with no ordinary Unit definition
+      in this snapshot. Preserve those endpoints separately from current logical-Unit identity.
+    - [x] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
+      as contextual source/application data. Treat `role = reinforcement` rows as
+      selectable catalog Section/pool contexts, not independently legal Army
+      Lists, and retain section-specific profile/AVA occurrence provenance. The current
+      application layer reproduces all 46 source parent links with no missing or unexpected
+      canonical edges.
+    - [x] Split the resolved generic source relation graph into reviewed structural semantics
+      before materialization. The current snapshot classifies 118 resolved relations as 81
+      same-logical cross-context exclusivity constraints, 21 cross-logical shared-cardinality
+      constraints, 14 single-logical profile/dependency constraints, and two single-logical
+      cardinality constraints. The remaining eight relations are independently reviewed as
+      stale historical-source constraints and remain outside current Unit materialization.
+    - [x] Materialize the 95 fully resolved selector-free relations as application selection
+      constraints. Preserve Army/relation context, source member identity, canonical logical-Unit
+      identity, group semantics, and min/max cardinality. The initial selector-free set is 81
+      same-logical cross-context exclusivity constraints, 12 selector-free cross-logical shared-
+      cardinality constraints, and two single-logical cardinality constraints (195 member rows).
+      Unit detail reads expose these relationships without reading raw relation rows at request time.
+    - [x] Resolve selector semantics and materialization contracts for the remaining selector-bearing
+      relations needed by the application layer.
+      - [x] Materialize the 14 same-logical profile/dependency relations whose member/dependency
+        `profile` selectors deterministically resolve to Army-local profile-group coordinates.
+        Preserve relation cardinality plus `perParent`, dependency `group`, `min`, `minDependant`,
+        and `options` context without promoting those source-local fields to logical-Unit facts.
+        Unit detail reads expose these as `group_dependencies`.
+      - [x] Resolve the remaining nine cross-Unit selector-bearing relations without forcing one
+        selector domain. Jaan Staar / Kiiutan is roster-selection-equivalent at Unit level because
+        both members have one selectable profile group and selector `1` names the active profile;
+        materialize its shared max-1 constraint. Keep the seven Traktor Mul / Dozer / Kuryer rows
+        and the Kuang Shi / Celestial Guard cross-source bridge as explicit source/context data: their
+        selector coordinates are not consistently Unit-selection semantics and must not be promoted.
+        The application selection layer therefore contains 96 constraints / 197 members in total.
+      - [x] Resolve the eight unresolved-placeholder relations from independent historical
+        evidence rather than relation partners. IDs 165, 613, 749, 1503, and 1509 are retired
+        Sun Tze v.2, Achilles, Achilles v2 (Corintian Armor), Boarding Action Sheskiin, and
+        Adil Mehmut (Special Division) source Units respectively. Treat the eight relations as
+        reviewed stale-source constraints: none of those endpoints is selectable in the pinned
+        snapshot, so do not alias them to current logical Units or materialize the relations as
+        current application constraints.
+  - [x] Audit Fireteam structures. The pinned snapshot contains 58 source charts,
+    272 named teams, 444 type memberships, and 1,261 member rows. The normalized
+    representation already retains the required Army-local chart structure; the new
+    read-only Fireteam semantics audit records the semantic boundary and source gaps.
+    - [x] Treat Fireteam Charts as Army-local relationship/configuration data:
+      preserve Fireteam type quotas, named Fireteams, type membership, min/max
+      formation constraints, required-choice pools, chart notes, FTO restrictions,
+      Wildcards, and bracketed Fireteam-Level equivalence terms without promoting
+      them to intrinsic logical-Unit facts. Current evidence includes 52 Wildcard
+      teams with no Fireteam type membership and 406 member rows carrying bracketed
+      Fireteam-Level wording (453 references / 146 distinct labels).
+    - [x] Resolve FTO eligibility to the applicable source option/loadout identity
+      rather than treating a Unit-level Fireteam member match as sufficient; retain
+      unresolved/ambiguous source wording instead of guessing. 195/197 FTO-bearing
+      rows resolve deterministically to Army-local loadout options. The two retained
+      source anomalies are Ank's Arjuna row, whose source slug resolves only to the
+      ordinary Arjuna context, and Melek's Korsan row, whose chart says FTO while the
+      selected Reinforcement Unit exposes no FTO-marked loadout option.
+    - [x] Interpret the source `required` flag as participation in the chart's
+      required-choice set where applicable, not as "every flagged row is mandatory",
+      and preserve chart notes because the rules allow them to override general
+      Fireteam rules. The snapshot has 219 required rows across 84 teams; only one
+      required row also has a positive `min`, so those dimensions stay independent.
+      One Army-level chart description and four team observations remain verbatim.
+    - [x] For Reinforcement Fireteams, retain both the Reinforcement Section chart
+      context and the selected parent Army's permitted Fireteam Types/counts; do
+      not mix Main-Section and Reinforcement-Section member eligibility. The 12
+      source Reinforcement charts reconcile to 11 application Sections and 46 parent
+      links. Across playable parent/type contexts, nine vanilla parent Armies block
+      Reinforcement CORE despite the Section chart containing CORE rows, confirming
+      that Section eligibility and parent quotas are separate constraints.
+  - [x] Identify normalization-only link structures that do not constitute
+    additional player-facing information. The current audit classifies the eight
+    `army_*` filter-catalog joins (15,072 rows) as source filter/index
+    normalization rather than gameplay relationships, and classifies only the
+    `option_weapon_templates.id` / `option_weapons.template_id` indirection as a
+    normalization-only storage link within source option-weapon occurrences. Keep
+    source-to-canonical identity mappings and profile/loadout occurrence-to-payload
+    links distinct: they add no separate gameplay relationship, but remain required
+    canonicalization/provenance infrastructure and may carry contextual deltas.
+  - [ ] Record any distinct player-relevant relationship not currently
+    presentable by the application as a 1.0 completeness gap.
+
 - [ ] **Separate lossless source storage from the application database after
   canonicalization.**
   This milestone refers to the existing `infinity.raw.db`; no additional
@@ -138,19 +309,7 @@ in `docs/releasing.md`.
     operationally consumed, redundant source representation,
     normalization-only structure, or unrepresented player information.
   - [ ] Add confirmed unrepresented player information to the 1.0 completeness
-    backlog. The completed relationship audit has already established these
-    player-relevant relationship gaps:
-    - [ ] Present Fireteam chart relationships: named teams, type eligibility/quotas,
-      membership/cardinality, required-choice context, FTO restrictions, Wildcards,
-      equivalence terms, and rule-bearing chart notes.
-    - [ ] Present occurrence-scoped include relationships for Profiles, Loadouts, and
-      top-level Unit options using their canonical resolved targets.
-    - [ ] Present canonical Army selection constraints and profile-group dependency
-      constraints currently returned by Unit detail but not rendered by the browser.
-    - [ ] Present canonical Peripheral attachments, Unit-backed Peripheral type identity,
-      and Controller access-pool relationships already available to Unit detail.
-    - [ ] Present Reinforcement Section -> parent Army relationships currently exposed by
-      the Army repository/API but not by the browser.
+    backlog.
   - [ ] Reconcile source presentation encodings with canonical rules identities
     without rewriting source provenance. In particular, Army Unit Profiles encode
     Cube/Cube 2.0 only through their profile symbols rather than textual Equipment
@@ -240,6 +399,31 @@ later. The release is ready when every currently exposed catalog/application
 surface has been systematically reconciled with the relevant audited rules
 knowledge, useful reviewed enrichment is presented to users, and every remaining
 gap is explicitly classified.
+
+## Release direction 0.8.0 — connected game relationships
+
+0.8.0 should make InfinityDB's already modeled relationships directly useful to
+players. The likely focus is first-class Fireteam browsing, Peripheral/Controller
+navigation, profile/loadout include links, selection/dependency constraints,
+Reinforcement Section parentage, and cross-army relationship discovery. Exact scope
+should be chosen after 0.7.0 so the UI builds on stable canonical/rules semantics
+rather than duplicating source-specific interpretations.
+
+The detailed candidates already live in the relationship-completeness, broader
+web-app, and product-feature sections below. 0.8.0 should not become an army-list
+legality engine or live game-state model.
+
+## Release direction 0.9.0 — completeness and polish
+
+0.9.0 should convert the completeness inventory into a release-hardening pass:
+close remaining in-scope player-data/presentation gaps, complete the end-to-end web
+consistency audit, and improve the experience around search, navigation, mobile use,
+accessibility, and themes. Work that is valuable but explicitly outside the 1.0 gate
+may still ship here when it does not displace completeness work.
+
+The release should leave 1.0 primarily as the final source-by-source completeness
+verification and resolution of any remaining material correctness gaps, not as a
+large new feature milestone.
 
 ## Army snapshot and symbol pipeline
 
