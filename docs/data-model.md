@@ -2528,3 +2528,42 @@ normalization-only.
 `tools/audit_normalization_links.py` records this boundary deterministically and fails when the
 maintained schema assumptions drift. The audit is classification evidence for completeness and the
 later raw/application database split; it does not itself remove tables or change runtime serving.
+
+#### Confirmed relationship presentation gaps
+
+The completed Milestone 2B relationship audit distinguishes data-model completeness from web
+presentation completeness. `tools/audit_relationship_presentation.py` checks the maintained
+application database and current repository/browser surfaces and records five confirmed
+player-relevant relationship families that still fail the version-1.0 web-accessibility gate.
+These are backlog items, not evidence that the underlying data is missing.
+
+Against the pinned 2026-09-18 Army snapshot:
+
+- **Fireteams are database-only.** The source/application database retains 272 named Fireteams,
+  444 Fireteam-type memberships, and 1,261 member rows. Fifteen member rows remain the already
+  documented non-Army-local/source-resolution anomalies. Team membership, cardinality,
+  required-choice context, FTO restrictions, Wildcards, equivalence wording, type quotas, and
+  chart notes have no normal repository/API/browser presentation yet.
+- **Include relationships are database-only.** Canonical target resolution exists for two Profile
+  include occurrences and 949 Loadout include occurrences. Thirty-five top-level Unit-option
+  include definitions expand to 322 Army-context target rows. Normal Unit-detail serving does not
+  currently return these relationships.
+- **Selection/dependency relationships stop at the repository/API boundary.** Unit detail returns
+  96 canonical selection constraints with 197 members plus 14 profile-group dependency
+  constraints with 14 members and 14 dependency targets, but `unit.js` does not render them.
+- **Peripheral relationships stop at the repository/API boundary.** The current snapshot has 818
+  Loadout Peripheral attachments, 279 reviewed embedded-source mappings, ten Unit-backed
+  Peripheral logical Units, and four Controller access records targeting eight logical Units.
+  Unit detail exposes the canonical attachments/types/access pools, but the browser does not
+  present them.
+- **Reinforcement parentage stops at the repository/API boundary.** Eleven Reinforcement Sections
+  have 46 Section -> parent Army edges. `list_armies()` exposes those parent IDs, but the browser
+  does not show which parent Armies a Section belongs to.
+
+This audit intentionally does not classify `unit_factions` as a confirmed presentation gap yet.
+Those source relationships remain semantically meaningful and operationally consumed, but their
+additional source grouping semantics have not been independently established as a player-facing
+requirement beyond the already presented canonical Army availability. Likewise, source-specific
+notes, `spectables`, and top-level `unit_options` remain broader source-to-presentation
+completeness candidates rather than relationship-family findings; they stay in the subsequent
+completeness inventory.

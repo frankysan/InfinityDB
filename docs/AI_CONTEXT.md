@@ -1110,3 +1110,22 @@ compatibility references remain unambiguous JSON integers.
   relation/dependency constraints, and similar scoped links) remain semantic unless a separate audit
   proves otherwise. `tools/audit_normalization_links.py` is the deterministic evidence tool for
   this boundary.
+
+### 2026-09-22 relationship presentation completeness checkpoint
+
+- Milestone 2B's relationship audit is complete. A deterministic
+  `tools/audit_relationship_presentation.py` audit now records five confirmed 1.0 web-presentation
+  gap families without confusing missing presentation with missing data.
+- Database-only gaps: Fireteam chart relationships and occurrence-scoped Profile/Loadout/Unit-option
+  include relationships.
+- Repository/API-only gaps: canonical Unit selection/profile-group dependency constraints,
+  Peripheral attachments/type/access-pool relationships, and Reinforcement Section parentage.
+- The pinned 2026-09-18 snapshot evidence is: 272 Fireteams / 444 type memberships / 1,261 members;
+  2 Profile + 949 Loadout include occurrences plus 35 Unit-option include definitions expanding to
+  322 target contexts; 96 selection constraints / 197 members; 14 group-dependency constraints;
+  818 Loadout Peripheral attachments plus 4 Controller access records / 8 targets; and 46
+  Reinforcement Section -> parent Army edges across 11 Sections.
+- `unit_factions` remains meaningful source/context data but is not yet classified as a confirmed
+  1.0 presentation gap; its additional grouping semantics need the broader source-to-presentation
+  inventory. Source-specific notes, `spectables`, and top-level `unit_options` are likewise deferred
+  to that broader inventory because they are payload/context rather than relationship families.
