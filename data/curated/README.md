@@ -10,8 +10,9 @@ provenance under `data/manifests/`.
 `rules/` contains validated rules-reference collections consumed by
 `infinity-db build-rules`. `identities/` contains reviewed source-derived
 presentation relationships consumed during Army normalization. `peripherals/`
-contains the separate reviewed Army-Peripheral identity/mapping contract; it is
-validated independently and is not yet a runtime Army import. These categories
+contains the separate reviewed Army-Peripheral identity/mapping contract.
+`relationships/` contains snapshot-bound review evidence for source relationship
+endpoints that cannot be resolved from the current Army snapshot alone. These categories
 have separate schemas and loaders; no loader treats arbitrary JSON from another
 curated category as valid input. Curated identifiers are stable
 project/domain identities. `armyLinks` are cross-domain references rather than curated
@@ -85,6 +86,21 @@ group the review queue and never creates identity automatically.
 The current reviewed identity/access contract is complete for the pinned snapshot. The next
 Milestone 2B step is to materialize these curated-derived relationships into the application
 database/API without collapsing their source-context provenance.
+
+### Reviewed historical relation endpoints
+
+`relationships/historical-unit-endpoints.json` records independent historical evidence for
+relation-referenced Army Unit IDs that are placeholders in the current snapshot. It is an audit
+review contract, not a logical-Unit alias file and not a runtime application input. The current
+contract identifies retired Unit IDs 165, 613, 749, 1503, and 1509 and pins the review to the
+2026-09-18 Army snapshot SHA-256.
+
+`tools/audit_relationship_semantics.py` uses the file only when one of those IDs is referenced by
+a relation. Before classifying the relation as `reviewed-stale-source-relation`, the audit verifies
+that the pinned snapshot matches and that the endpoint remains a source placeholder with no
+logical-Unit mapping, Army roster row, profile, loadout, or payload occurrence. Any drift fails
+closed for renewed review. Historical names provide provenance for the stale endpoint; they never
+imply equivalence with a current Unit or cause a current application constraint to be materialized.
 
 ### Curated display identities
 

@@ -420,6 +420,85 @@ def _fixture_database(tmp_path: Path) -> Path:
     return path
 
 
+def _historical_endpoint_review(
+    tmp_path: Path,
+    *,
+    source_unit_id: int = 99,
+    snapshot_sha256: str = "a" * 64,
+) -> Path:
+    path = tmp_path / "historical-unit-endpoints.json"
+    path.write_text(
+        json.dumps(
+            {
+                "format": "InfinityDB reviewed historical relation endpoints",
+                "formatVersion": 1,
+                "snapshotArchiveSha256": snapshot_sha256,
+                "sources": [
+                    {
+                        "id": "fixture-history",
+                        "kind": "fixture",
+                        "title": "Fixture history",
+                        "url": "https://example.invalid/fixture-history",
+                        "authority": "secondary",
+                    }
+                ],
+                "endpoints": [
+                    {
+                        "sourceUnitId": source_unit_id,
+                        "name": "Retired Unit",
+                        "status": "retired-historical-unit",
+                        "evidence": [{"sourceId": "fixture-history"}],
+                        "review": {
+                            "status": "reviewed",
+                            "reviewedOn": "2026-09-22",
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _add_historical_placeholder_relation(path: Path, *, source_unit_id: int = 99) -> None:
+    connection = sqlite3.connect(path)
+    try:
+        _insert(
+            connection,
+            "units",
+            id=source_unit_id,
+            name=None,
+            source_defined=0,
+            source_role=None,
+        )
+        _insert(
+            connection,
+            "relations",
+            army_id=101,
+            relation_id=6,
+            position=6,
+            min_count=1,
+            max_count=1,
+            is_group=0,
+        )
+        for relation_unit_id, unit_id in ((1, 3), (2, source_unit_id)):
+            _insert(
+                connection,
+                "relation_units",
+                army_id=101,
+                relation_id=6,
+                relation_unit_id=relation_unit_id,
+                position=relation_unit_id,
+                unit_id=unit_id,
+                profile_id=None,
+                per_parent=None,
+            )
+        connection.commit()
+    finally:
+        connection.close()
+
+
 def test_relationship_audit_resolves_includes_and_exposes_context(tmp_path: Path) -> None:
     report = audit_database(_fixture_database(tmp_path))
 
@@ -577,6 +656,46 @@ def test_relationship_audit_details_preserve_evidence(tmp_path: Path) -> None:
     ]
 
 
+def test_relationship_audit_classifies_reviewed_historical_endpoint_as_stale(
+    tmp_path: Path,
+) -> None:
+    database = _fixture_database(tmp_path)
+    _add_historical_placeholder_relation(database)
+    review = _historical_endpoint_review(tmp_path)
+
+    report = audit_database(
+        database,
+        include_details=True,
+        historical_relation_endpoints_path=review,
+    )
+    relations = report["relations"]
+
+    assert relations["relationCount"] == 6
+    assert relations["fullyResolvedRelationCount"] == 5
+    assert relations["reviewedStaleRelationCount"] == 1
+    assert relations["unresolvedRelationCount"] == 0
+    assert relations["memberEndpointResolution"]["reviewedHistoricalSourceUnitIds"] == [99]
+    assert relations["memberEndpointResolution"]["unresolvedSourceUnitIds"] == []
+    assert relations["semanticClassification"]["familyCounts"][
+        "reviewed-stale-source-relation"
+    ] == 1
+    stale = relations["relations"][-1]
+    assert stale["resolution"] == "reviewed_stale_source_relation"
+    assert stale["members"][1]["logicalUnitId"] is None
+    assert stale["members"][1]["reviewedHistoricalEndpoint"]["name"] == "Retired Unit"
+
+
+def test_relationship_audit_rejects_historical_review_for_other_snapshot(
+    tmp_path: Path,
+) -> None:
+    database = _fixture_database(tmp_path)
+    _add_historical_placeholder_relation(database)
+    review = _historical_endpoint_review(tmp_path, snapshot_sha256="b" * 64)
+
+    with pytest.raises(RelationshipSemanticsAuditError, match="bound to snapshot"):
+        audit_database(database, historical_relation_endpoints_path=review)
+
+
 def test_relationship_audit_rejects_missing_schema(tmp_path: Path) -> None:
     path = tmp_path / "broken.db"
     sqlite3.connect(path).close()
@@ -592,4 +711,4 @@ def test_relationship_audit_cli_writes_report(tmp_path: Path) -> None:
     assert main([str(database), "--output", str(output)]) == 0
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["format"] == "InfinityDB relationship semantics audit"
-    assert report["formatVersion"] == 5
+    assert report["formatVersion"] == 6

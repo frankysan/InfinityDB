@@ -1819,9 +1819,12 @@ The Milestone 2B relationship audit now resolves the normalized `relations`,
 `relation_units`, and `relation_dependencies` graph against logical-Unit identity before any
 application schema is designed. In the pinned 2026-09-18 snapshot the graph contains 126
 relations, 250 member rows, and 14 dependency rows. Of those relations, 118 resolve every
-member/dependency Unit endpoint canonically; eight retain unresolved member endpoints because
-Army references five Unit IDs (`165`, `613`, `749`, `1503`, and `1509`) that have no ordinary
-Unit definition in the selected snapshot. All 14 dependency Unit endpoints resolve.
+member/dependency Unit endpoint canonically. Eight contain relation-only placeholder endpoints
+whose five Unit IDs (`165`, `613`, `749`, `1503`, and `1509`) have no ordinary Unit definition
+in the selected snapshot. Independent archived Army evidence identifies them as retired
+Sun Tze v.2 (Marksman Leader), Achilles, Achilles v2 (Corintian Armor), Boarding Action
+Cadmus-Naish Agent Sheskiin, and Imperial Agent Adil Mehmut (Special Division), respectively.
+All 14 dependency Unit endpoints resolve.
 
 Canonical identity does not make these rows redundant. Ninety-seven fully resolved relations
 have a single logical-Unit endpoint set, but many are source-context constraints between ordinary
@@ -1848,8 +1851,12 @@ shared choice/quota range, with any profile selectors retained on the member. Fo
 `single-logical-profile-dependency`: one logical Unit carries source-local profile/per-parent/
 dependency selectors. Two are `single-logical-cardinality`: a one-Unit pool with a cardinality
 range and no profile/dependency selector (currently the Post-Human 2..3 relation). The eight
-unresolved-placeholder relations remain an explicit fifth state rather than receiving an inferred
-family.
+relations containing those historical endpoints form a reviewed fifth family,
+`reviewed-stale-source-relation`. The evidence identifies the retired source endpoint itself; it
+does not assert logical equivalence with the current relation partner. Because each historical
+endpoint has no current Army/profile/loadout occurrence, these constraints are current-selection
+no-ops and are deliberately not materialized as application Unit constraints. Any future snapshot
+that still references these IDs must be reviewed again before this stale classification is reused.
 
 This classification is intentionally relation-level. Ninety-five of the 118 resolved relations
 are selector-free; 23 carry one or more member/dependency selectors. The source field named

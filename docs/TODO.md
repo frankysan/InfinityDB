@@ -158,13 +158,12 @@ in `docs/releasing.md`.
         canonical embedded Peripheral mappings, reviewed Unit-backed logical-Unit types, and
         source-context Controller access pools. Repository Unit details expose canonical
         embedded attachments and Controller targets without reading curated JSON at runtime.
-  - [ ] Audit relation/dependency structures.
+  - [x] Audit relation/dependency structures.
     - [x] Inventory the current normalized relation/dependency graph after logical-Unit
       canonicalization. The pinned snapshot contains 126 relations, 250 member rows, and
       14 dependency rows. 118 relations resolve completely to canonical Unit identities;
-      eight retain unresolved source endpoints because five relation-referenced Unit IDs are
-      source placeholders without ordinary Unit definitions in this snapshot. Preserve those
-      unresolved IDs explicitly rather than guessing an identity.
+      eight contain relation-only historical source endpoints with no ordinary Unit definition
+      in this snapshot. Preserve those endpoints separately from current logical-Unit identity.
     - [x] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as
       selectable catalog Section/pool contexts, not independently legal Army
@@ -175,8 +174,8 @@ in `docs/releasing.md`.
       before materialization. The current snapshot classifies 118 resolved relations as 81
       same-logical cross-context exclusivity constraints, 21 cross-logical shared-cardinality
       constraints, 14 single-logical profile/dependency constraints, and two single-logical
-      cardinality constraints. The eight unresolved relations remain explicit source-endpoint
-      gaps rather than being forced into a family.
+      cardinality constraints. The remaining eight relations are independently reviewed as
+      stale historical-source constraints and remain outside current Unit materialization.
     - [x] Materialize the 95 fully resolved selector-free relations as application selection
       constraints. Preserve Army/relation context, source member identity, canonical logical-Unit
       identity, group semantics, and min/max cardinality. The initial selector-free set is 81
@@ -197,8 +196,13 @@ in `docs/releasing.md`.
         and the Kuang Shi / Celestial Guard cross-source bridge as explicit source/context data: their
         selector coordinates are not consistently Unit-selection semantics and must not be promoted.
         The application selection layer therefore contains 96 constraints / 197 members in total.
-      - [ ] Resolve the eight unresolved-placeholder relations only after independent evidence
-        identifies their source endpoints; do not infer identity from relation partners.
+      - [x] Resolve the eight unresolved-placeholder relations from independent historical
+        evidence rather than relation partners. IDs 165, 613, 749, 1503, and 1509 are retired
+        Sun Tze v.2, Achilles, Achilles v2 (Corintian Armor), Boarding Action Sheskiin, and
+        Adil Mehmut (Special Division) source Units respectively. Treat the eight relations as
+        reviewed stale-source constraints: none of those endpoints is selectable in the pinned
+        snapshot, so do not alias them to current logical Units or materialize the relations as
+        current application constraints.
   - [ ] Audit Fireteam structures.
     - [ ] Treat Fireteam Charts as Army-local relationship/configuration data:
       preserve Fireteam type quotas, named Fireteams, type membership, min/max

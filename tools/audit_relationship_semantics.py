@@ -17,7 +17,17 @@ from pathlib import Path
 from typing import Any
 
 REPORT_FORMAT = "InfinityDB relationship semantics audit"
-REPORT_FORMAT_VERSION = 5
+REPORT_FORMAT_VERSION = 6
+
+DEFAULT_HISTORICAL_RELATION_ENDPOINTS = (
+    Path(__file__).resolve().parents[1]
+    / "data"
+    / "curated"
+    / "relationships"
+    / "historical-unit-endpoints.json"
+)
+HISTORICAL_ENDPOINT_FORMAT = "InfinityDB reviewed historical relation endpoints"
+HISTORICAL_ENDPOINT_FORMAT_VERSION = 1
 
 REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
     "profile_includes": (
@@ -128,6 +138,112 @@ REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
 
 class RelationshipSemanticsAuditError(ValueError):
     """Raised when the selected database cannot be audited safely."""
+
+
+def _load_historical_relation_endpoints(
+    path: Path,
+) -> tuple[dict[int, dict[str, Any]], str]:
+    if not path.is_file():
+        raise RelationshipSemanticsAuditError(
+            f"Historical relation endpoint review does not exist: {path}"
+        )
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RelationshipSemanticsAuditError(
+            f"Could not load historical relation endpoint review {path}: {exc}"
+        ) from exc
+    if not isinstance(document, dict):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review must be a JSON object"
+        )
+    if document.get("format") != HISTORICAL_ENDPOINT_FORMAT:
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review has an unsupported format"
+        )
+    if document.get("formatVersion") != HISTORICAL_ENDPOINT_FORMAT_VERSION:
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review has an unsupported formatVersion"
+        )
+    snapshot_sha256 = document.get("snapshotArchiveSha256")
+    if (
+        not isinstance(snapshot_sha256, str)
+        or len(snapshot_sha256) != 64
+        or any(character not in "0123456789abcdef" for character in snapshot_sha256)
+    ):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review requires a lowercase snapshot SHA-256"
+        )
+
+    sources = document.get("sources")
+    if not isinstance(sources, list):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review sources must be a list"
+        )
+    source_ids: set[str] = set()
+    for source in sources:
+        if not isinstance(source, dict) or not isinstance(source.get("id"), str):
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint review contains an invalid source"
+            )
+        source_id = source["id"]
+        if source_id in source_ids:
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint review repeats source id {source_id!r}"
+            )
+        source_ids.add(source_id)
+
+    endpoints = document.get("endpoints")
+    if not isinstance(endpoints, list):
+        raise RelationshipSemanticsAuditError(
+            "Historical relation endpoint review endpoints must be a list"
+        )
+    by_source_id: dict[int, dict[str, Any]] = {}
+    for endpoint in endpoints:
+        if not isinstance(endpoint, dict):
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint review contains a non-object endpoint"
+            )
+        source_unit_id = endpoint.get("sourceUnitId")
+        name = endpoint.get("name")
+        status = endpoint.get("status")
+        evidence = endpoint.get("evidence")
+        review = endpoint.get("review")
+        if type(source_unit_id) is not int or source_unit_id <= 0:
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint sourceUnitId must be a positive integer"
+            )
+        if source_unit_id in by_source_id:
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint review repeats Unit id {source_unit_id}"
+            )
+        if not isinstance(name, str) or not name.strip():
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} requires a name"
+            )
+        if status != "retired-historical-unit":
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} has unsupported status {status!r}"
+            )
+        if not isinstance(evidence, list) or not evidence:
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} requires evidence"
+            )
+        for item in evidence:
+            if not isinstance(item, dict) or item.get("sourceId") not in source_ids:
+                raise RelationshipSemanticsAuditError(
+                    f"Historical relation endpoint {source_unit_id} has invalid evidence"
+                )
+        if (
+            not isinstance(review, dict)
+            or review.get("status") != "reviewed"
+            or not isinstance(review.get("reviewedOn"), str)
+        ):
+            raise RelationshipSemanticsAuditError(
+                f"Historical relation endpoint {source_unit_id} is not reviewed"
+            )
+        by_source_id[source_unit_id] = endpoint
+    return by_source_id, snapshot_sha256
 
 
 def _columns(connection: sqlite3.Connection, table: str) -> set[str]:
@@ -735,10 +851,52 @@ def _selection_equivalent_profile_selectors(
     return True
 
 
+def _validate_historical_relation_endpoint_state(
+    connection: sqlite3.Connection,
+    *,
+    source_unit_id: int,
+    unit_rows: dict[int, sqlite3.Row],
+    source_logical: dict[int, int],
+) -> None:
+    unit = unit_rows.get(source_unit_id)
+    if unit is None:
+        raise RelationshipSemanticsAuditError(
+            f"Reviewed historical relation Unit {source_unit_id} is absent from units"
+        )
+    if bool(unit["source_defined"]):
+        raise RelationshipSemanticsAuditError(
+            f"Reviewed historical relation Unit {source_unit_id} is source-defined again"
+        )
+    if source_unit_id in source_logical:
+        raise RelationshipSemanticsAuditError(
+            f"Reviewed historical relation Unit {source_unit_id} has a logical Unit mapping"
+        )
+
+    current_tables = (
+        "army_units",
+        "profile_groups",
+        "profiles",
+        "loadout_options",
+        "profile_payload_occurrences",
+        "loadout_payload_occurrences",
+    )
+    for table in current_tables:
+        if connection.execute(
+            f'SELECT 1 FROM "{table}" WHERE unit_id = ? LIMIT 1',
+            (source_unit_id,),
+        ).fetchone() is not None:
+            raise RelationshipSemanticsAuditError(
+                f"Reviewed historical relation Unit {source_unit_id} is current in {table}"
+            )
+
+
 def _audit_relation_structures(
     connection: sqlite3.Connection,
     *,
     source_logical: dict[int, int],
+    historical_endpoints: dict[int, dict[str, Any]],
+    historical_snapshot_sha256: str,
+    database_snapshot_sha256: str | None,
     include_details: bool,
 ) -> dict[str, Any]:
     relation_rows = _fetch_rows(connection, "relations")
@@ -779,10 +937,45 @@ def _audit_relation_structures(
         for row in member_rows
         if row["unit_id"] in unit_rows and not unit_rows[row["unit_id"]]["source_defined"]
     ]
+    referenced_source_unit_ids = {row["unit_id"] for row in member_rows + dependency_rows}
+    reviewed_historical_source_ids = referenced_source_unit_ids & historical_endpoints.keys()
+    if reviewed_historical_source_ids:
+        if database_snapshot_sha256 != historical_snapshot_sha256:
+            raise RelationshipSemanticsAuditError(
+                "Historical relation endpoint review is bound to snapshot "
+                f"{historical_snapshot_sha256}, not {database_snapshot_sha256!r}"
+            )
+        for source_unit_id in sorted(reviewed_historical_source_ids):
+            _validate_historical_relation_endpoint_state(
+                connection,
+                source_unit_id=source_unit_id,
+                unit_rows=unit_rows,
+                source_logical=source_logical,
+            )
+    reviewed_historical_member_rows = [
+        row for row in unresolved_member_rows if row["unit_id"] in reviewed_historical_source_ids
+    ]
+    unreviewed_member_rows = [
+        row
+        for row in unresolved_member_rows
+        if row["unit_id"] not in reviewed_historical_source_ids
+    ]
+    reviewed_historical_dependency_rows = [
+        row
+        for row in unresolved_dependency_rows
+        if row["unit_id"] in reviewed_historical_source_ids
+    ]
+    unreviewed_dependency_rows = [
+        row
+        for row in unresolved_dependency_rows
+        if row["unit_id"] not in reviewed_historical_source_ids
+    ]
 
     shape_counts: dict[tuple[Any, ...], int] = defaultdict(int)
     fully_resolved = 0
     unresolved_relations = 0
+    reviewed_stale_relations = 0
+    unreviewed_relations = 0
     single_logical = 0
     cross_logical = 0
     details: list[dict[str, Any]] = []
@@ -818,9 +1011,30 @@ def _audit_relation_structures(
             ]
         ]
         resolved = all(value is not None for value in logical_ids + dependency_logical_ids)
-        semantic_family = _relation_semantic_family(
-            relation, members, dependencies_by_member, logical_ids, dependency_logical_ids
+        relation_unresolved_source_ids = {
+            member["unit_id"] for member in members if member["unit_id"] not in source_logical
+        }
+        relation_unresolved_source_ids.update(
+            dep["unit_id"]
+            for member in members
+            for dep in dependencies_by_member[
+                (member["army_id"], member["relation_id"], member["relation_unit_id"])
+            ]
+            if dep["unit_id"] not in source_logical
         )
+        reviewed_stale_relation = bool(relation_unresolved_source_ids) and (
+            relation_unresolved_source_ids <= reviewed_historical_source_ids
+        )
+        if reviewed_stale_relation:
+            semantic_family = "reviewed-stale-source-relation"
+        else:
+            semantic_family = _relation_semantic_family(
+                relation,
+                members,
+                dependencies_by_member,
+                logical_ids,
+                dependency_logical_ids,
+            )
         cardinality_kind = _relation_cardinality_kind(
             relation["min_count"], relation["max_count"]
         )
@@ -847,6 +1061,10 @@ def _audit_relation_structures(
                 cross_logical += 1
         else:
             unresolved_relations += 1
+            if reviewed_stale_relation:
+                reviewed_stale_relations += 1
+            else:
+                unreviewed_relations += 1
 
         selector_disposition: str | None = None
         distinct_endpoint_ids = {
@@ -922,8 +1140,13 @@ def _audit_relation_structures(
                         "relationUnitId": member["relation_unit_id"],
                         "sourceUnitId": member["unit_id"],
                         "sourceUnitName": unit["name"] if unit is not None else None,
-                        "sourceDefined": bool(unit["source_defined"]) if unit is not None else None,
+                        "sourceDefined": (
+                            bool(unit["source_defined"]) if unit is not None else None
+                        ),
                         "logicalUnitId": canonical_unit,
+                        "reviewedHistoricalEndpoint": historical_endpoints.get(
+                            member["unit_id"]
+                        ),
                         "profileSelector": member["profile_id"],
                         "profileSelectorCandidateDomains": member_selector_domains,
                         "perParent": member["per_parent"],
@@ -931,6 +1154,9 @@ def _audit_relation_structures(
                             {
                                 "sourceUnitId": dep["unit_id"],
                                 "logicalUnitId": source_logical.get(dep["unit_id"]),
+                                "reviewedHistoricalEndpoint": historical_endpoints.get(
+                                    dep["unit_id"]
+                                ),
                                 "profileSelector": dep["profile_id"],
                                 "profileSelectorCandidateDomains": _selector_candidate_domains(
                                     dep["profile_id"],
@@ -966,8 +1192,17 @@ def _audit_relation_structures(
                     "minCount": relation["min_count"],
                     "maxCount": relation["max_count"],
                     "isGroup": bool(relation["is_group"]),
-                    "resolution": "complete" if resolved else "unresolved_source_endpoint",
+                    "resolution": (
+                        "complete"
+                        if resolved
+                        else (
+                            "reviewed_stale_source_relation"
+                            if reviewed_stale_relation
+                            else "unresolved_source_endpoint"
+                        )
+                    ),
                     "semanticFamily": semantic_family,
+                    "unresolvedSourceUnitIds": sorted(relation_unresolved_source_ids),
                     "cardinalityKind": cardinality_kind,
                     "crossLogicalSelectorDisposition": selector_disposition,
                     "canonicalLogicalUnitIds": sorted(
@@ -985,27 +1220,51 @@ def _audit_relation_structures(
         "memberCount": len(member_rows),
         "dependencyCount": len(dependency_rows),
         "fullyResolvedRelationCount": fully_resolved,
-        "unresolvedRelationCount": unresolved_relations,
+        "canonicalUnresolvedRelationCount": unresolved_relations,
+        "reviewedStaleRelationCount": reviewed_stale_relations,
+        "unresolvedRelationCount": unreviewed_relations,
         "singleLogicalEndpointSetRelationCount": single_logical,
         "crossLogicalEndpointSetRelationCount": cross_logical,
+        "historicalEndpointReview": {
+            "declaredSourceUnitIds": sorted(historical_endpoints),
+            "referencedReviewedSourceUnitIds": sorted(reviewed_historical_source_ids),
+            "snapshotArchiveSha256": historical_snapshot_sha256,
+        },
         "memberEndpointResolution": {
             "resolvedCount": len(member_rows) - len(unresolved_member_rows),
-            "unresolvedCount": len(unresolved_member_rows),
-            "unresolvedSourceUnitIds": sorted({row["unit_id"] for row in unresolved_member_rows}),
+            "canonicalUnresolvedCount": len(unresolved_member_rows),
+            "reviewedHistoricalCount": len(reviewed_historical_member_rows),
+            "unresolvedCount": len(unreviewed_member_rows),
+            "canonicalUnresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unresolved_member_rows}
+            ),
+            "reviewedHistoricalSourceUnitIds": sorted(
+                {row["unit_id"] for row in reviewed_historical_member_rows}
+            ),
+            "unresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unreviewed_member_rows}
+            ),
             "sourcePlaceholderRowCount": len(source_placeholder_member_rows),
         },
         "dependencyEndpointResolution": {
             "resolvedCount": len(dependency_rows) - len(unresolved_dependency_rows),
-            "unresolvedCount": len(unresolved_dependency_rows),
-            "unresolvedSourceUnitIds": sorted(
+            "canonicalUnresolvedCount": len(unresolved_dependency_rows),
+            "reviewedHistoricalCount": len(reviewed_historical_dependency_rows),
+            "unresolvedCount": len(unreviewed_dependency_rows),
+            "canonicalUnresolvedSourceUnitIds": sorted(
                 {row["unit_id"] for row in unresolved_dependency_rows}
+            ),
+            "reviewedHistoricalSourceUnitIds": sorted(
+                {row["unit_id"] for row in reviewed_historical_dependency_rows}
+            ),
+            "unresolvedSourceUnitIds": sorted(
+                {row["unit_id"] for row in unreviewed_dependency_rows}
             ),
         },
         "semanticClassification": {
-            "classifiedResolvedRelationCount": sum(
-                count
-                for family, count in semantic_family_counts.items()
-                if family != "unresolved-source-endpoint"
+            "classifiedResolvedRelationCount": fully_resolved,
+            "reviewedStaleRelationCount": semantic_family_counts.get(
+                "reviewed-stale-source-relation", 0
             ),
             "unresolvedRelationCount": semantic_family_counts.get(
                 "unresolved-source-endpoint", 0
@@ -1024,10 +1283,12 @@ def _audit_relation_structures(
                 "same-logical cross-context exclusivity, cross-logical shared cardinality, "
                 "single-logical profile/dependency constraints, and single-logical cardinality "
                 "constraints. Selectors remain contextual fields on the relation/member rather "
-                "than facts on the logical Unit. Unresolved source endpoints remain a fifth "
-                "explicit state and are not classified by inference. Cross-logical profile "
-                "selectors are materialization-safe only when every member has one selectable "
-                "profile group and the selector names a selectable profile in that group; other "
+                "than facts on the logical Unit. Independently reviewed retired source endpoints "
+                "form a fifth historical/stale family and are not materialized as current Unit "
+                "constraints; unreviewed source endpoints remain explicitly unresolved. "
+                "Cross-logical profile selectors are materialization-safe only when every member "
+                "has one selectable profile group and the selector names a selectable profile in "
+                "that group; other "
                 "cross-logical selectors remain source-context-only."
             ),
         },
@@ -1168,9 +1429,17 @@ def _audit_reinforcement_sections(
     return result
 
 
-def audit_database(path: Path, *, include_details: bool = False) -> dict[str, Any]:
+def audit_database(
+    path: Path,
+    *,
+    include_details: bool = False,
+    historical_relation_endpoints_path: Path = DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
+) -> dict[str, Any]:
     if not path.is_file():
         raise RelationshipSemanticsAuditError(f"Database does not exist: {path}")
+    historical_endpoints, historical_snapshot_sha256 = (
+        _load_historical_relation_endpoints(historical_relation_endpoints_path)
+    )
     connection = sqlite3.connect(path)
     connection.row_factory = sqlite3.Row
     try:
@@ -1231,7 +1500,12 @@ def audit_database(path: Path, *, include_details: bool = False) -> dict[str, An
             "includes": includes,
             "peripherals": _audit_peripherals(connection, include_details=include_details),
             "relations": _audit_relation_structures(
-                connection, source_logical=source_logical, include_details=include_details
+                connection,
+                source_logical=source_logical,
+                historical_endpoints=historical_endpoints,
+                historical_snapshot_sha256=historical_snapshot_sha256,
+                database_snapshot_sha256=metadata.get("snapshotArchiveSha256"),
+                include_details=include_details,
             ),
             "reinforcementSections": _audit_reinforcement_sections(
                 connection, include_details=include_details
@@ -1253,13 +1527,23 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("database", type=Path, help="Path to infinity.db")
     parser.add_argument("--details", action="store_true", help="Include row-level evidence")
     parser.add_argument("--output", type=Path, help="Write the JSON report to this path")
+    parser.add_argument(
+        "--historical-relation-endpoints",
+        type=Path,
+        default=DEFAULT_HISTORICAL_RELATION_ENDPOINTS,
+        help="Reviewed relation-only historical Unit endpoint evidence",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        report = audit_database(args.database, include_details=args.details)
+        report = audit_database(
+            args.database,
+            include_details=args.details,
+            historical_relation_endpoints_path=args.historical_relation_endpoints,
+        )
     except RelationshipSemanticsAuditError as exc:
         raise SystemExit(str(exc)) from exc
     payload = json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n"

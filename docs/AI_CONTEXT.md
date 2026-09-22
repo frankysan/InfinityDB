@@ -1010,10 +1010,11 @@ compatibility references remain unambiguous JSON integers.
 ### Milestone 2B relation/dependency audit boundary (2026-09-22)
 
 - The schema-19 snapshot has 126 normalized relations, 250 relation members, and 14 dependency
-  rows. 118 relations resolve every Unit endpoint through logical-Unit identity; eight contain
-  one of five relation-only source placeholder IDs (165, 613, 749, 1503, 1509) and must remain
-  unresolved until independent evidence identifies them. Do not infer those identities from the
-  relation partner alone.
+  rows. 118 relations resolve every Unit endpoint through logical-Unit identity. The other eight
+  contain one of five relation-only source placeholder IDs (165, 613, 749, 1503, 1509). Independent
+  archived Army evidence identifies these as retired Sun Tze v.2, Achilles, Achilles v2
+  (Corintian Armor), Boarding Action Sheskiin, and Adil Mehmut (Special Division) source Units.
+  The identification is historical evidence, not a logical-Unit alias to the relation partner.
 - Same logical Unit is not evidence that a relation is normalization-only. Ninety-seven resolved
   relations collapse to one logical-Unit endpoint set, including ordinary/Reinforcement selection
   constraints that remain player-relevant after identity canonicalization. Twenty-one resolved
@@ -1047,4 +1048,8 @@ compatibility references remain unambiguous JSON integers.
   cardinality, `perParent`, dependency `group`, `min`, `minDependant`, and validated option
   selectors. Seven Traktor Mul / Dozer / Kuryer rows and the Kuang Shi / Celestial Guard bridge
   remain source/context-only because their selector coordinates are not safe whole-Unit semantics.
-  The eight unresolved-placeholder relations remain pending independent endpoint evidence.
+  The eight historical-placeholder relations are now independently identified and reviewed as
+  stale source constraints. Their endpoints have no current Army/profile/loadout occurrence, so
+  they are not canonicalized to current Units and are not materialized as current constraints.
+  `data/curated/relationships/historical-unit-endpoints.json` pins that review to the 2026-09-18
+  snapshot; relation-audit reuse fails closed on snapshot drift.
