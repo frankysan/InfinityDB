@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -11,6 +13,7 @@ from infinity_db.peripheral_identities import (
     load_peripheral_identity_curated,
     parse_peripheral_identity_curated,
 )
+from infinity_db.peripheral_identity_coverage import audit_peripheral_identity_coverage
 
 
 def _source() -> dict:
@@ -130,3 +133,96 @@ def test_peripheral_identity_default_path_is_source_controlled() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "peripherals" / "army-identities.json"
 
     assert load_peripheral_identity_curated(path).document["format"] == PERIPHERAL_IDENTITY_FORMAT
+
+
+
+def _coverage_database(tmp_path: Path, *, snapshot_sha256: str = "a" * 64) -> Path:
+    path = tmp_path / "infinity.db"
+    connection = sqlite3.connect(path)
+    try:
+        connection.execute(
+            'CREATE TABLE "__infinity_metadata" (key TEXT PRIMARY KEY, value TEXT NOT NULL)'
+        )
+        connection.execute(
+            "CREATE TABLE peripherals (army_id INTEGER, id INTEGER, name TEXT, mercs INTEGER)"
+        )
+        connection.execute("PRAGMA user_version = 18")
+        connection.execute(
+            'INSERT INTO "__infinity_metadata" (key, value) VALUES (?, ?)',
+            (
+                "_meta",
+                json.dumps({"snapshotArchiveSha256": snapshot_sha256}),
+            ),
+        )
+        connection.executemany(
+            "INSERT INTO peripherals (army_id, id, name, mercs) VALUES (?, ?, ?, ?)",
+            [
+                (101, 1, "EXAMPLE", 0),
+                (102, 2, "EXAMPLE", 1),
+                (103, 3, " Example  ", 0),
+                (101, 4, "UNMAPPED", 0),
+            ],
+        )
+        connection.commit()
+    finally:
+        connection.close()
+    return path
+
+
+def test_peripheral_identity_coverage_reports_review_queue_and_curated_only(
+    tmp_path: Path,
+) -> None:
+    curated = parse_peripheral_identity_curated(_document())
+    report = audit_peripheral_identity_coverage(curated, _coverage_database(tmp_path))
+
+    assert report["status"] == "needs-review"
+    assert report["definitions"]["definitionCount"] == 4
+    assert report["definitions"]["mappedDefinitionCount"] == 1
+    assert report["definitions"]["unmappedDefinitionCount"] == 3
+    assert report["definitions"]["reviewGroupCount"] == 2
+    assert report["definitions"]["normalizedNameCollisionCount"] == 1
+    assert report["validation"]["status"] == "valid"
+    assert report["curated"]["curatedOnlyEntityCount"] == 0
+    example = next(
+        item for item in report["reviewQueue"] if item["normalizedName"] == "example"
+    )
+    assert example["definitionCount"] == 3
+    assert example["unmappedDefinitionCount"] == 2
+    assert example["nameCollision"] is True
+    assert example["reviewedTargets"] == [
+        {
+            "entityId": "peripheral:example",
+            "profileId": "peripheral-profile:example-connected",
+        }
+    ]
+
+
+def test_peripheral_identity_coverage_detects_stale_mapping_and_source_name_drift(
+    tmp_path: Path,
+) -> None:
+    document = _document()
+    document["mappings"][0]["sourceName"] = "OLD NAME"
+    stale = dict(document["mappings"][0])
+    stale["id"] = "peripheral-mapping:army-999-99"
+    stale["armyId"] = 999
+    stale["peripheralId"] = 99
+    stale["review"] = dict(stale["review"])
+    document["mappings"].append(stale)
+
+    report = audit_peripheral_identity_coverage(
+        parse_peripheral_identity_curated(document), _coverage_database(tmp_path)
+    )
+
+    assert report["status"] == "invalid"
+    assert report["validation"]["staleMappingCount"] == 1
+    assert report["validation"]["sourceNameDriftCount"] == 1
+    assert report["validation"]["status"] == "invalid"
+
+
+def test_peripheral_identity_coverage_rejects_wrong_snapshot(tmp_path: Path) -> None:
+    curated = parse_peripheral_identity_curated(_document())
+
+    with pytest.raises(PeripheralIdentityError, match="exactly one source matching"):
+        audit_peripheral_identity_coverage(
+            curated, _coverage_database(tmp_path, snapshot_sha256="b" * 64)
+        )

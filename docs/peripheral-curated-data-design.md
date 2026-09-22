@@ -331,10 +331,22 @@ including:
 - attempts to treat `mercs` as intrinsic Peripheral identity;
 - ambiguous Connected/Autonomous profile mapping.
 
-Validation against the actual current Army rows is still the next phase. That population/
-coverage pass must detect expected source names that no longer match, source-only
-definitions, curated-only entities, and review-queue name collisions rather than silently
-discarding either side.
+Validation against the actual Army rows is now implemented as an optional snapshot-bound
+coverage pass of `infinity-db validate-peripheral-identities`. With `--database`, the
+validator matches the database `snapshotArchiveSha256` to exactly one declared curated
+source, compares every explicit mapping against `(army_id, id, name)`, and reports:
+
+- source definitions with no reviewed mapping;
+- stale curated mappings whose source coordinates no longer exist;
+- exact source-name drift on an otherwise matching coordinate;
+- curated entities/profiles not referenced by the selected snapshot;
+- repeated source-name groups and normalization-only review collisions; and
+- a deterministic review queue grouped by the deliberately weak NFC/whitespace/case-fold
+  candidate normalization.
+
+Incomplete coverage is a normal `needs-review` state during population. Stale mappings or
+source-name drift make the snapshot validation invalid. Name grouping remains review
+evidence only and never creates or changes a canonical mapping.
 
 ## Facts that should remain prose or interaction references initially
 
@@ -388,9 +400,11 @@ constraints, profile-mode existence, and durable relationships.
    `data/curated/peripherals/army-identities.json` defines reviewed canonical entity/profile
    IDs and exact snapshot-local source mappings, with fail-closed validation and no
    automatic name promotion. The current checked-in mapping set is intentionally empty.
-7. **Populate the reviewed identity mappings.** Reconcile the 279 audited source
-   definitions against explicit canonical entities/profiles, report unresolved coverage,
-   and reject source-name drift or ambiguity rather than guessing.
+7. **Populate the reviewed identity mappings — coverage gate implemented, population
+   pending.** The snapshot-bound validator now reports unmapped definitions, stale/name-
+   drifted mappings, curated-only targets, repeated-name groups, and a deterministic review
+   queue. Reconcile the 279 audited source definitions against explicit canonical
+   entities/profiles and leave unresolved cases explicit rather than guessing.
 8. **Materialize curated-derived application relationships.** Join source
    Controller facts, reviewed identity mappings, and curated eligibility rules;
    preserve all provenance and then decide the `infinity.db`/API/UI surface for

@@ -224,6 +224,23 @@ def test_validate_peripheral_identities_command_defaults_to_curated_contract() -
     parser = build_parser()
     args = parser.parse_args(["validate-peripheral-identities"])
     assert args.input == Path("data/curated/peripherals/army-identities.json")
+    assert args.database is None
+    assert args.output is None
+
+
+def test_validate_peripheral_identities_command_accepts_coverage_database() -> None:
+    parser = build_parser()
+    args = parser.parse_args(
+        [
+            "validate-peripheral-identities",
+            "--database",
+            "data/generated/infinity.db",
+            "--output",
+            "reports/peripheral-coverage.json",
+        ]
+    )
+    assert args.database == Path("data/generated/infinity.db")
+    assert args.output == Path("reports/peripheral-coverage.json")
 
 
 def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str]) -> None:

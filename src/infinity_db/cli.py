@@ -18,6 +18,7 @@ from .database import export_database, raw_database_path
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
 from .peripheral_identities import load_peripheral_identity_curated
+from .peripheral_identity_coverage import audit_peripheral_identity_coverage
 from .rules_database import export_rules_database
 from .source_anomalies import (
     load_source_anomaly_baseline,
@@ -130,6 +131,34 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
         f"Entities: {curated.entity_count}; profiles: {curated.profile_count}; "
         f"mappings: {curated.mapping_count}"
     )
+    if args.database is None:
+        if args.output is not None:
+            raise ValueError("--output requires --database")
+        return 0
+
+    report = audit_peripheral_identity_coverage(curated, args.database, include_details=True)
+    definitions = report["definitions"]
+    validation = report["validation"]
+    print(
+        "Peripheral identity coverage: "
+        f"{definitions['mappedDefinitionCount']}/{definitions['definitionCount']} "
+        f"mapped ({definitions['coveragePercent']}%); "
+        f"{definitions['unmappedReviewGroupCount']} review groups"
+    )
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+        )
+        print(f"Coverage report: {args.output}")
+    if validation["status"] != "valid":
+        print(
+            "ERROR: Peripheral identity mappings do not match the selected Army snapshot "
+            f"({validation['staleMappingCount']} stale; "
+            f"{validation['sourceNameDriftCount']} name drift).",
+            file=sys.stderr,
+        )
+        return 1
     return 0
 
 
@@ -188,6 +217,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_peripherals.add_argument(
         "input", nargs="?", type=Path, default=DEFAULT_PERIPHERAL_IDENTITIES
+    )
+    p_peripherals.add_argument(
+        "--database",
+        type=Path,
+        help="Compare mappings with an exact Army database snapshot and report coverage",
+    )
+    p_peripherals.add_argument(
+        "--output",
+        type=Path,
+        help="Write the detailed snapshot coverage/review queue as JSON",
     )
     p_peripherals.set_defaults(func=cmd_validate_peripheral_identities)
     return parser

@@ -49,14 +49,27 @@ is not accepted as identity data. The checked-in current-snapshot contract inten
 contains no entities or mappings yet: absence is explicit rather than replacing review
 with name matching.
 
-Validate the contract with:
+Validate the authored contract with:
 
 ```powershell
 infinity-db validate-peripheral-identities
 ```
 
-The next Milestone 2B step is to populate reviewed mappings from the audited source
-definitions and only then materialize cross-Army Peripheral relationships.
+During mapping review, validate it against the exact generated Army snapshot and write the
+deterministic coverage/review queue with:
+
+```powershell
+infinity-db validate-peripheral-identities --database data/generated/infinity.db --output "reports/PERIPHERAL IDENTITY COVERAGE.json"
+```
+
+The snapshot-bound pass requires the database SHA-256 provenance to match exactly one
+declared curated source. Incomplete mapping coverage is reported as review work rather than
+a validation failure; stale coordinates or exact source-name drift are invalid. Candidate
+name normalization (Unicode NFC, collapsed whitespace, and case-folding) is used only to
+group the review queue and never creates identity automatically.
+
+The next Milestone 2B step is to populate reviewed mappings from that queue and only then
+materialize cross-Army Peripheral relationships.
 
 ### Curated display identities
 

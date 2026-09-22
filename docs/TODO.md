@@ -121,6 +121,13 @@ in `docs/releasing.md`.
       snapshot, then materialize curated-derived controller-eligibility and cross-army
       Peripheral relationships only after mapping coverage and rules vocabulary are both
       validated.
+      - [x] Validate the reviewed contract against the exact Army snapshot and emit a
+        deterministic coverage/review queue that reports unmapped definitions, stale
+        mappings, source-name drift, curated-only entities/profiles, repeated names, and
+        normalization-only review collisions without promoting names into identity.
+      - [ ] Populate the reviewed mappings for the current snapshot until every source
+        definition is either resolved to a canonical entity/profile or explicitly retained
+        as unresolved review work.
   - [ ] Audit relation/dependency structures.
     - [ ] Preserve the ordinary-Army -> Reinforcement Section/pool relationship
       as contextual source/application data. Treat `role = reinforcement` rows as
