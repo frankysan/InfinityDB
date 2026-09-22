@@ -105,7 +105,13 @@ REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
 
     "relations": ("army_id", "relation_id", "position", "min_count", "max_count", "is_group"),
     "relation_units": (
-        "army_id", "relation_id", "relation_unit_id", "position", "unit_id", "profile_id", "per_parent"
+        "army_id",
+        "relation_id",
+        "relation_unit_id",
+        "position",
+        "unit_id",
+        "profile_id",
+        "per_parent",
     ),
     "relation_dependencies": (
         "army_id", "relation_id", "relation_unit_id", "dependency_id", "position",
@@ -588,7 +594,9 @@ def _audit_peripherals(
     return result
 
 
-def _relation_shape_key(row: sqlite3.Row, member_count: int, dependency_count: int) -> tuple[Any, ...]:
+def _relation_shape_key(
+    row: sqlite3.Row, member_count: int, dependency_count: int
+) -> tuple[Any, ...]:
     return (
         row["min_count"],
         row["max_count"],
@@ -793,7 +801,11 @@ def _audit_relation_structures(
         key = (relation["army_id"], relation["relation_id"])
         members = sorted(members_by_relation.get(key, ()), key=lambda row: row["position"] or 0)
         dependency_count = sum(
-            len(dependencies_by_member[(row["army_id"], row["relation_id"], row["relation_unit_id"])])
+            len(
+                dependencies_by_member[
+                    (row["army_id"], row["relation_id"], row["relation_unit_id"])
+                ]
+            )
             for row in members
         )
         shape_counts[_relation_shape_key(relation, len(members), dependency_count)] += 1
@@ -938,7 +950,12 @@ def _audit_relation_structures(
                     }
                 )
         signatures[
-            (relation["min_count"], relation["max_count"], relation["is_group"], tuple(signature_members))
+            (
+                relation["min_count"],
+                relation["max_count"],
+                relation["is_group"],
+                tuple(signature_members),
+            )
         ].add(relation["army_id"])
         if include_details:
             details.append(
@@ -1110,7 +1127,9 @@ def _audit_reinforcement_sections(
             )
     missing = expected - materialized
     unexpected = materialized - expected
-    reinforcement_apps = [row for row in application_armies.values() if row["role"] == "reinforcement"]
+    reinforcement_apps = [
+        row for row in application_armies.values() if row["role"] == "reinforcement"
+    ]
     role_mismatch = [
         row["id"]
         for row in reinforcement_apps
