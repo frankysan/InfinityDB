@@ -49,6 +49,11 @@ canonical-relationship/completeness increment.
 
 ### Changed
 
+- Physically separate generated Army storage: `infinity.db` now publishes only the
+  self-contained application schema, while `infinity.raw.db` owns the complete queryable
+  normalized source schema plus exact lossless row JSON. Full source-to-canonical checks
+  run against a temporary relational staging database before publication, and runtime
+  validation no longer depends on raw-only tables.
 - Speed up development validation by reusing a template web-test database and running
   pytest through `pytest-xdist` by default. The primary local Windows benchmark dropped
   the complete 687-test stage from 59.67 seconds serially to 14.13 seconds with automatic
@@ -63,9 +68,10 @@ canonical-relationship/completeness increment.
 
 ### Upgrade notes
 
-- Rebuild generated Army databases before deploying the next release. Schema 22 /
-  compatibility revision 30 retains materialized include/Peripheral relationships, selection-safe
-  Unit constraints, and reviewed profile-group dependencies; there is no in-place database migration.
+- Rebuild generated Army databases before deploying the next release. Schema 23 /
+  compatibility revision 31 introduces the physical application/raw database split while
+  retaining materialized include/Peripheral relationships, selection-safe Unit constraints,
+  and reviewed profile-group dependencies; there is no in-place database migration.
 
 ## [0.6.2] - 2026-09-21
 

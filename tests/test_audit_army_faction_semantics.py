@@ -4,7 +4,7 @@ import hashlib
 from pathlib import Path
 
 from infinity_army_data.normalize import normalize_master, validate_normalized
-from infinity_db.database import export_database
+from infinity_db.database import export_database, raw_database_path
 from tools.audit_army_faction_semantics import audit_database
 
 
@@ -130,7 +130,10 @@ def test_army_faction_audit_classifies_overlapping_source_constructs(tmp_path: P
 
 def test_army_faction_audit_is_deterministic_and_read_only(tmp_path: Path) -> None:
     database = _army_database(tmp_path)
+    raw = raw_database_path(database)
     before = hashlib.sha256(database.read_bytes()).hexdigest()
+    raw_before = hashlib.sha256(raw.read_bytes()).hexdigest()
 
     assert audit_database(database) == audit_database(database)
     assert hashlib.sha256(database.read_bytes()).hexdigest() == before
+    assert hashlib.sha256(raw.read_bytes()).hexdigest() == raw_before

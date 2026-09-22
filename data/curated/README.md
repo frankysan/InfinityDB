@@ -7,19 +7,18 @@ provenance under `data/manifests/`.
 
 ## Current curated data
 
-`rules/` contains validated rules-reference collections consumed by
-`infinity-db build-rules`. `identities/` contains reviewed source-derived
-presentation relationships consumed during Army normalization. `peripherals/`
-contains the separate reviewed Army-Peripheral identity/mapping contract.
-`relationships/` contains snapshot-bound review evidence for source relationship
-endpoints that cannot be resolved from the current Army snapshot alone. These categories
-have separate schemas and loaders; no loader treats arbitrary JSON from another
-curated category as valid input. Curated identifiers are stable
-project/domain identities. `armyLinks` are cross-domain references rather than curated
-record identities: Skill, Equipment, and Weapon links may use either a positive numeric
-source ID or the owning application-domain slug, with slugs preferred in maintained
-rules data. Numeric references remain valid for compatibility, provenance, and explicit
-disambiguation.
+- `rules/` contains validated rules-reference collections consumed by `infinity-db build-rules`.
+- `identities/` contains reviewed source-derived presentation relationships consumed
+  during Army normalization.
+- `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
+- `relationships/` contains snapshot-bound review evidence for source relationship
+  endpoints that cannot be resolved from the current Army snapshot alone. These categories
+  have separate schemas and loaders; no loader treats arbitrary JSON from another
+  curated category as valid input. Curated identifiers are stable project/domain identities.
+- `armyLinks` are cross-domain references rather than curated record identities: Skill,
+  Equipment, and Weapon links may use either a positive numeric source ID or the owning
+  application-domain slug, with slugs preferred in maintained rules data. Numeric references
+  remain valid for compatibility, provenance, and explicit disambiguation.
 
 The sections below document the implemented `curated/rules/` contract.
 

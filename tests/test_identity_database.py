@@ -317,5 +317,5 @@ def test_database_validation_rejects_tampered_application_army_materialization(
         )
         connection.commit()
 
-    with pytest.raises(ValueError, match="materialized application Army identity"):
+    with pytest.raises(ValueError, match="published application content"):
         Database(path).validate()

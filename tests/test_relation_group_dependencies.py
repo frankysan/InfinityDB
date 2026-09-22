@@ -159,5 +159,5 @@ def test_database_validation_rejects_tampered_group_dependency(tmp_path: Path) -
         )
         connection.commit()
 
-    with pytest.raises(ValueError, match="materialized Unit profile-group dependencies"):
+    with pytest.raises(ValueError, match="published application content"):
         Database(path).validate()

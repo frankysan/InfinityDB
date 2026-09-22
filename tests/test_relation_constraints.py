@@ -126,7 +126,7 @@ def test_database_validation_rejects_tampered_relation_constraint(tmp_path: Path
         )
         connection.commit()
 
-    with pytest.raises(ValueError, match="materialized Unit selection constraints"):
+    with pytest.raises(ValueError, match="published application content"):
         Database(path).validate()
 
 

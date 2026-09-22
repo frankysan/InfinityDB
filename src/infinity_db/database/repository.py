@@ -39,12 +39,14 @@ from infinity_db.identities import (
 from .application_armies import (
     ARMY_ROLE_REINFORCEMENT,
     validate_application_armies,
+    validate_application_army_integrity,
 )
 from .application_catalogs import validate_application_catalogs
 from .application_domain_slugs import validate_application_domain_slugs
 from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .peripheral_relationships import validate_peripheral_relationships
+from .publication import PUBLISHED_CONTENT_SHA256_KEY, published_content_sha256
 from .relation_constraints import validate_relation_constraints
 from .relation_group_dependencies import validate_relation_group_dependencies
 from .schema import (
@@ -53,6 +55,7 @@ from .schema import (
     DATABASE_COMPATIBILITY_VERSION,
     DATABASE_TABLES,
     METADATA_TABLE,
+    PUBLISHED_DATABASE_TABLES,
     SCHEMA_VERSION,
     quote,
 )
@@ -807,14 +810,23 @@ class Database:
                 identities[source_id] = identity
         return identities
 
-    def validate(self) -> None:
-        """Reject missing, unrelated, unsupported, incomplete, or corrupt databases."""
+    def validate(self, *, source_consistency: bool = False) -> None:
+        """Reject missing, unrelated, unsupported, incomplete, or corrupt databases.
+
+        Normal runtime validation uses only the self-contained published application
+        schema. Export staging additionally enables ``source_consistency`` so every
+        canonical/materialized layer is cross-checked against the full normalized
+        relational source before publication.
+        """
         with self._connect() as connection:
             application_id = connection.execute("PRAGMA application_id").fetchone()[0]
             version = connection.execute("PRAGMA user_version").fetchone()[0]
             if application_id != APPLICATION_ID or version != SCHEMA_VERSION:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
-            for name, definition in DATABASE_TABLES.items():
+            required_tables = (
+                DATABASE_TABLES if source_consistency else PUBLISHED_DATABASE_TABLES
+            )
+            for name, definition in required_tables.items():
                 columns = {
                     row["name"] for row in connection.execute(f"PRAGMA table_info({quote(name)})")
                 }
@@ -849,7 +861,9 @@ class Database:
                     "rebuild the database"
                 )
             identity_config = identity_config_from_connection(connection)
-            validate_application_armies(connection, identity_config)
+            validate_application_army_integrity(connection)
+            if source_consistency:
+                validate_application_armies(connection, identity_config)
             validate_application_catalogs(connection, identity_config)
             validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(
@@ -887,9 +901,6 @@ class Database:
                 )
             _validate_logical_unit_payloads(connection)
 
-            source_profile_count = connection.execute(
-                "SELECT COUNT(*) FROM profiles"
-            ).fetchone()[0]
             profile_occurrence_count = connection.execute(
                 "SELECT COUNT(*) FROM profile_payload_occurrences"
             ).fetchone()[0]
@@ -907,31 +918,37 @@ class Database:
                 "JOIN logical_unit_sources AS lus ON lus.source_unit_id = ppo.unit_id "
                 "WHERE pp.logical_unit_id != lus.logical_unit_id LIMIT 1"
             ).fetchone()
-            invalid_profile_context = connection.execute(
-                "SELECT 1 FROM profile_payload_occurrences AS ppo "
-                "JOIN profiles AS p "
-                "ON p.army_id = ppo.army_id "
-                "AND p.unit_id = ppo.unit_id "
-                "AND p.group_id = ppo.group_id "
-                "AND p.profile_id = ppo.profile_id "
-                "WHERE NOT (ppo.position IS p.position) "
-                "OR NOT (ppo.ava IS p.ava) "
-                "OR NOT (ppo.logo IS p.logo) LIMIT 1"
-            ).fetchone()
+            invalid_profile_source = None
+            if source_consistency:
+                source_profile_count = connection.execute(
+                    "SELECT COUNT(*) FROM profiles"
+                ).fetchone()[0]
+                invalid_profile_context = connection.execute(
+                    "SELECT 1 FROM profile_payload_occurrences AS ppo "
+                    "JOIN profiles AS p "
+                    "ON p.army_id = ppo.army_id "
+                    "AND p.unit_id = ppo.unit_id "
+                    "AND p.group_id = ppo.group_id "
+                    "AND p.profile_id = ppo.profile_id "
+                    "WHERE NOT (ppo.position IS p.position) "
+                    "OR NOT (ppo.ava IS p.ava) "
+                    "OR NOT (ppo.logo IS p.logo) LIMIT 1"
+                ).fetchone()
+                if source_profile_count != profile_occurrence_count:
+                    invalid_profile_source = True
+            else:
+                invalid_profile_context = None
             if (
-                source_profile_count != profile_occurrence_count
-                or unsupported_payload is not None
+                unsupported_payload is not None
                 or invalid_profile_logical_unit is not None
                 or invalid_profile_context is not None
+                or invalid_profile_source is not None
             ):
                 raise ValueError(
                     "Database has invalid materialized canonical profile payloads; "
                     "rebuild the database"
                 )
 
-            source_loadout_count = connection.execute(
-                "SELECT COUNT(*) FROM loadout_options"
-            ).fetchone()[0]
             loadout_occurrence_count = connection.execute(
                 "SELECT COUNT(*) FROM loadout_payload_occurrences"
             ).fetchone()[0]
@@ -949,32 +966,62 @@ class Database:
                 "JOIN logical_unit_sources AS lus ON lus.source_unit_id = lpo.unit_id "
                 "WHERE lp.logical_unit_id != lus.logical_unit_id LIMIT 1"
             ).fetchone()
-            invalid_loadout_context = connection.execute(
-                "SELECT 1 FROM loadout_payload_occurrences AS lpo "
-                "JOIN loadout_options AS o "
-                "ON o.army_id = lpo.army_id "
-                "AND o.unit_id = lpo.unit_id "
-                "AND o.group_id = lpo.group_id "
-                "AND o.option_id = lpo.option_id "
-                "WHERE NOT (lpo.position IS o.position) "
-                "OR NOT (lpo.points IS o.points) "
-                "OR NOT (lpo.swc IS o.swc) LIMIT 1"
-            ).fetchone()
+            invalid_loadout_source = None
+            if source_consistency:
+                source_loadout_count = connection.execute(
+                    "SELECT COUNT(*) FROM loadout_options"
+                ).fetchone()[0]
+                invalid_loadout_context = connection.execute(
+                    "SELECT 1 FROM loadout_payload_occurrences AS lpo "
+                    "JOIN loadout_options AS o "
+                    "ON o.army_id = lpo.army_id "
+                    "AND o.unit_id = lpo.unit_id "
+                    "AND o.group_id = lpo.group_id "
+                    "AND o.option_id = lpo.option_id "
+                    "WHERE NOT (lpo.position IS o.position) "
+                    "OR NOT (lpo.points IS o.points) "
+                    "OR NOT (lpo.swc IS o.swc) LIMIT 1"
+                ).fetchone()
+                if source_loadout_count != loadout_occurrence_count:
+                    invalid_loadout_source = True
+            else:
+                invalid_loadout_context = None
             if (
-                source_loadout_count != loadout_occurrence_count
-                or unsupported_loadout_payload is not None
+                unsupported_loadout_payload is not None
                 or invalid_loadout_logical_unit is not None
                 or invalid_loadout_context is not None
+                or invalid_loadout_source is not None
             ):
                 raise ValueError(
                     "Database has invalid materialized canonical loadout payloads; "
                     "rebuild the database"
                 )
 
-            validate_include_relationships(connection)
-            validate_peripheral_relationships(connection)
-            validate_relation_constraints(connection)
-            validate_relation_group_dependencies(connection)
+            if source_consistency:
+                validate_include_relationships(connection)
+                validate_peripheral_relationships(connection)
+                validate_relation_constraints(connection)
+                validate_relation_group_dependencies(connection)
+
+            checksum_row = connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                (PUBLISHED_CONTENT_SHA256_KEY,),
+            ).fetchone()
+            try:
+                expected_checksum = json.loads(checksum_row["value"]) if checksum_row else None
+            except (json.JSONDecodeError, TypeError) as exc:
+                raise ValueError(
+                    "Database has invalid published content checksum metadata"
+                ) from exc
+            if (
+                not isinstance(expected_checksum, str)
+                or len(expected_checksum) != 64
+                or published_content_sha256(connection) != expected_checksum
+            ):
+                raise ValueError(
+                    "Database published application content does not match its validated checksum; "
+                    "rebuild the database"
+                )
 
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Database integrity check failed")

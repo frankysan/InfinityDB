@@ -15,10 +15,11 @@ from typing import Any
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.repository import Database, unit_sort_key
 from infinity_db.database.schema import (
-    DATABASE_TABLES,
     DERIVED_TABLES,
     METADATA_TABLE,
+    PUBLISHED_DATABASE_TABLES,
     RAW_ROWS_TABLE,
+    SOURCE_ONLY_TABLES,
     TABLES,
     quote,
 )
@@ -29,7 +30,7 @@ else:
     from audit_runtime_database_surface import audit_database as audit_runtime_surface
 
 FORMAT = "InfinityDB application/raw database separation audit"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 
 CANONICAL = "canonical_application"
 CONTEXTUAL = "contextual_application"
@@ -216,28 +217,33 @@ def _validation_reads(path: Path) -> dict[str, list[str]]:
 
 
 def _foreign_key_blockers(
+    connection: sqlite3.Connection,
     classification: Mapping[str, str],
 ) -> list[dict[str, Any]]:
+    """Return published foreign keys that still target raw-only tables."""
+
     blockers: list[dict[str, Any]] = []
-    for table, definition in DATABASE_TABLES.items():
-        if classification[table] == SOURCE_ONLY:
-            continue
-        for reference in definition.references:
-            if classification[reference.table] != SOURCE_ONLY:
+    for table in sorted(PUBLISHED_DATABASE_TABLES):
+        grouped: defaultdict[int, list[sqlite3.Row]] = defaultdict(list)
+        for row in connection.execute(f"PRAGMA foreign_key_list({quote(table)})"):
+            grouped[int(row[0])].append(row)
+        for rows in grouped.values():
+            target = str(rows[0][2])
+            if classification.get(target) != SOURCE_ONLY:
                 continue
+            rows.sort(key=lambda row: int(row[1]))
             blockers.append(
                 {
                     "table": table,
-                    "fields": list(reference.fields),
-                    "targetTable": reference.table,
-                    "targetFields": list(reference.target),
+                    "fields": [str(row[3]) for row in rows],
+                    "targetTable": target,
+                    "targetFields": [str(row[4]) for row in rows],
                 }
             )
     return blockers
 
 
 def _raw_archive_report(
-    application_path: Path,
     raw_path: Path,
     application_metadata: Mapping[str, str],
 ) -> dict[str, Any]:
@@ -249,18 +255,25 @@ def _raw_archive_report(
         }
 
     connection = sqlite3.connect(raw_path.resolve().as_uri() + "?mode=ro", uri=True)
+    connection.row_factory = sqlite3.Row
     try:
         tables = _table_names(connection)
-        expected_tables = {METADATA_TABLE, RAW_ROWS_TABLE}
+        expected_tables = {METADATA_TABLE, RAW_ROWS_TABLE, *TABLES}
         if tables != expected_tables:
+            missing = sorted(expected_tables - tables)
+            unexpected = sorted(tables - expected_tables)
+            details = []
+            if missing:
+                details.append("missing: " + ", ".join(missing))
+            if unexpected:
+                details.append("unexpected: " + ", ".join(unexpected))
             raise DatabaseSeparationAuditError(
-                "Raw archive schema mismatch: expected only metadata and lossless row storage"
+                "Raw archive schema mismatch (" + "; ".join(details) + ")"
             )
+
         raw_metadata = _metadata_rows(connection)
         if dict(application_metadata) != raw_metadata:
-            raise DatabaseSeparationAuditError(
-                "Application and raw sibling metadata differ"
-            )
+            raise DatabaseSeparationAuditError("Application and raw sibling metadata differ")
         imported = _json_metadata(raw_metadata, "imported_tables")
         if not isinstance(imported, list) or any(not isinstance(item, str) for item in imported):
             raise DatabaseSeparationAuditError("Raw archive imported_tables metadata is invalid")
@@ -270,32 +283,51 @@ def _raw_archive_report(
                 "Raw archive imported_tables contains unsupported normalized tables: "
                 + ", ".join(unknown_imported)
             )
-        raw_counts = {
+
+        lossless_counts = {
             str(table): int(count)
             for table, count in connection.execute(
                 f"SELECT table_name, COUNT(*) FROM {quote(RAW_ROWS_TABLE)} "
                 "GROUP BY table_name ORDER BY table_name"
             )
         }
-        unexpected_rows = sorted(set(raw_counts) - set(imported))
+        unexpected_rows = sorted(set(lossless_counts) - set(imported))
         if unexpected_rows:
             raise DatabaseSeparationAuditError(
                 "Raw archive contains rows for unknown normalized tables: "
                 + ", ".join(unexpected_rows)
             )
+        relational_counts = _row_counts(connection, sorted(TABLES))
+        mismatches = [
+            table
+            for table in sorted(TABLES)
+            if relational_counts[table] != lossless_counts.get(table, 0)
+        ]
+        if mismatches:
+            raise DatabaseSeparationAuditError(
+                "Raw relational source tables differ from lossless row storage: "
+                + ", ".join(mismatches)
+            )
+
+        storage = _table_storage_bytes(connection)
         return {
             "status": "complete",
             "path": str(raw_path),
             "databaseBytes": raw_path.stat().st_size,
             "supportedNormalizedTableCount": len(TABLES),
+            "relationalNormalizedTableCount": len(TABLES),
             "importedNormalizedTableCount": len(imported),
-            "storedRowCount": sum(raw_counts.values()),
-            "tableRowCounts": {table: raw_counts.get(table, 0) for table in imported},
+            "storedRowCount": sum(lossless_counts.values()),
+            "tableRowCounts": relational_counts,
+            "losslessTableRowCounts": {
+                table: lossless_counts.get(table, 0) for table in sorted(TABLES)
+            },
+            "tableStorageBytes": storage,
             "metadataMatchesApplication": True,
             "policy": (
-                "The raw sibling contains the shared build metadata plus exact JSON for every "
-                "normalized source row. Empty normalized tables are represented by imported_tables "
-                "metadata even when they contribute no raw-row records."
+                "The raw sibling contains queryable normalized source tables plus exact JSON "
+                "for every normalized source row. It shares build metadata with the published "
+                "application database and is not read by normal serving."
             ),
         }
     finally:
@@ -308,7 +340,8 @@ def audit_database(
     project_root: Path,
     raw_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Return deterministic evidence for the frontend/raw database boundary."""
+    """Return deterministic evidence for the completed application/raw split."""
+
     path = path.resolve()
     project_root = project_root.resolve()
     if not path.is_file():
@@ -317,14 +350,22 @@ def audit_database(
     Database(path).validate()
     runtime = audit_runtime_surface(path, project_root=project_root)
     classification = _table_classification()
-    expected_tables = set(classification)
+    logical_tables = set(classification)
+    expected_application_tables = {METADATA_TABLE, *PUBLISHED_DATABASE_TABLES}
+    source_only_tables = {
+        table for table, role in classification.items() if role == SOURCE_ONLY
+    }
+    if source_only_tables != set(SOURCE_ONLY_TABLES):
+        raise DatabaseSeparationAuditError(
+            "Maintained source-only classification differs from the published schema policy"
+        )
 
     connection = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
+    connection.row_factory = sqlite3.Row
     try:
-        connection.row_factory = sqlite3.Row
         actual_tables = _table_names(connection)
-        missing = sorted(expected_tables - actual_tables)
-        unexpected = sorted(actual_tables - expected_tables)
+        missing = sorted(expected_application_tables - actual_tables)
+        unexpected = sorted(actual_tables - expected_application_tables)
         if missing or unexpected:
             details = []
             if missing:
@@ -332,38 +373,55 @@ def audit_database(
             if unexpected:
                 details.append("unexpected: " + ", ".join(unexpected))
             raise DatabaseSeparationAuditError(
-                "Application database table inventory does not match policy ("
+                "Published application database table inventory does not match policy ("
                 + "; ".join(details)
                 + ")"
             )
-        counts = _row_counts(connection, sorted(expected_tables))
-        storage = _table_storage_bytes(connection)
+        application_counts = _row_counts(connection, sorted(actual_tables))
+        application_storage = _table_storage_bytes(connection)
         metadata = _metadata_rows(connection)
+        fk_blockers = _foreign_key_blockers(connection, classification)
     finally:
         connection.close()
 
+    published_metadata = _json_metadata(metadata, "published_tables")
+    if set(published_metadata) != set(PUBLISHED_DATABASE_TABLES):
+        raise DatabaseSeparationAuditError("published_tables metadata differs from schema policy")
+    source_only_metadata = _json_metadata(metadata, "source_only_tables")
+    if set(source_only_metadata) != set(SOURCE_ONLY_TABLES):
+        raise DatabaseSeparationAuditError("source_only_tables metadata differs from schema policy")
+
     runtime_tables = {item["table"] for item in runtime["inventory"]}
-    source_only_tables = {
-        table for table, role in classification.items() if role == SOURCE_ONLY
-    }
     runtime_source_only = sorted(runtime_tables & source_only_tables)
     if runtime_source_only:
         raise DatabaseSeparationAuditError(
-            "Normal serving reads table(s) classified as source/provenance-only: "
+            "Normal serving reads source/provenance-only table(s): "
             + ", ".join(runtime_source_only)
         )
 
     validation_reads = _validation_reads(path)
     validation_source_only = sorted(set(validation_reads) & source_only_tables)
-    fk_blockers = _foreign_key_blockers(classification)
+    if fk_blockers or validation_source_only:
+        raise DatabaseSeparationAuditError(
+            "Published database still depends on raw-only schema structures"
+        )
 
-    inventory = []
+    selected_raw_path = (raw_path or raw_database_path(path)).resolve()
+    raw_report = _raw_archive_report(selected_raw_path, metadata)
+    raw_counts = raw_report.get("tableRowCounts", {})
+    raw_storage = raw_report.get("tableStorageBytes") or {}
+
+    inventory: list[dict[str, Any]] = []
     class_counts: defaultdict[str, int] = defaultdict(int)
     class_rows: defaultdict[str, int] = defaultdict(int)
-    for table in sorted(expected_tables):
+    for table in sorted(logical_tables):
         role = classification[table]
         class_counts[role] += 1
-        class_rows[role] += counts[table]
+        if table == METADATA_TABLE or table in PUBLISHED_DATABASE_TABLES:
+            row_count = application_counts[table]
+        else:
+            row_count = int(raw_counts.get(table, 0))
+        class_rows[role] += row_count
         origin = (
             "operational_metadata"
             if table == METADATA_TABLE
@@ -376,41 +434,36 @@ def audit_database(
                 "table": table,
                 "origin": origin,
                 "classification": role,
-                "rowCount": counts[table],
-                "storageBytes": storage.get(table) if storage is not None else None,
+                "rowCount": row_count,
+                "published": table in expected_application_tables,
+                "rawStored": table in TABLES,
+                "applicationStorageBytes": (
+                    application_storage.get(table) if application_storage is not None else None
+                ),
+                "rawStorageBytes": raw_storage.get(table),
                 "runtimeRead": table in runtime_tables,
                 "validationRead": table in validation_reads,
             }
         )
 
-    source_only_bytes = (
-        sum(storage.get(table, 0) for table in source_only_tables)
-        if storage is not None
+    raw_source_only_bytes = (
+        sum(int(raw_storage.get(table, 0)) for table in source_only_tables)
+        if raw_storage
         else None
     )
-    database_bytes = path.stat().st_size
-    source_only_percent = (
-        round((source_only_bytes / database_bytes) * 100, 2)
-        if source_only_bytes is not None and database_bytes
-        else None
-    )
-
-    selected_raw_path = (raw_path or raw_database_path(path)).resolve()
-    raw_report = _raw_archive_report(path, selected_raw_path, metadata)
-
-    surface_roles = {}
-    for surface, tables in runtime["surfaces"].items():
-        surface_roles[surface] = {
-            table: classification[table] for table in sorted(tables)
-        }
+    surface_roles = {
+        surface: {table: classification[table] for table in sorted(tables)}
+        for surface, tables in runtime["surfaces"].items()
+    }
 
     return {
         "format": FORMAT,
         "formatVersion": FORMAT_VERSION,
         "database": {
             "path": str(path),
-            "databaseBytes": database_bytes,
-            "tableCount": len(expected_tables),
+            "databaseBytes": path.stat().st_size,
+            "tableCount": len(expected_application_tables),
+            "logicalInventoryTableCount": len(logical_tables),
             "normalizedSourceTableCount": len(TABLES),
             "derivedApplicationTableCount": len(DERIVED_TABLES),
         },
@@ -425,15 +478,13 @@ def audit_database(
             "runtimeSourceOnlyViolationCount": len(runtime_source_only),
             "foreignKeyBlockerCount": len(fk_blockers),
             "validationSourceOnlyDependencyCount": len(validation_source_only),
-            "sourceOnlyStorageBytes": source_only_bytes,
-            "sourceOnlyStoragePercent": source_only_percent,
+            "sourceOnlyStorageBytes": 0,
+            "sourceOnlyStoragePercent": 0.0,
+            "rawSourceOnlyStorageBytes": raw_source_only_bytes,
         },
         "rawArchive": raw_report,
         "foreignKeyBlockers": fk_blockers,
-        "validationSourceOnlyDependencies": [
-            {"table": table, "fields": validation_reads[table]}
-            for table in validation_source_only
-        ],
+        "validationSourceOnlyDependencies": [],
         "runtime": {
             "surfaceCount": runtime["summary"]["surfaceCount"],
             "tableCount": runtime["summary"]["runtimeTableCount"],
@@ -443,14 +494,12 @@ def audit_database(
         },
         "inventory": inventory,
         "conclusion": (
-            "The current frontend/raw split has a deterministic table boundary. Source-only "
-            "candidates are already absent from normal serving, but physical removal is still "
-            "blocked by retained foreign-key references and validation queries that compare "
-            "canonical materializations with duplicated source tables. Resolve those blockers "
-            "before changing the published infinity.db schema."
+            "The physical split is complete: published infinity.db contains only application "
+            "tables, has no foreign-key or runtime-validation dependency on raw-only tables, "
+            "and normal serving never reads infinity.raw.db. The raw sibling retains queryable "
+            "normalized source tables plus exact lossless row JSON for audit and reconstruction."
         ),
     }
-
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -495,12 +544,7 @@ def main(argv: list[str] | None = None) -> int:
         f"{summary['foreignKeyBlockerCount']} foreign keys | "
         f"{summary['validationSourceOnlyDependencyCount']} validation source tables"
     )
-    if summary["sourceOnlyStorageBytes"] is not None:
-        print(
-            "Current source-only footprint: "
-            f"{summary['sourceOnlyStorageBytes']} bytes "
-            f"({summary['sourceOnlyStoragePercent']}% of infinity.db)"
-        )
+    print("Published source-only footprint: 0 bytes")
     print(f"Raw archive: {report['rawArchive']['status']}")
 
     if args.output:

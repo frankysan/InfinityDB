@@ -1012,7 +1012,7 @@ compatibility references remain unambiguous JSON integers.
   to canonical logical Units and validates Controller name/type/target-pool drift separately.
 
 - 2026-09-22: Milestone 2B Peripheral identity/relationship research is now materialized in
-  the Army application database. Schema 22 / compatibility revision 30 retains the reviewed
+  the Army application database. Schema 23 / compatibility revision 31 retains the reviewed
   Peripheral contract/hash into database metadata and persists 56 current embedded entities,
   279 source-definition mappings, 17 Unit-backed source mappings to 10 logical Units, four
   Cyberplug Controller access occurrences, and eight access-pool edges to canonical Ranters/
@@ -1051,7 +1051,7 @@ compatibility references remain unambiguous JSON integers.
   current values mechanically match profile-group IDs in some rows, profile IDs in others, option
   IDs in others, and multiple domains where numeric coordinates overlap. Preserve it as an opaque
   source selector until its grammar is resolved; do not rename it to a canonical profile FK.
-- 2026-09-22: Schema 22 / compatibility revision 30 materializes 96 fully resolved selection-safe
+- 2026-09-22: Schema 23 / compatibility revision 31 materializes 96 fully resolved selection-safe
   Army-context constraints. The application layer contains 81 same-logical cross-context
   exclusivity constraints, 13 cross-logical shared-cardinality constraints, and two single-logical
   cardinality constraints, with 197 member rows. The additional cross-logical row is Jaan Staar /
@@ -1119,22 +1119,28 @@ compatibility references remain unambiguous JSON integers.
 
 ### Milestone 2B application/raw database separation boundary (2026-09-22)
 
+- Schema 23 / compatibility revision 31 completes the application/raw physical split. Export first
+  builds the complete normalized + derived relational model in a temporary staging database
+  and runs all source-to-canonical consistency validation there. Only after those checks
+  pass is the published application subset copied to `infinity.db`.
 - `infinity.raw.db` is the existing lossless normalized Army source/provenance sibling; no second
-  raw artifact is planned. The exporter stores the same pinned metadata as `infinity.db` plus exact
-  JSON for every row from every normalized collection actually imported. `imported_tables` records
-  collection presence even when a normalized table is empty.
-- `tools/audit_database_separation.py` is the fail-closed inventory for the physical split. It
-  combines the complete schema with the normal-serving probe plan and classifies every current
-  frontend table as canonical application data, explicit contextual application data, or
-  source/provenance-only representation. A source-only classification is a storage-boundary claim,
-  not a claim that the underlying game concept lacks player value.
-- On the reviewed 2026-09-18 application database the current inventory is 28 canonical application
-  tables, 40 contextual application tables, and 47 source/provenance-only tables. Normal serving
-  reads 62 tables and reads none of the 47 source-only candidates. Those candidates plus indexes
-  occupy about 9.9 MiB / 55.72% of the current `infinity.db` file.
-- Do not physically drop those 47 tables yet. The retained schema still has 21 foreign-key
-  references into source-only candidates, and production `Database.validate()` still reads 13 of
-  them for canonical-vs-source cross-checks. Retarget/remove those foreign keys deliberately and
-  replace each validation with an application-layer invariant or build/raw validation before the
-  source table disappears. Storage reduction must never be achieved by weakening correctness or
-  traceability.
+  raw artifact is planned. It now stores all 70 normalized source tables as queryable relational
+  tables **and** exact JSON for every imported normalized row in `__infinity_raw_rows`, under the
+  same pinned metadata as `infinity.db`.
+- The logical inventory remains 28 canonical application tables, 40 contextual application tables,
+  and 47 source/provenance-only normalized tables. Published `infinity.db` contains only
+  `__infinity_metadata` plus the 67 retained application tables; the 47 source-only tables are
+  physically absent. Foreign keys targeting raw-only tables are omitted from the published schema,
+  while retained-to-retained foreign keys remain enforced.
+- Normal repository/API/web serving and runtime `Database.validate()` do not open
+  `infinity.raw.db` and have zero raw-only table reads. Source-dependent semantic checks
+  remain mandatory during staging validation rather than being weakened or deleted. Runtime
+  validation also verifies a deterministic SHA-256 over the complete published application-
+  table contents so post-build drift is detected even for values that can no longer be
+  re-derived without raw source tables.
+- `tools/audit_database_separation.py` fails closed if the published table inventory,
+  raw relational/lossless equivalence, metadata pairing, runtime surface, foreign-key
+  boundary, or runtime-validation independence drifts. The pre-split production estimate
+  attributed about 9.9 MiB / 55.72% of the old `infinity.db` to the 47 now-raw-only tables;
+  record the rebuilt production size separately rather than treating storage savings as
+  the semantic acceptance criterion.

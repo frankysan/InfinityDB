@@ -33,15 +33,20 @@ def test_database_separation_audit_classifies_complete_frontend_schema(tmp_path:
     assert report["summary"]["contextualApplicationTableCount"] == 40
     assert report["summary"]["sourceProvenanceOnlyTableCount"] == 47
     assert report["summary"]["runtimeSourceOnlyViolationCount"] == 0
-    assert report["summary"]["foreignKeyBlockerCount"] == 21
-    assert report["summary"]["validationSourceOnlyDependencyCount"] == 9
+    assert report["summary"]["foreignKeyBlockerCount"] == 0
+    assert report["summary"]["validationSourceOnlyDependencyCount"] == 0
+    assert report["summary"]["sourceOnlyStorageBytes"] == 0
     assert len(report["inventory"]) == 115
+    assert report["database"]["tableCount"] == 68
+    assert report["database"]["logicalInventoryTableCount"] == 115
 
     assert _item(report, "logical_units")["classification"] == CANONICAL
     assert _item(report, "application_army_sources")["classification"] == CONTEXTUAL
     assert _item(report, "army_units")["classification"] == CONTEXTUAL
     assert _item(report, "units")["classification"] == CONTEXTUAL
     assert _item(report, "profiles")["classification"] == SOURCE_ONLY
+    assert _item(report, "profiles")["published"] is False
+    assert _item(report, "profiles")["rawStored"] is True
     assert _item(report, "loadout_options")["classification"] == SOURCE_ONLY
     assert _item(report, "fireteams")["classification"] == SOURCE_ONLY
     assert _item(report, "relations")["classification"] == SOURCE_ONLY
@@ -55,8 +60,10 @@ def test_database_separation_audit_validates_lossless_raw_sibling(tmp_path: Path
 
     assert raw["status"] == "complete"
     assert raw["supportedNormalizedTableCount"] == 70
+    assert raw["relationalNormalizedTableCount"] == 70
     assert raw["importedNormalizedTableCount"] == 54
-    assert raw["storedRowCount"] == sum(raw["tableRowCounts"].values())
+    assert raw["storedRowCount"] == sum(raw["losslessTableRowCounts"].values())
+    assert raw["tableRowCounts"] == raw["losslessTableRowCounts"]
     assert raw["metadataMatchesApplication"] is True
 
 

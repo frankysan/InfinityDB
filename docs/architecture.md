@@ -546,24 +546,23 @@ reuse logical-Unit identity, and source-context Cyberplug Controller access pool
 their Army provenance.
 
 Unit-detail repository reads now consume both canonical payload layers. Source
-profile/loadout tables remain available for provenance, validation, and deferred
-source-local/contextual relationships. Normal search/filter/catalog reverse reads
-now expand canonical payload occurrences rather than traversing those legacy
-payload tables. Compatibility revision 19 also requires unit-oriented indexes on
-both canonical occurrence tables so this read-path split does not regress unit-detail
-query behavior.
+profile/loadout tables remain available in `infinity.raw.db` and build staging for
+provenance, source-semantic validation, and deferred source-local/contextual
+relationships; they are no longer part of the published application database. Normal
+search/filter/catalog reverse reads expand canonical payload occurrences rather than
+traversing those legacy payload tables. Compatibility revision 19 also requires
+unit-oriented indexes on both canonical occurrence tables so this read-path split does not
+regress unit-detail query behavior.
 
-Milestone 2B now has an explicit physical-storage inventory. The current frontend
-schema classifies 28 tables as canonical application data, 40 as explicit contextual
-application data, and 47 normalized tables as source/provenance-only representation.
-Normal serving reads none of those 47 source-only candidates; `infinity.raw.db` is
-the long-term home for that lossless source representation. Physical removal is
-still gated by schema and validation dependencies: retained tables currently carry
-21 foreign-key references into source-only candidates, and `Database.validate()`
-still reads 13 source-only tables on the reviewed production snapshot for
-canonical-vs-source cross-checks. Those dependencies must be replaced deliberately
-before the published frontend schema is reduced; the split must not weaken
-correctness or provenance just to reduce file size.
+Milestone 2B now has a physical application/raw storage split. The logical inventory
+still classifies 28 tables as canonical application data, 40 as explicit contextual
+application data, and 47 normalized tables as source/provenance-only representation,
+but those 47 tables no longer ship in `infinity.db`. Export builds a complete temporary
+relational staging database, runs all source-to-canonical validation there, writes the
+normalized source schema plus exact lossless rows to `infinity.raw.db`, then publishes
+only the retained application schema. Foreign keys whose targets are raw-only are
+omitted from the published schema; retained-to-retained constraints remain enforced.
+Normal serving and runtime validation have no dependency on `infinity.raw.db`.
 
 ### General application-domain identifier contract
 
@@ -743,7 +742,10 @@ Army directory / ZIP
        + pinned identity document / SHA-256
     -> SQLite importer
        + revalidated pinned identity provenance
-    -> infinity.db + infinity.raw.db
+    -> full relational staging DB
+       -> source/canonical consistency validation
+       -> infinity.raw.db (normalized source + exact rows)
+       -> infinity.db (self-contained application schema)
     -> repository -> HTTP API -> browser UI
 
 PDF / wiki research sources
@@ -1064,11 +1066,11 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 22 and database compatibility revision
-30; it rejects incompatible databases with a rebuild
-instruction. The importer builds
-a lean frontend database and a lossless sibling raw archive, creates read-path
-indexes after loading, and persists SQLite planner statistics. Migration of
+application database has schema version 23 and database compatibility revision
+31; it rejects incompatible databases with a rebuild instruction. The importer
+validates a complete relational staging database, publishes a self-contained
+application database and a lossless sibling raw archive, creates read-path indexes
+after loading, and persists SQLite planner statistics. Migration of
 persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 

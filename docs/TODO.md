@@ -291,28 +291,36 @@ in `docs/releasing.md`.
     source/provenance-only normalized tables. Normal serving reads 62 tables and
     none of the 47 source-only candidates. `tools/audit_database_separation.py`
     fails closed if that boundary or the serving-surface probe coverage changes.
-    - [x] Record the physical-split blockers before removing any table. The current
-      schema has 21 retained foreign-key references into source-only candidates,
-      and `Database.validate()` still reads 13 source-only tables for canonical-vs-
-      source cross-checks on the production snapshot. Those validations must be
-      replaced with application-layer invariants or moved to build/raw validation,
-      not silently dropped.
+    - [x] Record and resolve the physical-split blockers before removing any table.
+      The pre-split schema had 21 retained foreign-key references into source-only
+      candidates and production validation read 13 source-only tables. Schema 23
+      omits raw-only foreign-key targets from the published schema and moves those
+      source-dependent cross-checks to full relational staging validation; the
+      published DB now has zero such foreign-key or runtime-validation dependencies.
     - [x] Measure the current source-only footprint without treating size as the
       semantic acceptance criterion. On the reviewed 2026-09-18 application DB,
       candidate source-only tables plus their indexes occupy about 9.9 MiB,
       55.72% of the current `infinity.db` file.
-  - [ ] Move source/provenance-only normalized tables out of `infinity.db` only
+  - [x] Move source/provenance-only normalized tables out of `infinity.db` only
     after canonical unit/profile/loadout/relationship/catalog replacements are
-    proven complete and reconstruction/provenance tests cover the transition.
-  - [ ] Make normal repository/API/web serving independent of `infinity.raw.db`;
-    production runtime should require the self-contained canonical `infinity.db`
-    plus the existing rules database/assets, while `infinity.raw.db` remains
-    a build/audit artifact.
-  - [ ] Preserve traceability from every canonical fact and contextual occurrence
-    back to supporting raw/source records after the physical database split.
-  - [ ] Document the rebuild/migration boundary and verify that removing the
-    duplicated source representation reduces physical application-database size
-    without using storage savings as the semantic acceptance criterion.
+    proven complete and reconstruction/provenance tests cover the transition. The
+    exporter now builds and validates a full relational staging database, writes all
+    normalized source tables plus exact row JSON to `infinity.raw.db`, then publishes
+    only the 68-table application schema (`__infinity_metadata` plus 67 application
+    tables). The 47 source/provenance-only tables are absent from the published DB.
+  - [x] Make normal repository/API/web serving independent of `infinity.raw.db`;
+    production runtime requires only the self-contained `infinity.db` plus the
+    existing rules database/assets. Runtime validation has zero raw-only table reads;
+    source-to-canonical cross-checks remain build-time staging validation.
+  - [x] Preserve traceability from canonical facts and contextual occurrences back to
+    supporting source records after the split. Application mappings/occurrence rows
+    retain source coordinates, while `infinity.raw.db` preserves the complete
+    queryable normalized source schema and exact lossless row JSON under identical
+    snapshot/identity metadata.
+  - [ ] Measure the rebuilt production `infinity.db` size after the physical split and
+    record the observed reduction. Schema 23 / compatibility revision 31 requires a
+    rebuild rather than in-place migration; storage savings remain evidence, not the
+    semantic acceptance criterion.
 
 - [ ] **Maintain a source-to-presentation completeness inventory while
   canonicalizing.**

@@ -1662,26 +1662,43 @@ source-only classification is not a declaration that Fireteams or another constr
 lack player value; it means their current normalized source shape is not the
 application representation that should be deployed long-term.
 
-The existing `infinity.raw.db` sibling is already the lossless source/provenance store.
-It contains the same pinned build metadata as `infinity.db` plus exact JSON for every
-row from every normalized table actually imported. `imported_tables` preserves which
-normalized collections were present even when a table was empty. Existing exporter
-tests compare the archived JSON row-for-row with normalized input; the separation
-audit additionally verifies sibling metadata and archive structure when the raw file
-is available.
+Schema 23 / compatibility revision 31 completes the physical split. Export now uses
+three database roles during one build:
 
-Physical removal is intentionally a separate step. The current schema still contains
-**21 foreign-key references from retained tables into source-only candidates**, and
-`Database.validate()` still reads **13 source-only tables** on the production snapshot
-to compare canonical materializations against duplicated source rows. Those checks
-must be replaced with application-layer invariants or moved to build/raw validation
-before the duplicated tables disappear. Dropping the source tables while simply
-removing those validations would weaken the correctness contract and is not acceptable.
+1. a temporary **relational staging database** containing the complete normalized source
+   schema plus all derived application tables;
+2. `infinity.raw.db`, which contains all 70 queryable normalized source tables plus
+   `__infinity_raw_rows` with the exact JSON for every imported normalized row; and
+3. the published `infinity.db`, which contains only `__infinity_metadata` plus the 67
+   retained application tables.
 
-SQLite `dbstat` attributes approximately **9.9 MiB**, or **55.72%** of the current
-18 MiB-class `infinity.db`, to the 47 source-only tables and their indexes. This is a
-useful physical-split estimate, not the semantic success criterion; correctness,
-traceability, and a self-contained runtime remain the acceptance requirements.
+All source-to-canonical validation runs against staging before publication. The 47
+source/provenance-only normalized tables are then omitted from `infinity.db`; foreign
+keys whose targets exist only in raw storage are omitted from the published schema,
+while retained-to-retained foreign keys remain intact. Normal `Database.validate()`
+therefore has **zero** raw-only table reads. Validation that requires duplicated source
+rows remains a build-time staging check rather than being discarded.
+
+The raw sibling and application database retain identical pinned build metadata.
+`published_tables` and `source_only_tables` make the storage boundary explicit, while
+`imported_tables` preserves source collection presence even when a normalized table is
+empty. The separation audit verifies that each relational raw table has the same row
+count as its exact lossless-row representation, that the published schema contains no
+source-only table or foreign-key dependency, and that normal serving never reads raw
+storage.
+
+Because removing duplicated source rows also removes some runtime ability to re-derive
+materialized values independently, the exporter records a deterministic SHA-256 over
+the complete published application-table contents after full staging validation.
+Runtime validation checks this hash in addition to intrinsic application invariants and
+SQLite integrity. This is a corruption/drift guard, not a replacement for the stronger
+source-semantic staging checks.
+
+Before the split, SQLite `dbstat` attributed approximately **9.9 MiB**, or **55.72%**
+of the reviewed 18 MiB-class `infinity.db`, to the 47 now-raw-only tables and their
+indexes. That remains the pre-split estimate; the rebuilt production-size measurement
+is recorded separately once generated locally. Correctness, traceability, and runtime
+independence remain the acceptance criteria rather than storage reduction alone.
 
 ### Army/faction semantic boundary audit
 
@@ -1817,7 +1834,7 @@ quantity differences. The shared unit-option rows resolve unambiguously in the a
 snapshot, but their target source option can still acquire different canonical payloads
 when Army-contextual loadout semantics differ.
 
-Schema version 22 / compatibility revision 30 retains the schema-18 include
+Schema version 23 / compatibility revision 31 retains the schema-18 include
 relationships without promoting the attachment into reusable payload identity:
 
 - `profile_occurrence_includes` keeps the exact Profile occurrence as parent context and
@@ -1842,7 +1859,8 @@ Unit-backed source IDs resolved through the existing logical-Unit layer to 10 lo
 Units. Unit-backed type comes from the source `Peripheral` Skill subtype rather than a
 parallel Peripheral entity namespace.
 
-Schema 22 retains the schema-19 reviewed Peripheral layer in the frontend database rather than leaving
+Schema 23 retains the schema-19 reviewed Peripheral layer in the application database rather
+than leaving
 it in build-time curated JSON only:
 
 - `application_peripheral_entities` / `application_peripheral_profiles` store canonical
@@ -1918,7 +1936,7 @@ match only a profile-group ID, only a profile ID, only an option ID, or several 
 when their numeric coordinates overlap. The audit reports these candidate-domain matches only as
 diagnostics and deliberately does not select one interpretation.
 
-Schema 22 materializes 96 fully resolved selection-safe constraints while preserving both canonical
+Schema 23 materializes 96 fully resolved selection-safe constraints while preserving both canonical
 and source-context identity. `application_unit_constraints` keeps the exact Army/relation context,
 structural family, group flag, and source min/max cardinality. Its
 `application_unit_constraint_members` rows retain each source relation-member occurrence and
@@ -1937,7 +1955,7 @@ constraint expresses only the equivalent whole-Unit max-1 rule. Unit detail read
 Fourteen of the 23 selector-bearing resolved relations have a narrower deterministic contract. In
 those same-logical dependency relations, both the member and dependency source fields named
 `profile` resolve to existing Army-local profile-group coordinates for the same logical Unit.
-Schema 22 retains them through `application_unit_group_dependency_constraints`,
+Schema 23 retains them through `application_unit_group_dependency_constraints`,
 `application_unit_group_dependency_members`, and
 `application_unit_group_dependency_targets`. The application rows retain Army/relation context,
 source Unit and canonical logical-Unit identity, the resolved profile-group IDs, relation
@@ -2156,18 +2174,22 @@ rather than in source parsing.
 
 ## SQLite storage
 
-`infinity_db.database` imports every normalized table with its original field
-names, declared primary keys, and foreign keys. Nested arrays and objects use
-JSON text. The frontend `infinity.db` contains only queryable columns. Its
-sibling `infinity.raw.db` contains `__infinity_raw_rows`, preserving each exact
-normalized record (including absent versus null fields) for development use.
-Both databases retain `__infinity_metadata`; the schema defines empty frontend
-tables so API queries do not depend on a particular snapshot containing every
-kind of record. The metadata also stores the validated source-identity
-configuration and its canonical hash copied from normalized provenance, making
-the identity policy part of the immutable database snapshot and allowing
-tampering, incomplete provenance, or conflicting explicit export policy to fail
-validation.
+`infinity_db.database` first imports every normalized table into a temporary
+relational staging database with its original field names, declared primary keys,
+and foreign keys. Nested arrays and objects use JSON text. After full source-to-
+canonical validation succeeds, the exporter writes two permanent siblings: the
+self-contained application `infinity.db` and the lossless source/provenance
+`infinity.raw.db`.
+
+The raw sibling contains all normalized source tables as queryable relational tables
+and `__infinity_raw_rows`, preserving each exact normalized record (including absent
+versus null fields). The application sibling contains only retained application
+source/context tables plus derived canonical tables; source-only normalized tables are
+physically absent. Both databases retain identical `__infinity_metadata`. Metadata
+stores the validated source-identity configuration and canonical hash, the published/
+raw table boundary, snapshot provenance, and the deterministic published-content hash.
+This makes identity and publication policy part of the immutable snapshot and lets
+incomplete provenance, incompatible schema, or post-build content drift fail closed.
 
 When an Army database is built from a ZIP snapshot, normalized `_meta` and both
 database siblings retain `snapshotArchiveSha256`: the SHA-256 of that exact ZIP.
@@ -2196,22 +2218,19 @@ derived frontend tables so generated application structure cannot be supplied as
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 22 and the application
-compatibility revision is 30. Imports build temporary sibling files, check
+records its schema version. The current schema version is 23 and the application
+compatibility revision is 31. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
 planner statistics in the immutable snapshot.
 
-**Design direction:** while canonicalization is in progress, `infinity.db`
-intentionally contains both derived application tables and lossless normalized
-source tables needed by remaining runtime/provenance paths. After canonical unit,
-relationship, and catalog coverage is complete, source/provenance-only normalized
-tables should move exclusively to `infinity.raw.db`. Normal repository/API/web
-serving should then require only the self-contained canonical `infinity.db`
-(alongside `rules.db` and assets), with `infinity.raw.db` retained as a build and
-audit artifact. The split must preserve canonical-to-source traceability and is
-not justified by file-size reduction alone.
+The physical application/raw split is now part of the generated-database contract.
+Normal repository/API/web serving requires only the self-contained `infinity.db`
+(alongside `rules.db` and assets); it never opens `infinity.raw.db`. The raw sibling is
+a build/audit/reconstruction artifact containing queryable normalized source tables and
+exact row JSON. Canonical-to-source traceability remains in application mappings and
+source coordinates, with the full source representation preserved in raw storage.
 
 ## Snapshot provenance and human annotations
 

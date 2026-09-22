@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 22
+SCHEMA_VERSION = 23
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 30
+DATABASE_COMPATIBILITY_VERSION = 31
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -542,7 +542,45 @@ DERIVED_TABLES = {
     ),
 }
 
+# Normalized source tables retained in the published application database.
+# Every derived application table is published; normalized tables omitted from
+# this set remain available only through the lossless raw archive after the
+# staging database has passed full source-to-canonical validation.
+PUBLISHED_SOURCE_TABLES = frozenset(
+    {
+        "army_lists",
+        "army_units",
+        "categories",
+        "characteristics",
+        "equipment",
+        "extras",
+        "metadata_ammunitions",
+        "metadata_weapons",
+        "option_peripherals",
+        "profile_groups",
+        "profile_peripherals",
+        "skills",
+        "troop_types",
+        "unit_factions",
+        "unit_option_equipment",
+        "unit_option_equipment_extras",
+        "unit_option_skill_extras",
+        "unit_option_skills",
+        "unit_option_weapon_extras",
+        "unit_option_weapons",
+        "unit_options",
+        "units",
+        "weapons",
+    }
+)
+
+SOURCE_ONLY_TABLES = frozenset(TABLES) - PUBLISHED_SOURCE_TABLES
 DATABASE_TABLES = {**TABLES, **DERIVED_TABLES}
+PUBLISHED_DATABASE_TABLES = {
+    name: definition
+    for name, definition in DATABASE_TABLES.items()
+    if name not in SOURCE_ONLY_TABLES
+}
 
 # Primary keys preserve the source hierarchy, which normally starts with
 # ``army_id``. The public read API also traverses the data by unit and performs
@@ -681,6 +719,7 @@ def create_schema(
     tables: dict[str, list[dict]],
     *,
     table_columns: Mapping[str, tuple[str, ...]] | None = None,
+    definitions: Mapping[str, Table] | None = None,
 ) -> None:
     """Create all tables, including empty ones, with deferred relational constraints.
 
@@ -694,7 +733,8 @@ def create_schema(
     connection.execute(
         f"CREATE TABLE {quote(METADATA_TABLE)} (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
     )
-    for name, definition in DATABASE_TABLES.items():
+    definitions = DATABASE_TABLES if definitions is None else definitions
+    for name, definition in definitions.items():
         columns = (
             table_columns[name]
             if table_columns is not None and name in table_columns
@@ -705,6 +745,8 @@ def create_schema(
         ]
         parts.append("PRIMARY KEY (" + ", ".join(map(quote, definition.key)) + ")")
         for reference in definition.references:
+            if reference.table not in definitions:
+                continue
             parts.append(
                 "FOREIGN KEY (" + ", ".join(map(quote, reference.fields)) + ") "
                 "REFERENCES "
@@ -717,8 +759,11 @@ def create_schema(
         connection.execute(f"CREATE TABLE {quote(name)} ({', '.join(parts)})")
 
 
-def create_indexes(connection: sqlite3.Connection) -> None:
+def create_indexes(
+    connection: sqlite3.Connection, *, table_names: Collection[str] | None = None
+) -> None:
     """Create read-path indexes after data loading completes."""
+    table_names = set(DATABASE_TABLES) if table_names is None else set(table_names)
     connection.execute("CREATE INDEX units_name ON units(name COLLATE NOCASE, id)")
     connection.execute("CREATE INDEX army_units_unit ON army_units(unit_id, army_id)")
     connection.execute(
@@ -778,4 +823,7 @@ def create_indexes(connection: sqlite3.Connection) -> None:
         "ON loadout_payload_occurrences(loadout_payload_id)"
     )
     for index_name, table_name, columns in INDEXES:
-        connection.execute(f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})")
+        if table_name in table_names:
+            connection.execute(
+                f"CREATE INDEX {quote(index_name)} ON {quote(table_name)} ({columns})"
+            )

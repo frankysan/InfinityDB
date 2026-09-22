@@ -20,8 +20,23 @@ from infinity_army_data.normalize import normalize_master
 from infinity_db import __display_version__
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
+from infinity_db.database.publication import (
+    PUBLISHED_CONTENT_SHA256_KEY,
+    published_content_sha256,
+)
 from infinity_db.rules_database import export_rules_database
 from infinity_db.web import create_app
+
+
+def _refresh_published_content_checksum(path: Path) -> None:
+    """Refresh build-integrity metadata after intentional fixture mutation."""
+
+    with sqlite3.connect(path) as connection:
+        checksum = published_content_sha256(connection)
+        connection.execute(
+            "UPDATE __infinity_metadata SET value = ? WHERE key = ?",
+            (json.dumps(checksum), PUBLISHED_CONTENT_SHA256_KEY),
+        )
 
 
 def request(
@@ -1028,6 +1043,7 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
             "UPDATE logical_units SET name = ? WHERE representative_unit_id = ?",
             ("Updated Ranger", 1),
         )
+    _refresh_published_content_checksum(rebuilt_database)
     rebuilt_app = create_app(rebuilt_database)
 
     rebuilt_status, rebuilt_headers, rebuilt_body = request(rebuilt_app, "/api/armies")
@@ -1625,6 +1641,7 @@ def test_trait_apis_compose_army_usage_with_curated_rules(
             (1, 31, "BS", "Combi Rifle", json.dumps(["Continous Damage", "Disposable (2)"])),
         )
         connection.commit()
+    _refresh_published_content_checksum(app.database.path)
 
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"

@@ -93,8 +93,15 @@ def test_build_creates_verified_json_and_queryable_database(
     with sqlite3.connect(output_dir / "infinity.db") as connection:
         assert connection.execute("SELECT id, name FROM units").fetchall() == [(17, "Test Ranger")]
         assert connection.execute("SELECT COUNT(*) FROM army_units").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM profile_payload_occurrences"
+        ).fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'profiles'"
+        ).fetchone() is None
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
+    with sqlite3.connect(output_dir / "infinity.raw.db") as raw_connection:
+        assert raw_connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] == 2
 
 
 def test_separate_merge_normalize_export_commands(
