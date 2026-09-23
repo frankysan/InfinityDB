@@ -139,8 +139,9 @@ requiring a new top-level browser surface in 0.7.0.
     Irregular Training are already classified per loadout Order occurrence. Curated v9
     preserves Martial Arts L1-L5 / Strategos L1-L2 as typed exact-source Levels,
     adds reviewed BS=12, BS=11, and CC=21 numeric Attribute replacements, and models
-    the six non-base TinBot source variants as named exact-source variants; special
-    generated Orders remain separate.
+    the six non-base TinBot source variants as named exact-source variants; Equipment
+    detail composition now exposes those typed variants directly to the API/browser;
+    special generated Orders remain separate.
   - [x] Represent reviewed related-item relationships explicitly rather than
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.

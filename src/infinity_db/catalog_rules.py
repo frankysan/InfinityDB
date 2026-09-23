@@ -45,6 +45,9 @@ class CatalogRules:
         self._category_indexes: dict[
             str, dict[ArmyLinkRef, list[dict[str, Any]]]
         ] = {}
+        self._source_variant_indexes: dict[
+            str, dict[ArmyLinkRef, dict[str, Any]]
+        ] = {}
 
     @staticmethod
     def _application_refs(item: dict[str, Any]) -> tuple[ArmyLinkRef, ...]:
@@ -72,6 +75,20 @@ class CatalogRules:
             categories.sort(key=lambda item: (item["order"], item["name"], item["page"] or 0))
         self._category_indexes[entity] = index
         return index
+
+    def _source_variant_index(
+        self, entity: str
+    ) -> dict[ArmyLinkRef, dict[str, Any]]:
+        if entity in self._source_variant_indexes:
+            return self._source_variant_indexes[entity]
+        rules_database = self.rules_database
+        if rules_database is None:
+            self._source_variant_indexes[entity] = {}
+            return self._source_variant_indexes[entity]
+        self._source_variant_indexes[entity] = (
+            rules_database.catalog_source_variant_semantics(entity)
+        )
+        return self._source_variant_indexes[entity]
 
     def _categories_for_refs(
         self, entity: str, refs: tuple[ArmyLinkRef, ...]
@@ -154,8 +171,13 @@ class CatalogRules:
         records = list(family_rules.values())
         if records:
             result["rules"] = records
+        source_variants = self._source_variant_index(entity)
         for variant in result.get("variants", []):
-            variant_rules = source_rules.get(int(variant["item_id"]))
+            source_id = int(variant["item_id"])
+            source_variant = source_variants.get(source_id)
+            if source_variant is not None:
+                variant["source_variant"] = deepcopy(source_variant)
+            variant_rules = source_rules.get(source_id)
             if variant_rules:
                 variant["rules"] = list(variant_rules.values())
 

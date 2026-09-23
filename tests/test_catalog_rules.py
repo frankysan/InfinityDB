@@ -79,6 +79,7 @@ def test_catalog_rules_apply_curated_tinbot_family_and_named_variant_rules(
     assert [rule["id"] for rule in firewall["rules"]] == [
         "equipment:tinbot-firewall"
     ]
+    assert firewall["source_variant"] == {"kind": "named", "label": "Firewall"}
     assert firewall["rules"][0]["variant_semantics"]["source_variant"] == {
         "kind": "named",
         "label": "Firewall",
@@ -87,6 +88,7 @@ def test_catalog_rules_apply_curated_tinbot_family_and_named_variant_rules(
     assert [rule["id"] for rule in discover["rules"]] == [
         "equipment:tinbot-discover"
     ]
+    assert discover["source_variant"] == {"kind": "named", "label": "Discover"}
     assert discover["rules"][0]["variant_semantics"]["source_variant"] == {
         "kind": "named",
         "label": "Discover",
@@ -154,6 +156,10 @@ def test_catalog_rules_keep_source_specific_rules_on_matching_variant(
     )
 
     assert [rule["id"] for rule in result["rules"]] == ["equipment:testbot"]
+    assert result["variants"][0]["source_variant"] == {
+        "kind": "named",
+        "label": "test variant",
+    }
     assert [rule["id"] for rule in result["variants"][0]["rules"]] == [
         "equipment:testbot-discover"
     ]

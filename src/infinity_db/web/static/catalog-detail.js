@@ -40,6 +40,17 @@ function label(item, variant) {
     : variantName;
 }
 
+function sourceVariantLabel(variant) {
+  const semantics = variant.source_variant;
+  if (!semantics) return null;
+  if (semantics.kind === "level") return `Level ${semantics.value}`;
+  if (semantics.kind === "named") return semantics.label;
+  if (semantics.kind === "attribute-replacement") {
+    return `${semantics.attribute} = ${semantics.value}`;
+  }
+  return null;
+}
+
 function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
@@ -249,7 +260,9 @@ function usageSections(item) {
       title.textContent = label(item, variant);
       const count = document.createElement("span");
       count.className = "section-index";
-      count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
+      const semanticLabel = sourceVariantLabel(variant);
+      const unitCount = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
+      count.textContent = semanticLabel ? `${semanticLabel} · ${unitCount}` : unitCount;
       summary.append(title, count);
       section.append(summary);
       section.addEventListener("toggle", () => {

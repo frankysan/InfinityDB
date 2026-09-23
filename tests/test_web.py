@@ -1873,6 +1873,17 @@ def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
+def test_catalog_detail_frontend_renders_typed_source_variant_labels(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"function sourceVariantLabel(variant)" in body
+    assert b'if (semantics.kind === "named") return semantics.label;' in body
+    assert b"semanticLabel ? `${semanticLabel} \xc2\xb7 ${unitCount}` : unitCount" in body
+
+
 def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> None:
     status, _, body = request(app, "/static/skill.js")
 

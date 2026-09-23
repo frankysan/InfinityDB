@@ -1253,10 +1253,11 @@ compatibility references remain unambiguous JSON integers.
   `martial-arts` Skill family. Strategos source IDs 69-70 are reviewed Level 1-2
   variants of `strategos`. The family remains the browsing identity while exact source
   occurrences retain the Level that controls applicable rules.
-- `RulesDatabase.catalog_source_variant_semantics()` exposes exact-source semantics and
+- `RulesDatabase.catalog_source_variant_semantics()` exposes exact-source semantics.
   `SkillCatalog` attaches them as `source_variant` to matching Skill variants and Unit
-  occurrences. The browser may label those variants from structured data; it does not
-  infer Level semantics from an `L<number>` display-name suffix.
+  occurrences, while `CatalogRules` does the same for Equipment/Weapon usage variants.
+  Browsers may label variants from structured data rather than inferring semantics from
+  display-name suffixes.
 - BS Attack source IDs 278 (`BS=12`) and 279 (`BS=11`), plus CC Attack source
   ID 274 (`CC=21`), are reviewed numeric Attribute replacements and are exposed
   through the same `source_variant` path. The UI renders their target/value from

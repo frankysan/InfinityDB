@@ -23,6 +23,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Expose reviewed exact-source semantics directly on Equipment/Weapon usage variants,
+  allowing detail pages to label named variants such as TinBot Firewall/Discover from
+  structured rules data while keeping occurrence modifiers separate.
 - Present the Army weapon-profile `damage` value using the N5 Possibility of Survival
   (`PS`) label across ranged and melee/Equipment profile details while preserving the
   upstream field name in application data for compatibility and provenance.
