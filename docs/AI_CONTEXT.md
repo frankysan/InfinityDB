@@ -555,7 +555,7 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v9 rules contract includes collection/source metadata,
+The current curated-v10 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, exact-source variant semantics, and citations.
@@ -1245,7 +1245,7 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 typed exact-source semantics (2026-09-23)
 
-- Curated rules format v9 and `rules.db` schema/compatibility 7 require every
+- Curated rules format v10 and `rules.db` schema/compatibility 7 require every
   `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
   Supported kinds are numeric `level`, explicit `named`, and numeric
   `attribute-replacement`; family records may not declare source-variant metadata.
@@ -1271,6 +1271,7 @@ compatibility references remain unambiguous JSON integers.
   signed values, rerolls, and Special Dice remain opaque until the owning rule supplies
   reviewed target/operation semantics; source-variant identity and occurrence parameters
   remain separate axes.
+  
 ## 0.7.0 enrichment coverage audit (2026-09-23)
 
 - `tools/audit_enrichment_coverage.py` is the maintained gate for measuring how much of
@@ -1301,6 +1302,6 @@ compatibility references remain unambiguous JSON integers.
 
 - Rules-interaction relationships are a core 0.7.0 product feature. Author semantic
   edges once, derive reverse navigation in `rules.db`, and present useful context from
-  both endpoints. Multispectral Visor/Mimetism is a canonical acceptance example once
-  cited N5.3 semantics are curated. Keep this separate from 0.8 structural application
-  relationships.
+  both endpoints. Multispectral Visor/Mimetism is the first production example: MSV authors
+  `reduces-modifiers-from` toward Mimetism and the reverse relationship is derived for the
+  Mimetism surface. Keep this separate from 0.8 structural application relationships.

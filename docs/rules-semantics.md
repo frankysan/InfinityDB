@@ -981,7 +981,7 @@ These rules refine `RS-BR-ROLL-001/002`. InfinityDB should preserve the exact
 source annotation and use typed parameter semantics for interpretation. A value
 such as `-3` is insufficient without the owning rule and semantic target.
 
-Curated format v9 implements the reviewed exact-source Attribute-replacement subset:
+Curated format v9 introduced the reviewed exact-source Attribute-replacement subset:
 Army Skill IDs 278 (`BS=12`) and 279 (`BS=11`) are typed variants of BS Attack,
 and ID 274 (`CC=21`) is a typed variant of CC Attack. Their structured
 `source_variant` metadata carries `kind: attribute-replacement`, the target
@@ -1011,7 +1011,7 @@ The existing canonical grouping of Martial Arts L1-L5 and Strategos L1-L2 is
 therefore compatible with the rules only while the source Level remains
 preserved and presentable.
 
-This is now implemented in curated format v9: Martial Arts source IDs 19-23 are typed
+This was introduced in curated format v9: Martial Arts source IDs 19-23 are typed
 as Levels 1-5 and Strategos source IDs 69-70 as Levels 1-2. The application keeps the
 family browsing identity while exposing the exact Level as `source_variant` metadata on
 the matching source occurrence; no `L<number>` runtime name parsing is used.
@@ -1085,6 +1085,30 @@ Sources:
 - Wiki: <https://infinitythewiki.com/AI_Motorcycle>
 - PDF: Infinity N5 V5.3, printed pages 117 and 119
 
+### RS-SE-MSV-001 — Multispectral Visor reduces Mimetism MODs
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+Mimetism imposes its listed negative MOD on enemy BS Attacks requiring LoF and on
+Discover attempts against the user. Every Multispectral Visor Level changes that
+Mimetism interaction: Level 1 reduces Mimetism (-3) to 0 and Mimetism (-6) to -3,
+while Levels 2 and 3 reduce Mimetism MODs to 0. The exact Visor Level still owns
+its more detailed visibility, Smoke, Discover, Surprise Attack, and Camouflaged
+Marker effects.
+
+InfinityDB therefore models the family-level interaction as one authored
+`reduces-modifiers-from` edge from Multispectral Visor to Mimetism. This edge is
+valid for every Level without pretending that all Levels have identical effects.
+`rules.db` derives the inverse navigation, allowing a player reading Mimetism to
+discover that Multispectral Visor reduces its MODs even though Mimetism's own rule
+text does not need to maintain a reciprocal list. Level-specific detail remains in
+the Multispectral Visor rule facts rather than being duplicated onto the relation.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Mimetism&oldid=3102>
+- Wiki: <https://infinitythewiki.com/index.php?title=Multispectral_Visor&oldid=4111>
+
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
 **Classification:** source-native with a presentation-encoding consequence.
@@ -1122,7 +1146,7 @@ rules.
 This supports the current application/catalog policy of retaining
 `application_catalog_sources` and source labels alongside canonical identities.
 
-Curated format v9 now applies this distinction to the current TinBot identity group.
+Curated format v9 introduced this distinction for the current TinBot identity group.
 The Firewall, Neurocinetics, Albedo, Discover, ECM Guided, and Repeater source records
 are typed `named` exact-source variants of the TinBot family. Their Army occurrence
 extras remain separate source data: this classification identifies the named advantage

@@ -7,6 +7,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add the first bidirectional gameplay-interaction enrichment: Multispectral Visor
+  now links to Mimetism as reducing its MODs, while Mimetism automatically exposes
+  the inverse relationship so players can discover the interaction from either rule.
 - Add a deterministic rules-enrichment coverage audit across the currently exposed
   Skill, Equipment, Weapon, and Trait catalogs, reporting missing definitions,
   review/source freshness gaps, ambiguous family/exact-source mappings, and unresolved

@@ -41,6 +41,34 @@ def test_armed_turret_profile_comes_from_curated_rules(tmp_path: Path) -> None:
     assert [rule["id"] for rule in item["rules"]] == ["weapon:armed-turret"]
 
 
+
+def test_catalog_rules_surface_msv_mimetism_interaction(tmp_path: Path) -> None:
+    catalog = CatalogRules(_rules_database(tmp_path))
+    item = {
+        "id": 9001,
+        "name": "Multispectral Visor",
+        "slug": "multispectral-visor",
+        "variants": [],
+    }
+
+    result = catalog.enrich_catalog_item("equipment", item)
+
+    rule = next(rule for rule in result["rules"] if rule["id"] == "equipment:multispectral-visor")
+    assert rule["display_relations"] == [
+        {
+            "type": "reduces-modifiers-from",
+            "record_id": "skill:mimetism",
+            "collection_id": "n5-core-v5.3",
+            "direction": "outbound",
+            "record": {
+                "id": "skill:mimetism",
+                "kind": "skill",
+                "name": "Mimetism",
+                "army_links": [{"entity": "skill", "id": "mimetism"}],
+            },
+        }
+    ]
+
 def test_catalog_rules_leave_army_item_raw_without_rules_database() -> None:
     item = {"id": 226, "name": "Armed Turret", "profiles": []}
 

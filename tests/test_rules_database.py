@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 132
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 134
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -501,6 +501,57 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
     }
 
+
+
+def test_msv_mimetism_interaction_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    msv = next(
+        record
+        for record in database.composed_records_for_army_link(
+            "equipment", "multispectral-visor"
+        )
+        if record["id"] == "equipment:multispectral-visor"
+    )
+    mimetism = next(
+        record
+        for record in database.composed_records_for_army_link("skill", "mimetism")
+        if record["id"] == "skill:mimetism"
+    )
+
+    assert msv["display_relations"] == [
+        {
+            "type": "reduces-modifiers-from",
+            "record_id": "skill:mimetism",
+            "collection_id": "n5-core-v5.3",
+            "direction": "outbound",
+            "record": {
+                "id": "skill:mimetism",
+                "kind": "skill",
+                "name": "Mimetism",
+                "army_links": [{"entity": "skill", "id": "mimetism"}],
+            },
+        }
+    ]
+    assert mimetism["display_relations"] == [
+        {
+            "type": "reduces-modifiers-from",
+            "record_id": "equipment:multispectral-visor",
+            "collection_id": "n5-core-v5.3",
+            "direction": "inbound",
+            "record": {
+                "id": "equipment:multispectral-visor",
+                "kind": "equipment",
+                "name": "Multispectral Visor",
+                "army_links": [
+                    {"entity": "equipment", "id": "multispectral-visor"}
+                ],
+            },
+        }
+    ]
 
 def test_rules_database_preserves_variant_inheritance_and_variant_links(
     tmp_path: Path,

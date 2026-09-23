@@ -45,11 +45,11 @@ property of the canonical Skill/Equipment identity.
 **Relationships.** Reviewed semantic relationships are a primary InfinityDB
 feature, not supporting metadata. A player should be able to start from either
 side of a gameplay interaction and discover the other side even when the source
-rule or Wiki page documents only one direction. For example, once the reviewed
-N5.3 enrichment records how Multispectral Visors modify Mimetism, the MSV surface
-must point to Mimetism and the Mimetism surface must expose the derived reverse
-interaction. Curated data should author the semantic edge once; `rules.db` derives
-the reverse direction.
+rule or Wiki page documents only one direction. The first production example is
+Multispectral Visor/Mimetism: curated data authors `reduces-modifiers-from` once
+from MSV to Mimetism, while `rules.db` derives the reverse relationship for the
+Mimetism surface. Future interactions should follow the same one-authored-edge
+model rather than maintaining reciprocal facts independently.
 
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation
@@ -86,9 +86,9 @@ follow-ups.
   relations. The shared renderer now receives resolved endpoint metadata and can
   present the currently reviewed State/Peripheral relationship vocabulary with
   direction-aware player labels while suppressing bookkeeping edges such as
-  `variant-of`. The remaining audit must extend that same model to reviewed
-  cross-rule gameplay interactions (for example MSV/Mimetism) and verify that
-  both endpoints expose the relationship clearly.
+  `variant-of`. The same model now covers the reviewed Multispectral Visor/Mimetism
+  interaction in both directions. The remaining audit must systematically identify
+  other player-relevant interactions and verify them against the generated browser.
 - **Source/applicability context currently precedes the concise summary.** This is
   correct data, but the complete browser audit should determine whether the
   normal reading order should lead with gameplay meaning and move provenance/

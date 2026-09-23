@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 9,
+    "formatVersion": 10,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -281,6 +281,24 @@
             "url": "https://infinitythewiki.com/index.php?title=Forward_Deployment&oldid=3076",
             "authority": "secondary",
             "retrievedDate": "2026-09-17"
+        },
+        {
+            "id": "wiki-mimetism-oldid-3102",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Mimetism revision 3102",
+            "version": "N5.3 / oldid 3102",
+            "url": "https://infinitythewiki.com/index.php?title=Mimetism&oldid=3102",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-multispectral-visor-oldid-4111",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Multispectral Visor revision 4111",
+            "version": "N5.3 / oldid 4111",
+            "url": "https://infinitythewiki.com/index.php?title=Multispectral_Visor&oldid=4111",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
         }
     ],
     "records": [
@@ -5358,6 +5376,103 @@
                 {
                     "type": "variant-of",
                     "recordId": "equipment:tinbot"
+                }
+            ]
+        },
+        {
+            "id": "skill:mimetism",
+            "kind": "skill",
+            "name": "Mimetism",
+            "labelIds": [
+                "negative-feedback",
+                "obligatory"
+            ],
+            "summary": "An Automatic Special Skill that imposes its listed negative MOD on enemy BS Attacks requiring LoF and on Discover attempts against the user.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "effects": [
+                    "Enemy BS Attacks that require LoF and Discover attempts against the user apply the Mimetism MOD listed in the Unit Profile.",
+                    "The Mimetism MOD does not apply to CC Attacks."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "mimetism"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-mimetism-oldid-3102",
+                    "heading": "Mimetism"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:multispectral-visor",
+            "kind": "equipment",
+            "name": "Multispectral Visor",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "Automatic Equipment whose Level reduces Mimetism and Visibility Zone MODs, with higher Levels improving visibility handling and Level 3 adding further camouflage-countering effects.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Level 1 reduces Mimetism (-3) to 0 and Mimetism (-6) to -3.",
+                    "Levels 2 and 3 reduce Mimetism MODs to 0.",
+                    "All Levels interact with Visibility Zones and Smoke; Levels 2 and 3 remove Visibility Zone MODs while drawing LoF through those Zones.",
+                    "Level 3 additionally improves Discover against Camouflaged targets, ignores specified Surprise Attack MODs, and can BS Attack a Camouflage Marker in LoF without first succeeding at Discover during the Active Turn; the Marker’s Mimetism MOD still applies to that attack."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "multispectral-visor"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-multispectral-visor-oldid-4111",
+                    "heading": "Multispectral Visor"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "reduces-modifiers-from",
+                    "recordId": "skill:mimetism"
                 }
             ]
         }

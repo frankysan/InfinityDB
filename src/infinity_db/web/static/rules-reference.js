@@ -36,6 +36,10 @@ const relationLabels = {
   "enters-state": { outbound: "Enters state", inbound: "Entered by" },
   "has-subtype": { outbound: "Includes subtype", inbound: "Subtype of" },
   "reveals-state": { outbound: "Reveals state", inbound: "Revealed by" },
+  "reduces-modifiers-from": {
+    outbound: "Reduces MODs from",
+    inbound: "MODs reduced by",
+  },
 };
 
 function relationHref(record) {

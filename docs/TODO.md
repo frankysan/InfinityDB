@@ -137,7 +137,7 @@ requiring a new top-level browser surface in 0.7.0.
     Equipment-domain Deactivator/GizmoKit/MediKit actions.
   - [ ] Add the remaining reviewed semantic labels/classifications that help users
     interpret existing data, including typed MOD/parameter meaning. Regular and
-    Irregular Training are already classified per loadout Order occurrence. Curated v9
+    Irregular Training are already classified per loadout Order occurrence. Curated v10
     preserves Martial Arts L1-L5 / Strategos L1-L2 as typed exact-source Levels,
     adds reviewed BS=12, BS=11, and CC=21 numeric Attribute replacements, and models
     the six non-base TinBot source variants as named exact-source variants; Equipment
@@ -207,14 +207,15 @@ requiring a new top-level browser surface in 0.7.0.
     graph when they help a player understand or navigate the current item. A relation
     is authored once in curated data and `rules.db` derives the reverse direction;
     both endpoints must expose useful player-facing context when both have browser
-    surfaces. Multispectral Visor -> Mimetism is a required audit example: once its
-    exact N5.3 semantics are curated, the MSV page must show the interaction and the
-    Mimetism page must show the derived reverse interaction. Translate semantic edge
-    types into direction-aware player language and suppress implementation-only
-    relationships such as family bookkeeping when the existing variant UI already
-    communicates them. The shared rules renderer now supports resolved forward/reverse
-    endpoint metadata for the existing reviewed relation vocabulary; interaction
-    coverage remains incomplete until the rules audit adds the missing gameplay edges.
+    surfaces. Multispectral Visor -> Mimetism is now the first production acceptance
+    example: curated v10 authors `reduces-modifiers-from` once on Multispectral Visor,
+    the MSV surface presents “Reduces MODs from: Mimetism”, and the Mimetism surface
+    receives the derived “MODs reduced by: Multispectral Visor” relationship. Translate
+    further semantic edge types into direction-aware player language and suppress
+    implementation-only relationships such as family bookkeeping when the existing
+    variant UI already communicates them. Systematic interaction coverage remains open
+    until the rules audit identifies and curates the other gameplay edges relevant to
+    currently exposed rules.
   - [ ] Review information hierarchy on Skill, Equipment, Weapon, Trait, and
     representative Unit/profile/loadout surfaces: the concise gameplay meaning and
     applicable variant/occurrence context should be easier to find than provenance,

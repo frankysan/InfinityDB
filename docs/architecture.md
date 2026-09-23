@@ -279,7 +279,7 @@ Skill-extra distance semantics are split according to source authority. Army
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v9 makes applicability, review state, contribution role, typed
+Curated rules format v10 makes applicability, review state, contribution role, typed
 related-item edges, explicit catalog-variant inheritance, typed exact-source variants, and
 cross-domain declaration categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
@@ -303,14 +303,16 @@ current semantic record before `rules.db` can be published. Composed rule payloa
 `display_relations` graph projection with direction and resolved endpoint identity/Army
 links. The shared browser renderer translates only reviewed player-relevant relation types
 into direction-aware labels and links; it does not expose raw edge names or duplicate
-`variant-of` bookkeeping. This projection is the foundation for 0.7.0 cross-rule gameplay
-interactions such as the reviewed Multispectral Visor/Mimetism relationship, while 0.8.x
-remains focused on structural application relationships such as Fireteams, includes, and
-selection dependencies.
+`variant-of` bookkeeping. Format v10 adds the first gameplay-interaction edge,
+`reduces-modifiers-from`: Multispectral Visor authors that edge once toward Mimetism,
+and the Mimetism surface receives the derived inverse relationship automatically. This
+projection is the foundation for further 0.7.0 cross-rule gameplay interactions, while
+0.8.x remains focused on structural application relationships such as Fireteams, includes,
+and selection dependencies.
 `Super-Jump` and `Forward Deployment` currently use
 `variantSemantics.occurrenceParameters` to state how a positive distance sign should be
 displayed. Exact source variants use `variantSemantics.sourceVariant`; format v9
-standardizes numeric `level`, explicit `named`, and numeric
+introduced numeric `level`, explicit `named`, and numeric
 `attribute-replacement` variants. Martial Arts L1-L5 and Strategos L1-L2 are
 maintained as reviewed Level variants, BS=12, BS=11, and CC=21 are reviewed
 Attribute-replacement variants, and the six non-base TinBot identities are reviewed
@@ -1122,7 +1124,7 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v9 rules contract stores collection scope, source metadata,
+The current curated-v10 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, typed related-rule edges,
 explicit variant inheritance and exact-source variant semantics, composition role, review
 state, and source-specific citations. PDF sources carry both the local
@@ -1132,7 +1134,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v9 must be migrated before ingestion.
+Curated-rule files older than format v10 must be migrated before ingestion.
 
 ## HTTP API
 

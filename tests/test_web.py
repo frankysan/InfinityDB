@@ -1915,6 +1915,8 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'heading.textContent = "Related rules"' in body
     assert b'"enters-state": { outbound: "Enters state", inbound: "Entered by" }' in body
     assert b'"reveals-state": { outbound: "Reveals state", inbound: "Revealed by" }' in body
+    assert b'outbound: "Reduces MODs from"' in body
+    assert b'inbound: "MODs reduced by"' in body
     assert b'const labels = relationLabels[relation.type]' in body
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body
