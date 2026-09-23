@@ -967,6 +967,24 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110#Silent_(X)>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 
+### RS-GSG-TRAIT-004 — Concealed uses Camouflaged State effects without entering it
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+`Concealed` gives its bearer the effects of Camouflaged State while retaining a distinct
+Silhouette 2 concealing Marker. It is not a generic transition into Camouflaged State, so
+representing it with `enters-state` would misstate the rule.
+
+InfinityDB therefore authors `uses-effects-of` from Concealed toward Camouflaged State.
+`rules.db` derives the reverse navigation so the State page identifies Concealed as a
+consumer of its effects without duplicating the Trait's Marker-specific behavior. The
+Marker Silhouette remains on the Trait, not the relation edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110#Concealed>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
 ## Skills and Equipment / Module semantics
 
 ### RS-SE-SCOPE-001 — Navigation membership does not determine rules scope

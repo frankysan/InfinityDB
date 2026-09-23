@@ -59,6 +59,7 @@ const relationLabels = {
     inbound: "MODs reduced by",
   },
   "restricts-use-of": { outbound: "Restricts use of", inbound: "Use restricted by" },
+  "uses-effects-of": { outbound: "Uses effects of", inbound: "Effects used by" },
 };
 
 function relationHref(record) {

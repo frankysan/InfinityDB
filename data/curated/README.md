@@ -200,7 +200,7 @@ ignored MODs separately from effects that become ineffective. Format v12 adds
 Skill's Roll or constrain one specific use without implying that the whole target rule
 is negated. Format v13 adds `applies-effects-to` and `imposes-modifiers-on` so rules such
 as Reflective and Albedo can expose who they affect without collapsing those different
-mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state. Format v16 adds `causes-state` for explicit activation paths such as Forward Observer causing Targeted State, while existing roll/restriction relations make the affected State useful from both directions. Format v17 adds `enables-use-of` when a reviewed rule or State satisfies a documented prerequisite for another rule without claiming that all of the target rule's requirements are met.
+mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state. Format v16 adds `causes-state` for explicit activation paths such as Forward Observer causing Targeted State, while existing roll/restriction relations make the affected State useful from both directions. Format v17 adds `enables-use-of` when a reviewed rule or State satisfies a documented prerequisite for another rule without claiming that all of the target rule's requirements are met. Format v18 adds `uses-effects-of` when a rule reuses another rule's effects without claiming that it enters the target State; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior.
 
 Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 `{"orderType": "irregular"}` and canonical IDs `training:regular` /
@@ -374,7 +374,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v17 are no longer accepted by the loader and must
+Curated-rule files older than format v18 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

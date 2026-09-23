@@ -334,9 +334,10 @@ links to Suppressive Fire State; `Concealed` invokes Camouflaged State effects;
 `Disposable (X)` leads to Unloaded State when uses are exhausted; and
 `Non-Reloadable` changes Unloaded cancellation.
 
-These are useful candidates for a future relationship graph between Traits,
-States, Weapons, Equipment, Skills, and Ammunition. The later domain audits should
-validate the complete edge set before materializing such a graph.
+These are useful candidates for a relationship graph between Traits, States,
+Weapons, Equipment, Skills, and Ammunition. The reviewed Concealed-to-Camouflaged-State
+edge is now materialized as `uses-effects-of`; the later domain audits should validate
+the remaining edge set before it is materialized.
 
 Sources:
 

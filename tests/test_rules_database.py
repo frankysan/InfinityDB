@@ -460,6 +460,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("enters-state", "inbound", "skill:camouflage"),
         ("reveals-state", "inbound", "skill:discover"),
         ("reveals-state", "inbound", "skill:sensor"),
+        ("uses-effects-of", "inbound", "trait:concealed"),
     }
 
     camouflage = next(
@@ -496,6 +497,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("enters-state", "inbound", "Camouflage", (("skill", "camouflage"),)),
         ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
         ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
+        ("uses-effects-of", "inbound", "Concealed", ()),
     }
 
 

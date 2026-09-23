@@ -7,6 +7,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Link Concealed bidirectionally to Camouflaged State, making its reuse of that State's
+  effects discoverable without incorrectly representing it as State entry.
 - Link Stealth bidirectionally to Cautious Movement using the existing `enables-use-of`
   relationship, exposing the documented ZoC/Hacking Area exception without flattening the
   remaining declaration, LoF, and ARO conditions into the graph edge.
