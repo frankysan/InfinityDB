@@ -2559,7 +2559,7 @@ first-class navigation targets for the interaction graph without implying that I
 stores a Trooper's current in-game state in `infinity.db`.
 
 The rules schema stores collections, sources, vocabulary definitions, record
-contributions, citations, Army links, and typed record relations. Curated format v16
+contributions, citations, Army links, and typed record relations. Curated format v17
 requires every record contribution to carry an explicit applicability scope (`game`
 plus one or more `seasons`), review state/date, and composition role. Current semantic
 composition is fail-closed: exactly one `definition` contribution must exist for each
@@ -2596,7 +2596,7 @@ specific use of another rule without claiming full negation. Sensor is the first
 to combine those edge types with existing state/reduction semantics. Format v13 adds
 `applies-effects-to` when another rule's effects explicitly extend to the target and
 `imposes-modifiers-on` when the source rule applies MODs to the target rule's user;
-Reflective and Albedo use those distinct semantics toward Marksmanship and MSV. Format v14 adds `overrides-effects-of` for cases where one reviewed rule explicitly takes precedence over another without claiming the target rule is globally negated. Format v15 adds `cancels-state` for reviewed Skills that remove a State; Doctor and Engineer author those edges and State records receive the inverse relation automatically. Format v16 adds `causes-state` for reviewed effects that explicitly place a target in a State; Forward Observer uses it for Targeted, while Targeted's own outbound `modifies-rolls-for` and `restricts-use-of` edges expose the consequences from the affected Skills as well.
+Reflective and Albedo use those distinct semantics toward Marksmanship and MSV. Format v14 adds `overrides-effects-of` for cases where one reviewed rule explicitly takes precedence over another without claiming the target rule is globally negated. Format v15 adds `cancels-state` for reviewed Skills that remove a State; Doctor and Engineer author those edges and State records receive the inverse relation automatically. Format v16 adds `causes-state` for reviewed effects that explicitly place a target in a State; Forward Observer uses it for Targeted, while Targeted's own outbound `modifies-rolls-for` and `restricts-use-of` edges expose the consequences from the affected Skills as well. Format v17 adds `enables-use-of` for documented prerequisite relationships; Camouflaged and Hidden Deployment States use it toward Surprise Attack without asserting that its other declaration requirements are satisfied.
 The edge describes the relationship itself; conditional details remain in the owning rule
 facts rather than being duplicated onto the reverse edge.
 

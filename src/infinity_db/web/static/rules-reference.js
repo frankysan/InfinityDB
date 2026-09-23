@@ -37,6 +37,7 @@ const relationLabels = {
   "cancels-state": { outbound: "Cancels state", inbound: "Cancelled by" },
   "causes-state": { outbound: "Causes state", inbound: "Caused by" },
   "enters-state": { outbound: "Enters state", inbound: "Entered by" },
+  "enables-use-of": { outbound: "Enables use of", inbound: "Enabled by" },
   "has-subtype": { outbound: "Includes subtype", inbound: "Subtype of" },
   "ignores-modifiers-from": {
     outbound: "Ignores MODs from",

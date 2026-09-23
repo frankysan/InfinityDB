@@ -69,6 +69,8 @@ IMM-A, IMM-B, Isolated, Stunned, Targeted, and Unconscious. Each affected State 
 remain in the owning rule facts.
 Targeted extends State pages from recovery-only navigation into a full interaction hub. Forward Observer authors `causes-state` toward Targeted; Reset authors cancellation edges toward Targeted and IMM-B; and Targeted itself authors roll/restriction relationships toward BS Attack, Discover, Reset, Cautious Movement, and Stealth. A player can therefore start from either the State or one of the affected Skills and discover the interaction without duplicating exact MOD values across records.
 
+Camouflaged State is now a reviewed lifecycle hub rather than a draft supporting record: Camouflage enters it, Discover and Sensor reveal it, and the State itself enables the documented Marker-form prerequisite for Surprise Attack. Hidden Deployment State authors the same `enables-use-of` relationship. Surprise Attack therefore exposes both enabling States in reverse while retaining its separate Active Turn and Attack-declaration requirements.
+
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation
 when a browser surface exists, and bookkeeping edges such as `variant-of` should

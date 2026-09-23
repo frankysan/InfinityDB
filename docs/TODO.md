@@ -152,6 +152,9 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Make Targeted State a bidirectional interaction hub: Forward Observer causes it,
     Reset cancels it (and IMM-B), and Targeted exposes the reviewed roll/declaration
     interactions with BS Attack, Discover, Reset, Cautious Movement, and Stealth.
+  - [x] Review Camouflage/Camouflaged State and model the documented Surprise Attack
+    prerequisite bidirectionally: Camouflaged and Hidden Deployment States enable use of
+    Surprise Attack while the Skill retains its remaining Active Turn/Attack requirements.
   - [x] Keep semantic identity, source publication provenance, and applicability
     scope separate so core, annex, FAQ, season, or scenario material can enrich the
     same canonical item without duplication or collection-load-order semantics.

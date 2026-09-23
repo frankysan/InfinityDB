@@ -677,6 +677,31 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Reset>
 - Wiki: <https://infinitythewiki.com/Cautious_Movement>
 
+### RS-GSG-STATE-005C — State prerequisites can enable another rule without making it legal by themselves
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+Some rules require the user to begin an Order in a particular State or presentation form.
+Surprise Attack explicitly requires Marker form (including Camouflaged State) or Hidden
+Deployment at the start of the Order, in addition to its Active Turn and Attack-declaration
+requirements.
+
+InfinityDB represents the State/form prerequisite with `enables-use-of` edges from reviewed
+Camouflaged State and Hidden Deployment State to Surprise Attack. The reverse projection lets
+players reading Surprise Attack discover those enabling States. The edge does **not** mean that
+being in one of those States is sufficient by itself: the remaining requirements stay on the
+Surprise Attack definition.
+
+This is distinct from `enters-state`: Camouflage and Hidden Deployment Skills describe how their
+States are entered, while `enables-use-of` describes a gameplay consequence of already being in
+the State.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Camouflaged>
+- Wiki: <https://infinitythewiki.com/Hidden_Deployment_State>
+- Wiki: <https://infinitythewiki.com/Surprise_Attack>
+
 ### RS-GSG-STATE-006 — Unloaded is item-specific runtime state
 
 **Classification:** source-native with a future state-model consequence.

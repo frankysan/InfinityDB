@@ -59,6 +59,7 @@ def _fixture_database(tmp_path: Path) -> Path:
                 {"id": 3013, "name": "Forward Observer"},
                 {"id": 3014, "name": "Reset"},
                 {"id": 3015, "name": "Cautious Movement"},
+                {"id": 3016, "name": "Surprise Attack"},
                 {"id": 999, "name": "Missing Skill"},
             ],
             "equip": [
@@ -107,32 +108,20 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 20
-    assert report["summary"]["completeCount"] == 16
-    assert report["summary"]["gapCount"] == 4
+    assert report["summary"]["exposedCount"] == 21
+    assert report["summary"]["completeCount"] == 19
+    assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
         "stale_citation_source": 1,
-        "unreviewed_rule": 2,
     }
-    assert report["summary"]["classifiedGapCount"] == 4
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 4}
-    assert report["summary"]["releaseBlockerCount"] == 4
+    assert report["summary"]["classifiedGapCount"] == 2
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 2}
+    assert report["summary"]["releaseBlockerCount"] == 2
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
-    assert skills["Camouflage"]["gapCodes"] == ["unreviewed_rule"]
-    assert skills["Camouflage"]["gapClassifications"] == [
-        {
-            "code": "unreviewed_rule",
-            "classification": "release-blocker",
-            "reason": (
-                "Draft or otherwise unreviewed contributions cannot satisfy the 0.7.0 "
-                "reviewed-enrichment gate."
-            ),
-            "source": "gap-code",
-        }
-    ]
+    assert skills["Camouflage"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapCodes"] == ["missing_rule_definition"]
     assert skills["Missing Skill"]["gapClassifications"][0]["classification"] == (
         "release-blocker"
@@ -150,6 +139,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert turret["familyRuleIds"] == ["weapon:armed-turret"]
     assert turret["gapCodes"] == ["stale_citation_source"]
     states = {item["name"]: item for item in report["domains"]["states"]["items"]}
+    assert states["Camouflaged State"]["gapCodes"] == []
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []
 
@@ -162,13 +152,10 @@ def test_enrichment_coverage_default_details_only_list_gaps(tmp_path: Path) -> N
     report = audit_coverage(_fixture_database(tmp_path), _fixture_rules(tmp_path))
 
     assert [item["name"] for item in report["domains"]["skills"]["items"]] == [
-        "Camouflage",
-        "Missing Skill",
+        "Missing Skill"
     ]
     assert report["domains"]["equipment"]["items"] == []
-    assert [item["name"] for item in report["domains"]["states"]["items"]] == [
-        "Camouflaged State"
-    ]
+    assert report["domains"]["states"]["items"] == []
     assert [item["name"] for item in report["domains"]["weapons"]["items"]] == [
         "Armed Turret"
     ]
@@ -230,9 +217,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 3,
+        "release-blocker": 1,
     }
-    assert report["summary"]["releaseBlockerCount"] == 3
+    assert report["summary"]["releaseBlockerCount"] == 1
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:

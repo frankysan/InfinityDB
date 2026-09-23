@@ -1245,7 +1245,7 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 typed exact-source semantics (2026-09-23)
 
-- Curated rules format v16 and `rules.db` schema/compatibility 7 require every
+- Curated rules format v17 and `rules.db` schema/compatibility 7 require every
   `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
   Supported kinds are numeric `level`, explicit `named`, and numeric
   `attribute-replacement`; family records may not declare source-variant metadata.
@@ -1315,5 +1315,5 @@ compatibility references remain unambiguous JSON integers.
   Marksmanship and Multispectral Visor. Natural Born Warrior then reuses
   `ignores-modifiers-from` toward Martial Arts and Surprise Attack, with reverse navigation
   derived on both affected Skills while generic signed CC/weapon MOD semantics remain
-  intentionally unmodeled. Curated v14 adds `overrides-effects-of`: No Cover takes precedence over Limited Cover when both restrictions apply, with the inverse relation derived automatically. Curated v15 adds `cancels-state`: Doctor and Engineer author cancellation edges toward reviewed States, and the new rules-backed State pages expose the derived reverse navigation. Curated v16 adds `causes-state`: Forward Observer causes Targeted, Reset cancels Targeted/IMM-B, and Targeted itself projects roll/restriction interactions to BS Attack, Discover, Reset, Cautious Movement, and Stealth. Keep this separate from 0.8 structural application
+  intentionally unmodeled. Curated v14 adds `overrides-effects-of`: No Cover takes precedence over Limited Cover when both restrictions apply, with the inverse relation derived automatically. Curated v15 adds `cancels-state`: Doctor and Engineer author cancellation edges toward reviewed States, and the new rules-backed State pages expose the derived reverse navigation. Curated v16 adds `causes-state`: Forward Observer causes Targeted, Reset cancels Targeted/IMM-B, and Targeted itself projects roll/restriction interactions to BS Attack, Discover, Reset, Cautious Movement, and Stealth. Curated v17 adds `enables-use-of`: reviewed Camouflaged and Hidden Deployment States satisfy Surprise Attack's documented state/form prerequisite, while its Active Turn and attack-declaration requirements remain on Surprise Attack. Keep this separate from 0.8 structural application
   relationships.

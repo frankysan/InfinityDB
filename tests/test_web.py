@@ -1982,6 +1982,7 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
         b'"restricts-use-of": { outbound: "Restricts use of", inbound: "Use restricted by" }'
         in body
     )
+    assert b'"enables-use-of": { outbound: "Enables use of", inbound: "Enabled by" }' in body
     assert b'const labels = relationLabels[relation.type]' in body
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body

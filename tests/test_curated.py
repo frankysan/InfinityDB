@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 16,
+        "formatVersion": 17,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -465,7 +465,12 @@ def test_checked_in_n5_collection_is_valid() -> None:
     records = {record["id"]: record for record in document["records"]}
     assert records["state:camouflaged"]["kind"] == "state"
     assert records["state:camouflaged"]["labelIds"] == ["marker"]
+    assert records["state:camouflaged"]["review"]["status"] == "reviewed"
+    assert records["state:camouflaged"]["relations"] == [
+        {"type": "enables-use-of", "recordId": "skill:surprise-attack"}
+    ]
     assert records["skill:camouflage"]["kind"] == "skill"
+    assert records["skill:camouflage"]["review"]["status"] == "reviewed"
     assert records["skill:camouflage"]["labelIds"] == ["optional"]
     assert records["skill:camouflage"]["facts"]["typeId"] == "automatic"
     assert records["skill:camouflage"]["relations"] == [

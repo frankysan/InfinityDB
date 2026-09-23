@@ -456,6 +456,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         (item["type"], item["direction"], item["record_id"])
         for item in relations
     } == {
+        ("enables-use-of", "outbound", "skill:surprise-attack"),
         ("enters-state", "inbound", "skill:camouflage"),
         ("reveals-state", "inbound", "skill:discover"),
         ("reveals-state", "inbound", "skill:sensor"),
@@ -491,6 +492,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         )
         for relation in camouflaged["display_relations"]
     } == {
+        ("enables-use-of", "outbound", "Surprise Attack", (("skill", "surprise-attack"),)),
         ("enters-state", "inbound", "Camouflage", (("skill", "camouflage"),)),
         ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
         ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
@@ -569,14 +571,17 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
     }
     assert ("negates-effects-of", "inbound", "Combat Instinct") in stealth_relations
     assert ("negates-effects-of", "inbound", "Sixth Sense") in stealth_relations
+    surprise_relations = {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in surprise_attack["display_relations"]
+    }
     assert (
         "ignores-modifiers-from",
         "inbound",
         "Combat Instinct",
-    ) in {
-        (relation["type"], relation["direction"], relation["record"]["name"])
-        for relation in surprise_attack["display_relations"]
-    }
+    ) in surprise_relations
+    assert ("enables-use-of", "inbound", "Camouflaged State") in surprise_relations
+    assert ("enables-use-of", "inbound", "Hidden Deployment State") in surprise_relations
 
 
 def test_sensor_interactions_are_bidirectional(tmp_path: Path) -> None:
@@ -643,6 +648,7 @@ def test_sensor_interactions_are_bidirectional(tmp_path: Path) -> None:
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in hidden_state["display_relations"]
     } == {
+        ("enables-use-of", "outbound", "Surprise Attack"),
         ("enters-state", "inbound", "Hidden Deployment"),
         ("reveals-state", "inbound", "Sensor"),
     }

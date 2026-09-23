@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 16,
+    "formatVersion": 17,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -511,7 +511,7 @@
                 "Camouflage State",
                 "CAMO"
             ],
-            "summary": "A state in which a trooper is represented by a Camouflage Marker rather than its model.",
+            "summary": "A Marker State that hides the represented Trooper, Weapon, or Equipment until it is revealed by Discover or another rule.",
             "composition": {
                 "role": "definition"
             },
@@ -524,15 +524,23 @@
             "facts": {
                 "category": "state",
                 "timing": [
-                    "Deployment Phase"
+                    "Deployment Phase",
+                    "Active Turn"
                 ],
                 "effects": [
-                    "The trooper is represented by a Camouflage Marker."
+                    "The represented game element is replaced by a Camouflaged Marker while the State is active.",
+                    "A successful Discover Roll reveals the Marker and replaces it with the corresponding Model or Token.",
+                    "A Camouflaged Marker may carry the user's Mimetism MOD and has 360-degree Line of Fire."
                 ],
                 "requirements": [
-                    "The trooper has the Camouflage Special Skill."
+                    "The game element has the Camouflage Special Skill."
                 ],
-                "restrictions": []
+                "restrictions": [
+                    "Enemy Troopers cannot declare Attacks against a Camouflaged Marker unless another rule allows it; the Marker must normally be Discovered first.",
+                    "Enemy Troopers cannot enter Silhouette contact with a Camouflaged Marker.",
+                    "A Trooper in Camouflaged State cannot be part of a Fireteam.",
+                    "During the Active Turn, a Camouflage user may regain this State only with the required Long Skill while outside the LoF of enemy Models and Markers."
+                ]
             },
             "citations": [
                 {
@@ -557,9 +565,15 @@
                 }
             ],
             "review": {
-                "status": "draft",
-                "reviewedOn": "2026-09-15"
-            }
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:surprise-attack"
+                }
+            ]
         },
         {
             "id": "skill:camouflage",
@@ -571,7 +585,7 @@
             "aliases": [
                 "CAMO"
             ],
-            "summary": "A Special Skill that allows a trooper to enter and remain in Camouflaged State.",
+            "summary": "An Automatic Special Skill that lets its user deploy in and later enter Camouflaged State.",
             "composition": {
                 "role": "definition"
             },
@@ -584,11 +598,9 @@
             "facts": {
                 "category": "special-skill",
                 "typeId": "automatic",
-                "timing": [
-                    "Deployment Phase"
-                ],
                 "effects": [
-                    "Allows the trooper to enter Camouflaged State."
+                    "During the Deployment Phase, the user may deploy in Camouflaged State.",
+                    "During the game, the user may enter Camouflaged State under that State's activation conditions."
                 ],
                 "requirements": [],
                 "restrictions": []
@@ -617,8 +629,8 @@
                 }
             ],
             "review": {
-                "status": "draft",
-                "reviewedOn": "2026-09-15"
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
             },
             "relations": [
                 {
@@ -5975,6 +5987,12 @@
             },
             "labelIds": [
                 "private-information"
+            ],
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:surprise-attack"
+                }
             ]
         },
         {
