@@ -2458,7 +2458,7 @@ identities and structured effects; FAQs yield dated rulings; ITS material is
 isolated by season; wiki material supplies discovery, aliases, and cross-links.
 Historical documents must not be silently merged into current rules.
 
-The current curated-v11 document has collection identity, source records, typed
+The current curated-v12 document has collection identity, source records, typed
 fact records, maintained vocabularies, scope, Army links, typed relations, explicit
 variant inheritance and exact-source variant semantics, composition role, review state,
 and source-specific citations. PDF sources record the local
@@ -2552,7 +2552,7 @@ display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
 The rules schema stores collections, sources, vocabulary definitions, record
-contributions, citations, Army links, and typed record relations. Curated format v11
+contributions, citations, Army links, and typed record relations. Curated format v12
 requires every record contribution to carry an explicit applicability scope (`game`
 plus one or more `seasons`), review state/date, and composition role. Current semantic
 composition is fail-closed: exactly one `definition` contribution must exist for each
@@ -2583,7 +2583,10 @@ interaction edge: the authored endpoint reduces MODs imposed by the target rule,
 the reverse projection reads as that rule having its MODs reduced by the source endpoint.
 Format v11 adds `ignores-modifiers-from` when the source rule ignores MODs imposed
 by another rule and `negates-effects-of` when another rule becomes ineffective against
-the source endpoint.
+the source endpoint. Format v12 adds `modifies-rolls-for` for a rule that changes how
+another rule's Roll is resolved and `restricts-use-of` for a rule that constrains a
+specific use of another rule without claiming full negation. Sensor is the first record
+to combine those edge types with existing state/reduction semantics.
 The edge describes the relationship itself; conditional details remain in the owning rule
 facts rather than being duplicated onto the reverse edge.
 

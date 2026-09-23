@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 11,
+    "formatVersion": 12,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -333,6 +333,33 @@
             "title": "Infinity Wiki — Surprise Attack revision 3943",
             "version": "N5.3 / oldid 3943",
             "url": "https://infinitythewiki.com/index.php?title=Surprise_Attack&oldid=3943",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-sensor-oldid-3274",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Sensor revision 3274",
+            "version": "N5.3 / oldid 3274",
+            "url": "https://infinitythewiki.com/index.php?title=Sensor&oldid=3274",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-hidden-deployment-oldid-3084",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Hidden Deployment revision 3084",
+            "version": "N5.3 / oldid 3084",
+            "url": "https://infinitythewiki.com/index.php?title=Hidden_Deployment&oldid=3084",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-hidden-deployment-state-oldid-3835",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Hidden Deployment State revision 3835",
+            "version": "N5.3 / oldid 3835",
+            "url": "https://infinitythewiki.com/index.php?title=Hidden_Deployment_State&oldid=3835",
             "authority": "secondary",
             "retrievedDate": "2026-09-23"
         }
@@ -5718,6 +5745,188 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
             },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "state:hidden-deployment",
+            "kind": "state",
+            "name": "Hidden Deployment State",
+            "aliases": [
+                "Hidden Deployment"
+            ],
+            "summary": "A deployment state in which a trooper's position is recorded privately without placing a Model or Marker on the table.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "timing": [
+                    "Deployment Phase"
+                ],
+                "effects": [
+                    "The trooper is not placed on the table while the state is active and is generally treated as not being on the table.",
+                    "The state is canceled when the trooper is Discovered by a rule that explicitly allows it, such as Sensor."
+                ],
+                "requirements": [
+                    "The trooper has the Hidden Deployment Special Skill."
+                ],
+                "restrictions": [
+                    "Once canceled, Hidden Deployment State cannot be regained."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-hidden-deployment-state-oldid-3835",
+                    "heading": "Hidden Deployment State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "labelIds": [
+                "private-information"
+            ]
+        },
+        {
+            "id": "skill:hidden-deployment",
+            "kind": "skill",
+            "name": "Hidden Deployment",
+            "summary": "An optional Deployment Special Skill that lets the user deploy in Hidden Deployment State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "deployment-skill",
+                "effects": [
+                    "During the Deployment Phase, the user may deploy in Hidden Deployment State."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional",
+                "private-information"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "hidden-deployment"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 94,
+                    "section": "Hidden Deployment"
+                },
+                {
+                    "sourceId": "wiki-hidden-deployment-oldid-3084",
+                    "heading": "Hidden Deployment"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:hidden-deployment"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:sensor",
+            "kind": "skill",
+            "name": "Sensor",
+            "summary": "A Short Special Skill that detects hidden threats in the user's Zone of Control and improves Discover against Camouflage.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "short-skill",
+                "effects": [
+                    "The user may make a Normal WIP+6 Roll to simultaneously Discover enemy Troopers, Weapons, or Equipment in Hidden Deployment or Camouflaged State inside the user's Zone of Control.",
+                    "The Sensor Roll does not apply Range or Mimetism MODs and does not require LoF or a designated target.",
+                    "Enemies with the Camouflage Special Skill cannot regain Camouflaged State inside the user's Zone of Control.",
+                    "The user gains +6 WIP when declaring Discover against Camouflage Markers."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [
+                "attack",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "sensor"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112,
+                    "section": "Sensor"
+                },
+                {
+                    "sourceId": "wiki-sensor-oldid-3274",
+                    "heading": "Sensor"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "ignores-modifiers-from",
+                    "recordId": "skill:mimetism"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:discover"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:camouflage"
+                },
+                {
+                    "type": "reveals-state",
+                    "recordId": "state:camouflaged"
+                },
+                {
+                    "type": "reveals-state",
+                    "recordId": "state:hidden-deployment"
+                }
+            ],
             "variantSemantics": {
                 "inheritance": "family"
             }

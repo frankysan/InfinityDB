@@ -40,11 +40,16 @@ const relationLabels = {
     inbound: "MODs ignored by",
   },
   "negates-effects-of": { outbound: "Negates", inbound: "Negated by" },
+  "modifies-rolls-for": {
+    outbound: "Modifies rolls for",
+    inbound: "Rolls modified by",
+  },
   "reveals-state": { outbound: "Reveals state", inbound: "Revealed by" },
   "reduces-modifiers-from": {
     outbound: "Reduces MODs from",
     inbound: "MODs reduced by",
   },
+  "restricts-use-of": { outbound: "Restricts use of", inbound: "Use restricted by" },
 };
 
 function relationHref(record) {

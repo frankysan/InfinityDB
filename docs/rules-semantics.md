@@ -1132,6 +1132,31 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Combat_Instinct&oldid=3135>
 - Wiki: <https://infinitythewiki.com/index.php?title=Surprise_Attack&oldid=3943>
 
+### RS-SE-SENSOR-001 — Sensor is a multi-edge interaction hub
+
+**Classification:** source-native cross-rule and cross-state gameplay relationship semantics.
+
+Sensor interacts with several independent rules at once. Its Sensor Roll ignores Mimetism
+MODs, can Discover enemies in Camouflaged or Hidden Deployment State inside the user's
+Zone of Control, restricts enemies with Camouflage from regaining Camouflaged State in
+that Zone of Control, and grants +6 WIP to Discover against Camouflage Markers. These are
+not aliases or family relationships; they are separate gameplay interactions that players
+benefit from discovering from either endpoint.
+
+InfinityDB therefore authors Sensor's edges once: `ignores-modifiers-from` toward
+Mimetism, `modifies-rolls-for` toward Discover, `restricts-use-of` toward Camouflage, and
+`reveals-state` toward Camouflaged State and Hidden Deployment State. Hidden Deployment
+Skill separately authors `enters-state` toward Hidden Deployment State. `rules.db` derives
+the inverse navigation so the affected Skill/State pages identify Sensor automatically.
+The exact +6 value, Zone of Control restriction, and other conditions remain in Sensor's
+rule facts rather than being duplicated into the relation edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Sensor&oldid=3274>
+- Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment&oldid=3084>
+- Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment_State&oldid=3835>
+
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
 **Classification:** source-native with a presentation-encoding consequence.

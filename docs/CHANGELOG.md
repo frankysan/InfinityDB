@@ -7,6 +7,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Expand the bidirectional gameplay-interaction graph with Sensor as the first multi-edge
+  hub: Sensor now links to Mimetism, Discover, Camouflage, Camouflaged State, and Hidden
+  Deployment State, while affected pages receive derived reverse relationships. Add
+  reviewed Hidden Deployment Skill/State identities so Sensor's hidden-state interaction
+  resolves to stable rules concepts.
 - Add bidirectional gameplay-interaction enrichment so players can discover rule
   interactions from either endpoint: Multispectral Visor reduces Mimetism MODs; Sixth
   Sense and Combat Instinct negate Stealth; and Combat Instinct ignores Surprise Attack

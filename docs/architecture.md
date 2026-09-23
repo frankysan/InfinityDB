@@ -279,7 +279,7 @@ Skill-extra distance semantics are split according to source authority. Army
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v11 makes applicability, review state, contribution role, typed
+Curated rules format v12 makes applicability, review state, contribution role, typed
 related-item edges, explicit catalog-variant inheritance, typed exact-source variants, and
 cross-domain declaration categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
@@ -308,7 +308,10 @@ into direction-aware labels and links; it does not expose raw edge names or dupl
 and the Mimetism surface receives the derived inverse relationship automatically. Format
 v11 adds `ignores-modifiers-from` and `negates-effects-of`; Combat Instinct uses both
 against Surprise Attack and Stealth, while Sixth Sense independently negates Stealth.
-This projection is the foundation for further 0.7.0 cross-rule gameplay interactions,
+Format v12 adds `modifies-rolls-for` and `restricts-use-of`; Sensor uses those alongside
+existing `reveals-state` and `ignores-modifiers-from` edges so Discover, Camouflage,
+Camouflaged State, Hidden Deployment State, and Mimetism all expose the reverse
+interaction automatically. This projection is the foundation for further 0.7.0 cross-rule gameplay interactions,
 while 0.8.x remains focused on structural application relationships such as Fireteams,
 includes, and selection dependencies.
 `Super-Jump` and `Forward Deployment` currently use
@@ -1126,7 +1129,7 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v11 rules contract stores collection scope, source metadata,
+The current curated-v12 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, typed related-rule edges,
 explicit variant inheritance and exact-source variant semantics, composition role, review
 state, and source-specific citations. PDF sources carry both the local
@@ -1136,7 +1139,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v11 must be migrated before ingestion.
+Curated-rule files older than format v12 must be migrated before ingestion.
 
 ## HTTP API
 

@@ -213,8 +213,11 @@ requiring a new top-level browser surface in 0.7.0.
     receives the derived “MODs reduced by: Multispectral Visor” relationship. The second
     production cluster adds Sixth Sense/Combat Instinct -> Stealth `negates-effects-of`
     edges plus Combat Instinct -> Surprise Attack `ignores-modifiers-from`, with reverse
-    navigation derived on Stealth and Surprise Attack. Continue translating further
-    semantic edge types into direction-aware player language and suppress
+    navigation derived on Stealth and Surprise Attack. The third production cluster makes
+    Sensor a multi-edge hub: it ignores Mimetism MODs, modifies Discover rolls, restricts
+    Camouflage use, and reveals Camouflaged/Hidden Deployment States, with all reverse
+    relationships derived automatically. Continue translating further semantic edge types
+    into direction-aware player language and suppress
     implementation-only relationships such as family bookkeeping when the existing
     variant UI already communicates them. Systematic interaction coverage remains open
     until the rules audit identifies and curates the other gameplay edges relevant to

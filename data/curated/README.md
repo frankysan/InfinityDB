@@ -195,7 +195,10 @@ than being field-merged by load order. Related concepts use typed one-way `relat
 reverse navigation is derived by `rules.db`. Format v10 introduced the gameplay-
 interaction edge `reduces-modifiers-from`; format v11 extends that closed vocabulary
 with `ignores-modifiers-from` and `negates-effects-of` so counter-rules can describe
-ignored MODs separately from effects that become ineffective.
+ignored MODs separately from effects that become ineffective. Format v12 adds
+`modifies-rolls-for` and `restricts-use-of` for rules such as Sensor that alter another
+Skill's Roll or constrain one specific use without implying that the whole target rule
+is negated.
 
 Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 `{"orderType": "irregular"}` and canonical IDs `training:regular` /
@@ -213,7 +216,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 11,
+    "formatVersion": 12,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -369,7 +372,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v11 are no longer accepted by the loader and must
+Curated-rule files older than format v12 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

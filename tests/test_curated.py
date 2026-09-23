@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 11,
+        "formatVersion": 12,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",

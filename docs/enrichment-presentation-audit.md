@@ -51,8 +51,13 @@ from MSV to Mimetism, while `rules.db` derives the reverse relationship for the
 Mimetism surface. The Stealth counter cluster extends that model: Sixth Sense and Combat
 Instinct each author `negates-effects-of` toward Stealth, and Combat Instinct authors
 `ignores-modifiers-from` toward Surprise Attack; Stealth and Surprise Attack receive the
-reverse relationships automatically. Future interactions should follow the same one-
-authored-edge model rather than maintaining reciprocal facts independently.
+reverse relationships automatically. Sensor is the first multi-edge hub: one Sensor
+definition links to Mimetism, Discover, Camouflage, Camouflaged State, and Hidden
+Deployment State, and every affected endpoint receives the derived reverse relationship.
+The graph label communicates that an interaction exists; exact values and conditions such
+as Sensor's +6 WIP and Zone of Control restriction remain in the owning rule facts. Future
+interactions should follow the same one-authored-edge model rather than maintaining
+reciprocal facts independently.
 
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation

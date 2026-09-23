@@ -555,7 +555,7 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v11 rules contract includes collection/source metadata,
+The current curated-v12 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, exact-source variant semantics, and citations.
@@ -1245,7 +1245,7 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 typed exact-source semantics (2026-09-23)
 
-- Curated rules format v11 and `rules.db` schema/compatibility 7 require every
+- Curated rules format v12 and `rules.db` schema/compatibility 7 require every
   `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
   Supported kinds are numeric `level`, explicit `named`, and numeric
   `attribute-replacement`; family records may not declare source-variant metadata.
@@ -1306,5 +1306,8 @@ compatibility references remain unambiguous JSON integers.
   `reduces-modifiers-from` toward Mimetism and the reverse relationship is derived for the
   Mimetism surface. Curated v11 extends the same graph with `negates-effects-of` and
   `ignores-modifiers-from`: Sixth Sense and Combat Instinct negate Stealth, while Combat
-  Instinct ignores Surprise Attack MODs. Keep this separate from 0.8 structural application
-  relationships.
+  Instinct ignores Surprise Attack MODs. Curated v12 adds `modifies-rolls-for` and
+  `restricts-use-of`; Sensor uses them together with `reveals-state` and
+  `ignores-modifiers-from` so its interactions are navigable from Discover, Camouflage,
+  Camouflaged State, Hidden Deployment State, and Mimetism. Keep this separate from 0.8
+  structural application relationships.

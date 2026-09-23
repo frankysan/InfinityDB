@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 138
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 141
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -458,6 +458,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
     } == {
         ("enters-state", "inbound", "skill:camouflage"),
         ("reveals-state", "inbound", "skill:discover"),
+        ("reveals-state", "inbound", "skill:sensor"),
     }
 
     camouflage = next(
@@ -465,20 +466,13 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         for record in database.composed_records_for_army_link("skill", "camouflage")
         if record["id"] == "skill:camouflage"
     )
-    assert camouflage["display_relations"] == [
-        {
-            "type": "enters-state",
-            "record_id": "state:camouflaged",
-            "collection_id": "n5-core-v5.3",
-            "direction": "outbound",
-            "record": {
-                "id": "state:camouflaged",
-                "kind": "state",
-                "name": "Camouflaged State",
-                "army_links": [],
-            },
-        }
-    ]
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in camouflage["display_relations"]
+    } == {
+        ("enters-state", "outbound", "Camouflaged State"),
+        ("restricts-use-of", "inbound", "Sensor"),
+    }
 
     camouflaged = next(
         record
@@ -499,6 +493,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
     } == {
         ("enters-state", "inbound", "Camouflage", (("skill", "camouflage"),)),
         ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
+        ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
     }
 
 
@@ -536,22 +531,13 @@ def test_msv_mimetism_interaction_is_bidirectional(tmp_path: Path) -> None:
             },
         }
     ]
-    assert mimetism["display_relations"] == [
-        {
-            "type": "reduces-modifiers-from",
-            "record_id": "equipment:multispectral-visor",
-            "collection_id": "n5-core-v5.3",
-            "direction": "inbound",
-            "record": {
-                "id": "equipment:multispectral-visor",
-                "kind": "equipment",
-                "name": "Multispectral Visor",
-                "army_links": [
-                    {"entity": "equipment", "id": "multispectral-visor"}
-                ],
-            },
-        }
-    ]
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in mimetism["display_relations"]
+    } == {
+        ("reduces-modifiers-from", "inbound", "Multispectral Visor"),
+        ("ignores-modifiers-from", "inbound", "Sensor"),
+    }
 
 
 def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
@@ -594,6 +580,75 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in surprise_attack["display_relations"]
     } == {("ignores-modifiers-from", "inbound", "Combat Instinct")}
+
+
+def test_sensor_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(kind: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_by_kind(kind)
+            if item["id"] == record_id
+        )
+
+    sensor = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "sensor")
+        if item["id"] == "skill:sensor"
+    )
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in sensor["display_relations"]
+    } == {
+        ("ignores-modifiers-from", "outbound", "Mimetism"),
+        ("modifies-rolls-for", "outbound", "Discover"),
+        ("restricts-use-of", "outbound", "Camouflage"),
+        ("reveals-state", "outbound", "Camouflaged State"),
+        ("reveals-state", "outbound", "Hidden Deployment State"),
+    }
+
+    discover = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "discover")
+        if item["id"] == "skill:discover"
+    )
+    assert ("modifies-rolls-for", "inbound", "Sensor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in discover["display_relations"]
+    }
+
+    camouflage = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "camouflage")
+        if item["id"] == "skill:camouflage"
+    )
+    assert ("restricts-use-of", "inbound", "Sensor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in camouflage["display_relations"]
+    }
+
+    hidden_deployment = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "hidden-deployment")
+        if item["id"] == "skill:hidden-deployment"
+    )
+    assert ("enters-state", "outbound", "Hidden Deployment State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in hidden_deployment["display_relations"]
+    }
+
+    hidden_state = record("state", "state:hidden-deployment")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in hidden_state["display_relations"]
+    } == {
+        ("enters-state", "inbound", "Hidden Deployment"),
+        ("reveals-state", "inbound", "Sensor"),
+    }
 
 
 def test_rules_database_preserves_variant_inheritance_and_variant_links(
