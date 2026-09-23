@@ -50,7 +50,9 @@ class CatalogRules:
 
         records_by_id: dict[str, dict[str, Any]] = {}
         for army_ref in self._army_refs(result):
-            for record in self.rules_database.records_for_army_link(entity, army_ref):
+            for record in self.rules_database.composed_records_for_army_link(
+                entity, army_ref
+            ):
                 records_by_id.setdefault(record["id"], record)
         records = list(records_by_id.values())
         if records:

@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 4,
+    "formatVersion": 5,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -296,6 +296,9 @@
                 "CAMO"
             ],
             "summary": "A state in which a trooper is represented by a Camouflage Marker rather than its model.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -313,18 +316,8 @@
                 "requirements": [
                     "The trooper has the Camouflage Special Skill."
                 ],
-                "restrictions": [],
-                "enteredBy": [
-                    "skill:camouflage"
-                ],
-                "interactions": [
-                    "rule:discover"
-                ]
+                "restrictions": []
             },
-            "relatedRecords": [
-                "skill:camouflage",
-                "rule:discover"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -363,6 +356,9 @@
                 "CAMO"
             ],
             "summary": "A Special Skill that allows a trooper to enter and remain in Camouflaged State.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -379,23 +375,13 @@
                     "Allows the trooper to enter Camouflaged State."
                 ],
                 "requirements": [],
-                "restrictions": [],
-                "entersStates": [
-                    "state:camouflaged"
-                ],
-                "interactions": [
-                    "rule:discover"
-                ]
+                "restrictions": []
             },
             "armyLinks": [
                 {
                     "entity": "skill",
                     "id": "camouflage"
                 }
-            ],
-            "relatedRecords": [
-                "state:camouflaged",
-                "rule:discover"
             ],
             "citations": [
                 {
@@ -417,6 +403,59 @@
             "review": {
                 "status": "draft",
                 "reviewedOn": "2026-09-15"
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:camouflaged"
+                }
+            ]
+        },
+        {
+            "id": "skill:discover",
+            "kind": "skill",
+            "name": "Discover",
+            "summary": "A Common Skill used to reveal game elements represented by Markers.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "typeId": "basic-short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "discover"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "reveals-state",
+                    "recordId": "state:camouflaged"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 78,
+                    "section": "Discover"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Discover",
+                    "member": "Discover"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
             }
         },
         {
@@ -428,6 +467,9 @@
                 "optional"
             ],
             "summary": "A Special Skill that modifies Jump and can add a listed Unit Profile distance to a Jump.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -468,6 +510,9 @@
                 "optional"
             ],
             "summary": "A Deployment Skill that allows deployment beyond the Deployment Zone by the distance listed in the Unit Profile.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -504,6 +549,9 @@
             "kind": "trait",
             "name": "Anti-materiel",
             "summary": "Its Special Ammunition can affect structures and scenery.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -526,6 +574,9 @@
             "kind": "trait",
             "name": "ARM = 0",
             "summary": "Reduces the target's ARM Attribute to 0 for Saving Rolls.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -548,6 +599,9 @@
             "kind": "trait",
             "name": "ARO",
             "summary": "Only usable in ARO.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -570,6 +624,9 @@
             "kind": "trait",
             "name": "BioWeapon",
             "summary": "Applies DA+Shock Special Ammunition against targets with VITA.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -603,6 +660,9 @@
             "kind": "trait",
             "name": "Boost",
             "summary": "Applies the Boost rule when an enemy declares or executes an Order or ARO in its Zone of Control.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -625,6 +685,9 @@
             "kind": "trait",
             "name": "BS Weapon (PH)",
             "summary": "Makes BS Attacks using PH instead of BS; BS rules and MODs affect PH instead.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -647,6 +710,9 @@
             "kind": "trait",
             "name": "BS Weapon (WIP)",
             "summary": "Makes BS Attacks using WIP instead of BS; BS rules and MODs affect WIP instead.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -669,6 +735,9 @@
             "kind": "trait",
             "name": "BTS = 0",
             "summary": "Reduces the target's BTS Attribute to 0 for Saving Rolls.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -691,6 +760,9 @@
             "kind": "trait",
             "name": "Burst (B)",
             "summary": "Indicates how many dice are rolled when using the weapon or piece of Equipment.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -713,6 +785,9 @@
             "kind": "trait",
             "name": "Burst: Single Target",
             "summary": "All shots in the Burst must choose one target.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -735,6 +810,9 @@
             "kind": "trait",
             "name": "CC",
             "summary": "Can be used to make CC Attacks.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -757,6 +835,9 @@
             "kind": "trait",
             "name": "Concealed",
             "summary": "Uses the effects of Camouflaged State; its concealing marker has Silhouette 2.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -779,6 +860,9 @@
             "kind": "trait",
             "name": "Continuous Damage",
             "summary": "After a failed Saving Roll, the target keeps making Saving Rolls until one succeeds or it enters Dead State.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -804,6 +888,9 @@
             "kind": "trait",
             "name": "Deployable",
             "summary": "May be deployed as an independent battlefield element with its own profile and Attributes.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -826,6 +913,9 @@
             "kind": "trait",
             "name": "Direct Template",
             "summary": "Uses Direct Template rules, firing the indicated Template.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -855,6 +945,9 @@
             "kind": "trait",
             "name": "Disposable (X)",
             "summary": "Has limited uses. Each use is expended when declared, and all modes share the available uses.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -884,6 +977,9 @@
             "kind": "trait",
             "name": "Double Shot",
             "summary": "In the Active Turn, may apply +1 Burst; with Disposable (2), this spends both uses.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -906,6 +1002,9 @@
             "kind": "trait",
             "name": "Impact Template",
             "summary": "Places the indicated Template at the point of impact.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -935,6 +1034,9 @@
             "kind": "trait",
             "name": "Improvised",
             "summary": "Imposes a -6 MOD to the user's relevant Attribute.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -957,6 +1059,9 @@
             "kind": "trait",
             "name": "Indiscriminate",
             "summary": "May be used or deployed despite Camouflage and Hiding Markers in its Area of Effect.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -979,6 +1084,9 @@
             "kind": "trait",
             "name": "Intuitive Attack",
             "summary": "Can be used to make Intuitive Attacks.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1001,6 +1109,9 @@
             "kind": "trait",
             "name": "Non-Lethal",
             "summary": "Never inflicts Wounds or requires Saving Rolls, regardless of ammunition added by other rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1023,6 +1134,9 @@
             "kind": "trait",
             "name": "Non-Reloadable",
             "summary": "Its expended Disposable uses cannot be regained.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1045,6 +1159,9 @@
             "kind": "trait",
             "name": "Perimeter",
             "summary": "When placed, applies Deployable and Perimeter, placing it completely inside the user's Zone of Control.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1067,6 +1184,9 @@
             "kind": "trait",
             "name": "Prior Deployment",
             "summary": "Must be placed during the Deployment Phase.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1089,6 +1209,9 @@
             "kind": "trait",
             "name": "Reflective",
             "summary": "Also affects Troopers with Marksmanship, Multispectral Visors, or specified equivalent Equipment.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1111,6 +1234,9 @@
             "kind": "trait",
             "name": "Silent (X)",
             "summary": "When used inside the target's Zone of Control but outside LoF, applies its bracketed MOD to Face to Face Dodge Rolls.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1140,6 +1266,9 @@
             "kind": "trait",
             "name": "Speculative Attack",
             "summary": "Can be used to make Speculative Attacks.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1162,6 +1291,9 @@
             "kind": "trait",
             "name": "State",
             "summary": "Causes the target to enter the Game State indicated in its profile.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1191,6 +1323,9 @@
             "kind": "trait",
             "name": "Suppressive Fire (SF)",
             "summary": "Allows the user to enter Suppressive Fire State and use its SF Mode profile.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1216,6 +1351,9 @@
             "kind": "trait",
             "name": "Target (Attribute)",
             "summary": "Only affects targets with the indicated VITA or STR Attribute.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1245,6 +1383,9 @@
             "kind": "trait",
             "name": "Targetless",
             "summary": "Can fire without designating an enemy target; in the Reactive Turn it requires LoF to the Active Trooper.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1267,6 +1408,9 @@
             "kind": "trait",
             "name": "Zone of Control (ZoC)",
             "summary": "Its range is the user's Zone of Control (8 inches).",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1293,6 +1437,9 @@
             "kind": "weapon",
             "name": "Armed Turret",
             "summary": "A stationary Deployable Weapon that reacts to enemy Orders.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1370,6 +1517,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1401,6 +1551,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1436,6 +1589,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1475,6 +1631,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1506,6 +1665,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1545,6 +1707,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1580,6 +1745,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1615,6 +1783,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1654,6 +1825,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1685,6 +1859,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1720,6 +1897,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1751,6 +1931,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1782,6 +1965,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1817,6 +2003,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1852,6 +2041,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1891,6 +2083,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1922,6 +2117,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1957,6 +2155,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -1988,6 +2189,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2023,6 +2227,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2054,6 +2261,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2085,6 +2295,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2116,6 +2329,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2151,6 +2367,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2182,6 +2401,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2225,6 +2447,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2260,6 +2485,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2291,6 +2519,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2330,6 +2561,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2365,6 +2599,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2396,6 +2633,9 @@
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2439,6 +2679,9 @@
             "kind": "skill-declaration-category",
             "name": "Deployment",
             "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2474,6 +2717,9 @@
             "kind": "skill-declaration-category",
             "name": "Deployment",
             "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2505,6 +2751,9 @@
             "kind": "skill-declaration-category",
             "name": "Deployment",
             "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2536,6 +2785,9 @@
             "kind": "skill-declaration-category",
             "name": "Deployment",
             "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2567,6 +2819,9 @@
             "kind": "skill-declaration-category",
             "name": "Deployment",
             "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2598,6 +2853,9 @@
             "kind": "skill-declaration-category",
             "name": "Deployment",
             "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2629,6 +2887,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2660,6 +2921,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2691,6 +2955,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2722,6 +2989,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2753,6 +3023,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2784,6 +3057,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2819,6 +3095,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2854,6 +3133,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2885,6 +3167,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2916,6 +3201,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2947,6 +3235,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -2978,6 +3269,9 @@
             "kind": "skill-declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3009,6 +3303,9 @@
             "kind": "skill-declaration-category",
             "name": "Long Skill",
             "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3044,6 +3341,9 @@
             "kind": "skill-declaration-category",
             "name": "Long Skill",
             "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3075,6 +3375,9 @@
             "kind": "skill-declaration-category",
             "name": "Long Skill",
             "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3106,6 +3409,9 @@
             "kind": "skill-declaration-category",
             "name": "Entire Order",
             "summary": "The linked Army skills are declared as Entire Order in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3137,6 +3443,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3168,6 +3477,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3199,6 +3511,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3230,6 +3545,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3261,6 +3579,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3292,6 +3613,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3327,6 +3651,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3362,6 +3689,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3393,6 +3723,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3424,6 +3757,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3455,6 +3791,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3486,6 +3825,9 @@
             "kind": "skill-declaration-category",
             "name": "ARO",
             "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3517,6 +3859,9 @@
             "kind": "skill",
             "name": "Doctor",
             "summary": "A Short Special Skill associated with VITA recovery and Peripheral (Servant) controller eligibility.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3534,9 +3879,6 @@
                     "id": "doctor"
                 }
             ],
-            "relatedRecords": [
-                "rule:peripheral-type:servant"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -3547,13 +3889,22 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-22"
-            }
+            },
+            "relations": [
+                {
+                    "type": "controller-eligible-for",
+                    "recordId": "rule:peripheral-type:servant"
+                }
+            ]
         },
         {
             "id": "skill:engineer",
             "kind": "skill",
             "name": "Engineer",
             "summary": "A Short Special Skill associated with STR recovery and Peripheral (Servant) controller eligibility.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3571,9 +3922,6 @@
                     "id": "engineer"
                 }
             ],
-            "relatedRecords": [
-                "rule:peripheral-type:servant"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -3584,13 +3932,22 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-22"
-            }
+            },
+            "relations": [
+                {
+                    "type": "controller-eligible-for",
+                    "recordId": "rule:peripheral-type:servant"
+                }
+            ]
         },
         {
             "id": "skill:cyberplug",
             "kind": "skill",
             "name": "Cyberplug",
             "summary": "An Automatic Special Skill that grants access to Peripheral (Cyberplug) troopers.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3608,9 +3965,6 @@
                     "id": "cyberplug"
                 }
             ],
-            "relatedRecords": [
-                "rule:peripheral-type:cyberplug"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -3621,13 +3975,22 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-22"
-            }
+            },
+            "relations": [
+                {
+                    "type": "controller-eligible-for",
+                    "recordId": "rule:peripheral-type:cyberplug"
+                }
+            ]
         },
         {
             "id": "skill:peripheral",
             "kind": "skill",
             "name": "Peripheral",
             "summary": "An Automatic Special Skill defining common Controller/Peripheral behavior and the five core Peripheral types.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3644,13 +4007,6 @@
                     "entity": "skill",
                     "id": "peripheral"
                 }
-            ],
-            "relatedRecords": [
-                "rule:peripheral-type:servant",
-                "rule:peripheral-type:synchronized",
-                "rule:peripheral-type:control",
-                "rule:peripheral-type:ancillary",
-                "rule:peripheral-type:cyberplug"
             ],
             "citations": [
                 {
@@ -3672,13 +4028,38 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-22"
-            }
+            },
+            "relations": [
+                {
+                    "type": "has-subtype",
+                    "recordId": "rule:peripheral-type:servant"
+                },
+                {
+                    "type": "has-subtype",
+                    "recordId": "rule:peripheral-type:synchronized"
+                },
+                {
+                    "type": "has-subtype",
+                    "recordId": "rule:peripheral-type:control"
+                },
+                {
+                    "type": "has-subtype",
+                    "recordId": "rule:peripheral-type:ancillary"
+                },
+                {
+                    "type": "has-subtype",
+                    "recordId": "rule:peripheral-type:cyberplug"
+                }
+            ]
         },
         {
             "id": "rule:peripheral-type:servant",
             "kind": "rule",
             "name": "Peripheral (Servant)",
             "summary": "A Peripheral type controlled by a Doctor or Engineer, with unlimited operating distance and a maximum of two per Controller.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3700,11 +4081,6 @@
                 "maxPerController": 2,
                 "operatingDistance": "unlimited"
             },
-            "relatedRecords": [
-                "skill:peripheral",
-                "skill:doctor",
-                "skill:engineer"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -3732,6 +4108,9 @@
             "kind": "rule",
             "name": "Peripheral (Synchronized)",
             "summary": "A Peripheral type whose operation depends on its Controller and Coherency; the core type rule states no generic Controller-eligibility predicate.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3744,9 +4123,6 @@
                     "status": "not-stated"
                 }
             },
-            "relatedRecords": [
-                "skill:peripheral"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -3774,6 +4150,9 @@
             "kind": "rule",
             "name": "Peripheral (Control)",
             "summary": "A Peripheral type with unlimited operating distance and a maximum of three per Controller; the core type rule states no generic Controller-eligibility predicate.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3788,9 +4167,6 @@
                 "maxPerController": 3,
                 "operatingDistance": "unlimited"
             },
-            "relatedRecords": [
-                "skill:peripheral"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -3818,6 +4194,9 @@
             "kind": "rule",
             "name": "Peripheral (Ancillary)",
             "summary": "A Peripheral type with unlimited operating distance that starts undeployed; the core type rule states no generic Controller-eligibility predicate.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3831,9 +4210,6 @@
                 },
                 "operatingDistance": "unlimited"
             },
-            "relatedRecords": [
-                "skill:peripheral"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -3861,6 +4237,9 @@
             "kind": "rule",
             "name": "Peripheral (Cyberplug)",
             "summary": "A Peripheral type granted by Cyberplug, with unlimited operating distance, a maximum of two per Controller, and Connected/Autonomous operating profiles.",
+            "composition": {
+                "role": "definition"
+            },
             "scope": {
                 "game": "N5",
                 "seasons": [
@@ -3879,10 +4258,6 @@
                     "autonomous"
                 ]
             },
-            "relatedRecords": [
-                "skill:peripheral",
-                "skill:cyberplug"
-            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",

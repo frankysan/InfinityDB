@@ -31,6 +31,59 @@ function applicabilityText(rule) {
   return parts.join(" · ");
 }
 
+function appendRuleDetails(container, rule) {
+  const applicability = applicabilityText(rule);
+  if (applicability) {
+    const context = document.createElement("p");
+    context.className = "detail-source";
+    context.textContent = applicability;
+    container.append(context);
+  }
+
+  const summary = document.createElement("p");
+  summary.className = "detail-copy";
+  summary.textContent = rule.summary;
+  container.append(summary);
+
+  const badges = [];
+  if (rule.skill_type?.name) badges.push(rule.skill_type.name);
+  for (const label of rule.labels || []) badges.push(label.name);
+  if (badges.length) {
+    const badgeRow = document.createElement("p");
+    badgeRow.className = "detail-badges";
+    for (const badge of badges) {
+      const element = document.createElement("span");
+      element.className = "badge";
+      element.textContent = badge;
+      badgeRow.append(element);
+    }
+    container.append(badgeRow);
+  }
+
+  const facts = rule.facts || {};
+  for (const key of ["effects", "requirements", "restrictions"]) {
+    if (!Array.isArray(facts[key]) || !facts[key].length) continue;
+    const list = document.createElement("ul");
+    list.className = "detail-list";
+    for (const fact of facts[key]) {
+      const item = document.createElement("li");
+      item.textContent = fact;
+      list.append(item);
+    }
+    container.append(list);
+  }
+
+  if (rule.citations?.length) {
+    const citations = document.createElement("p");
+    citations.className = "detail-source";
+    for (const [index, citation] of rule.citations.entries()) {
+      if (index) citations.append(" · ");
+      citations.append(citationNode(citation));
+    }
+    container.append(citations);
+  }
+}
+
 export function rulesReferenceSection(rules) {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference";
@@ -45,56 +98,16 @@ export function rulesReferenceSection(rules) {
     const title = document.createElement("h3");
     title.textContent = rule.name;
     article.append(title);
+    appendRuleDetails(article, rule);
 
-    const applicability = applicabilityText(rule);
-    if (applicability) {
-      const context = document.createElement("p");
-      context.className = "detail-source";
-      context.textContent = applicability;
-      article.append(context);
-    }
-
-    const summary = document.createElement("p");
-    summary.className = "detail-copy";
-    summary.textContent = rule.summary;
-    article.append(summary);
-
-    const badges = [];
-    if (rule.skill_type?.name) badges.push(rule.skill_type.name);
-    for (const label of rule.labels || []) badges.push(label.name);
-    if (badges.length) {
-      const badgeRow = document.createElement("p");
-      badgeRow.className = "detail-badges";
-      for (const badge of badges) {
-        const element = document.createElement("span");
-        element.className = "badge";
-        element.textContent = badge;
-        badgeRow.append(element);
-      }
-      article.append(badgeRow);
-    }
-
-    const facts = rule.facts || {};
-    for (const key of ["effects", "requirements", "restrictions"]) {
-      if (!Array.isArray(facts[key]) || !facts[key].length) continue;
-      const list = document.createElement("ul");
-      list.className = "detail-list";
-      for (const fact of facts[key]) {
-        const item = document.createElement("li");
-        item.textContent = fact;
-        list.append(item);
-      }
-      article.append(list);
-    }
-
-    if (rule.citations?.length) {
-      const citations = document.createElement("p");
-      citations.className = "detail-source";
-      for (const [index, citation] of rule.citations.entries()) {
-        if (index) citations.append(" · ");
-        citations.append(citationNode(citation));
-      }
-      article.append(citations);
+    for (const supplement of rule.supplements || []) {
+      const supplemental = document.createElement("div");
+      supplemental.className = "rules-supplement";
+      const supplementTitle = document.createElement("h4");
+      supplementTitle.textContent = "Additional rules context";
+      supplemental.append(supplementTitle);
+      appendRuleDetails(supplemental, supplement);
+      article.append(supplemental);
     }
     section.append(article);
   }

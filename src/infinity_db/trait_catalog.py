@@ -46,7 +46,7 @@ class TraitCatalog:
         if self._records is not None:
             return
         records = (
-            self.rules_database.records_by_kind("trait")
+            self.rules_database.composed_records_by_kind("trait")
             if self.rules_database is not None
             else []
         )

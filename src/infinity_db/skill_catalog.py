@@ -157,7 +157,9 @@ class SkillCatalog:
                 key=lambda value: (isinstance(value, str), str(value)),
             )
             for skill_ref in army_refs:
-                for record in self.rules_database.records_for_army_link("skill", skill_ref):
+                for record in self.rules_database.composed_records_for_army_link(
+                    "skill", skill_ref
+                ):
                     if record["kind"] == DECLARATION_KIND:
                         continue
                     rules.setdefault(record["id"], record)

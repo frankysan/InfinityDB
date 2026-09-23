@@ -10,13 +10,16 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Show the existing curated rules reference on Skill, Trait, Equipment, and Weapon
   detail pages through one shared renderer, including applicability context and linked
   authoritative citations.
+- Add typed rules relationships with derived reverse navigation, replacing generic
+  related-record lists with explicit semantic edges for state transitions and
+  Peripheral subtype/controller relationships.
 
 ### Changed
 
-- Require explicit applicability scope and review metadata in curated rules format v4,
-  return collection provenance with composed rule records, and exclude non-current
-  collections from normal Army-linked enrichment unless historical material is
-  requested explicitly.
+- Advance curated rules to format v5 and `rules.db` schema/compatibility 3. Each current
+  semantic identity now has exactly one definition contribution plus optional scoped
+  supplements; supplements retain independent provenance and are never field-merged by
+  collection order. Non-current collections remain excluded from normal enrichment.
 
 ## [0.6.3] - 2026-09-22
 

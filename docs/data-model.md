@@ -2452,9 +2452,9 @@ identities and structured effects; FAQs yield dated rulings; ITS material is
 isolated by season; wiki material supplies discovery, aliases, and cross-links.
 Historical documents must not be silently merged into current rules.
 
-The current curated-v3 document has collection identity, source records, typed
-fact records, maintained vocabularies, scope, Army links, related-record links,
-review state, and source-specific citations. PDF sources record the local
+The current curated-v5 document has collection identity, source records, typed
+fact records, maintained vocabularies, scope, Army links, typed relations,
+composition role, review state, and source-specific citations. PDF sources record the local
 reviewed file, Corvus Belli source URL, publication date, and page count; PDF
 citations require positive printed page numbers. Archived wiki sources record
 the exact timestamped ZIP path/hash, acquisition timestamp, language, document
@@ -2472,7 +2472,7 @@ curated facts in a separate SQLite database rather than either Army-derived
 database. Directory ingestion skips `example.json`. Other curated subtrees are
 not rules-database inputs. The rules database has an independent schema,
 application ID, compatibility version, and replaceable snapshot lifecycle; its
-current schema and compatibility versions are both 2.
+current schema and compatibility versions are both 3.
 
 A curated rule fact may reference stable application-level identities, but neither
 database is an import source for the other; any combined view is assembled by
@@ -2530,14 +2530,22 @@ The rules-reference browsers query the global `skills`, `equipment`, and
 display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
-The rules schema stores collections, sources, vocabulary definitions, records,
-citations, Army links, and related-record links. Curated format v4 requires every
-record to carry an explicit applicability scope (`game` plus one or more `seasons`)
-and review state/date. Those fields are deliberately separate from semantic record
-identity and from collection/source/citation provenance. Normal application
-composition reads only `current` collections unless a caller explicitly requests
-historical/superseded material, and returned rule records include their collection
-metadata so downstream consumers do not depend on collection load order.
+The rules schema stores collections, sources, vocabulary definitions, record
+contributions, citations, Army links, and typed record relations. Curated format v5
+requires every record contribution to carry an explicit applicability scope (`game`
+plus one or more `seasons`), review state/date, and composition role. Current semantic
+composition is fail-closed: exactly one `definition` contribution must exist for each
+semantic ID, while zero or more `supplement` contributions may add scoped rulings,
+clarifications, facts, citations, or relations. Supplement fields are not merged into
+the definition by priority or load order; they retain their own collection and scope.
+Historical/superseded collections remain queryable but are excluded from normal
+application composition.
+
+`record_relations` stores authored one-way edges as `(type, target semantic ID)`.
+Current relation targets must resolve to a current semantic ID before export. Reverse
+navigation is derived from inbound edges at read time rather than represented by a
+second authored row. `related_records` remains only as a compatibility projection of
+the typed outbound targets in returned contribution payloads.
 
 Curated records may also link to `ammunition`, `extras`, `characteristics`,
 `troop_types`, `units`, and profile occurrences. These are annotations and

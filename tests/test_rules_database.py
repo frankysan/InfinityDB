@@ -2,6 +2,8 @@ import copy
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import (
     RULES_APPLICATION_ID,
@@ -22,7 +24,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 112
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 113
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -47,13 +49,10 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute(
             "SELECT url FROM sources WHERE id = 'n5-core-v5.3-pdf'"
         ).fetchone()[0] == "https://experience.corvusbelli.com/en/infinity/resources"
-        assert (
-            connection.execute(
-                "SELECT related_record_id FROM record_relations "
-                "WHERE record_id = 'state:camouflaged' ORDER BY position LIMIT 1"
-            ).fetchone()[0]
-            == "skill:camouflage"
-        )
+        assert connection.execute(
+            "SELECT relation_type, related_record_id FROM record_relations "
+            "WHERE record_id = 'skill:camouflage' ORDER BY position LIMIT 1"
+        ).fetchone() == ("enters-state", "state:camouflaged")
         assert connection.execute(
             "SELECT source_id, page FROM record_citations "
             "WHERE record_id = 'state:camouflaged' AND page IS NOT NULL "
@@ -202,4 +201,93 @@ def test_army_link_records_use_current_collections_by_default(tmp_path: Path) ->
     assert {record["collection"]["status"] for record in all_records} == {
         "current",
         "superseded",
+    }
+
+
+def test_composed_records_attach_current_supplements_without_field_merging(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    supplement = copy.deepcopy(current)
+    supplement["collection"] = {
+        **supplement["collection"],
+        "id": "n5-faq-v0.1",
+        "title": "N5 FAQ v0.1",
+        "domain": "faq",
+        "effectiveFrom": "2026-09-01",
+    }
+    supplement["records"] = [
+        {
+            "id": "skill:camouflage",
+            "kind": "skill",
+            "name": "Camouflage",
+            "summary": "A scoped FAQ clarification for Camouflage.",
+            "composition": {"role": "supplement"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 87}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+        }
+    ]
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        [(current_path, current), (root / "n5-faq-v0.1.json", supplement)], output
+    )
+
+    raw = RulesDatabase(output).records_for_army_link("skill", "camouflage")
+    composed = RulesDatabase(output).composed_records_for_army_link(
+        "skill", "camouflage"
+    )
+
+    raw_camouflage = [record for record in raw if record["id"] == "skill:camouflage"]
+    composed_camouflage = next(
+        record for record in composed if record["id"] == "skill:camouflage"
+    )
+    assert len(raw_camouflage) == 1
+    assert composed_camouflage["summary"] == next(
+        record["summary"]
+        for record in current["records"]
+        if record["id"] == "skill:camouflage"
+    )
+    assert [item["summary"] for item in composed_camouflage["supplements"]] == [
+        "A scoped FAQ clarification for Camouflage."
+    ]
+    assert composed_camouflage["supplements"][0]["collection"]["id"] == "n5-faq-v0.1"
+
+
+def test_export_rejects_ambiguous_current_definitions(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    duplicate = copy.deepcopy(current)
+    duplicate["collection"] = {
+        **duplicate["collection"],
+        "id": "n5-annex-current",
+        "title": "N5 Annex",
+        "domain": "annex",
+    }
+    duplicate["records"] = [
+        next(record for record in duplicate["records"] if record["id"] == "skill:camouflage")
+    ]
+
+    with pytest.raises(ValueError, match="exactly one definition contribution"):
+        export_rules_database(
+            [(current_path, current), (root / "annex.json", duplicate)],
+            tmp_path / "rules.db",
+        )
+
+
+def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+
+    relations = RulesDatabase(output).relations_for_record("state:camouflaged")
+
+    assert {
+        (item["type"], item["direction"], item["record_id"])
+        for item in relations
+    } == {
+        ("enters-state", "inbound", "skill:camouflage"),
+        ("reveals-state", "inbound", "skill:discover"),
     }

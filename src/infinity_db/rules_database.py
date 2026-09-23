@@ -8,12 +8,13 @@ import sqlite3
 import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 2
-RULES_COMPATIBILITY_VERSION = 2
+RULES_SCHEMA_VERSION = 3
+RULES_COMPATIBILITY_VERSION = 3
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -105,6 +106,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             kind TEXT NOT NULL,
             name TEXT NOT NULL,
             summary TEXT NOT NULL,
+            composition_role TEXT NOT NULL,
             aliases_json TEXT,
             label_ids_json TEXT,
             scope_json TEXT,
@@ -143,6 +145,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             collection_id TEXT NOT NULL,
             record_id TEXT NOT NULL,
             position INTEGER NOT NULL,
+            relation_type TEXT NOT NULL,
             related_record_id TEXT NOT NULL,
             PRIMARY KEY (collection_id, record_id, position),
             FOREIGN KEY (collection_id, record_id)
@@ -151,17 +154,46 @@ def _create_schema(connection: sqlite3.Connection) -> None:
         CREATE INDEX records_kind_name ON records(kind, name COLLATE NOCASE);
         CREATE INDEX record_citations_source ON record_citations(collection_id, source_id);
         CREATE INDEX record_army_links_entity ON record_army_links(entity, external_id);
+        CREATE INDEX record_relations_target ON record_relations(related_record_id);
         """
     )
 
 
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
     collection_ids: set[str] = set()
+    current_records: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
     for path, document in documents:
         collection_id = document["collection"]["id"]
         if collection_id in collection_ids:
             raise ValueError(f"Duplicate curated collection id {collection_id!r}: {path}")
         collection_ids.add(collection_id)
+        if document["collection"]["status"] != "current":
+            continue
+        for record in document["records"]:
+            current_records.setdefault(record["id"], []).append((path, record))
+
+    current_ids = set(current_records)
+    for record_id, contributions in current_records.items():
+        definitions = [
+            (path, record)
+            for path, record in contributions
+            if record["composition"]["role"] == "definition"
+        ]
+        if len(definitions) != 1:
+            sources = ", ".join(str(path) for path, _ in contributions)
+            raise ValueError(
+                f"Current rules record {record_id!r} requires exactly one definition "
+                f"contribution; found {len(definitions)} across {sources}"
+            )
+
+        for path, record in contributions:
+            for relation in record.get("relations", []):
+                target_id = relation["recordId"]
+                if target_id not in current_ids:
+                    raise ValueError(
+                        f"Current rules relation {record_id!r} -> {target_id!r} in {path} "
+                        "does not resolve to a current semantic record"
+                    )
 
 
 def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -> None:
@@ -255,9 +287,9 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
     _insert_many(
         connection,
         "INSERT INTO records "
-        "(collection_id, id, kind, name, summary, aliases_json, label_ids_json, scope_json, "
-        "facts_json, review_json) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "(collection_id, id, kind, name, summary, composition_role, aliases_json, "
+        "label_ids_json, scope_json, facts_json, review_json) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 collection_id,
@@ -265,6 +297,7 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
                 record["kind"],
                 record["name"],
                 record["summary"],
+                record["composition"]["role"],
                 _json_text(record["aliases"]) if "aliases" in record else None,
                 _json_text(record["labelIds"]) if "labelIds" in record else None,
                 _json_text(record["scope"]) if "scope" in record else None,
@@ -316,10 +349,17 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
         _insert_many(
             connection,
             "INSERT INTO record_relations "
-            "(collection_id, record_id, position, related_record_id) VALUES (?, ?, ?, ?)",
+            "(collection_id, record_id, position, relation_type, related_record_id) "
+            "VALUES (?, ?, ?, ?, ?)",
             [
-                (collection_id, record_id, position, related_id)
-                for position, related_id in enumerate(record.get("relatedRecords", []))
+                (
+                    collection_id,
+                    record_id,
+                    position,
+                    relation["type"],
+                    relation["recordId"],
+                )
+                for position, relation in enumerate(record.get("relations", []))
             ],
         )
 
@@ -344,7 +384,7 @@ def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Pa
                     _insert_document(connection, document)
                 metadata = {
                     "format": "InfinityDB curated rules database",
-                    "formatVersion": 2,
+                    "formatVersion": 3,
                     "collectionCount": len(documents),
                     "databaseCompatibilityVersion": RULES_COMPATIBILITY_VERSION,
                 }
@@ -438,6 +478,7 @@ class RulesDatabase:
                 "kind": row["kind"],
                 "name": row["name"],
                 "summary": row["summary"],
+                "composition": {"role": row["composition_role"]},
                 "aliases": _decode_json(row["aliases_json"], []),
                 "label_ids": _decode_json(row["label_ids_json"], []),
                 "scope": _decode_json(row["scope_json"], None),
@@ -479,16 +520,189 @@ class RulesDatabase:
                     (row["collection_id"], row["id"]),
                 ).fetchall()
             ]
-            record["related_records"] = [
-                relation["related_record_id"]
+            record["relations"] = [
+                {
+                    "type": relation["relation_type"],
+                    "record_id": relation["related_record_id"],
+                }
                 for relation in connection.execute(
-                    "SELECT related_record_id FROM record_relations "
+                    "SELECT relation_type, related_record_id FROM record_relations "
                     "WHERE collection_id = ? AND record_id = ? ORDER BY position",
                     (row["collection_id"], row["id"]),
                 ).fetchall()
             ]
+            record["related_records"] = [
+                relation["record_id"] for relation in record["relations"]
+            ]
             records.append(record)
         return records
+
+    @staticmethod
+    def _compose_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for record in records:
+            grouped.setdefault(record["id"], []).append(record)
+
+        result = []
+        for record_id in sorted(grouped):
+            contributions = grouped[record_id]
+            definitions = [
+                record
+                for record in contributions
+                if record["composition"]["role"] == "definition"
+            ]
+            if len(definitions) != 1:
+                raise ValueError(
+                    f"Current rules record {record_id!r} requires exactly one definition"
+                )
+            definition = deepcopy(definitions[0])
+            supplements = [
+                deepcopy(record)
+                for record in contributions
+                if record["composition"]["role"] == "supplement"
+            ]
+            supplements.sort(
+                key=lambda record: (
+                    record["collection"]["effective_from"],
+                    record["collection"]["id"],
+                )
+            )
+            if supplements:
+                definition["supplements"] = supplements
+
+            combined_relations: list[dict[str, Any]] = []
+            seen_relations: set[tuple[str, str, str]] = set()
+            for contribution in [definition, *supplements]:
+                collection_id = contribution["collection"]["id"]
+                for relation in contribution.get("relations", []):
+                    key = (relation["type"], relation["record_id"], collection_id)
+                    if key in seen_relations:
+                        continue
+                    seen_relations.add(key)
+                    combined_relations.append(
+                        {
+                            **relation,
+                            "collection_id": collection_id,
+                        }
+                    )
+            definition["relations"] = combined_relations
+            definition["related_records"] = list(
+                dict.fromkeys(relation["record_id"] for relation in combined_relations)
+            )
+            result.append(definition)
+        return result
+
+    @staticmethod
+    def _attach_reverse_relations(
+        connection: sqlite3.Connection, records: list[dict[str, Any]]
+    ) -> None:
+        for record in records:
+            rows = connection.execute(
+                "SELECT rr.collection_id, rr.record_id, rr.relation_type "
+                "FROM record_relations AS rr JOIN collections AS c "
+                "ON c.id = rr.collection_id "
+                "WHERE rr.related_record_id = ? AND c.status = 'current' "
+                "ORDER BY rr.collection_id, rr.record_id, rr.position",
+                (record["id"],),
+            ).fetchall()
+            if rows:
+                record["reverse_relations"] = [
+                    {
+                        "type": row["relation_type"],
+                        "record_id": row["record_id"],
+                        "collection_id": row["collection_id"],
+                    }
+                    for row in rows
+                ]
+
+    def composed_records_for_army_link(
+        self,
+        entity: str,
+        external_id: ArmyLinkRef,
+    ) -> list[dict[str, Any]]:
+        """Return one current semantic record per Army-linked rules identity.
+
+        The Army link may live on any current contribution. Once a semantic record
+        ID is selected, all current contributions for that ID are composed without
+        field-wise precedence: one definition remains authoritative and any
+        supplements retain their own scope, collection provenance, facts, and
+        citations.
+        """
+        with self._connect() as connection:
+            linked_rows = connection.execute(
+                "SELECT DISTINCT r.id FROM records AS r "
+                "JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE l.entity = ? AND l.external_id = ? AND c.status = 'current' "
+                "ORDER BY r.id",
+                (entity, str(external_id)),
+            ).fetchall()
+            record_ids = [row["id"] for row in linked_rows]
+            if not record_ids:
+                return []
+            placeholders = ", ".join("?" for _ in record_ids)
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                f"WHERE r.id IN ({placeholders}) AND c.status = 'current' "
+                "ORDER BY r.id, r.collection_id",
+                record_ids,
+            ).fetchall()
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+            return records
+
+    def composed_records_by_kind(self, kind: str) -> list[dict[str, Any]]:
+        """Return current semantic records of one kind with supplements attached."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                "WHERE r.kind = ? AND c.status = 'current' "
+                "ORDER BY r.id, r.collection_id",
+                (kind,),
+            ).fetchall()
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+            return records
+
+    def relations_for_record(
+        self, record_id: str, *, current_only: bool = True
+    ) -> list[dict[str, Any]]:
+        """Return authored outbound and derived reverse links for one semantic record."""
+        with self._connect() as connection:
+            status_clause = "AND c.status = 'current' " if current_only else ""
+            rows = connection.execute(
+                "SELECT rr.collection_id, rr.record_id, rr.relation_type, "
+                "rr.related_record_id, c.title AS collection_title, "
+                "c.status AS collection_status, c.effective_from "
+                "FROM record_relations AS rr JOIN collections AS c "
+                "ON c.id = rr.collection_id "
+                "WHERE (rr.record_id = ? OR rr.related_record_id = ?) "
+                + status_clause
+                + "ORDER BY rr.collection_id, rr.record_id, rr.position",
+                (record_id, record_id),
+            ).fetchall()
+            result = []
+            for row in rows:
+                outbound = row["record_id"] == record_id
+                result.append(
+                    {
+                        "type": row["relation_type"],
+                        "direction": "outbound" if outbound else "inbound",
+                        "record_id": (
+                            row["related_record_id"] if outbound else row["record_id"]
+                        ),
+                        "collection": {
+                            "id": row["collection_id"],
+                            "title": row["collection_title"],
+                            "status": row["collection_status"],
+                            "effective_from": row["effective_from"],
+                        },
+                    }
+                )
+            return result
 
     def records_for_army_link(
         self,

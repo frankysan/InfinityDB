@@ -555,10 +555,11 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v3 rules contract includes collection/source metadata,
+The current curated-v5 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
-`vocabularySources`, typed records, Army links, related-record links, review
-state, and citations. Versions 1 and 2 must be migrated before ingestion. The
+`vocabularySources`, typed record contributions, Army links, typed related-record
+edges, composition role, review state, and citations. Older formats must be migrated
+before ingestion. The
 reserved `rules/example.json` template is excluded from directory ingestion.
 
 The rules database has its own schema/versioning and replacement lifecycle. It
@@ -1165,16 +1166,25 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 rules-enrichment contract foundation (2026-09-23)
 
-- Curated rules format v4 requires every record to declare `scope.game`, a non-empty
+- Curated rules format v5 requires every record to declare `scope.game`, a non-empty
   `scope.seasons` list, and a review object containing `status` (`draft` or `reviewed`)
-  plus `reviewedOn`. Applicability and review state are therefore explicit build-time
-  contract fields rather than optional free-form metadata.
+  plus `reviewedOn`, together with a composition role of `definition` or `supplement`.
+  Applicability, review state, and contribution semantics are therefore explicit
+  build-time contract fields rather than optional free-form metadata.
 - Semantic record identity, applicability, and source/publication provenance remain
   separate. `RulesDatabase` returns collection metadata with each record; citations
   continue to carry source title/version/URL and location.
 - Army-linked rule lookup consumes only `current` collections by default. Historical
   or superseded collections may coexist in `rules.db` and can be requested explicitly,
   but they must not affect normal catalog enrichment merely because they were loaded.
+- Current multi-publication composition is additive and fail-closed: every semantic ID
+  must have exactly one definition, while additional current publications may contribute
+  scoped supplements. Supplement fields are not merged into the definition and no
+  precedence is inferred from load order, collection ID, or effective date.
+- Related-item navigation uses typed one-way semantic edges. Current targets must resolve
+  to current semantic IDs before export; `rules.db` derives reverse links from inbound
+  edges so reciprocal rows are not authored independently. The initial typed relation
+  set covers state entry/reveal and Peripheral subtype/controller-eligibility edges.
 - Skill, Trait, Equipment, and Weapon detail pages share one rules-reference renderer.
   It displays existing curated summaries/classifications and source citations as links;
   this is presentation of maintained enrichment, not a new source of rule semantics.

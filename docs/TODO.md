@@ -135,14 +135,15 @@ requiring a new top-level browser surface in 0.7.0.
     existing data, including declaration/action type, Automatic/Short/Long/ARO
     semantics, rule-domain identity, and typed Level/MOD/parameter meaning where
     relevant.
-  - [ ] Represent reviewed related-item relationships explicitly rather than
-    deriving them from display-name matching; support reverse links where useful.
-  - [ ] Keep semantic identity, source publication provenance, and applicability
+  - [x] Represent reviewed related-item relationships explicitly rather than
+    deriving them from display-name matching; curated v5 uses typed one-way edges and
+    `rules.db` derives reverse links without mirrored authored rows.
+  - [x] Keep semantic identity, source publication provenance, and applicability
     scope separate so core, annex, FAQ, season, or scenario material can enrich the
-    same canonical item without duplication or collection-load-order semantics. The
-    v4 foundation now makes scope/review explicit and ignores non-current collections
-    during normal composition; additive multi-publication contribution semantics still
-    need to be defined before this item is complete.
+    same canonical item without duplication or collection-load-order semantics.
+    Current composition requires exactly one definition contribution per semantic ID
+    and permits scoped supplements that retain their own facts/citations/provenance;
+    fields are never merged by priority or load order.
   - [ ] Make enrichment variant-aware: base rule knowledge may be inherited only
     where valid, while exact Levels, MODs, typed parameters, and source variants
     retain their own meaning and provenance.

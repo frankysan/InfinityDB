@@ -9,13 +9,22 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 4
+CURATED_FORMAT_VERSION = 5
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
 REQUIRED_SOURCE_FIELDS = frozenset({"id", "kind", "title", "version", "authority"})
 REQUIRED_RECORD_FIELDS = frozenset(
-    {"id", "kind", "name", "summary", "scope", "citations", "review"}
+    {
+        "id",
+        "kind",
+        "name",
+        "summary",
+        "scope",
+        "citations",
+        "review",
+        "composition",
+    }
 )
 REQUIRED_SKILL_TYPE_FIELDS = frozenset({"id", "name", "labels", "descriptions"})
 REQUIRED_LABEL_FIELDS = frozenset({"id", "name", "description"})
@@ -25,6 +34,14 @@ ARMY_LINK_SLUG_DOMAINS = {
     "equipment": "equipment",
     "weapon": "weapons",
 }
+RULE_RELATION_TYPES = frozenset(
+    {
+        "controller-eligible-for",
+        "enters-state",
+        "has-subtype",
+        "reveals-state",
+    }
+)
 
 
 def _require_string(value: Any, field: str, context: str) -> None:
@@ -72,6 +89,31 @@ def _validate_review(value: object, context: str) -> None:
         or len(parts[2]) != 2
     ):
         raise ValueError(f"{context}: 'reviewedOn' must use YYYY-MM-DD")
+
+
+def _validate_composition(value: object, context: str) -> str:
+    if not isinstance(value, dict) or set(value) != {"role"}:
+        raise ValueError(f"{context}: must contain only 'role'")
+    role = value.get("role")
+    if role not in {"definition", "supplement"}:
+        raise ValueError(f"{context}: 'role' must be 'definition' or 'supplement'")
+    return role
+
+
+def _validate_rule_relation(value: object, context: str) -> None:
+    if not isinstance(value, dict) or set(value) != {"type", "recordId"}:
+        raise ValueError(f"{context}: must contain only 'type' and 'recordId'")
+    relation_type = value.get("type")
+    if relation_type not in RULE_RELATION_TYPES:
+        raise ValueError(
+            f"{context}: unsupported relation type {relation_type!r}; "
+            f"expected one of {sorted(RULE_RELATION_TYPES)}"
+        )
+    record_id = value.get("recordId")
+    _require_string(record_id, "recordId", context)
+    assert isinstance(record_id, str)
+    domain = record_id.split(":", 1)[0]
+    validate_typed_domain_id(record_id, expected_domain=domain, context=f"{context}.recordId")
 
 
 def _validate_army_link_id(entity: str, value: Any, context: str) -> None:
@@ -421,21 +463,47 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         )
         if not isinstance(record["citations"], list) or not record["citations"]:
             raise ValueError(f"{context}: 'citations' must be a non-empty array")
-        for optional_list in ("aliases", "relatedRecords"):
+        for optional_list in ("aliases",):
             if optional_list in record and (
                 not isinstance(record[optional_list], list)
                 or any(not isinstance(value, str) for value in record[optional_list])
             ):
                 raise ValueError(f"{context}: '{optional_list}' must be an array of strings")
+        if "relatedRecords" in record:
+            raise ValueError(
+                f"{context}: 'relatedRecords' was replaced by typed 'relations' in format v5"
+            )
+        composition_role = _validate_composition(
+            record["composition"], f"{context}.composition"
+        )
+        relations = record.get("relations", [])
+        if not isinstance(relations, list):
+            raise ValueError(f"{context}: 'relations' must be an array")
+        relation_keys: set[tuple[str, str]] = set()
+        for relation_index, relation in enumerate(relations):
+            _validate_rule_relation(
+                relation, f"{context}.relations[{relation_index}]"
+            )
+            relation_key = (relation["type"], relation["recordId"])
+            if relation_key in relation_keys:
+                raise ValueError(
+                    f"{context}.relations[{relation_index}]: duplicate relation "
+                    f"{relation_key!r}"
+                )
+            relation_keys.add(relation_key)
         _validate_scope(record["scope"], f"{context}.scope")
         _validate_review(record["review"], f"{context}.review")
         if "facts" in record and not isinstance(record["facts"], dict):
             raise ValueError(f"{context}: 'facts' must be an object")
         if record["kind"] == "skill":
             facts = record.get("facts")
-            if not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids:
+            if composition_role == "definition" and (
+                not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids
+            ):
                 raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
-            parameter_semantics = facts.get("parameterSemantics")
+            parameter_semantics = (
+                facts.get("parameterSemantics") if isinstance(facts, dict) else None
+            )
             if parameter_semantics is not None:
                 if not isinstance(parameter_semantics, dict):
                     raise ValueError(
@@ -458,11 +526,6 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict) and facts.get("category") == "peripheral-type":
-                related = record.get("relatedRecords")
-                if not isinstance(related, list) or "skill:peripheral" not in related:
-                    raise ValueError(
-                        f"{context}: Peripheral type must relate to 'skill:peripheral'"
-                    )
                 peripheral_type_skill_refs[record["id"]] = _validate_peripheral_type_facts(
                     facts, f"{context}.facts"
                 )
@@ -495,9 +558,9 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         )
         if record["kind"] == "weapon":
             facts = record.get("facts")
-            if not isinstance(facts, dict):
+            if composition_role == "definition" and not isinstance(facts, dict):
                 raise ValueError(f"{context}: weapon 'facts' must be an object")
-            if "specialProfile" in facts:
+            if isinstance(facts, dict) and "specialProfile" in facts:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
                 )
@@ -536,7 +599,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 raise ValueError(
                     f"{context}: skill declaration category citation must reference a PDF"
                 )
-        if record["kind"] in {"skill", "state"}:
+        if composition_role == "definition" and record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")
             if not isinstance(record_labels, list):
                 raise ValueError(f"{context}: '{record['kind']}' requires a 'labelIds' array")
@@ -578,5 +641,33 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                     f"Peripheral type {record_id!r} controller eligibility references "
                     f"unknown skill {skill_id!r}"
                 )
+            controller_record = next(record for record in records if record["id"] == skill_id)
+            controller_relations = {
+                (relation["type"], relation["recordId"])
+                for relation in controller_record.get("relations", [])
+            }
+            if ("controller-eligible-for", record_id) not in controller_relations:
+                raise ValueError(
+                    f"Peripheral type {record_id!r} controller eligibility requires a "
+                    f"'controller-eligible-for' relation from {skill_id!r}"
+                )
+
+        peripheral_record = next(
+            (record for record in records if record["id"] == "skill:peripheral"),
+            None,
+        )
+        if peripheral_record is None:
+            raise ValueError(
+                f"Peripheral type {record_id!r} requires canonical 'skill:peripheral'"
+            )
+        peripheral_relations = {
+            (relation["type"], relation["recordId"])
+            for relation in peripheral_record.get("relations", [])
+        }
+        if ("has-subtype", record_id) not in peripheral_relations:
+            raise ValueError(
+                f"Peripheral type {record_id!r} requires a 'has-subtype' relation "
+                "from 'skill:peripheral'"
+            )
 
     return document

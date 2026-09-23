@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 4,
+        "formatVersion": 5,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -81,6 +81,7 @@ def valid_document() -> dict:
                 "facts": {"typeId": "automatic"},
                 "labelIds": ["example-label"],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
+                "composition": {"role": "definition"},
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             }
         ],
@@ -115,6 +116,40 @@ def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Pa
     }
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="status.*draft.*reviewed"):
+        load_curated_document(path)
+
+
+def test_load_curated_document_requires_explicit_composition_role(tmp_path: Path) -> None:
+    document = valid_document()
+    del document["records"][0]["composition"]
+    path = tmp_path / "missing-composition.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="missing fields.*composition"):
+        load_curated_document(path)
+
+    document = valid_document()
+    document["records"][0]["composition"] = {"role": "override"}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="definition.*supplement"):
+        load_curated_document(path)
+
+
+def test_load_curated_document_requires_typed_relations(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"][0]["relatedRecords"] = ["state:example"]
+    path = tmp_path / "legacy-relations.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="replaced by typed 'relations'"):
+        load_curated_document(path)
+
+    document = valid_document()
+    document["records"][0]["relations"] = [
+        {"type": "maybe-related", "recordId": "state:example"}
+    ]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="unsupported relation type"):
         load_curated_document(path)
 
 
@@ -204,7 +239,7 @@ def test_load_curated_document_accepts_url_backed_wiki_citation(tmp_path: Path) 
 
 def test_load_curated_document_rejects_older_versions(tmp_path: Path) -> None:
     document = valid_document()
-    for version in (1, 2, 3):
+    for version in (1, 2, 3, 4):
         document["formatVersion"] = version
         path = tmp_path / f"v{version}.json"
         path.write_text(json.dumps(document), encoding="utf-8")
@@ -291,12 +326,18 @@ def test_checked_in_n5_collection_is_valid() -> None:
     records = {record["id"]: record for record in document["records"]}
     assert records["state:camouflaged"]["kind"] == "state"
     assert records["state:camouflaged"]["labelIds"] == ["marker"]
-    assert records["state:camouflaged"]["facts"]["enteredBy"] == ["skill:camouflage"]
     assert records["skill:camouflage"]["kind"] == "skill"
     assert records["skill:camouflage"]["labelIds"] == ["optional"]
     assert records["skill:camouflage"]["facts"]["typeId"] == "automatic"
+    assert records["skill:camouflage"]["relations"] == [
+        {"type": "enters-state", "recordId": "state:camouflaged"}
+    ]
     assert records["skill:camouflage"]["armyLinks"] == [
         {"entity": "skill", "id": "camouflage"}
+    ]
+    assert records["skill:discover"]["facts"]["typeId"] == "basic-short-skill"
+    assert records["skill:discover"]["relations"] == [
+        {"type": "reveals-state", "recordId": "state:camouflaged"}
     ]
     assert records["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
     assert records["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
@@ -330,6 +371,7 @@ def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: P
             "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {"sourceIdentity": {"prefixes": "Disposable ("}},
             "citations": [{"sourceId": "n5-core-v5.3", "page": 170}],
+            "composition": {"role": "definition"},
             "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
         }
     ]
@@ -380,6 +422,7 @@ def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: 
             },
             "armyLinks": [{"entity": "weapon", "id": 226}],
             "citations": [{"sourceId": "n5-core-v5.3", "page": 74}],
+            "composition": {"role": "definition"},
             "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
         }
     ]
@@ -404,6 +447,7 @@ def test_skill_declaration_category_requires_valid_order_and_skill_links(
             "facts": {"order": 10},
             "armyLinks": [{"entity": "skill", "id": 19}],
             "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
+            "composition": {"role": "definition"},
             "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
         }
     )
@@ -430,6 +474,7 @@ def test_skill_declaration_category_requires_valid_order_and_skill_links(
             {"sourceId": "n5-core-v5.3", "page": 12},
             {"sourceId": "n5-core-v5.3", "page": 13},
         ],
+        "composition": {"role": "definition"},
         "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
     }
     document["records"].append(declaration)
@@ -487,7 +532,14 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
+                "relations": [
+                    {
+                        "type": "controller-eligible-for",
+                        "recordId": "rule:peripheral-type:servant",
+                    }
+                ],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 90}],
+                "composition": {"role": "definition"},
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
@@ -498,7 +550,14 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
+                "relations": [
+                    {
+                        "type": "controller-eligible-for",
+                        "recordId": "rule:peripheral-type:servant",
+                    }
+                ],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 91}],
+                "composition": {"role": "definition"},
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
@@ -509,7 +568,14 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
+                "relations": [
+                    {
+                        "type": "has-subtype",
+                        "recordId": "rule:peripheral-type:servant",
+                    }
+                ],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "composition": {"role": "definition"},
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
@@ -529,8 +595,8 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                     "maxPerController": 2,
                     "operatingDistance": "unlimited",
                 },
-                "relatedRecords": ["skill:peripheral"],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "composition": {"role": "definition"},
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
         ]
@@ -567,6 +633,7 @@ def test_peripheral_type_rejects_unknown_controller_skill(tmp_path: Path) -> Non
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "composition": {"role": "definition"},
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
@@ -580,8 +647,8 @@ def test_peripheral_type_rejects_unknown_controller_skill(tmp_path: Path) -> Non
                     "controllerEligibility": {"hasSkill": "skill:missing"},
                     "profileModes": ["connected", "autonomous"],
                 },
-                "relatedRecords": ["skill:peripheral"],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "composition": {"role": "definition"},
                 "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
         ]
@@ -628,7 +695,14 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
         "connected",
         "autonomous",
     ]
-    assert all(
-        "skill:peripheral" in record["relatedRecords"]
-        for record in peripheral_types.values()
-    )
+    assert {
+        relation["recordId"]
+        for relation in records["skill:peripheral"]["relations"]
+        if relation["type"] == "has-subtype"
+    } == set(peripheral_types)
+    assert records["skill:doctor"]["relations"] == [
+        {
+            "type": "controller-eligible-for",
+            "recordId": "rule:peripheral-type:servant",
+        }
+    ]
