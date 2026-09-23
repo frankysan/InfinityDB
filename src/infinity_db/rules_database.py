@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 3
-RULES_COMPATIBILITY_VERSION = 3
+RULES_SCHEMA_VERSION = 4
+RULES_COMPATIBILITY_VERSION = 4
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -111,6 +111,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             label_ids_json TEXT,
             scope_json TEXT,
             facts_json TEXT,
+            variant_json TEXT,
             review_json TEXT,
             PRIMARY KEY (collection_id, id),
             FOREIGN KEY (collection_id) REFERENCES collections(id)
@@ -173,6 +174,7 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
             current_records.setdefault(record["id"], []).append((path, record))
 
     current_ids = set(current_records)
+    definitions_by_id: dict[str, tuple[Path, dict[str, Any]]] = {}
     for record_id, contributions in current_records.items():
         definitions = [
             (path, record)
@@ -185,6 +187,7 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                 f"Current rules record {record_id!r} requires exactly one definition "
                 f"contribution; found {len(definitions)} across {sources}"
             )
+        definitions_by_id[record_id] = definitions[0]
 
         for path, record in contributions:
             for relation in record.get("relations", []):
@@ -194,6 +197,40 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                         f"Current rules relation {record_id!r} -> {target_id!r} in {path} "
                         "does not resolve to a current semantic record"
                     )
+
+    for record_id, (path, definition) in definitions_by_id.items():
+        variant = definition.get("variantSemantics")
+        if not isinstance(variant, dict) or variant.get("inheritance") != "source":
+            continue
+        family_targets = [
+            relation["recordId"]
+            for relation in definition.get("relations", [])
+            if relation["type"] == "variant-of"
+        ]
+        if len(family_targets) != 1:
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} in {path} requires exactly "
+                "one 'variant-of' relation"
+            )
+        family_id = family_targets[0]
+        family_definition = definitions_by_id.get(family_id)
+        if family_definition is None:
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} references missing family "
+                f"definition {family_id!r}"
+            )
+        _, family = family_definition
+        if family["kind"] != definition["kind"]:
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} must reference a family "
+                "record of the same kind"
+            )
+        family_variant = family.get("variantSemantics")
+        if not isinstance(family_variant, dict) or family_variant.get("inheritance") != "family":
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} requires family target "
+                f"{family_id!r} to declare family inheritance"
+            )
 
 
 def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -> None:
@@ -288,8 +325,8 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
         connection,
         "INSERT INTO records "
         "(collection_id, id, kind, name, summary, composition_role, aliases_json, "
-        "label_ids_json, scope_json, facts_json, review_json) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "label_ids_json, scope_json, facts_json, variant_json, review_json) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 collection_id,
@@ -302,6 +339,11 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
                 _json_text(record["labelIds"]) if "labelIds" in record else None,
                 _json_text(record["scope"]) if "scope" in record else None,
                 _json_text(record["facts"]) if "facts" in record else None,
+                (
+                    _json_text(record["variantSemantics"])
+                    if "variantSemantics" in record
+                    else None
+                ),
                 _json_text(record["review"]) if "review" in record else None,
             )
             for record in document["records"]
@@ -384,7 +426,7 @@ def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Pa
                     _insert_document(connection, document)
                 metadata = {
                     "format": "InfinityDB curated rules database",
-                    "formatVersion": 3,
+                    "formatVersion": RULES_SCHEMA_VERSION,
                     "collectionCount": len(documents),
                     "databaseCompatibilityVersion": RULES_COMPATIBILITY_VERSION,
                 }
@@ -416,6 +458,25 @@ def _decode_json(value: str | None, default: Any) -> Any:
         return json.loads(value)
     except json.JSONDecodeError:
         return default
+
+
+def _variant_semantics(value: str | None) -> dict[str, Any] | None:
+    raw = _decode_json(value, None)
+    if not isinstance(raw, dict):
+        return None
+    parameters = []
+    for parameter in raw.get("occurrenceParameters", []):
+        item = {
+            "source": parameter["source"],
+            "kind": parameter["kind"],
+        }
+        if "positiveSign" in parameter:
+            item["positive_sign"] = parameter["positiveSign"]
+        parameters.append(item)
+    result: dict[str, Any] = {"inheritance": raw["inheritance"]}
+    if parameters:
+        result["occurrence_parameters"] = parameters
+    return result
 
 
 class RulesDatabase:
@@ -483,6 +544,7 @@ class RulesDatabase:
                 "label_ids": _decode_json(row["label_ids_json"], []),
                 "scope": _decode_json(row["scope_json"], None),
                 "facts": _decode_json(row["facts_json"], None),
+                "variant_semantics": _variant_semantics(row["variant_json"]),
                 "review": _decode_json(row["review_json"], None),
                 "collection": dict(collection),
             }
@@ -743,7 +805,7 @@ class RulesDatabase:
         """Return curated skill parameter semantics keyed to authored Army refs."""
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT l.external_id AS skill_ref, r.facts_json "
+                "SELECT l.external_id AS skill_ref, r.variant_json "
                 "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
                 "AND l.record_id = r.id "
@@ -753,13 +815,24 @@ class RulesDatabase:
             ).fetchall()
             result: dict[ArmyLinkRef, dict[str, str]] = {}
             for row in rows:
-                facts = _decode_json(row["facts_json"], {})
-                semantics = facts.get("parameterSemantics") if isinstance(facts, dict) else None
-                if not isinstance(semantics, dict):
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                parameters = variant.get("occurrence_parameters", [])
+                semantics = next(
+                    (
+                        parameter
+                        for parameter in parameters
+                        if parameter.get("source") == "army-extra"
+                        and parameter.get("kind") == "distance"
+                    ),
+                    None,
+                )
+                if semantics is None:
                     continue
                 value = {
                     "kind": semantics["kind"],
-                    "positive_sign": semantics["positiveSign"],
+                    "positive_sign": semantics["positive_sign"],
                 }
                 skill_ref = _army_link_ref(row["skill_ref"])
                 existing = result.get(skill_ref)

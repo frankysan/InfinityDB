@@ -277,8 +277,8 @@ Skill-extra distance semantics are split according to source authority. Army
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v5 makes applicability, review state, contribution role, and
-typed related-item edges part of every record contract. Each record carries explicit
+Curated rules format v6 makes applicability, review state, contribution role, typed
+related-item edges, and explicit catalog-variant inheritance part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
 `definition` or `supplement`; source publication provenance remains in the collection,
 source, and citation structures rather than being folded into semantic identity.
@@ -298,7 +298,7 @@ not display name. The rules database derives inbound/reverse navigation from tho
 edges, so reciprocal rows are not maintained independently. Current edges must resolve to a
 current semantic record before `rules.db` can be published.
 `Super-Jump` and `Forward Deployment` currently use
-`facts.parameterSemantics` to state how a positive distance sign should be
+`variantSemantics.occurrenceParameters` to state how a positive distance sign should be
 displayed. `SkillCatalog` composes that semantic hint into skill, modifier, and
 unit API payloads, and browser code formats distances without recognizing skill
 names.
@@ -1097,7 +1097,7 @@ replace a complete imported snapshot.
 
 Rules-reference data uses a distinct SQLite database with its own schema,
 compatibility/versioning, importer, and atomic replacement policy. The current
-`rules.db` schema and compatibility versions are both 3. This database is not an
+`rules.db` schema and compatibility versions are both 4. This database is not an
 extension of `infinity.db` or `infinity.raw.db`.
 
 The source-controlled `data/curated/rules/` JSON layer is the only
@@ -1106,16 +1106,16 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v5 rules contract stores collection scope, source metadata,
+The current curated-v6 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, typed related-rule edges,
-composition role, review state, and source-specific citations. PDF sources carry both the local
+explicit variant inheritance, composition role, review state, and source-specific citations. PDF sources carry both the local
 reviewed file and official upstream URL; PDF citations use printed pages.
 Archived wiki sources carry exact ZIP/hash provenance and citations use archive
 members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v5 must be migrated before ingestion.
+Curated-rule files older than format v6 must be migrated before ingestion.
 
 ## HTTP API
 

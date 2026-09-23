@@ -555,7 +555,7 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v5 rules contract includes collection/source metadata,
+The current curated-v6 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, and citations. Older formats must be migrated
@@ -704,8 +704,8 @@ compatibility references remain unambiguous JSON integers.
   as derivable presentation data, not configuration. Weapon detail rendering now
   derives ordered range endpoints from imported profile `distance[].max` values.
   Distance-skill handling is now source-driven: Army `extras.type` determines
-  `DISTANCE` versus text, while curated skill `parameterSemantics` supplies only
-  rule-derived sign-display behavior for Super-Jump and Forward Deployment.
+  `DISTANCE` versus text, while curated skill `variantSemantics.occurrenceParameters`
+  supplies only rule-derived sign-display behavior for Super-Jump and Forward Deployment.
   Reinforcement prefix normalization is now pinned in the identity config and
   unit-detail profile display names are backend-derived. Remaining audit targets
   are now limited to symbol-semantic name tables reserved for the symbol-pipeline
@@ -1166,7 +1166,7 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 rules-enrichment contract foundation (2026-09-23)
 
-- Curated rules format v5 requires every record to declare `scope.game`, a non-empty
+- Curated rules format v6 requires every record to declare `scope.game`, a non-empty
   `scope.seasons` list, and a review object containing `status` (`draft` or `reviewed`)
   plus `reviewedOn`, together with a composition role of `definition` or `supplement`.
   Applicability, review state, and contribution semantics are therefore explicit
@@ -1188,3 +1188,27 @@ compatibility references remain unambiguous JSON integers.
 - Skill, Trait, Equipment, and Weapon detail pages share one rules-reference renderer.
   It displays existing curated summaries/classifications and source citations as links;
   this is presentation of maintained enrichment, not a new source of rule semantics.
+
+## 0.7.0 variant-aware rules contract (2026-09-23)
+
+- Curated rules format v6 and `rules.db` schema/compatibility 4 make rule inheritance
+  across canonical Army catalog families explicit. Every Army-linked Skill, Equipment,
+  or Weapon definition declares `variantSemantics.inheritance` as `family` or `source`;
+  application catalog grouping alone is never evidence that rule facts are shared.
+- `family` contributions may be presented at the canonical catalog level. `source`
+  contributions require exactly one numeric Army source identity and exactly one typed
+  `variant-of` relation to a same-kind family definition; composition attaches those
+  rules only to the matching source variant. This is the required pattern for exact
+  Levels and named source variants whose rules differ.
+- Army routing belongs to definition contributions. Supplements inherit the definition's
+  routing and may not declare their own `armyLinks`; this prevents a scoped supplement
+  from silently changing family-versus-source applicability during composition.
+- Occurrence parameters remain independent of source-variant identity. Format v6 moves
+  the existing distance display semantics out of `facts` into
+  `variantSemantics.occurrenceParameters`; raw Army extras remain occurrence-scoped.
+  Only the audited `army-extra` / `distance` parameter is standardized initially.
+  Unknown MOD/value spellings must remain opaque until reviewed rather than being
+  generalized into universal base-rule facts.
+- Skill/Equipment/Weapon detail APIs retain canonical family rules separately from
+  source-specific variant rules, and the browser renders exact variant rules inside the
+  corresponding usage variant.

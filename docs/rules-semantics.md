@@ -514,7 +514,7 @@ These forms affect different targets and phases and sometimes have additional
 constraints. InfinityDB should preserve the raw/exact source representation and
 attach rule-derived parameter semantics where needed rather than flattening all
 extras into a generic numeric modifier. This aligns with the existing curated
-`facts.parameterSemantics` boundary.
+`variantSemantics.occurrenceParameters` boundary.
 
 Sources:
 
@@ -2590,7 +2590,8 @@ also allows this bonus to combine with other effects that modify that maximum.
 
 The parenthetical value is therefore neither a Skill Level nor a generic MOD to
 an Attribute. A future annex-scoped Commlink record should encode the parameter
-as a typed `maximum Trooper count bonus` in `parameterSemantics` while preserving
+as a typed `maximum Trooper count bonus` in `variantSemantics.occurrenceParameters`
+while preserving
 the exact Army/source representation for provenance.
 
 Source:

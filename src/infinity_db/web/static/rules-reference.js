@@ -84,12 +84,12 @@ function appendRuleDetails(container, rule) {
   }
 }
 
-export function rulesReferenceSection(rules) {
+export function rulesReferenceSection(rules, headingText = "Rules reference") {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference";
   const heading = document.createElement("h2");
   heading.className = "detail-section-title";
-  heading.textContent = "Rules reference";
+  heading.textContent = headingText;
   section.append(heading);
 
   for (const rule of rules) {

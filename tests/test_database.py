@@ -3340,3 +3340,66 @@ def test_database_materializes_and_exposes_reviewed_embedded_peripheral(
             "quantity": 1,
         }
     ]
+
+
+def test_skill_catalog_keeps_source_specific_rules_on_matching_variant(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 19, "name": "Martial Arts L1", "source_defined": True},
+            {"id": 20, "name": "Martial Arts L2", "source_defined": True},
+            {"id": 21, "name": "Martial Arts L3", "source_defined": True},
+            {"id": 22, "name": "Martial Arts L4", "source_defined": True},
+            {"id": 23, "name": "Martial Arts L5", "source_defined": True},
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = 20
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    document = copy.deepcopy(current)
+    common = {
+        "kind": "skill",
+        "summary": "Martial Arts test semantics.",
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "facts": {"category": "special-skill", "typeId": "automatic"},
+        "labelIds": [],
+        "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 100}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+    }
+    document["records"].extend(
+        [
+            {
+                **common,
+                "id": "skill:martial-arts",
+                "name": "Martial Arts",
+                "armyLinks": [{"entity": "skill", "id": "martial-arts"}],
+                "variantSemantics": {"inheritance": "family"},
+            },
+            {
+                **common,
+                "id": "skill:martial-arts-l2",
+                "name": "Martial Arts L2",
+                "summary": "Level 2 semantics only.",
+                "armyLinks": [{"entity": "skill", "id": 20}],
+                "variantSemantics": {"inheritance": "source"},
+                "relations": [
+                    {"type": "variant-of", "recordId": "skill:martial-arts"}
+                ],
+            },
+        ]
+    )
+    rules_path = tmp_path / "rules.db"
+    export_rules_database([(current_path, document)], rules_path)
+
+    detail = SkillCatalog(Database(database_path), RulesDatabase(rules_path)).get_skill(20)
+
+    assert detail is not None
+    assert [rule["id"] for rule in detail["rules"]] == ["skill:martial-arts"]
+    variant = next(item for item in detail["variants"] if item["skill_id"] == 20)
+    assert [rule["id"] for rule in variant["rules"]] == ["skill:martial-arts-l2"]

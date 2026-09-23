@@ -109,6 +109,7 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
     records = database.records_for_army_link("weapon", "armed-turret")
 
     assert [record["id"] for record in records] == ["weapon:armed-turret"]
+    assert records[0]["variant_semantics"] == {"inheritance": "family"}
     assert records[0]["facts"]["specialProfile"] == {
         "stats": [
             ["MOV", "--"],
@@ -291,3 +292,90 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("enters-state", "inbound", "skill:camouflage"),
         ("reveals-state", "inbound", "skill:discover"),
     }
+
+
+def test_rules_database_preserves_variant_inheritance_and_variant_links(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    document = copy.deepcopy(current)
+    common = {
+        "kind": "skill",
+        "summary": "Variant contract test.",
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "facts": {"category": "special-skill", "typeId": "automatic"},
+        "labelIds": [],
+        "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 76}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+    }
+    document["records"].extend(
+        [
+            {
+                **common,
+                "id": "skill:variant-family-test",
+                "name": "Variant Family Test",
+                "armyLinks": [{"entity": "skill", "id": "variant-family-test"}],
+                "variantSemantics": {"inheritance": "family"},
+            },
+            {
+                **common,
+                "id": "skill:variant-family-test-l2",
+                "name": "Variant Family Test L2",
+                "armyLinks": [{"entity": "skill", "id": 20}],
+                "variantSemantics": {"inheritance": "source"},
+                "relations": [
+                    {"type": "variant-of", "recordId": "skill:variant-family-test"}
+                ],
+            },
+        ]
+    )
+    output = tmp_path / "rules.db"
+    export_rules_database([(current_path, document)], output)
+
+    database = RulesDatabase(output)
+    family = database.composed_records_for_army_link("skill", "variant-family-test")
+    exact = database.composed_records_for_army_link("skill", 20)
+
+    assert family[0]["variant_semantics"] == {"inheritance": "family"}
+    assert exact[0]["variant_semantics"] == {"inheritance": "source"}
+    assert exact[0]["relations"] == [
+        {
+            "type": "variant-of",
+            "record_id": "skill:variant-family-test",
+            "collection_id": "n5-core-v5.3",
+        }
+    ]
+    assert {
+        (relation["type"], relation["direction"], relation["record_id"])
+        for relation in database.relations_for_record("skill:variant-family-test")
+        if relation["type"] == "variant-of"
+    } == {("variant-of", "inbound", "skill:variant-family-test-l2")}
+
+
+def test_export_rejects_source_specific_variant_without_family_relation(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    document = copy.deepcopy(current)
+    document["records"].append(
+        {
+            "id": "skill:orphan-variant-test",
+            "kind": "skill",
+            "name": "Orphan Variant Test",
+            "summary": "Invalid source-specific variant.",
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {"category": "special-skill", "typeId": "automatic"},
+            "labelIds": [],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 76}],
+            "composition": {"role": "definition"},
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+            "armyLinks": [{"entity": "skill", "id": 20}],
+            "variantSemantics": {"inheritance": "source"},
+        }
+    )
+
+    with pytest.raises(ValueError, match="requires exactly one 'variant-of' relation"):
+        export_rules_database([(current_path, document)], tmp_path / "rules.db")

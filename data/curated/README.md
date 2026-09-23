@@ -140,13 +140,13 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v3 contract
+### Current v6 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `3`
+- `formatVersion`: `6`
 - `collection`: collection identity/scope/authority
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
@@ -168,6 +168,12 @@ Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be
 blended accidentally.
 
+Every record declares `composition.role` as `definition` or `supplement`. Across
+current collections, each semantic record ID has exactly one definition; supplements
+retain their own scope, facts, citations, relations, and publication provenance rather
+than being field-merged by load order. Related concepts use typed one-way `relations`;
+reverse navigation is derived by `rules.db`.
+
 ### Document shape
 
 The main collection structure is:
@@ -175,7 +181,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 3,
+    "formatVersion": 6,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -188,8 +194,20 @@ The main collection structure is:
         "skillTypes": [],
         "labels": []
     },
-    "skillTypes": [],
-    "labels": [],
+    "skillTypes": [
+        {
+            "id": "automatic",
+            "name": "Automatic Skills",
+            "labels": ["Automatic Skill", "Automatic Skills"],
+            "descriptions": {
+                "singular": "Automatic Skill description.",
+                "plural": "Automatic Skills description."
+            }
+        }
+    ],
+    "labels": [
+        {"id": "optional", "name": "Optional", "description": "Optional label."}
+    ],
     "sources": [
         {
             "id": "n5-core-v5.3-pdf",
@@ -205,26 +223,21 @@ The main collection structure is:
     ],
     "records": [
         {
-            "id": "rule:camouflaged-state",
-            "kind": "state",
-            "name": "Camouflaged State",
-            "aliases": ["Camouflage"],
+            "id": "skill:camouflage",
+            "kind": "skill",
+            "name": "Camouflage",
             "summary": "Concise human-written summary.",
             "scope": {"game": "N5", "seasons": ["current"]},
-            "facts": {
-                "category": "state",
-                "timing": ["States Phase"],
-                "effects": [],
-                "requirements": [],
-                "restrictions": [],
-                "interactions": ["rule:discover", "rule:surprise-attack"]
-            },
+            "facts": {"typeId": "automatic"},
+            "labelIds": ["optional"],
             "armyLinks": [{"entity": "skill", "id": "camouflage"}],
-            "relatedRecords": ["rule:camouflage", "rule:marker-state"],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [],
             "citations": [
                 {"sourceId": "n5-core-v5.3-pdf", "page": 113, "section": "States"}
             ],
-            "review": {"status": "reviewed", "reviewedOn": "2026-09-15"}
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-15"},
+            "composition": {"role": "definition"}
         }
     ]
 }
@@ -248,11 +261,19 @@ positive printed page. The application treats the absence of such a record as
 `Unclassified`; do not create uncited category records to represent missing rules
 classification.
 
-Skill records may use `facts.parameterSemantics` when a rule-derived parameter
-needs display behavior that Army source data does not encode. The current schema
-supports `{"kind": "distance", "positiveSign": "preserve|omit|force"}`. This
-field does not decide whether an Army extra is a distance: imported
-`extras.type == "DISTANCE"` remains authoritative for that source semantic.
+Army-linked Skill, Equipment, and Weapon definitions declare
+`variantSemantics.inheritance` as `family` or `source`. Family semantics may be
+presented for the canonical application family. Source semantics require exactly one
+numeric Army source identity and a typed `variant-of` relation to a same-kind family
+definition; they apply only to that exact source variant. Supplements inherit Army
+routing from their definition and therefore do not declare their own `armyLinks`.
+
+Rule-derived occurrence-parameter display behavior lives under
+`variantSemantics.occurrenceParameters`. The currently standardized parameter is an
+Army extra with `kind: "distance"` and `positiveSign: "preserve|omit|force"`. This
+does not decide whether an Army extra is a distance: imported
+`extras.type == "DISTANCE"` remains authoritative for that source semantic. Other
+MOD/value forms remain opaque until their semantics are reviewed.
 
 Skill records always carry a `labelIds` array, but it may be empty when the reviewed
 rule does not assign any maintained rules Label. States still require at least one

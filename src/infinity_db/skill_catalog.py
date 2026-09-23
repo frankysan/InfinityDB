@@ -150,21 +150,46 @@ class SkillCatalog:
         if semantics is not None:
             result["parameter_semantics"] = semantics
 
-        if self.rules_database is not None:
-            rules: dict[str, dict[str, Any]] = {}
-            army_refs = sorted(
-                self._army_refs_for_ids(source_ids),
-                key=lambda value: (isinstance(value, str), str(value)),
-            )
-            for skill_ref in army_refs:
-                for record in self.rules_database.composed_records_for_army_link(
-                    "skill", skill_ref
+        rules_database = self.rules_database
+        if rules_database is not None:
+            family_rules: dict[str, dict[str, Any]] = {}
+            source_rules: dict[int, dict[str, dict[str, Any]]] = {}
+
+            def collect_rules(army_ref: ArmyLinkRef, source_id: int | None) -> None:
+                for record in rules_database.composed_records_for_army_link(
+                    "skill", army_ref
                 ):
                     if record["kind"] == DECLARATION_KIND:
                         continue
-                    rules.setdefault(record["id"], record)
-            if rules:
-                result["rules"] = list(rules.values())
+                    inheritance = (record.get("variant_semantics") or {}).get(
+                        "inheritance"
+                    )
+                    if inheritance == "source":
+                        if source_id is None:
+                            raise ValueError(
+                                f"Source-specific Skill rule {record['id']!r} must be "
+                                "linked by numeric source id"
+                            )
+                        source_rules.setdefault(source_id, {}).setdefault(
+                            record["id"], record
+                        )
+                    else:
+                        family_rules.setdefault(record["id"], record)
+
+            for source_id in sorted(source_ids):
+                collect_rules(source_id, source_id)
+            application_slug = self.database.application_slug(
+                "skills", int(result["id"])
+            )
+            if application_slug is not None:
+                collect_rules(application_slug, None)
+
+            if family_rules:
+                result["rules"] = list(family_rules.values())
+            for variant in result.get("variants", []):
+                variant_rules = source_rules.get(int(variant["skill_id"]))
+                if variant_rules:
+                    variant["rules"] = list(variant_rules.values())
         return result
 
     def list_skill_extras(self) -> list[dict[str, Any]]:

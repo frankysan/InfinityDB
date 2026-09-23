@@ -144,9 +144,10 @@ requiring a new top-level browser surface in 0.7.0.
     Current composition requires exactly one definition contribution per semantic ID
     and permits scoped supplements that retain their own facts/citations/provenance;
     fields are never merged by priority or load order.
-  - [ ] Make enrichment variant-aware: base rule knowledge may be inherited only
-    where valid, while exact Levels, MODs, typed parameters, and source variants
-    retain their own meaning and provenance.
+  - [x] Make enrichment variant-aware: curated v6 requires explicit `family` versus
+    exact `source` inheritance, source-only records use typed `variant-of` edges, and
+    reviewed occurrence parameters remain separate from source-variant identity. Unknown
+    MOD/value forms stay opaque until their typed semantics are reviewed.
 
 - [ ] **Systematically enrich the data currently available through InfinityDB.**
   - [ ] Reconcile existing Skills, Equipment, Weapons, Traits, and relevant

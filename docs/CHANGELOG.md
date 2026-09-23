@@ -11,15 +11,18 @@ Entries describe meaningful release outcomes rather than detailed implementation
   detail pages through one shared renderer, including applicability context and linked
   authoritative citations.
 - Add typed rules relationships with derived reverse navigation, replacing generic
-  related-record lists with explicit semantic edges for state transitions and
-  Peripheral subtype/controller relationships.
+  related-record lists with explicit semantic edges for state transitions, Peripheral
+  subtype/controller relationships, and exact source variants linked to their rule
+  family.
 
 ### Changed
 
-- Advance curated rules to format v5 and `rules.db` schema/compatibility 3. Each current
-  semantic identity now has exactly one definition contribution plus optional scoped
-  supplements; supplements retain independent provenance and are never field-merged by
-  collection order. Non-current collections remain excluded from normal enrichment.
+- Advance curated rules to format v6 and `rules.db` schema/compatibility 4. Each current
+  semantic identity has exactly one definition plus optional scoped supplements, and
+  Army-linked catalog rules now explicitly distinguish family-wide knowledge from exact
+  source-variant semantics. Occurrence parameters remain attached to their source usage
+  rather than becoming universal properties of a canonical catalog family. Non-current
+  collections remain excluded from normal enrichment.
 
 ## [0.6.3] - 2026-09-22
 

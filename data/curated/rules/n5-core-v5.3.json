@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 5,
+    "formatVersion": 6,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -409,7 +409,10 @@
                     "type": "enters-state",
                     "recordId": "state:camouflaged"
                 }
-            ]
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         },
         {
             "id": "skill:discover",
@@ -456,6 +459,9 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
             }
         },
         {
@@ -478,11 +484,7 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "automatic",
-                "parameterSemantics": {
-                    "kind": "distance",
-                    "positiveSign": "omit"
-                }
+                "typeId": "automatic"
             },
             "armyLinks": [
                 {
@@ -499,6 +501,16 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
+            },
+            "variantSemantics": {
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "distance",
+                        "positiveSign": "omit"
+                    }
+                ]
             }
         },
         {
@@ -521,11 +533,7 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "deployment-skill",
-                "parameterSemantics": {
-                    "kind": "distance",
-                    "positiveSign": "force"
-                }
+                "typeId": "deployment-skill"
             },
             "armyLinks": [
                 {
@@ -542,6 +550,16 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
+            },
+            "variantSemantics": {
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "distance",
+                        "positiveSign": "force"
+                    }
+                ]
             }
         },
         {
@@ -1510,6 +1528,9 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
             }
         },
         {
@@ -3895,7 +3916,10 @@
                     "type": "controller-eligible-for",
                     "recordId": "rule:peripheral-type:servant"
                 }
-            ]
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         },
         {
             "id": "skill:engineer",
@@ -3938,7 +3962,10 @@
                     "type": "controller-eligible-for",
                     "recordId": "rule:peripheral-type:servant"
                 }
-            ]
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         },
         {
             "id": "skill:cyberplug",
@@ -3981,7 +4008,10 @@
                     "type": "controller-eligible-for",
                     "recordId": "rule:peripheral-type:cyberplug"
                 }
-            ]
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         },
         {
             "id": "skill:peripheral",
@@ -4050,7 +4080,10 @@
                     "type": "has-subtype",
                     "recordId": "rule:peripheral-type:cyberplug"
                 }
-            ]
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         },
         {
             "id": "rule:peripheral-type:servant",

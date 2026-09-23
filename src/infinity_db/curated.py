@@ -9,7 +9,7 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 5
+CURATED_FORMAT_VERSION = 6
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -40,8 +40,79 @@ RULE_RELATION_TYPES = frozenset(
         "enters-state",
         "has-subtype",
         "reveals-state",
+        "variant-of",
     }
 )
+
+CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
+VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
+VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
+VARIANT_PARAMETER_KINDS = frozenset({"distance"})
+
+
+def _validate_variant_semantics(
+    value: object, context: str, army_links: list[object]
+) -> str:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: must be an object")
+    allowed = {"inheritance", "occurrenceParameters"}
+    unknown = set(value) - allowed
+    if unknown:
+        raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
+    inheritance = value.get("inheritance")
+    if inheritance not in VARIANT_INHERITANCE_MODES:
+        raise ValueError(
+            f"{context}: 'inheritance' must be one of "
+            f"{sorted(VARIANT_INHERITANCE_MODES)}"
+        )
+
+    parameters = value.get("occurrenceParameters", [])
+    if not isinstance(parameters, list):
+        raise ValueError(f"{context}: 'occurrenceParameters' must be an array")
+    seen_parameters: set[tuple[str, str]] = set()
+    for index, parameter in enumerate(parameters):
+        parameter_context = f"{context}.occurrenceParameters[{index}]"
+        if not isinstance(parameter, dict):
+            raise ValueError(f"{parameter_context}: must be an object")
+        source = parameter.get("source")
+        kind = parameter.get("kind")
+        if source not in VARIANT_PARAMETER_SOURCES:
+            raise ValueError(
+                f"{parameter_context}: unsupported parameter source {source!r}; "
+                f"expected one of {sorted(VARIANT_PARAMETER_SOURCES)}"
+            )
+        if kind not in VARIANT_PARAMETER_KINDS:
+            raise ValueError(
+                f"{parameter_context}: unsupported parameter kind {kind!r}; "
+                f"expected one of {sorted(VARIANT_PARAMETER_KINDS)}"
+            )
+        expected_fields = {"source", "kind", "positiveSign"}
+        if set(parameter) != expected_fields:
+            raise ValueError(
+                f"{parameter_context}: distance parameters must contain only "
+                "'source', 'kind', and 'positiveSign'"
+            )
+        if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
+            raise ValueError(
+                f"{parameter_context}: 'positiveSign' must be one of "
+                "'preserve', 'omit', or 'force'"
+            )
+        key = (source, kind)
+        if key in seen_parameters:
+            raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")
+        seen_parameters.add(key)
+
+    if inheritance == "source":
+        if len(army_links) != 1:
+            raise ValueError(
+                f"{context}: source-specific semantics require exactly one Army link"
+            )
+        link = army_links[0]
+        if not isinstance(link, dict) or type(link.get("id")) is not int:
+            raise ValueError(
+                f"{context}: source-specific semantics require an exact numeric Army source id"
+            )
+    return inheritance
 
 
 def _require_string(value: Any, field: str, context: str) -> None:
@@ -471,7 +542,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 raise ValueError(f"{context}: '{optional_list}' must be an array of strings")
         if "relatedRecords" in record:
             raise ValueError(
-                f"{context}: 'relatedRecords' was replaced by typed 'relations' in format v5"
+                f"{context}: 'relatedRecords' was replaced by typed 'relations' in format v6"
             )
         composition_role = _validate_composition(
             record["composition"], f"{context}.composition"
@@ -501,28 +572,6 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids
             ):
                 raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
-            parameter_semantics = (
-                facts.get("parameterSemantics") if isinstance(facts, dict) else None
-            )
-            if parameter_semantics is not None:
-                if not isinstance(parameter_semantics, dict):
-                    raise ValueError(
-                        f"{context}: skill 'facts.parameterSemantics' must be an object"
-                    )
-                if set(parameter_semantics) != {"kind", "positiveSign"}:
-                    raise ValueError(
-                        f"{context}: skill 'facts.parameterSemantics' must contain only "
-                        "'kind' and 'positiveSign'"
-                    )
-                if parameter_semantics["kind"] != "distance":
-                    raise ValueError(
-                        f"{context}: skill parameter semantics 'kind' must be 'distance'"
-                    )
-                if parameter_semantics["positiveSign"] not in {"preserve", "omit", "force"}:
-                    raise ValueError(
-                        f"{context}: skill parameter semantics 'positiveSign' must be one of "
-                        "'preserve', 'omit', or 'force'"
-                    )
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict) and facts.get("category") == "peripheral-type":
@@ -609,6 +658,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 raise ValueError(f"{context}: 'labelIds' must reference labels")
         if "armyLinks" in record and not isinstance(record["armyLinks"], list):
             raise ValueError(f"{context}: 'armyLinks' must be an array")
+        army_links = record.get("armyLinks", [])
         if record["id"] in record_ids:
             raise ValueError(f"{context}: duplicate record id {record['id']!r}")
         record_ids.add(record["id"])
@@ -633,6 +683,44 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 raise ValueError(f"{link_context}: requires 'id' or 'name'")
             if "id" in link:
                 _validate_army_link_id(link["entity"], link["id"], link_context)
+
+        if composition_role == "supplement" and army_links:
+            raise ValueError(
+                f"{context}: supplement contributions inherit Army routing from their "
+                "definition and must not declare 'armyLinks'"
+            )
+        if composition_role == "definition" and record["kind"] in CATALOG_RULE_KINDS:
+            for link in army_links:
+                if link["entity"] != record["kind"]:
+                    raise ValueError(
+                        f"{context}: {record['kind']} definitions may only link to "
+                        f"Army {record['kind']} identities"
+                    )
+
+        variant_semantics = record.get("variantSemantics")
+        requires_variant_semantics = (
+            composition_role == "definition"
+            and record["kind"] in CATALOG_RULE_KINDS
+            and bool(army_links)
+        )
+        if requires_variant_semantics and variant_semantics is None:
+            raise ValueError(
+                f"{context}: Army-linked {record['kind']} definitions require "
+                "'variantSemantics'"
+            )
+        if variant_semantics is not None:
+            if composition_role != "definition":
+                raise ValueError(
+                    f"{context}: only definition contributions may declare 'variantSemantics'"
+                )
+            if record["kind"] not in CATALOG_RULE_KINDS:
+                raise ValueError(
+                    f"{context}: 'variantSemantics' is only supported for "
+                    f"{sorted(CATALOG_RULE_KINDS)} records"
+                )
+            _validate_variant_semantics(
+                variant_semantics, f"{context}.variantSemantics", army_links
+            )
 
     for record_id, skill_refs in peripheral_type_skill_refs.items():
         for skill_id in skill_refs:

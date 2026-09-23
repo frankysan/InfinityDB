@@ -60,6 +60,9 @@ function variantSection(variant, parameterSemantics) {
     const container = document.createElement("div");
     container.className = "table-container";
     container.append(table);
+    if (variant.rules?.length) {
+      section.append(rulesReferenceSection(variant.rules, "Variant rules"));
+    }
     section.append(container);
     section.dataset.loaded = "true";
   });

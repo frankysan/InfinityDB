@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 5,
+        "formatVersion": 6,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -153,6 +153,71 @@ def test_load_curated_document_requires_typed_relations(tmp_path: Path) -> None:
         load_curated_document(path)
 
 
+
+def test_load_curated_document_requires_variant_semantics_for_army_linked_rules(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    document["records"][0]["armyLinks"] = [{"entity": "skill", "id": "example"}]
+    path = tmp_path / "missing-variant-semantics.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="require.*variantSemantics"):
+        load_curated_document(path)
+
+    document["records"][0]["variantSemantics"] = {
+        "inheritance": "family",
+        "occurrenceParameters": [
+            {
+                "source": "army-extra",
+                "kind": "distance",
+                "positiveSign": "omit",
+            }
+        ],
+    }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][0]["variantSemantics"] == (
+        document["records"][0]["variantSemantics"]
+    )
+
+
+def test_source_specific_variant_semantics_require_numeric_army_identity(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["armyLinks"] = [{"entity": "skill", "id": "example"}]
+    record["variantSemantics"] = {"inheritance": "source"}
+    path = tmp_path / "source-variant.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="exact numeric Army source id"):
+        load_curated_document(path)
+
+def test_catalog_rule_army_links_must_match_record_kind(tmp_path: Path) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["armyLinks"] = [{"entity": "weapon", "id": 1}]
+    record["variantSemantics"] = {"inheritance": "family"}
+    path = tmp_path / "mismatched-army-link.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="skill definitions may only link"):
+        load_curated_document(path)
+
+
+def test_supplements_cannot_define_army_routing(tmp_path: Path) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["composition"] = {"role": "supplement"}
+    record["armyLinks"] = [{"entity": "skill", "id": "example"}]
+    path = tmp_path / "supplement-army-link.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="inherit Army routing"):
+        load_curated_document(path)
+
+
 def test_load_curated_document_rejects_unstructured_json(tmp_path: Path) -> None:
     path = tmp_path / "source.json"
     path.write_text(json.dumps({"units": []}), encoding="utf-8")
@@ -239,7 +304,7 @@ def test_load_curated_document_accepts_url_backed_wiki_citation(tmp_path: Path) 
 
 def test_load_curated_document_rejects_older_versions(tmp_path: Path) -> None:
     document = valid_document()
-    for version in (1, 2, 3, 4):
+    for version in (1, 2, 3, 4, 5):
         document["formatVersion"] = version
         path = tmp_path / f"v{version}.json"
         path.write_text(json.dumps(document), encoding="utf-8")
@@ -335,6 +400,19 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["skill:camouflage"]["armyLinks"] == [
         {"entity": "skill", "id": "camouflage"}
     ]
+    assert records["skill:camouflage"]["variantSemantics"] == {
+        "inheritance": "family"
+    }
+    assert records["skill:super-jump"]["variantSemantics"] == {
+        "inheritance": "family",
+        "occurrenceParameters": [
+            {
+                "source": "army-extra",
+                "kind": "distance",
+                "positiveSign": "omit",
+            }
+        ],
+    }
     assert records["skill:discover"]["facts"]["typeId"] == "basic-short-skill"
     assert records["skill:discover"]["relations"] == [
         {"type": "reveals-state", "recordId": "state:camouflaged"}
@@ -385,20 +463,30 @@ def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: P
 def test_skill_parameter_semantics_are_validated(tmp_path: Path) -> None:
     document = valid_document()
     record = next(record for record in document["records"] if record["kind"] == "skill")
-    record["facts"]["parameterSemantics"] = {
-        "kind": "distance",
-        "positiveSign": "omit",
+    record["armyLinks"] = [{"entity": "skill", "id": "example"}]
+    record["variantSemantics"] = {
+        "inheritance": "family",
+        "occurrenceParameters": [
+            {
+                "source": "army-extra",
+                "kind": "distance",
+                "positiveSign": "omit",
+            }
+        ],
     }
     path = tmp_path / "rules.json"
     path.write_text(json.dumps(document), encoding="utf-8")
 
     loaded = load_curated_document(path)
-    assert loaded["records"][0]["facts"]["parameterSemantics"] == {
-        "kind": "distance",
-        "positiveSign": "omit",
-    }
+    assert loaded["records"][0]["variantSemantics"]["occurrenceParameters"] == [
+        {
+            "source": "army-extra",
+            "kind": "distance",
+            "positiveSign": "omit",
+        }
+    ]
 
-    record["facts"]["parameterSemantics"]["positiveSign"] = "sometimes"
+    record["variantSemantics"]["occurrenceParameters"][0]["positiveSign"] = "sometimes"
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="positiveSign"):
         load_curated_document(path)
@@ -421,6 +509,7 @@ def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: 
                 }
             },
             "armyLinks": [{"entity": "weapon", "id": 226}],
+            "variantSemantics": {"inheritance": "family"},
             "citations": [{"sourceId": "n5-core-v5.3", "page": 74}],
             "composition": {"role": "definition"},
             "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
@@ -490,6 +579,7 @@ def test_army_links_accept_numeric_ids_and_catalog_slugs(tmp_path: Path) -> None
         {"entity": "skill", "id": 29},
         {"entity": "skill", "id": "camouflage"},
     ]
+    record["variantSemantics"] = {"inheritance": "family"}
     path = tmp_path / "rules.json"
     path.write_text(json.dumps(document), encoding="utf-8")
 

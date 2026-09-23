@@ -2452,9 +2452,9 @@ identities and structured effects; FAQs yield dated rulings; ITS material is
 isolated by season; wiki material supplies discovery, aliases, and cross-links.
 Historical documents must not be silently merged into current rules.
 
-The current curated-v5 document has collection identity, source records, typed
-fact records, maintained vocabularies, scope, Army links, typed relations,
-composition role, review state, and source-specific citations. PDF sources record the local
+The current curated-v6 document has collection identity, source records, typed
+fact records, maintained vocabularies, scope, Army links, typed relations, explicit
+variant semantics, composition role, review state, and source-specific citations. PDF sources record the local
 reviewed file, Corvus Belli source URL, publication date, and page count; PDF
 citations require positive printed page numbers. Archived wiki sources record
 the exact timestamped ZIP path/hash, acquisition timestamp, language, document
@@ -2472,7 +2472,7 @@ curated facts in a separate SQLite database rather than either Army-derived
 database. Directory ingestion skips `example.json`. Other curated subtrees are
 not rules-database inputs. The rules database has an independent schema,
 application ID, compatibility version, and replaceable snapshot lifecycle; its
-current schema and compatibility versions are both 3.
+current schema and compatibility versions are both 4.
 
 A curated rule fact may reference stable application-level identities, but neither
 database is an import source for the other; any combined view is assembled by
@@ -2505,14 +2505,22 @@ link compatibility) and keeps uncited `Unclassified` as the fallback only when t
 logical Skill has no curated declaration. The Army database does not materialize these
 rules facts.
 
-Skill parameter interpretation follows the same source/curated split. The imported
-Army `extras.type` field determines whether an extra is a distance; this source
-semantic is preserved into the frontend database and drives `is_distance` in
-repository responses. Curated `skill` records may additionally carry
-`facts.parameterSemantics` for rule-derived display behavior such as whether a
-positive sign is omitted or forced. Those hints use the same numeric-or-slug Army-link
-contract and are composed onto the logical Skill at read time; they are not copied into
-the Army database.
+Variant and parameter interpretation follow the same source/curated split. Every
+Army-linked Skill, Equipment, or Weapon definition must declare
+`variantSemantics.inheritance` as either `family` or `source`. `family` means the
+reviewed base rule is safe to present for the canonical application family. `source`
+means the contribution applies only to one exact numeric Army source identity; such a
+record must link back to a same-kind family definition with `variant-of`, and application
+composition attaches it only to the matching usage variant. Canonical grouping therefore
+never implies rule inheritance by itself.
+
+Occurrence parameters are a separate axis. The imported Army `extras.type` field still
+determines whether an extra is a distance and remains attached to the exact source
+occurrence. Curated `variantSemantics.occurrenceParameters` may add reviewed
+interpretation for that occurrence value. Format v6 initially standardizes only the
+already-audited `army-extra` / `distance` parameter with its positive-sign display
+policy; other parenthetical MODs/values remain opaque occurrence data until their typed
+semantics are reviewed rather than being generalized from their spelling.
 
 ## Application query model
 
@@ -2531,7 +2539,7 @@ display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
 The rules schema stores collections, sources, vocabulary definitions, record
-contributions, citations, Army links, and typed record relations. Curated format v5
+contributions, citations, Army links, and typed record relations. Curated format v6
 requires every record contribution to carry an explicit applicability scope (`game`
 plus one or more `seasons`), review state/date, and composition role. Current semantic
 composition is fail-closed: exactly one `definition` contribution must exist for each
@@ -2546,6 +2554,16 @@ Current relation targets must resolve to a current semantic ID before export. Re
 navigation is derived from inbound edges at read time rather than represented by a
 second authored row. `related_records` remains only as a compatibility projection of
 the typed outbound targets in returned contribution payloads.
+
+`variant-of` is the typed family edge for exact source variants. A source-specific
+semantic definition is valid only when it has one exact numeric Army link and exactly
+one `variant-of` edge to a same-kind definition whose inheritance mode is `family`.
+This is intentionally stricter than application identity grouping: Martial Arts Levels,
+Strategos Levels, TinBot variants, and similar source identities may share one browsing
+family without silently sharing every rule fact.
+Army routing is authored only on definition contributions. Supplements inherit their
+definition's routing and cannot add `armyLinks`, so a supplementary publication cannot
+change which canonical family or exact source variant receives the composed record.
 
 Curated records may also link to `ammunition`, `extras`, `characteristics`,
 `troop_types`, `units`, and profile occurrences. These are annotations and
