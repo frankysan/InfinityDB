@@ -981,6 +981,14 @@ These rules refine `RS-BR-ROLL-001/002`. InfinityDB should preserve the exact
 source annotation and use typed parameter semantics for interpretation. A value
 such as `-3` is insufficient without the owning rule and semantic target.
 
+Curated format v9 implements the reviewed exact-source Attribute-replacement subset:
+Army Skill IDs 278 (`BS=12`) and 279 (`BS=11`) are typed variants of BS Attack,
+and ID 274 (`CC=21`) is a typed variant of CC Attack. Their structured
+`source_variant` metadata carries `kind: attribute-replacement`, the target
+Attribute, and the replacement value. No runtime display-name parsing is used; PH
+replacement forms and the remaining MOD/reroll/Special Dice annotations stay opaque
+until reviewed separately.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module#Modifiers_Explained_.28MODs.29>
@@ -1003,7 +1011,7 @@ The existing canonical grouping of Martial Arts L1-L5 and Strategos L1-L2 is
 therefore compatible with the rules only while the source Level remains
 preserved and presentable.
 
-This is now implemented in curated format v8: Martial Arts source IDs 19-23 are typed
+This is now implemented in curated format v9: Martial Arts source IDs 19-23 are typed
 as Levels 1-5 and Strategos source IDs 69-70 as Levels 1-2. The application keeps the
 family browsing identity while exposing the exact Level as `source_variant` metadata on
 the matching source occurrence; no `L<number>` runtime name parsing is used.

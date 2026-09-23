@@ -42,6 +42,9 @@ function sourceVariantLabel(variant) {
   if (!semantics) return null;
   if (semantics.kind === "level") return `Level ${semantics.value}`;
   if (semantics.kind === "named") return semantics.label;
+  if (semantics.kind === "attribute-replacement") {
+    return `${semantics.attribute} = ${semantics.value}`;
+  }
   return null;
 }
 

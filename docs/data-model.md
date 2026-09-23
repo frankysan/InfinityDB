@@ -2452,7 +2452,7 @@ identities and structured effects; FAQs yield dated rulings; ITS material is
 isolated by season; wiki material supplies discovery, aliases, and cross-links.
 Historical documents must not be silently merged into current rules.
 
-The current curated-v8 document has collection identity, source records, typed
+The current curated-v9 document has collection identity, source records, typed
 fact records, maintained vocabularies, scope, Army links, typed relations, explicit
 variant inheritance and exact-source variant semantics, composition role, review state,
 and source-specific citations. PDF sources record the local
@@ -2473,7 +2473,7 @@ curated facts in a separate SQLite database rather than either Army-derived
 database. Directory ingestion skips `example.json`. Other curated subtrees are
 not rules-database inputs. The rules database has an independent schema,
 application ID, compatibility version, and replaceable snapshot lifecycle; its
-current schema and compatibility versions are both 6.
+current schema and compatibility versions are both 7.
 
 A curated rule fact may reference stable application-level identities, but neither
 database is an import source for the other; any combined view is assembled by
@@ -2519,11 +2519,13 @@ never implies rule inheritance by itself.
 Occurrence parameters are a separate axis from exact source variants. The imported Army
 `extras.type` field still determines whether an extra is a distance and remains attached
 to the exact source occurrence. Curated `variantSemantics.occurrenceParameters` may add
-reviewed interpretation for that occurrence value. Format v8 currently standardizes only
+reviewed interpretation for that occurrence value. Format v9 currently standardizes only
 the already-audited `army-extra` / `distance` parameter with its positive-sign display
-policy. Exact source Level metadata belongs to `variantSemantics.sourceVariant`, not to
-occurrence parameters; other parenthetical MODs/values remain opaque occurrence data
-until their typed semantics are reviewed rather than generalized from their spelling.
+policy. Exact source Level and Attribute-replacement metadata belong to
+`variantSemantics.sourceVariant`, not to occurrence parameters. BS=12, BS=11, and
+CC=21 are authored exact-source Attribute replacements; other parenthetical MODs/values
+remain opaque occurrence data until their typed semantics are reviewed rather than
+generalized from their spelling.
 
 ## Application query model
 
@@ -2542,7 +2544,7 @@ display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
 The rules schema stores collections, sources, vocabulary definitions, record
-contributions, citations, Army links, and typed record relations. Curated format v8
+contributions, citations, Army links, and typed record relations. Curated format v9
 requires every record contribution to carry an explicit applicability scope (`game`
 plus one or more `seasons`), review state/date, and composition role. Current semantic
 composition is fail-closed: exactly one `definition` contribution must exist for each
@@ -2568,9 +2570,10 @@ semantic definition is valid only when it has one exact numeric Army link and ex
 one `variant-of` edge to a same-kind definition whose inheritance mode is `family`.
 This is intentionally stricter than application identity grouping: Martial Arts Levels,
 Strategos Levels, TinBot variants, and similar source identities may share one browsing
-family without silently sharing every rule fact. Format v8 additionally requires the
-exact source contribution to carry typed `sourceVariant` metadata, so Level and named
-variants are distinguishable without parsing the Army display name at runtime.
+family without silently sharing every rule fact. Format v9 additionally requires the
+exact source contribution to carry typed `sourceVariant` metadata, so Level, named,
+and Attribute-replacement variants are distinguishable without parsing the Army display
+name at runtime.
 Army routing is authored only on definition contributions. Supplements inherit their
 definition's routing and cannot add `armyLinks`, so a supplementary publication cannot
 change which canonical family or exact source variant receives the composed record.

@@ -2669,9 +2669,17 @@ def test_skill_catalog_uses_curated_declaration_categories(
             {"id": 201, "name": "BS Attack", "source_defined": True},
             {"id": 278, "name": "BS=12", "source_defined": True},
             {"id": 279, "name": "BS=11", "source_defined": True},
+            {"id": 240, "name": "CC Attack", "source_defined": True},
+            {"id": 274, "name": "CC=21", "source_defined": True},
             {"id": 260, "name": "Unclassified Example", "source_defined": True},
         ]
     )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = 278
+    for occurrence in normalized["tables"]["option_skills"]:
+        occurrence["item_id"] = 279
+    for occurrence in normalized["tables"]["unit_option_skills"]:
+        occurrence["item_id"] = 274
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
@@ -2699,6 +2707,36 @@ def test_skill_catalog_uses_curated_declaration_categories(
         {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
         {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
     ]
+    bs_variants = {
+        int(variant["skill_id"]): variant
+        for variant in mixed["variants"]
+    }
+    assert bs_variants[278]["source_variant"] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 12,
+    }
+    assert bs_variants[279]["source_variant"] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 11,
+    }
+
+    cc = catalog.get_skill(274)
+    assert cc is not None
+    assert cc["categories"] == [
+        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 45},
+        {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 45},
+    ]
+    cc_variant = next(
+        variant for variant in cc["variants"] if int(variant["skill_id"]) == 274
+    )
+    assert cc_variant["source_variant"] == {
+        "kind": "attribute-replacement",
+        "attribute": "CC",
+        "value": 21,
+    }
+
     unclassified = next(item for item in catalog.list_skills() if item["id"] == 260)
     assert unclassified["categories"] == [
         {"name": "Unclassified", "source": None, "page": None}

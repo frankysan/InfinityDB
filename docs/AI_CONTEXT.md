@@ -555,7 +555,7 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v8 rules contract includes collection/source metadata,
+The current curated-v9 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, exact-source variant semantics, and citations.
@@ -1243,12 +1243,12 @@ compatibility references remain unambiguous JSON integers.
   Skills without a reviewed declaration retain the uncited `Unclassified` fallback;
   Equipment receives no invented fallback category.
 
-## 0.7.0 typed source-Level semantics (2026-09-23)
+## 0.7.0 typed exact-source semantics (2026-09-23)
 
-- Curated rules format v8 and `rules.db` schema/compatibility 6 require every
+- Curated rules format v9 and `rules.db` schema/compatibility 7 require every
   `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
-  Supported first-phase kinds are numeric `level` and explicit `named`; family records
-  may not declare source-variant metadata.
+  Supported kinds are numeric `level`, explicit `named`, and numeric
+  `attribute-replacement`; family records may not declare source-variant metadata.
 - Martial Arts source IDs 19-23 are reviewed Level 1-5 variants of the canonical
   `martial-arts` Skill family. Strategos source IDs 69-70 are reviewed Level 1-2
   variants of `strategos`. The family remains the browsing identity while exact source
@@ -1257,6 +1257,11 @@ compatibility references remain unambiguous JSON integers.
   `SkillCatalog` attaches them as `source_variant` to matching Skill variants and Unit
   occurrences. The browser may label those variants from structured data; it does not
   infer Level semantics from an `L<number>` display-name suffix.
-- This does not classify generic parenthetical MOD syntax. Bare signed values remain
-  opaque until the owning rule supplies reviewed target/operation semantics; Level
-  identity and occurrence parameters remain separate axes.
+- BS Attack source IDs 278 (`BS=12`) and 279 (`BS=11`), plus CC Attack source
+  ID 274 (`CC=21`), are reviewed numeric Attribute replacements and are exposed
+  through the same `source_variant` path. The UI renders their target/value from
+  structured data rather than parsing the display name.
+- This does not classify generic parenthetical MOD syntax. PH replacement forms, bare
+  signed values, rerolls, and Special Dice remain opaque until the owning rule supplies
+  reviewed target/operation semantics; source-variant identity and occurrence parameters
+  remain separate axes.

@@ -136,9 +136,10 @@ requiring a new top-level browser surface in 0.7.0.
     Equipment-domain Deactivator/GizmoKit/MediKit actions.
   - [ ] Add the remaining reviewed semantic labels/classifications that help users
     interpret existing data, including typed MOD/parameter meaning. Regular and
-    Irregular Training are already classified per loadout Order occurrence, and curated
-    v8 now exposes Martial Arts L1-L5 / Strategos L1-L2 as typed exact-source Levels;
-    special generated Orders remain separate.
+    Irregular Training are already classified per loadout Order occurrence. Curated v9
+    preserves Martial Arts L1-L5 / Strategos L1-L2 as typed exact-source Levels and
+    adds reviewed BS=12, BS=11, and CC=21 numeric Attribute replacements; special
+    generated Orders remain separate.
   - [x] Represent reviewed related-item relationships explicitly rather than
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.
@@ -164,7 +165,9 @@ requiring a new top-level browser surface in 0.7.0.
   - [ ] Make remaining profile/loadout annotations such as `(+1B)`, `(-3)`, `PH=`,
     rerolls, and Special Dice explicit enough that an occurrence modifier is not
     mistaken for a universal property of the base rule or Unit. Explicit Skill Levels
-    are now typed at the exact source-variant layer rather than inferred from names.
+    and BS/CC numeric Attribute replacements are now typed at the exact source-variant
+    layer rather than inferred from names. PH replacements, generic signed MODs,
+    rerolls, and Special Dice remain intentionally opaque pending their own review.
   - [ ] Reconcile N5 weapon-profile presentation terminology with the current
     Combat rules: preserve Army's source field/provenance while exposing the
     rules-native Possibility of Survival (`PS`) label rather than presenting the

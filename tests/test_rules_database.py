@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 120
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 125
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -208,6 +208,21 @@ def test_rules_database_returns_reviewed_source_variant_semantics(tmp_path: Path
     assert variants[23] == {"kind": "level", "value": 5}
     assert variants[69] == {"kind": "level", "value": 1}
     assert variants[70] == {"kind": "level", "value": 2}
+    assert variants[278] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 12,
+    }
+    assert variants[279] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 11,
+    }
+    assert variants[274] == {
+        "kind": "attribute-replacement",
+        "attribute": "CC",
+        "value": 21,
+    }
 
 
 def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:

@@ -9,7 +9,7 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 8
+CURATED_FORMAT_VERSION = 9
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -48,7 +48,7 @@ CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
 VARIANT_PARAMETER_KINDS = frozenset({"distance"})
-SOURCE_VARIANT_KINDS = frozenset({"level", "named"})
+SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
 
 
@@ -134,7 +134,7 @@ def _validate_variant_semantics(
             _require_positive_int(
                 source_variant.get("value"), "value", f"{context}.sourceVariant"
             )
-        else:
+        elif kind == "named":
             if set(source_variant) != {"kind", "label"}:
                 raise ValueError(
                     f"{context}.sourceVariant: named variants must contain only "
@@ -142,6 +142,20 @@ def _validate_variant_semantics(
                 )
             _require_string(
                 source_variant.get("label"), "label", f"{context}.sourceVariant"
+            )
+        else:
+            if set(source_variant) != {"kind", "attribute", "value"}:
+                raise ValueError(
+                    f"{context}.sourceVariant: attribute-replacement variants must "
+                    "contain only 'kind', 'attribute', and 'value'"
+                )
+            _require_string(
+                source_variant.get("attribute"),
+                "attribute",
+                f"{context}.sourceVariant",
+            )
+            _require_positive_int(
+                source_variant.get("value"), "value", f"{context}.sourceVariant"
             )
     elif source_variant is not None:
         raise ValueError(

@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 8,
+    "formatVersion": 9,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -4760,6 +4760,264 @@
                 {
                     "type": "variant-of",
                     "recordId": "skill:strategos"
+                }
+            ]
+        },
+        {
+            "id": "skill:bs-attack",
+            "kind": "skill",
+            "name": "BS Attack",
+            "summary": "A Common Skill used to make BS Attacks; exact source variants may replace the user's BS Attribute with a listed value for this Skill.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeId": "short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "bs-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 40,
+                    "section": "BS Attack"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:bs-12",
+            "kind": "skill",
+            "name": "BS=12",
+            "summary": "The BS=12 exact source variant of BS Attack. When using this Skill, the user replaces their BS Attribute with 12.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeId": "short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 278
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 40,
+                    "section": "BS Attack"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "attribute-replacement",
+                    "attribute": "BS",
+                    "value": 12
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:bs-attack"
+                }
+            ]
+        },
+        {
+            "id": "skill:bs-11",
+            "kind": "skill",
+            "name": "BS=11",
+            "summary": "The BS=11 exact source variant of BS Attack. When using this Skill, the user replaces their BS Attribute with 11.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeId": "short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 279
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 40,
+                    "section": "BS Attack"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "attribute-replacement",
+                    "attribute": "BS",
+                    "value": 11
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:bs-attack"
+                }
+            ]
+        },
+        {
+            "id": "skill:cc-attack",
+            "kind": "skill",
+            "name": "CC Attack",
+            "summary": "A Common Skill used to make CC Attacks; an exact source variant may replace the user's CC Attribute with a listed value for this Skill.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeId": "short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "cc-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 45,
+                    "section": "CC Attack"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:cc-21",
+            "kind": "skill",
+            "name": "CC=21",
+            "summary": "The CC=21 exact source variant of CC Attack. When using this Skill, the user replaces their CC Attribute with 21.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeId": "short-skill"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 274
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 45,
+                    "section": "CC Attack"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "attribute-replacement",
+                    "attribute": "CC",
+                    "value": 21
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:cc-attack"
                 }
             ]
         }

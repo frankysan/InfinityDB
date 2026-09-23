@@ -279,7 +279,7 @@ Skill-extra distance semantics are split according to source authority. Army
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v8 makes applicability, review state, contribution role, typed
+Curated rules format v9 makes applicability, review state, contribution role, typed
 related-item edges, explicit catalog-variant inheritance, typed exact-source variants, and
 cross-domain declaration categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
@@ -302,10 +302,11 @@ edges, so reciprocal rows are not maintained independently. Current edges must r
 current semantic record before `rules.db` can be published.
 `Super-Jump` and `Forward Deployment` currently use
 `variantSemantics.occurrenceParameters` to state how a positive distance sign should be
-displayed. Exact source variants use `variantSemantics.sourceVariant`; format v8 initially
-standardizes numeric `level` and explicit `named` variants. Martial Arts L1-L5 and
-Strategos L1-L2 are maintained as reviewed Level variants while remaining members of
-their canonical browsing families. `SkillCatalog` composes those semantics into detail
+displayed. Exact source variants use `variantSemantics.sourceVariant`; format v9
+standardizes numeric `level`, explicit `named`, and numeric
+`attribute-replacement` variants. Martial Arts L1-L5 and Strategos L1-L2 are
+maintained as reviewed Level variants, while BS=12, BS=11, and CC=21 are reviewed
+Attribute-replacement variants. `SkillCatalog` composes those semantics into detail
 and Unit API payloads without deriving rules meaning from display names.
 
 Army presentation and classification currently combine imported relationships
@@ -1102,7 +1103,7 @@ replace a complete imported snapshot.
 
 Rules-reference data uses a distinct SQLite database with its own schema,
 compatibility/versioning, importer, and atomic replacement policy. The current
-`rules.db` schema and compatibility versions are both 6. This database is not an
+`rules.db` schema and compatibility versions are both 7. This database is not an
 extension of `infinity.db` or `infinity.raw.db`.
 
 The source-controlled `data/curated/rules/` JSON layer is the only
@@ -1111,7 +1112,7 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v8 rules contract stores collection scope, source metadata,
+The current curated-v9 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, typed related-rule edges,
 explicit variant inheritance and exact-source variant semantics, composition role, review
 state, and source-specific citations. PDF sources carry both the local
@@ -1121,7 +1122,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v8 must be migrated before ingestion.
+Curated-rule files older than format v9 must be migrated before ingestion.
 
 ## HTTP API
 

@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 8,
+        "formatVersion": 9,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -247,6 +247,21 @@ def test_source_specific_variant_semantics_require_typed_source_variant(
         "kind": "named",
         "label": "Profile variant",
     }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][0]["variantSemantics"] == (
+        record["variantSemantics"]
+    )
+
+    record["variantSemantics"]["sourceVariant"] = {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 0,
+    }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="positive integer"):
+        load_curated_document(path)
+
+    record["variantSemantics"]["sourceVariant"]["value"] = 12
     path.write_text(json.dumps(document), encoding="utf-8")
     assert load_curated_document(path)["records"][0]["variantSemantics"] == (
         record["variantSemantics"]

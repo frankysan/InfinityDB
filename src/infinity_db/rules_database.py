@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 6
-RULES_COMPATIBILITY_VERSION = 6
+RULES_SCHEMA_VERSION = 7
+RULES_COMPATIBILITY_VERSION = 7
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 

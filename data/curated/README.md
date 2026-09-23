@@ -190,7 +190,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 8,
+    "formatVersion": 9,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -277,7 +277,9 @@ presented for the canonical application family. Source semantics require exactly
 numeric Army source identity, a typed `variant-of` relation to a same-kind family
 definition, and `variantSemantics.sourceVariant`. A numeric Level uses
 `{"kind": "level", "value": 2}`; a reviewed named variant uses
-`{"kind": "named", "label": "..."}`. These apply only to that exact source variant.
+`{"kind": "named", "label": "..."}`; and a reviewed numeric Attribute replacement uses
+`{"kind": "attribute-replacement", "attribute": "BS", "value": 12}`. These apply only
+to that exact source variant.
 Supplements inherit Army routing from their definition and therefore do not declare
 their own `armyLinks`.
 
@@ -285,8 +287,10 @@ Rule-derived occurrence-parameter display behavior lives under
 `variantSemantics.occurrenceParameters`. The currently standardized parameter is an
 Army extra with `kind: "distance"` and `positiveSign: "preserve|omit|force"`. This
 does not decide whether an Army extra is a distance: imported
-`extras.type == "DISTANCE"` remains authoritative for that source semantic. Other
-MOD/value forms remain opaque until their semantics are reviewed.
+`extras.type == "DISTANCE"` remains authoritative for that source semantic. Reviewed
+exact-source Attribute replacements are kept on `sourceVariant`, not as generic
+occurrence parameters. Other MOD/value forms remain opaque until their semantics are
+reviewed.
 
 Skill records always carry a `labelIds` array, but it may be empty when the reviewed
 rule does not assign any maintained rules Label. States still require at least one
@@ -342,7 +346,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v8 are no longer accepted by the loader and must
+Curated-rule files older than format v9 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 
