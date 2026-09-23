@@ -974,6 +974,16 @@ def test_checked_in_n5_collection_models_mimetism_affected_rolls() -> None:
     ]
 
 
+def test_checked_in_n5_collection_models_silent_dodge_modifier() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["trait:silent-x"]["relations"] == [
+        {"type": "imposes-modifiers-on", "recordId": "skill:dodge"}
+    ]
+
+
 def test_checked_in_n5_collection_models_stealth_cautious_movement_exception() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

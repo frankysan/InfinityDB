@@ -1516,7 +1516,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-09-23"
             },
             "facts": {
                 "sourceIdentity": {
@@ -1524,7 +1524,13 @@
                         "Silent ("
                     ]
                 }
-            }
+            },
+            "relations": [
+                {
+                    "type": "imposes-modifiers-on",
+                    "recordId": "skill:dodge"
+                }
+            ]
         },
         {
             "id": "trait:speculative-attack",

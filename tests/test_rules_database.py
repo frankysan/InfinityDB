@@ -552,6 +552,33 @@ def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> Non
         }
 
 
+def test_silent_dodge_modifier_interaction_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    silent = next(
+        item
+        for item in database.composed_records_by_kind("trait")
+        if item["id"] == "trait:silent-x"
+    )
+    dodge = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "dodge")
+        if item["id"] == "skill:dodge"
+    )
+
+    assert ("imposes-modifiers-on", "outbound", "Dodge") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in silent["display_relations"]
+    }
+    assert ("imposes-modifiers-on", "inbound", "Silent (X)") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in dodge["display_relations"]
+    }
+
+
 def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"

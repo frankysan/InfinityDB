@@ -949,6 +949,24 @@ Sources:
 - PDF: Infinity N5 V5.3, printed pages 174-175
 - Curated data: `data/curated/rules/n5-core-v5.3.json`
 
+### RS-GSG-TRAIT-003 — Silent exposes its Dodge modifier relationship
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+`Silent (X)` applies its bracketed MOD to Face to Face Dodge Rolls when the attack is
+declared inside the target's Zone of Control but outside LoF. The parameter value belongs
+to the Trait occurrence, while the affected declaration is the canonical Dodge Skill.
+
+InfinityDB therefore authors `imposes-modifiers-on` from Silent (X) toward Dodge.
+`rules.db` derives the inverse navigation so Dodge identifies Silent (X) as a possible
+modifier without duplicating the relationship. The exact MOD value and ZoC/LoF conditions
+remain on the Trait occurrence and curated Trait summary rather than on the relation edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110#Silent_(X)>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
 ## Skills and Equipment / Module semantics
 
 ### RS-SE-SCOPE-001 — Navigation membership does not determine rules scope
