@@ -1700,7 +1700,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     declaration = next(
         record
         for record in document["records"]
-        if record["id"] == "skill-declaration-category:automatic:p87"
+        if record["id"] == "declaration-category:automatic:p87"
     )
     declaration["armyLinks"].append({"entity": "skill", "id": 11})
     rules_path = tmp_path / "rules.db"
@@ -1728,6 +1728,29 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
         {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
+
+
+
+def test_equipment_api_adds_curated_declaration_category(
+    app: Callable, tmp_path: Path
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/equipment/medikit")
+
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["categories"] == [
+        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 124}
+    ]
+
+    status, _, body = request(rules_app, "/static/catalog-detail.js")
+    assert status == 200
+    assert b'const categories = (item.categories || [])' in body
+    assert 'if (categories) meta.append(` · ${categories}`);'.encode() in body
 
 
 def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:

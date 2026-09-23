@@ -11,7 +11,7 @@ from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 
 UNCLASSIFIED_CATEGORY = {"name": "Unclassified", "source": None, "page": None}
-DECLARATION_KIND = "skill-declaration-category"
+DECLARATION_KIND = "declaration-category"
 
 
 def _source_label(category: dict[str, Any]) -> str | None:

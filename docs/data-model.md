@@ -2496,14 +2496,15 @@ resolved catalog identity, never by independently normalizing an arbitrary label
 application joins Army and rules sources at read time; the Army database does not copy
 curated Trait knowledge into its snapshot.
 
-Skill declaration categories are another application-level composition. Army-derived
-`skills` and their usage remain source data, while current curated
-`skill-declaration-category` records carry the N5 declaration label, deterministic
-display order, application-domain Skill links, and printed-page citation. `SkillCatalog`
-joins those records at read time using the logical Skill slug (while retaining numeric
-link compatibility) and keeps uncited `Unclassified` as the fallback only when the
-logical Skill has no curated declaration. The Army database does not materialize these
-rules facts.
+Declaration categories are another application-level composition. Army-derived Skill
+and Equipment usage remain source data, while current curated `declaration-category`
+records carry a canonical `skillTypes` identity in `facts.typeId`, the N5 declaration
+label, deterministic display order, application-domain Skill/Equipment links, and
+printed-page citation. `SkillCatalog` joins Skill categories
+at read time and `CatalogRules` does the same for Equipment, accepting logical slugs
+while retaining numeric-link compatibility. Skills retain uncited `Unclassified` as the
+fallback only when no curated declaration exists; Equipment gets no invented fallback.
+The Army database does not materialize these rules facts.
 
 Variant and parameter interpretation follow the same source/curated split. Every
 Army-linked Skill, Equipment, or Weapon definition must declare
@@ -2517,7 +2518,7 @@ never implies rule inheritance by itself.
 Occurrence parameters are a separate axis. The imported Army `extras.type` field still
 determines whether an extra is a distance and remains attached to the exact source
 occurrence. Curated `variantSemantics.occurrenceParameters` may add reviewed
-interpretation for that occurrence value. Format v6 initially standardizes only the
+interpretation for that occurrence value. Format v7 currently standardizes only the
 already-audited `army-extra` / `distance` parameter with its positive-sign display
 policy; other parenthetical MODs/values remain opaque occurrence data until their typed
 semantics are reviewed rather than being generalized from their spelling.
@@ -2539,7 +2540,7 @@ display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
 The rules schema stores collections, sources, vocabulary definitions, record
-contributions, citations, Army links, and typed record relations. Curated format v6
+contributions, citations, Army links, and typed record relations. Curated format v7
 requires every record contribution to carry an explicit applicability scope (`game`
 plus one or more `seasons`), review state/date, and composition role. Current semantic
 composition is fail-closed: exactly one `definition` contribution must exist for each

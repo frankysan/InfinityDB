@@ -384,8 +384,8 @@ whole Order. The two Skills of one Order are resolved as simultaneous actions
 even though they are declared sequentially.
 
 This confirms the semantic basis of InfinityDB's curated
-`skill-declaration-category` records. Category labels are rule-derived metadata
-about Skills and should remain in `rules.db`, not be inferred from Army usage or
+`declaration-category` records. Category labels are rule-derived metadata
+about Skills or Equipment and should remain in `rules.db`, not be inferred from Army usage or
 hard-coded in browser code.
 
 Sources:
@@ -918,22 +918,22 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
 - PDF: Infinity N5 V5.3, printed pages 76, 111, 121, 123-124, and 191
 
-### RS-SE-CAT-002 — Existing declaration-category facts require N5 V5.3 reconciliation
+### RS-SE-CAT-002 — Declaration categories are reconciled against N5 V5.3
 
-**Classification:** confirmed InfinityDB curated-data correctness gap.
+**Classification:** resolved InfinityDB curated-data correctness requirement.
 
-The tracked `skillTypes` vocabulary correctly defines the six current categories:
-Automatic, Deployment, Basic Short, Short, Long, and ARO. The existing
-`skill-declaration-category` records do not consistently match those rules.
+The tracked `skillTypes` vocabulary defines the six current categories: Automatic,
+Deployment, Basic Short, Short, Long, and ARO. Curated format v7 uses generic
+`declaration-category` records whose `facts.typeId` resolves to that vocabulary, so the
+same typed classification can apply to Skills and Equipment without changing their
+catalog identity.
 
-Confirmed mismatches include current Short Skill / ARO rules stored as Basic
-Short Skill / ARO (`BS Attack`, `CC Attack`, `Dodge`, `Forward Observer`);
-current Short Skills stored as Basic Short Skill / ARO (`Doctor`, `Engineer`);
-Automatic Skills stored as Basic Short Skill / ARO (`Cyberplug`, `Paramedic`);
-`Parachutist` stored as Deployment rather than Long; and `Triangulated Fire`
-stored as Basic Short Skill / ARO rather than Long. The tracked `Entire Order`
-record for Berserk also uses a category name absent from the current six-category
-vocabulary.
+The 2026-09-23 reconciliation corrected the audited mismatches: BS Attack, CC Attack,
+Dodge, and Forward Observer are Short Skill / ARO; Doctor and Engineer are Short Skill;
+Cyberplug and Paramedic are Automatic; Parachutist and Triangulated Fire are Long Skill;
+and Berserk uses Long Skill rather than the obsolete `Entire Order` label. Deactivator,
+GizmoKit, and MediKit are represented as Equipment-domain Short Skill actions rather
+than pseudo-Skills.
 
 `Regular` requires a different interpretation. The rules classify
 Regular/Irregular as Training, but Army-derived data also exposes `Regular`
@@ -943,17 +943,13 @@ evidence that the rules-domain concept itself is a Skill. InfinityDB can preserv
 the Army occurrence while classifying/presenting the semantic concept as
 Training.
 
-The Equipment cases expose an additional schema issue:
-`skill-declaration-category` validation and query code currently require
-`armyLinks.entity == "skill"`, so Short Skill actions supplied by GizmoKit,
-MediKit, or Deactivator cannot be represented in their actual Equipment domain.
-
-Consumers must not treat the current declaration-category dataset as fully
-audited N5 V5.3 truth until the focused backlog reconciliation is complete.
+The declaration-category validator/query layer now accepts `skill` and `equipment` Army
+links. Browser/API composition surfaces these classifications from `rules.db`; no Python
+name table or display-name inference is involved.
 
 Sources:
 
-- PDF: Infinity N5 V5.3, printed pages 76, 77-85, 86-118, 123-124, and 191
+- PDF: Infinity N5 V5.3, printed pages 76, 77-85, 86-118, 121, 123-124, and 191
 - Curated data: `data/curated/rules/n5-core-v5.3.json`
 - Validation/query ownership: `src/infinity_db/curated.py` and
   `src/infinity_db/rules_database.py`
@@ -1994,7 +1990,7 @@ Short Skill, ordinary Jump and Climb are Long Skills, and other rules can modify
 those categories while the action remains Movement.
 
 InfinityDB should keep the curated `movement` Label separate from
-`skill-declaration-category` facts. Label membership should be reviewed/cited
+`declaration-category` facts. Label membership should be reviewed/cited
 rather than inferred from a Skill name or from Basic Short/Short/Long/ARO
 classification.
 

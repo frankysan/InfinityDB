@@ -103,3 +103,20 @@ def test_catalog_rules_keep_source_specific_rules_on_matching_variant(
     assert [rule["id"] for rule in result["variants"][0]["rules"]] == [
         "equipment:tinbot-discover"
     ]
+
+
+def test_equipment_catalog_adds_curated_declaration_categories(tmp_path: Path) -> None:
+    catalog = CatalogRules(_rules_database(tmp_path))
+    item = {
+        "id": 21,
+        "name": "Medikit",
+        "slug": "medikit",
+        "variants": [],
+    }
+
+    result = catalog.enrich_catalog_item("equipment", item)
+
+    assert result["categories"] == [
+        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 124}
+    ]
+    assert "rules" not in result

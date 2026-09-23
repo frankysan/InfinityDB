@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 4
-RULES_COMPATIBILITY_VERSION = 4
+RULES_SCHEMA_VERSION = 5
+RULES_COMPATIBILITY_VERSION = 5
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -843,11 +843,13 @@ class RulesDatabase:
                 result[skill_ref] = value
             return result
 
-    def skill_declaration_categories(self) -> list[dict[str, Any]]:
-        """Return curated skill declaration categories keyed to authored Army refs."""
+    def declaration_categories(self, entity: str) -> list[dict[str, Any]]:
+        """Return current declaration categories for one Army catalog entity."""
+        if entity not in {"skill", "equipment"}:
+            raise ValueError("Declaration categories support skill or equipment entities")
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT l.external_id AS skill_ref, r.name, r.facts_json, "
+                "SELECT l.external_id AS army_ref, r.name, r.facts_json, "
                 "s.title AS source_title, s.version AS source_version, c.page "
                 "FROM records AS r JOIN collections AS col ON col.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
@@ -856,17 +858,19 @@ class RulesDatabase:
                 "AND c.record_id = r.id "
                 "JOIN sources AS s ON s.collection_id = c.collection_id "
                 "AND s.id = c.source_id "
-                "WHERE r.kind = 'skill-declaration-category' "
-                "AND col.status = 'current' AND l.entity = 'skill' "
+                "WHERE r.kind = 'declaration-category' "
+                "AND col.status = 'current' AND l.entity = ? "
                 "AND l.external_id IS NOT NULL "
-                "ORDER BY l.external_id, r.collection_id, r.id, c.position"
+                "ORDER BY l.external_id, r.collection_id, r.id, c.position",
+                (entity,),
             ).fetchall()
             result = []
             for row in rows:
                 facts = _decode_json(row["facts_json"], {})
                 result.append(
                     {
-                        "skill_ref": _army_link_ref(row["skill_ref"]),
+                        "army_ref": _army_link_ref(row["army_ref"]),
+                        "type_id": facts["typeId"],
                         "name": row["name"],
                         "order": facts["order"],
                         "source_title": row["source_title"],
@@ -874,7 +878,29 @@ class RulesDatabase:
                         "page": row["page"],
                     }
                 )
+            result.sort(
+                key=lambda item: (
+                    str(item["army_ref"]),
+                    item["order"],
+                    item["name"],
+                    item["page"] or 0,
+                )
+            )
             return result
+
+    def skill_declaration_categories(self) -> list[dict[str, Any]]:
+        """Return current Skill declaration categories keyed to authored Army refs."""
+        return [
+            {
+                "skill_ref": item["army_ref"],
+                "name": item["name"],
+                "order": item["order"],
+                "source_title": item["source_title"],
+                "source_version": item["source_version"],
+                "page": item["page"],
+            }
+            for item in self.declaration_categories("skill")
+        ]
 
     def records_by_kind(self, kind: str, *, current_only: bool = True) -> list[dict[str, Any]]:
         """Return curated records of one kind, preferring current collections."""

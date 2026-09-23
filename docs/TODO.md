@@ -131,10 +131,12 @@ requiring a new top-level browser surface in 0.7.0.
     serving rule-derived editorial text.
   - [x] Store authoritative source links and provenance, including applicable
     rulebook/publication version, printed PDF page when available, and Wiki links.
-  - [ ] Add reviewed semantic labels/classifications that help users interpret
-    existing data, including declaration/action type, Automatic/Short/Long/ARO
-    semantics, rule-domain identity, and typed Level/MOD/parameter meaning where
-    relevant.
+  - [x] Reconcile N5.3 declaration/action categories across Skills and Equipment,
+    including Automatic/Deployment/Basic Short/Short/Long/ARO semantics and the
+    Equipment-domain Deactivator/GizmoKit/MediKit actions.
+  - [ ] Add the remaining reviewed semantic labels/classifications that help users
+    interpret existing data, including rule-domain identity and typed
+    Level/MOD/parameter meaning where relevant.
   - [x] Represent reviewed related-item relationships explicitly rather than
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.
@@ -509,21 +511,12 @@ work against that contract.
       profile fields and generate the Hacking Device -> baseline Program matrix
       from explicit source associations after semantic reconciliation; keep
       Upgrade Programs distinct and cross-link Program targets/States/effects.
-  - [ ] Reconcile the existing declaration-category records with the current N5
-    V5.3 Skills and Equipment rules before expanding that dataset: remove stale
-    category names/mappings, refresh printed-page citations, and generalize the
-    link contract so actions supplied by Equipment are not represented as Skills.
-    Preserve Army-derived compatibility/source shapes such as `Regular` appearing
-    in skill-like data without treating those shapes as the rules-domain
-    classification; `Regular`/`Irregular` remain Training semantics in InfinityDB.
-    Validate authored category names against the canonical `skillTypes` vocabulary
-    and resolve links against the correct Army catalog domain.
-    - [ ] Once reconciled, generate an Orders/AROs declaration matrix from these
-      cross-domain relationships and use it as a completeness check for missing,
-      invalid, or contradictory declaration categories rather than maintaining a
-      second hard-coded chart. Make the projection source/scope-aware so
-      scenario-only Skills/AROs can be represented without appearing in the core
-      N5 matrix or being flagged as missing core categories.
+  - [ ] Generate an Orders/AROs declaration matrix from the reconciled cross-domain
+    relationships and use it as a completeness check for missing, invalid, or
+    contradictory declaration categories rather than maintaining a second hard-coded
+    chart. Make the projection source/scope-aware so scenario-only Skills/AROs can be
+    represented without appearing in the core N5 matrix or being flagged as missing
+    core categories.
   - [ ] Model Ammunition rules as first-class cited identities and relationships.
     Distinguish the eleven base Ammunition types from source-defined combined
     forms, preserve component relationships for combined Ammunition, and keep

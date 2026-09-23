@@ -2696,7 +2696,7 @@ def test_skill_catalog_uses_curated_declaration_categories(
     mixed = catalog.get_skill(278)
     assert mixed is not None
     assert mixed["categories"] == [
-        {"name": "Basic Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
+        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
         {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
     ]
     unclassified = next(item for item in catalog.list_skills() if item["id"] == 260)

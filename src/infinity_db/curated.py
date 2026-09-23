@@ -9,7 +9,7 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 6
+CURATED_FORMAT_VERSION = 7
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -613,31 +613,38 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
                 )
-        if record["kind"] == "skill-declaration-category":
+        if record["kind"] == "declaration-category":
             facts = record.get("facts")
-            if not isinstance(facts, dict) or set(facts) != {"order"}:
+            if not isinstance(facts, dict) or set(facts) != {"typeId", "order"}:
                 raise ValueError(
-                    f"{context}: skill declaration category 'facts' must contain only 'order'"
+                    f"{context}: declaration category 'facts' must contain only "
+                    "'typeId' and 'order'"
+                )
+            if facts["typeId"] not in skill_type_ids:
+                raise ValueError(
+                    f"{context}: declaration category 'facts.typeId' must reference "
+                    "skillTypes"
                 )
             if type(facts["order"]) is not int or facts["order"] < 0:
                 raise ValueError(
-                    f"{context}: skill declaration category 'facts.order' must be "
+                    f"{context}: declaration category 'facts.order' must be "
                     "a non-negative integer"
                 )
             links = record.get("armyLinks")
             if not isinstance(links, list) or not links:
                 raise ValueError(
-                    f"{context}: skill declaration category requires non-empty 'armyLinks'"
+                    f"{context}: declaration category requires non-empty 'armyLinks'"
                 )
             for link in links:
-                if not isinstance(link, dict) or link.get("entity") != "skill":
+                if not isinstance(link, dict) or link.get("entity") not in {"skill", "equipment"}:
                     raise ValueError(
-                        f"{context}: skill declaration category armyLinks must reference skills"
+                        f"{context}: declaration category armyLinks must reference "
+                        "skills or equipment"
                     )
-                _validate_army_link_id("skill", link.get("id"), context)
+                _validate_army_link_id(link["entity"], link.get("id"), context)
             if len(record["citations"]) != 1:
                 raise ValueError(
-                    f"{context}: skill declaration category requires exactly one citation"
+                    f"{context}: declaration category requires exactly one citation"
                 )
             citation_source = record["citations"][0].get("sourceId")
             citation_kind = next(
@@ -646,7 +653,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             )
             if citation_kind != "pdf":
                 raise ValueError(
-                    f"{context}: skill declaration category citation must reference a PDF"
+                    f"{context}: declaration category citation must reference a PDF"
                 )
         if composition_role == "definition" and record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")

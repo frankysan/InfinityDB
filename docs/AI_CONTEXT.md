@@ -1212,3 +1212,21 @@ compatibility references remain unambiguous JSON integers.
 - Skill/Equipment/Weapon detail APIs retain canonical family rules separately from
   source-specific variant rules, and the browser renders exact variant rules inside the
   corresponding usage variant.
+
+## 0.7.0 declaration-category reconciliation (2026-09-23)
+
+- Curated rules format v7 and `rules.db` schema/compatibility 5 replace the former
+  Skill-only `skill-declaration-category` record kind with generic
+  `declaration-category` records. They may classify Army Skills or Equipment while
+  preserving the catalog domain of the referenced item.
+- The six maintained N5.3 categories are Automatic, Deployment, Basic Short Skill,
+  Short Skill, Long Skill, and ARO. `facts.typeId` must resolve to the canonical
+  `skillTypes` vocabulary; deterministic display order is 10/20/30/40/50/60. `Entire
+  Order` is not a seventh category.
+- The focused reconciliation corrected BS Attack/CC Attack/Dodge/Forward Observer,
+  Doctor/Engineer, Cyberplug/Paramedic, Parachutist, Triangulated Fire, and Berserk, and
+  added Equipment-domain Short Skill classifications for Deactivator, GizmoKit, and
+  MediKit.
+- Declaration records are composition metadata, not ordinary rule-summary records.
+  Skills without a reviewed declaration retain the uncited `Unclassified` fallback;
+  Equipment receives no invented fallback category.

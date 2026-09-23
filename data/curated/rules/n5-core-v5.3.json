@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 6,
+    "formatVersion": 7,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -1534,10 +1534,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p86",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p86",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1548,6 +1548,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1568,10 +1569,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p87",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p87",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1582,6 +1583,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1606,10 +1608,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p88",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p88",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1620,6 +1622,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1648,10 +1651,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p89",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p89",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1662,6 +1665,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1682,10 +1686,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p90",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p90",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1696,6 +1700,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1710,6 +1715,10 @@
                 {
                     "entity": "skill",
                     "id": "counterintelligence"
+                },
+                {
+                    "entity": "skill",
+                    "id": "cyberplug"
                 }
             ],
             "citations": [
@@ -1724,10 +1733,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p91",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p91",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1738,6 +1747,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1762,10 +1772,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p92",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p92",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1776,6 +1786,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1800,10 +1811,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p93",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p93",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1814,6 +1825,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1842,10 +1854,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p94",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p94",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1856,6 +1868,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1876,10 +1889,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p95",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p95",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1890,6 +1903,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1914,10 +1928,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p96",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p96",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1928,6 +1942,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1948,10 +1963,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p97",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p97",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1962,6 +1977,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -1982,10 +1998,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p98",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p98",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -1996,6 +2012,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2020,10 +2037,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p99",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p99",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2034,6 +2051,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2058,10 +2076,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p100",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p100",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2072,6 +2090,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2100,10 +2119,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p101",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p101",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2114,6 +2133,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2134,10 +2154,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p102",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p102",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2148,6 +2168,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2172,10 +2193,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p103",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p103",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2186,6 +2207,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2206,10 +2228,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p104",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p104",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2220,6 +2242,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2244,10 +2267,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p105",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p105",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2258,12 +2281,17 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
                 {
                     "entity": "skill",
                     "id": "number-2"
+                },
+                {
+                    "entity": "skill",
+                    "id": "paramedic"
                 }
             ],
             "citations": [
@@ -2278,10 +2306,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p106",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p106",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2292,6 +2320,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2312,10 +2341,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p109",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p109",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2326,6 +2355,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2346,10 +2376,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p110",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p110",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2360,6 +2390,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2384,10 +2415,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p111",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p111",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2398,6 +2429,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2418,10 +2450,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p112",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p112",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2432,6 +2464,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2464,10 +2497,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p113",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p113",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2478,6 +2511,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2502,10 +2536,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p114",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p114",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2516,6 +2550,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2536,10 +2571,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p115",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p115",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2550,6 +2585,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2578,10 +2614,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p116",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p116",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2592,6 +2628,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2616,10 +2653,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p117",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p117",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2630,6 +2667,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2650,10 +2688,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:automatic:p118",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p118",
+            "kind": "declaration-category",
             "name": "Automatic",
-            "summary": "The linked Army skills are declared as Automatic in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2664,6 +2702,7 @@
                 ]
             },
             "facts": {
+                "typeId": "automatic",
                 "order": 10
             },
             "armyLinks": [
@@ -2696,10 +2735,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:deployment:p89",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:deployment:p89",
+            "kind": "declaration-category",
             "name": "Deployment",
-            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2710,13 +2749,10 @@
                 ]
             },
             "facts": {
+                "typeId": "deployment-skill",
                 "order": 20
             },
             "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "parachutist"
-                },
                 {
                     "entity": "skill",
                     "id": "infiltration"
@@ -2734,10 +2770,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:deployment:p92",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:deployment:p92",
+            "kind": "declaration-category",
             "name": "Deployment",
-            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2748,6 +2784,7 @@
                 ]
             },
             "facts": {
+                "typeId": "deployment-skill",
                 "order": 20
             },
             "armyLinks": [
@@ -2768,10 +2805,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:deployment:p93",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:deployment:p93",
+            "kind": "declaration-category",
             "name": "Deployment",
-            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2782,6 +2819,7 @@
                 ]
             },
             "facts": {
+                "typeId": "deployment-skill",
                 "order": 20
             },
             "armyLinks": [
@@ -2802,10 +2840,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:deployment:p94",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:deployment:p94",
+            "kind": "declaration-category",
             "name": "Deployment",
-            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2816,6 +2854,7 @@
                 ]
             },
             "facts": {
+                "typeId": "deployment-skill",
                 "order": 20
             },
             "armyLinks": [
@@ -2836,10 +2875,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:deployment:p102",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:deployment:p102",
+            "kind": "declaration-category",
             "name": "Deployment",
-            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2850,6 +2889,7 @@
                 ]
             },
             "facts": {
+                "typeId": "deployment-skill",
                 "order": 20
             },
             "armyLinks": [
@@ -2870,10 +2910,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:deployment:p111",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:deployment:p111",
+            "kind": "declaration-category",
             "name": "Deployment",
-            "summary": "The linked Army skills are declared as Deployment in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2884,6 +2924,7 @@
                 ]
             },
             "facts": {
+                "typeId": "deployment-skill",
                 "order": 20
             },
             "armyLinks": [
@@ -2904,10 +2945,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p40",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "id": "declaration-category:short-skill:p40",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2918,7 +2959,8 @@
                 ]
             },
             "facts": {
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
@@ -2938,10 +2980,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p45",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "id": "declaration-category:short-skill:p45",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2952,7 +2994,8 @@
                 ]
             },
             "facts": {
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
@@ -2972,10 +3015,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p78",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:basic-short-skill:p78",
+            "kind": "declaration-category",
             "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -2986,6 +3029,7 @@
                 ]
             },
             "facts": {
+                "typeId": "basic-short-skill",
                 "order": 30
             },
             "armyLinks": [
@@ -3006,10 +3050,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p79",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "id": "declaration-category:short-skill:p79",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3020,7 +3064,8 @@
                 ]
             },
             "facts": {
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
@@ -3040,10 +3085,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p86",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "id": "declaration-category:short-skill:p90",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3054,50 +3099,13 @@
                 ]
             },
             "facts": {
-                "order": 30
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "gizmokit"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 86
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "skill-declaration-category:basic-short-skill:p90",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
                     "entity": "skill",
                     "id": "doctor"
-                },
-                {
-                    "entity": "skill",
-                    "id": "cyberplug"
                 }
             ],
             "citations": [
@@ -3112,10 +3120,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p91",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "id": "declaration-category:short-skill:p91",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3126,16 +3134,13 @@
                 ]
             },
             "facts": {
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
                     "entity": "skill",
                     "id": "engineer"
-                },
-                {
-                    "entity": "skill",
-                    "id": "medikit"
                 }
             ],
             "citations": [
@@ -3150,10 +3155,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p92",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "id": "declaration-category:short-skill:p92",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3164,7 +3169,8 @@
                 ]
             },
             "facts": {
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
@@ -3184,10 +3190,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p103",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:basic-short-skill:p103",
+            "kind": "declaration-category",
             "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3198,6 +3204,7 @@
                 ]
             },
             "facts": {
+                "typeId": "basic-short-skill",
                 "order": 30
             },
             "armyLinks": [
@@ -3218,10 +3225,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p105",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:basic-short-skill:p112",
+            "kind": "declaration-category",
             "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3232,40 +3239,7 @@
                 ]
             },
             "facts": {
-                "order": 30
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "paramedic"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 105
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "skill-declaration-category:basic-short-skill:p112",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
+                "typeId": "basic-short-skill",
                 "order": 30
             },
             "armyLinks": [
@@ -3286,10 +3260,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:basic-short-skill:p118",
-            "kind": "skill-declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army skills are declared as Basic Short Skill in the cited N5 rules.",
+            "id": "declaration-category:long-skill:p118",
+            "kind": "declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3300,7 +3274,8 @@
                 ]
             },
             "facts": {
-                "order": 30
+                "typeId": "long-skill",
+                "order": 50
             },
             "armyLinks": [
                 {
@@ -3320,10 +3295,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:long-skill:p25",
-            "kind": "skill-declaration-category",
-            "name": "Long Skill",
-            "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "id": "declaration-category:short-skill:p121",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3334,7 +3309,113 @@
                 ]
             },
             "facts": {
+                "typeId": "short-skill",
                 "order": 40
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "deactivator"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 121
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "declaration-category:short-skill:p123",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "typeId": "short-skill",
+                "order": 40
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "gizmokit"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 123
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "declaration-category:short-skill:p124",
+            "kind": "declaration-category",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "typeId": "short-skill",
+                "order": 40
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "medikit"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 124
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "declaration-category:long-skill:p25",
+            "kind": "declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "typeId": "long-skill",
+                "order": 50
             },
             "armyLinks": [
                 {
@@ -3358,10 +3439,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:long-skill:p89",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:long-skill:p89",
+            "kind": "declaration-category",
             "name": "Long Skill",
-            "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3372,12 +3453,17 @@
                 ]
             },
             "facts": {
-                "order": 40
+                "typeId": "long-skill",
+                "order": 50
             },
             "armyLinks": [
                 {
                     "entity": "skill",
                     "id": "combat-jump"
+                },
+                {
+                    "entity": "skill",
+                    "id": "parachutist"
                 }
             ],
             "citations": [
@@ -3392,10 +3478,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:long-skill:p111",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:long-skill:p111",
+            "kind": "declaration-category",
             "name": "Long Skill",
-            "summary": "The linked Army skills are declared as Long Skill in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3406,7 +3492,8 @@
                 ]
             },
             "facts": {
-                "order": 40
+                "typeId": "long-skill",
+                "order": 50
             },
             "armyLinks": [
                 {
@@ -3426,10 +3513,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:entire-order:p86",
-            "kind": "skill-declaration-category",
-            "name": "Entire Order",
-            "summary": "The linked Army skills are declared as Entire Order in the cited N5 rules.",
+            "id": "declaration-category:long-skill:p86",
+            "kind": "declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3440,6 +3527,7 @@
                 ]
             },
             "facts": {
+                "typeId": "long-skill",
                 "order": 50
             },
             "armyLinks": [
@@ -3460,10 +3548,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:aro:p40",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:aro:p40",
+            "kind": "declaration-category",
             "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3474,6 +3562,7 @@
                 ]
             },
             "facts": {
+                "typeId": "aro",
                 "order": 60
             },
             "armyLinks": [
@@ -3494,10 +3583,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:aro:p45",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:aro:p45",
+            "kind": "declaration-category",
             "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3508,6 +3597,7 @@
                 ]
             },
             "facts": {
+                "typeId": "aro",
                 "order": 60
             },
             "armyLinks": [
@@ -3528,10 +3618,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:aro:p78",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:aro:p78",
+            "kind": "declaration-category",
             "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3542,6 +3632,7 @@
                 ]
             },
             "facts": {
+                "typeId": "aro",
                 "order": 60
             },
             "armyLinks": [
@@ -3562,10 +3653,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:aro:p79",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:aro:p79",
+            "kind": "declaration-category",
             "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3576,6 +3667,7 @@
                 ]
             },
             "facts": {
+                "typeId": "aro",
                 "order": 60
             },
             "armyLinks": [
@@ -3596,10 +3688,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:aro:p86",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:aro:p92",
+            "kind": "declaration-category",
             "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3610,116 +3702,7 @@
                 ]
             },
             "facts": {
-                "order": 60
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "gizmokit"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 86
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "skill-declaration-category:aro:p90",
-            "kind": "skill-declaration-category",
-            "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "order": 60
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "doctor"
-                },
-                {
-                    "entity": "skill",
-                    "id": "cyberplug"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 90
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "skill-declaration-category:aro:p91",
-            "kind": "skill-declaration-category",
-            "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "order": 60
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "engineer"
-                },
-                {
-                    "entity": "skill",
-                    "id": "medikit"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 91
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "skill-declaration-category:aro:p92",
-            "kind": "skill-declaration-category",
-            "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
+                "typeId": "aro",
                 "order": 60
             },
             "armyLinks": [
@@ -3740,10 +3723,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:aro:p103",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:aro:p103",
+            "kind": "declaration-category",
             "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3754,6 +3737,7 @@
                 ]
             },
             "facts": {
+                "typeId": "aro",
                 "order": 60
             },
             "armyLinks": [
@@ -3774,10 +3758,10 @@
             }
         },
         {
-            "id": "skill-declaration-category:aro:p105",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:aro:p112",
+            "kind": "declaration-category",
             "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
+            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3788,40 +3772,7 @@
                 ]
             },
             "facts": {
-                "order": 60
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "paramedic"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 105
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "skill-declaration-category:aro:p112",
-            "kind": "skill-declaration-category",
-            "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
+                "typeId": "aro",
                 "order": 60
             },
             "armyLinks": [
@@ -3834,40 +3785,6 @@
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 112
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "skill-declaration-category:aro:p118",
-            "kind": "skill-declaration-category",
-            "name": "ARO",
-            "summary": "The linked Army skills are declared as ARO in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "order": 60
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "triangulated-fire"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 118
                 }
             ],
             "review": {

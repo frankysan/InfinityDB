@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 6,
+        "formatVersion": 7,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -522,18 +522,18 @@ def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: 
         load_curated_document(path)
 
 
-def test_skill_declaration_category_requires_valid_order_and_skill_links(
+def test_declaration_category_requires_valid_order_and_catalog_links(
     tmp_path: Path,
 ) -> None:
     document = valid_document()
     document["records"].append(
         {
-            "id": "skill-declaration-category:automatic:p12",
-            "kind": "skill-declaration-category",
+            "id": "declaration-category:automatic:p12",
+            "kind": "declaration-category",
             "name": "Automatic",
             "summary": "The linked skill is declared as Automatic.",
             "scope": {"game": "N5", "seasons": ["current"]},
-            "facts": {"order": 10},
+            "facts": {"typeId": "automatic", "order": 10},
             "armyLinks": [{"entity": "skill", "id": 19}],
             "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
             "composition": {"role": "definition"},
@@ -543,21 +543,41 @@ def test_skill_declaration_category_requires_valid_order_and_skill_links(
     path = tmp_path / "rules.json"
     path.write_text(json.dumps(document), encoding="utf-8")
 
-    assert load_curated_document(path)["records"][-1]["facts"]["order"] == 10
+    assert load_curated_document(path)["records"][-1]["facts"] == {
+        "typeId": "automatic",
+        "order": 10,
+    }
+
+    document["records"][-1]["armyLinks"] = [{"entity": "equipment", "id": "medikit"}]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][-1]["armyLinks"] == [
+        {"entity": "equipment", "id": "medikit"}
+    ]
 
     document["records"][-1]["armyLinks"] = [{"entity": "weapon", "id": 19}]
     path.write_text(json.dumps(document), encoding="utf-8")
-    with pytest.raises(ValueError, match="must reference skills"):
+    with pytest.raises(ValueError, match="must reference skills or equipment"):
+        load_curated_document(path)
+
+    document["records"][-1]["armyLinks"] = [{"entity": "skill", "id": 19}]
+    document["records"][-1]["facts"]["typeId"] = "entire-order"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.typeId.*skillTypes"):
+        load_curated_document(path)
+
+    del document["records"][-1]["facts"]["typeId"]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must contain only 'typeId' and 'order'"):
         load_curated_document(path)
 
     document = valid_document()
     declaration = {
-        "id": "skill-declaration-category:automatic:p12",
-        "kind": "skill-declaration-category",
+        "id": "declaration-category:automatic:p12",
+        "kind": "declaration-category",
         "name": "Automatic",
         "summary": "The linked skill is declared as Automatic.",
         "scope": {"game": "N5", "seasons": ["current"]},
-        "facts": {"order": 10},
+        "facts": {"typeId": "automatic", "order": 10},
         "armyLinks": [{"entity": "skill", "id": 19}],
         "citations": [
             {"sourceId": "n5-core-v5.3", "page": 12},

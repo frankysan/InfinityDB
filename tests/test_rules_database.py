@@ -24,7 +24,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 113
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 109
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -165,12 +165,83 @@ def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> 
         {
             "skill_ref": "sapper",
             "name": "Long Skill",
-            "order": 40,
+            "order": 50,
             "source_title": "N5 Core Rules",
             "source_version": "5.3",
             "page": 111,
         },
     ]
+
+
+
+def test_rules_database_returns_equipment_declaration_categories(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+
+    categories = RulesDatabase(output).declaration_categories("equipment")
+
+    assert [
+        {
+            "army_ref": category["army_ref"],
+            "type_id": category["type_id"],
+            "name": category["name"],
+            "order": category["order"],
+            "page": category["page"],
+        }
+        for category in categories
+    ] == [
+        {
+            "army_ref": "deactivator",
+            "type_id": "short-skill",
+            "name": "Short Skill",
+            "order": 40,
+            "page": 121,
+        },
+        {
+            "army_ref": "gizmokit",
+            "type_id": "short-skill",
+            "name": "Short Skill",
+            "order": 40,
+            "page": 123,
+        },
+        {
+            "army_ref": "medikit",
+            "type_id": "short-skill",
+            "name": "Short Skill",
+            "order": 40,
+            "page": 124,
+        },
+    ]
+
+    with pytest.raises(ValueError, match="skill or equipment"):
+        RulesDatabase(output).declaration_categories("weapon")
+
+
+def test_current_declaration_categories_match_reviewed_n5_3_semantics(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    skill_categories: dict[object, list[str]] = {}
+    for category in database.declaration_categories("skill"):
+        skill_categories.setdefault(category["army_ref"], []).append(category["name"])
+
+    assert skill_categories["bs-attack"] == ["Short Skill", "ARO"]
+    assert skill_categories["cc-attack"] == ["Short Skill", "ARO"]
+    assert skill_categories["dodge"] == ["Short Skill", "ARO"]
+    assert skill_categories["forward-observer"] == ["Short Skill", "ARO"]
+    assert skill_categories["doctor"] == ["Short Skill"]
+    assert skill_categories["engineer"] == ["Short Skill"]
+    assert skill_categories["cyberplug"] == ["Automatic"]
+    assert skill_categories["paramedic"] == ["Automatic"]
+    assert skill_categories["parachutist"] == ["Long Skill"]
+    assert skill_categories["triangulated-fire"] == ["Long Skill"]
+    assert skill_categories["berserk"] == ["Long Skill"]
 
 
 def test_army_link_records_use_current_collections_by_default(tmp_path: Path) -> None:

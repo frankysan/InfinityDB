@@ -7,6 +7,8 @@ from typing import Any
 
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 
+DECLARATION_KIND = "declaration-category"
+
 
 def _special_profile(record: dict[str, Any]) -> dict[str, Any] | None:
     facts = record.get("facts")
@@ -23,11 +25,26 @@ def _special_profile(record: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def _source_label(category: dict[str, Any]) -> str | None:
+    title = category.get("source_title")
+    version = category.get("source_version")
+    if not isinstance(title, str) or not title.strip():
+        return None
+    if not isinstance(version, str) or not version.strip():
+        return title
+    if version.casefold() in title.casefold():
+        return title
+    return f"{title} v{version}"
+
+
 class CatalogRules:
     """Enrich Army catalog items with curated rule records when available."""
 
     def __init__(self, rules_database: RulesDatabase | None) -> None:
         self.rules_database = rules_database
+        self._category_indexes: dict[
+            str, dict[ArmyLinkRef, list[dict[str, Any]]]
+        ] = {}
 
     @staticmethod
     def _application_refs(item: dict[str, Any]) -> tuple[ArmyLinkRef, ...]:
@@ -41,10 +58,51 @@ class CatalogRules:
         source_ids.add(int(item["id"]))
         return tuple(sorted(source_ids))
 
+    def _category_index(self, entity: str) -> dict[ArmyLinkRef, list[dict[str, Any]]]:
+        if entity in self._category_indexes:
+            return self._category_indexes[entity]
+        rules_database = self.rules_database
+        if rules_database is None:
+            self._category_indexes[entity] = {}
+            return self._category_indexes[entity]
+        index: dict[ArmyLinkRef, list[dict[str, Any]]] = {}
+        for category in rules_database.declaration_categories(entity):
+            index.setdefault(category["army_ref"], []).append(category)
+        for categories in index.values():
+            categories.sort(key=lambda item: (item["order"], item["name"], item["page"] or 0))
+        self._category_indexes[entity] = index
+        return index
+
+    def _categories_for_refs(
+        self, entity: str, refs: tuple[ArmyLinkRef, ...]
+    ) -> list[dict[str, Any]]:
+        categories: dict[tuple[str, str | None, int | None], tuple[int, dict[str, Any]]] = {}
+        index = self._category_index(entity)
+        for army_ref in refs:
+            for category in index.get(army_ref, []):
+                item = {
+                    "name": category["name"],
+                    "source": _source_label(category),
+                    "page": category["page"],
+                }
+                key = (item["name"], item["source"], item["page"])
+                categories.setdefault(key, (category["order"], item))
+        return [
+            item
+            for _, item in sorted(
+                categories.values(),
+                key=lambda value: (
+                    value[0],
+                    value[1]["name"],
+                    value[1]["page"] or 0,
+                ),
+            )
+        ]
+
     def enrich_catalog_item(
         self, catalog: str, item: dict[str, Any]
     ) -> dict[str, Any]:
-        """Add curated rules and special profiles to one catalog item."""
+        """Add curated classifications, rules, and special profiles to one item."""
         result = deepcopy(item)
         rules_database = self.rules_database
         if rules_database is None:
@@ -55,6 +113,14 @@ class CatalogRules:
         if entity is None:
             return result
 
+        application_refs = self._application_refs(result)
+        source_ids = self._source_ids(result)
+        if entity == "equipment":
+            category_refs: tuple[ArmyLinkRef, ...] = (*source_ids, *application_refs)
+            categories = self._categories_for_refs(entity, category_refs)
+            if categories:
+                result["categories"] = categories
+
         family_rules: dict[str, dict[str, Any]] = {}
         source_rules: dict[int, dict[str, dict[str, Any]]] = {}
 
@@ -62,6 +128,8 @@ class CatalogRules:
             for record in rules_database.composed_records_for_army_link(
                 entity, army_ref
             ):
+                if record["kind"] == DECLARATION_KIND:
+                    continue
                 inheritance = (record.get("variant_semantics") or {}).get(
                     "inheritance"
                 )
@@ -77,9 +145,9 @@ class CatalogRules:
                 else:
                     family_rules.setdefault(record["id"], record)
 
-        for source_id in self._source_ids(result):
+        for source_id in source_ids:
             collect_rules(source_id, source_id)
-        for army_ref in self._application_refs(result):
+        for army_ref in application_refs:
             if isinstance(army_ref, str):
                 collect_rules(army_ref, None)
 

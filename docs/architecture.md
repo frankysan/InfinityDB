@@ -263,22 +263,25 @@ metadata. Centimetre labels use those source endpoints directly and inch labels
 use the shared 2.5 cm conversion, so a new source range endpoint is displayed
 without updating a hard-coded global range table.
 
-Skill declaration categories follow the same composition boundary. Army snapshots
-identify skills and their usage but do not provide N5 declaration categories. The
-curated N5 collection stores those rule-derived declarations as
-`skill-declaration-category` records linked to Army skill IDs and cited by printed
-rulebook page. The Army repository exposes raw skill catalog/usage data only;
-`SkillCatalog` composes declaration categories and other curated skill records from
-`rules.db`. Without a valid rules database, skills remain browsable and declaration
-categories fall back to uncited `Unclassified` rather than hidden Python rules data.
+Declaration categories follow the same composition boundary. Army snapshots identify
+Skills/Equipment and their usage but do not provide the N5 action/declaration category.
+The curated N5 collection stores those rule-derived declarations as
+`declaration-category` records linked to Army Skill or Equipment identities and cited by
+printed rulebook page. Each record references the canonical `skillTypes` vocabulary by
+`facts.typeId`; display text is not itself the semantic category key. `SkillCatalog` composes Skill categories and `CatalogRules`
+composes Equipment categories from `rules.db`; declaration records themselves are not
+returned as ordinary rule summaries. Without a valid rules database, Skills remain
+browsable with uncited `Unclassified` fallback while Equipment receives no invented
+category.
 
 Skill-extra distance semantics are split according to source authority. Army
 `extras.type` is authoritative for whether an extra is a distance; the repository
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v6 makes applicability, review state, contribution role, typed
-related-item edges, and explicit catalog-variant inheritance part of the record contract. Each record carries explicit
+Curated rules format v7 makes applicability, review state, contribution role, typed
+related-item edges, explicit catalog-variant inheritance, and cross-domain declaration
+categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
 `definition` or `supplement`; source publication provenance remains in the collection,
 source, and citation structures rather than being folded into semantic identity.
@@ -1115,7 +1118,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v6 must be migrated before ingestion.
+Curated-rule files older than format v7 must be migrated before ingestion.
 
 ## HTTP API
 
@@ -1268,11 +1271,12 @@ invented. Browser rendering consumes these backend-derived references and does
 not canonicalize trait text or generate trait slugs independently.
 
 Skill list/detail responses obtain declaration categories from current curated
-`skill-declaration-category` records in `rules.db`. Category records themselves are
-composition metadata and are not emitted as ordinary skill `rules`; other curated
-skill records remain available through that field. If rules data is unavailable or
-a skill has no curated declaration, the API reports an uncited `Unclassified`
-category.
+`declaration-category` records in `rules.db`. Equipment detail responses use the same
+record kind for Equipment actions such as Deactivator, GizmoKit, and MediKit. Category
+records themselves are composition metadata and are not emitted as ordinary `rules`;
+other curated records remain available through that field. If rules data is unavailable
+or a Skill has no curated declaration, the Skill API reports an uncited `Unclassified`
+category; Equipment has no invented fallback.
 
 `GET /api/traits` returns the shared-traits catalog composed from raw Army usage
 and optional current curated trait records. `GET /api/traits/{slug}` returns a

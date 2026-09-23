@@ -125,7 +125,7 @@ def validate_typed_domain_id(value: object, *, expected_domain: str, context: st
     """Validate a curated typed identity such as ``skill:doctor``.
 
     Additional colon-separated qualifiers are supported for domains that need
-    them, for example ``skill-declaration-category:automatic:p86``. Every
+    them, for example ``declaration-category:automatic:p86``. Every
     segment follows the same domain-slug grammar.
     """
 

@@ -72,6 +72,7 @@ function variantSection(variant, parameterSemantics) {
 function render(skill) {
   document.title = `${skill.name} · InfinityDB`;
   name.firstChild.textContent = skill.name;
+  const categories = (skill.categories || []).map((category) => category.name).join(", ");
   if (skill.wiki) {
     meta.classList.remove("developer-only");
     const link = document.createElement("a");
@@ -80,9 +81,9 @@ function render(skill) {
     link.rel = "noopener noreferrer";
     link.textContent = displayWikiUrl(skill.wiki);
     meta.replaceChildren(link);
+    if (categories) meta.append(` · ${categories}`);
   } else {
     meta.classList.add("developer-only");
-    const categories = (skill.categories || []).map((category) => category.name).join(", ");
     meta.textContent = `Skill #${skill.id}${categories ? ` · ${categories}` : ""}`;
   }
   const variants = [...skill.variants].sort((left, right) => (

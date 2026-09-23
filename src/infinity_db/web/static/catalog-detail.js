@@ -302,6 +302,7 @@ function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
   if (meta) {
+    const categories = (item.categories || []).map((category) => category.name).join(", ");
     if (item.wiki) {
       meta.classList.remove("developer-only");
       const link = document.createElement("a");
@@ -310,9 +311,15 @@ function render(item) {
       link.rel = "noopener noreferrer";
       link.textContent = displayWikiUrl(item.wiki);
       meta.replaceChildren(link);
+      if (categories) meta.append(` · ${categories}`);
     } else {
       meta.classList.add("developer-only");
-      meta.textContent = `${catalog === "equipment" ? "Equipment" : catalog === "weapons" ? "Weapon" : "Weapon trait"} #${item.id}`;
+      const domain = catalog === "equipment"
+        ? "Equipment"
+        : catalog === "weapons"
+          ? "Weapon"
+          : "Weapon trait";
+      meta.textContent = `${domain} #${item.id}${categories ? ` · ${categories}` : ""}`;
     }
   }
   const sections = usageSections(item);

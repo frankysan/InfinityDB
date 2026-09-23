@@ -140,13 +140,13 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v6 contract
+### Current v7 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `6`
+- `formatVersion`: `7`
 - `collection`: collection identity/scope/authority
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
@@ -181,7 +181,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 6,
+    "formatVersion": 7,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -243,7 +243,7 @@ The main collection structure is:
 }
 ```
 
-Supported record kinds include `rule`, `skill`, `skill-declaration-category`,
+Supported record kinds include `rule`, `skill`, `declaration-category`,
 `equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
 `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
@@ -254,12 +254,13 @@ profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon
 the application composes it into the existing weapon-reference API only when a
 validated `rules.db` is available.
 
-Skill declaration category records represent rule-derived declaration labels that
-are absent from Army source data. They use `facts.order` for deterministic display
-ordering, link only to Army `skill` IDs, and require exactly one PDF citation with a
-positive printed page. The application treats the absence of such a record as
-`Unclassified`; do not create uncited category records to represent missing rules
-classification.
+Declaration-category records represent rule-derived action/declaration labels that
+are absent from Army source data. They use `facts.typeId` to reference the canonical
+`skillTypes` vocabulary and `facts.order` for deterministic display ordering, may link
+to Army `skill` or `equipment` identities, and require exactly one PDF citation with a
+positive printed page. Skills without a curated declaration fall
+back to `Unclassified`; Equipment receives no invented fallback category. Do not create
+uncited category records to represent missing rules classification.
 
 Army-linked Skill, Equipment, and Weapon definitions declare
 `variantSemantics.inheritance` as `family` or `source`. Family semantics may be

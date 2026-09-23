@@ -17,12 +17,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
-- Advance curated rules to format v6 and `rules.db` schema/compatibility 4. Each current
-  semantic identity has exactly one definition plus optional scoped supplements, and
-  Army-linked catalog rules now explicitly distinguish family-wide knowledge from exact
-  source-variant semantics. Occurrence parameters remain attached to their source usage
-  rather than becoming universal properties of a canonical catalog family. Non-current
-  collections remain excluded from normal enrichment.
+- Strengthen the structured rules contract with deterministic multi-publication
+  composition, typed related-item links, explicit family-versus-source variant
+  inheritance, and cross-domain declaration categories. N5.3 action classifications are
+  reconciled for the audited Skill mismatches and for Deactivator, GizmoKit, and MediKit
+  as Equipment actions; non-current collections remain excluded from normal enrichment.
 
 ## [0.6.3] - 2026-09-22
 
