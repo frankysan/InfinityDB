@@ -1233,6 +1233,26 @@ Source:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
 
+## Baggage and Reload
+
+### RR-BR-RELOAD-001 — N5.3 disagrees on which Trooper must be non-Null
+
+**Scope:** core N5.3 Baggage / Reload interaction.
+
+The current Baggage rule requires the *affected Allied Trooper* to be in a
+non-Null State, while the current Reload rule requires the Allied Trooper or
+game element *with Baggage* to be in a non-Null State. These are not equivalent
+requirements. InfinityDB therefore preserves each rule's own source wording and
+does not infer a shared prerequisite or choose one formulation as authoritative.
+
+An official clarification or later rules revision is required before this can be
+promoted to a normalized cross-rule semantic relationship.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Baggage>, live N5.3 page, reviewed 2026-09-23
+- Wiki: <https://infinitythewiki.com/Reload>, live N5.3 page, reviewed 2026-09-23
+
 ## ITS FAQ
 
 ### RR-FAQ-RUNTIME-001 — Card use, timing, and tracking remain session procedure

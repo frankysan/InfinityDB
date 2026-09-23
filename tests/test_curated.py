@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.curated import (
+    CURATED_FORMAT_VERSION,
     discover_curated_documents,
     load_curated_directory,
     load_curated_document,
@@ -404,6 +405,13 @@ def test_curated_directory_ignores_example_template(tmp_path: Path) -> None:
 
     assert discover_curated_documents(curated_dir) == [collection_path]
     assert load_curated_directory(curated_dir)[0][0] == collection_path
+
+
+def test_curated_example_tracks_current_format_version() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "example.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+
+    assert document["formatVersion"] == CURATED_FORMAT_VERSION
 
 
 def test_checked_in_n5_collection_is_valid() -> None:
@@ -902,6 +910,97 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
     } >= {
         ("controller-eligible-for", "rule:peripheral-type:servant"),
     }
+
+
+def test_checked_in_n5_collection_keeps_common_skill_labels_source_faithful() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_labels = {
+        "skill:alert": ["optional", "no-roll"],
+        "skill:bs-attack": ["attack"],
+        "skill:cautious-movement": ["movement", "no-roll"],
+        "skill:cc-attack": ["attack"],
+        "skill:climb": ["movement", "no-lof", "no-roll"],
+        "skill:discover": [],
+        "skill:dodge": ["movement"],
+        "skill:idle": ["no-roll"],
+        "skill:intuitive-attack": ["bs-attack"],
+        "skill:jump": ["movement", "no-lof", "no-roll"],
+        "skill:move": ["movement", "no-lof", "no-roll"],
+        "skill:look-out": ["no-roll"],
+        "skill:place-deployable": ["attack"],
+        "skill:reload": ["attack"],
+        "skill:request-speedball": ["optional"],
+        "skill:reset": ["no-lof"],
+        "skill:speculative-attack": ["bs-attack"],
+        "skill:suppressive-fire": ["attack"],
+    }
+
+    assert {
+        record_id: records[record_id]["labelIds"] for record_id in expected_labels
+    } == expected_labels
+
+
+def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_faithful() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_labels = {
+        "skill:combat-instinct": ["optional"],
+        "skill:cyberplug": ["obligatory"],
+        "skill:doctor": ["optional"],
+        "skill:engineer": ["optional"],
+        "skill:forward-deployment": ["superior-deployment", "optional"],
+        "skill:limited-cover": ["obligatory"],
+        "skill:marksmanship": ["obligatory"],
+        "skill:martial-arts": ["cc-special-skill", "optional"],
+        "skill:mimetism": ["negative-feedback", "obligatory"],
+        "skill:natural-born-warrior": ["cc-special-skill"],
+        "skill:no-cover": ["obligatory"],
+        "skill:peripheral": ["obligatory"],
+        "skill:sixth-sense": ["optional"],
+        "skill:stealth": ["optional"],
+        "skill:strategos": ["optional"],
+        "skill:super-jump": ["movement", "optional"],
+    }
+
+    assert {
+        record_id: records[record_id]["labelIds"] for record_id in expected_labels
+    } == expected_labels
+
+    martial_arts = records["skill:martial-arts"]["facts"]
+    assert "Silhouette contact" in martial_arts["requirements"][0]
+    assert "declare CC Attack" in martial_arts["requirements"][0]
+
+    strategos = records["skill:strategos"]["facts"]
+    assert strategos["requirements"] == ["The user must be the army's Lieutenant."]
+    assert "Order Count" in strategos["effects"][0]
+
+    super_jump = records["skill:super-jump"]["facts"]
+    assert "Basic Short Skill" in super_jump["effects"][0]
+    assert "plus 4 inches" in super_jump["effects"][1]
+
+
+def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    look_out = records["skill:look-out"]["facts"]
+    assert "LoF" in look_out["requirements"][0]
+    assert "Dodge (PH-3)" in look_out["effects"][0]
+
+    speedball = records["skill:request-speedball"]["facts"]
+    assert speedball["requirements"] == ["The player must have two Speedball Tokens."]
+    assert "two 55 mm Speedball Tokens" in speedball["effects"][0]
+    assert "PH 15" in speedball["effects"][0]
+
+    reload = records["skill:reload"]["facts"]
+    assert "Baggage holder must be in a non-Null State" in reload["requirements"][0]
+    assert any("Non-Reloadable" in restriction for restriction in reload["restrictions"])
 
 
 def test_checked_in_n5_collection_models_cover_precedence() -> None:

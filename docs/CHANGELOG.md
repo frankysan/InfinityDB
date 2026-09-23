@@ -24,6 +24,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Audit the expanded Skills layer against current N5.3 source material: correct missing
+  labels and concise facts across newly exposed Common Skills and touched Special Skills,
+  preserve the documented Baggage/Reload ambiguity, and make rules-only Skill relation
+  targets such as Reload navigate to their catalog detail pages.
 - Expand the Common and Special Skills reference with concise, source-cited
   requirements, effects, and restrictions, including rules-only Common Skills.
 - Expand Targeted State into a bidirectional interaction hub: Forward Observer now causes
@@ -63,8 +67,6 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Explain Regular and Irregular Training alongside the corresponding Unit loadout
   Orders, with reviewed rules summaries and cited sources while keeping special
   Order-generation types separate.
-
-### Changed
 
 - Add reviewed No Cover / Limited Cover rules and a bidirectional precedence relationship so players can see immediately that No Cover overrides Limited Cover when both restrictions apply.
 

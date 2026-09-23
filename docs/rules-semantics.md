@@ -1089,8 +1089,10 @@ N5.3 citations. Tactical and Lieutenant Orders remain separate facts, and no
 rule-engine or temporary Isolated/Loss-of-Lieutenant state is inferred.
 
 The declaration-category validator/query layer now accepts `skill` and `equipment` Army
-links. Browser/API composition surfaces these classifications from `rules.db`; no Python
-name table or display-name inference is involved.
+links. Browser/API composition surfaces those Army-linked classifications from `rules.db`;
+rules-native Common Skills without an Army identity currently expose their primary
+`facts.typeId` only. Secondary categories for those rules-native Skills remain explicit
+follow-up work rather than being inferred from display names.
 
 Sources:
 
