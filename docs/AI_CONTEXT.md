@@ -1271,3 +1271,24 @@ compatibility references remain unambiguous JSON integers.
   signed values, rerolls, and Special Dice remain opaque until the owning rule supplies
   reviewed target/operation semantics; source-variant identity and occurrence parameters
   remain separate axes.
+## 0.7.0 enrichment coverage audit (2026-09-23)
+
+- `tools/audit_enrichment_coverage.py` is the maintained gate for measuring how much of
+  the currently exposed Skill, Equipment, Weapon, and Trait application surface is
+  actually enriched by the selected `rules.db`. It consumes a specific generated
+  `infinity.db` plus `rules.db`; it does not infer coverage from curated JSON alone.
+- The audit follows the same composition paths as the API: `SkillCatalog` for Skills,
+  `CatalogRules` for Equipment/Weapons (including public catalog slugs before rules
+  composition), and `TraitCatalog` for Traits. This intentionally catches enrichment
+  that exists in rules storage but is not surfaced through the application contract.
+- Gap codes currently cover missing rule definitions, unreviewed current contributions,
+  missing citations, citation sources explicitly tied to an older N5 revision than
+  their current collection, ambiguous family or exact-source routing, unresolved
+  surfaced rule IDs, and related catalog/trait targets that do not resolve to an
+  exposed identity. Rules-only State/Training/etc. relation targets are counted as
+  supporting identities rather than false UI gaps.
+- Default JSON detail lists include only catalog items with gaps;
+  `--include-complete` emits the full inventory. The report is diagnostic rather than a
+  second ontology: semantic classifications remain owned by canonical application
+  identity plus curated rules data. Remaining gaps still require explicit 0.7.0 blocker/
+  intentional-omission/later-work classification in the maintained release plan.

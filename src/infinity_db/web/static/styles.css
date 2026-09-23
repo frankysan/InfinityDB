@@ -68,6 +68,7 @@
   --color-logo-rim-default: #a8cd92;
   --color-logo-rim-shadow: #527b5d;
 
+  /* Faction colors used by Army. */
   --color-faction-panoceania-primary: #009fe4;
   --color-faction-panoceania-secondary: #004665;
   --color-faction-yu-jing-primary: #f1861d;
@@ -90,6 +91,14 @@
   --color-faction-o-12-secondary: #1c173b;
   --color-faction-jsa-primary: #e3f2f1;
   --color-faction-jsa-secondary: #4ca49e;
+
+  /* Skill category colors used by infinitythewiki.com. */
+  --color-skill-category-automatic: #000000;
+  --color-skill-category-deployment: #4B0082;
+  --color-skill-category-basic-short: #3278bd;
+  --color-skill-category-short: #228b22;
+  --color-skill-category-long: #b20000;
+  --color-skill-category-aro: #ffbf00;
 }
 
 * {

@@ -189,9 +189,13 @@ requiring a new top-level browser surface in 0.7.0.
     curated JSON, `rules.db`, raw source data, or developer tooling.
 
 - [ ] **Use the audited research as a controlled coverage process.**
-  - [ ] Add a coverage report for currently exposed data that identifies missing
+  - [x] Add a coverage report for currently exposed data that identifies missing
     enrichment, ambiguous identity/variant mappings, unresolved related-item links,
     and citations whose source version is stale or unreviewed.
+    `tools/audit_enrichment_coverage.py` audits the composed Skill/Equipment/Weapon/
+    Trait surfaces against a specific `infinity.db` + `rules.db` pair; by default its
+    detail lists contain only gaps, with `--include-complete` available for a full
+    inventory.
   - [ ] Classify every remaining gap explicitly as a 0.7.0 blocker, intentional
     omission, supporting identity without a standalone UI, or later product work;
     do not silently treat absence as complete coverage.
