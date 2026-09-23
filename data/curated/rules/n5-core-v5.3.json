@@ -5688,7 +5688,17 @@
             },
             "variantSemantics": {
                 "inheritance": "family"
-            }
+            },
+            "relations": [
+                {
+                    "type": "imposes-modifiers-on",
+                    "recordId": "skill:bs-attack"
+                },
+                {
+                    "type": "imposes-modifiers-on",
+                    "recordId": "skill:discover"
+                }
+            ]
         },
         {
             "id": "equipment:multispectral-visor",

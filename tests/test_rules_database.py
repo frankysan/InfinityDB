@@ -500,11 +500,18 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
 
 
 
-def test_msv_mimetism_interaction_is_bidirectional(tmp_path: Path) -> None:
+def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), output)
     database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            record
+            for record in database.composed_records_for_army_link("skill", slug)
+            if record["id"] == record_id
+        )
 
     msv = next(
         record
@@ -513,11 +520,9 @@ def test_msv_mimetism_interaction_is_bidirectional(tmp_path: Path) -> None:
         )
         if record["id"] == "equipment:multispectral-visor"
     )
-    mimetism = next(
-        record
-        for record in database.composed_records_for_army_link("skill", "mimetism")
-        if record["id"] == "skill:mimetism"
-    )
+    mimetism = skill_rule("mimetism", "skill:mimetism")
+    bs_attack = skill_rule("bs-attack", "skill:bs-attack")
+    discover = skill_rule("discover", "skill:discover")
 
     assert (
         "reduces-modifiers-from",
@@ -531,9 +536,20 @@ def test_msv_mimetism_interaction_is_bidirectional(tmp_path: Path) -> None:
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in mimetism["display_relations"]
     } == {
+        ("imposes-modifiers-on", "outbound", "BS Attack"),
+        ("imposes-modifiers-on", "outbound", "Discover"),
         ("reduces-modifiers-from", "inbound", "Multispectral Visor"),
         ("ignores-modifiers-from", "inbound", "Sensor"),
     }
+    for target in (bs_attack, discover):
+        assert (
+            "imposes-modifiers-on",
+            "inbound",
+            "Mimetism",
+        ) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
 
 
 def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:

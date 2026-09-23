@@ -1185,6 +1185,24 @@ Sources:
 - Wiki: <https://infinitythewiki.com/AI_Motorcycle>
 - PDF: Infinity N5 V5.3, printed pages 117 and 119
 
+### RS-SE-MIMETISM-001 — Mimetism exposes its affected declarations
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Mimetism imposes its listed negative MOD on enemy BS Attacks that require LoF and on
+Discover attempts against the user. Those are direct rule-to-rule interactions, not
+profile eligibility or derived Unit capabilities.
+
+InfinityDB therefore authors `imposes-modifiers-on` from Mimetism toward BS Attack and
+Discover. `rules.db` derives the inverse navigation so those declaration pages identify
+Mimetism as a possible modifier without duplicating the relationship. The actual MOD
+value and LoF/target conditions remain in Mimetism's facts and the Unit Profile.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Mimetism&oldid=3102>
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+
 ### RS-SE-MSV-001 — Multispectral Visor reduces Mimetism MODs
 
 **Classification:** source-native cross-domain gameplay relationship semantics.

@@ -963,6 +963,17 @@ def test_checked_in_n5_collection_models_targeted_interaction_hub() -> None:
     }
 
 
+def test_checked_in_n5_collection_models_mimetism_affected_rolls() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:mimetism"]["relations"] == [
+        {"type": "imposes-modifiers-on", "recordId": "skill:bs-attack"},
+        {"type": "imposes-modifiers-on", "recordId": "skill:discover"},
+    ]
+
+
 def test_checked_in_n5_collection_models_stealth_cautious_movement_exception() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
