@@ -1311,5 +1311,8 @@ compatibility references remain unambiguous JSON integers.
   `ignores-modifiers-from` so its interactions are navigable from Discover, Camouflage,
   Camouflaged State, Hidden Deployment State, and Mimetism. Curated v13 adds
   `applies-effects-to` and `imposes-modifiers-on`; Reflective and Albedo use them toward
-  Marksmanship and Multispectral Visor. Keep this separate from 0.8 structural application
+  Marksmanship and Multispectral Visor. Natural Born Warrior then reuses
+  `ignores-modifiers-from` toward Martial Arts and Surprise Attack, with reverse navigation
+  derived on both affected Skills while generic signed CC/weapon MOD semantics remain
+  intentionally unmodeled. Keep this separate from 0.8 structural application
   relationships.

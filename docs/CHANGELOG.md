@@ -39,6 +39,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Expand the bidirectional CC interaction graph with Natural Born Warrior as a counter
+  hub for Martial Arts and Surprise Attack MODs, deriving reverse navigation on both
+  affected Skill pages while preserving the rule's CC-only activation conditions.
+
 - Expanded the 0.7.0 bidirectional interaction graph with reviewed
   Marksmanship/Multispectral Visor counter relationships from Albedo and Reflective.
 

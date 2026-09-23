@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 143
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 144
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -570,10 +570,14 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
         ("negates-effects-of", "inbound", "Combat Instinct"),
         ("negates-effects-of", "inbound", "Sixth Sense"),
     }
-    assert {
+    assert (
+        "ignores-modifiers-from",
+        "inbound",
+        "Combat Instinct",
+    ) in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in surprise_attack["display_relations"]
-    } == {("ignores-modifiers-from", "inbound", "Combat Instinct")}
+    }
 
 
 def test_sensor_interactions_are_bidirectional(tmp_path: Path) -> None:
@@ -697,6 +701,43 @@ def test_marksmanship_counter_interactions_are_bidirectional(tmp_path: Path) -> 
             ("applies-effects-to", "inbound", "Reflective"),
             ("imposes-modifiers-on", "inbound", "Albedo"),
         }
+
+def test_natural_born_warrior_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    natural_born_warrior = skill_rule(
+        "natural-born-warrior", "skill:natural-born-warrior"
+    )
+    martial_arts = skill_rule("martial-arts", "skill:martial-arts")
+    surprise_attack = skill_rule("surprise-attack", "skill:surprise-attack")
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in natural_born_warrior["display_relations"]
+    } == {
+        ("ignores-modifiers-from", "outbound", "Martial Arts"),
+        ("ignores-modifiers-from", "outbound", "Surprise Attack"),
+    }
+    for target in (martial_arts, surprise_attack):
+        assert (
+            "ignores-modifiers-from",
+            "inbound",
+            "Natural Born Warrior",
+        ) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
 
 def test_rules_database_preserves_variant_inheritance_and_variant_links(
     tmp_path: Path,

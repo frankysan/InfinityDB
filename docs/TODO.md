@@ -218,7 +218,10 @@ requiring a new top-level browser surface in 0.7.0.
     Camouflage use, and reveals Camouflaged/Hidden Deployment States, with all reverse
     relationships derived automatically. The fourth production cluster links Albedo and
     Reflective to both Marksmanship and Multispectral Visor, distinguishing imposed MODs
-    from effects that explicitly extend to those users. Continue translating further
+    from effects that explicitly extend to those users. The fifth production cluster adds
+    Natural Born Warrior -> Martial Arts / Surprise Attack `ignores-modifiers-from` edges,
+    so both affected Skill pages identify the CC counter automatically while exact CC-only
+    requirements remain on Natural Born Warrior. Continue translating further
     semantic edge types into direction-aware player language and suppress
     implementation-only relationships such as family bookkeeping when the existing
     variant UI already communicates them. Systematic interaction coverage remains open

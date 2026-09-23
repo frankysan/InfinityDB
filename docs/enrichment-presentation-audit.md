@@ -54,6 +54,9 @@ Instinct each author `negates-effects-of` toward Stealth, and Combat Instinct au
 reverse relationships automatically. Sensor is the first multi-edge hub: one Sensor
 definition links to Mimetism, Discover, Camouflage, Camouflaged State, and Hidden
 Deployment State, and every affected endpoint receives the derived reverse relationship.
+Natural Born Warrior extends the same pattern to a CC counter hub: one reviewed rule
+authors `ignores-modifiers-from` toward Martial Arts and Surprise Attack, while both Skill
+pages receive the reverse relationship without duplicating its CC-only requirements.
 The graph label communicates that an interaction exists; exact values and conditions such
 as Sensor's +6 WIP and Zone of Control restriction remain in the owning rule facts. Future
 interactions should follow the same one-authored-edge model rather than maintaining

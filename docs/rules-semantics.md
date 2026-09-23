@@ -1182,6 +1182,30 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Albedo&oldid=3163>
 - Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110>
 
+
+### RS-SE-NBW-001 — Natural Born Warrior ignores opposing negative CC MODs
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Natural Born Warrior applies when its user is the target of a CC Attack and also declares
+a CC Attack. In the resulting CC Face to Face Roll, the user ignores all negative MODs
+imposed by the opposing Trooper. The current N5.3 example explicitly demonstrates this
+against Surprise Attack, Martial Arts, CC Attack (-3), and a PARA CC Weapon modifier.
+
+InfinityDB models the two already-reviewed catalog endpoints as
+`ignores-modifiers-from` edges from Natural Born Warrior to Martial Arts and Surprise
+Attack. `rules.db` derives the reverse navigation so those Skill pages identify Natural
+Born Warrior as a counter. Generic signed CC Attack parameters and weapon/ammunition MODs
+remain outside this edge set until their own parameter semantics are reviewed; the graph
+must not imply that Natural Born Warrior universally disables either Skill outside the
+CC Face to Face requirements recorded on the owning rule.
+
+Sources:
+
+- PDF: Infinity N5 V5.3, printed page 101
+- Wiki: <https://infinitythewiki.com/index.php?title=Natural_Born_Warrior&oldid=3109>
+
+
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
 **Classification:** source-native with a presentation-encoding consequence.
