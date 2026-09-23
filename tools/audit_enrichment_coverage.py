@@ -395,14 +395,21 @@ def audit_coverage(
                 sources = trait_catalog.list_traits()
             elif catalog == "states":
                 sources = state_catalog.list_states()
+            elif catalog == "skills":
+                sources = skill_catalog.list_skills()
             else:
                 sources = database.list_catalog_items(catalog)
 
             for source in sources:
                 if catalog == "skills":
-                    detail = skill_catalog.get_skill(int(source["id"])) or {}
-                    slug = database.application_slug("skills", int(source["id"]))
-                    source_ids = [int(value) for value in source.get("source_ids", [])]
+                    source_ref = source["id"]
+                    detail = skill_catalog.get_skill(source_ref) or {}
+                    slug = str(source.get("slug") or "") or None
+                    source_ids = [
+                        int(value)
+                        for value in source.get("source_ids", [])
+                        if str(value).isdecimal()
+                    ]
                     family_ids, exact_ids = _surface_rule_ids(detail)
                 elif catalog in {"equipment", "weapons"}:
                     raw = database.get_catalog_item(catalog, int(source["id"])) or {}
@@ -556,18 +563,19 @@ def audit_coverage(
                     state_slug = str(target_id).removeprefix("state:")
                     resolved = state_catalog.get_state(state_slug) is not None
                 else:
-                    resolved = False
-                    for link in target.get("links", []):
-                        if link["entity"] != target_kind:
-                            continue
-                        ref: int | str = (
-                            int(link["id"])
-                            if str(link["id"]).isdecimal()
-                            else str(link["id"])
-                        )
-                        if database.application_catalog_id(target_catalog, ref) is not None:
-                            resolved = True
-                            break
+                    resolved = target_id in exposed_rule_ids
+                    if not resolved:
+                        for link in target.get("links", []):
+                            if link["entity"] != target_kind:
+                                continue
+                            ref: int | str = (
+                                int(link["id"])
+                                if str(link["id"]).isdecimal()
+                                else str(link["id"])
+                            )
+                            if database.application_catalog_id(target_catalog, ref) is not None:
+                                resolved = True
+                                break
                 if not resolved:
                     relation_gaps.append(
                         {

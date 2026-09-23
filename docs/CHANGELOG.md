@@ -9,6 +9,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 - Add all core Common Skills to the rules-backed Skills catalog and present them ahead
   of Special Skills, including rules that never appear as Army profile entries.
+- Add Baggage rules and link its conditional reload and Unloaded-State recovery
+  effects to the relevant Common Skill and State.
 - Add the item-specific Unloaded State and link it bidirectionally with Disposable (X),
   making exhausted-use behavior discoverable without asserting current game state on a Trooper.
 - Link Concealed bidirectionally to Camouflaged State, making its reuse of that State's
@@ -19,6 +21,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Add bidirectional restrictive-State self-recovery interactions: Dodge now cancels IMM-A,
   Reset also cancels Isolated, and IMM-A / IMM-B / Isolated expose the State-specific Dodge
   or Reset roll interaction from both endpoints without duplicating the exact MOD values.
+
+### Changed
+
+- Expand the Common and Special Skills reference with concise, source-cited
+  requirements, effects, and restrictions, including rules-only Common Skills.
 - Expand Targeted State into a bidirectional interaction hub: Forward Observer now causes
   Targeted, Reset cancels Targeted/IMM-B, and Targeted exposes which player-facing Skills
   receive its roll modifiers or declaration restrictions. Reverse navigation is derived

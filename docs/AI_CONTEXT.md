@@ -1282,6 +1282,10 @@ compatibility references remain unambiguous JSON integers.
   `CatalogRules` for Equipment/Weapons (including public catalog slugs before rules
   composition), and `TraitCatalog` for Traits. This intentionally catches enrichment
   that exists in rules storage but is not surfaced through the application contract.
+- Skill coverage is based on `SkillCatalog.list_skills()`: canonical Common Skills,
+  including common families without a base Army row, remain exposed rules identities.
+  Relation resolution therefore accepts any rule identity surfaced by that catalog rather
+  than requiring a direct Army occurrence.
 - Gap codes currently cover missing rule definitions, unreviewed current contributions,
   missing citations, citation sources explicitly tied to an older N5 revision than
   their current collection, ambiguous family or exact-source routing, unresolved

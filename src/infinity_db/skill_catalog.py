@@ -159,21 +159,21 @@ class SkillCatalog:
         """Return Army and rules-native Skills grouped by source category."""
         items = deepcopy(self.database.list_catalog_items("skills"))
         curated_by_ref: dict[ArmyLinkRef, dict[str, Any]] = {}
-        standalone_common: list[dict[str, Any]] = []
+        common_records: list[dict[str, Any]] = []
         if self.rules_database is not None:
             for record in self.rules_database.composed_records_by_kind("skill"):
-                if record.get("facts", {}).get("category") != "common-skill":
+                if (
+                    record.get("facts", {}).get("category") != "common-skill"
+                    or (record.get("variant_semantics") or {}).get("inheritance")
+                    == "source"
+                ):
                     continue
+                common_records.append(record)
                 links = record.get("army_links", [])
-                if not links:
-                    standalone_common.append(record)
-                    continue
                 for link in links:
                     if link.get("entity") == "skill" and "id" in link:
                         curated_by_ref[link["id"]] = record
-        standalone_by_name = {
-            record["name"].casefold(): record for record in standalone_common
-        }
+        common_by_name = {record["name"].casefold(): record for record in common_records}
         represented_common_ids: set[str] = set()
         for item in items:
             item["categories"] = self._categories_for_ids({int(item["id"])})
@@ -187,11 +187,11 @@ class SkillCatalog:
                 None,
             )
             if record is None:
-                record = standalone_by_name.get(str(item.get("name", "")).casefold())
+                record = common_by_name.get(str(item.get("name", "")).casefold())
             if record is not None:
                 represented_common_ids.add(record["id"])
             item["category"] = _skill_category(record)
-        for record in standalone_common:
+        for record in common_records:
             if record["id"] in represented_common_ids:
                 continue
             semantic_id = record["id"].removeprefix("skill:")
@@ -227,7 +227,8 @@ class SkillCatalog:
                     for record in self.rules_database.composed_records_by_kind("skill")
                     if record["id"] == record_id
                     and record.get("facts", {}).get("category") == "common-skill"
-                    and not record.get("army_links")
+                    and (record.get("variant_semantics") or {}).get("inheritance")
+                    != "source"
                 ),
                 None,
             )
@@ -275,6 +276,25 @@ class SkillCatalog:
             )
             if application_slug is not None:
                 collect_rules(application_slug, None)
+
+            # Common Skills are canonical rules identities even where the Army
+            # snapshot supplies only a same-named source occurrence.  Match the
+            # list view's category composition so numeric detail routes expose
+            # that rules definition as well.
+            common_rule = next(
+                (
+                    record
+                    for record in rules_database.composed_records_by_kind("skill")
+                    if record.get("facts", {}).get("category") == "common-skill"
+                    and (record.get("variant_semantics") or {}).get("inheritance")
+                    != "source"
+                    and record["name"].casefold()
+                    == str(result.get("name", "")).casefold()
+                ),
+                None,
+            )
+            if common_rule is not None:
+                family_rules.setdefault(common_rule["id"], common_rule)
 
             if family_rules:
                 result["rules"] = list(family_rules.values())

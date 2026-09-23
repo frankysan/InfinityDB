@@ -731,7 +731,16 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "automatic"
+                "typeId": "automatic",
+                "requirements": [
+                    "The user must declare Jump."
+                ],
+                "effects": [
+                    "The user applies the Super-Jump effects when resolving Jump, including any listed Unit Profile distance."
+                ],
+                "restrictions": [
+                    "Jump's normal declaration and movement requirements still apply."
+                ]
             },
             "armyLinks": [
                 {
@@ -780,7 +789,16 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "deployment-skill"
+                "typeId": "deployment-skill",
+                "requirements": [
+                    "The user must deploy during the Deployment Phase."
+                ],
+                "effects": [
+                    "The user may deploy beyond their Deployment Zone by the distance listed in the Unit Profile."
+                ],
+                "restrictions": [
+                    "The listed distance and all normal Deployment restrictions limit the placement."
+                ]
             },
             "armyLinks": [
                 {
@@ -4083,7 +4101,16 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "short-skill"
+                "typeId": "short-skill",
+                "requirements": [
+                    "The target must be a friendly VITA-based Trooper in Silhouette contact with the user."
+                ],
+                "effects": [
+                    "A successful WIP Roll restores a lost Wound or cancels an applicable State."
+                ],
+                "restrictions": [
+                    "The target's State and the Doctor rule determine whether the Roll is permitted and its result."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -4137,7 +4164,16 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "short-skill"
+                "typeId": "short-skill",
+                "requirements": [
+                    "The target must be a friendly STR-based Trooper, piece of Equipment, or Scenery item in Silhouette contact with the user."
+                ],
+                "effects": [
+                    "A successful WIP Roll restores a lost Structure or cancels an applicable State."
+                ],
+                "restrictions": [
+                    "The target's State and the Engineer rule determine whether the Roll is permitted and its result."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -4211,7 +4247,14 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "automatic"
+                "typeId": "automatic",
+                "requirements": [],
+                "effects": [
+                    "The user has access to Peripheral (Cyberplug) troopers as specified by the applicable profile."
+                ],
+                "restrictions": [
+                    "Peripheral (Cyberplug) rules and the profile's listed options govern the available troopers."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -4257,7 +4300,14 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "automatic"
+                "typeId": "automatic",
+                "requirements": [],
+                "effects": [
+                    "The rule defines the Controller and Peripheral behavior for the applicable Peripheral type."
+                ],
+                "restrictions": [
+                    "The selected Peripheral type and its specific rules limit Controller and Peripheral actions."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -4615,7 +4665,16 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "automatic"
+                "typeId": "automatic",
+                "requirements": [
+                    "The user must apply the Martial Arts Level listed in their Unit Profile."
+                ],
+                "effects": [
+                    "The listed Level supplies its defined Close Combat MODs and effects."
+                ],
+                "restrictions": [
+                    "Only the exact Level listed for the user applies."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -4935,7 +4994,16 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeId": "automatic"
+                "typeId": "automatic",
+                "requirements": [
+                    "The user must apply the Strategos Level listed in their Unit Profile."
+                ],
+                "effects": [
+                    "The listed Level supplies its defined Tactical Phase and deployment effects."
+                ],
+                "restrictions": [
+                    "Only the exact Level listed for the user applies."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5714,6 +5782,10 @@
                 "effects": [
                     "Enemy BS Attacks that require LoF and Discover attempts against the user apply the Mimetism MOD listed in the Unit Profile.",
                     "The Mimetism MOD does not apply to CC Attacks."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "Only the Mimetism MOD listed in the user's Unit Profile applies."
                 ]
             },
             "armyLinks": [
@@ -5820,6 +5892,10 @@
                 "effects": [
                     "The user ignores Surprise Attack MODs imposed by attackers.",
                     "Stealth is not effective against the user."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "The Skill affects only Surprise Attack MODs and Stealth; other MODs and ARO conditions still apply."
                 ]
             },
             "armyLinks": [
@@ -5877,6 +5953,10 @@
                     "When targeted by a BS Attack through a Zero Visibility Zone, the user ignores the -6 MOD caused by the resulting Poor Visibility Zone.",
                     "Dodge and Reset ignore negative MODs except the specified Immobilized-A, Immobilized-B, and Isolated State penalties.",
                     "Stealth is not effective against the user."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "The Skill's response and MOD exceptions apply only in the situations it specifies."
                 ]
             },
             "armyLinks": [
@@ -5933,6 +6013,9 @@
                     "Cautious Movement, Idle, and Basic Short Skills with the Movement Label grant AROs only to enemies that have LoF to the user.",
                     "Other declared Skills grant AROs normally.",
                     "If the user enters Silhouette contact without entering the enemy's LoF and then declares another Skill, that enemy's available AROs are restricted to the options allowed by the Stealth rule."
+                ],
+                "restrictions": [
+                    "Stealth does not prevent AROs when an enemy has LoF to the user or when the user declares another Skill."
                 ]
             },
             "armyLinks": [
@@ -6226,6 +6309,9 @@
                 ],
                 "effects": [
                     "The user may ignore negative BS MODs imposed by Partial Cover and Nanoscreen."
+                ],
+                "restrictions": [
+                    "Only the negative BS MODs from Partial Cover and Nanoscreen are ignored."
                 ]
             },
             "armyLinks": [
@@ -6238,6 +6324,69 @@
                 {
                     "sourceId": "wiki-marksmanship-oldid-3812",
                     "heading": "Marksmanship"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:baggage",
+            "kind": "equipment",
+            "name": "Baggage",
+            "labelIds": [
+                "obligatory",
+                "no-roll"
+            ],
+            "summary": "Automatic Equipment that lets nearby Allied Troopers reload eligible Disposable items and recover from Unloaded State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The affected Allied Trooper must be non-Null and inside the Baggage Trooper's Zone of Control."
+                ],
+                "effects": [
+                    "The affected Trooper may use Reload to cancel Unloaded State or regain all expended uses of eligible Disposable Weapons or Equipment.",
+                    "During the States Phase, each eligible Allied Trooper in range may automatically receive the same recovery."
+                ],
+                "restrictions": [
+                    "Only one Allied Trooper can receive the Reload effect per Order.",
+                    "Non-Reloadable items cannot regain uses or cancel their Unloaded State through this effect.",
+                    "Recovering uses does not affect items already deployed on the table."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "baggage"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:reload"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:unloaded"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Baggage",
+                    "heading": "Baggage"
                 }
             ],
             "review": {
@@ -6327,6 +6476,9 @@
                 ],
                 "effects": [
                     "In the resulting CC Face to Face Roll, the user ignores all negative MODs imposed by the opposing Trooper."
+                ],
+                "restrictions": [
+                    "The effect applies only to negative MODs imposed by the opposing Trooper in that CC Face to Face Roll."
                 ]
             },
             "armyLinks": [
@@ -6386,6 +6538,10 @@
                 "typeId": "automatic",
                 "effects": [
                     "Attacks against the Trooper do not apply the -3 BS MOD granted by Partial Cover."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "Other applicable Partial Cover effects remain in force."
                 ]
             },
             "armyLinks": [
@@ -6431,6 +6587,10 @@
                 "effects": [
                     "The Trooper cannot benefit from any MODs granted by Partial Cover.",
                     "When No Cover and Limited Cover both apply, the more severe No Cover restriction takes precedence."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "The restriction applies only to MODs granted by Partial Cover."
                 ]
             },
             "armyLinks": [

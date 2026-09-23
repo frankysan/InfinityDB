@@ -3415,3 +3415,25 @@ def test_skill_catalog_keeps_source_specific_rules_on_matching_variant(
     enriched = catalog.enrich_unit(raw_unit)
     skill = enriched["armies"][0]["profiles"][0]["skills"][0]
     assert skill["source_variant"] == {"kind": "level", "value": 2}
+
+
+def test_skill_catalog_attaches_common_rule_to_same_named_army_skill(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 24, "name": "Climb", "source_defined": True}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+
+    catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
+    detail = catalog.get_skill(24)
+
+    assert detail is not None
+    assert [rule["id"] for rule in detail["rules"]] == ["skill:climb"]
+    assert next(item for item in catalog.list_skills() if item["id"] == 24)[
+        "category"
+    ] == "Common Skills"

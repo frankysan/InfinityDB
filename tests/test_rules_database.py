@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 170
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 171
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -55,6 +55,13 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
             "SELECT relation_type, related_record_id FROM record_relations "
             "WHERE record_id = 'skill:camouflage' ORDER BY position LIMIT 1"
         ).fetchone() == ("enters-state", "state:camouflaged")
+        assert connection.execute(
+            "SELECT relation_type, related_record_id FROM record_relations "
+            "WHERE record_id = 'equipment:baggage' ORDER BY position"
+        ).fetchall() == [
+            ("enables-use-of", "skill:reload"),
+            ("cancels-state", "state:unloaded"),
+        ]
         assert connection.execute(
             "SELECT source_id, page FROM record_citations "
             "WHERE record_id = 'state:camouflaged' AND page IS NOT NULL "

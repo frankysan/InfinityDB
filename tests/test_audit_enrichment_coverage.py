@@ -109,8 +109,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 22
-    assert report["summary"]["completeCount"] == 20
+    assert report["summary"]["exposedCount"] == 36
+    assert report["summary"]["completeCount"] == 34
     assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
@@ -123,6 +123,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
     assert skills["Camouflage"]["gapCodes"] == []
+    assert skills["CC Attack"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapCodes"] == ["missing_rule_definition"]
     assert skills["Missing Skill"]["gapClassifications"][0]["classification"] == (
         "release-blocker"
