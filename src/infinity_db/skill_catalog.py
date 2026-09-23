@@ -171,6 +171,10 @@ class SkillCatalog:
                 for link in links:
                     if link.get("entity") == "skill" and "id" in link:
                         curated_by_ref[link["id"]] = record
+        standalone_by_name = {
+            record["name"].casefold(): record for record in standalone_common
+        }
+        represented_common_ids: set[str] = set()
         for item in items:
             item["categories"] = self._categories_for_ids({int(item["id"])})
             self._enrich_skill_item(item)
@@ -182,8 +186,14 @@ class SkillCatalog:
                 ),
                 None,
             )
+            if record is None:
+                record = standalone_by_name.get(str(item.get("name", "")).casefold())
+            if record is not None:
+                represented_common_ids.add(record["id"])
             item["category"] = _skill_category(record)
         for record in standalone_common:
+            if record["id"] in represented_common_ids:
+                continue
             semantic_id = record["id"].removeprefix("skill:")
             items.append(
                 {
