@@ -2548,7 +2548,12 @@ semantic ID, while zero or more `supplement` contributions may add scoped ruling
 clarifications, facts, citations, or relations. Supplement fields are not merged into
 the definition by priority or load order; they retain their own collection and scope.
 Historical/superseded collections remain queryable but are excluded from normal
-application composition.
+application composition. Reviewed `training` definitions classify the two normal
+Army Order-generation types (`regular` and `irregular`) separately from Skills
+and from special generated Lieutenant/Tactical Orders. Unit detail composition
+adds their source-cited rules records to matching loadout Order occurrences only;
+no inferred unit-wide Training or synthetic Army Skill membership is created.
+When `rules.db` is unavailable, the original source Orders remain unchanged.
 
 `record_relations` stores authored one-way edges as `(type, target semantic ID)`.
 Current relation targets must resolve to a current semantic ID before export. Reverse

@@ -14,6 +14,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
   related-record lists with explicit semantic edges for state transitions, Peripheral
   subtype/controller relationships, and exact source variants linked to their rule
   family.
+- Explain Regular and Irregular Training alongside the corresponding Unit loadout
+  Orders, with reviewed rules summaries and cited sources while keeping special
+  Order-generation types separate.
 
 ### Changed
 

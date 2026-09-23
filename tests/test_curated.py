@@ -119,6 +119,37 @@ def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Pa
         load_curated_document(path)
 
 
+@pytest.mark.parametrize(
+    "facts",
+    [{}, {"orderType": "tactical"}, {"orderType": "regular", "level": 1}],
+)
+def test_training_requires_reviewed_order_type(tmp_path: Path, facts: dict) -> None:
+    document = valid_document()
+    training = document["records"][0]
+    training.update(id="training:regular", kind="training", facts=facts)
+    training.pop("labelIds")
+    path = tmp_path / "bad-training.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="Training"):
+        load_curated_document(path)
+
+
+def test_training_cannot_masquerade_as_army_skill(tmp_path: Path) -> None:
+    document = valid_document()
+    training = document["records"][0]
+    training.update(
+        id="training:irregular",
+        kind="training",
+        facts={"orderType": "irregular"},
+        armyLinks=[{"entity": "skill", "id": "regular"}],
+    )
+    training.pop("labelIds")
+    path = tmp_path / "mislinked-training.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must not link to an Army Skill"):
+        load_curated_document(path)
+
+
 def test_load_curated_document_requires_explicit_composition_role(tmp_path: Path) -> None:
     document = valid_document()
     del document["records"][0]["composition"]

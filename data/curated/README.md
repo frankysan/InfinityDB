@@ -174,6 +174,15 @@ retain their own scope, facts, citations, relations, and publication provenance 
 than being field-merged by load order. Related concepts use typed one-way `relations`;
 reverse navigation is derived by `rules.db`.
 
+Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
+`{"orderType": "irregular"}` and canonical IDs `training:regular` /
+`training:irregular`. They do **not** have Army Skill links. Ordinary Army
+loadout Order-generation entries reference these records in the Unit API and
+browser, with citations; Lieutenant/Tactical Orders and source skill-like
+compatibility rows must not be treated as further Training values. Training
+supplements may add scoped facts but cannot redefine `orderType`. This is an
+additive v7 record-kind contract; it does not alter the `rules.db` schema.
+
 ### Document shape
 
 The main collection structure is:

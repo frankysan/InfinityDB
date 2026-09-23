@@ -34,6 +34,7 @@ class SkillCatalog:
         self.rules_database = rules_database
         self._category_index: dict[ArmyLinkRef, list[dict[str, Any]]] | None = None
         self._parameter_index: dict[ArmyLinkRef, dict[str, str]] | None = None
+        self._training_index: dict[str, dict[str, Any]] | None = None
 
     def _ensure_category_index(self) -> None:
         if self._category_index is not None:
@@ -206,8 +207,16 @@ class SkillCatalog:
         return items
 
     def enrich_unit(self, unit: dict[str, Any]) -> dict[str, Any]:
-        """Attach curated parameter semantics to skill occurrences in a unit payload."""
+        """Annotate source-backed Skill and Order occurrences with curated context."""
         result = deepcopy(unit)
+        training_index = self._training_index
+        if training_index is None:
+            training_index = (
+                self.rules_database.training_by_order_type()
+                if self.rules_database is not None
+                else {}
+            )
+            self._training_index = training_index
 
         def walk(value: Any) -> None:
             if isinstance(value, dict):
@@ -216,6 +225,14 @@ class SkillCatalog:
                         for item in child:
                             if isinstance(item, dict):
                                 self._enrich_skill_item(item)
+                    if key == "orders" and isinstance(child, list):
+                        for order in child:
+                            if isinstance(order, dict):
+                                order_type = order.get("type")
+                                if isinstance(order_type, str) and order_type in training_index:
+                                    order["training_reference"] = deepcopy(
+                                        training_index[order_type]
+                                    )
                     walk(child)
             elif isinstance(value, list):
                 for child in value:

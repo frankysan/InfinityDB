@@ -1213,6 +1213,18 @@ compatibility references remain unambiguous JSON integers.
   source-specific variant rules, and the browser renders exact variant rules inside the
   corresponding usage variant.
 
+## 0.7.0 Training classification (2026-09-23)
+
+- `Regular` and `Irregular` are rules-domain Training, not rule-defined Skills;
+  Army skill-like compatibility occurrences remain source data, not proof of
+  rules-domain classification.
+- Reviewed Training records are keyed to `regular`/`irregular` generated Order
+  occurrences at the loadout level and retain publication/citation provenance.
+  No application-wide or Unit-wide Training is inferred, and Tactical/Lieutenant
+  Order generation and temporary state effects remain distinct.
+- This additive kind uses curated format v7 and the existing rules DB schema 5;
+  published application DB schema and source normalization are unchanged.
+
 ## 0.7.0 declaration-category reconciliation (2026-09-23)
 
 - Curated rules format v7 and `rules.db` schema/compatibility 5 replace the former

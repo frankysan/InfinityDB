@@ -135,8 +135,9 @@ requiring a new top-level browser surface in 0.7.0.
     including Automatic/Deployment/Basic Short/Short/Long/ARO semantics and the
     Equipment-domain Deactivator/GizmoKit/MediKit actions.
   - [ ] Add the remaining reviewed semantic labels/classifications that help users
-    interpret existing data, including rule-domain identity and typed
-    Level/MOD/parameter meaning where relevant.
+    interpret existing data, including typed Level/MOD/parameter meaning. Regular
+    and Irregular Training are already classified and shown per loadout Order
+    occurrence; special generated Orders remain separate.
   - [x] Represent reviewed related-item relationships explicitly rather than
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.

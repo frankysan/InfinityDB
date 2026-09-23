@@ -1637,6 +1637,49 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body)["error"] == "Skill not found"
 
 
+def test_unit_api_adds_training_to_order_occurrences_only_when_rules_exist(
+    app: Callable, tmp_path: Path
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/units/1")
+    assert status == 200
+    payload = json.loads(body)
+    orders = [
+        order
+        for army in payload["armies"]
+        for loadout in army["loadouts"]
+        for order in loadout["orders"]
+    ]
+    assert orders
+    assert all(order["training_reference"]["id"] == "training:regular" for order in orders)
+    assert all(order["training_reference"]["citations"][0]["page"] == 11 for order in orders)
+    assert not any(
+        "training_reference" in profile
+        for army in payload["armies"]
+        for profile in army["profiles"]
+    )
+
+    status, _, body = request(app, "/api/units/1")
+    assert status == 200
+    assert all(
+        "training_reference" not in order
+        for army in json.loads(body)["armies"]
+        for loadout in army["loadouts"]
+        for order in loadout["orders"]
+    )
+
+
+def test_unit_page_renders_occurrence_training_with_citations(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"training_reference" in body
+    assert b"rulesReferenceSection" in body
+
+
 def test_trait_apis_compose_army_usage_with_curated_rules(
     app: Callable, tmp_path: Path
 ) -> None:

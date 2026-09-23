@@ -5,12 +5,14 @@ from pathlib import Path
 import pytest
 
 from infinity_db.curated import load_curated_directory
+from infinity_db.database import Database
 from infinity_db.rules_database import (
     RULES_APPLICATION_ID,
     RULES_SCHEMA_VERSION,
     RulesDatabase,
     export_rules_database,
 )
+from infinity_db.skill_catalog import SkillCatalog
 
 
 def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path: Path) -> None:
@@ -24,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 109
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 111
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -97,6 +99,60 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     )
     assert archived["member"] == "Camouflaged_State"
     assert archived["source_url"] == "https://infinitythewiki.com/"
+
+
+def test_training_classifies_normal_order_types_without_conflating_tactical_orders(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+    training = database.training_by_order_type()
+    assert set(training) == {"regular", "irregular"}
+    assert {item["id"] for item in training.values()} == {
+        "training:regular",
+        "training:irregular",
+    }
+    assert all(item["kind"] == "training" for item in training.values())
+    assert all(item["citations"][0]["page"] == 11 for item in training.values())
+    assert all(item["collection"]["status"] == "current" for item in training.values())
+
+    with sqlite3.connect(output) as connection:
+        connection.execute("UPDATE collections SET status = 'superseded'")
+    assert database.training_by_order_type() == {}
+
+
+def test_training_enrichment_preserves_all_other_orders(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    catalog = SkillCatalog(Database(tmp_path / "unused.db"), RulesDatabase(output))
+    unit = {
+        "armies": [
+            {
+                "loadouts": [
+                    {
+                        "orders": [
+                            {"type": "regular", "list": 1},
+                            {"type": "irregular", "list": 1},
+                            {"type": "tactical", "list": 1},
+                            {"type": "lieutenant", "list": 1},
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    enriched = catalog.enrich_unit(unit)
+    orders = enriched["armies"][0]["loadouts"][0]["orders"]
+    assert [order.get("training_reference", {}).get("id") for order in orders] == [
+        "training:regular", "training:irregular", None, None
+    ]
+    assert all(
+        "training_reference" not in order
+        for order in unit["armies"][0]["loadouts"][0]["orders"]
+    )
 
 
 def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> None:

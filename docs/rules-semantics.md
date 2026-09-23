@@ -943,6 +943,12 @@ evidence that the rules-domain concept itself is a Skill. InfinityDB can preserv
 the Army occurrence while classifying/presenting the semantic concept as
 Training.
 
+This distinction is now implemented using reviewed `training:regular` and
+`training:irregular` records whose typed `facts.orderType` matches source
+loadout Order-generation entries. They are presented per loadout with core
+N5.3 citations. Tactical and Lieutenant Orders remain separate facts, and no
+rule-engine or temporary Isolated/Loss-of-Lieutenant state is inferred.
+
 The declaration-category validator/query layer now accepts `skill` and `equipment` Army
 links. Browser/API composition surfaces these classifications from `rules.db`; no Python
 name table or display-name inference is involved.

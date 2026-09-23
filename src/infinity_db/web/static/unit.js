@@ -1,6 +1,7 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
 import { unitSymbol } from "./unit-symbols.js";
+import { rulesReferenceSection } from "./rules-reference.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
@@ -546,6 +547,21 @@ function profileNameWithDivisionBadge(profile) {
   return title;
 }
 
+function trainingReference(loadout) {
+  const records = new Map();
+  for (const order of loadout.orders || []) {
+    const rule = order.training_reference;
+    if (rule?.id) records.set(rule.id, rule);
+  }
+  if (!records.size) return null;
+  const details = document.createElement("details");
+  details.className = "loadout-training";
+  const summary = document.createElement("summary");
+  summary.textContent = `Training: ${[...records.values()].map((rule) => rule.name).join(", ")}`;
+  details.append(summary, rulesReferenceSection([...records.values()], "Training rules"));
+  return details;
+}
+
 function loadoutTable(loadouts, sharedItems, generalOrderType) {
   return table(
     ["Name", "Points", "SWC"],
@@ -561,6 +577,11 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
       const loadoutRow = [{ content: loadoutName }, loadout.points, loadout.swc];
       loadoutRow.className = index ? "profile-summary loadout-start" : "profile-summary";
       const rows = [loadoutRow];
+      const training = trainingReference(loadout);
+      if (training) rows.push([
+        { value: "Training", header: true, className: "data-label profile-item-label" },
+        { content: training, colSpan: 2 },
+      ]);
       for (const [label, property, fallbackLabel] of [
         ["Skills", "skills", "Skill"],
         ["Equipment", "equipment", "Equipment"],

@@ -888,6 +888,23 @@ class RulesDatabase:
             )
             return result
 
+    def training_by_order_type(self) -> dict[str, dict[str, Any]]:
+        """Map reviewed Training to normal source Order-generation types only.
+
+        Tactical and Lieutenant Orders are distinct generated Order types, not
+        additional Training values. Multiple current Training identities claiming
+        one Order type fail closed rather than depending on publication order.
+        """
+        index: dict[str, dict[str, Any]] = {}
+        for record in self.composed_records_by_kind("training"):
+            order_type = record["facts"]["orderType"]
+            if order_type in index:
+                raise ValueError(
+                    f"Multiple current Training definitions for Order {order_type!r}"
+                )
+            index[order_type] = record
+        return index
+
     def skill_declaration_categories(self) -> list[dict[str, Any]]:
         """Return current Skill declaration categories keyed to authored Army refs."""
         return [

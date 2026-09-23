@@ -48,6 +48,7 @@ CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
 VARIANT_PARAMETER_KINDS = frozenset({"distance"})
+TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
 
 
 def _validate_variant_semantics(
@@ -612,6 +613,31 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             if isinstance(facts, dict) and "specialProfile" in facts:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
+                )
+        if record["kind"] == "training":
+            facts = record.get("facts", {})
+            if composition_role == "definition":
+                if not isinstance(facts, dict) or set(facts) != {"orderType"}:
+                    raise ValueError(
+                        f"{context}: Training definition facts must contain only 'orderType'"
+                    )
+                order_type = facts["orderType"]
+                if order_type not in TRAINING_ORDER_TYPES:
+                    raise ValueError(
+                        f"{context}: unsupported Training orderType {order_type!r}"
+                    )
+                if record["id"] != f"training:{order_type}":
+                    raise ValueError(
+                        f"{context}: Training id must match its orderType"
+                    )
+            elif isinstance(facts, dict) and "orderType" in facts:
+                raise ValueError(
+                    f"{context}: Training supplements must not redefine 'orderType'"
+                )
+            if record.get("armyLinks"):
+                raise ValueError(
+                    f"{context}: Training is sourced from regular/irregular Order "
+                    "types and must not link to an Army Skill"
                 )
         if record["kind"] == "declaration-category":
             facts = record.get("facts")
