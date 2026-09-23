@@ -503,6 +503,10 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
         "Disposable ("
     ]
+    assert records["trait:disposable-x"]["relations"] == [
+        {"type": "causes-state", "recordId": "state:unloaded"}
+    ]
+    assert records["state:unloaded"]["kind"] == "state"
     assert records["trait:zone-of-control-zc"]["name"] == "Zone of Control (ZoC)"
     assert records["trait:zone-of-control-zc"]["citations"][0]["sourceId"] == (
         "wiki-traits-oldid-4110"

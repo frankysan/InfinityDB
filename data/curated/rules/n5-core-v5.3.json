@@ -1223,7 +1223,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-09-23"
             },
             "facts": {
                 "sourceIdentity": {
@@ -1231,7 +1231,13 @@
                         "Disposable ("
                     ]
                 }
-            }
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:unloaded"
+                }
+            ]
         },
         {
             "id": "trait:double-shot",
@@ -6975,6 +6981,49 @@
                     "recordId": "skill:stealth"
                 }
             ]
+        },
+        {
+            "id": "state:unloaded",
+            "kind": "state",
+            "name": "Unloaded State",
+            "aliases": [
+                "Unloaded"
+            ],
+            "summary": "An item-specific State entered when a Disposable Weapon or Equipment item exhausts its uses or ammunition.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The relevant Weapon or Equipment item cannot be used while Unloaded State is active.",
+                    "Reloading cancels the state and restores the item's uses unless a rule such as Non-Reloadable says otherwise."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Unloaded_State",
+                    "heading": "Unloaded State"
+                },
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "heading": "Disposable (X)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
         }
     ]
 }

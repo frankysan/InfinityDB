@@ -336,8 +336,9 @@ links to Suppressive Fire State; `Concealed` invokes Camouflaged State effects;
 
 These are useful candidates for a relationship graph between Traits, States,
 Weapons, Equipment, Skills, and Ammunition. The reviewed Concealed-to-Camouflaged-State
-edge is now materialized as `uses-effects-of`; the later domain audits should validate
-the remaining edge set before it is materialized.
+edge is materialized as `uses-effects-of`, and Disposable-to-Unloaded-State is materialized
+as `causes-state`; the later domain audits should validate the remaining edge set before it
+is materialized.
 
 Sources:
 

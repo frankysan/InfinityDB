@@ -732,7 +732,7 @@ Sources:
 
 ### RS-GSG-STATE-006 — Unloaded is item-specific runtime state
 
-**Classification:** source-native with a future state-model consequence.
+**Classification:** source-native with rules-reference and future state-model consequences.
 
 Unloaded State is activated when the ammunition/uses of a relevant Disposable
 weapon or piece of Equipment are exhausted. Its effect is that the **relevant
@@ -743,8 +743,11 @@ whole.
 
 A future play/session model should therefore not assume every State is a simple
 boolean attached only to a Trooper ID. State instances may need affected-item or
-mode context. Static InfinityDB data should continue to model `Disposable (X)`
-and `Non-Reloadable` as rules/catalog semantics, not current ammunition state.
+mode context. The rules-backed catalog now exposes Unloaded State and authors one
+`causes-state` edge from `Disposable (X)` so both endpoints expose the activation
+path. This is reference navigation only: it does not assert that a particular
+Trooper or item is currently Unloaded. `Non-Reloadable` remains a separate rule
+about cancellation and is not flattened into this edge.
 
 Sources:
 

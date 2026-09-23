@@ -7,6 +7,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add the item-specific Unloaded State and link it bidirectionally with Disposable (X),
+  making exhausted-use behavior discoverable without asserting current game state on a Trooper.
 - Link Concealed bidirectionally to Camouflaged State, making its reuse of that State's
   effects discoverable without incorrectly representing it as State entry.
 - Link Stealth bidirectionally to Cautious Movement using the existing `enables-use-of`

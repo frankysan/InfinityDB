@@ -15,6 +15,7 @@ def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: P
     assert "unconscious" in states
     assert "immobilized-a" in states
     assert "targeted" in states
+    assert "unloaded" in states
     assert states["unconscious"]["name"] == "Unconscious State"
 
     unconscious = catalog.get_state("unconscious")
@@ -31,6 +32,13 @@ def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: P
     assert ("cancels-state", "inbound", "Engineer") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in targeted["rules"][0]["display_relations"]
+    }
+
+    unloaded = catalog.get_state("unloaded")
+    assert unloaded is not None
+    assert ("causes-state", "inbound", "Disposable (X)") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in unloaded["rules"][0]["display_relations"]
     }
 
 

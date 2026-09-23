@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 157
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 158
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -578,6 +578,33 @@ def test_silent_dodge_modifier_interaction_is_bidirectional(tmp_path: Path) -> N
     assert ("imposes-modifiers-on", "inbound", "Silent (X)") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in dodge["display_relations"]
+    }
+
+
+def test_disposable_causes_item_specific_unloaded_state(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    disposable = next(
+        item
+        for item in database.composed_records_by_kind("trait")
+        if item["id"] == "trait:disposable-x"
+    )
+    unloaded = next(
+        item
+        for item in database.composed_records_by_kind("state")
+        if item["id"] == "state:unloaded"
+    )
+
+    assert ("causes-state", "outbound", "Unloaded State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in disposable["display_relations"]
+    }
+    assert ("causes-state", "inbound", "Disposable (X)") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in unloaded["display_relations"]
     }
 
 
