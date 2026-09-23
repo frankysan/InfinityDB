@@ -188,6 +188,36 @@ requiring a new top-level browser surface in 0.7.0.
     experiences; enrichment required for 0.7.0 must not remain available only in
     curated JSON, `rules.db`, raw source data, or developer tooling.
 
+- [ ] **Audit the player-facing presentation of rules enrichment before 0.7.0.**
+  The release is not complete merely because reviewed enrichment exists in
+  `rules.db` or the API. Audit the browser from a player's point of view so the
+  added context answers useful gameplay questions without exposing the internal
+  ontology as UI.
+  - [x] Define the presentation-review rubric and record the initial source-level
+    findings in `docs/enrichment-presentation-audit.md`.
+  - [x] Distinguish Requirements, Effects, and Restrictions visibly in the shared
+    rules-reference renderer instead of presenting those semantically different
+    facts as unlabeled consecutive bullet lists.
+  - [ ] Make declaration/action categories prominent enough to scan as gameplay
+    information rather than burying them in source metadata. Reuse the maintained
+    Wiki category colors where useful, but always retain text labels so color is
+    never the only cue.
+  - [ ] Present reviewed related-rule relationships when they help a player
+    understand or navigate the current item. Translate semantic edge types into
+    player-facing language and suppress implementation-only relationships such as
+    family bookkeeping when the existing variant UI already communicates them.
+  - [ ] Review information hierarchy on Skill, Equipment, Weapon, Trait, and
+    representative Unit/profile/loadout surfaces: the concise gameplay meaning and
+    applicable variant/occurrence context should be easier to find than provenance,
+    IDs, collection mechanics, or other developer-oriented context.
+  - [ ] Review whether family rules, exact-source variant rules, and occurrence
+    modifiers are shown at the point where a player needs them without implying
+    that occurrence-specific modifiers are universal properties of the base item.
+  - [ ] Perform a representative browser audit against the complete generated
+    dataset, including narrow/mobile layouts, light/dark presentation, keyboard
+    navigation, and cases with multiple variants/supplements/relations. Record and
+    resolve every player-relevance/correctness issue classified as a 0.7.0 blocker.
+
 - [ ] **Use the audited research as a controlled coverage process.**
   - [x] Add a coverage report for currently exposed data that identifies missing
     enrichment, ambiguous identity/variant mappings, unresolved related-item links,

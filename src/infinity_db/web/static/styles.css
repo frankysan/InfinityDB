@@ -1271,9 +1271,21 @@ h1>span {
 }
 
 .rules-reference h3,
+.rules-reference h4,
 .rules-reference p,
 .rules-reference ul {
   margin: 0;
+}
+
+.detail-fact-group {
+  display: grid;
+  gap: 4px;
+}
+
+.detail-fact-heading {
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .detail-copy {

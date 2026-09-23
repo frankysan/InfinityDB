@@ -61,8 +61,17 @@ function appendRuleDetails(container, rule) {
   }
 
   const facts = rule.facts || {};
-  for (const key of ["effects", "requirements", "restrictions"]) {
+  for (const [key, label] of [
+    ["requirements", "Requirements"],
+    ["effects", "Effects"],
+    ["restrictions", "Restrictions"],
+  ]) {
     if (!Array.isArray(facts[key]) || !facts[key].length) continue;
+    const group = document.createElement("div");
+    group.className = "detail-fact-group";
+    const heading = document.createElement("h4");
+    heading.className = "detail-fact-heading";
+    heading.textContent = label;
     const list = document.createElement("ul");
     list.className = "detail-list";
     for (const fact of facts[key]) {
@@ -70,7 +79,8 @@ function appendRuleDetails(container, rule) {
       item.textContent = fact;
       list.append(item);
     }
-    container.append(list);
+    group.append(heading, list);
+    container.append(group);
   }
 
   if (rule.citations?.length) {

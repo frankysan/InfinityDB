@@ -30,6 +30,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Improve rules-reference readability for players by labeling Requirements,
+  Effects, and Restrictions explicitly and presenting Requirements before rule
+  effects rather than rendering semantically different facts as anonymous lists.
 - Expose reviewed exact-source semantics directly on Equipment/Weapon usage variants,
   allowing detail pages to label named variants such as TinBot Firewall/Discover from
   structured rules data while keeping occurrence modifiers separate.

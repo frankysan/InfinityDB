@@ -1905,6 +1905,13 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"rule.collection?.title" in body
     assert b"rule.supplements || []" in body
     assert b"Additional rules context" in body
+    assert b'["requirements", "Requirements"]' in body
+    assert b'["effects", "Effects"]' in body
+    assert b'["restrictions", "Restrictions"]' in body
+    assert body.index(b'["requirements", "Requirements"]') < body.index(
+        b'["effects", "Effects"]'
+    )
+    assert b'detail-fact-heading' in body
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body
