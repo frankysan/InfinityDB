@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 3,
+        "formatVersion": 4,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -77,9 +77,11 @@ def valid_document() -> dict:
                 "kind": "skill",
                 "name": "Example skill",
                 "summary": "A concise human-written summary.",
+                "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": ["example-label"],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
+                "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             }
         ],
     }
@@ -90,6 +92,30 @@ def test_load_curated_document_requires_provenance(tmp_path: Path) -> None:
     path.write_text(json.dumps(valid_document()), encoding="utf-8")
 
     assert load_curated_document(path)["records"][0]["citations"][0]["page"] == 12
+
+
+def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Path) -> None:
+    document = valid_document()
+    del document["records"][0]["scope"]
+    path = tmp_path / "missing-scope.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="missing fields.*scope"):
+        load_curated_document(path)
+
+    document = valid_document()
+    document["records"][0]["scope"] = {"game": "N5", "seasons": []}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="seasons.*non-empty array"):
+        load_curated_document(path)
+
+    document = valid_document()
+    document["records"][0]["review"] = {
+        "status": "approved",
+        "reviewedOn": "2026-09-23",
+    }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="status.*draft.*reviewed"):
+        load_curated_document(path)
 
 
 def test_load_curated_document_rejects_unstructured_json(tmp_path: Path) -> None:
@@ -178,7 +204,7 @@ def test_load_curated_document_accepts_url_backed_wiki_citation(tmp_path: Path) 
 
 def test_load_curated_document_rejects_older_versions(tmp_path: Path) -> None:
     document = valid_document()
-    for version in (1, 2):
+    for version in (1, 2, 3):
         document["formatVersion"] = version
         path = tmp_path / f"v{version}.json"
         path.write_text(json.dumps(document), encoding="utf-8")
@@ -301,8 +327,10 @@ def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: P
             "kind": "trait",
             "name": "Disposable (X)",
             "summary": "Limited uses.",
+            "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {"sourceIdentity": {"prefixes": "Disposable ("}},
             "citations": [{"sourceId": "n5-core-v5.3", "page": 170}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
         }
     ]
     path = tmp_path / "trait.json"
@@ -341,6 +369,7 @@ def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: 
             "kind": "weapon",
             "name": "Armed Turret",
             "summary": "A deployable weapon.",
+            "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {
                 "specialProfile": {
                     "stats": [["MOV", "--"]],
@@ -351,6 +380,7 @@ def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: 
             },
             "armyLinks": [{"entity": "weapon", "id": 226}],
             "citations": [{"sourceId": "n5-core-v5.3", "page": 74}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
         }
     ]
     path = tmp_path / "weapon.json"
@@ -370,9 +400,11 @@ def test_skill_declaration_category_requires_valid_order_and_skill_links(
             "kind": "skill-declaration-category",
             "name": "Automatic",
             "summary": "The linked skill is declared as Automatic.",
+            "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {"order": 10},
             "armyLinks": [{"entity": "skill", "id": 19}],
             "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
         }
     )
     path = tmp_path / "rules.json"
@@ -391,12 +423,14 @@ def test_skill_declaration_category_requires_valid_order_and_skill_links(
         "kind": "skill-declaration-category",
         "name": "Automatic",
         "summary": "The linked skill is declared as Automatic.",
+        "scope": {"game": "N5", "seasons": ["current"]},
         "facts": {"order": 10},
         "armyLinks": [{"entity": "skill", "id": 19}],
         "citations": [
             {"sourceId": "n5-core-v5.3", "page": 12},
             {"sourceId": "n5-core-v5.3", "page": 13},
         ],
+        "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
     }
     document["records"].append(declaration)
     path.write_text(json.dumps(document), encoding="utf-8")
@@ -450,33 +484,40 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 "kind": "skill",
                 "name": "Doctor",
                 "summary": "Doctor skill.",
+                "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 90}],
+                "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
                 "id": "skill:engineer",
                 "kind": "skill",
                 "name": "Engineer",
                 "summary": "Engineer skill.",
+                "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 91}],
+                "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
                 "id": "skill:peripheral",
                 "kind": "skill",
                 "name": "Peripheral",
                 "summary": "Peripheral skill.",
+                "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
                 "id": "rule:peripheral-type:servant",
                 "kind": "rule",
                 "name": "Peripheral (Servant)",
                 "summary": "Servant type.",
+                "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {
                     "category": "peripheral-type",
                     "controllerEligibility": {
@@ -490,6 +531,7 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 },
                 "relatedRecords": ["skill:peripheral"],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
         ]
     )
@@ -521,15 +563,18 @@ def test_peripheral_type_rejects_unknown_controller_skill(tmp_path: Path) -> Non
                 "kind": "skill",
                 "name": "Peripheral",
                 "summary": "Peripheral skill.",
+                "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {"typeId": "automatic"},
                 "labelIds": [],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
             {
                 "id": "rule:peripheral-type:cyberplug",
                 "kind": "rule",
                 "name": "Peripheral (Cyberplug)",
                 "summary": "Cyberplug type.",
+                "scope": {"game": "N5", "seasons": ["current"]},
                 "facts": {
                     "category": "peripheral-type",
                     "controllerEligibility": {"hasSkill": "skill:missing"},
@@ -537,6 +582,7 @@ def test_peripheral_type_rejects_unknown_controller_skill(tmp_path: Path) -> Non
                 },
                 "relatedRecords": ["skill:peripheral"],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+                "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             },
         ]
     )

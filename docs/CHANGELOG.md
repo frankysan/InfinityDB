@@ -5,7 +5,18 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
-_No unreleased changes._
+### Added
+
+- Show the existing curated rules reference on Skill, Trait, Equipment, and Weapon
+  detail pages through one shared renderer, including applicability context and linked
+  authoritative citations.
+
+### Changed
+
+- Require explicit applicability scope and review metadata in curated rules format v4,
+  return collection provenance with composed rule records, and exclude non-current
+  collections from normal Army-linked enrichment unless historical material is
+  requested explicitly.
 
 ## [0.6.3] - 2026-09-22
 

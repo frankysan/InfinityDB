@@ -9,12 +9,14 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 3
+CURATED_FORMAT_VERSION = 4
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
 REQUIRED_SOURCE_FIELDS = frozenset({"id", "kind", "title", "version", "authority"})
-REQUIRED_RECORD_FIELDS = frozenset({"id", "kind", "name", "summary", "citations"})
+REQUIRED_RECORD_FIELDS = frozenset(
+    {"id", "kind", "name", "summary", "scope", "citations", "review"}
+)
 REQUIRED_SKILL_TYPE_FIELDS = frozenset({"id", "name", "labels", "descriptions"})
 REQUIRED_LABEL_FIELDS = frozenset({"id", "name", "description"})
 EXCLUDED_CURATED_FILENAMES = frozenset({"example.json"})
@@ -33,6 +35,43 @@ def _require_string(value: Any, field: str, context: str) -> None:
 def _require_positive_int(value: Any, field: str, context: str) -> None:
     if type(value) is not int or value < 1:
         raise ValueError(f"{context}: '{field}' must be a positive integer")
+
+
+def _validate_scope(value: object, context: str) -> None:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: must be an object")
+    if set(value) != {"game", "seasons"}:
+        raise ValueError(f"{context}: must contain only 'game' and 'seasons'")
+    _require_string(value.get("game"), "game", context)
+    seasons = value.get("seasons")
+    if (
+        not isinstance(seasons, list)
+        or not seasons
+        or any(not isinstance(item, str) or not item.strip() for item in seasons)
+    ):
+        raise ValueError(f"{context}: 'seasons' must be a non-empty array of strings")
+    if len(set(seasons)) != len(seasons):
+        raise ValueError(f"{context}: 'seasons' must not contain duplicates")
+
+
+def _validate_review(value: object, context: str) -> None:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: must be an object")
+    if set(value) != {"status", "reviewedOn"}:
+        raise ValueError(f"{context}: must contain only 'status' and 'reviewedOn'")
+    if value.get("status") not in {"draft", "reviewed"}:
+        raise ValueError(f"{context}: 'status' must be 'draft' or 'reviewed'")
+    _require_string(value.get("reviewedOn"), "reviewedOn", context)
+    reviewed_on = value["reviewedOn"]
+    parts = reviewed_on.split("-")
+    if (
+        len(parts) != 3
+        or any(not part.isdecimal() for part in parts)
+        or len(parts[0]) != 4
+        or len(parts[1]) != 2
+        or len(parts[2]) != 2
+    ):
+        raise ValueError(f"{context}: 'reviewedOn' must use YYYY-MM-DD")
 
 
 def _validate_army_link_id(entity: str, value: Any, context: str) -> None:
@@ -172,7 +211,6 @@ def _validate_weapon_special_profile(profile: object, context: str) -> None:
         ):
             raise ValueError(f"{context}.{field}: must be an array of non-empty strings")
     _require_string(profile["ccWeapon"], "ccWeapon", context)
-
 
 
 def _validate_controller_eligibility(value: object, context: str) -> set[str]:
@@ -389,9 +427,10 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 or any(not isinstance(value, str) for value in record[optional_list])
             ):
                 raise ValueError(f"{context}: '{optional_list}' must be an array of strings")
-        for optional_object in ("scope", "facts", "review"):
-            if optional_object in record and not isinstance(record[optional_object], dict):
-                raise ValueError(f"{context}: '{optional_object}' must be an object")
+        _validate_scope(record["scope"], f"{context}.scope")
+        _validate_review(record["review"], f"{context}.review")
+        if "facts" in record and not isinstance(record["facts"], dict):
+            raise ValueError(f"{context}: 'facts' must be an object")
         if record["kind"] == "skill":
             facts = record.get("facts")
             if not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids:

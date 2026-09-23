@@ -1162,3 +1162,19 @@ compatibility references remain unambiguous JSON integers.
   meaning/scope is resolved.
 - Milestone 2B shipped in 0.6.3. The next active milestone is 0.7.0 rules-enriched
   catalog data, not further canonicalization.
+
+## 0.7.0 rules-enrichment contract foundation (2026-09-23)
+
+- Curated rules format v4 requires every record to declare `scope.game`, a non-empty
+  `scope.seasons` list, and a review object containing `status` (`draft` or `reviewed`)
+  plus `reviewedOn`. Applicability and review state are therefore explicit build-time
+  contract fields rather than optional free-form metadata.
+- Semantic record identity, applicability, and source/publication provenance remain
+  separate. `RulesDatabase` returns collection metadata with each record; citations
+  continue to carry source title/version/URL and location.
+- Army-linked rule lookup consumes only `current` collections by default. Historical
+  or superseded collections may coexist in `rules.db` and can be requested explicitly,
+  but they must not affect normal catalog enrichment merely because they were loaded.
+- Skill, Trait, Equipment, and Weapon detail pages share one rules-reference renderer.
+  It displays existing curated summaries/classifications and source citations as links;
+  this is presentation of maintained enrichment, not a new source of rule semantics.

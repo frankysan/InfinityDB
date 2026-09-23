@@ -1,3 +1,4 @@
+import copy
 import sqlite3
 from pathlib import Path
 
@@ -81,6 +82,14 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     assert traits["trait:continuous-damage"]["citations"][0]["source_url"] == (
         "https://infinitythewiki.com/index.php?title=Traits&oldid=4110"
     )
+    assert traits["trait:continuous-damage"]["collection"] == {
+        "id": "n5-core-v5.3",
+        "title": "N5 Core Rules v5.3",
+        "domain": "core-rules",
+        "status": "current",
+        "effective_from": "2026-08-10",
+        "authority": "primary",
+    }
     camouflaged = database.records_by_kind("state")[0]
     archived = next(
         citation
@@ -162,3 +171,35 @@ def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> 
             "page": 111,
         },
     ]
+
+
+def test_army_link_records_use_current_collections_by_default(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    superseded = copy.deepcopy(current)
+    superseded["collection"] = {
+        **superseded["collection"],
+        "id": "n5-core-v5.2",
+        "title": "N5 Core Rules v5.2",
+        "status": "superseded",
+        "effectiveFrom": "2026-01-01",
+    }
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        [(current_path, current), (root / "n5-core-v5.2.json", superseded)],
+        output,
+    )
+
+    database = RulesDatabase(output)
+    current_records = database.records_for_army_link("skill", "camouflage")
+    all_records = database.records_for_army_link(
+        "skill", "camouflage", current_only=False
+    )
+
+    assert current_records
+    assert {record["collection"]["status"] for record in current_records} == {"current"}
+    assert len(all_records) == len(current_records) * 2
+    assert {record["collection"]["status"] for record in all_records} == {
+        "current",
+        "superseded",
+    }

@@ -1,6 +1,7 @@
 import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
+import { rulesReferenceSection } from "./rules-reference.js";
 
 const catalog = document.body.dataset.catalog;
 const itemId = window.location.pathname.split("/").pop();
@@ -313,7 +314,9 @@ function render(item) {
   }
   const sections = usageSections(item);
   content.replaceChildren(
-    ...(catalog === "traits" && item.description ? [traitDescription(item.description)] : []),
+    ...(item.rules?.length ? [rulesReferenceSection(item.rules)] : []),
+    ...(catalog === "traits" && item.description && !item.rules?.length
+      ? [traitDescription(item.description)] : []),
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
     ...(catalog === "weapons" && item.weapon_variants?.length
       ? [weaponVariants(item.weapon_variants)] : []),

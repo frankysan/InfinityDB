@@ -276,6 +276,16 @@ Skill-extra distance semantics are split according to source authority. Army
 `extras.type` is authoritative for whether an extra is a distance; the repository
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
+
+Curated rules format v4 makes applicability and review state part of every record
+contract. Each record carries explicit `scope.game` / `scope.seasons` plus a
+review status/date, while source publication provenance remains in the collection,
+source, and citation structures rather than being folded into semantic identity.
+Runtime Army/catalog composition selects only collections with `status=current` by
+default; draft, superseded, or historical collections remain queryable for audit
+work but cannot alter normal user-facing enrichment merely by being present in
+`rules.db`. Returned rule payloads include their collection metadata so API/browser
+consumers can distinguish semantic identity, applicability, and publication context.
 `Super-Jump` and `Forward Deployment` currently use
 `facts.parameterSemantics` to state how a positive distance sign should be
 displayed. `SkillCatalog` composes that semantic hint into skill, modifier, and
@@ -662,16 +672,16 @@ The current reviewed 2026-09-18 snapshot resolves all initial registry candidate
 are snapshot evidence rather than permanent invariants.
 
 The Peripheral rules/identity work uses this project-wide identity architecture rather
-than a one-off slug scheme. The rules side is represented in the existing curated v3
+than a one-off slug scheme. The rules side is represented in the curated v4
 rules collection: Doctor, Engineer, Cyberplug, and Peripheral are canonical Skill records
 and the five N5.3 Peripheral types are validated `rule` records with explicit controller-
 eligibility facts. The separate `data/curated/peripherals/army-identities.json` contract
 owns reviewed `peripheral:*` identities for embedded Army Peripheral definitions, reviewed
 source-Unit mappings onto existing logical Units for Unit-backed Peripherals, and
-source-context Cyberplug Controller access pools. Schema 19 consumes the contract only
-when its pinned snapshot hash matches, stores the contract/hash in database metadata, and
-materializes canonical application relationships so runtime repository reads never infer
-identity from Army labels or open curated JSON.
+source-context Cyberplug Controller access pools. The current application database consumes
+the contract only when its pinned snapshot hash matches, stores the contract/hash in database
+metadata, and materializes canonical application relationships so runtime repository reads
+never infer identity from Army labels or open curated JSON.
 
 ## Snapshot acquisition and provenance
 

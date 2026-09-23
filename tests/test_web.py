@@ -1716,6 +1716,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
     assert payload["rules"][0]["id"] == "skill:stealth"
+    assert payload["rules"][0]["collection"]["id"] == "n5-core-v5.3"
+    assert payload["rules"][0]["scope"] == {"game": "N5", "seasons": ["current"]}
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
     assert payload["rules"][0]["citations"][0]["page"] == 87
 
@@ -1810,12 +1812,20 @@ def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
-def test_skill_details_frontend_renders_curated_rules_reference(app: Callable) -> None:
-    status, _, body = request(app, "/static/skill.js")
+def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:
+    for asset in ("skill.js", "catalog-detail.js"):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b'rulesReferenceSection' in body
+        assert b'from "./rules-reference.js"' in body
 
+    status, _, body = request(app, "/static/rules-reference.js")
     assert status == 200
-    assert b"rulesReferenceSection" in body
     assert b"Rules reference" in body
+    assert b"rule.collection?.title" in body
+    assert b"citation.source_url" in body
+    assert b'link.target = "_blank"' in body
+    assert b'link.rel = "noopener noreferrer"' in body
 
 
 @pytest.mark.full_assets

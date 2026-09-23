@@ -1,6 +1,7 @@
 import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
+import { rulesReferenceSection } from "./rules-reference.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -34,63 +35,6 @@ function formatVariantName(variant, parameterSemantics = null) {
     return formatSkillDistanceExtra(extra.name, parameterSemantics);
   });
   return extras.length ? `${variant.skill_name} (${extras.join(", ")})` : variant.skill_name;
-}
-
-function rulesReferenceSection(rules) {
-  const section = document.createElement("section");
-  section.className = "detail-group rules-reference";
-  const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
-  heading.textContent = "Rules reference";
-  section.append(heading);
-  for (const rule of rules) {
-    const article = document.createElement("article");
-    article.className = "detail-section";
-    const title = document.createElement("h3");
-    title.textContent = rule.name;
-    article.append(title);
-    const summary = document.createElement("p");
-    summary.className = "detail-copy";
-    summary.textContent = rule.summary;
-    article.append(summary);
-    const badges = [];
-    if (rule.skill_type?.name) badges.push(rule.skill_type.name);
-    for (const label of rule.labels || []) badges.push(label.name);
-    if (badges.length) {
-      const badgeRow = document.createElement("p");
-      badgeRow.className = "detail-badges";
-      for (const badge of badges) {
-        const element = document.createElement("span");
-        element.className = "badge";
-        element.textContent = badge;
-        badgeRow.append(element);
-      }
-      article.append(badgeRow);
-    }
-    const facts = rule.facts || {};
-    for (const key of ["effects", "requirements", "restrictions"]) {
-      if (!Array.isArray(facts[key]) || !facts[key].length) continue;
-      const list = document.createElement("ul");
-      list.className = "detail-list";
-      for (const fact of facts[key]) {
-        const item = document.createElement("li");
-        item.textContent = fact;
-        list.append(item);
-      }
-      article.append(list);
-    }
-    if (rule.citations?.length) {
-      const citations = document.createElement("p");
-      citations.className = "detail-source";
-      citations.textContent = rule.citations.map((citation) => {
-        const location = citation.page ? `p. ${citation.page}` : citation.heading || citation.member;
-        return `${citation.source_title || citation.source_id}, ${location}`;
-      }).join(" · ");
-      article.append(citations);
-    }
-    section.append(article);
-  }
-  return section;
 }
 
 function variantSection(variant, parameterSemantics) {

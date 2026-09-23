@@ -419,7 +419,20 @@ class RulesDatabase:
         self, connection: sqlite3.Connection, rows: list[sqlite3.Row]
     ) -> list[dict[str, Any]]:
         records = []
+        collections: dict[str, dict[str, Any]] = {}
         for row in rows:
+            collection_id = str(row["collection_id"])
+            collection = collections.get(collection_id)
+            if collection is None:
+                collection_row = connection.execute(
+                    "SELECT id, title, domain, status, effective_from, authority "
+                    "FROM collections WHERE id = ?",
+                    (collection_id,),
+                ).fetchone()
+                if collection_row is None:
+                    raise ValueError(f"Rules record {row['id']!r} has no collection")
+                collection = dict(collection_row)
+                collections[collection_id] = collection
             record = {
                 "id": row["id"],
                 "kind": row["kind"],
@@ -430,6 +443,7 @@ class RulesDatabase:
                 "scope": _decode_json(row["scope_json"], None),
                 "facts": _decode_json(row["facts_json"], None),
                 "review": _decode_json(row["review_json"], None),
+                "collection": dict(collection),
             }
             label_ids = record["label_ids"]
             if label_ids:
@@ -477,17 +491,38 @@ class RulesDatabase:
         return records
 
     def records_for_army_link(
-        self, entity: str, external_id: ArmyLinkRef
+        self,
+        entity: str,
+        external_id: ArmyLinkRef,
+        *,
+        current_only: bool = True,
     ) -> list[dict[str, Any]]:
+        """Return curated records linked to an Army identity.
+
+        Runtime composition uses current collections by default so superseded or
+        historical collections cannot affect catalog enrichment merely by being
+        present in the rules database.
+        """
         with self._connect() as connection:
-            rows = connection.execute(
-                "SELECT r.* FROM records AS r "
-                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
-                "AND l.record_id = r.id "
-                "WHERE l.entity = ? AND l.external_id = ? "
-                "ORDER BY r.collection_id, r.id",
-                (entity, str(external_id)),
-            ).fetchall()
+            if current_only:
+                rows = connection.execute(
+                    "SELECT r.* FROM records AS r "
+                    "JOIN collections AS c ON c.id = r.collection_id "
+                    "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                    "AND l.record_id = r.id "
+                    "WHERE l.entity = ? AND l.external_id = ? AND c.status = 'current' "
+                    "ORDER BY r.collection_id, r.id",
+                    (entity, str(external_id)),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    "SELECT r.* FROM records AS r "
+                    "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                    "AND l.record_id = r.id "
+                    "WHERE l.entity = ? AND l.external_id = ? "
+                    "ORDER BY r.collection_id, r.id",
+                    (entity, str(external_id)),
+                ).fetchall()
             return self._records_from_rows(connection, rows)
 
     def skill_parameter_semantics(self) -> dict[ArmyLinkRef, dict[str, str]]:

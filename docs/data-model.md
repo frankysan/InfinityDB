@@ -2530,12 +2530,21 @@ The rules-reference browsers query the global `skills`, `equipment`, and
 display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
-The rules schema stores collections, sources, vocabulary definitions,
-records, citations, Army links, and related-record links. Curated records may
-also link to `ammunition`, `extras`, `characteristics`, `troop_types`, `units`,
-and profile occurrences. These are annotations and explanations only; Army JSON
-remains authoritative for unit membership, availability, legality, and
-source-derived statistics.
+The rules schema stores collections, sources, vocabulary definitions, records,
+citations, Army links, and related-record links. Curated format v4 requires every
+record to carry an explicit applicability scope (`game` plus one or more `seasons`)
+and review state/date. Those fields are deliberately separate from semantic record
+identity and from collection/source/citation provenance. Normal application
+composition reads only `current` collections unless a caller explicitly requests
+historical/superseded material, and returned rule records include their collection
+metadata so downstream consumers do not depend on collection load order.
+
+Curated records may also link to `ammunition`, `extras`, `characteristics`,
+`troop_types`, `units`, and profile occurrences. These are annotations and
+explanations only; Army JSON remains authoritative for unit membership,
+availability, legality, and source-derived statistics. The shared browser rules
+reference renderer presents current curated summaries and linked citations across
+Skill, Trait, Equipment, and Weapon detail surfaces when such enrichment exists.
 
 ## Required Army API metadata
 

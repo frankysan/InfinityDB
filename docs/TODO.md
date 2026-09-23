@@ -129,7 +129,7 @@ requiring a new top-level browser surface in 0.7.0.
   - [ ] Store original concise summaries rather than copied rulebook/wiki prose;
     confirm publishing permissions plus attribution/linking requirements before
     serving rule-derived editorial text.
-  - [ ] Store authoritative source links and provenance, including applicable
+  - [x] Store authoritative source links and provenance, including applicable
     rulebook/publication version, printed PDF page when available, and Wiki links.
   - [ ] Add reviewed semantic labels/classifications that help users interpret
     existing data, including declaration/action type, Automatic/Short/Long/ARO
@@ -139,7 +139,10 @@ requiring a new top-level browser surface in 0.7.0.
     deriving them from display-name matching; support reverse links where useful.
   - [ ] Keep semantic identity, source publication provenance, and applicability
     scope separate so core, annex, FAQ, season, or scenario material can enrich the
-    same canonical item without duplication or collection-load-order semantics.
+    same canonical item without duplication or collection-load-order semantics. The
+    v4 foundation now makes scope/review explicit and ignores non-current collections
+    during normal composition; additive multi-publication contribution semantics still
+    need to be defined before this item is complete.
   - [ ] Make enrichment variant-aware: base rule knowledge may be inherited only
     where valid, while exact Levels, MODs, typed parameters, and source variants
     retain their own meaning and provenance.
