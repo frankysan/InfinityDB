@@ -667,7 +667,16 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeId": "basic-short-skill"
+                "typeId": "basic-short-skill",
+                "requirements": [
+                    "The user must meet the target and visibility requirements for the Marker."
+                ],
+                "effects": [
+                    "The user makes the required WIP Roll to reveal an eligible Marker."
+                ],
+                "restrictions": [
+                    "The Marker State and other rules determine the Roll MODs and result."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5081,7 +5090,16 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeId": "short-skill"
+                "typeId": "short-skill",
+                "requirements": [
+                    "The user must select an eligible BS Weapon, Equipment item, or Skill and meet its targeting requirements."
+                ],
+                "effects": [
+                    "The user makes the attack using the selected item's profile and applicable Attributes, Burst, Ammunition, and MODs."
+                ],
+                "restrictions": [
+                    "The selected item's range, Line of Fire, target, and special rules limit the attack."
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5238,7 +5256,16 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeId": "short-skill"
+                "typeId": "short-skill",
+                "requirements": [
+                    "The user must be in Silhouette contact with the target and select an eligible CC Weapon or rule."
+                ],
+                "effects": [
+                    "The user makes the attack using the selected item's profile and applicable CC, Ammunition, and MODs."
+                ],
+                "restrictions": [
+                    "The selected item's effects and close-combat rules limit the attack."
+                ]
             },
             "labelIds": [],
             "armyLinks": [

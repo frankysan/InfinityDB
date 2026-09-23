@@ -222,6 +222,7 @@ class SkillCatalog:
                         "use_count": 0,
                         "category": COMMON_SKILL_CATEGORY,
                         "rules": [record],
+                        "variants": [],
                     }
                     for record in self.rules_database.composed_records_by_kind("skill")
                     if record["id"] == record_id

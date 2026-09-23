@@ -1825,6 +1825,14 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
 
+    status, _, body = request(rules_app, "/api/skills/alert")
+    assert status == 200
+    alert = json.loads(body)
+    assert alert["id"] == "alert"
+    assert alert["category"] == "Common Skills"
+    assert alert["variants"] == []
+    assert [rule["id"] for rule in alert["rules"]] == ["skill:alert"]
+
 
 
 def test_equipment_api_adds_curated_declaration_category(
