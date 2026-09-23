@@ -1286,6 +1286,9 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert status == 200
     assert b'card.className = "explorer surface weapon-profile"' in weapon_detail
     assert b"const profileTitle = profile.mode || profile.name || variant.name;" in weapon_detail
+    assert b"<th>Ammunition</th><th>B</th><th>PS</th><th>Saving</th>" in weapon_detail
+    assert b'["PS", profile.damage]' in weapon_detail
+    assert b"<th>DAM</th>" not in weapon_detail
     assert b'title.className = "data-surface-header";' in weapon_detail
     assert b"headingText" not in weapon_detail
     assert b"variantTitle" not in weapon_detail

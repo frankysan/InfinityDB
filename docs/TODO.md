@@ -170,10 +170,10 @@ requiring a new top-level browser surface in 0.7.0.
     the exact source-variant layer rather than inferred from names. TinBot occurrence
     modifiers remain separate; PH replacements, generic signed MODs, rerolls, and
     Special Dice remain intentionally opaque pending their own review.
-  - [ ] Reconcile N5 weapon-profile presentation terminology with the current
-    Combat rules: preserve Army's source field/provenance while exposing the
-    rules-native Possibility of Survival (`PS`) label rather than presenting the
-    value as `DAM`, for both ranged and melee profiles where applicable.
+  - [x] Reconcile N5 weapon-profile presentation terminology with the current
+    Combat rules: Army's source `damage` field remains intact for provenance/API
+    compatibility, while the shared ranged/melee profile renderer now exposes the
+    rules-native Possibility of Survival (`PS`) label instead of `DAM`.
   - [ ] Normalize non-textual Army presentation encodings into canonical
     relationships where appropriate. In particular, Unit Profiles never list Cube
     or Cube 2.0 alongside textual Equipment; their dedicated symbols are the source

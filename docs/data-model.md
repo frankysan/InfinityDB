@@ -2061,6 +2061,12 @@ Weapon modes, ammunition, ranges, traits, Equipment-style weapon profiles, and
 other mode-specific values remain in `metadata_weapons` and are joined as
 contextual detail rather than flattened into catalog identity.
 
+The Weapon-profile `damage` field is intentionally retained with that upstream name in
+stored/application payloads for source fidelity and compatibility. In N5 rules-facing
+presentation it represents Possibility of Survival (`PS`), so the shared profile renderer
+labels the value `PS` for both ranged and melee/Equipment profiles without renaming or
+rewriting the source-shaped field.
+
 The abstraction is deliberately limited to Skills, Equipment, and Weapons used
 by the current runtime. It does not claim that two source records are globally
 identical outside the documented grouping rule, does not canonicalize curated

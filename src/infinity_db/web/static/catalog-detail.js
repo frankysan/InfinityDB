@@ -161,10 +161,10 @@ function weaponVariants(variants) {
 
     const statTable = document.createElement("table");
     statTable.className = "data-table--compact weapon-statline";
-    statTable.innerHTML = "<thead><tr><th>Ammunition</th><th>B</th><th>DAM</th><th>Saving</th></tr></thead>";
+    statTable.innerHTML = "<thead><tr><th>Ammunition</th><th>B</th><th>PS</th><th>Saving</th></tr></thead>";
     const statRow = document.createElement("tr");
     const saving = [profile.saving, profile.saving_num].filter((value) => value !== null && value !== undefined && value !== "").join(" × ");
-    for (const [statLabel, value] of [["Ammunition", profile.ammunition], ["B", profile.burst], ["DAM", profile.damage], ["Saving", saving]]) {
+    for (const [statLabel, value] of [["Ammunition", profile.ammunition], ["B", profile.burst], ["PS", profile.damage], ["Saving", saving]]) {
       const cell = document.createElement("td");
       cell.dataset.label = statLabel;
       cell.textContent = text(value);

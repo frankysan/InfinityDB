@@ -1248,16 +1248,17 @@ protection when determining the Saving-Roll Success Value.
 
 Infinity Army metadata currently reaches InfinityDB through a source field named
 `damage`; preserving that source key is provenance, not permission to present the
-N5 concept as `Damage`/`DAM`. The current Weapon detail UI labels the field `DAM`;
-rules-facing presentation should expose **PS** while retaining the upstream field
-name internally where required for compatibility.
+N5 concept as `Damage`/`DAM`. InfinityDB now renders that field as **PS** in the
+shared Weapon/Equipment profile UI while retaining the upstream `damage` key in
+application payloads for source fidelity and compatibility. The same renderer covers
+ranged and melee profiles, so the rules-native label is consistent across both.
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Possibility_of_Survival_%28PS%29>
 - Wiki: <https://infinitythewiki.com/Ranged_Weapon_Profile>
 - PDF: Infinity N5 V5.3, printed pages 37 and 46
-- Current presentation: `src/infinity_db/web/static/catalog-detail.js`
+- Presentation boundary: `src/infinity_db/web/static/catalog-detail.js`
 
 ### RS-CM-SR-001 — Saving-Roll profile fields encode typed expressions
 

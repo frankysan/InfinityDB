@@ -23,6 +23,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Present the Army weapon-profile `damage` value using the N5 Possibility of Survival
+  (`PS`) label across ranged and melee/Equipment profile details while preserving the
+  upstream field name in application data for compatibility and provenance.
 - Strengthen the structured rules contract with deterministic multi-publication
   composition, typed related-item links, explicit family-versus-source variant
   inheritance, and cross-domain declaration categories. N5.3 action classifications are
