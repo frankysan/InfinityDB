@@ -658,8 +658,45 @@ class RulesDatabase:
         return result
 
     @staticmethod
+    def _relation_endpoint_index(
+        connection: sqlite3.Connection, record_ids: set[str]
+    ) -> dict[str, dict[str, Any]]:
+        if not record_ids:
+            return {}
+        placeholders = ", ".join("?" for _ in record_ids)
+        rows = connection.execute(
+            "SELECT r.collection_id, r.id, r.kind, r.name "
+            "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+            "WHERE r.id IN (" + placeholders + ") "
+            "AND r.composition_role = 'definition' AND c.status = 'current' "
+            "ORDER BY r.id",
+            tuple(sorted(record_ids)),
+        ).fetchall()
+        endpoints: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            links: list[dict[str, str]] = []
+            for link in connection.execute(
+                "SELECT entity, external_id, external_name FROM record_army_links "
+                "WHERE collection_id = ? AND record_id = ? ORDER BY position",
+                (row["collection_id"], row["id"]),
+            ).fetchall():
+                item = {"entity": link["entity"]}
+                if link["external_id"] is not None:
+                    item["id"] = link["external_id"]
+                if link["external_name"] is not None:
+                    item["name"] = link["external_name"]
+                links.append(item)
+            endpoints[row["id"]] = {
+                "id": row["id"],
+                "kind": row["kind"],
+                "name": row["name"],
+                "army_links": links,
+            }
+        return endpoints
+
+    @classmethod
     def _attach_reverse_relations(
-        connection: sqlite3.Connection, records: list[dict[str, Any]]
+        cls, connection: sqlite3.Connection, records: list[dict[str, Any]]
     ) -> None:
         for record in records:
             rows = connection.execute(
@@ -670,15 +707,33 @@ class RulesDatabase:
                 "ORDER BY rr.collection_id, rr.record_id, rr.position",
                 (record["id"],),
             ).fetchall()
-            if rows:
-                record["reverse_relations"] = [
-                    {
-                        "type": row["relation_type"],
-                        "record_id": row["record_id"],
-                        "collection_id": row["collection_id"],
-                    }
-                    for row in rows
-                ]
+            reverse_relations = [
+                {
+                    "type": row["relation_type"],
+                    "record_id": row["record_id"],
+                    "collection_id": row["collection_id"],
+                }
+                for row in rows
+            ]
+            if reverse_relations:
+                record["reverse_relations"] = reverse_relations
+
+            display_source = [
+                {**relation, "direction": "outbound"}
+                for relation in record.get("relations", [])
+            ] + [
+                {**relation, "direction": "inbound"}
+                for relation in reverse_relations
+            ]
+            endpoint_ids = {relation["record_id"] for relation in display_source}
+            endpoints = cls._relation_endpoint_index(connection, endpoint_ids)
+            display_relations = [
+                {**relation, "record": endpoints[relation["record_id"]]}
+                for relation in display_source
+                if relation["record_id"] in endpoints
+            ]
+            if display_relations:
+                record["display_relations"] = display_relations
 
     def composed_records_for_army_link(
         self,

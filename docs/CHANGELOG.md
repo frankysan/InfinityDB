@@ -30,6 +30,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Surface reviewed rules relationships with resolved endpoint metadata and
+  direction-aware player-facing labels, preserving one-way curated authorship while
+  using derived reverse navigation.
 - Improve rules-reference readability for players by labeling Requirements,
   Effects, and Restrictions explicitly and presenting Requirements before rule
   effects rather than rendering semantically different facts as anonymous lists.

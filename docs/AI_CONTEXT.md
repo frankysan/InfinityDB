@@ -1298,3 +1298,9 @@ compatibility references remain unambiguous JSON integers.
   supporting identities. This policy is release-planning metadata, not a second rules
   ontology; semantic classifications remain owned by canonical application identity plus
   curated rules data.
+
+- Rules-interaction relationships are a core 0.7.0 product feature. Author semantic
+  edges once, derive reverse navigation in `rules.db`, and present useful context from
+  both endpoints. Multispectral Visor/Mimetism is a canonical acceptance example once
+  cited N5.3 semantics are curated. Keep this separate from 0.8 structural application
+  relationships.

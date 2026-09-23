@@ -1912,6 +1912,10 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
         b'["effects", "Effects"]'
     )
     assert b'detail-fact-heading' in body
+    assert b'heading.textContent = "Related rules"' in body
+    assert b'"enters-state": { outbound: "Enters state", inbound: "Entered by" }' in body
+    assert b'"reveals-state": { outbound: "Reveals state", inbound: "Revealed by" }' in body
+    assert b'const labels = relationLabels[relation.type]' in body
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body

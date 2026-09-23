@@ -38,11 +38,12 @@ sections below and the durable 1.0 acceptance gate remains in `docs/releasing.md
 
 - **0.7.x — Rules & context.** Enrich the existing catalogs and application data with
   concise rules summaries, official references, classifications, variant-aware
-  semantics, and reviewed related-item links.
-- **0.8.x — Connect the game.** Turn the relationship graph into first-class user
-  features: Fireteams, Peripheral/Controller links, profile/loadout includes,
-  selection/dependency relationships, Reinforcement parentage, and useful cross-army
-  navigation. Prefer connected views over duplicating the same facts in new silos.
+  semantics, and a first-class bidirectional graph of reviewed rules interactions.
+- **0.8.x — Connect the game structure.** Extend the same connected-data approach to
+  structural application relationships: Fireteams, Peripheral/Controller source
+  structure, profile/loadout includes, selection/dependency relationships,
+  Reinforcement parentage, and useful cross-army navigation. Prefer connected views
+  over duplicating the same facts in new silos.
 - **0.9.x — Complete & polish.** Use the completeness inventory and consistency audit
   to close remaining player-facing gaps, then improve search/navigation, mobile
   behavior, accessibility, themes, and overall presentation without redefining the
@@ -202,10 +203,18 @@ requiring a new top-level browser surface in 0.7.0.
     information rather than burying them in source metadata. Reuse the maintained
     Wiki category colors where useful, but always retain text labels so color is
     never the only cue.
-  - [ ] Present reviewed related-rule relationships when they help a player
-    understand or navigate the current item. Translate semantic edge types into
-    player-facing language and suppress implementation-only relationships such as
-    family bookkeeping when the existing variant UI already communicates them.
+  - [ ] Present reviewed related-rule relationships as a bidirectional gameplay
+    graph when they help a player understand or navigate the current item. A relation
+    is authored once in curated data and `rules.db` derives the reverse direction;
+    both endpoints must expose useful player-facing context when both have browser
+    surfaces. Multispectral Visor -> Mimetism is a required audit example: once its
+    exact N5.3 semantics are curated, the MSV page must show the interaction and the
+    Mimetism page must show the derived reverse interaction. Translate semantic edge
+    types into direction-aware player language and suppress implementation-only
+    relationships such as family bookkeeping when the existing variant UI already
+    communicates them. The shared rules renderer now supports resolved forward/reverse
+    endpoint metadata for the existing reviewed relation vocabulary; interaction
+    coverage remains incomplete until the rules audit adds the missing gameplay edges.
   - [ ] Review information hierarchy on Skill, Equipment, Weapon, Trait, and
     representative Unit/profile/loadout surfaces: the concise gameplay meaning and
     applicable variant/occurrence context should be easier to find than provenance,

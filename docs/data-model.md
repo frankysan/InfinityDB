@@ -2571,7 +2571,14 @@ When `rules.db` is unavailable, the original source Orders remain unchanged.
 Current relation targets must resolve to a current semantic ID before export. Reverse
 navigation is derived from inbound edges at read time rather than represented by a
 second authored row. `related_records` remains only as a compatibility projection of
-the typed outbound targets in returned contribution payloads.
+the typed outbound targets in returned contribution payloads. Composed rules payloads
+also expose additive `display_relations`: forward and derived reverse edges with
+direction plus the related record's stable ID, kind, name, and definition-owned Army
+links. This is the player-facing graph projection; it lets the browser navigate from
+either endpoint without duplicating curated relations or parsing semantic IDs/names.
+The renderer decides which relation types are useful to players and suppresses
+bookkeeping edges such as `variant-of` when the existing variant UI already expresses
+the same relationship.
 
 `variant-of` is the typed family edge for exact source variants. A source-specific
 semantic definition is valid only when it has one exact numeric Army link and exactly

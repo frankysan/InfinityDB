@@ -31,6 +31,69 @@ function applicabilityText(rule) {
   return parts.join(" · ");
 }
 
+const relationLabels = {
+  "controller-eligible-for": { outbound: "Can control", inbound: "Can be controlled by" },
+  "enters-state": { outbound: "Enters state", inbound: "Entered by" },
+  "has-subtype": { outbound: "Includes subtype", inbound: "Subtype of" },
+  "reveals-state": { outbound: "Reveals state", inbound: "Revealed by" },
+};
+
+function relationHref(record) {
+  const catalogs = { skill: "skills", equipment: "equipment", weapon: "weapons" };
+  for (const link of record.army_links || []) {
+    const catalog = catalogs[link.entity];
+    if (!catalog || typeof link.id !== "string" || /^\d+$/.test(link.id)) continue;
+    return `/${catalog}/${encodeURIComponent(link.id)}`;
+  }
+  if (record.kind === "trait" && typeof record.id === "string") {
+    const prefix = "trait:";
+    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
+      return `/traits/${encodeURIComponent(record.id.slice(prefix.length))}`;
+    }
+  }
+  return null;
+}
+
+function relationNode(relation) {
+  const labels = relationLabels[relation.type];
+  const label = labels?.[relation.direction];
+  const record = relation.record;
+  if (!label || !record?.name) return null;
+
+  const item = document.createElement("li");
+  const relationLabel = document.createElement("span");
+  relationLabel.className = "rules-relation-label";
+  relationLabel.textContent = `${label}: `;
+  item.append(relationLabel);
+
+  const href = relationHref(record);
+  if (href) {
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = record.name;
+    item.append(link);
+  } else {
+    item.append(document.createTextNode(record.name));
+  }
+  return item;
+}
+
+function appendRuleRelations(container, rule) {
+  const items = (rule.display_relations || []).map(relationNode).filter(Boolean);
+  if (!items.length) return;
+
+  const group = document.createElement("div");
+  group.className = "detail-fact-group rules-relations";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "Related rules";
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  list.append(...items);
+  group.append(heading, list);
+  container.append(group);
+}
+
 function appendRuleDetails(container, rule) {
   const applicability = applicabilityText(rule);
   if (applicability) {
@@ -82,6 +145,8 @@ function appendRuleDetails(container, rule) {
     group.append(heading, list);
     container.append(group);
   }
+
+  appendRuleRelations(container, rule);
 
   if (rule.citations?.length) {
     const citations = document.createElement("p");

@@ -449,7 +449,8 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
     output = tmp_path / "rules.db"
     export_rules_database(documents, output)
 
-    relations = RulesDatabase(output).relations_for_record("state:camouflaged")
+    database = RulesDatabase(output)
+    relations = database.relations_for_record("state:camouflaged")
 
     assert {
         (item["type"], item["direction"], item["record_id"])
@@ -457,6 +458,47 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
     } == {
         ("enters-state", "inbound", "skill:camouflage"),
         ("reveals-state", "inbound", "skill:discover"),
+    }
+
+    camouflage = next(
+        record
+        for record in database.composed_records_for_army_link("skill", "camouflage")
+        if record["id"] == "skill:camouflage"
+    )
+    assert camouflage["display_relations"] == [
+        {
+            "type": "enters-state",
+            "record_id": "state:camouflaged",
+            "collection_id": "n5-core-v5.3",
+            "direction": "outbound",
+            "record": {
+                "id": "state:camouflaged",
+                "kind": "state",
+                "name": "Camouflaged State",
+                "army_links": [],
+            },
+        }
+    ]
+
+    camouflaged = next(
+        record
+        for record in database.composed_records_by_kind("state")
+        if record["id"] == "state:camouflaged"
+    )
+    assert {
+        (
+            relation["type"],
+            relation["direction"],
+            relation["record"]["name"],
+            tuple(
+                (link["entity"], link.get("id"))
+                for link in relation["record"]["army_links"]
+            ),
+        )
+        for relation in camouflaged["display_relations"]
+    } == {
+        ("enters-state", "inbound", "Camouflage", (("skill", "camouflage"),)),
+        ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
     }
 
 

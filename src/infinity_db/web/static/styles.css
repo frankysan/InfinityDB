@@ -1306,6 +1306,11 @@ h1>span {
   color: var(--color-text-secondary);
 }
 
+.rules-relation-label {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
 .detail-source {
   color: var(--color-text-tertiary);
   font-size: 12px;

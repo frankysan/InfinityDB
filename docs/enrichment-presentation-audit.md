@@ -42,11 +42,21 @@ occurrence modifiers must remain distinguishable. An occurrence-specific `(+1B)`
 `(-3)`, reroll, distance parameter, or similar value must not read as a universal
 property of the canonical Skill/Equipment identity.
 
-**Relationships.** Reviewed semantic relationships should become navigation or
-context when they clarify gameplay. Raw ontology edges are not themselves UI
-copy: relationship types need player-language labels, and bookkeeping edges such
-as `variant-of` should not be duplicated when the variant presentation already
-communicates that relationship.
+**Relationships.** Reviewed semantic relationships are a primary InfinityDB
+feature, not supporting metadata. A player should be able to start from either
+side of a gameplay interaction and discover the other side even when the source
+rule or Wiki page documents only one direction. For example, once the reviewed
+N5.3 enrichment records how Multispectral Visors modify Mimetism, the MSV surface
+must point to Mimetism and the Mimetism surface must expose the derived reverse
+interaction. Curated data should author the semantic edge once; `rules.db` derives
+the reverse direction.
+
+Raw ontology edges are not themselves UI copy. Relationship types need
+player-language, direction-aware labels, target identities need useful navigation
+when a browser surface exists, and bookkeeping edges such as `variant-of` should
+not be duplicated when the variant presentation already communicates that
+relationship. Rules-only targets may remain contextual text when a standalone
+page would add no value.
 
 **Provenance.** Official source links, publication/version, and page/section
 references should be easy to reach. Provenance is supporting evidence rather
@@ -71,11 +81,14 @@ follow-ups.
   gameplay semantics and should receive a scannable presentation. The stylesheet
   already carries the maintained Wiki category colors; any use of those colors
   must retain text labels.
-- **Reviewed related-rule edges are not presented.** Curated rule records carry
-  typed forward/reverse relationships, but the current shared renderer does not
-  expose them. A follow-up should render the subset that helps players navigate
-  States, Peripheral/controller concepts, and similar rule context without
-  dumping internal edge names into the UI.
+- **Reviewed related-rule edges need first-class presentation.** Curated rule
+  records already author one-way typed edges and `rules.db` derives reverse
+  relations. The shared renderer now receives resolved endpoint metadata and can
+  present the currently reviewed State/Peripheral relationship vocabulary with
+  direction-aware player labels while suppressing bookkeeping edges such as
+  `variant-of`. The remaining audit must extend that same model to reviewed
+  cross-rule gameplay interactions (for example MSV/Mimetism) and verify that
+  both endpoints expose the relationship clearly.
 - **Source/applicability context currently precedes the concise summary.** This is
   correct data, but the complete browser audit should determine whether the
   normal reading order should lead with gameplay meaning and move provenance/

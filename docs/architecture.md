@@ -299,7 +299,14 @@ Related rules concepts use typed one-way edges such as `enters-state`, `reveals-
 `has-subtype`, and `controller-eligible-for`. Targets resolve by stable typed semantic ID,
 not display name. The rules database derives inbound/reverse navigation from those authored
 edges, so reciprocal rows are not maintained independently. Current edges must resolve to a
-current semantic record before `rules.db` can be published.
+current semantic record before `rules.db` can be published. Composed rule payloads add a
+`display_relations` graph projection with direction and resolved endpoint identity/Army
+links. The shared browser renderer translates only reviewed player-relevant relation types
+into direction-aware labels and links; it does not expose raw edge names or duplicate
+`variant-of` bookkeeping. This projection is the foundation for 0.7.0 cross-rule gameplay
+interactions such as the reviewed Multispectral Visor/Mimetism relationship, while 0.8.x
+remains focused on structural application relationships such as Fireteams, includes, and
+selection dependencies.
 `Super-Jump` and `Forward Deployment` currently use
 `variantSemantics.occurrenceParameters` to state how a positive distance sign should be
 displayed. Exact source variants use `variantSemantics.sourceVariant`; format v9
