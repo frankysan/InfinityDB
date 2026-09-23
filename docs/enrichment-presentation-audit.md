@@ -12,7 +12,7 @@ more useful.
 
 ## Player questions
 
-For each enriched Skill, Equipment item, Weapon, Trait, and representative Unit
+For each enriched Skill, Equipment item, Weapon, Trait, State, and representative Unit
 occurrence, the browser should make the following questions easy to answer when
 the underlying data supports them:
 
@@ -62,13 +62,20 @@ as Sensor's +6 WIP and Zone of Control restriction remain in the owning rule fac
 interactions should follow the same one-authored-edge model rather than maintaining
 reciprocal facts independently.
 No Cover extends the graph with explicit precedence: it authors `overrides-effects-of` toward Limited Cover, and Limited Cover receives the derived `Overridden by: No Cover` context. This is intentionally distinct from negation because the relationship is about which restriction wins when both apply.
+The recovery network extends the same principle to State pages. Doctor authors
+`cancels-state` toward Unconscious and Stunned; Engineer authors it toward Disconnected,
+IMM-A, IMM-B, Isolated, Stunned, Targeted, and Unconscious. Each affected State page derives
+`Cancelled by` navigation, while VITA/STR requirements and alternative cancellation methods
+remain in the owning rule facts.
 
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation
 when a browser surface exists, and bookkeeping edges such as `variant-of` should
 not be duplicated when the variant presentation already communicates that
 relationship. Rules-only targets may remain contextual text when a standalone
-page would add no value.
+page would add no value. States are an explicit exception where reverse navigation is itself
+player value: the rules-backed States catalog lets affected-state pages expose recovery,
+reveal, and other interactions directly.
 
 **Provenance.** Official source links, publication/version, and page/section
 references should be easy to reach. Provenance is supporting evidence rather

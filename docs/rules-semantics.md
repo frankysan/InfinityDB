@@ -74,9 +74,9 @@ Each State defines its own effects and activation/cancellation rules, and
 multiple States can apply cumulatively.
 
 Static Army/Profile data can identify rules that interact with States, but it
-must not be interpreted as the Trooper's current in-game State. A future Game
-States catalog belongs in the rules/reference layer; actual per-game state would
-belong to a separate session/game model.
+must not be interpreted as the Trooper's current in-game State. The Game States catalog belongs in the rules/reference layer and now exposes reviewed
+State identities for navigation and interaction discovery; actual per-game state still
+belongs to a separate session/game model.
 
 Sources:
 
@@ -573,7 +573,7 @@ player.
 InfinityDB should model this as a relationship from State identities to the
 `Null` Label rather than by duplicating `is_null` rules in consumers. The current
 curated `null` Label is therefore a useful reusable vocabulary entry for the
-planned State catalog.
+State catalog.
 
 Sources:
 
@@ -618,8 +618,8 @@ the affected Trooper to Dodge with a PH-6 MOD, while IMM-B uses Reset with a
 WIP-3 MOD. Both still provide Orders. Impersonation similarly has meaningful
 IMP-1 and IMP-2 levels with different interaction/reveal behavior.
 
-State canonicalization must preserve these distinctions. A future State catalog
-may expose family/group relationships such as `Immobilized` or `Impersonation`,
+State canonicalization must preserve these distinctions. The State catalog may expose
+family/group relationships such as `Immobilized` or `Impersonation`,
 but a normalized family name must never erase the source State/level that
 controls rules behavior.
 
@@ -629,6 +629,27 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Immobilized-B_State>
 - Wiki: <https://infinitythewiki.com/Impersonation_State>
 - PDF: Infinity N5 V5.3, printed pages 164-167
+
+### RS-GSG-STATE-005A — State cancellation is a bidirectional rules relationship
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+Skills such as Doctor and Engineer explicitly cancel named States under their own
+requirements. InfinityDB should author that fact once as a typed `cancels-state` edge from
+the Skill to the State and derive the reverse navigation on the State page. The edge says
+that a cancellation path exists; VITA/STR requirements, Roll outcomes, alternative Reset or
+Dodge cancellation paths, and automatic phase cancellation remain facts of the owning rules
+and must not be flattened into the edge itself.
+
+This is the first interaction family that requires State identities to be directly browsable:
+a player looking at Targeted, Immobilized-B, or Unconscious should be able to discover the
+relevant Engineer/Doctor rule without already knowing which Skill to search for.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Doctor>
+- Wiki: <https://infinitythewiki.com/Engineer>
+- Wiki: <https://infinitythewiki.com/States>
 
 ### RS-GSG-STATE-006 — Unloaded is item-specific runtime state
 

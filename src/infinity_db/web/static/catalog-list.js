@@ -3,6 +3,7 @@ import { initializeDistanceUnitToggle } from "./preferences.js";
 
 const page = document.body.dataset.catalog;
 const title = page === "traits" ? "traits" : page;
+const hasUsage = page !== "states";
 const byId = (id) => document.getElementById(id);
 const elements = {
   count: byId("catalog-count"), results: byId("catalog-results"), loading: byId("catalog-loading"),
@@ -32,7 +33,9 @@ function render() {
   const visible = query ? items.filter((item) => item.searchText.includes(query)) : items;
   elements.count.textContent = page === "traits"
     ? `${visible.length} trait${visible.length === 1 ? "" : "s"}`
-    : `${visible.length} ${title}${visible.length === 1 ? "" : " entries"}`;
+    : page === "states"
+      ? `${visible.length} state${visible.length === 1 ? "" : "s"}`
+      : `${visible.length} ${title}${visible.length === 1 ? "" : " entries"}`;
   if (!visible.length) return show(elements.empty);
   const fragment = document.createDocumentFragment();
   let category;
@@ -52,7 +55,7 @@ function render() {
     const row = document.createElement("tr");
     const name = document.createElement("th");
     name.scope = "row";
-    if (["skills", "equipment", "weapons", "traits"].includes(page)) {
+    if (["skills", "equipment", "weapons", "traits", "states"].includes(page)) {
       const link = document.createElement("a");
       const routeId = item.slug || item.id;
       link.href = `/${page}/${encodeURIComponent(routeId)}`;
@@ -61,12 +64,16 @@ function render() {
     } else {
       name.textContent = item.name;
     }
-    const useCount = document.createElement("td");
-    useCount.textContent = Number(item.use_count || 0).toLocaleString();
     const id = document.createElement("td");
     id.className = "id-column unit-id";
     id.textContent = item.id;
-    row.append(name, useCount, id);
+    if (hasUsage) {
+      const useCount = document.createElement("td");
+      useCount.textContent = Number(item.use_count || 0).toLocaleString();
+      row.append(name, useCount, id);
+    } else {
+      row.append(name, id);
+    }
     fragment.append(row);
   }
   elements.list.replaceChildren(fragment);

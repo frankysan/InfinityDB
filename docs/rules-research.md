@@ -197,7 +197,7 @@ Sources:
 **Scope:** core N5.
 
 The 23 current States are not one uniform mechanic. The audit exposes recurring
-families that may be useful for a future State catalog or thesaurus:
+families that may be useful as the State catalog expands or for a future thesaurus:
 
 - representation/hidden-information States: Camouflaged, Decoy, Hidden
   Deployment, Holoecho, HoloMask, Impersonation;
@@ -207,9 +207,9 @@ families that may be useful for a future State catalog or thesaurus:
   Immobilized-B, Normal, Prone, Stunned, Suppressive Fire, Targeted;
 - item-availability state: Unloaded.
 
-These are research groupings, not source-native State categories. If a future
-catalog exposes them, mark them as InfinityDB classification metadata and keep
-the canonical State identities/rules primary.
+These are research groupings, not source-native State categories. If the State
+catalog exposes such groupings, mark them as InfinityDB classification metadata
+and keep the canonical State identities/rules primary.
 
 Sources:
 

@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 14,
+        "formatVersion": 15,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -884,12 +884,12 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
         for relation in records["skill:peripheral"]["relations"]
         if relation["type"] == "has-subtype"
     } == set(peripheral_types)
-    assert records["skill:doctor"]["relations"] == [
-        {
-            "type": "controller-eligible-for",
-            "recordId": "rule:peripheral-type:servant",
-        }
-    ]
+    assert {
+        (relation["type"], relation["recordId"])
+        for relation in records["skill:doctor"]["relations"]
+    } >= {
+        ("controller-eligible-for", "rule:peripheral-type:servant"),
+    }
 
 
 def test_checked_in_n5_collection_models_cover_precedence() -> None:
@@ -903,3 +903,32 @@ def test_checked_in_n5_collection_models_cover_precedence() -> None:
     assert records["skill:no-cover"]["relations"] == [
         {"type": "overrides-effects-of", "recordId": "skill:limited-cover"}
     ]
+
+
+def test_checked_in_n5_collection_models_state_recovery_relations() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["state:immobilized-a"]["labelIds"] == []
+    assert {
+        relation["recordId"]
+        for relation in records["skill:doctor"]["relations"]
+        if relation["type"] == "cancels-state"
+    } == {
+        "state:unconscious",
+        "state:stunned",
+    }
+    assert {
+        relation["recordId"]
+        for relation in records["skill:engineer"]["relations"]
+        if relation["type"] == "cancels-state"
+    } == {
+        "state:disconnected",
+        "state:immobilized-a",
+        "state:immobilized-b",
+        "state:isolated",
+        "state:stunned",
+        "state:targeted",
+        "state:unconscious",
+    }

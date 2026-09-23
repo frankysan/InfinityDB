@@ -99,17 +99,17 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 5
-    assert report["summary"]["completeCount"] == 2
-    assert report["summary"]["gapCount"] == 3
+    assert report["summary"]["exposedCount"] == 14
+    assert report["summary"]["completeCount"] == 10
+    assert report["summary"]["gapCount"] == 4
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
         "stale_citation_source": 1,
-        "unreviewed_rule": 1,
+        "unreviewed_rule": 2,
     }
-    assert report["summary"]["classifiedGapCount"] == 3
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 3}
-    assert report["summary"]["releaseBlockerCount"] == 3
+    assert report["summary"]["classifiedGapCount"] == 4
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 4}
+    assert report["summary"]["releaseBlockerCount"] == 4
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -141,12 +141,13 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     turret = report["domains"]["weapons"]["items"][0]
     assert turret["familyRuleIds"] == ["weapon:armed-turret"]
     assert turret["gapCodes"] == ["stale_citation_source"]
+    states = {item["name"]: item for item in report["domains"]["states"]["items"]}
+    assert states["Unconscious State"]["gapCodes"] == []
+    assert states["Targeted State"]["gapCodes"] == []
+
     assert report["summary"]["unresolvedRelatedItemLinkCount"] == 0
-    assert report["summary"]["supportingRelationTargetCount"] >= 1
-    assert report["relationCoverage"]["supporting"]
-    assert {
-        item["classification"] for item in report["relationCoverage"]["supporting"]
-    } == {"supporting-identity"}
+    assert report["summary"]["supportingRelationTargetCount"] == 0
+    assert report["relationCoverage"]["supporting"] == []
 
 
 def test_enrichment_coverage_default_details_only_list_gaps(tmp_path: Path) -> None:
@@ -157,6 +158,9 @@ def test_enrichment_coverage_default_details_only_list_gaps(tmp_path: Path) -> N
         "Missing Skill",
     ]
     assert report["domains"]["equipment"]["items"] == []
+    assert [item["name"] for item in report["domains"]["states"]["items"]] == [
+        "Camouflaged State"
+    ]
     assert [item["name"] for item in report["domains"]["weapons"]["items"]] == [
         "Armed Turret"
     ]
@@ -169,7 +173,7 @@ def test_enrichment_coverage_cli_writes_report(tmp_path: Path, capsys) -> None:
 
     assert main([str(database), "--rules", str(rules), "--output", str(output)]) == 0
     payload = json.loads(output.read_text(encoding="utf-8"))
-    assert payload["formatVersion"] == 2
+    assert payload["formatVersion"] == 3
     assert payload["classificationPolicy"]["sha256"]
     assert "Enrichment coverage audit written" in capsys.readouterr().out
 
@@ -218,9 +222,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 2,
+        "release-blocker": 3,
     }
-    assert report["summary"]["releaseBlockerCount"] == 2
+    assert report["summary"]["releaseBlockerCount"] == 3
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:

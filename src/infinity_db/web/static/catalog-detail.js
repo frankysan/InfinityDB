@@ -28,7 +28,7 @@ function displayWikiUrl(url) {
 }
 
 function withVisibleUnits(item, ids) {
-  return { ...item, variants: item.variants.map((variant) => ({
+  return { ...item, variants: (item.variants || []).map((variant) => ({
     ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
   })).filter((variant) => variant.units.length) };
 }
@@ -249,7 +249,7 @@ function weaponVariants(variants) {
 }
 
 function usageSections(item) {
-  return [...item.variants]
+  return [...(item.variants || [])]
     .sort((a, b) => label(item, a).localeCompare(label(item, b), undefined, { numeric: true }))
     .map((variant) => {
       const section = document.createElement("details");
@@ -358,6 +358,7 @@ window.addEventListener("distanceunitchange", () => {
 getCatalogItem(catalog, itemId).then((item) => {
   currentItem = item;
   render(item);
+  if (catalog === "states") return null;
   return visibleUnitIds().then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
   name.firstChild.textContent = "Item unavailable";

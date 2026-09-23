@@ -160,13 +160,13 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v7 contract
+### Current v15 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `7`
+- `formatVersion`: `15`
 - `collection`: collection identity/scope/authority
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
@@ -200,7 +200,7 @@ ignored MODs separately from effects that become ineffective. Format v12 adds
 Skill's Roll or constrain one specific use without implying that the whole target rule
 is negated. Format v13 adds `applies-effects-to` and `imposes-modifiers-on` so rules such
 as Reflective and Albedo can expose who they affect without collapsing those different
-mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply.
+mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state.
 
 Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 `{"orderType": "irregular"}` and canonical IDs `training:regular` /
@@ -218,7 +218,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 13,
+    "formatVersion": 15,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -320,9 +320,9 @@ exact-source Attribute replacements are kept on `sourceVariant`, not as generic
 occurrence parameters. Other MOD/value forms remain opaque until their semantics are
 reviewed.
 
-Skill records always carry a `labelIds` array, but it may be empty when the reviewed
-rule does not assign any maintained rules Label. States still require at least one
-Label. Do not invent a Label merely to satisfy serialization.
+Skill and State records always carry a `labelIds` array, but it may be empty when the reviewed
+rule does not assign any maintained rules Label. Do not invent a Label merely to satisfy
+serialization.
 
 Peripheral types remain ordinary `rule` records in this same collection. A Peripheral
 type uses `facts.category = "peripheral-type"` and a validated
@@ -374,7 +374,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v14 are no longer accepted by the loader and must
+Curated-rule files older than format v15 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

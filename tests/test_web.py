@@ -635,6 +635,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'aria-label="Project navigation"' in body
     assert b'href="/units"' in body
     assert b'href="/traits"' in body
+    assert b'href="/states"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
     assert f'data-app-version="{__version__}"'.encode() in body
@@ -1492,9 +1493,52 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b'from "./api.js"' in body
     assert b"getCatalogItems(page)" in body
     assert b"fetch(" not in body
-    assert b'["skills", "equipment", "weapons", "traits"].includes(page)' in body
+    assert b'["skills", "equipment", "weapons", "traits", "states"].includes(page)' in body
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
+
+
+def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Path) -> None:
+    status, headers, body = request(app, "/states")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"States catalog" in body
+    assert b'href="/states" aria-current="page"' in body
+    assert b'<th scope="col">Uses</th>' not in body
+
+    status, _, body = request(app, "/api/states")
+    assert status == 200
+    assert json.loads(body) == {"items": []}
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/states")
+    assert status == 200
+    states = {item["id"]: item for item in json.loads(body)["items"]}
+    assert states["unconscious"]["name"] == "Unconscious State"
+    assert states["targeted"]["name"] == "Targeted State"
+
+    status, headers, body = request(rules_app, "/states/unconscious")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"catalog-detail.js" in body
+
+    status, _, body = request(rules_app, "/api/states/unconscious")
+    assert status == 200
+    state = json.loads(body)
+    assert state["slug"] == "unconscious"
+    assert {
+        relation["record"]["name"]
+        for relation in state["rules"][0]["display_relations"]
+        if relation["type"] == "cancels-state"
+    } == {"Doctor", "Engineer"}
+
+    status, _, body = request(rules_app, "/api/states/not-a-state")
+    assert status == 404
+    assert json.loads(body)["error"] == "State not found"
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
@@ -1929,6 +1973,8 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'inbound: "MODs imposed by"' in body
     assert b'"negates-effects-of": { outbound: "Negates", inbound: "Negated by" }' in body
     assert b'"overrides-effects-of": { outbound: "Overrides", inbound: "Overridden by" }' in body
+    assert b'"cancels-state": { outbound: "Cancels state", inbound: "Cancelled by" }' in body
+    assert b'return `/states/${encodeURIComponent(record.id.slice(prefix.length))}`;' in body
     assert b'outbound: "Modifies rolls for"' in body
     assert b'inbound: "Rolls modified by"' in body
     assert (

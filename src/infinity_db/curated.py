@@ -9,7 +9,7 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 14
+CURATED_FORMAT_VERSION = 15
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -38,6 +38,7 @@ RULE_RELATION_TYPES = frozenset(
     {
         "applies-effects-to",
         "controller-eligible-for",
+        "cancels-state",
         "enters-state",
         "has-subtype",
         "ignores-modifiers-from",
@@ -741,8 +742,6 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             record_labels = record.get("labelIds")
             if not isinstance(record_labels, list):
                 raise ValueError(f"{context}: '{record['kind']}' requires a 'labelIds' array")
-            if record["kind"] == "state" and not record_labels:
-                raise ValueError(f"{context}: 'state' requires non-empty 'labelIds'")
             if any(label_id not in label_ids for label_id in record_labels):
                 raise ValueError(f"{context}: 'labelIds' must reference labels")
         if "armyLinks" in record and not isinstance(record["armyLinks"], list):

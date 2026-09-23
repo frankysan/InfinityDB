@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add a first-class rules-backed States catalog and bidirectional recovery graph: Doctor
+  and Engineer now author typed State-cancellation relationships, while affected State
+  pages expose derived `Cancelled by` navigation. The enrichment coverage audit now treats
+  States as a normal audited player-facing surface.
 - Expand the bidirectional gameplay-interaction graph with Sensor as the first multi-edge
   hub: Sensor now links to Mimetism, Discover, Camouflage, Camouflaged State, and Hidden
   Deployment State, while affected pages receive derived reverse relationships. Add
@@ -17,7 +21,7 @@ Entries describe meaningful release outcomes rather than detailed implementation
   Sense and Combat Instinct negate Stealth; and Combat Instinct ignores Surprise Attack
   MODs. Reverse relationships are derived automatically rather than maintained twice.
 - Add a deterministic rules-enrichment coverage audit across the currently exposed
-  Skill, Equipment, Weapon, and Trait catalogs, reporting missing definitions,
+  Skill, Equipment, Weapon, Trait, and State catalogs, reporting missing definitions,
   review/source freshness gaps, ambiguous family/exact-source mappings, and unresolved
   related-item targets against a pinned `infinity.db` + `rules.db` pair. A maintained
   fail-closed classification policy now labels every detected gap as release-blocking or as

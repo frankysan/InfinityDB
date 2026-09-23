@@ -555,7 +555,7 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v12 rules contract includes collection/source metadata,
+The current curated-v15 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, exact-source variant semantics, and citations.
@@ -1245,7 +1245,7 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 typed exact-source semantics (2026-09-23)
 
-- Curated rules format v14 and `rules.db` schema/compatibility 7 require every
+- Curated rules format v15 and `rules.db` schema/compatibility 7 require every
   `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
   Supported kinds are numeric `level`, explicit `named`, and numeric
   `attribute-replacement`; family records may not declare source-variant metadata.
@@ -1275,7 +1275,7 @@ compatibility references remain unambiguous JSON integers.
 ## 0.7.0 enrichment coverage audit (2026-09-23)
 
 - `tools/audit_enrichment_coverage.py` is the maintained gate for measuring how much of
-  the currently exposed Skill, Equipment, Weapon, and Trait application surface is
+  the currently exposed Skill, Equipment, Weapon, Trait, and State application surface is
   actually enriched by the selected `rules.db`. It consumes a specific generated
   `infinity.db` plus `rules.db`; it does not infer coverage from curated JSON alone.
 - The audit follows the same composition paths as the API: `SkillCatalog` for Skills,
@@ -1286,10 +1286,11 @@ compatibility references remain unambiguous JSON integers.
   missing citations, citation sources explicitly tied to an older N5 revision than
   their current collection, ambiguous family or exact-source routing, unresolved
   surfaced rule IDs, and related catalog/trait targets that do not resolve to an
-  exposed identity. Rules-only State/Training/etc. relation targets are counted as
-  supporting identities rather than false UI gaps.
+  exposed identity. Rules-only Training/etc. relation targets are counted as supporting identities rather
+  than false UI gaps. States are first-class audited surfaces through `StateCatalog`.
 - Default JSON detail lists include only catalog items with gaps;
-  `--include-complete` emits the full inventory. Report format v2 also consumes the maintained
+  `--include-complete` emits the full inventory. Report format v3 includes the rules-backed
+  States catalog and also consumes the maintained
   `data/curated/enrichment-coverage/classifications.json` release-scope policy. Every known
   gap code must have an explicit classification and reason; item/relation overrides may mark
   reviewed exceptions as `intentional-omission`, `supporting-identity`, or
@@ -1314,5 +1315,5 @@ compatibility references remain unambiguous JSON integers.
   Marksmanship and Multispectral Visor. Natural Born Warrior then reuses
   `ignores-modifiers-from` toward Martial Arts and Surprise Attack, with reverse navigation
   derived on both affected Skills while generic signed CC/weapon MOD semantics remain
-  intentionally unmodeled. Curated v14 adds `overrides-effects-of`: No Cover takes precedence over Limited Cover when both restrictions apply, with the inverse relation derived automatically. Keep this separate from 0.8 structural application
+  intentionally unmodeled. Curated v14 adds `overrides-effects-of`: No Cover takes precedence over Limited Cover when both restrictions apply, with the inverse relation derived automatically. Curated v15 adds `cancels-state`: Doctor and Engineer author cancellation edges toward reviewed States, and the new rules-backed State pages expose the derived reverse navigation. Keep this separate from 0.8 structural application
   relationships.

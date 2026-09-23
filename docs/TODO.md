@@ -146,6 +146,9 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Represent reviewed related-item relationships explicitly rather than
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.
+  - [x] Promote reviewed Game States to a lightweight rules-backed catalog and model
+    Doctor/Engineer recovery with authored `cancels-state` edges, so Unconscious, Stunned,
+    Targeted, IMM-A/B, Isolated, and Disconnected expose reverse cancellation navigation.
   - [x] Keep semantic identity, source publication provenance, and applicability
     scope separate so core, annex, FAQ, season, or scenario material can enrich the
     same canonical item without duplication or collection-load-order semantics.
@@ -158,10 +161,12 @@ requiring a new top-level browser surface in 0.7.0.
     MOD/value forms stay opaque until their typed semantics are reviewed.
 
 - [ ] **Systematically enrich the data currently available through InfinityDB.**
-  - [ ] Reconcile existing Skills, Equipment, Weapons, Traits, and relevant
-    Unit/Profile/loadout concepts against the completed rules audit; include
-    supporting Ammunition, State, Hacking, Fireteam, glossary, or scenario
-    identities only where required to explain or relate those existing items.
+  - [ ] Reconcile existing Skills, Equipment, Weapons, Traits, States, and relevant
+    Unit/Profile/loadout concepts against the completed rules audit; include supporting
+    Ammunition, Hacking, Fireteam, glossary, or scenario identities where required to
+    explain or relate those existing items. States are now a first-class rules-backed
+    browser surface because bidirectional interaction discovery requires useful navigation
+    from the affected State as well as from the cancelling/revealing Skill.
   - [ ] Add cited summaries, rules links, user-facing labels, related catalog
     items, relevant state/ammunition/trait relationships, and Unit/profile/loadout
     usage links where the audited evidence supports them.

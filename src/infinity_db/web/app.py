@@ -25,6 +25,7 @@ from infinity_db.database import ArmySelectionError, Database
 from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 from infinity_db.unit_slugs import (
     attach_public_unit_slug,
@@ -76,6 +77,8 @@ EQUIPMENT_API_PATH = re.compile(
 )
 WEAPON_PAGE_PATH = re.compile(rf"/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 WEAPON_API_PATH = re.compile(rf"/api/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+STATE_PAGE_PATH = re.compile(rf"/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+STATE_API_PATH = re.compile(rf"/api/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
@@ -166,6 +169,10 @@ def _page(
         .replace(
             "{{TRAITS_CURRENT}}",
             ' aria-current="page"' if active_page == "traits" else "",
+        )
+        .replace(
+            "{{STATES_CURRENT}}",
+            ' aria-current="page"' if active_page == "states" else "",
         )
         .replace(
             "{{SKILL_EXTRAS_CURRENT}}",
@@ -325,6 +332,7 @@ class Application:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
         self.trait_catalog = TraitCatalog(self.database, self.rules_database)
+        self.state_catalog = StateCatalog(self.rules_database)
         self.skill_catalog = SkillCatalog(self.database, self.rules_database)
         self.catalog_rules = CatalogRules(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
@@ -445,7 +453,7 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
                 catalog_tag="Reference data",
             )
-        elif path in {"/skills", "/equipment", "/weapons", "/traits"}:
+        elif path in {"/skills", "/equipment", "/weapons", "/traits", "/states"}:
             content_type = "text/html; charset=utf-8"
             catalog = path.removeprefix("/")
             body = _page(
@@ -508,6 +516,20 @@ class Application:
                 ),
                 catalog_tag="Reference data",
             )
+        elif STATE_PAGE_PATH.fullmatch(path):
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "states-detail.html",
+                active_page="states",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(
+                    ("Database", "/"),
+                    ("States", "/states"),
+                    ("Details", None),
+                ),
+                catalog_tag="Rules reference",
+            )
         elif path == "/about":
             content_type = "text/html; charset=utf-8"
             body = _page(
@@ -556,6 +578,14 @@ class Application:
                 LOGGER.exception("Could not read traits")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The traits are unavailable. Please try again."}
+        elif path == "/api/states":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = {"items": self.state_catalog.list_states()}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read states")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The states are unavailable. Please try again."}
         elif match := SKILL_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
@@ -633,6 +663,17 @@ class Application:
                 LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The trait is unavailable. Please try again."}
+        elif match := STATE_API_PATH.fullmatch(path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = self.state_catalog.get_state(match.group("identifier"))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "State not found"}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read state")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The state is unavailable. Please try again."}
         elif path == "/api/armies":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:

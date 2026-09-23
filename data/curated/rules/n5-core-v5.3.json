@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 14,
+    "formatVersion": 15,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -405,6 +405,69 @@
             "title": "Infinity Wiki — Limited Cover revision 3970",
             "version": "N5.3 / oldid 3970",
             "url": "https://infinitythewiki.com/index.php?title=Limited_Cover&oldid=3970",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-unconscious-state-oldid-3982",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Unconscious State revision 3982",
+            "version": "N5.3 / oldid 3982",
+            "url": "https://infinitythewiki.com/index.php?title=Unconscious_State&oldid=3982",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-disconnected-state-oldid-3930",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Disconnected State revision 3930",
+            "version": "N5.3 / oldid 3930",
+            "url": "https://infinitythewiki.com/index.php?title=Disconnected_State&oldid=3930",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-immobilized-a-state-oldid-4104",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Immobilized-A State revision 4104",
+            "version": "N5.3 / oldid 4104",
+            "url": "https://infinitythewiki.com/index.php?title=Immobilized-A_State&oldid=4104",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-immobilized-b-state-oldid-4103",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Immobilized-B State revision 4103",
+            "version": "N5.3 / oldid 4103",
+            "url": "https://infinitythewiki.com/index.php?title=Immobilized-B_State&oldid=4103",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-isolated-state-oldid-4095",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Isolated State revision 4095",
+            "version": "N5.3 / oldid 4095",
+            "url": "https://infinitythewiki.com/index.php?title=Isolated_State&oldid=4095",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-stunned-state-oldid-4102",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Stunned State revision 4102",
+            "version": "N5.3 / oldid 4102",
+            "url": "https://infinitythewiki.com/index.php?title=Stunned_State&oldid=4102",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-targeted-state-oldid-3670",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Targeted State revision 3670",
+            "version": "N5.3 / oldid 3670",
+            "url": "https://infinitythewiki.com/index.php?title=Targeted_State&oldid=3670",
             "authority": "secondary",
             "retrievedDate": "2026-09-23"
         }
@@ -3932,7 +3995,7 @@
             "id": "skill:doctor",
             "kind": "skill",
             "name": "Doctor",
-            "summary": "A Short Special Skill associated with VITA recovery and Peripheral (Servant) controller eligibility.",
+            "summary": "A Short Special Skill that restores VITA-based allies and can cancel applicable states.",
             "composition": {
                 "role": "definition"
             },
@@ -3968,6 +4031,14 @@
                 {
                     "type": "controller-eligible-for",
                     "recordId": "rule:peripheral-type:servant"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:unconscious"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:stunned"
                 }
             ],
             "variantSemantics": {
@@ -3978,7 +4049,7 @@
             "id": "skill:engineer",
             "kind": "skill",
             "name": "Engineer",
-            "summary": "A Short Special Skill associated with STR recovery and Peripheral (Servant) controller eligibility.",
+            "summary": "A Short Special Skill that repairs STR-based allies and cancels applicable states.",
             "composition": {
                 "role": "definition"
             },
@@ -4014,6 +4085,34 @@
                 {
                     "type": "controller-eligible-for",
                     "recordId": "rule:peripheral-type:servant"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:disconnected"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:immobilized-a"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:immobilized-b"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:isolated"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:stunned"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:targeted"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:unconscious"
                 }
             ],
             "variantSemantics": {
@@ -6246,6 +6345,287 @@
             ],
             "variantSemantics": {
                 "inheritance": "family"
+            }
+        },
+        {
+            "id": "state:unconscious",
+            "kind": "state",
+            "name": "Unconscious State",
+            "aliases": [
+                "Unconscious"
+            ],
+            "summary": "A Null State entered when a trooper has received as many Wounds as its VITA or STR Attribute.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The trooper cannot declare Orders or AROs and does not contribute an Order during the Tactical Phase.",
+                    "Automatic Special Skills and Automatic Equipment have no effect while the state is active.",
+                    "Removing a Wound so the trooper has fewer Wounds than its VITA or STR value cancels the state."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [
+                "null"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-unconscious-state-oldid-3982",
+                    "heading": "Unconscious State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "state:disconnected",
+            "kind": "state",
+            "name": "Disconnected State",
+            "aliases": [
+                "Disconnected"
+            ],
+            "summary": "A Null State in which a Peripheral cannot activate while separated from or disabled through its Controller relationship.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The Peripheral cannot be activated or declare Orders or AROs.",
+                    "Automatic Special Skills and Automatic Equipment have no effect except for the Peripheral Special Skill.",
+                    "Engineer can cancel the state when it was caused directly by an Attack, scenery, or a Scenario Special Rule."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [
+                "null"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-disconnected-state-oldid-3930",
+                    "heading": "Disconnected State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "state:immobilized-a",
+            "kind": "state",
+            "name": "Immobilized-A State",
+            "aliases": [
+                "Immobilized-A",
+                "IMM-A"
+            ],
+            "summary": "A restrictive State that normally limits the trooper to Dodge at PH -6.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The trooper cannot declare Skills or AROs except Dodge, applying a -6 PH MOD.",
+                    "A successful qualifying Dodge or an Engineer WIP Roll can cancel the state."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-immobilized-a-state-oldid-4104",
+                    "heading": "Immobilized-A State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "state:immobilized-b",
+            "kind": "state",
+            "name": "Immobilized-B State",
+            "aliases": [
+                "Immobilized-B",
+                "IMM-B"
+            ],
+            "summary": "A restrictive State that normally limits the trooper to Reset at WIP -3.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The trooper cannot declare Skills, Attacks, or AROs except Reset, applying a -3 WIP MOD.",
+                    "A successful qualifying Reset or an Engineer WIP Roll can cancel the state."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-immobilized-b-state-oldid-4103",
+                    "heading": "Immobilized-B State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "state:isolated",
+            "kind": "state",
+            "name": "Isolated State",
+            "aliases": [
+                "Isolated"
+            ],
+            "summary": "A State that cuts a trooper off from its Order Pool and disables its Comms-related capabilities.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The trooper cannot receive Orders from its Order Pool and becomes Irregular in following Active Turns while still Isolated.",
+                    "Comms Attack and Comms Equipment capabilities, including Hacking Programs, are disabled.",
+                    "Reset is made at WIP -9; a successful qualifying Reset or Engineer WIP Roll can cancel the state."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "An Isolated trooper cannot be part of a Fireteam or take part in a Coordinated Order."
+                ]
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-isolated-state-oldid-4095",
+                    "heading": "Isolated State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "state:stunned",
+            "kind": "state",
+            "name": "Stunned State",
+            "aliases": [
+                "Stunned"
+            ],
+            "summary": "A temporary State that prevents Attacks and applies a -3 MOD to most Rolls.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The trooper cannot declare Attacks and applies a -3 MOD to Rolls other than Saving Rolls.",
+                    "Doctor can cancel the state for VITA targets and Engineer can cancel it for STR targets.",
+                    "The state also cancels automatically at the start of the States Phase of the Player Turn in which it was caused."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-stunned-state-oldid-4102",
+                    "heading": "Stunned State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "state:targeted",
+            "kind": "state",
+            "name": "Targeted State",
+            "aliases": [
+                "Targeted"
+            ],
+            "summary": "A State that makes the trooper easier to attack or Discover and interferes with Reset, Cautious Movement, and Stealth.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "BS Attack, Comms Attack, and Discover against the trooper gain a +3 MOD to the Attribute used.",
+                    "The trooper applies a -3 WIP MOD to Reset.",
+                    "A successful qualifying Reset or an Engineer WIP Roll can cancel the state."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "The trooper cannot declare Cautious Movement or use the Stealth Special Skill."
+                ]
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-targeted-state-oldid-3670",
+                    "heading": "Targeted State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
             }
         }
     ]

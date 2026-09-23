@@ -16,11 +16,12 @@ from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
 REPORT_FORMAT = "InfinityDB rules enrichment coverage audit"
-REPORT_FORMAT_VERSION = 2
-CATALOGS = ("skills", "equipment", "weapons", "traits")
+REPORT_FORMAT_VERSION = 3
+CATALOGS = ("skills", "equipment", "weapons", "traits", "states")
 CLASSIFICATION_FORMAT = "InfinityDB enrichment coverage classifications"
 CLASSIFICATION_FORMAT_VERSION = 1
 CLASSIFICATIONS = frozenset(
@@ -43,7 +44,7 @@ DEFAULT_CLASSIFICATION_PATH = (
     PROJECT_ROOT / "data" / "curated" / "enrichment-coverage" / "classifications.json"
 )
 ENTITY_BY_CATALOG = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}
-CATALOG_BY_KIND = {value: key for key, value in ENTITY_BY_CATALOG.items()}
+CATALOG_BY_KIND = {**{value: key for key, value in ENTITY_BY_CATALOG.items()}, "state": "states"}
 
 
 class EnrichmentCoverageAuditError(ValueError):
@@ -382,6 +383,7 @@ def audit_coverage(
         skill_catalog = SkillCatalog(database, rules)
         catalog_rules = CatalogRules(rules)
         trait_catalog = TraitCatalog(database, rules)
+        state_catalog = StateCatalog(rules)
 
         exposed_rule_ids: set[str] = set()
         exposed_trait_rule_ids: set[str] = set()
@@ -391,6 +393,8 @@ def audit_coverage(
             items: list[dict[str, Any]] = []
             if catalog == "traits":
                 sources = trait_catalog.list_traits()
+            elif catalog == "states":
+                sources = state_catalog.list_states()
             else:
                 sources = database.list_catalog_items(catalog)
 
@@ -408,12 +412,17 @@ def audit_coverage(
                     slug = database.application_slug(catalog, int(source["id"]))
                     source_ids = [int(value) for value in source.get("source_ids", [])]
                     family_ids, exact_ids = _surface_rule_ids(detail)
-                else:
+                elif catalog == "traits":
                     detail = trait_catalog.get_trait(str(source["id"])) or {}
                     slug = str(source["id"])
                     source_ids = []
                     family_ids, exact_ids = _surface_rule_ids(detail)
                     exposed_trait_rule_ids.update(family_ids)
+                else:
+                    detail = state_catalog.get_state(str(source["id"])) or {}
+                    slug = str(source["id"])
+                    source_ids = []
+                    family_ids, exact_ids = _surface_rule_ids(detail)
 
                 exposed_rule_ids.update(family_ids)
                 exposed_rule_ids.update(exact_ids)
@@ -429,7 +438,7 @@ def audit_coverage(
                     gap_codes.update(_record_gap_codes(record))
 
                 mapping: dict[str, Any] = {}
-                if catalog != "traits":
+                if catalog not in {"traits", "states"}:
                     entity = ENTITY_BY_CATALOG[catalog]
                     family_candidates: set[str] = set()
                     exact_candidates: dict[int, list[str]] = {}
@@ -543,18 +552,22 @@ def audit_coverage(
                     else:
                         supporting_targets.add(target_id)
                     continue
-                resolved = False
-                for link in target.get("links", []):
-                    if link["entity"] != target_kind:
-                        continue
-                    ref: int | str = (
-                        int(link["id"])
-                        if str(link["id"]).isdecimal()
-                        else str(link["id"])
-                    )
-                    if database.application_catalog_id(target_catalog, ref) is not None:
-                        resolved = True
-                        break
+                if target_catalog == "states":
+                    state_slug = str(target_id).removeprefix("state:")
+                    resolved = state_catalog.get_state(state_slug) is not None
+                else:
+                    resolved = False
+                    for link in target.get("links", []):
+                        if link["entity"] != target_kind:
+                            continue
+                        ref: int | str = (
+                            int(link["id"])
+                            if str(link["id"]).isdecimal()
+                            else str(link["id"])
+                        )
+                        if database.application_catalog_id(target_catalog, ref) is not None:
+                            resolved = True
+                            break
                 if not resolved:
                     relation_gaps.append(
                         {
