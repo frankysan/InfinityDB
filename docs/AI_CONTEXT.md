@@ -1245,7 +1245,7 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 typed exact-source semantics (2026-09-23)
 
-- Curated rules format v12 and `rules.db` schema/compatibility 7 require every
+- Curated rules format v13 and `rules.db` schema/compatibility 7 require every
   `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
   Supported kinds are numeric `level`, explicit `named`, and numeric
   `attribute-replacement`; family records may not declare source-variant metadata.
@@ -1309,5 +1309,7 @@ compatibility references remain unambiguous JSON integers.
   Instinct ignores Surprise Attack MODs. Curated v12 adds `modifies-rolls-for` and
   `restricts-use-of`; Sensor uses them together with `reveals-state` and
   `ignores-modifiers-from` so its interactions are navigable from Discover, Camouflage,
-  Camouflaged State, Hidden Deployment State, and Mimetism. Keep this separate from 0.8
-  structural application relationships.
+  Camouflaged State, Hidden Deployment State, and Mimetism. Curated v13 adds
+  `applies-effects-to` and `imposes-modifiers-on`; Reflective and Albedo use them toward
+  Marksmanship and Multispectral Visor. Keep this separate from 0.8 structural application
+  relationships.

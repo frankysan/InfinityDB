@@ -39,6 +39,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Expanded the 0.7.0 bidirectional interaction graph with reviewed
+  Marksmanship/Multispectral Visor counter relationships from Albedo and Reflective.
+
 - Surface reviewed rules relationships with resolved endpoint metadata and
   direction-aware player-facing labels, preserving one-way curated authorship while
   using derived reverse navigation.

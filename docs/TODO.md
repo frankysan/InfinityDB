@@ -216,8 +216,10 @@ requiring a new top-level browser surface in 0.7.0.
     navigation derived on Stealth and Surprise Attack. The third production cluster makes
     Sensor a multi-edge hub: it ignores Mimetism MODs, modifies Discover rolls, restricts
     Camouflage use, and reveals Camouflaged/Hidden Deployment States, with all reverse
-    relationships derived automatically. Continue translating further semantic edge types
-    into direction-aware player language and suppress
+    relationships derived automatically. The fourth production cluster links Albedo and
+    Reflective to both Marksmanship and Multispectral Visor, distinguishing imposed MODs
+    from effects that explicitly extend to those users. Continue translating further
+    semantic edge types into direction-aware player language and suppress
     implementation-only relationships such as family bookkeeping when the existing
     variant UI already communicates them. Systematic interaction coverage remains open
     until the rules audit identifies and curates the other gameplay edges relevant to

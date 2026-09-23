@@ -1157,6 +1157,31 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment&oldid=3084>
 - Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment_State&oldid=3835>
 
+### RS-SE-MARKSMANSHIP-001 — Marksmanship and MSV have explicit counter-interactions
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Marksmanship ignores negative BS MODs from Partial Cover and Nanoscreen when used with
+a BS Attack. The current Marksmanship and Multispectral Visor rules also explicitly call
+out the same counter-elements: Albedo, Reflective effects, and White Noise Zones. Within
+the 0.7.0 catalog scope, Albedo and Reflective are directly representable as Equipment/
+Trait relationships; White Noise remains part of the planned post-0.7.0 Hacking Program
+expansion rather than being modeled prematurely as a catalog item.
+
+InfinityDB therefore authors `imposes-modifiers-on` from Albedo to Marksmanship and
+Multispectral Visor because Albedo applies its listed negative Attribute MOD when those
+users make the specified attacks or Discover attempts against the bearer. Reflective
+authors `applies-effects-to` toward the same two endpoints because the Trait explicitly
+extends the owning item's effects to them. `rules.db` derives the inverse navigation so
+Marksmanship and MSV identify both counters without maintaining reciprocal curated rows.
+Exact conditions and MOD values remain in the owning rule facts.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Marksmanship&oldid=3812>
+- Wiki: <https://infinitythewiki.com/index.php?title=Albedo&oldid=3163>
+- Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110>
+
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
 **Classification:** source-native with a presentation-encoding consequence.

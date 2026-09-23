@@ -279,7 +279,7 @@ Skill-extra distance semantics are split according to source authority. Army
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v12 makes applicability, review state, contribution role, typed
+Curated rules format v13 makes applicability, review state, contribution role, typed
 related-item edges, explicit catalog-variant inheritance, typed exact-source variants, and
 cross-domain declaration categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
@@ -311,8 +311,11 @@ against Surprise Attack and Stealth, while Sixth Sense independently negates Ste
 Format v12 adds `modifies-rolls-for` and `restricts-use-of`; Sensor uses those alongside
 existing `reveals-state` and `ignores-modifiers-from` edges so Discover, Camouflage,
 Camouflaged State, Hidden Deployment State, and Mimetism all expose the reverse
-interaction automatically. This projection is the foundation for further 0.7.0 cross-rule gameplay interactions,
-while 0.8.x remains focused on structural application relationships such as Fireteams,
+interaction automatically. Format v13 adds `applies-effects-to` and
+`imposes-modifiers-on`; Reflective and Albedo use those edges toward Marksmanship and
+Multispectral Visor so both affected surfaces receive the reverse interaction. This
+projection is the foundation for further 0.7.0 cross-rule gameplay interactions, while
+0.8.x remains focused on structural application relationships such as Fireteams,
 includes, and selection dependencies.
 `Super-Jump` and `Forward Deployment` currently use
 `variantSemantics.occurrenceParameters` to state how a positive distance sign should be
@@ -1139,7 +1142,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v12 must be migrated before ingestion.
+Curated-rule files older than format v13 must be migrated before ingestion.
 
 ## HTTP API
 

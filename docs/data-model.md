@@ -2552,7 +2552,7 @@ display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
 The rules schema stores collections, sources, vocabulary definitions, record
-contributions, citations, Army links, and typed record relations. Curated format v12
+contributions, citations, Army links, and typed record relations. Curated format v13
 requires every record contribution to carry an explicit applicability scope (`game`
 plus one or more `seasons`), review state/date, and composition role. Current semantic
 composition is fail-closed: exactly one `definition` contribution must exist for each
@@ -2586,7 +2586,10 @@ by another rule and `negates-effects-of` when another rule becomes ineffective a
 the source endpoint. Format v12 adds `modifies-rolls-for` for a rule that changes how
 another rule's Roll is resolved and `restricts-use-of` for a rule that constrains a
 specific use of another rule without claiming full negation. Sensor is the first record
-to combine those edge types with existing state/reduction semantics.
+to combine those edge types with existing state/reduction semantics. Format v13 adds
+`applies-effects-to` when another rule's effects explicitly extend to the target and
+`imposes-modifiers-on` when the source rule applies MODs to the target rule's user;
+Reflective and Albedo use those distinct semantics toward Marksmanship and MSV.
 The edge describes the relationship itself; conditional details remain in the owning rule
 facts rather than being duplicated onto the reverse edge.
 

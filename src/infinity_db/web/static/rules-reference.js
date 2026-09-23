@@ -32,12 +32,17 @@ function applicabilityText(rule) {
 }
 
 const relationLabels = {
+  "applies-effects-to": { outbound: "Effects apply to", inbound: "Affected by" },
   "controller-eligible-for": { outbound: "Can control", inbound: "Can be controlled by" },
   "enters-state": { outbound: "Enters state", inbound: "Entered by" },
   "has-subtype": { outbound: "Includes subtype", inbound: "Subtype of" },
   "ignores-modifiers-from": {
     outbound: "Ignores MODs from",
     inbound: "MODs ignored by",
+  },
+  "imposes-modifiers-on": {
+    outbound: "Imposes MODs on",
+    inbound: "MODs imposed by",
   },
   "negates-effects-of": { outbound: "Negates", inbound: "Negated by" },
   "modifies-rolls-for": {

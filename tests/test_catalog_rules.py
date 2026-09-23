@@ -54,20 +54,14 @@ def test_catalog_rules_surface_msv_mimetism_interaction(tmp_path: Path) -> None:
     result = catalog.enrich_catalog_item("equipment", item)
 
     rule = next(rule for rule in result["rules"] if rule["id"] == "equipment:multispectral-visor")
-    assert rule["display_relations"] == [
-        {
-            "type": "reduces-modifiers-from",
-            "record_id": "skill:mimetism",
-            "collection_id": "n5-core-v5.3",
-            "direction": "outbound",
-            "record": {
-                "id": "skill:mimetism",
-                "kind": "skill",
-                "name": "Mimetism",
-                "army_links": [{"entity": "skill", "id": "mimetism"}],
-            },
-        }
-    ]
+    assert (
+        "reduces-modifiers-from",
+        "outbound",
+        "Mimetism",
+    ) in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in rule["display_relations"]
+    }
 
 def test_catalog_rules_leave_army_item_raw_without_rules_database() -> None:
     item = {"id": 226, "name": "Armed Turret", "profiles": []}

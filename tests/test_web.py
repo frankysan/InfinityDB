@@ -1924,6 +1924,9 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'inbound: "MODs reduced by"' in body
     assert b'outbound: "Ignores MODs from"' in body
     assert b'inbound: "MODs ignored by"' in body
+    assert b'"applies-effects-to": { outbound: "Effects apply to", inbound: "Affected by" }' in body
+    assert b'outbound: "Imposes MODs on"' in body
+    assert b'inbound: "MODs imposed by"' in body
     assert b'"negates-effects-of": { outbound: "Negates", inbound: "Negated by" }' in body
     assert b'outbound: "Modifies rolls for"' in body
     assert b'inbound: "Rolls modified by"' in body

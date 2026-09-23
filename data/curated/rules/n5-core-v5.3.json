@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 12,
+    "formatVersion": 13,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -360,6 +360,24 @@
             "title": "Infinity Wiki — Hidden Deployment State revision 3835",
             "version": "N5.3 / oldid 3835",
             "url": "https://infinitythewiki.com/index.php?title=Hidden_Deployment_State&oldid=3835",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-marksmanship-oldid-3812",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Marksmanship revision 3812",
+            "version": "N5.3 / oldid 3812",
+            "url": "https://infinitythewiki.com/index.php?title=Marksmanship&oldid=3812",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-albedo-oldid-3163",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Albedo revision 3163",
+            "version": "N5.3 / oldid 3163",
+            "url": "https://infinitythewiki.com/index.php?title=Albedo&oldid=3163",
             "authority": "secondary",
             "retrievedDate": "2026-09-23"
         }
@@ -1326,7 +1344,17 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "equipment:multispectral-visor"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:marksmanship"
+                }
+            ]
         },
         {
             "id": "trait:silent-x",
@@ -5930,6 +5958,107 @@
             "variantSemantics": {
                 "inheritance": "family"
             }
+        },
+        {
+            "id": "skill:marksmanship",
+            "kind": "skill",
+            "name": "Marksmanship",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "An Automatic Special Skill used with BS Attacks that ignores negative BS MODs from Partial Cover and Nanoscreen.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "requirements": [
+                    "The user can benefit from Marksmanship only when declaring a BS Attack."
+                ],
+                "effects": [
+                    "The user may ignore negative BS MODs imposed by Partial Cover and Nanoscreen."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "marksmanship"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-marksmanship-oldid-3812",
+                    "heading": "Marksmanship"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:albedo",
+            "kind": "equipment",
+            "name": "Albedo",
+            "labelIds": [
+                "obligatory",
+                "negative-feedback"
+            ],
+            "summary": "Automatic Equipment whose listed negative MOD affects enemy Multispectral Visor or Marksmanship users attacking or Discovering the bearer.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "An enemy with a Multispectral Visor or Marksmanship that declares a LoF-requiring BS Attack or Discover against the bearer applies the listed Albedo negative MOD to the relevant Attribute.",
+                    "The Albedo MOD does not apply to CC Attacks."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "albedo"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-albedo-oldid-3163",
+                    "heading": "Albedo"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "imposes-modifiers-on",
+                    "recordId": "equipment:multispectral-visor"
+                },
+                {
+                    "type": "imposes-modifiers-on",
+                    "recordId": "skill:marksmanship"
+                }
+            ]
         }
     ]
 }
