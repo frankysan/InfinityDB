@@ -1109,6 +1109,29 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Mimetism&oldid=3102>
 - Wiki: <https://infinitythewiki.com/index.php?title=Multispectral_Visor&oldid=4111>
 
+### RS-SE-COUNTER-001 — Counter-rules are authored once and navigated from both endpoints
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Stealth explicitly becomes ineffective against Troopers with Sixth Sense or Combat
+Instinct. Combat Instinct also ignores Surprise Attack MODs imposed by attackers. These
+are direct gameplay interactions between otherwise independent Skill identities, and a
+player reading the affected Skill benefits from knowing which other rules counter it.
+
+InfinityDB therefore authors `negates-effects-of` from Sixth Sense and Combat Instinct
+toward Stealth, and `ignores-modifiers-from` from Combat Instinct toward Surprise Attack.
+`rules.db` derives the inverse navigation so Stealth lists both counters and Surprise
+Attack identifies Combat Instinct without maintaining reciprocal curated rows. The edge
+expresses only the documented interaction; activation requirements, exceptions, and the
+rest of each Skill remain in that Skill's own facts.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Stealth&oldid=3914>
+- Wiki: <https://infinitythewiki.com/index.php?title=Sixth_Sense&oldid=3901>
+- Wiki: <https://infinitythewiki.com/index.php?title=Combat_Instinct&oldid=3135>
+- Wiki: <https://infinitythewiki.com/index.php?title=Surprise_Attack&oldid=3943>
+
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
 **Classification:** source-native with a presentation-encoding consequence.

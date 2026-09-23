@@ -192,9 +192,10 @@ Every record declares `composition.role` as `definition` or `supplement`. Across
 current collections, each semantic record ID has exactly one definition; supplements
 retain their own scope, facts, citations, relations, and publication provenance rather
 than being field-merged by load order. Related concepts use typed one-way `relations`;
-reverse navigation is derived by `rules.db`. Format v10 adds the gameplay-interaction
-edge `reduces-modifiers-from`, allowing one rule to state that it reduces MODs imposed
-by another while the application derives the inverse player-facing relationship.
+reverse navigation is derived by `rules.db`. Format v10 introduced the gameplay-
+interaction edge `reduces-modifiers-from`; format v11 extends that closed vocabulary
+with `ignores-modifiers-from` and `negates-effects-of` so counter-rules can describe
+ignored MODs separately from effects that become ineffective.
 
 Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 `{"orderType": "irregular"}` and canonical IDs `training:regular` /
@@ -212,7 +213,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 10,
+    "formatVersion": 11,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -368,7 +369,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v10 are no longer accepted by the loader and must
+Curated-rule files older than format v11 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

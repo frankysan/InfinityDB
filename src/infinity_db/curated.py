@@ -9,7 +9,7 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 10
+CURATED_FORMAT_VERSION = 11
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -39,6 +39,8 @@ RULE_RELATION_TYPES = frozenset(
         "controller-eligible-for",
         "enters-state",
         "has-subtype",
+        "ignores-modifiers-from",
+        "negates-effects-of",
         "reveals-state",
         "reduces-modifiers-from",
         "variant-of",

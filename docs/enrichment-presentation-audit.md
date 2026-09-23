@@ -48,8 +48,11 @@ side of a gameplay interaction and discover the other side even when the source
 rule or Wiki page documents only one direction. The first production example is
 Multispectral Visor/Mimetism: curated data authors `reduces-modifiers-from` once
 from MSV to Mimetism, while `rules.db` derives the reverse relationship for the
-Mimetism surface. Future interactions should follow the same one-authored-edge
-model rather than maintaining reciprocal facts independently.
+Mimetism surface. The Stealth counter cluster extends that model: Sixth Sense and Combat
+Instinct each author `negates-effects-of` toward Stealth, and Combat Instinct authors
+`ignores-modifiers-from` toward Surprise Attack; Stealth and Surprise Attack receive the
+reverse relationships automatically. Future interactions should follow the same one-
+authored-edge model rather than maintaining reciprocal facts independently.
 
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation

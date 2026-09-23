@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 10,
+    "formatVersion": 11,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -297,6 +297,42 @@
             "title": "Infinity Wiki — Multispectral Visor revision 4111",
             "version": "N5.3 / oldid 4111",
             "url": "https://infinitythewiki.com/index.php?title=Multispectral_Visor&oldid=4111",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-combat-instinct-oldid-3135",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Combat Instinct revision 3135",
+            "version": "N5.3 / oldid 3135",
+            "url": "https://infinitythewiki.com/index.php?title=Combat_Instinct&oldid=3135",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-sixth-sense-oldid-3901",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Sixth Sense revision 3901",
+            "version": "N5.3 / oldid 3901",
+            "url": "https://infinitythewiki.com/index.php?title=Sixth_Sense&oldid=3901",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-stealth-oldid-3914",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Stealth revision 3914",
+            "version": "N5.3 / oldid 3914",
+            "url": "https://infinitythewiki.com/index.php?title=Stealth&oldid=3914",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-surprise-attack-oldid-3943",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Surprise Attack revision 3943",
+            "version": "N5.3 / oldid 3943",
+            "url": "https://infinitythewiki.com/index.php?title=Surprise_Attack&oldid=3943",
             "authority": "secondary",
             "retrievedDate": "2026-09-23"
         }
@@ -5475,6 +5511,216 @@
                     "recordId": "skill:mimetism"
                 }
             ]
+        },
+        {
+            "id": "skill:combat-instinct",
+            "kind": "skill",
+            "name": "Combat Instinct",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "An Automatic Special Skill that ignores Surprise Attack MODs and makes enemy Stealth ineffective against the user.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "effects": [
+                    "The user ignores Surprise Attack MODs imposed by attackers.",
+                    "Stealth is not effective against the user."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "combat-instinct"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-combat-instinct-oldid-3135",
+                    "heading": "Combat Instinct"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "ignores-modifiers-from",
+                    "recordId": "skill:surprise-attack"
+                },
+                {
+                    "type": "negates-effects-of",
+                    "recordId": "skill:stealth"
+                }
+            ]
+        },
+        {
+            "id": "skill:sixth-sense",
+            "kind": "skill",
+            "name": "Sixth Sense",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "An Automatic Special Skill that improves reactions to attacks from outside LoF and makes enemy Stealth ineffective against the user.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "effects": [
+                    "The user can respond to Attacks directed at them from outside LoF, using a 360° LoF arc for those attackers; this also allows LoF to outside attackers while Engaged.",
+                    "When targeted by a BS Attack through a Zero Visibility Zone, the user ignores the -6 MOD caused by the resulting Poor Visibility Zone.",
+                    "Dodge and Reset ignore negative MODs except the specified Immobilized-A, Immobilized-B, and Isolated State penalties.",
+                    "Stealth is not effective against the user."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "sixth-sense"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-sixth-sense-oldid-3901",
+                    "heading": "Sixth Sense"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "negates-effects-of",
+                    "recordId": "skill:stealth"
+                }
+            ]
+        },
+        {
+            "id": "skill:stealth",
+            "kind": "skill",
+            "name": "Stealth",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "An Automatic Special Skill that limits ARO generation for movement and idle actions when enemies lack LoF.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "requirements": [
+                    "The user must be in the Active Turn."
+                ],
+                "effects": [
+                    "The user may declare Cautious Movement inside enemy Zones of Control and Hacking Areas.",
+                    "Cautious Movement, Idle, and Basic Short Skills with the Movement Label grant AROs only to enemies that have LoF to the user.",
+                    "Other declared Skills grant AROs normally.",
+                    "If the user enters Silhouette contact without entering the enemy's LoF and then declares another Skill, that enemy's available AROs are restricted to the options allowed by the Stealth rule."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "stealth"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-stealth-oldid-3914",
+                    "heading": "Stealth"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:surprise-attack",
+            "kind": "skill",
+            "name": "Surprise Attack",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "An Automatic Special Skill that imposes its listed negative MOD on targets' Face to Face ARO Rolls when attacking from Marker form or Hidden Deployment.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic",
+                "requirements": [
+                    "The user must begin the Order in Marker form or Hidden Deployment.",
+                    "The user must declare a CC Attack, BS Attack, or Comms Attack during the Active Turn."
+                ],
+                "effects": [
+                    "The Attack imposes the negative Surprise Attack MOD shown in the Unit Profile on Face to Face Rolls made in ARO by targets of that Attack.",
+                    "If the profile names a specific Attribute, the MOD applies only to that Attribute and does not stack with another Surprise Attack MOD."
+                ],
+                "restrictions": [
+                    "After use, Surprise Attack cannot be used again until the Trooper returns to Marker form."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "surprise-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-surprise-attack-oldid-3943",
+                    "heading": "Surprise Attack"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         }
     ]
 }

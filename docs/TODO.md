@@ -137,7 +137,7 @@ requiring a new top-level browser surface in 0.7.0.
     Equipment-domain Deactivator/GizmoKit/MediKit actions.
   - [ ] Add the remaining reviewed semantic labels/classifications that help users
     interpret existing data, including typed MOD/parameter meaning. Regular and
-    Irregular Training are already classified per loadout Order occurrence. Curated v10
+    Irregular Training are already classified per loadout Order occurrence. Curated v11
     preserves Martial Arts L1-L5 / Strategos L1-L2 as typed exact-source Levels,
     adds reviewed BS=12, BS=11, and CC=21 numeric Attribute replacements, and models
     the six non-base TinBot source variants as named exact-source variants; Equipment
@@ -208,10 +208,13 @@ requiring a new top-level browser surface in 0.7.0.
     is authored once in curated data and `rules.db` derives the reverse direction;
     both endpoints must expose useful player-facing context when both have browser
     surfaces. Multispectral Visor -> Mimetism is now the first production acceptance
-    example: curated v10 authors `reduces-modifiers-from` once on Multispectral Visor,
+    example: curated v11 authors `reduces-modifiers-from` once on Multispectral Visor,
     the MSV surface presents “Reduces MODs from: Mimetism”, and the Mimetism surface
-    receives the derived “MODs reduced by: Multispectral Visor” relationship. Translate
-    further semantic edge types into direction-aware player language and suppress
+    receives the derived “MODs reduced by: Multispectral Visor” relationship. The second
+    production cluster adds Sixth Sense/Combat Instinct -> Stealth `negates-effects-of`
+    edges plus Combat Instinct -> Surprise Attack `ignores-modifiers-from`, with reverse
+    navigation derived on Stealth and Surprise Attack. Continue translating further
+    semantic edge types into direction-aware player language and suppress
     implementation-only relationships such as family bookkeeping when the existing
     variant UI already communicates them. Systematic interaction coverage remains open
     until the rules audit identifies and curates the other gameplay edges relevant to

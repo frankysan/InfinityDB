@@ -1740,8 +1740,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     documents = load_curated_directory(root / "data" / "curated")
     document = copy.deepcopy(documents[0][1])
     skill_record = next(record for record in document["records"] if record["kind"] == "skill")
-    skill_record["id"] = "skill:stealth"
-    skill_record["name"] = "Stealth"
+    skill_record["id"] = "skill:test-stealth-fixture"
+    skill_record["name"] = "Test Stealth Fixture"
     skill_record["armyLinks"] = [{"entity": "skill", "id": 11}]
     declaration = next(
         record
@@ -1761,7 +1761,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
         {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
     ]
-    assert payload["rules"][0]["id"] == "skill:stealth"
+    assert payload["rules"][0]["id"] == "skill:test-stealth-fixture"
     assert payload["rules"][0]["collection"]["id"] == "n5-core-v5.3"
     assert payload["rules"][0]["scope"] == {"game": "N5", "seasons": ["current"]}
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
@@ -1917,6 +1917,9 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'"reveals-state": { outbound: "Reveals state", inbound: "Revealed by" }' in body
     assert b'outbound: "Reduces MODs from"' in body
     assert b'inbound: "MODs reduced by"' in body
+    assert b'outbound: "Ignores MODs from"' in body
+    assert b'inbound: "MODs ignored by"' in body
+    assert b'"negates-effects-of": { outbound: "Negates", inbound: "Negated by" }' in body
     assert b'const labels = relationLabels[relation.type]' in body
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body

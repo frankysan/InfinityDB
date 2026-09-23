@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 134
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 138
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -552,6 +552,49 @@ def test_msv_mimetism_interaction_is_bidirectional(tmp_path: Path) -> None:
             },
         }
     ]
+
+
+def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            record
+            for record in database.composed_records_for_army_link("skill", slug)
+            if record["id"] == record_id
+        )
+
+    combat_instinct = skill_rule("combat-instinct", "skill:combat-instinct")
+    sixth_sense = skill_rule("sixth-sense", "skill:sixth-sense")
+    stealth = skill_rule("stealth", "skill:stealth")
+    surprise_attack = skill_rule("surprise-attack", "skill:surprise-attack")
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in combat_instinct["display_relations"]
+    } == {
+        ("ignores-modifiers-from", "outbound", "Surprise Attack"),
+        ("negates-effects-of", "outbound", "Stealth"),
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in sixth_sense["display_relations"]
+    } == {("negates-effects-of", "outbound", "Stealth")}
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in stealth["display_relations"]
+    } == {
+        ("negates-effects-of", "inbound", "Combat Instinct"),
+        ("negates-effects-of", "inbound", "Sixth Sense"),
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in surprise_attack["display_relations"]
+    } == {("ignores-modifiers-from", "inbound", "Combat Instinct")}
+
 
 def test_rules_database_preserves_variant_inheritance_and_variant_links(
     tmp_path: Path,

@@ -35,6 +35,11 @@ const relationLabels = {
   "controller-eligible-for": { outbound: "Can control", inbound: "Can be controlled by" },
   "enters-state": { outbound: "Enters state", inbound: "Entered by" },
   "has-subtype": { outbound: "Includes subtype", inbound: "Subtype of" },
+  "ignores-modifiers-from": {
+    outbound: "Ignores MODs from",
+    inbound: "MODs ignored by",
+  },
+  "negates-effects-of": { outbound: "Negates", inbound: "Negated by" },
   "reveals-state": { outbound: "Reveals state", inbound: "Revealed by" },
   "reduces-modifiers-from": {
     outbound: "Reduces MODs from",

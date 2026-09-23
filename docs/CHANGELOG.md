@@ -7,9 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
-- Add the first bidirectional gameplay-interaction enrichment: Multispectral Visor
-  now links to Mimetism as reducing its MODs, while Mimetism automatically exposes
-  the inverse relationship so players can discover the interaction from either rule.
+- Add bidirectional gameplay-interaction enrichment so players can discover rule
+  interactions from either endpoint: Multispectral Visor reduces Mimetism MODs; Sixth
+  Sense and Combat Instinct negate Stealth; and Combat Instinct ignores Surprise Attack
+  MODs. Reverse relationships are derived automatically rather than maintained twice.
 - Add a deterministic rules-enrichment coverage audit across the currently exposed
   Skill, Equipment, Weapon, and Trait catalogs, reporting missing definitions,
   review/source freshness gaps, ambiguous family/exact-source mappings, and unresolved
