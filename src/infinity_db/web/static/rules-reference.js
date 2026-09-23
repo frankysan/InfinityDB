@@ -45,6 +45,7 @@ const relationLabels = {
     inbound: "MODs imposed by",
   },
   "negates-effects-of": { outbound: "Negates", inbound: "Negated by" },
+  "overrides-effects-of": { outbound: "Overrides", inbound: "Overridden by" },
   "modifies-rolls-for": {
     outbound: "Modifies rolls for",
     inbound: "Rolls modified by",

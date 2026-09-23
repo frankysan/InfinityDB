@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 144
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 146
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -738,6 +738,32 @@ def test_natural_born_warrior_counter_interactions_are_bidirectional(tmp_path: P
             for relation in target["display_relations"]
         }
 
+
+
+def test_no_cover_override_interaction_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    no_cover = skill_rule("no-cover", "skill:no-cover")
+    limited_cover = skill_rule("limited-cover", "skill:limited-cover")
+
+    assert ("overrides-effects-of", "outbound", "Limited Cover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in no_cover["display_relations"]
+    }
+    assert ("overrides-effects-of", "inbound", "No Cover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in limited_cover["display_relations"]
+    }
 
 def test_rules_database_preserves_variant_inheritance_and_variant_links(
     tmp_path: Path,

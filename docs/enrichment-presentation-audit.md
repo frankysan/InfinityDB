@@ -61,6 +61,7 @@ The graph label communicates that an interaction exists; exact values and condit
 as Sensor's +6 WIP and Zone of Control restriction remain in the owning rule facts. Future
 interactions should follow the same one-authored-edge model rather than maintaining
 reciprocal facts independently.
+No Cover extends the graph with explicit precedence: it authors `overrides-effects-of` toward Limited Cover, and Limited Cover receives the derived `Overridden by: No Cover` context. This is intentionally distinct from negation because the relationship is about which restriction wins when both apply.
 
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation

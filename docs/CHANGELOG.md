@@ -39,6 +39,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Add reviewed No Cover / Limited Cover rules and a bidirectional precedence relationship so players can see immediately that No Cover overrides Limited Cover when both restrictions apply.
+
 - Expand the bidirectional CC interaction graph with Natural Born Warrior as a counter
   hub for Martial Arts and Surprise Attack MODs, deriving reverse navigation on both
   affected Skill pages while preserving the rule's CC-only activation conditions.

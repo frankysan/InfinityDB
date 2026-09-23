@@ -1245,7 +1245,7 @@ compatibility references remain unambiguous JSON integers.
 
 ## 0.7.0 typed exact-source semantics (2026-09-23)
 
-- Curated rules format v13 and `rules.db` schema/compatibility 7 require every
+- Curated rules format v14 and `rules.db` schema/compatibility 7 require every
   `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
   Supported kinds are numeric `level`, explicit `named`, and numeric
   `attribute-replacement`; family records may not declare source-variant metadata.
@@ -1314,5 +1314,5 @@ compatibility references remain unambiguous JSON integers.
   Marksmanship and Multispectral Visor. Natural Born Warrior then reuses
   `ignores-modifiers-from` toward Martial Arts and Surprise Attack, with reverse navigation
   derived on both affected Skills while generic signed CC/weapon MOD semantics remain
-  intentionally unmodeled. Keep this separate from 0.8 structural application
+  intentionally unmodeled. Curated v14 adds `overrides-effects-of`: No Cover takes precedence over Limited Cover when both restrictions apply, with the inverse relation derived automatically. Keep this separate from 0.8 structural application
   relationships.

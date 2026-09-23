@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 13,
+        "formatVersion": 14,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -889,4 +889,17 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
             "type": "controller-eligible-for",
             "recordId": "rule:peripheral-type:servant",
         }
+    ]
+
+
+def test_checked_in_n5_collection_models_cover_precedence() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:limited-cover"]["armyLinks"] == [
+        {"entity": "skill", "id": "limited-cover"}
+    ]
+    assert records["skill:no-cover"]["relations"] == [
+        {"type": "overrides-effects-of", "recordId": "skill:limited-cover"}
     ]

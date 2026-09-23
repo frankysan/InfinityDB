@@ -1206,6 +1206,27 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Natural_Born_Warrior&oldid=3109>
 
 
+### RS-SE-COVER-001 — No Cover takes precedence over Limited Cover
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Limited Cover removes the -3 BS MOD normally granted by Partial Cover. No Cover is the
+more severe restriction: a Trooper with No Cover cannot benefit from any Partial Cover
+MODs, and the current N5.3 rules explicitly state that No Cover still applies when the
+Trooper also gains Limited Cover from another rule or Skill.
+
+InfinityDB therefore authors one `overrides-effects-of` edge from No Cover to Limited
+Cover. `rules.db` derives the inverse navigation so the Limited Cover page identifies
+No Cover as the overriding rule. This edge describes precedence only; it must not be
+rendered as if Limited Cover were globally disabled in situations where No Cover does not
+apply.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=No_Cover&oldid=3969>
+- Wiki: <https://infinitythewiki.com/index.php?title=Limited_Cover&oldid=3970>
+
+
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
 **Classification:** source-native with a presentation-encoding consequence.

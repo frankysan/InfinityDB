@@ -221,7 +221,9 @@ requiring a new top-level browser surface in 0.7.0.
     from effects that explicitly extend to those users. The fifth production cluster adds
     Natural Born Warrior -> Martial Arts / Surprise Attack `ignores-modifiers-from` edges,
     so both affected Skill pages identify the CC counter automatically while exact CC-only
-    requirements remain on Natural Born Warrior. Continue translating further
+    requirements remain on Natural Born Warrior. The sixth production interaction adds
+    No Cover -> Limited Cover `overrides-effects-of`, making precedence visible from both
+    Skill pages without treating Limited Cover as globally negated. Continue translating further
     semantic edge types into direction-aware player language and suppress
     implementation-only relationships such as family bookkeeping when the existing
     variant UI already communicates them. Systematic interaction coverage remains open
