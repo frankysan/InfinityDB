@@ -5020,6 +5020,346 @@
                     "recordId": "skill:cc-attack"
                 }
             ]
+        },
+        {
+            "id": "equipment:tinbot",
+            "kind": "equipment",
+            "name": "TinBot",
+            "summary": "Automatic Equipment that grants its owner the MOD, Special Skill, or Equipment advantage specified by the exact TinBot source variant.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "tinbot"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 127,
+                    "section": "TinBot"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "TinBot",
+                    "member": "TinBot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:tinbot-firewall",
+            "kind": "equipment",
+            "name": "TinBot: Firewall",
+            "summary": "The Firewall named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 169
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 127,
+                    "section": "TinBot"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "TinBot",
+                    "member": "TinBot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Firewall"
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:tinbot"
+                }
+            ]
+        },
+        {
+            "id": "equipment:tinbot-neurocinetics",
+            "kind": "equipment",
+            "name": "TinBot: Neurocinetics",
+            "summary": "The Neurocinetics named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 188
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 127,
+                    "section": "TinBot"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "TinBot",
+                    "member": "TinBot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Neurocinetics"
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:tinbot"
+                }
+            ]
+        },
+        {
+            "id": "equipment:tinbot-albedo",
+            "kind": "equipment",
+            "name": "TinBot: Albedo",
+            "summary": "The Albedo named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 193
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 127,
+                    "section": "TinBot"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "TinBot",
+                    "member": "TinBot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Albedo"
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:tinbot"
+                }
+            ]
+        },
+        {
+            "id": "equipment:tinbot-discover",
+            "kind": "equipment",
+            "name": "TinBot: Discover",
+            "summary": "The Discover named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 244
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 127,
+                    "section": "TinBot"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "TinBot",
+                    "member": "TinBot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Discover"
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:tinbot"
+                }
+            ]
+        },
+        {
+            "id": "equipment:tinbot-ecm-guided",
+            "kind": "equipment",
+            "name": "TinBot: ECM Guided",
+            "summary": "The ECM Guided named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 247
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 127,
+                    "section": "TinBot"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "TinBot",
+                    "member": "TinBot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "ECM Guided"
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:tinbot"
+                }
+            ]
+        },
+        {
+            "id": "equipment:tinbot-repeater",
+            "kind": "equipment",
+            "name": "TinBot: Repeater",
+            "summary": "The Repeater named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 248
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 127,
+                    "section": "TinBot"
+                },
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "TinBot",
+                    "member": "TinBot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Repeater"
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:tinbot"
+                }
+            ]
         }
     ]
 }

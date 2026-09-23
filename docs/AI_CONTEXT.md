@@ -1261,6 +1261,11 @@ compatibility references remain unambiguous JSON integers.
   ID 274 (`CC=21`), are reviewed numeric Attribute replacements and are exposed
   through the same `source_variant` path. The UI renders their target/value from
   structured data rather than parsing the display name.
+- TinBot is the first production use of the v9 `named` exact-source variant kind.
+  Equipment IDs 169 (Firewall), 188 (Neurocinetics), 193 (Albedo), 244 (Discover),
+  247 (ECM Guided), and 248 (Repeater) retain source-specific curated rules under the
+  canonical TinBot browsing family. Their occurrence extras remain independent raw
+  modifier data and are not interpreted by the named-variant classification.
 - This does not classify generic parenthetical MOD syntax. PH replacement forms, bare
   signed values, rerolls, and Special Dice remain opaque until the owning rule supplies
   reviewed target/operation semantics; source-variant identity and occurrence parameters

@@ -2521,11 +2521,13 @@ Occurrence parameters are a separate axis from exact source variants. The import
 to the exact source occurrence. Curated `variantSemantics.occurrenceParameters` may add
 reviewed interpretation for that occurrence value. Format v9 currently standardizes only
 the already-audited `army-extra` / `distance` parameter with its positive-sign display
-policy. Exact source Level and Attribute-replacement metadata belong to
+policy. Exact source Level, named, and Attribute-replacement metadata belong to
 `variantSemantics.sourceVariant`, not to occurrence parameters. BS=12, BS=11, and
-CC=21 are authored exact-source Attribute replacements; other parenthetical MODs/values
-remain opaque occurrence data until their typed semantics are reviewed rather than
-generalized from their spelling.
+CC=21 are authored exact-source Attribute replacements; TinBot's Firewall,
+Neurocinetics, Albedo, Discover, ECM Guided, and Repeater identities are authored named
+source variants. Their parenthetical modifiers and other MOD/value forms remain opaque
+occurrence data until their typed semantics are reviewed rather than generalized from
+their spelling.
 
 ## Application query model
 
@@ -2573,7 +2575,9 @@ Strategos Levels, TinBot variants, and similar source identities may share one b
 family without silently sharing every rule fact. Format v9 additionally requires the
 exact source contribution to carry typed `sourceVariant` metadata, so Level, named,
 and Attribute-replacement variants are distinguishable without parsing the Army display
-name at runtime.
+name at runtime. The current TinBot group uses the family rule for unqualified TinBot and
+exact named records for Firewall, Neurocinetics, Albedo, Discover, ECM Guided, and
+Repeater; occurrence extras remain attached independently.
 Army routing is authored only on definition contributions. Supplements inherit their
 definition's routing and cannot add `armyLinks`, so a supplementary publication cannot
 change which canonical family or exact source variant receives the composed record.

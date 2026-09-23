@@ -305,9 +305,12 @@ current semantic record before `rules.db` can be published.
 displayed. Exact source variants use `variantSemantics.sourceVariant`; format v9
 standardizes numeric `level`, explicit `named`, and numeric
 `attribute-replacement` variants. Martial Arts L1-L5 and Strategos L1-L2 are
-maintained as reviewed Level variants, while BS=12, BS=11, and CC=21 are reviewed
-Attribute-replacement variants. `SkillCatalog` composes those semantics into detail
-and Unit API payloads without deriving rules meaning from display names.
+maintained as reviewed Level variants, BS=12, BS=11, and CC=21 are reviewed
+Attribute-replacement variants, and the six non-base TinBot identities are reviewed
+named variants. Skill source semantics are composed into detail and Unit API payloads;
+Equipment source-specific rules are routed to the matching catalog variant by numeric
+Army source ID. Neither path derives rules meaning from display names, and TinBot
+occurrence modifiers remain separate from its named source-variant identity.
 
 Army presentation and classification currently combine imported relationships
 with merger-derived fields. The source/application scope distinction is important:

@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 125
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 132
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -223,6 +223,16 @@ def test_rules_database_returns_reviewed_source_variant_semantics(tmp_path: Path
         "attribute": "CC",
         "value": 21,
     }
+
+    equipment_variants = RulesDatabase(output).catalog_source_variant_semantics(
+        "equipment"
+    )
+    assert equipment_variants[169] == {"kind": "named", "label": "Firewall"}
+    assert equipment_variants[188] == {"kind": "named", "label": "Neurocinetics"}
+    assert equipment_variants[193] == {"kind": "named", "label": "Albedo"}
+    assert equipment_variants[244] == {"kind": "named", "label": "Discover"}
+    assert equipment_variants[247] == {"kind": "named", "label": "ECM Guided"}
+    assert equipment_variants[248] == {"kind": "named", "label": "Repeater"}
 
 
 def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:
