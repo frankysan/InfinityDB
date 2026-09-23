@@ -963,6 +963,16 @@ def test_checked_in_n5_collection_models_targeted_interaction_hub() -> None:
     }
 
 
+def test_checked_in_n5_collection_models_stealth_cautious_movement_exception() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:stealth"]["relations"] == [
+        {"type": "enables-use-of", "recordId": "skill:cautious-movement"}
+    ]
+
+
 def test_checked_in_n5_collection_models_state_self_recovery_rolls() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

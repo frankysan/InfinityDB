@@ -1232,6 +1232,28 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Combat_Instinct&oldid=3135>
 - Wiki: <https://infinitythewiki.com/index.php?title=Surprise_Attack&oldid=3943>
 
+### RS-SE-STEALTH-001 — Stealth enables a scoped Cautious Movement exception
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Cautious Movement normally generates AROs when it begins or ends inside an enemy Model or
+Marker's Zone of Control, and Hackable Models must also remain outside enemy Hacking Areas.
+Stealth explicitly changes that interaction: its user may declare Cautious Movement inside
+those enemy Zones of Control and Hacking Areas, while the rest of the Cautious Movement and
+Stealth requirements still apply.
+
+InfinityDB represents that documented exception with an `enables-use-of` edge from Stealth
+to Cautious Movement. The edge does not claim that Stealth makes every Cautious Movement
+legal or suppresses every ARO condition; it exposes the specific enabling relationship while
+leaving geometry, LoF, Active-Turn, Hackable, and other conditions in the owning rule facts.
+`rules.db` derives the reverse navigation so Cautious Movement can identify Stealth as a
+rule that expands where it may be used.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Stealth>
+- Wiki: <https://infinitythewiki.com/Cautious_Movement>
+
 ### RS-SE-SENSOR-001 — Sensor is a multi-edge interaction hub
 
 **Classification:** source-native cross-rule and cross-state gameplay relationship semantics.

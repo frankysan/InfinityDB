@@ -552,6 +552,7 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
     combat_instinct = skill_rule("combat-instinct", "skill:combat-instinct")
     sixth_sense = skill_rule("sixth-sense", "skill:sixth-sense")
     stealth = skill_rule("stealth", "skill:stealth")
+    cautious_movement = skill_rule("cautious-movement", "skill:cautious-movement")
     surprise_attack = skill_rule("surprise-attack", "skill:surprise-attack")
 
     assert {
@@ -571,6 +572,11 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
     }
     assert ("negates-effects-of", "inbound", "Combat Instinct") in stealth_relations
     assert ("negates-effects-of", "inbound", "Sixth Sense") in stealth_relations
+    assert ("enables-use-of", "outbound", "Cautious Movement") in stealth_relations
+    assert ("enables-use-of", "inbound", "Stealth") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in cautious_movement["display_relations"]
+    }
     surprise_relations = {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in surprise_attack["display_relations"]

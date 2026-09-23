@@ -5895,6 +5895,12 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
             },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:cautious-movement"
+                }
+            ],
             "variantSemantics": {
                 "inheritance": "family"
             }

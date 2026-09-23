@@ -7,6 +7,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Link Stealth bidirectionally to Cautious Movement using the existing `enables-use-of`
+  relationship, exposing the documented ZoC/Hacking Area exception without flattening the
+  remaining declaration, LoF, and ARO conditions into the graph edge.
 - Add bidirectional restrictive-State self-recovery interactions: Dodge now cancels IMM-A,
   Reset also cancels Isolated, and IMM-A / IMM-B / Isolated expose the State-specific Dodge
   or Reset roll interaction from both endpoints without duplicating the exact MOD values.

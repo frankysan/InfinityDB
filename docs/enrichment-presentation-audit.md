@@ -58,8 +58,10 @@ Natural Born Warrior extends the same pattern to a CC counter hub: one reviewed 
 authors `ignores-modifiers-from` toward Martial Arts and Surprise Attack, while both Skill
 pages receive the reverse relationship without duplicating its CC-only requirements.
 The graph label communicates that an interaction exists; exact values and conditions such
-as Sensor's +6 WIP and Zone of Control restriction remain in the owning rule facts. Future
-interactions should follow the same one-authored-edge model rather than maintaining
+as Sensor's +6 WIP and Zone of Control restriction remain in the owning rule facts. Stealth
+also authors `enables-use-of` toward Cautious Movement for its documented ZoC/Hacking Area
+exception, while the remaining movement and ARO conditions stay in the owning rule facts.
+Future interactions should follow the same one-authored-edge model rather than maintaining
 reciprocal facts independently.
 No Cover extends the graph with explicit precedence: it authors `overrides-effects-of` toward Limited Cover, and Limited Cover receives the derived `Overridden by: No Cover` context. This is intentionally distinct from negation because the relationship is about which restriction wins when both apply.
 The recovery network extends the same principle to State pages. Doctor authors

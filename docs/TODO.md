@@ -155,6 +155,9 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Review Camouflage/Camouflaged State and model the documented Surprise Attack
     prerequisite bidirectionally: Camouflaged and Hidden Deployment States enable use of
     Surprise Attack while the Skill retains its remaining Active Turn/Attack requirements.
+  - [x] Model Stealth's documented Cautious Movement exception bidirectionally: Stealth
+    enables Cautious Movement inside enemy Zones of Control/Hacking Areas without claiming
+    that its other declaration and ARO conditions are automatically satisfied.
   - [x] Model reviewed self-recovery interactions for restrictive States: Dodge cancels
     IMM-A at PH -6; Reset cancels IMM-B at WIP -3 and Isolated at WIP -9. State pages
     expose both the cancellation path and the State-specific roll modifier bidirectionally.
