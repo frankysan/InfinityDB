@@ -12,6 +12,14 @@ from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 
 UNCLASSIFIED_CATEGORY = {"name": "Unclassified", "source": None, "page": None}
 DECLARATION_KIND = "declaration-category"
+COMMON_SKILL_CATEGORY = "Common Skills"
+SPECIAL_SKILL_CATEGORY = "Special Skills"
+
+
+def _skill_category(record: dict[str, Any] | None) -> str:
+    """Return the player-facing source category for a Skill record."""
+    category = (record or {}).get("facts", {}).get("category")
+    return COMMON_SKILL_CATEGORY if category == "common-skill" else SPECIAL_SKILL_CATEGORY
 
 
 def _source_label(category: dict[str, Any]) -> str | None:
@@ -148,18 +156,71 @@ class SkillCatalog:
         ]
 
     def list_skills(self) -> list[dict[str, Any]]:
-        """Return Army skills with curated declaration categories when available."""
+        """Return Army and rules-native Skills grouped by source category."""
         items = deepcopy(self.database.list_catalog_items("skills"))
+        curated_by_ref: dict[ArmyLinkRef, dict[str, Any]] = {}
+        standalone_common: list[dict[str, Any]] = []
+        if self.rules_database is not None:
+            for record in self.rules_database.composed_records_by_kind("skill"):
+                if record.get("facts", {}).get("category") != "common-skill":
+                    continue
+                links = record.get("army_links", [])
+                if not links:
+                    standalone_common.append(record)
+                    continue
+                for link in links:
+                    if link.get("entity") == "skill" and "id" in link:
+                        curated_by_ref[link["id"]] = record
         for item in items:
             item["categories"] = self._categories_for_ids({int(item["id"])})
             self._enrich_skill_item(item)
+            record = next(
+                (
+                    curated_by_ref[reference]
+                    for reference in self._army_refs_for_ids({int(item["id"])})
+                    if reference in curated_by_ref
+                ),
+                None,
+            )
+            item["category"] = _skill_category(record)
+        for record in standalone_common:
+            semantic_id = record["id"].removeprefix("skill:")
+            items.append(
+                {
+                    "id": semantic_id,
+                    "slug": semantic_id,
+                    "name": record["name"],
+                    "use_count": 0,
+                    "category": COMMON_SKILL_CATEGORY,
+                }
+            )
         return items
 
     def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
         """Return one Army Skill reference enriched with curated declarations and rules."""
         item = self.database.get_skill(skill_ref)
         if item is None:
-            return None
+            if not isinstance(skill_ref, str) or self.rules_database is None:
+                return None
+            record_id = f"skill:{skill_ref}"
+            item = next(
+                (
+                    {
+                        "id": skill_ref,
+                        "slug": skill_ref,
+                        "name": record["name"],
+                        "use_count": 0,
+                        "category": COMMON_SKILL_CATEGORY,
+                        "rules": [record],
+                    }
+                    for record in self.rules_database.composed_records_by_kind("skill")
+                    if record["id"] == record_id
+                    and record.get("facts", {}).get("category") == "common-skill"
+                    and not record.get("army_links")
+                ),
+                None,
+            )
+            return item
         result = deepcopy(item)
         self._attach_public_slug(result)
         source_ids = set(self.database.skill_source_ids(int(result["id"])))

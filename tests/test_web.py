@@ -1563,6 +1563,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "use_count": 1,
             "slug": "stealth",
             "categories": [{"name": "Unclassified", "source": None, "page": None}],
+                "category": "Special Skills",
         },
         "equipment": {
             "id": 21,

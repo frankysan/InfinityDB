@@ -4,6 +4,12 @@ import { initializeDistanceUnitToggle } from "./preferences.js";
 const page = document.body.dataset.catalog;
 const title = page === "traits" ? "traits" : page;
 const hasUsage = page !== "states";
+const categoryOrder = {
+  "Common Skills": 10,
+  "Special Skills": 20,
+  "Scenario Skills": 30,
+  "ITS Scenario Skills": 40,
+};
 const byId = (id) => document.getElementById(id);
 const elements = {
   count: byId("catalog-count"), results: byId("catalog-results"), loading: byId("catalog-loading"),
@@ -41,7 +47,7 @@ function render() {
   let category;
   for (const item of visible) {
     const itemCategory = item.categoryName;
-    if (page === "weapons" && itemCategory !== category) {
+    if (["weapons", "skills"].includes(page) && itemCategory !== category) {
       category = itemCategory;
       const categoryRow = document.createElement("tr");
       categoryRow.className = "catalog-category-row";
@@ -85,9 +91,9 @@ async function load() {
   try {
     const payload = await getCatalogItems(page);
     items = payload.items.map(searchableItem).sort((left, right) => (
-      `${left.categoryName}\u0000${left.name}`.localeCompare(
-        `${right.categoryName}\u0000${right.name}`, undefined, { numeric: true },
-      )
+      (categoryOrder[left.categoryName] || 999) - (categoryOrder[right.categoryName] || 999)
+      || left.categoryName.localeCompare(right.categoryName)
+      || left.name.localeCompare(right.name, undefined, { numeric: true })
     ));
     render();
   } catch (error) {

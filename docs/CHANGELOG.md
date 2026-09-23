@@ -7,6 +7,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add all core Common Skills to the rules-backed Skills catalog and present them ahead
+  of Special Skills, including rules that never appear as Army profile entries.
 - Add the item-specific Unloaded State and link it bidirectionally with Disposable (X),
   making exhausted-use behavior discoverable without asserting current game state on a Trooper.
 - Link Concealed bidirectionally to Camouflaged State, making its reuse of that State's

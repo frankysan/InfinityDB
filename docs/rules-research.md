@@ -454,10 +454,10 @@ InfinityDB does not depend on appearing as Army metadata records. They can still
 be targets of Traits, declaration-category help, cross-links, and play-aid
 content.
 
-A future rules thesaurus/catalog may therefore need identities whose source of
-existence is the ruleset rather than an Army catalog row. This is a useful test
-case for keeping application rule identity separate from Army occurrence
-identity.
+The rules-backed Skills catalog now carries all 18 core Common Skill identities
+whether or not they have Army occurrences, and presents them above Special Skills.
+This keeps rules identity separate from Army-profile occurrence and leaves distinct
+Scenario Skills and ITS Scenario Skills categories available for later scoped work.
 
 Sources:
 
