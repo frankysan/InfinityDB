@@ -1288,7 +1288,13 @@ compatibility references remain unambiguous JSON integers.
   exposed identity. Rules-only State/Training/etc. relation targets are counted as
   supporting identities rather than false UI gaps.
 - Default JSON detail lists include only catalog items with gaps;
-  `--include-complete` emits the full inventory. The report is diagnostic rather than a
-  second ontology: semantic classifications remain owned by canonical application
-  identity plus curated rules data. Remaining gaps still require explicit 0.7.0 blocker/
-  intentional-omission/later-work classification in the maintained release plan.
+  `--include-complete` emits the full inventory. Report format v2 also consumes the maintained
+  `data/curated/enrichment-coverage/classifications.json` release-scope policy. Every known
+  gap code must have an explicit classification and reason; item/relation overrides may mark
+  reviewed exceptions as `intentional-omission`, `supporting-identity`, or
+  `later-product-work`. Overrides that no longer match the selected database pair fail closed.
+  Current defaults conservatively classify detected exposed-surface gaps as
+  `release-blocker`, while non-UI rules-only relation targets are classified separately as
+  supporting identities. This policy is release-planning metadata, not a second rules
+  ontology; semantic classifications remain owned by canonical application identity plus
+  curated rules data.

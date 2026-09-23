@@ -196,9 +196,14 @@ requiring a new top-level browser surface in 0.7.0.
     Trait surfaces against a specific `infinity.db` + `rules.db` pair; by default its
     detail lists contain only gaps, with `--include-complete` available for a full
     inventory.
-  - [ ] Classify every remaining gap explicitly as a 0.7.0 blocker, intentional
+  - [x] Classify every remaining gap explicitly as a 0.7.0 blocker, intentional
     omission, supporting identity without a standalone UI, or later product work;
-    do not silently treat absence as complete coverage.
+    do not silently treat absence as complete coverage. The maintained
+    `data/curated/enrichment-coverage/classifications.json` policy classifies every known
+    audit gap code, supports reviewed item/relation overrides, and fails closed on unknown
+    gap codes or stale overrides. Current defaults conservatively treat detected exposed-
+    surface gaps as release blockers; rules-only relation targets are classified separately
+    as supporting identities.
   - [ ] Validate summaries/labels/relationships against the maintained rules
     semantics and canonical Army relationships rather than independently hard-
     coding a second ontology into the frontend.

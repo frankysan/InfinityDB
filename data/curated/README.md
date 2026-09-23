@@ -12,7 +12,10 @@ provenance under `data/manifests/`.
   during Army normalization.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
-  endpoints that cannot be resolved from the current Army snapshot alone. These categories
+  endpoints that cannot be resolved from the current Army snapshot alone.
+- `enrichment-coverage/` contains maintained release-scope classifications consumed by
+  the rules-enrichment coverage audit; these decisions classify audit gaps without becoming
+  runtime game semantics. These categories
   have separate schemas and loaders; no loader treats arbitrary JSON from another
   curated category as valid input. Curated identifiers are stable project/domain identities.
 - `armyLinks` are cross-domain references rather than curated record identities: Skill,
@@ -30,6 +33,23 @@ notes associated with immutable snapshots by SHA-256. Those notes remain
 separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
+
+
+### Rules-enrichment coverage classifications
+
+`enrichment-coverage/classifications.json` is the maintained release-scope policy for
+`tools/audit_enrichment_coverage.py`. Every gap code known to the audit must have an explicit
+default classification: `release-blocker`, `intentional-omission`, `supporting-identity`,
+or `later-product-work`. The checked-in defaults are deliberately conservative: detected
+user-facing coverage gaps block 0.7.0 until reviewed otherwise, while rules-only relation
+targets that already support an exposed item are classified separately as
+`supporting-identity`.
+
+Item- or relation-specific `overrides` record reviewed exceptions with a reason. Overrides
+must match a gap in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides
+fail the audit instead of silently surviving after the underlying data changes. The policy is
+release-planning metadata only. It must not be consumed as rules ontology or application
+runtime behavior.
 
 ### Curated Peripheral identities
 

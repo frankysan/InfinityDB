@@ -10,7 +10,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Add a deterministic rules-enrichment coverage audit across the currently exposed
   Skill, Equipment, Weapon, and Trait catalogs, reporting missing definitions,
   review/source freshness gaps, ambiguous family/exact-source mappings, and unresolved
-  related-item targets against a pinned `infinity.db` + `rules.db` pair.
+  related-item targets against a pinned `infinity.db` + `rules.db` pair. A maintained
+  fail-closed classification policy now labels every detected gap as release-blocking or as
+  an explicitly reviewed scope exception, while rules-only relation targets remain identified
+  as supporting identities without requiring standalone UI.
 - Add reviewed exact-source Level semantics for Martial Arts L1-L5 and Strategos L1-L2,
   preserving their shared browsing families while exposing the applicable Level on each
   source variant and Unit occurrence.

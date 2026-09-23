@@ -3,12 +3,19 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from infinity_army_data.merge import make_source, merge_sources
 from infinity_army_data.normalize import normalize_master
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
 from infinity_db.rules_database import export_rules_database
-from tools.audit_enrichment_coverage import audit_coverage, main
+from tools.audit_enrichment_coverage import (
+    DEFAULT_CLASSIFICATION_PATH,
+    EnrichmentCoverageAuditError,
+    audit_coverage,
+    main,
+)
 
 
 def _fixture_database(tmp_path: Path) -> Path:
@@ -100,11 +107,28 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         "stale_citation_source": 1,
         "unreviewed_rule": 1,
     }
+    assert report["summary"]["classifiedGapCount"] == 3
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 3}
+    assert report["summary"]["releaseBlockerCount"] == 3
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
     assert skills["Camouflage"]["gapCodes"] == ["unreviewed_rule"]
+    assert skills["Camouflage"]["gapClassifications"] == [
+        {
+            "code": "unreviewed_rule",
+            "classification": "release-blocker",
+            "reason": (
+                "Draft or otherwise unreviewed contributions cannot satisfy the 0.7.0 "
+                "reviewed-enrichment gate."
+            ),
+            "source": "gap-code",
+        }
+    ]
     assert skills["Missing Skill"]["gapCodes"] == ["missing_rule_definition"]
+    assert skills["Missing Skill"]["gapClassifications"][0]["classification"] == (
+        "release-blocker"
+    )
 
     tinbot = report["domains"]["equipment"]["items"][0]
     assert tinbot["familyRuleIds"] == ["equipment:tinbot"]
@@ -119,6 +143,10 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert turret["gapCodes"] == ["stale_citation_source"]
     assert report["summary"]["unresolvedRelatedItemLinkCount"] == 0
     assert report["summary"]["supportingRelationTargetCount"] >= 1
+    assert report["relationCoverage"]["supporting"]
+    assert {
+        item["classification"] for item in report["relationCoverage"]["supporting"]
+    } == {"supporting-identity"}
 
 
 def test_enrichment_coverage_default_details_only_list_gaps(tmp_path: Path) -> None:
@@ -140,5 +168,80 @@ def test_enrichment_coverage_cli_writes_report(tmp_path: Path, capsys) -> None:
     output = tmp_path / "coverage.json"
 
     assert main([str(database), "--rules", str(rules), "--output", str(output)]) == 0
-    assert json.loads(output.read_text(encoding="utf-8"))["formatVersion"] == 1
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["formatVersion"] == 2
+    assert payload["classificationPolicy"]["sha256"]
     assert "Enrichment coverage audit written" in capsys.readouterr().out
+
+
+def _classification_policy_with_override(
+    tmp_path: Path, override: dict[str, object]
+) -> Path:
+    document = json.loads(DEFAULT_CLASSIFICATION_PATH.read_text(encoding="utf-8"))
+    document["overrides"] = [override]
+    path = tmp_path / "classifications.json"
+    path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> None:
+    classifications = _classification_policy_with_override(
+        tmp_path,
+        {
+            "scope": "catalog",
+            "catalog": "skills",
+            "itemId": 999,
+            "gapCode": "missing_rule_definition",
+            "classification": "later-product-work",
+            "reason": "Synthetic fixture decision.",
+        },
+    )
+
+    report = audit_coverage(
+        _fixture_database(tmp_path),
+        _fixture_rules(tmp_path),
+        classification_path=classifications,
+    )
+
+    missing = next(
+        item
+        for item in report["domains"]["skills"]["items"]
+        if item["name"] == "Missing Skill"
+    )
+    assert missing["gapClassifications"] == [
+        {
+            "code": "missing_rule_definition",
+            "classification": "later-product-work",
+            "reason": "Synthetic fixture decision.",
+            "source": "override",
+        }
+    ]
+    assert report["summary"]["classificationCounts"] == {
+        "later-product-work": 1,
+        "release-blocker": 2,
+    }
+    assert report["summary"]["releaseBlockerCount"] == 2
+
+
+def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:
+    classifications = _classification_policy_with_override(
+        tmp_path,
+        {
+            "scope": "catalog",
+            "catalog": "skills",
+            "itemId": 123456,
+            "gapCode": "missing_rule_definition",
+            "classification": "intentional-omission",
+            "reason": "Must not silently outlive the gap it classified.",
+        },
+    )
+
+    with pytest.raises(
+        EnrichmentCoverageAuditError,
+        match="overrides that do not match current gaps",
+    ):
+        audit_coverage(
+            _fixture_database(tmp_path),
+            _fixture_rules(tmp_path),
+            classification_path=classifications,
+        )

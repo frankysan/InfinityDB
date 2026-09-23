@@ -19,8 +19,29 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
 REPORT_FORMAT = "InfinityDB rules enrichment coverage audit"
-REPORT_FORMAT_VERSION = 1
+REPORT_FORMAT_VERSION = 2
 CATALOGS = ("skills", "equipment", "weapons", "traits")
+CLASSIFICATION_FORMAT = "InfinityDB enrichment coverage classifications"
+CLASSIFICATION_FORMAT_VERSION = 1
+CLASSIFICATIONS = frozenset(
+    {"release-blocker", "intentional-omission", "supporting-identity", "later-product-work"}
+)
+KNOWN_GAP_CODES = frozenset(
+    {
+        "ambiguous_family_mapping",
+        "ambiguous_source_variant_mapping",
+        "missing_citation",
+        "missing_rule_definition",
+        "stale_citation_source",
+        "unresolved_related_item_link",
+        "unresolved_surface_rule",
+        "unreviewed_rule",
+    }
+)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CLASSIFICATION_PATH = (
+    PROJECT_ROOT / "data" / "curated" / "enrichment-coverage" / "classifications.json"
+)
 ENTITY_BY_CATALOG = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}
 CATALOG_BY_KIND = {value: key for key, value in ENTITY_BY_CATALOG.items()}
 
@@ -28,6 +49,188 @@ CATALOG_BY_KIND = {value: key for key, value in ENTITY_BY_CATALOG.items()}
 class EnrichmentCoverageAuditError(ValueError):
     """Raised when the selected application/rules snapshots cannot be audited safely."""
 
+
+
+def _classification_decision(value: object, context: str) -> dict[str, str]:
+    if not isinstance(value, dict) or set(value) != {"classification", "reason"}:
+        raise EnrichmentCoverageAuditError(
+            f"{context} must contain exactly classification and reason"
+        )
+    classification = value.get("classification")
+    reason = value.get("reason")
+    if classification not in CLASSIFICATIONS:
+        raise EnrichmentCoverageAuditError(
+            f"{context}.classification must be one of {sorted(CLASSIFICATIONS)}"
+        )
+    if not isinstance(reason, str) or not reason.strip():
+        raise EnrichmentCoverageAuditError(f"{context}.reason must be a non-empty string")
+    return {"classification": str(classification), "reason": reason.strip()}
+
+
+def _load_classification_policy(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        raise EnrichmentCoverageAuditError(
+            f"Enrichment coverage classification policy does not exist: {path}"
+        )
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise EnrichmentCoverageAuditError(
+            f"Cannot read enrichment coverage classification policy {path}: {exc}"
+        ) from exc
+    if not isinstance(document, dict):
+        raise EnrichmentCoverageAuditError("Classification policy root must be an object")
+    expected = {"format", "formatVersion", "gapCodes", "supportingIdentity", "overrides"}
+    if set(document) != expected:
+        raise EnrichmentCoverageAuditError(
+            f"Classification policy must contain exactly {sorted(expected)}"
+        )
+    if document.get("format") != CLASSIFICATION_FORMAT:
+        raise EnrichmentCoverageAuditError(
+            f"Unsupported classification policy format: {document.get('format')!r}"
+        )
+    if document.get("formatVersion") != CLASSIFICATION_FORMAT_VERSION:
+        raise EnrichmentCoverageAuditError(
+            "Unsupported classification policy formatVersion: "
+            f"{document.get('formatVersion')!r}"
+        )
+
+    raw_gap_codes = document.get("gapCodes")
+    if not isinstance(raw_gap_codes, dict):
+        raise EnrichmentCoverageAuditError("Classification policy gapCodes must be an object")
+    actual_codes = set(raw_gap_codes)
+    if actual_codes != KNOWN_GAP_CODES:
+        missing = sorted(KNOWN_GAP_CODES - actual_codes)
+        extra = sorted(actual_codes - KNOWN_GAP_CODES)
+        raise EnrichmentCoverageAuditError(
+            f"Classification policy gapCodes mismatch; missing={missing}, extra={extra}"
+        )
+    gap_codes = {
+        code: _classification_decision(raw_gap_codes[code], f"gapCodes.{code}")
+        for code in sorted(KNOWN_GAP_CODES)
+    }
+    supporting = _classification_decision(
+        document.get("supportingIdentity"), "supportingIdentity"
+    )
+    if supporting["classification"] != "supporting-identity":
+        raise EnrichmentCoverageAuditError(
+            "supportingIdentity.classification must be supporting-identity"
+        )
+
+    raw_overrides = document.get("overrides")
+    if not isinstance(raw_overrides, list):
+        raise EnrichmentCoverageAuditError("Classification policy overrides must be an array")
+    catalog_overrides: dict[tuple[str, str, str], dict[str, str]] = {}
+    relation_overrides: dict[tuple[str, str, str], dict[str, str]] = {}
+    override_keys: set[tuple[str, ...]] = set()
+    for position, raw in enumerate(raw_overrides):
+        context = f"overrides[{position}]"
+        if not isinstance(raw, dict):
+            raise EnrichmentCoverageAuditError(f"{context} must be an object")
+        scope = raw.get("scope")
+        if scope == "catalog":
+            expected_override = {
+                "scope", "catalog", "itemId", "gapCode", "classification", "reason"
+            }
+            if set(raw) != expected_override:
+                raise EnrichmentCoverageAuditError(
+                    f"{context} catalog override must contain exactly {sorted(expected_override)}"
+                )
+            catalog = raw.get("catalog")
+            gap_code = raw.get("gapCode")
+            item_id = raw.get("itemId")
+            if catalog not in CATALOGS:
+                raise EnrichmentCoverageAuditError(
+                    f"{context}.catalog must be one of {list(CATALOGS)}"
+                )
+            if gap_code not in KNOWN_GAP_CODES - {"unresolved_related_item_link"}:
+                raise EnrichmentCoverageAuditError(
+                    f"{context}.gapCode is not a catalog gap code: {gap_code!r}"
+                )
+            if isinstance(item_id, bool) or not isinstance(item_id, (int, str)) or not str(item_id):
+                raise EnrichmentCoverageAuditError(
+                    f"{context}.itemId must be a non-empty string or integer"
+                )
+            decision = _classification_decision(
+                {"classification": raw.get("classification"), "reason": raw.get("reason")},
+                context,
+            )
+            key = (str(catalog), str(item_id), str(gap_code))
+            if key in catalog_overrides:
+                raise EnrichmentCoverageAuditError(f"Duplicate catalog override: {key}")
+            catalog_overrides[key] = decision
+            override_keys.add(("catalog", *key))
+        elif scope == "relation":
+            expected_override = {
+                "scope", "recordId", "relationType", "targetRecordId",
+                "classification", "reason"
+            }
+            if set(raw) != expected_override:
+                raise EnrichmentCoverageAuditError(
+                    f"{context} relation override must contain exactly {sorted(expected_override)}"
+                )
+            record_id = raw.get("recordId")
+            relation_type = raw.get("relationType")
+            target_id = raw.get("targetRecordId")
+            if not all(
+                isinstance(value, str) and value.strip()
+                for value in (record_id, relation_type, target_id)
+            ):
+                raise EnrichmentCoverageAuditError(
+                    f"{context} relation selectors must be non-empty strings"
+                )
+            decision = _classification_decision(
+                {"classification": raw.get("classification"), "reason": raw.get("reason")},
+                context,
+            )
+            key = (str(record_id), str(relation_type), str(target_id))
+            if key in relation_overrides:
+                raise EnrichmentCoverageAuditError(f"Duplicate relation override: {key}")
+            relation_overrides[key] = decision
+            override_keys.add(("relation", *key))
+        else:
+            raise EnrichmentCoverageAuditError(
+                f"{context}.scope must be catalog or relation"
+            )
+
+    return {
+        "gapCodes": gap_codes,
+        "supportingIdentity": supporting,
+        "catalogOverrides": catalog_overrides,
+        "relationOverrides": relation_overrides,
+        "overrideKeys": override_keys,
+    }
+
+
+def _catalog_gap_classification(
+    policy: dict[str, Any],
+    matched_overrides: set[tuple[str, ...]],
+    catalog: str,
+    item_id: object,
+    gap_code: str,
+) -> dict[str, str]:
+    key = (catalog, str(item_id), gap_code)
+    override = policy["catalogOverrides"].get(key)
+    if override is not None:
+        matched_overrides.add(("catalog", *key))
+        return {"code": gap_code, **override, "source": "override"}
+    return {"code": gap_code, **policy["gapCodes"][gap_code], "source": "gap-code"}
+
+
+def _relation_gap_classification(
+    policy: dict[str, Any],
+    matched_overrides: set[tuple[str, ...]],
+    gap: dict[str, Any],
+) -> dict[str, str]:
+    key = (str(gap["recordId"]), str(gap["relationType"]), str(gap["targetRecordId"]))
+    override = policy["relationOverrides"].get(key)
+    if override is not None:
+        matched_overrides.add(("relation", *key))
+        return {**override, "source": "override"}
+    return {
+        **policy["gapCodes"]["unresolved_related_item_link"],
+        "source": "gap-code",
+    }
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -157,7 +360,11 @@ def _surface_rule_ids(detail: dict[str, Any]) -> tuple[set[str], set[str]]:
 
 
 def audit_coverage(
-    database_path: Path, rules_path: Path, *, include_complete: bool = False
+    database_path: Path,
+    rules_path: Path,
+    *,
+    include_complete: bool = False,
+    classification_path: Path = DEFAULT_CLASSIFICATION_PATH,
 ) -> dict[str, Any]:
     if not database_path.is_file():
         raise EnrichmentCoverageAuditError(f"Database does not exist: {database_path}")
@@ -170,6 +377,8 @@ def audit_coverage(
         rules = RulesDatabase(rules_path)
         rules.validate()
         records, links = _rules_index(rules_path)
+        classification_policy = _load_classification_policy(classification_path)
+        matched_overrides: set[tuple[str, ...]] = set()
         skill_catalog = SkillCatalog(database, rules)
         catalog_rules = CatalogRules(rules)
         trait_catalog = TraitCatalog(database, rules)
@@ -263,6 +472,7 @@ def audit_coverage(
                             str(key): value for key, value in ambiguous_sources.items()
                         }
 
+                sorted_gap_codes = sorted(gap_codes)
                 item = {
                     "id": source["id"],
                     "name": source["name"],
@@ -271,7 +481,17 @@ def audit_coverage(
                     "sourceIds": source_ids,
                     "familyRuleIds": sorted(family_ids),
                     "exactSourceRuleIds": sorted(exact_ids),
-                    "gapCodes": sorted(gap_codes),
+                    "gapCodes": sorted_gap_codes,
+                    "gapClassifications": [
+                        _catalog_gap_classification(
+                            classification_policy,
+                            matched_overrides,
+                            catalog,
+                            source["id"],
+                            code,
+                        )
+                        for code in sorted_gap_codes
+                    ],
                 }
                 if mapping:
                     item["mapping"] = mapping
@@ -345,24 +565,61 @@ def audit_coverage(
                         }
                     )
 
+        for gap in relation_gaps:
+            gap["gapCode"] = "unresolved_related_item_link"
+            gap["classification"] = _relation_gap_classification(
+                classification_policy, matched_overrides, gap
+            )
+
+        unmatched_overrides = classification_policy["overrideKeys"] - matched_overrides
+        if unmatched_overrides:
+            raise EnrichmentCoverageAuditError(
+                "Classification policy contains overrides that do not match current gaps: "
+                + ", ".join(str(value) for value in sorted(unmatched_overrides))
+            )
+
         gap_counts: dict[str, int] = {}
+        classification_counts: dict[str, int] = {}
         for domain in domain_reports.values():
             for item in domain["items"]:
                 for code in item["gapCodes"]:
                     gap_counts[code] = gap_counts.get(code, 0) + 1
+                for decision in item["gapClassifications"]:
+                    classification = decision["classification"]
+                    classification_counts[classification] = (
+                        classification_counts.get(classification, 0) + 1
+                    )
         if relation_gaps:
             gap_counts["unresolved_related_item_link"] = len(relation_gaps)
+            for gap in relation_gaps:
+                classification = gap["classification"]["classification"]
+                classification_counts[classification] = (
+                    classification_counts.get(classification, 0) + 1
+                )
+
+        supporting_decision = classification_policy["supportingIdentity"]
+        supporting_items = [
+            {"recordId": record_id, **supporting_decision}
+            for record_id in sorted(supporting_targets)
+        ]
 
         return {
             "format": REPORT_FORMAT,
             "formatVersion": REPORT_FORMAT_VERSION,
             "database": {"path": str(database_path), "sha256": _sha256(database_path)},
             "rulesDatabase": {"path": str(rules_path), "sha256": _sha256(rules_path)},
+            "classificationPolicy": {
+                "path": str(classification_path),
+                "sha256": _sha256(classification_path),
+            },
             "summary": {
                 "exposedCount": sum(item["exposedCount"] for item in domain_reports.values()),
                 "completeCount": sum(item["completeCount"] for item in domain_reports.values()),
                 "gapCount": sum(item["gapCount"] for item in domain_reports.values()),
                 "gapCounts": dict(sorted(gap_counts.items())),
+                "classifiedGapCount": sum(classification_counts.values()),
+                "classificationCounts": dict(sorted(classification_counts.items())),
+                "releaseBlockerCount": classification_counts.get("release-blocker", 0),
                 "unresolvedRelatedItemLinkCount": len(relation_gaps),
                 "supportingRelationTargetCount": len(supporting_targets),
             },
@@ -370,6 +627,7 @@ def audit_coverage(
             "relationCoverage": {
                 "unresolved": relation_gaps,
                 "supportingRecordIds": sorted(supporting_targets),
+                "supporting": supporting_items,
             },
         }
     except (OSError, ValueError, sqlite3.Error) as exc:
@@ -389,6 +647,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Include fully covered items in domain detail lists",
     )
+    parser.add_argument(
+        "--classifications",
+        type=Path,
+        default=DEFAULT_CLASSIFICATION_PATH,
+        help="Path to the maintained gap-classification policy",
+    )
     parser.add_argument("--output", type=Path, help="Write the JSON report to this path")
     return parser
 
@@ -396,7 +660,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        report = audit_coverage(args.database, args.rules, include_complete=args.include_complete)
+        report = audit_coverage(
+            args.database,
+            args.rules,
+            include_complete=args.include_complete,
+            classification_path=args.classifications,
+        )
     except EnrichmentCoverageAuditError as exc:
         raise SystemExit(str(exc)) from exc
     payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
