@@ -149,6 +149,9 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Promote reviewed Game States to a lightweight rules-backed catalog and model
     Doctor/Engineer recovery with authored `cancels-state` edges, so Unconscious, Stunned,
     Targeted, IMM-A/B, Isolated, and Disconnected expose reverse cancellation navigation.
+  - [x] Make Targeted State a bidirectional interaction hub: Forward Observer causes it,
+    Reset cancels it (and IMM-B), and Targeted exposes the reviewed roll/declaration
+    interactions with BS Attack, Discover, Reset, Cautious Movement, and Stealth.
   - [x] Keep semantic identity, source publication provenance, and applicability
     scope separate so core, annex, FAQ, season, or scenario material can enrich the
     same canonical item without duplication or collection-load-order semantics.

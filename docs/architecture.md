@@ -279,7 +279,7 @@ Skill-extra distance semantics are split according to source authority. Army
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v15 makes applicability, review state, contribution role, typed
+Curated rules format v16 makes applicability, review state, contribution role, typed
 related-item edges, explicit catalog-variant inheritance, typed exact-source variants, and
 cross-domain declaration categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
@@ -313,7 +313,7 @@ existing `reveals-state` and `ignores-modifiers-from` edges so Discover, Camoufl
 Camouflaged State, Hidden Deployment State, and Mimetism all expose the reverse
 interaction automatically. Format v13 adds `applies-effects-to` and
 `imposes-modifiers-on`; Reflective and Albedo use those edges toward Marksmanship and
-Multispectral Visor so both affected surfaces receive the reverse interaction. Format v14 adds `overrides-effects-of`; No Cover authors that precedence edge toward Limited Cover so the latter exposes the derived inverse relationship. Format v15 adds `cancels-state`; Doctor and Engineer author recovery edges once and State pages receive the derived inverse navigation.
+Multispectral Visor so both affected surfaces receive the reverse interaction. Format v14 adds `overrides-effects-of`; No Cover authors that precedence edge toward Limited Cover so the latter exposes the derived inverse relationship. Format v15 adds `cancels-state`; Doctor and Engineer author recovery edges once and State pages receive the derived inverse navigation. Format v16 adds `causes-state`; Forward Observer authors the Targeted activation edge once, while Targeted itself links the Skills whose rolls or declarations it changes.
 
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions
@@ -1137,7 +1137,7 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v15 rules contract stores collection scope, source metadata,
+The current curated-v16 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, typed related-rule edges,
 explicit variant inheritance and exact-source variant semantics, composition role, review
 state, and source-specific citations. PDF sources carry both the local
@@ -1147,7 +1147,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v15 must be migrated before ingestion.
+Curated-rule files older than format v16 must be migrated before ingestion.
 
 ## HTTP API
 

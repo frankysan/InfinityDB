@@ -651,6 +651,32 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Engineer>
 - Wiki: <https://infinitythewiki.com/States>
 
+### RS-GSG-STATE-005B — State activation and behavioral effects belong in the interaction graph
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+A State page should expose both how the State is caused or cancelled and which player-facing
+Skills it changes. These relationships should be authored only where the source rule owns
+them and then projected in reverse automatically.
+
+Targeted State is the canonical example:
+
+- Forward Observer explicitly causes Targeted State, represented by `causes-state`.
+- Reset cancels Targeted State and Immobilized-B State, represented by `cancels-state`.
+- Targeted modifies rolls for BS Attack, Discover, and Reset.
+- Targeted prevents Cautious Movement and Stealth, represented by `restricts-use-of`.
+
+The graph edge communicates the interaction category, not the complete rule. Exact values
+such as Targeted's +3 and -3 MODs, Forward Observer's LoF requirement, and Reset's
+State-specific MODs remain facts of the owning definitions.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Targeted_State>
+- Wiki: <https://infinitythewiki.com/Forward_Observer>
+- Wiki: <https://infinitythewiki.com/Reset>
+- Wiki: <https://infinitythewiki.com/Cautious_Movement>
+
 ### RS-GSG-STATE-006 — Unloaded is item-specific runtime state
 
 **Classification:** source-native with a future state-model consequence.

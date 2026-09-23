@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 153
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 156
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -563,13 +563,12 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in sixth_sense["display_relations"]
     } == {("negates-effects-of", "outbound", "Stealth")}
-    assert {
+    stealth_relations = {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in stealth["display_relations"]
-    } == {
-        ("negates-effects-of", "inbound", "Combat Instinct"),
-        ("negates-effects-of", "inbound", "Sixth Sense"),
     }
+    assert ("negates-effects-of", "inbound", "Combat Instinct") in stealth_relations
+    assert ("negates-effects-of", "inbound", "Sixth Sense") in stealth_relations
     assert (
         "ignores-modifiers-from",
         "inbound",
@@ -895,3 +894,49 @@ def test_export_rejects_source_specific_variant_without_family_relation(
 
     with pytest.raises(ValueError, match="requires exactly one 'variant-of' relation"):
         export_rules_database([(current_path, document)], tmp_path / "rules.db")
+
+def test_targeted_interaction_hub_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    forward_observer = skill("forward-observer", "skill:forward-observer")
+    reset = skill("reset", "skill:reset")
+    bs_attack = skill("bs-attack", "skill:bs-attack")
+    cautious_movement = skill("cautious-movement", "skill:cautious-movement")
+    states = {item["id"]: item for item in database.composed_records_by_kind("state")}
+    targeted = states["state:targeted"]
+    immobilized_b = states["state:immobilized-b"]
+
+    assert ("causes-state", "outbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in forward_observer["display_relations"]
+    }
+    assert ("causes-state", "inbound", "Forward Observer") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in targeted["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in reset["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in immobilized_b["display_relations"]
+    }
+    assert ("modifies-rolls-for", "inbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in bs_attack["display_relations"]
+    }
+    assert ("restricts-use-of", "inbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in cautious_movement["display_relations"]
+    }

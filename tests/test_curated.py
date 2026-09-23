@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 15,
+        "formatVersion": 16,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -931,4 +931,28 @@ def test_checked_in_n5_collection_models_state_recovery_relations() -> None:
         "state:stunned",
         "state:targeted",
         "state:unconscious",
+    }
+
+def test_checked_in_n5_collection_models_targeted_interaction_hub() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:forward-observer"]["relations"] == [
+        {"type": "causes-state", "recordId": "state:targeted"}
+    ]
+    assert {
+        relation["recordId"]
+        for relation in records["skill:reset"]["relations"]
+        if relation["type"] == "cancels-state"
+    } == {"state:targeted", "state:immobilized-b"}
+    assert {
+        (relation["type"], relation["recordId"])
+        for relation in records["state:targeted"]["relations"]
+    } == {
+        ("modifies-rolls-for", "skill:bs-attack"),
+        ("modifies-rolls-for", "skill:discover"),
+        ("modifies-rolls-for", "skill:reset"),
+        ("restricts-use-of", "skill:cautious-movement"),
+        ("restricts-use-of", "skill:stealth"),
     }

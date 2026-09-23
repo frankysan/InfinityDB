@@ -1974,6 +1974,7 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'"negates-effects-of": { outbound: "Negates", inbound: "Negated by" }' in body
     assert b'"overrides-effects-of": { outbound: "Overrides", inbound: "Overridden by" }' in body
     assert b'"cancels-state": { outbound: "Cancels state", inbound: "Cancelled by" }' in body
+    assert b'"causes-state": { outbound: "Causes state", inbound: "Caused by" }' in body
     assert b'return `/states/${encodeURIComponent(record.id.slice(prefix.length))}`;' in body
     assert b'outbound: "Modifies rolls for"' in body
     assert b'inbound: "Rolls modified by"' in body

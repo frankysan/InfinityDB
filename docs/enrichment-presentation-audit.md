@@ -67,6 +67,7 @@ The recovery network extends the same principle to State pages. Doctor authors
 IMM-A, IMM-B, Isolated, Stunned, Targeted, and Unconscious. Each affected State page derives
 `Cancelled by` navigation, while VITA/STR requirements and alternative cancellation methods
 remain in the owning rule facts.
+Targeted extends State pages from recovery-only navigation into a full interaction hub. Forward Observer authors `causes-state` toward Targeted; Reset authors cancellation edges toward Targeted and IMM-B; and Targeted itself authors roll/restriction relationships toward BS Attack, Discover, Reset, Cautious Movement, and Stealth. A player can therefore start from either the State or one of the affected Skills and discover the interaction without duplicating exact MOD values across records.
 
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation

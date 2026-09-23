@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Expand Targeted State into a bidirectional interaction hub: Forward Observer now causes
+  Targeted, Reset cancels Targeted/IMM-B, and Targeted exposes which player-facing Skills
+  receive its roll modifiers or declaration restrictions. Reverse navigation is derived
+  automatically from the one-way curated graph.
 - Add a first-class rules-backed States catalog and bidirectional recovery graph: Doctor
   and Engineer now author typed State-cancellation relationships, while affected State
   pages expose derived `Cancelled by` navigation. The enrichment coverage audit now treats

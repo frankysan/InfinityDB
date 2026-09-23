@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 15,
+    "formatVersion": 16,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -468,6 +468,33 @@
             "title": "Infinity Wiki — Targeted State revision 3670",
             "version": "N5.3 / oldid 3670",
             "url": "https://infinitythewiki.com/index.php?title=Targeted_State&oldid=3670",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-forward-observer-oldid-3878",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Forward Observer revision 3878",
+            "version": "N5.3 / oldid 3878",
+            "url": "https://infinitythewiki.com/index.php?title=Forward_Observer&oldid=3878",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-reset-oldid-3056",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Reset revision 3056",
+            "version": "N5.3 / oldid 3056",
+            "url": "https://infinitythewiki.com/index.php?title=Reset&oldid=3056",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-cautious-movement-oldid-3931",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Cautious Movement revision 3931",
+            "version": "N5.3 / oldid 3931",
+            "url": "https://infinitythewiki.com/index.php?title=Cautious_Movement&oldid=3931",
             "authority": "secondary",
             "retrievedDate": "2026-09-23"
         }
@@ -6348,6 +6375,171 @@
             }
         },
         {
+            "id": "skill:forward-observer",
+            "kind": "skill",
+            "name": "Forward Observer",
+            "summary": "A Special Skill that makes a WIP-based BS Attack and places a successfully affected target in Targeted State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "short-skill",
+                "requirements": [
+                    "The user must be able to draw LoF to the target."
+                ],
+                "effects": [
+                    "Forward Observer is a BS Attack using a BS Weapon (WIP); instead of forcing a Saving Roll, a successful attack causes the target to enter Targeted State."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "bs-attack",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "forward-observer"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:targeted"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-forward-observer-oldid-3878",
+                    "heading": "Forward Observer"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:reset",
+            "kind": "skill",
+            "name": "Reset",
+            "summary": "A Common Skill used to oppose Comms Attacks and Guided attacks and to cancel Targeted or Immobilized-B State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeId": "short-skill",
+                "requirements": [
+                    "The user must be the Active Trooper or be allowed to declare an ARO."
+                ],
+                "effects": [
+                    "Reset uses WIP to oppose enemy Comms Attacks and BS Attacks (Guided); otherwise it is a Normal WIP Roll.",
+                    "A successful Reset Roll cancels the user's Targeted State and Immobilized-B State, applying any State-specific MODs."
+                ],
+                "restrictions": [
+                    "Reset does not evade other types of Attacks; Dodge is used for those instead."
+                ]
+            },
+            "labelIds": [
+                "no-lof"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "reset"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:targeted"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:immobilized-b"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-reset-oldid-3056",
+                    "heading": "Reset"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:cautious-movement",
+            "kind": "skill",
+            "name": "Cautious Movement",
+            "summary": "A Long Common Skill that can move a Trooper without generating enemy AROs when its start and end positions satisfy the rule's visibility and proximity limits.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeId": "long-skill",
+                "requirements": [],
+                "effects": [
+                    "The Trooper may move up to the first MOV value without generating enemy AROs when the movement begins and ends outside the required enemy LoF, Zone of Control, and applicable Hacking Areas."
+                ],
+                "restrictions": [
+                    "TAGs, Remotes, Vehicles, Troopers with Motorcycles, Troopers with Aerial, and Troopers in Targeted State cannot declare Cautious Movement."
+                ]
+            },
+            "labelIds": [
+                "movement",
+                "no-roll"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "cautious-movement"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-cautious-movement-oldid-3931",
+                    "heading": "Cautious Movement"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
             "id": "state:unconscious",
             "kind": "state",
             "name": "Unconscious State",
@@ -6626,7 +6818,29 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
-            }
+            },
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:discover"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:reset"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:cautious-movement"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:stealth"
+                }
+            ]
         }
     ]
 }

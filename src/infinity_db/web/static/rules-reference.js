@@ -35,6 +35,7 @@ const relationLabels = {
   "applies-effects-to": { outbound: "Effects apply to", inbound: "Affected by" },
   "controller-eligible-for": { outbound: "Can control", inbound: "Can be controlled by" },
   "cancels-state": { outbound: "Cancels state", inbound: "Cancelled by" },
+  "causes-state": { outbound: "Causes state", inbound: "Caused by" },
   "enters-state": { outbound: "Enters state", inbound: "Entered by" },
   "has-subtype": { outbound: "Includes subtype", inbound: "Subtype of" },
   "ignores-modifiers-from": {

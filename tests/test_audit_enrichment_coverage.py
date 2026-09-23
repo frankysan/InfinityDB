@@ -51,6 +51,14 @@ def _fixture_database(tmp_path: Path) -> Path:
             "skills": [
                 {"id": 74, "name": "Super-Jump"},
                 {"id": 10, "name": "Camouflage"},
+                {"id": 201, "name": "BS Attack"},
+                {"id": 278, "name": "BS=12"},
+                {"id": 279, "name": "BS=11"},
+                {"id": 3011, "name": "Discover"},
+                {"id": 3012, "name": "Stealth"},
+                {"id": 3013, "name": "Forward Observer"},
+                {"id": 3014, "name": "Reset"},
+                {"id": 3015, "name": "Cautious Movement"},
                 {"id": 999, "name": "Missing Skill"},
             ],
             "equip": [
@@ -99,8 +107,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 14
-    assert report["summary"]["completeCount"] == 10
+    assert report["summary"]["exposedCount"] == 20
+    assert report["summary"]["completeCount"] == 16
     assert report["summary"]["gapCount"] == 4
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
