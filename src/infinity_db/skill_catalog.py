@@ -34,6 +34,7 @@ class SkillCatalog:
         self.rules_database = rules_database
         self._category_index: dict[ArmyLinkRef, list[dict[str, Any]]] | None = None
         self._parameter_index: dict[ArmyLinkRef, dict[str, str]] | None = None
+        self._source_variant_index: dict[ArmyLinkRef, dict[str, Any]] | None = None
         self._training_index: dict[str, dict[str, Any]] | None = None
 
     def _ensure_category_index(self) -> None:
@@ -57,6 +58,21 @@ class SkillCatalog:
             if self.rules_database is None
             else self.rules_database.skill_parameter_semantics()
         )
+
+    def _ensure_source_variant_index(self) -> None:
+        if self._source_variant_index is not None:
+            return
+        self._source_variant_index = (
+            {}
+            if self.rules_database is None
+            else self.rules_database.catalog_source_variant_semantics("skill")
+        )
+
+    def _source_variant_semantics(self, skill_id: int) -> dict[str, Any] | None:
+        self._ensure_source_variant_index()
+        assert self._source_variant_index is not None
+        semantics = self._source_variant_index.get(skill_id)
+        return deepcopy(semantics) if semantics is not None else None
 
     def _army_refs_for_ids(self, skill_ids: set[int]) -> set[ArmyLinkRef]:
         refs: set[ArmyLinkRef] = set(skill_ids)
@@ -100,6 +116,9 @@ class SkillCatalog:
         semantics = self._parameter_semantics_for_ids({skill_id})
         if semantics is not None:
             item["parameter_semantics"] = semantics
+        source_variant = self._source_variant_semantics(skill_id)
+        if source_variant is not None:
+            item["source_variant"] = source_variant
 
     def _categories_for_ids(self, skill_ids: set[int]) -> list[dict[str, Any]]:
         self._ensure_category_index()
@@ -188,7 +207,11 @@ class SkillCatalog:
             if family_rules:
                 result["rules"] = list(family_rules.values())
             for variant in result.get("variants", []):
-                variant_rules = source_rules.get(int(variant["skill_id"]))
+                skill_id = int(variant["skill_id"])
+                source_variant = self._source_variant_semantics(skill_id)
+                if source_variant is not None:
+                    variant["source_variant"] = source_variant
+                variant_rules = source_rules.get(skill_id)
                 if variant_rules:
                     variant["rules"] = list(variant_rules.values())
         return result

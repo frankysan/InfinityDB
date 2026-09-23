@@ -7,6 +7,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed exact-source Level semantics for Martial Arts L1-L5 and Strategos L1-L2,
+  preserving their shared browsing families while exposing the applicable Level on each
+  source variant and Unit occurrence.
 - Show the existing curated rules reference on Skill, Trait, Equipment, and Weapon
   detail pages through one shared renderer, including applicability context and linked
   authoritative citations.

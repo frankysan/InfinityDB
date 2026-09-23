@@ -37,6 +37,14 @@ function formatVariantName(variant, parameterSemantics = null) {
   return extras.length ? `${variant.skill_name} (${extras.join(", ")})` : variant.skill_name;
 }
 
+function sourceVariantLabel(variant) {
+  const semantics = variant.source_variant;
+  if (!semantics) return null;
+  if (semantics.kind === "level") return `Level ${semantics.value}`;
+  if (semantics.kind === "named") return semantics.label;
+  return null;
+}
+
 function variantSection(variant, parameterSemantics) {
   const section = document.createElement("details");
   section.className = "explorer army-profile";
@@ -46,7 +54,9 @@ function variantSection(variant, parameterSemantics) {
   title.textContent = formatVariantName(variant, parameterSemantics);
   const count = document.createElement("span");
   count.className = "section-index";
-  count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
+  const semanticLabel = sourceVariantLabel(variant);
+  const unitCount = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
+  count.textContent = semanticLabel ? `${semanticLabel} · ${unitCount}` : unitCount;
   heading.append(title, count);
   section.append(heading);
   section.addEventListener("toggle", () => {

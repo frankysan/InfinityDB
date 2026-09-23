@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 5
-RULES_COMPATIBILITY_VERSION = 5
+RULES_SCHEMA_VERSION = 6
+RULES_COMPATIBILITY_VERSION = 6
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -476,6 +476,9 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
     result: dict[str, Any] = {"inheritance": raw["inheritance"]}
     if parameters:
         result["occurrence_parameters"] = parameters
+    source_variant = raw.get("sourceVariant")
+    if isinstance(source_variant, dict):
+        result["source_variant"] = dict(source_variant)
     return result
 
 
@@ -841,6 +844,41 @@ class RulesDatabase:
                         f"Skill {skill_ref!r} has conflicting curated parameter semantics"
                     )
                 result[skill_ref] = value
+            return result
+
+    def catalog_source_variant_semantics(
+        self, entity: str
+    ) -> dict[ArmyLinkRef, dict[str, Any]]:
+        """Return reviewed exact-source variant semantics for one catalog domain."""
+        if entity not in {"skill", "equipment", "weapon"}:
+            raise ValueError("Source variants support skill, equipment, or weapon entities")
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS army_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = ? AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = ? "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id",
+                (entity, entity),
+            ).fetchall()
+            result: dict[ArmyLinkRef, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict) or variant.get("inheritance") != "source":
+                    continue
+                source_variant = variant.get("source_variant")
+                if not isinstance(source_variant, dict):
+                    continue
+                army_ref = _army_link_ref(row["army_ref"])
+                existing = result.get(army_ref)
+                if existing is not None and existing != source_variant:
+                    raise ValueError(
+                        f"{entity.title()} {army_ref!r} has conflicting source variant semantics"
+                    )
+                result[army_ref] = dict(source_variant)
             return result
 
     def declaration_categories(self, entity: str) -> list[dict[str, Any]]:

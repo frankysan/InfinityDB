@@ -190,7 +190,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 7,
+    "formatVersion": 8,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -274,9 +274,12 @@ uncited category records to represent missing rules classification.
 Army-linked Skill, Equipment, and Weapon definitions declare
 `variantSemantics.inheritance` as `family` or `source`. Family semantics may be
 presented for the canonical application family. Source semantics require exactly one
-numeric Army source identity and a typed `variant-of` relation to a same-kind family
-definition; they apply only to that exact source variant. Supplements inherit Army
-routing from their definition and therefore do not declare their own `armyLinks`.
+numeric Army source identity, a typed `variant-of` relation to a same-kind family
+definition, and `variantSemantics.sourceVariant`. A numeric Level uses
+`{"kind": "level", "value": 2}`; a reviewed named variant uses
+`{"kind": "named", "label": "..."}`. These apply only to that exact source variant.
+Supplements inherit Army routing from their definition and therefore do not declare
+their own `armyLinks`.
 
 Rule-derived occurrence-parameter display behavior lives under
 `variantSemantics.occurrenceParameters`. The currently standardized parameter is an
@@ -339,8 +342,9 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Versions 1 and 2 curated-rule files are no longer accepted by the loader and
-must be migrated to the v3 source/citation contract before ingestion.
+Curated-rule files older than format v8 are no longer accepted by the loader and must
+be migrated to the current source/citation, composition, variant, declaration, and
+Training contracts before ingestion.
 
 The starter file `rules/example.json` is intentionally empty and is never an
 ingestion input. Directory ingestion skips that reserved filename. Validate all

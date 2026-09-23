@@ -13,7 +13,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 7,
+        "formatVersion": 8,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -224,6 +224,34 @@ def test_source_specific_variant_semantics_require_numeric_army_identity(
 
     with pytest.raises(ValueError, match="exact numeric Army source id"):
         load_curated_document(path)
+
+def test_source_specific_variant_semantics_require_typed_source_variant(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["armyLinks"] = [{"entity": "skill", "id": 20}]
+    record["variantSemantics"] = {"inheritance": "source"}
+    path = tmp_path / "missing-source-variant.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="require 'sourceVariant'"):
+        load_curated_document(path)
+
+    record["variantSemantics"]["sourceVariant"] = {"kind": "level", "value": 0}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="positive integer"):
+        load_curated_document(path)
+
+    record["variantSemantics"]["sourceVariant"] = {
+        "kind": "named",
+        "label": "Profile variant",
+    }
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][0]["variantSemantics"] == (
+        record["variantSemantics"]
+    )
+
 
 def test_catalog_rule_army_links_must_match_record_kind(tmp_path: Path) -> None:
     document = valid_document()

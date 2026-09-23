@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 111
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 120
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -195,6 +195,20 @@ def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> Non
         "super-jump": {"kind": "distance", "positive_sign": "omit"},
         "forward-deployment": {"kind": "distance", "positive_sign": "force"},
     }
+
+
+def test_rules_database_returns_reviewed_source_variant_semantics(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+
+    variants = RulesDatabase(output).catalog_source_variant_semantics("skill")
+
+    assert variants[19] == {"kind": "level", "value": 1}
+    assert variants[23] == {"kind": "level", "value": 5}
+    assert variants[69] == {"kind": "level", "value": 1}
+    assert variants[70] == {"kind": "level", "value": 2}
+
 
 def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
@@ -450,8 +464,11 @@ def test_rules_database_preserves_variant_inheritance_and_variant_links(
                 **common,
                 "id": "skill:variant-family-test-l2",
                 "name": "Variant Family Test L2",
-                "armyLinks": [{"entity": "skill", "id": 20}],
-                "variantSemantics": {"inheritance": "source"},
+                "armyLinks": [{"entity": "skill", "id": 92020}],
+                "variantSemantics": {
+                    "inheritance": "source",
+                    "sourceVariant": {"kind": "named", "label": "test variant"},
+                },
                 "relations": [
                     {"type": "variant-of", "recordId": "skill:variant-family-test"}
                 ],
@@ -463,10 +480,13 @@ def test_rules_database_preserves_variant_inheritance_and_variant_links(
 
     database = RulesDatabase(output)
     family = database.composed_records_for_army_link("skill", "variant-family-test")
-    exact = database.composed_records_for_army_link("skill", 20)
+    exact = database.composed_records_for_army_link("skill", 92020)
 
     assert family[0]["variant_semantics"] == {"inheritance": "family"}
-    assert exact[0]["variant_semantics"] == {"inheritance": "source"}
+    assert exact[0]["variant_semantics"] == {
+        "inheritance": "source",
+        "source_variant": {"kind": "named", "label": "test variant"},
+    }
     assert exact[0]["relations"] == [
         {
             "type": "variant-of",
@@ -500,7 +520,10 @@ def test_export_rejects_source_specific_variant_without_family_relation(
             "composition": {"role": "definition"},
             "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
             "armyLinks": [{"entity": "skill", "id": 20}],
-            "variantSemantics": {"inheritance": "source"},
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {"kind": "named", "label": "test variant"},
+            },
         }
     )
 

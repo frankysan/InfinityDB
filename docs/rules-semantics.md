@@ -1003,6 +1003,11 @@ The existing canonical grouping of Martial Arts L1-L5 and Strategos L1-L2 is
 therefore compatible with the rules only while the source Level remains
 preserved and presentable.
 
+This is now implemented in curated format v8: Martial Arts source IDs 19-23 are typed
+as Levels 1-5 and Strategos source IDs 69-70 as Levels 1-2. The application keeps the
+family browsing identity while exposing the exact Level as `source_variant` metadata on
+the matching source occurrence; no `L<number>` runtime name parsing is used.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module#Levels.2C_Labels_and_Traits>

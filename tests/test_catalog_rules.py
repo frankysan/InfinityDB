@@ -77,7 +77,10 @@ def test_catalog_rules_keep_source_specific_rules_on_matching_variant(
                 "name": "TinBot: Discover",
                 "summary": "Discover variant semantics only.",
                 "armyLinks": [{"entity": "equipment", "id": 244}],
-                "variantSemantics": {"inheritance": "source"},
+                "variantSemantics": {
+                    "inheritance": "source",
+                    "sourceVariant": {"kind": "named", "label": "test variant"},
+                },
                 "relations": [
                     {"type": "variant-of", "recordId": "equipment:tinbot"}
                 ],

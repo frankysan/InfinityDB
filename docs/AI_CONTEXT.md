@@ -555,11 +555,11 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v6 rules contract includes collection/source metadata,
+The current curated-v8 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
-edges, composition role, review state, and citations. Older formats must be migrated
-before ingestion. The
+edges, composition role, review state, exact-source variant semantics, and citations.
+Older formats must be migrated before ingestion. The
 reserved `rules/example.json` template is excluded from directory ingestion.
 
 The rules database has its own schema/versioning and replacement lifecycle. It
@@ -1242,3 +1242,21 @@ compatibility references remain unambiguous JSON integers.
 - Declaration records are composition metadata, not ordinary rule-summary records.
   Skills without a reviewed declaration retain the uncited `Unclassified` fallback;
   Equipment receives no invented fallback category.
+
+## 0.7.0 typed source-Level semantics (2026-09-23)
+
+- Curated rules format v8 and `rules.db` schema/compatibility 6 require every
+  `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
+  Supported first-phase kinds are numeric `level` and explicit `named`; family records
+  may not declare source-variant metadata.
+- Martial Arts source IDs 19-23 are reviewed Level 1-5 variants of the canonical
+  `martial-arts` Skill family. Strategos source IDs 69-70 are reviewed Level 1-2
+  variants of `strategos`. The family remains the browsing identity while exact source
+  occurrences retain the Level that controls applicable rules.
+- `RulesDatabase.catalog_source_variant_semantics()` exposes exact-source semantics and
+  `SkillCatalog` attaches them as `source_variant` to matching Skill variants and Unit
+  occurrences. The browser may label those variants from structured data; it does not
+  infer Level semantics from an `L<number>` display-name suffix.
+- This does not classify generic parenthetical MOD syntax. Bare signed values remain
+  opaque until the owning rule supplies reviewed target/operation semantics; Level
+  identity and occurrence parameters remain separate axes.

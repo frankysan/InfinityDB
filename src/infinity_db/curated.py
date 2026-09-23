@@ -9,7 +9,7 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 7
+CURATED_FORMAT_VERSION = 8
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -48,6 +48,7 @@ CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
 VARIANT_PARAMETER_KINDS = frozenset({"distance"})
+SOURCE_VARIANT_KINDS = frozenset({"level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
 
 
@@ -56,7 +57,7 @@ def _validate_variant_semantics(
 ) -> str:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
-    allowed = {"inheritance", "occurrenceParameters"}
+    allowed = {"inheritance", "occurrenceParameters", "sourceVariant"}
     unknown = set(value) - allowed
     if unknown:
         raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
@@ -103,6 +104,7 @@ def _validate_variant_semantics(
             raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")
         seen_parameters.add(key)
 
+    source_variant = value.get("sourceVariant")
     if inheritance == "source":
         if len(army_links) != 1:
             raise ValueError(
@@ -113,6 +115,38 @@ def _validate_variant_semantics(
             raise ValueError(
                 f"{context}: source-specific semantics require an exact numeric Army source id"
             )
+        if not isinstance(source_variant, dict):
+            raise ValueError(
+                f"{context}: source-specific semantics require 'sourceVariant'"
+            )
+        kind = source_variant.get("kind")
+        if kind not in SOURCE_VARIANT_KINDS:
+            raise ValueError(
+                f"{context}.sourceVariant: 'kind' must be one of "
+                f"{sorted(SOURCE_VARIANT_KINDS)}"
+            )
+        if kind == "level":
+            if set(source_variant) != {"kind", "value"}:
+                raise ValueError(
+                    f"{context}.sourceVariant: level variants must contain only "
+                    "'kind' and 'value'"
+                )
+            _require_positive_int(
+                source_variant.get("value"), "value", f"{context}.sourceVariant"
+            )
+        else:
+            if set(source_variant) != {"kind", "label"}:
+                raise ValueError(
+                    f"{context}.sourceVariant: named variants must contain only "
+                    "'kind' and 'label'"
+                )
+            _require_string(
+                source_variant.get("label"), "label", f"{context}.sourceVariant"
+            )
+    elif source_variant is not None:
+        raise ValueError(
+            f"{context}: family semantics must not declare 'sourceVariant'"
+        )
     return inheritance
 
 

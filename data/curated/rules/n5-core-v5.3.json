@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 7,
+    "formatVersion": 8,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -4287,6 +4287,481 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
             }
+        },
+        {
+            "id": "skill:martial-arts",
+            "kind": "skill",
+            "name": "Martial Arts",
+            "summary": "An Automatic Special Skill with discrete Levels; the exact Level listed for a Trooper determines the applicable Level effects.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "martial-arts"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100,
+                    "section": "Martial Arts"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:martial-arts-l1",
+            "kind": "skill",
+            "name": "Martial Arts L1",
+            "summary": "The Level 1 source variant of Martial Arts. Levels are discrete rather than cumulative, so this occurrence identifies Level 1 specifically.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 19
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100,
+                    "section": "Martial Arts"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "level",
+                    "value": 1
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:martial-arts"
+                }
+            ]
+        },
+        {
+            "id": "skill:martial-arts-l2",
+            "kind": "skill",
+            "name": "Martial Arts L2",
+            "summary": "The Level 2 source variant of Martial Arts. Levels are discrete rather than cumulative, so this occurrence identifies Level 2 specifically.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 20
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100,
+                    "section": "Martial Arts"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "level",
+                    "value": 2
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:martial-arts"
+                }
+            ]
+        },
+        {
+            "id": "skill:martial-arts-l3",
+            "kind": "skill",
+            "name": "Martial Arts L3",
+            "summary": "The Level 3 source variant of Martial Arts. Levels are discrete rather than cumulative, so this occurrence identifies Level 3 specifically.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 21
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100,
+                    "section": "Martial Arts"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "level",
+                    "value": 3
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:martial-arts"
+                }
+            ]
+        },
+        {
+            "id": "skill:martial-arts-l4",
+            "kind": "skill",
+            "name": "Martial Arts L4",
+            "summary": "The Level 4 source variant of Martial Arts. Levels are discrete rather than cumulative, so this occurrence identifies Level 4 specifically.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 22
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100,
+                    "section": "Martial Arts"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "level",
+                    "value": 4
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:martial-arts"
+                }
+            ]
+        },
+        {
+            "id": "skill:martial-arts-l5",
+            "kind": "skill",
+            "name": "Martial Arts L5",
+            "summary": "The Level 5 source variant of Martial Arts. Levels are discrete rather than cumulative, so this occurrence identifies Level 5 specifically.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 23
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100,
+                    "section": "Martial Arts"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "level",
+                    "value": 5
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:martial-arts"
+                }
+            ]
+        },
+        {
+            "id": "skill:strategos",
+            "kind": "skill",
+            "name": "Strategos",
+            "summary": "An Automatic Special Skill with discrete Levels; the exact Level listed for a Trooper determines the applicable Strategos effects.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "strategos"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 113,
+                    "section": "Strategos"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:strategos-l1",
+            "kind": "skill",
+            "name": "Strategos L1",
+            "summary": "The Level 1 source variant of Strategos. Levels are discrete rather than cumulative, so this occurrence identifies Level 1 specifically.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 69
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 113,
+                    "section": "Strategos"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "level",
+                    "value": 1
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:strategos"
+                }
+            ]
+        },
+        {
+            "id": "skill:strategos-l2",
+            "kind": "skill",
+            "name": "Strategos L2",
+            "summary": "The Level 2 source variant of Strategos. Levels are discrete rather than cumulative, so this occurrence identifies Level 2 specifically.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeId": "automatic"
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 70
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 113,
+                    "section": "Strategos"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 76,
+                    "section": "Levels, Labels and Traits"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "level",
+                    "value": 2
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "skill:strategos"
+                }
+            ]
         }
     ]
 }
