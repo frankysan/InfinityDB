@@ -71,6 +71,11 @@ Targeted extends State pages from recovery-only navigation into a full interacti
 
 Camouflaged State is now a reviewed lifecycle hub rather than a draft supporting record: Camouflage enters it, Discover and Sensor reveal it, and the State itself enables the documented Marker-form prerequisite for Surprise Attack. Hidden Deployment State authors the same `enables-use-of` relationship. Surprise Attack therefore exposes both enabling States in reverse while retaining its separate Active Turn and Attack-declaration requirements.
 
+Restrictive-State self-recovery is also modeled in both directions. IMM-A links to Dodge
+and its PH -6 recovery Roll; IMM-B and Isolated link to Reset and their WIP -3 / WIP -9
+recovery Rolls. Dodge and Reset therefore expose which States they can cancel and which
+States modify those Rolls, while the exact MOD values remain on the State definitions.
+
 Raw ontology edges are not themselves UI copy. Relationship types need
 player-language, direction-aware labels, target identities need useful navigation
 when a browser surface exists, and bookkeeping edges such as `variant-of` should

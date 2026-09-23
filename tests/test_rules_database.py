@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 156
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 157
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -945,4 +945,50 @@ def test_targeted_interaction_hub_is_bidirectional(tmp_path: Path) -> None:
     assert ("restricts-use-of", "inbound", "Targeted State") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in cautious_movement["display_relations"]
+    }
+
+
+def test_state_self_recovery_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    dodge = skill("dodge", "skill:dodge")
+    reset = skill("reset", "skill:reset")
+    states = {item["id"]: item for item in database.composed_records_by_kind("state")}
+    immobilized_a = states["state:immobilized-a"]
+    immobilized_b = states["state:immobilized-b"]
+    isolated = states["state:isolated"]
+
+    assert ("cancels-state", "outbound", "Immobilized-A State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in dodge["display_relations"]
+    }
+    assert ("modifies-rolls-for", "inbound", "Immobilized-A State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in dodge["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Dodge") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in immobilized_a["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in immobilized_b["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Isolated State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in reset["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in isolated["display_relations"]
     }

@@ -155,6 +155,9 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Review Camouflage/Camouflaged State and model the documented Surprise Attack
     prerequisite bidirectionally: Camouflaged and Hidden Deployment States enable use of
     Surprise Attack while the Skill retains its remaining Active Turn/Attack requirements.
+  - [x] Model reviewed self-recovery interactions for restrictive States: Dodge cancels
+    IMM-A at PH -6; Reset cancels IMM-B at WIP -3 and Isolated at WIP -9. State pages
+    expose both the cancellation path and the State-specific roll modifier bidirectionally.
   - [x] Keep semantic identity, source publication provenance, and applicability
     scope separate so core, annex, FAQ, season, or scenario material can enrich the
     same canonical item without duplication or collection-load-order semantics.

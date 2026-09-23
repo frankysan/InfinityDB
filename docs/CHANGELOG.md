@@ -7,6 +7,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add bidirectional restrictive-State self-recovery interactions: Dodge now cancels IMM-A,
+  Reset also cancels Isolated, and IMM-A / IMM-B / Isolated expose the State-specific Dodge
+  or Reset roll interaction from both endpoints without duplicating the exact MOD values.
 - Expand Targeted State into a bidirectional interaction hub: Forward Observer now causes
   Targeted, Reset cancels Targeted/IMM-B, and Targeted exposes which player-facing Skills
   receive its roll modifiers or declaration restrictions. Reverse navigation is derived

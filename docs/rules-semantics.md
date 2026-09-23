@@ -637,9 +637,10 @@ Sources:
 Skills such as Doctor and Engineer explicitly cancel named States under their own
 requirements. InfinityDB should author that fact once as a typed `cancels-state` edge from
 the Skill to the State and derive the reverse navigation on the State page. The edge says
-that a cancellation path exists; VITA/STR requirements, Roll outcomes, alternative Reset or
-Dodge cancellation paths, and automatic phase cancellation remain facts of the owning rules
-and must not be flattened into the edge itself.
+that a cancellation path exists. Reviewed self-recovery paths such as Dodge or Reset may
+also be authored as `cancels-state` edges; exact Attribute MODs, declaration conditions,
+Roll outcomes, and automatic phase cancellation remain facts of the owning rules and must
+not be flattened into the edge itself.
 
 This is the first interaction family that requires State identities to be directly browsable:
 a player looking at Targeted, Immobilized-B, or Unconscious should be able to discover the
@@ -662,7 +663,7 @@ them and then projected in reverse automatically.
 Targeted State is the canonical example:
 
 - Forward Observer explicitly causes Targeted State, represented by `causes-state`.
-- Reset cancels Targeted State and Immobilized-B State, represented by `cancels-state`.
+- Reset cancels Targeted, Immobilized-B, and Isolated States, represented by `cancels-state`.
 - Targeted modifies rolls for BS Attack, Discover, and Reset.
 - Targeted prevents Cautious Movement and Stealth, represented by `restricts-use-of`.
 
@@ -701,6 +702,33 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Camouflaged>
 - Wiki: <https://infinitythewiki.com/Hidden_Deployment_State>
 - Wiki: <https://infinitythewiki.com/Surprise_Attack>
+
+### RS-GSG-STATE-005D — Self-recovery rolls are both cancellation and roll interactions
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+Some restrictive States provide a self-recovery Skill and modify the Roll used to escape
+the State. InfinityDB should model both facts when reviewed:
+
+- Immobilized-A allows Dodge as the exceptional declaration, applies PH -6 to that Dodge,
+  and a successful Dodge cancels the State.
+- Immobilized-B allows Reset as the exceptional declaration, applies WIP -3 to that Reset,
+  and a successful Reset cancels the State.
+- Isolated applies WIP -9 to Reset, and a successful Reset cancels the State.
+
+The cancellation capability is represented by `cancels-state`; the State-specific Roll
+interaction is represented separately by `modifies-rolls-for`. This lets a player discover
+the escape route from the State page and also see, from Dodge or Reset, which States alter
+that recovery Roll. Exact MOD values remain in the State facts rather than being encoded in
+the graph edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Dodge>
+- Wiki: <https://infinitythewiki.com/Reset>
+- Wiki: <https://infinitythewiki.com/Immobilized-A_State>
+- Wiki: <https://infinitythewiki.com/Immobilized-B_State>
+- Wiki: <https://infinitythewiki.com/Isolated_State>
 
 ### RS-GSG-STATE-006 — Unloaded is item-specific runtime state
 

@@ -950,7 +950,7 @@ def test_checked_in_n5_collection_models_targeted_interaction_hub() -> None:
         relation["recordId"]
         for relation in records["skill:reset"]["relations"]
         if relation["type"] == "cancels-state"
-    } == {"state:targeted", "state:immobilized-b"}
+    } == {"state:targeted", "state:immobilized-b", "state:isolated"}
     assert {
         (relation["type"], relation["recordId"])
         for relation in records["state:targeted"]["relations"]
@@ -961,3 +961,28 @@ def test_checked_in_n5_collection_models_targeted_interaction_hub() -> None:
         ("restricts-use-of", "skill:cautious-movement"),
         ("restricts-use-of", "skill:stealth"),
     }
+
+
+def test_checked_in_n5_collection_models_state_self_recovery_rolls() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:dodge"]["relations"] == [
+        {"type": "cancels-state", "recordId": "state:immobilized-a"}
+    ]
+    assert (
+        "modifies-rolls-for",
+        "skill:dodge",
+    ) in {
+        (relation["type"], relation["recordId"])
+        for relation in records["state:immobilized-a"]["relations"]
+    }
+    assert {
+        (relation["type"], relation["recordId"])
+        for relation in records["state:immobilized-b"]["relations"]
+    } >= {("modifies-rolls-for", "skill:reset")}
+    assert {
+        (relation["type"], relation["recordId"])
+        for relation in records["state:isolated"]["relations"]
+    } >= {("modifies-rolls-for", "skill:reset")}
