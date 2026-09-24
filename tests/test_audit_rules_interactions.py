@@ -20,31 +20,31 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 187
-    assert report["summary"]["authoredOutgoingRelationCount"] == 218
+    assert report["summary"]["recordCount"] == 190
+    assert report["summary"]["authoredOutgoingRelationCount"] == 230
     assert report["summary"]["futureInteractionCount"] == 105
     assert report["summary"]["releases"]["0.7.0"] == {
-        "total": 187,
-        "complete": 187,
+        "total": 190,
+        "complete": 190,
         "pending": 0,
-        "reviewed": 177,
+        "reviewed": 180,
         "inherited": 10,
         "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 180,
-        "complete": 159,
-        "pending": 21,
-        "percentComplete": 88.3,
+        "complete": 162,
+        "pending": 18,
+        "percentComplete": 90.0,
         "catalogs": {
             "skills": {
                 "total": 95,
-                "complete": 74,
-                "pending": 21,
-                "defined": 74,
-                "missingRuleDefinition": 21,
-                "percentComplete": 77.9,
+                "complete": 77,
+                "pending": 18,
+                "defined": 77,
+                "missingRuleDefinition": 18,
+                "percentComplete": 81.1,
             },
             "equipment": {
                 "total": 28,
@@ -318,9 +318,27 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert set(items["skill:protheion"]["relations"]) == {
         ("applies-effects-to", "skill:cc-attack")
     }
+    assert set(items["skill:paramedic"]["relations"]) == {
+        ("uses-effects-of", "equipment:medikit")
+    }
+    assert set(items["skill:tech-recovery"]["relations"]) == {
+        ("applies-effects-to", "equipment:gizmokit"),
+        ("cancels-state", "state:disconnected"),
+        ("cancels-state", "state:immobilized-a"),
+        ("cancels-state", "state:immobilized-b"),
+        ("cancels-state", "state:isolated"),
+        ("cancels-state", "state:stunned"),
+        ("cancels-state", "state:targeted"),
+    }
+    assert set(items["skill:technorganic"]["relations"]) == {
+        ("applies-effects-to", "skill:doctor"),
+        ("applies-effects-to", "skill:engineer"),
+        ("applies-effects-to", "equipment:medikit"),
+        ("applies-effects-to", "equipment:gizmokit"),
+    }
 
     expected = render_markdown(report)
-    assert "Skill **74/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
+    assert "Skill **77/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -339,8 +357,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 159/180 complete" in output
-    assert "21 pending" in output
+    assert "0.7.0 primary catalog: 162/180 complete" in output
+    assert "18 pending" in output
     assert "0 supporting identities pending" in output
 
 

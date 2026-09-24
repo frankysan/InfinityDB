@@ -22,15 +22,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 159/180 complete (88.3%), 21 pending.**
-- Primary domains: Skill **74/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 162/180 complete (90.0%), 18 pending.**
+- Primary domains: Skill **77/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **28/28** complete, **0** pending.
-- Current authored outgoing relations: **218**.
+- Current authored outgoing relations: **230**.
 - Explicitly tracked future/deferred interactions: **105**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (74/95)
+### Skill (77/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -232,8 +232,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Parachutist** (`skill:parachutist`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
-- [ ] **Paramedic** (`skill:paramedic`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Paramedic** (`skill:paramedic`) — reviewed
+  - `uses-effects-of` → MediKit (`equipment:medikit`)
 - [x] **Peripheral** (`skill:peripheral`) — reviewed
   - `has-subtype` → Peripheral (Servant) (`rule:peripheral-type:servant`)
   - `has-subtype` → Peripheral (Synchronized) (`rule:peripheral-type:synchronized`)
@@ -309,10 +309,19 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Tactical Order (`rule:tactical-order`)
 - [ ] **TAGCom** (`skill:tagcom`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Tech-recovery** (`skill:tech-recovery`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Technorganic** (`skill:technorganic`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Tech-recovery** (`skill:tech-recovery`) — reviewed
+  - `applies-effects-to` → GizmoKit (`equipment:gizmokit`)
+  - `cancels-state` → Disconnected State (`state:disconnected`)
+  - `cancels-state` → Immobilized-A State (`state:immobilized-a`)
+  - `cancels-state` → Immobilized-B State (`state:immobilized-b`)
+  - `cancels-state` → Isolated State (`state:isolated`)
+  - `cancels-state` → Stunned State (`state:stunned`)
+  - `cancels-state` → Targeted State (`state:targeted`)
+- [x] **Technorganic** (`skill:technorganic`) — reviewed
+  - `applies-effects-to` → Doctor (`skill:doctor`)
+  - `applies-effects-to` → Engineer (`skill:engineer`)
+  - `applies-effects-to` → MediKit (`equipment:medikit`)
+  - `applies-effects-to` → GizmoKit (`equipment:gizmokit`)
 - [x] **Terrain** (`skill:terrain`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `applies-effects-to` → `rule:movement-label` — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.

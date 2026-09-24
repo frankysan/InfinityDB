@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed recovery-support rules for Paramedic, Tech-Recovery, and Technorganic.
+  Connect Paramedic to MediKit, expose Tech-Recovery's GizmoKit-driven cancellation of
+  Engineer-recoverable States other than Unconscious, and show how Technorganic lets
+  medical and engineering recovery cross the normal VITA/STR eligibility boundary.
 - Add reviewed survivability/recovery rules for Dogged, No Wound Incapacitation, Remote
   Presence, Shasvastii, Regeneration, and Protheion. Expose their stable Unconscious/Normal/Dead,
   repair, and CC Attack interactions while retaining conditional healing, Wound-threshold,

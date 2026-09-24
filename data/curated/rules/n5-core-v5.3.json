@@ -984,6 +984,33 @@
             "url": "https://infinitythewiki.com/index.php?title=Command_Tokens&oldid=3959",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-paramedic-oldid-3119",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Paramedic revision 3119",
+            "version": "N5.3 / oldid 3119",
+            "url": "https://infinitythewiki.com/index.php?title=Paramedic&oldid=3119",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-tech-recovery-oldid-4090",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Tech-Recovery revision 4090",
+            "version": "N5.3 / oldid 4090",
+            "url": "https://infinitythewiki.com/index.php?title=Tech-Recovery&oldid=4090",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-technorganic-oldid-4089",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Technorganic revision 4089",
+            "version": "N5.3 / oldid 4089",
+            "url": "https://infinitythewiki.com/index.php?title=Technorganic&oldid=4089",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -12241,6 +12268,217 @@
                 {
                     "sourceId": "wiki-tactical-awareness-oldid-3595",
                     "heading": "Tactical Awareness"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:paramedic",
+            "kind": "skill",
+            "name": "Paramedic",
+            "summary": "An obligatory Automatic Special Skill that equips the user with a MediKit for recovering Unconscious allies.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user is equipped with a MediKit to recover allied Troopers from Unconscious State."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "paramedic"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:medikit"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-paramedic-oldid-3119",
+                    "heading": "Paramedic"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:tech-recovery",
+            "kind": "skill",
+            "name": "Tech-Recovery",
+            "summary": "An optional Automatic Special Skill that lets an allied GizmoKit cancel Engineer-recoverable States through the user’s PH Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must be in a State that can be canceled by Engineer.",
+                    "An allied GizmoKit must successfully hit the user or be applied through Silhouette contact."
+                ],
+                "effects": [
+                    "A successful Normal PH Roll cancels all of the user’s States that Engineer can cancel, except Unconscious State.",
+                    "A failed PH Roll has no negative consequence and the recovery can be tried again in a later Order.",
+                    "If the user has a GizmoKit PH value listed in its Unit Profile, use that PH value when a GizmoKit is used on the user.",
+                    "Tech-Recovery remains active while the user is in a Null State."
+                ],
+                "restrictions": [
+                    "Tech-Recovery does not cancel Unconscious State; resolve the GizmoKit using its normal Unconscious-recovery rules instead."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "tech-recovery"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "equipment:gizmokit"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:disconnected"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:immobilized-a"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:immobilized-b"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:isolated"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:stunned"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:targeted"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-tech-recovery-oldid-4090",
+                    "heading": "Tech-Recovery"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:technorganic",
+            "kind": "skill",
+            "name": "Technorganic",
+            "summary": "An optional Automatic Special Skill that allows an Unconscious Trooper to be recovered by medical or engineering methods regardless of VITA or STR.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must be in Unconscious State."
+                ],
+                "effects": [
+                    "Doctor, Engineer, MediKit, and GizmoKit may cancel the user’s Unconscious State regardless of whether the user has the VITA or STR Attribute.",
+                    "Technorganic remains active while the user is in a Null State."
+                ],
+                "restrictions": [
+                    "Outside Unconscious State, Technorganic does not extend those recovery methods beyond their normal VITA or STR applicability."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "technorganic"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:doctor"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:engineer"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "equipment:medikit"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "equipment:gizmokit"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-technorganic-oldid-4089",
+                    "heading": "Technorganic"
                 }
             ],
             "review": {

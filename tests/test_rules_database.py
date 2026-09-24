@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 247
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 250
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -1137,6 +1137,31 @@ def test_state_recovery_interactions_are_bidirectional(tmp_path: Path) -> None:
         for item in database.composed_records_for_army_link("skill", "engineer")
         if item["id"] == "skill:engineer"
     )
+    paramedic = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "paramedic")
+        if item["id"] == "skill:paramedic"
+    )
+    tech_recovery = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "tech-recovery")
+        if item["id"] == "skill:tech-recovery"
+    )
+    technorganic = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "technorganic")
+        if item["id"] == "skill:technorganic"
+    )
+    gizmokit = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "gizmokit")
+        if item["id"] == "equipment:gizmokit"
+    )
+    medikit = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "medikit")
+        if item["id"] == "equipment:medikit"
+    )
     states = {item["id"]: item for item in database.composed_records_by_kind("state")}
 
     assert ("cancels-state", "outbound", "Unconscious State") in {
@@ -1154,6 +1179,40 @@ def test_state_recovery_interactions_are_bidirectional(tmp_path: Path) -> None:
     assert ("cancels-state", "inbound", "Engineer") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in states["state:targeted"]["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "MediKit") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in paramedic["display_relations"]
+    }
+    assert ("uses-effects-of", "inbound", "Paramedic") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in medikit["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tech_recovery["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Unconscious State") not in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tech_recovery["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Tech-Recovery") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in states["state:targeted"]["display_relations"]
+    }
+    assert ("applies-effects-to", "inbound", "Tech-Recovery") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in gizmokit["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in technorganic["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("applies-effects-to", "outbound", "Doctor"),
+        ("applies-effects-to", "outbound", "Engineer"),
+        ("applies-effects-to", "outbound", "GizmoKit"),
+        ("applies-effects-to", "outbound", "MediKit"),
     }
 
 
