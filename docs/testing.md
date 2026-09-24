@@ -29,8 +29,10 @@ The named profiles are
 
 ## Graphical asset test modes
 
-The test stage has an explicit policy for the ignored Corvus Belli graphical
-asset tree:
+The test stage has an explicit policy for the currently ignored Corvus Belli
+graphical publication. The publication may be redistributed with InfinityDB under
+Corvus Belli's explicit non-commercial permission; the ignored layout remains a
+current repository/testing implementation detail:
 
 ```powershell
 # Hermetic tests only; suitable for clean/public CI
@@ -70,7 +72,7 @@ Use `python -m pytest -m full_assets -q` only when debugging those integration
 tests directly. Normal development/handoff runs should prefer `run_checks.py`
 because it validates the asset set before enabling them. Hermetic web tests use
 project-owned temporary SVG fixtures to retain coverage of dynamic SVG serving
-without redistributing third-party artwork.
+without depending on the complete processed graphical publication.
 
 ## Parallel pytest execution
 
@@ -136,9 +138,12 @@ because it requires a Docker daemon. The configured GitHub Actions `Deployment s
 workflow builds the real application databases from a small synthetic Army
 fixture plus the tracked curated rules collection, builds the Docker image, and
 uses `scripts/verify-container-image.sh` to validate image contents and healthy
-production startup. `--redistributable` rejects locally acquired Corvus Belli
-graphical-asset trees. Local production deployment uses the complementary
-`--published-assets` mode after `tools/verify_deployment_assets.py` has bound the
+production startup. The legacy `--redistributable` mode rejects the currently
+ignored Corvus Belli graphical-asset trees to preserve the existing asset-free
+smoke contract; its name
+no longer describes a legal redistribution restriction. Local production deployment
+uses the complementary `--published-assets` mode after
+`tools/verify_deployment_assets.py` has bound the
 host publication to terminal symbol-build manifest state; it revalidates the
 installed inventory/hashes and live symbol routes before Compose activation.
 The workflow stages its fixture databases and Docker context under the runner
@@ -184,8 +189,9 @@ project runner with
 `--assets required`. Configure `FULL_ASSET_BUNDLE_URL` and
 `FULL_ASSET_BUNDLE_SHA256` as environment secrets before it can run successfully.
 The workflow does not upload the graphical tree as an artifact. See
-[the continuous integration strategy](ci.md) for the security and redistribution
-boundary.
+[the continuous integration strategy](ci.md) for the operational boundary between
+hermetic CI, the current private bundle, and the permitted processed
+graphical publication.
 
 ## Reports
 

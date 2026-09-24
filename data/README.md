@@ -137,6 +137,8 @@ where local data classes live; it does not duplicate the complete processing
 algorithm or backlog.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
-Belli graphical assets are not automatically covered by InfinityDB's MIT
-License. Review the repository's [third-party notices](../THIRD_PARTY_NOTICES.md)
-before redistributing any snapshot or derived artifact that contains them.
+Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli
+has explicitly permitted InfinityDB to redistribute the processed graphical
+publication used by this non-commercial project; raw Army/wiki/PDF/source-symbol
+archives remain separate local/provenance inputs by project policy. Review the
+repository's [third-party notices](../THIRD_PARTY_NOTICES.md) for the full boundary.

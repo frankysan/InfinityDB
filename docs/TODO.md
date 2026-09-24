@@ -377,10 +377,13 @@ requiring a new top-level browser surface in 0.7.0.
     rules are grouped consistently by gameplay meaning; and gameplay context now precedes
     provenance in the shared renderer. Responsive/composed-page acceptance remains in
     the dedicated presentation-audit tasks above.
-  - [ ] Revise repository and application language about Corvus Belli assets to
-    reflect the explicit permission to use and redistribute the graphical assets
-    used by InfinityDB, while keeping those assets separate from the MIT-licensed
-    InfinityDB code and retaining the non-commercial/attribution requirements.
+  - [x] Revise repository and application language about Corvus Belli assets to
+    reflect the explicit permission granted on 2026-09-24 to use and redistribute
+    the graphical assets used by InfinityDB. The maintained policy now distinguishes
+    the permitted processed SVG publication from raw Army/wiki/PDF/source-symbol
+    archives, keeps Corvus Belli material outside the MIT License, records the
+    attribution/non-commercial requirements, and treats the current ignored asset
+    layout as an implementation detail rather than a rights restriction.
   - [ ] Rewrite the landing page and About page to reflect the current state of the
     project and give users a concise indication of the planned direction.
   - [ ] Make the landing page explicitly identify InfinityDB as an open-source
@@ -627,14 +630,14 @@ work is limited to:
     confirmed player-relevant Fireteam information into the 1.0 completeness
     backlog.
   - [ ] Exercise degraded states deliberately: rules database available versus
-    unavailable; clean redistributable source checkout without graphical assets;
-    complete local published assets; unknown unit/catalog/trait IDs; empty search
+    unavailable; clean source checkout without the processed graphical publication;
+    complete published assets; unknown unit/catalog/trait IDs; empty search
     or filter results; invalid query parameters; missing catalog enrichment;
     stale version/snapshot detection; and database/symbol snapshot mismatch.
   - [ ] Verify the three supported runtime contexts independently: a clean source
-    checkout without redistributed Corvus Belli graphics, local development with
-    explicitly supplied generated artifacts, and production deployment that fails
-    closed for incomplete or mismatched databases/assets. Passing one context does
+    checkout without the processed Corvus Belli graphical publication, local
+    development with explicitly supplied generated artifacts, and production
+    deployment that fails closed for incomplete or mismatched databases/assets. Passing one context does
     not establish the others.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
     coverage where practical. Record intentional deferrals in the audit document

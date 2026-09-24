@@ -122,6 +122,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Update the project-wide Corvus Belli asset policy to reflect the explicit 2026-09-24
+  permission to use and redistribute Infinity graphical assets for InfinityDB's
+  non-commercial scope. Processed SVGs may be included in public repositories and
+  build/deployment packages with attribution and license separation, while raw
+  Army/wiki/PDF/source-symbol archives remain outside Git by project policy.
 - Complete the post-vetting catalog consistency pass: normalize Infinity rules terminology
   across maintained editorial text, make gameplay summaries lead source/applicability
   provenance, and regroup Related rules into clearer enabling, State, MOD/change, and

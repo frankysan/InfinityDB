@@ -7,8 +7,10 @@ smoke, local asset-test policy, and dispatch-only full-asset workflow are curren
 behavior.
 
 The goal is to make a clean checkout independently trustworthy while still
-supporting deeper validation against a complete local Corvus Belli graphical
-asset set when one is legitimately available.
+supporting deeper validation against a complete Corvus Belli graphical
+publication. Redistribution of that processed publication is explicitly permitted
+for InfinityDB's non-commercial scope; CI independence is an engineering choice,
+not a licensing requirement.
 
 ## Principles
 
@@ -27,9 +29,11 @@ asset set when one is legitimately available.
 5. **Platform behavior is part of correctness.** Maintained Python tooling should
    be exercised on Windows, Ubuntu/Linux, and macOS where practical, especially
    filesystem/path-sensitive tooling.
-6. **Third-party graphical assets are not CI artifacts.** Public workflows must
-   not upload acquired Corvus Belli SVG trees or derived copies merely to make
-   testing convenient.
+6. **Raw third-party acquisition inputs are not routine CI artifacts.** Public
+   workflows must not upload Army/wiki/PDF/source-symbol archives merely to make
+   testing convenient. Corvus Belli has permitted redistribution of InfinityDB's
+   processed graphical publication, but required source CI remains independent of
+   that publication until the tracked asset-layout migration is completed.
 
 ## Validation layers
 

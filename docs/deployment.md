@@ -6,11 +6,13 @@ snapshots. Caddy listens on HTTP and proxies traffic to the application, which i
 directly on the host. Put Caddy behind an external TLS reverse proxy for public
 HTTPS.
 
-Corvus Belli graphical assets are not bundled with the InfinityDB source or a
-redistributable release by default. A local installation may acquire and process
-those assets separately for local browser use, but that does not grant
-redistribution rights. Review [third-party notices](../THIRD_PARTY_NOTICES.md)
-before distributing any image or database that contains external data or assets.
+Corvus Belli has explicitly permitted InfinityDB to use and redistribute the
+graphical assets used by this non-commercial community project, including
+processed SVGs in public repositories and deployment/build packages. Those assets
+remain Corvus Belli property and stay outside InfinityDB's MIT License. Raw Army,
+wiki, PDF, and source-symbol archives remain separate local/provenance inputs by
+project policy. Review [third-party notices](../THIRD_PARTY_NOTICES.md) for the
+full permission and attribution boundary.
 
 This guide documents the **current deployment workflows**. Army/wiki/symbol
 acquisition and symbol processing/publication are explicit workflows separate
@@ -92,8 +94,9 @@ project or run the production image-pruning policy.
 
 The deployment scripts do not acquire Corvus Belli graphical assets. When a local
 installation should serve symbols, prepare the complete published asset set
-separately before building the Docker image. A deployable local publication consists
-of the ignored `armies/`, `characteristics/`, `orders/`, and `units/` trees,
+separately before building the Docker image. A deployable publication currently
+consists of the locally generated/ignored `armies/`, `characteristics/`, `orders/`,
+and `units/` trees,
 `src/infinity_db/web/static/symbol-inventory.json`, and the terminal version-8
 `data/manifests/army-symbol-build.json` that promoted them. The tracked
 `army-symbols.js` and `unit-symbol-map.js` files must be the exact SHA-bound maps
@@ -158,8 +161,9 @@ requires its own raw Army snapshot.
 For an exact server replacement, copy the already-published local asset set rather
 than relying on cross-machine SVG regeneration. See
 [server migration](server-migration.md) for the full transfer checklist and the
-current reproducibility limits. Local publication does not change the third-party
-redistribution boundary described above.
+current reproducibility limits. The processed publication may be redistributed
+with InfinityDB under Corvus Belli's permission; raw acquisition archives remain
+separate from that distributable publication.
 
 ## Deployment smoke validation
 
@@ -175,15 +179,17 @@ The verifier requires `/app/data/` to contain exactly `infinity.db` and
 `rules.db`, validates both database formats, checks the configured runtime paths
 and non-root image user, and starts Gunicorn with a read-only root filesystem,
 `/tmp` tmpfs, and `no-new-privileges`. It waits for the image health check and
-then exercises Army, rules-enriched Skill, and version API endpoints. In
-`--redistributable` mode it also rejects the ignored `armies/`,
-`characteristics/`, `orders/`, and `units/` Corvus Belli graphical-asset trees if
-they appear in either the copied source tree or the installed Python package.
-In `--published-assets` mode it instead requires the installed package to contain
-exactly the `symbol-inventory.json` publication, re-hashes every SVG, verifies the
-published byte total, and requests one served symbol from each namespace. These
-modes keep redistributable CI/release validation separate from local asset-backed
-deployment validation.
+then exercises Army, rules-enriched Skill, and version API endpoints. In the legacy
+`--redistributable` mode it rejects the currently ignored `armies/`,
+`characteristics/`, `orders/`, and `units/` graphical trees so the existing
+asset-free deployment-smoke contract remains deterministic. The flag name reflects
+the older repository policy; it is no longer a statement that the processed Corvus
+Belli publication is legally non-redistributable. In `--published-assets` mode the
+verifier instead requires the installed package to contain exactly the
+`symbol-inventory.json` publication, re-hashes every SVG, verifies the published
+byte total, and requests one served symbol from each namespace. The two modes now
+exercise asset-free versus complete-publication packaging until the approved
+processed SVG set is migrated into the tracked release layout.
 
 The same image verifier can be run manually after preparing the two generated
 databases and building an image:

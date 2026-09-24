@@ -934,10 +934,14 @@ inventory must then validate the complete ignored publication by path, SVG
 parseability, byte count, and SHA-256. After Docker builds the application image,
 the image verifier revalidates the installed package against that inventory and
 exercises one served asset from each publication namespace before Compose may
-replace the running service. Redistributable CI/release images use the opposite
-explicit mode and must contain none of the ignored third-party graphical trees.
-This keeps publication, packaging, and deployment separate while preventing a
-clean checkout from silently producing a symbol-less local deployment image.
+replace the running service. The legacy asset-free CI/release image mode uses
+the opposite explicit check and must contain none of the currently ignored
+graphical trees. That remains a useful
+packaging invariant for clean-checkout smoke coverage, but it is no longer a rights
+boundary: Corvus Belli has explicitly permitted InfinityDB to redistribute its
+processed graphical publication for this non-commercial project. This keeps
+publication, packaging, and deployment separate while the approved SVG set is
+migrated into the tracked release layout.
 
 ## Module boundaries
 
@@ -963,11 +967,13 @@ requests live in `api.js`; shared unit-row rendering lives in `unit-list.js`;
 page-specific state and rendering live in the corresponding module (for
 example, `app.js` or `catalog-detail.js`). The current UI uses native modules
 and requires no JavaScript build step. When Corvus Belli graphical symbols are
-published into a local installation, army and unit symbols are addressed by
-stable ID-and-slug paths while JavaScript maps source identities to those paths.
-Those locally acquired graphical assets are not part of the InfinityDB source
-distribution or redistributable release artifacts by default; see the
-third-party notices for the current rights boundary.
+published, army and unit symbols are addressed by stable ID-and-slug paths while
+JavaScript maps source identities to those paths. Corvus Belli has explicitly
+permitted InfinityDB to redistribute the processed graphical publication in the
+public repository and release/build packages for this non-commercial project. The
+assets remain Corvus Belli property and outside the MIT License. Raw acquisition
+archives remain separate build/provenance inputs; see the third-party notices for
+the current rights boundary.
 
 Acquisition tools must not become hidden network dependencies of normal builds.
 A normal build can consume explicit local snapshots. Network refreshes are

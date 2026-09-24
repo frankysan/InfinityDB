@@ -419,9 +419,14 @@ concurrency must remain safe under the Windows `spawn` model.
 
 ### Current
 
-Downloaded Corvus Belli graphical assets remain outside the public repository
-unless redistribution permission clearly allows inclusion. Local corrected
-image overrides likewise remain ignored unless redistribution status changes.
+Corvus Belli granted InfinityDB explicit permission on 2026-09-24 to use and
+redistribute the requested graphical assets for the project's non-commercial scope,
+including public Git repository/build-package inclusion and technical SVG
+optimization. The processed publication may therefore be tracked and distributed,
+but it remains Corvus Belli property and outside the MIT License. Raw Army, wiki,
+PDF, and source-symbol archives remain outside the public repository by project
+policy. The current generated SVG trees and local corrected image overrides remain
+ignored until a deliberate tracked-asset migration changes that layout.
 
 Army-symbol acquisition is now source-semantic and URL/reference based.
 `tools/download_army_symbols.py` discovers every
@@ -635,11 +640,16 @@ compatibility references remain unambiguous JSON integers.
 
 ## Decision log
 
+- 2026-09-24: Corvus Belli granted explicit permission for InfinityDB to use and
+  redistribute the requested graphical assets for the project's non-commercial
+  scope, including processed SVGs in the public repository and build/deployment
+  packages. The assets remain outside MIT; raw Army/wiki/PDF/source-symbol archives
+  remain untracked by project policy.
 - 2026-09-18: CI/testing design separates required hermetic source checks from
-  explicit full-asset integration. Clean public CI must not depend on ignored
-  Corvus Belli graphical assets or live acquisition; full-asset runs require a
-  validated complete asset set and must not redistribute it. Installed-package,
-  deployment, and cross-platform checks are separate validation layers.
+  explicit full-asset integration. Clean public CI does not depend on the processed
+  graphical publication or live acquisition; full-asset runs require a validated
+  complete asset set. Installed-package, deployment, and cross-platform checks are
+  separate validation layers.
 - 2026-09-12: Database builds require validated Army API metadata. The importer
   enforces this too, so metadata-free normalized data cannot bypass the build
   command and become a database.
