@@ -33,89 +33,6 @@ function applicabilityText(rule) {
   return parts.join(" · ");
 }
 
-const relationGroupOrder = [
-  {
-    name: "Creates & enables",
-    types: new Set([
-      "applies-effects-to",
-      "controller-eligible-for",
-      "enables-use-of",
-      "has-subtype",
-      "uses-effects-of",
-    ]),
-  },
-  {
-    name: "State interactions",
-    types: new Set([
-      "cancels-state",
-      "causes-state",
-      "enters-state",
-      "prevents-state-entry",
-      "reveals-state",
-      "triggered-by-state-entry",
-    ]),
-  },
-  {
-    name: "MODs & changes",
-    types: new Set([
-      "ignores-modifiers-from",
-      "imposes-modifiers-on",
-      "modifies-rolls-for",
-      "modifies-use-of",
-      "overrides-effects-of",
-      "reduces-modifiers-from",
-    ]),
-  },
-  {
-    name: "Cancels & restricts",
-    types: new Set([
-      "negates-effects-of",
-      "restricts-use-of",
-    ]),
-  },
-  { name: "Other interactions", types: null },
-];
-
-const relationLabels = {
-  "applies-effects-to": { outbound: "Effects apply to", inbound: "Affected by" },
-  "controller-eligible-for": { outbound: "Can control", inbound: "Can be controlled by" },
-  "cancels-state": { outbound: "Cancels state", inbound: "Cancelled by" },
-  "causes-state": { outbound: "Causes state", inbound: "Caused by" },
-  "enters-state": { outbound: "Enters state", inbound: "Entered by" },
-  "enables-use-of": { outbound: "Enables use of", inbound: "Enabled by" },
-  "has-subtype": { outbound: "Includes subtype", inbound: "Subtype of" },
-  "ignores-modifiers-from": {
-    outbound: "Ignores MODs from",
-    inbound: "MODs ignored by",
-  },
-  "imposes-modifiers-on": {
-    outbound: "Imposes MODs on",
-    inbound: "MODs imposed by",
-  },
-  "negates-effects-of": { outbound: "Negates", inbound: "Negated by" },
-  "overrides-effects-of": { outbound: "Overrides", inbound: "Overridden by" },
-  "modifies-rolls-for": {
-    outbound: "Modifies rolls for",
-    inbound: "Rolls modified by",
-  },
-  "modifies-use-of": { outbound: "Modifies use of", inbound: "Use modified by" },
-  "prevents-state-entry": {
-    outbound: "Prevents state entry",
-    inbound: "State entry prevented by",
-  },
-  "reveals-state": { outbound: "Reveals state", inbound: "Revealed by" },
-  "reduces-modifiers-from": {
-    outbound: "Reduces MODs from",
-    inbound: "MODs reduced by",
-  },
-  "restricts-use-of": { outbound: "Restricts use of", inbound: "Use restricted by" },
-  "triggered-by-state-entry": {
-    outbound: "Triggered by entering",
-    inbound: "State entry triggers",
-  },
-  "uses-effects-of": { outbound: "Uses effects of", inbound: "Effects used by" },
-};
-
 function relationHref(record) {
   const catalogs = { skill: "skills", equipment: "equipment", weapon: "weapons" };
   const armyLinks = record.army_links || [];
@@ -146,11 +63,11 @@ function relationHref(record) {
 }
 
 function relationPresentation(relation) {
-  const labels = relationLabels[relation.type];
-  const label = labels?.[relation.direction];
+  const presentation = relation.presentation;
   const record = relation.record;
-  if (!label || !record?.name) return null;
-  return { relation, label, record };
+  if (!presentation?.label || !presentation?.group_id || !presentation?.group_label
+      || !Number.isFinite(presentation?.group_order) || !record?.name) return null;
+  return { relation, presentation, label: presentation.label, record };
 }
 
 function relationNode(presentation) {
@@ -173,11 +90,6 @@ function relationNode(presentation) {
   return item;
 }
 
-function relationGroup(relation) {
-  return relationGroupOrder.find((group) => group.types?.has(relation.type))
-    || relationGroupOrder.at(-1);
-}
-
 function appendRuleRelations(container, rule) {
   const relations = (rule.display_relations || [])
     .map(relationPresentation)
@@ -191,23 +103,30 @@ function appendRuleRelations(container, rule) {
   heading.textContent = "Related rules";
   group.append(heading);
 
-  for (const relationGroupDefinition of relationGroupOrder) {
-    const grouped = relations
-      .filter((presentation) => relationGroup(presentation.relation) === relationGroupDefinition)
-      .sort((left, right) => (
-        left.record.name.localeCompare(right.record.name, undefined, { numeric: true })
-        || left.label.localeCompare(right.label)
-      ));
-    if (!grouped.length) continue;
+  const groups = new Map();
+  for (const item of relations) {
+    const { group_id: id, group_label: label, group_order: order } = item.presentation;
+    const relationGroup = groups.get(id) || { id, label, order, relations: [] };
+    relationGroup.relations.push(item);
+    groups.set(id, relationGroup);
+  }
+
+  for (const relationGroup of [...groups.values()].sort((left, right) => (
+    left.order - right.order || left.label.localeCompare(right.label)
+  ))) {
+    relationGroup.relations.sort((left, right) => (
+      left.record.name.localeCompare(right.record.name, undefined, { numeric: true })
+      || left.label.localeCompare(right.label)
+    ));
 
     const relationGroupElement = document.createElement("div");
     relationGroupElement.className = "rules-relation-group";
     const groupHeading = document.createElement("h5");
     groupHeading.className = "rules-relation-group-heading";
-    groupHeading.textContent = relationGroupDefinition.name;
+    groupHeading.textContent = relationGroup.label;
     const list = document.createElement("ul");
     list.className = "detail-list";
-    list.append(...grouped.map(relationNode));
+    list.append(...relationGroup.relations.map(relationNode));
     relationGroupElement.append(groupHeading, list);
     group.append(relationGroupElement);
   }

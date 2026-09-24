@@ -320,9 +320,10 @@ not display name. The rules database derives inbound/reverse navigation from tho
 edges, so reciprocal rows are not maintained independently. Current edges must resolve to a
 current semantic record before `rules.db` can be published. Composed rule payloads add a
 `display_relations` graph projection with direction and resolved endpoint identity/Army
-links. The shared browser renderer translates only reviewed player-relevant relation types
-into direction-aware labels and links; it does not expose raw edge names or duplicate
-`variant-of` bookkeeping. Format v10 introduced the first gameplay-interaction edge,
+links. The backend attaches the reviewed player-facing relation group and direction-aware
+label to that projection; the shared browser renderer consumes those semantics rather than
+translating raw relation types itself. Structural edges such as `variant-of` remain available
+to API consumers but intentionally receive no generic Related-rules presentation. Format v10 introduced the first gameplay-interaction edge,
 `reduces-modifiers-from`: Multispectral Visor authors that edge once toward Mimetism,
 and the Mimetism surface receives the derived inverse relationship automatically. Format
 v11 adds `ignores-modifiers-from` and `negates-effects-of`; Combat Instinct uses both

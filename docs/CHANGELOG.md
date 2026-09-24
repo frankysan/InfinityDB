@@ -122,6 +122,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Make rules-enrichment presentation semantics backend-owned: curated summaries and
+  semantic Labels are verified to pass through `rules.db` unchanged, Army-linked catalog
+  definitions now require stable IDs/slugs rather than name-only routing, and
+  `display_relations` carries canonical player-facing group/label metadata so the browser
+  no longer maintains a parallel relation ontology.
 - Rewrite the landing and About pages around InfinityDB's current rules-enriched state and
   public roadmap direction. The landing page now identifies InfinityDB prominently as an
   open-source, non-commercial community project that is not affiliated with Corvus Belli S.L.,

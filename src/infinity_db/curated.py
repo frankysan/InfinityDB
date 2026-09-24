@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.rule_relations import RULE_RELATION_TYPES
 
 CURATED_FORMAT = "InfinityDB curated reference"
 CURATED_FORMAT_VERSION = 20
@@ -34,31 +35,6 @@ ARMY_LINK_SLUG_DOMAINS = {
     "equipment": "equipment",
     "weapon": "weapons",
 }
-RULE_RELATION_TYPES = frozenset(
-    {
-        "applies-effects-to",
-        "controller-eligible-for",
-        "cancels-state",
-        "causes-state",
-        "enters-state",
-        "enables-use-of",
-        "has-subtype",
-        "ignores-modifiers-from",
-        "imposes-modifiers-on",
-        "negates-effects-of",
-        "overrides-effects-of",
-        "modifies-rolls-for",
-        "modifies-use-of",
-        "prevents-state-entry",
-        "reveals-state",
-        "reduces-modifiers-from",
-        "restricts-use-of",
-        "triggered-by-state-entry",
-        "uses-effects-of",
-        "variant-of",
-    }
-)
-
 CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
@@ -809,6 +785,12 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                     raise ValueError(
                         f"{context}: {record['kind']} definitions may only link to "
                         f"Army {record['kind']} identities"
+                    )
+                if "id" not in link:
+                    raise ValueError(
+                        f"{context}: Army-linked {record['kind']} definitions require "
+                        "a stable numeric source id or domain slug; name-only links are "
+                        "not canonical catalog relationships"
                     )
 
         variant_semantics = record.get("variantSemantics")

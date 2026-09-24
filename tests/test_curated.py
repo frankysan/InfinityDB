@@ -130,6 +130,18 @@ def test_skill_definition_supports_multiple_categories(tmp_path: Path) -> None:
         load_curated_document(path)
 
 
+def test_catalog_definition_requires_stable_army_link_id(tmp_path: Path) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["armyLinks"] = [{"entity": "skill", "name": "Example skill"}]
+    record["variantSemantics"] = {"inheritance": "family"}
+    path = tmp_path / "name-only-link.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="stable numeric source id or domain slug"):
+        load_curated_document(path)
+
+
 def test_full_skill_categories_override_fallback_declarations(tmp_path: Path) -> None:
     document = valid_document()
     document["skillTypes"].append(

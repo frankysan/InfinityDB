@@ -12,6 +12,8 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from infinity_db.rule_relations import relation_presentation
+
 RULES_APPLICATION_ID = 0x49445231
 RULES_SCHEMA_VERSION = 7
 RULES_COMPATIBILITY_VERSION = 8
@@ -775,11 +777,18 @@ class RulesDatabase:
             ]
             endpoint_ids = {relation["record_id"] for relation in display_source}
             endpoints = cls._relation_endpoint_index(connection, endpoint_ids)
-            display_relations = [
-                {**relation, "record": endpoints[relation["record_id"]]}
-                for relation in display_source
-                if relation["record_id"] in endpoints
-            ]
+            display_relations = []
+            for relation in display_source:
+                endpoint = endpoints.get(relation["record_id"])
+                if endpoint is None:
+                    continue
+                item = {**relation, "record": endpoint}
+                presentation = relation_presentation(
+                    relation["type"], relation["direction"]
+                )
+                if presentation is not None:
+                    item["presentation"] = presentation
+                display_relations.append(item)
             if display_relations:
                 record["display_relations"] = display_relations
 

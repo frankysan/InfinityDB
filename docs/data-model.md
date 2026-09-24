@@ -2595,10 +2595,12 @@ also expose additive `display_relations`: forward and derived reverse edges with
 direction plus the related record's stable ID, kind, name, and definition-owned Army
 links. This is the player-facing graph projection; it lets the browser navigate from
 either endpoint without duplicating curated relations or parsing semantic IDs/names.
-The renderer decides which relation types are useful to players and suppresses
-bookkeeping edges such as `variant-of` when the existing variant UI already expresses
-the same relationship. `reduces-modifiers-from` is the first explicit cross-rule gameplay
-interaction edge: the authored endpoint reduces MODs imposed by the target rule, while
+The backend owns the player-facing relation vocabulary: each gameplay relation receives
+a canonical group, ordering, and direction-aware label before it reaches the browser,
+while bookkeeping edges such as `variant-of` intentionally receive no generic
+presentation metadata. The shared renderer only groups and renders that supplied
+metadata; it does not maintain a second relation-type ontology in JavaScript.
+`reduces-modifiers-from` is the first explicit cross-rule gameplay interaction edge: the authored endpoint reduces MODs imposed by the target rule, while
 the reverse projection reads as that rule having its MODs reduced by the source endpoint.
 Format v11 adds `ignores-modifiers-from` when the source rule ignores MODs imposed
 by another rule and `negates-effects-of` when another rule becomes ineffective against
@@ -2610,7 +2612,13 @@ to combine those edge types with existing state/reduction semantics. Format v13 
 `imposes-modifiers-on` when the source rule applies MODs to the target rule's user;
 Reflective and Albedo use those distinct semantics toward Marksmanship and MSV. Format v14 adds `overrides-effects-of` for cases where one reviewed rule explicitly takes precedence over another without claiming the target rule is globally negated. Format v15 adds `cancels-state` for reviewed Skills that remove a State; Doctor and Engineer author those edges and State records receive the inverse relation automatically. Format v16 adds `causes-state` for reviewed effects that explicitly place a target in a State; Forward Observer uses it for Targeted, while Targeted's own outbound `modifies-rolls-for` and `restricts-use-of` edges expose the consequences from the affected Skills as well. Disposable (X) also uses `causes-state` for Unloaded State, whose item-specific target remains part of the owning Trait/State facts. Format v17 adds `enables-use-of` for documented prerequisite/permission relationships; Camouflaged and Hidden Deployment States use it toward Surprise Attack, and Stealth uses it toward Cautious Movement for the documented ZoC/Hacking Area exception, without asserting that the targets' other declaration requirements are satisfied. Format v18 adds `uses-effects-of` for a rule that reuses another rule's effects without implying State entry; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior. Format v19 moves Skill classification from singular definition `facts.typeId` to ordered `facts.typeIds`, while retaining singular `typeId` only on partial `declaration-category` records. Format v20 adds `modifies-use-of`, `prevents-state-entry`, and `triggered-by-state-entry` so use transformations, State-entry prohibitions, and State-entry activation triggers can be represented directly.
 The edge describes the relationship itself; conditional details remain in the owning rule
-facts rather than being duplicated onto the reverse edge.
+facts rather than being duplicated onto the reverse edge. Current catalog-definition
+Army links are likewise fail-closed presentation routing: Skill, Equipment, and Weapon
+definitions must use a stable numeric source ID or domain slug, never a display-name-only
+link. Curated summaries and semantic Labels pass through `rules.db` composition unchanged;
+`tools/audit_enrichment_coverage.py` remains the maintained pair-snapshot coverage check for
+missing definitions, ambiguous mappings, unresolved relation targets, and review/citation
+freshness.
 
 `variant-of` is the typed family edge for exact source variants. A source-specific
 semantic definition is valid only when it has one exact numeric Army link and exactly

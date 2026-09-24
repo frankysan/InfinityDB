@@ -117,7 +117,9 @@ follow-ups.
   suppressing bookkeeping edges such as `variant-of`. After the complete 0.7.0
   interaction review and semantic-only deferred-link pass, relationships are
   grouped by player meaning: creation/enabling, State interactions, MOD/change
-  interactions, and cancellation/restriction. Supporting identities without a
+  interactions, and cancellation/restriction. The backend now owns those group
+  assignments and directional labels in the canonical relation contract; JavaScript
+  only renders the supplied presentation metadata. Supporting identities without a
   browser surface remain readable text rather than dead links.
 - **Source/applicability context used to precede the concise summary.** The shared
   renderer now leads with the gameplay summary, categories, facts, and related
@@ -164,6 +166,14 @@ Three presentation consistency issues were actionable without broadening scope:
   catch-all.
 - Gameplay meaning now precedes collection/applicability provenance in the
   shared rules-reference renderer.
+
+A follow-up structured-enrichment consistency audit confirmed that all current curated
+definition summaries and semantic Label IDs are projected through `rules.db` unchanged.
+The 126 Army links on the 126 Army-linked Skill/Equipment/Weapon definitions all use stable
+numeric source IDs or domain slugs; no catalog definition depends on a display-name-only
+relationship. The remaining duplicated ontology was relation presentation itself, which is
+now backend-owned and covered across every current relation type. Structural `variant-of`
+edges remain deliberately suppressed by the generic Related-rules renderer.
 
 This is the catalog-level consistency audit, not the final rendered-browser
 acceptance pass. Responsive layout, exact-source/occurrence discoverability,

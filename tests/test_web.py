@@ -2008,42 +2008,15 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     )
     assert b'detail-fact-heading' in body
     assert b'heading.textContent = "Related rules"' in body
-    assert b'name: "Creates & enables"' in body
-    assert b'name: "State interactions"' in body
-    assert b'name: "MODs & changes"' in body
-    assert b'name: "Cancels & restricts"' in body
-    assert b'name: "Other interactions"' in body
-    assert b'left.record.name.localeCompare(right.record.name' in body
-    assert b'left.label.localeCompare(right.label)' in body
-    assert b'"enters-state": { outbound: "Enters state", inbound: "Entered by" }' in body
-    assert b'"reveals-state": { outbound: "Reveals state", inbound: "Revealed by" }' in body
-    assert b'outbound: "Reduces MODs from"' in body
-    assert b'inbound: "MODs reduced by"' in body
-    assert b'outbound: "Ignores MODs from"' in body
-    assert b'inbound: "MODs ignored by"' in body
-    assert b'"applies-effects-to": { outbound: "Effects apply to", inbound: "Affected by" }' in body
-    assert b'outbound: "Imposes MODs on"' in body
-    assert b'inbound: "MODs imposed by"' in body
-    assert b'"negates-effects-of": { outbound: "Negates", inbound: "Negated by" }' in body
-    assert b'"overrides-effects-of": { outbound: "Overrides", inbound: "Overridden by" }' in body
-    assert b'"cancels-state": { outbound: "Cancels state", inbound: "Cancelled by" }' in body
-    assert b'"causes-state": { outbound: "Causes state", inbound: "Caused by" }' in body
-    assert b'return `/skills/${encodeURIComponent(record.id.slice(prefix.length))}`;' in body
-    assert b'return `/states/${encodeURIComponent(record.id.slice(prefix.length))}`;' in body
-    assert b'outbound: "Modifies rolls for"' in body
-    assert b'inbound: "Rolls modified by"' in body
-    assert (
-        b'"restricts-use-of": { outbound: "Restricts use of", inbound: "Use restricted by" }'
-        in body
-    )
-    assert b'"enables-use-of": { outbound: "Enables use of", inbound: "Enabled by" }' in body
-    assert b'"modifies-use-of": { outbound: "Modifies use of", inbound: "Use modified by" }' in body
-    assert b'outbound: "Prevents state entry"' in body
-    assert b'inbound: "State entry prevented by"' in body
-    assert b'outbound: "Triggered by entering"' in body
-    assert b'inbound: "State entry triggers"' in body
-    assert b'"uses-effects-of": { outbound: "Uses effects of", inbound: "Effects used by" }' in body
-    assert b'const labels = relationLabels[relation.type]' in body
+    assert b"const presentation = relation.presentation;" in body
+    assert b"presentation?.group_id" in body
+    assert b"presentation?.group_label" in body
+    assert b"presentation?.group_order" in body
+    assert b"groupHeading.textContent = relationGroup.label" in body
+    assert b"relationLabels" not in body
+    assert b"relationGroupOrder" not in body
+    assert b"Creates & enables" not in body
+    assert b'"reduces-modifiers-from"' not in body
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body

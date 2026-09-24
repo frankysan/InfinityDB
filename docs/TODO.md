@@ -348,26 +348,6 @@ requiring a new top-level browser surface in 0.7.0.
     navigation, and cases with multiple variants/supplements/relations. Record and
     resolve every player-relevance/correctness issue classified as a 0.7.0 blocker.
 
-- [ ] **Use the audited research as a controlled coverage process.**
-  - [x] Add a coverage report for currently exposed data that identifies missing
-    enrichment, ambiguous identity/variant mappings, unresolved related-item links,
-    and citations whose source version is stale or unreviewed.
-    `tools/audit_enrichment_coverage.py` audits the composed Skill/Equipment/Weapon/
-    Trait surfaces against a specific `infinity.db` + `rules.db` pair; by default its
-    detail lists contain only gaps, with `--include-complete` available for a full
-    inventory.
-  - [x] Classify every remaining gap explicitly as a 0.7.0 blocker, intentional
-    omission, supporting identity without a standalone UI, or later product work;
-    do not silently treat absence as complete coverage. The maintained
-    `data/curated/enrichment-coverage/classifications.json` policy classifies every known
-    audit gap code, supports reviewed item/relation overrides, and fails closed on unknown
-    gap codes or stale overrides. Current defaults conservatively treat detected exposed-
-    surface gaps as release blockers; rules-only relation targets are classified separately
-    as supporting identities.
-  - [ ] Validate summaries/labels/relationships against the maintained rules
-    semantics and canonical Army relationships rather than independently hard-
-    coding a second ontology into the frontend.
-
 0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
 every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
 charts, saved-list guidance, organizer tooling, a live action-legality engine, or
