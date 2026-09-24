@@ -152,9 +152,12 @@ code that interprets them.
 `data/curated/` is different from configuration: it contains human-reviewed
 information derived from identified external sources and retains source
 provenance. `data/curated/rules/` is consumed by the rules-database build, while
-`data/curated/rules-interactions/` is project review metadata: it tracks whether each
-semantic identity has had its outgoing interactions audited and preserves deferred/future
-candidates without becoming rules ontology or runtime input.
+`data/curated/rules-interactions/` is project review metadata: it owns the maintained
+public-catalog scope for the interaction-review denominator, tracks whether each semantic
+identity has had its outgoing interactions audited, and preserves deferred/future candidates
+without becoming rules ontology or runtime input. Catalog progress is therefore measured
+against the actual public Skill/Equipment/Trait identities rather than only against the subset
+that already has curated rules records.
 `data/curated/identities/` contains reviewed source-derived presentation
 relationships consumed during Army normalization. `data/curated/peripherals/` owns
 the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed

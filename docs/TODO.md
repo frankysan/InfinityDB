@@ -147,12 +147,17 @@ requiring a new top-level browser surface in 0.7.0.
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.
   - [ ] Complete the maintained outgoing-interaction review checklist for 0.7.0.
-    `docs/rules-interaction-checklist.md` is generated from the curated graph plus the
-    long-lived `data/curated/rules-interactions/reviews.json` ledger. Every semantic rules
-    identity must be tracked even when review concludes that it has no outgoing edge. Known
-    post-0.7.0 candidates remain in the same ledger so later releases inherit the research
-    instead of rediscovering it. The 0.7.0 gate is reached when no entity targeted at 0.7.0
-    remains `pending`; future-targeted interactions do not block that release.
+    `docs/rules-interaction-checklist.md` is generated from the maintained public-catalog
+    scope, curated graph, and long-lived `data/curated/rules-interactions/reviews.json`
+    ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, and
+    Traits** catalogs, including catalog items that do not yet have a curated rules record;
+    exact source variants and independently modeled Rule/State/Training/Weapon identities
+    are tracked separately as supporting semantics. Ordinary Weapon rows are covered through
+    their Skill/Trait semantics unless they have an independent curated rules definition.
+    Known post-0.7.0 candidates remain in the same ledger so later releases inherit the
+    research instead of rediscovering it. The 0.7.0 gate is reached when no primary catalog
+    item or supporting identity targeted at 0.7.0 remains pending; future-targeted
+    interactions do not block that release.
   - [x] Promote reviewed Game States to a lightweight rules-backed catalog and model
     Doctor/Engineer recovery with authored `cancels-state` edges, so Unconscious, Stunned,
     Targeted, IMM-A/B, Isolated, and Disconnected expose reverse cancellation navigation.
@@ -342,6 +347,15 @@ release-hardening pass:
   current context. Define escaping, unresolved-link validation, plural/display-text
   behavior, accessibility/keyboard interaction, and which semantic identity resolver
   owns each namespace before implementation.
+  - Treat dynamic distances as typed inline tokens handled by the same maintained-text
+    rendering layer, for example: `a successful Dodge may also move the user up to
+    [[distance:2:inch]].` Every distance embedded in a maintained text field must be marked
+    structurally rather than stored only as display text so it can render according to the
+    user's current cm/in toggle. Reuse the application's canonical distance-conversion and
+    formatting policy rather than introducing parser-local conversion rules. The eventual
+    migration should inventory existing text fields, convert literal distances to typed
+    tokens, and add validation that prevents newly maintained text from silently
+    reintroducing unmarked distance literals where they can be detected reliably.
 - [ ] Present source-attributed Unit notes, including meaningful variant-specific notes
   that do not belong only to the representative source Unit.
 - [ ] Resolve and present the semantics of the 18 current top-level composite

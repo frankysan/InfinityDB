@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from tools.audit_rules_interactions import (
+    DEFAULT_CATALOG_SCOPE_PATH,
     DEFAULT_CHECKLIST_PATH,
     DEFAULT_POLICY_PATH,
     DEFAULT_RULES_DIRECTORY,
@@ -30,6 +31,53 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "inherited": 16,
         "percentComplete": 63.6,
     }
+    assert report["summary"]["primaryCatalog"] == {
+        "targetRelease": "0.7.0",
+        "total": 161,
+        "complete": 47,
+        "pending": 114,
+        "percentComplete": 29.2,
+        "catalogs": {
+            "skills": {
+                "total": 100,
+                "complete": 35,
+                "pending": 65,
+                "defined": 39,
+                "missingRuleDefinition": 61,
+                "percentComplete": 35.0,
+            },
+            "equipment": {
+                "total": 28,
+                "complete": 3,
+                "pending": 25,
+                "defined": 4,
+                "missingRuleDefinition": 24,
+                "percentComplete": 10.7,
+            },
+            "traits": {
+                "total": 33,
+                "complete": 9,
+                "pending": 24,
+                "defined": 28,
+                "missingRuleDefinition": 5,
+                "percentComplete": 27.3,
+            },
+        },
+    }
+    assert report["summary"]["supporting"]["total"] == 39
+    assert report["summary"]["supporting"]["complete"] == 23
+    assert report["summary"]["supporting"]["pending"] == 16
+
+    primary = {item["id"]: item for item in report["primaryCatalogItems"]}
+    equipment_items = [
+        item for item in report["primaryCatalogItems"] if item["catalog"] == "equipment"
+    ]
+    assert len(equipment_items) == 28
+    assert primary["equipment:360o-visor"]["status"] == "pending"
+    assert primary["equipment:360o-visor"]["recordDefined"] is False
+    assert primary["equipment:baggage"]["status"] == "reviewed"
+    assert primary["skill:aerial"]["recordDefined"] is False
+    assert primary["trait:cc-attack-3"]["recordDefined"] is False
 
     items = {item["id"]: item for item in report["items"]}
     assert "declaration-category:skill:74:automatic" not in items
@@ -75,6 +123,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:stealth", "skill:move", None) in future_keys
 
     expected = render_markdown(report)
+    assert "Skill **35/100**; Equipment **3/28**; Trait **9/33**" in expected
+    assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
 
@@ -92,8 +142,19 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0: 70/110 complete" in output
-    assert "40 pending" in output
+    assert "0.7.0 primary catalog: 47/161 complete" in output
+    assert "114 pending" in output
+    assert "16 supporting identities pending" in output
+
+
+def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:
+    document = json.loads(DEFAULT_CATALOG_SCOPE_PATH.read_text(encoding="utf-8"))
+    assert document["targetRelease"] == "0.7.0"
+    assert {key: len(value) for key, value in document["catalogs"].items()} == {
+        "skills": 100,
+        "equipment": 28,
+        "traits": 33,
+    }
 
 
 def test_rules_interaction_checklist_check_passes() -> None:

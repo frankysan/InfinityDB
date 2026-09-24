@@ -58,13 +58,20 @@ runtime behavior.
 
 ### Rules-interaction review policy
 
-`rules-interactions/reviews.json` is the maintained review ledger for outgoing semantic
-relationships. Every semantic rules identity other than `declaration-category` projection
-records must have exactly one ledger entry. Entries record the release whose outgoing
-interactions are being reviewed, whether that review is pending/reviewed/inherited, and
-known future interactions that should survive beyond the current release. The top-level
+`rules-interactions/catalog-scope.json` is the maintained public-catalog denominator for
+the interaction review. It lists every public Skill, Equipment item, and Trait targeted by
+the current release, including catalog identities that do not yet have a curated rules
+definition. `rules-interactions/reviews.json` separately tracks every semantic rules identity
+other than `declaration-category` projection records. Entries record the release whose
+outgoing interactions are being reviewed, whether that review is pending/reviewed/inherited,
+and known future interactions that should survive beyond the current release. The top-level
 `futureInteractions` queue can also retain a provisional source/target ID that is not yet a
 current rules record, so future domain work does not lose already-reviewed interactions.
+
+A primary catalog item is complete only when its canonical typed rules identity exists and
+that identity's outgoing semantics are reviewed. Missing rules definitions therefore remain
+visible as pending catalog work instead of disappearing from the checklist denominator.
+Exact source variants and independently modeled supporting identities are reported separately.
 
 The ledger deliberately does not duplicate authored `relations`: the current curated rules
 graph remains authoritative for edges that exist now. `tools/audit_rules_interactions.py`
@@ -79,6 +86,14 @@ Regenerate/check the maintained checklist with:
 ```powershell
 python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md
 python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md
+```
+
+When the Army/application catalog snapshot changes, validate or refresh the maintained catalog
+scope against the generated databases:
+
+```powershell
+python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db
+python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
 ```
 
 A release gate may be inspected explicitly with `--require-release <version>`. Pending

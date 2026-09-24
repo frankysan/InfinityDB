@@ -1328,14 +1328,22 @@ compatibility references remain unambiguous JSON integers.
 
 ## Long-lived rules interaction review ledger (2026-09-24)
 
-- `data/curated/rules-interactions/reviews.json` is the maintained review ledger for
-  outgoing rules relationships. It is planning/review metadata, not runtime ontology;
-  authored `relations` in curated rules remain the single source of truth for edges that
-  currently exist.
-- Every semantic rules identity except `declaration-category` projection records must have
-  a ledger entry. Adding or removing a Skill, Equipment item, Weapon, Trait, State, Training
-  identity, supporting Rule, or future semantic kind therefore makes the audit fail until
-  the review ledger is reconciled.
+- `data/curated/rules-interactions/catalog-scope.json` is the maintained public-catalog
+  denominator for interaction-review progress. For 0.7.0 it contains all public Skills,
+  Equipment items, and Traits, including identities without a curated rule definition. The
+  current baseline is 100 Skills, 28 Equipment items, and 33 Traits; the Skill count includes
+  88 Army application identities plus 12 rules-only Common Skills exposed by `SkillCatalog`.
+  Refresh/validate this scope against the generated `infinity.db` + `rules.db` whenever the
+  application catalog snapshot changes.
+- `data/curated/rules-interactions/reviews.json` is the maintained semantic review ledger. It
+  remains planning/review metadata, not runtime ontology; authored `relations` in curated rules
+  are still the single source of truth for edges that currently exist. Every semantic rules
+  identity except `declaration-category` projection records must have one ledger entry.
+- The primary 0.7.0 progress figure is catalog-based, not curated-record-based. A public catalog
+  item is complete only when its canonical typed rules identity exists and is reviewed; missing
+  rules definitions remain pending. Exact source variants plus independently modeled Rule, State,
+  Training, supporting Trait, and curated Weapon identities are reported separately as supporting
+  semantics so they cannot inflate the public-catalog completion percentage.
 - Review state is release-aware. `reviewed` means outgoing interactions were audited for the
   entry's target release; `inherited` means an exact source variant reuses its family's
   reviewed interaction semantics; `pending` remains release work. Zero outgoing edges are a
@@ -1352,10 +1360,12 @@ compatibility references remain unambiguous JSON integers.
   queue retains Super-Jump -> Jump, Perimeter -> Place Deployable, and the documented White
   Noise counter-interactions with Marksmanship and Multispectral Visor even though White Noise
   does not yet have a 0.7.0 catalog identity.
-- `tools/audit_rules_interactions.py` combines the ledger with the current curated graph and
-  generates `docs/rules-interaction-checklist.md`. `--check-output` detects a stale committed
-  checklist; `--require-release <version>` is the release gate and fails while that release has
-  pending entity reviews.
+- `tools/audit_rules_interactions.py` combines catalog scope, the semantic ledger, and the
+  current curated graph to generate `docs/rules-interaction-checklist.md`. `--check-output`
+  detects a stale committed checklist; `--database` + `--rules-database` validate the maintained
+  scope against runtime catalogs; `--refresh-catalog-scope` updates it deliberately.
+  `--require-release <version>` fails while that release has pending primary catalog items or
+  supporting semantic reviews.
 
 - Rules-interaction relationships are a core 0.7.0 product feature. Author semantic
   edges once, derive reverse navigation in `rules.db`, and present useful context from
