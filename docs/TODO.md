@@ -326,6 +326,21 @@ requiring a new top-level browser surface in 0.7.0.
     semantics and canonical Army relationships rather than independently hard-
     coding a second ontology into the frontend.
 
+- [ ] **Finish 0.7.0 with a catalog-consistency and project-presentation pass.**
+  - [ ] After all current catalog items have been vetted, audit them together for
+    consistency of semantics, terminology, information hierarchy, and player-facing
+    presentation.
+  - [ ] Revise repository and application language about Corvus Belli assets to
+    reflect the explicit permission to use and redistribute the graphical assets
+    used by InfinityDB, while keeping those assets separate from the MIT-licensed
+    InfinityDB code and retaining the non-commercial/attribution requirements.
+  - [ ] Rewrite the landing page and About page to reflect the current state of the
+    project and give users a concise indication of the planned direction.
+  - [ ] Make the landing page explicitly identify InfinityDB as an open-source
+    community project that is not affiliated with Corvus Belli S.L., while also
+    stating that InfinityDB has explicit permission to use the Corvus Belli assets
+    it distributes.
+
 0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
 every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
 charts, saved-list guidance, organizer tooling, a live action-legality engine, or
@@ -343,6 +358,14 @@ navigation, profile/loadout include links, selection/dependency constraints,
 Reinforcement Section parentage, and cross-army relationship discovery. Exact scope
 should be chosen after 0.7.0 so the UI builds on stable canonical/rules semantics
 rather than duplicating source-specific interpretations.
+
+- [ ] **Start 0.8.0 with a rules-data/domain audit.** Review what useful structured
+  data exists in the maintained rules sources but InfinityDB does not yet present.
+  This does not need to inventory every individual rule; it should establish which
+  new canonical domains or browser surfaces are required for the next phase. Include
+  the current unresolved/deferred links and relations, and use the Wiki alongside
+  the maintained rule sources so already-known relationship gaps inform the domain
+  boundaries instead of being rediscovered later.
 
 The Milestone 2B completeness inventory currently makes these relationship families
 explicit 0.8.x candidates:
