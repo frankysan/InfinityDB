@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 236
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 247
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -1567,4 +1567,61 @@ def test_remaining_equipment_slice_relations_are_bidirectional(tmp_path: Path) -
     assert ("uses-effects-of", "outbound", "Repeater") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in tinbot_repeater["display_relations"]
+    }
+
+def test_command_order_skill_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        item["id"]: item
+        for kind in ("skill", "rule", "training", "state")
+        for item in database.composed_records_by_kind(kind)
+    }
+
+    chain = records["skill:chain-of-command"]
+    lieutenant = records["skill:lieutenant"]
+    nco = records["skill:nco"]
+    tactical_awareness = records["skill:tactical-awareness"]
+    loss = records["rule:loss-of-lieutenant"]
+    strategic_use = records["rule:command-token-strategic-use"]
+    isolated = records["state:isolated"]
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in chain["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("uses-effects-of", "outbound", "Lieutenant"),
+        ("negates-effects-of", "outbound", "Loss of Lieutenant"),
+    }
+    assert ("uses-effects-of", "inbound", "Chain of Command") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in lieutenant["display_relations"]
+    }
+    assert ("restricts-use-of", "outbound", "NCO") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in isolated["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Tactical Order") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tactical_awareness["display_relations"]
+    }
+    assert ("overrides-effects-of", "outbound", "Special Lieutenant Order") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in nco["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Irregular") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in loss["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in strategic_use["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("causes-state", "outbound", "Suppressive Fire State"),
+        ("enables-use-of", "outbound", "Request Speedball"),
     }

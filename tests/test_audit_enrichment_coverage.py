@@ -110,8 +110,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 127
-    assert report["summary"]["completeCount"] == 125
+    assert report["summary"]["exposedCount"] == 134
+    assert report["summary"]["completeCount"] == 132
     assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
@@ -149,7 +149,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Targeted State"]["gapCodes"] == []
 
     assert report["summary"]["unresolvedRelatedItemLinkCount"] == 3
-    assert report["summary"]["supportingRelationTargetCount"] == 5
+    assert report["summary"]["supportingRelationTargetCount"] == 10
     assert {
         item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
     } == {
@@ -165,6 +165,11 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         "rule:peripheral-type:cyberplug",
         "rule:peripheral-type:servant",
         "rule:peripheral-type:synchronized",
+        "rule:command-token-strategic-use",
+        "rule:loss-of-lieutenant",
+        "rule:special-lieutenant-order",
+        "rule:tactical-order",
+        "training:regular",
     }
 
 

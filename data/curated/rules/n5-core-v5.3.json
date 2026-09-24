@@ -894,6 +894,96 @@
             "url": "https://infinitythewiki.com/index.php?title=Protheion&oldid=3908",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-chain-of-command-oldid-3799",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Chain of Command revision 3799",
+            "version": "N5.3 / oldid 3799",
+            "url": "https://infinitythewiki.com/index.php?title=Chain_of_Command&oldid=3799",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-counterintelligence-oldid-3991",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Counterintelligence revision 3991",
+            "version": "N5.3 / oldid 3991",
+            "url": "https://infinitythewiki.com/index.php?title=Counterintelligence&oldid=3991",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-inspiring-leadership-oldid-3992",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Inspiring Leadership revision 3992",
+            "version": "N5.3 / oldid 3992",
+            "url": "https://infinitythewiki.com/index.php?title=Inspiring_Leadership&oldid=3992",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-lieutenant-oldid-3667",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Lieutenant revision 3667",
+            "version": "N5.3 / oldid 3667",
+            "url": "https://infinitythewiki.com/index.php?title=Lieutenant&oldid=3667",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-mnemonica-oldid-3105",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Mnemonica revision 3105",
+            "version": "N5.3 / oldid 3105",
+            "url": "https://infinitythewiki.com/index.php?title=Mnemonica&oldid=3105",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-nco-oldid-3594",
+            "kind": "wiki",
+            "title": "Infinity Wiki — NCO revision 3594",
+            "version": "N5.3 / oldid 3594",
+            "url": "https://infinitythewiki.com/index.php?title=NCO&oldid=3594",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-tactical-awareness-oldid-3595",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Tactical Awareness revision 3595",
+            "version": "N5.3 / oldid 3595",
+            "url": "https://infinitythewiki.com/index.php?title=Tactical_Awareness&oldid=3595",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-loss-of-lieutenant-oldid-3508",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Loss of Lieutenant revision 3508",
+            "version": "N5.3 / oldid 3508",
+            "url": "https://infinitythewiki.com/index.php?title=Loss_of_Lieutenant&oldid=3508",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-orders-order-pool-oldid-3589",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Orders and the Order Pool revision 3589",
+            "version": "N5.3 / oldid 3589",
+            "url": "https://infinitythewiki.com/index.php?title=Orders_and_the_Order_Pool&oldid=3589",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-command-tokens-oldid-3959",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Command Tokens revision 3959",
+            "version": "N5.3 / oldid 3959",
+            "url": "https://infinitythewiki.com/index.php?title=Command_Tokens&oldid=3959",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -5110,6 +5200,12 @@
             "facts": {
                 "orderType": "irregular"
             },
+            "relations": [
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:lieutenant"
+                }
+            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -7824,6 +7920,10 @@
                 {
                     "type": "cancels-state",
                     "recordId": "state:suppressive-fire"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:nco"
                 }
             ]
         },
@@ -11536,6 +11636,611 @@
                 {
                     "sourceId": "wiki-protheion-oldid-3908",
                     "heading": "Protheion"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "rule:loss-of-lieutenant",
+            "kind": "rule",
+            "name": "Loss of Lieutenant",
+            "summary": "An army-level situation declared when the active player lacks an operational deployed Lieutenant during the Tactical Phase.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "During the Tactical Phase, the active player has no deployed Lieutenant because the Lieutenant is absent, Isolated, or in a Null State."
+                ],
+                "effects": [
+                    "All Troopers in the Army List are Irregular while the Loss of Lieutenant situation applies.",
+                    "At the end of the Turn, the player appoints a new eligible Lieutenant at no cost, canceling the situation."
+                ],
+                "restrictions": [
+                    "Troopers with Irregular Training or the REM Troop Type cannot be appointed as the replacement Lieutenant."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "training:irregular"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-loss-of-lieutenant-oldid-3508",
+                    "heading": "Loss of Lieutenant"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "rule:special-lieutenant-order",
+            "kind": "rule",
+            "name": "Special Lieutenant Order",
+            "summary": "A special Order generated for the Lieutenant and kept separate from the Combat Group Order Pool for the Lieutenant's own use.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "order-type",
+                "effects": [
+                    "The Order is kept separate from the Order Pool for the Lieutenant's own use.",
+                    "Its status and expenditure are Open Information."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "The Special Lieutenant Order is not part of an Order Pool."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-orders-order-pool-oldid-3589",
+                    "heading": "Special Lieutenant Order"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "rule:tactical-order",
+            "kind": "rule",
+            "name": "Tactical Order",
+            "summary": "A special Order kept by the Trooper that generates it, usable by that Trooper and by applicable advanced rules such as Fireteams.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "order-type",
+                "effects": [
+                    "A Tactical Order is kept by the Trooper that generates it for that Trooper's own use.",
+                    "Applicable advanced rules may allow the Tactical Order to activate a Fireteam."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "A Tactical Order is not added to an Order Pool."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-orders-order-pool-oldid-3589",
+                    "heading": "Tactical Order"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "rule:command-token-strategic-use",
+            "kind": "rule",
+            "name": "Command Token: Strategic Use",
+            "summary": "The Strategic Use mode of Command Tokens, covering first-turn procedural effects and the Speedball logistical option.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "command-token-use",
+                "effects": [
+                    "Strategic Use can alter Deployment, remove Regular Orders, limit enemy Command Token use, place a Trooper into Suppressive Fire State, or grant Speedball Tokens according to the selected option."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "Each player may spend at most two Command Tokens for Strategic Use: one Procedural option and one Logistical option."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:suppressive-fire"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:request-speedball"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-command-tokens-oldid-3959",
+                    "heading": "Command Tokens: Strategic Use"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "skill:chain-of-command",
+            "kind": "skill",
+            "name": "Chain of Command",
+            "summary": "An optional private Automatic Special Skill that appoints its user as the new Lieutenant when the current Lieutenant is unavailable during the Loss of Lieutenant check.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "Use only at the start of the player's Loss of Lieutenant check.",
+                    "The current Lieutenant must be Isolated or in a Null State.",
+                    "The user must be on the table as a Model or Marker and cannot be Isolated or in a Null State."
+                ],
+                "effects": [
+                    "The user becomes the new Lieutenant and gains the Lieutenant Special Skill with no additional abilities.",
+                    "The Loss of Lieutenant check is successful for the Turn."
+                ],
+                "restrictions": [
+                    "Chain of Command (Non Specialist) does not grant Specialist Troop status in scenarios where ordinary Chain of Command would do so."
+                ]
+            },
+            "labelIds": [
+                "optional",
+                "private-information"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "chain-of-command"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:lieutenant"
+                },
+                {
+                    "type": "negates-effects-of",
+                    "recordId": "rule:loss-of-lieutenant"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-chain-of-command-oldid-3799",
+                    "heading": "Chain of Command"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:counterintelligence",
+            "kind": "skill",
+            "name": "Counterintelligence",
+            "summary": "An optional private Automatic Special Skill that reduces the opponent's first-turn Command Token Strategic Use effects.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "Reduce to one the number of Orders the adversary can nullify with Strategic Use of a Command Token.",
+                    "Alternatively, increase to two the number of Command Tokens the adversary may use when Strategic Use would otherwise limit them to one."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional",
+                "private-information"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "counterintelligence"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "rule:command-token-strategic-use"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-counterintelligence-oldid-3991",
+                    "heading": "Counterintelligence"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:inspiring-leadership",
+            "kind": "skill",
+            "name": "Inspiring Leadership",
+            "summary": "An obligatory Automatic Special Skill that, while its user is the active Lieutenant, grants army-wide Training and Courage effects plus command benefits.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "If the user is Lieutenant, on the table, and not in a Null State, all Order-providing Troopers gain Regular Training and Courage except that Religious Troop does not receive the granted Courage effect.",
+                    "The Special Lieutenant Order may be used to declare a Coordinated Order including the user without the normal Command Token or extra Order expenditure.",
+                    "The army is unaffected by Retreat! while the active Lieutenant conditions are met.",
+                    "A qualifying all-Regular Fireteam containing the user receives a +2 inch Team Leader Zone of Control bonus for Coherency Checks."
+                ],
+                "restrictions": [
+                    "The Fireteam Coherency bonus is not cumulative with another Team Leader Zone of Control bonus."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "inspiring-leadership"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "training:regular"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:courage"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "rule:special-lieutenant-order"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-inspiring-leadership-oldid-3992",
+                    "heading": "Inspiring Leadership"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:lieutenant",
+            "kind": "skill",
+            "name": "Lieutenant",
+            "summary": "An obligatory private Automatic Special Skill identifying the army's commanding officer and granting the Special Lieutenant Order.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user has a Special Lieutenant Order.",
+                    "If the Lieutenant is absent from the table, Isolated, or in a Null State during the Tactical Phase, Loss of Lieutenant applies.",
+                    "The Lieutenant Skill remains active while its owner is in a Null State until a new Lieutenant is appointed."
+                ],
+                "restrictions": [
+                    "An Army List must include exactly one Lieutenant.",
+                    "Irregular Troops and REM Troop Types cannot be chosen as Lieutenant."
+                ]
+            },
+            "labelIds": [
+                "private-information",
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "lieutenant"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "rule:special-lieutenant-order"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:inspiring-leadership"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:strategos"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-lieutenant-oldid-3667",
+                    "heading": "Lieutenant"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:mnemonica",
+            "kind": "skill",
+            "name": "Mnemonica",
+            "summary": "An optional Automatic Special Skill that transfers the user's WIP, Mnemonica, and any Lieutenant status to an eligible allied host when the user enters a Null State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must enter a Null State.",
+                    "The chosen allied host must be on the battlefield as a Model or Marker and have either a Cube or the REM Troop Type."
+                ],
+                "effects": [
+                    "Transfer the user's WIP value and Mnemonica to the chosen host; if the user was Lieutenant, transfer Lieutenant and its additional abilities as well.",
+                    "The transfer completes automatically at the end of the Order in which the user entered the Null State.",
+                    "After the transfer, the original user enters Dead State and is removed from the game table."
+                ],
+                "restrictions": [
+                    "Troopers with Mnemonica are never considered to have a Cube."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "mnemonica"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:lieutenant"
+                },
+                {
+                    "type": "enters-state",
+                    "recordId": "state:dead"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-mnemonica-oldid-3105",
+                    "heading": "Mnemonica"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:nco",
+            "kind": "skill",
+            "name": "NCO",
+            "summary": "An optional Automatic Special Skill that converts Special Lieutenant Orders into Tactical Orders for the NCO to use.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "Replace any Special Lieutenant Orders with Tactical Orders and use them.",
+                    "The NCO and Lieutenant do not need to be in the same Combat Group.",
+                    "An NCO acting as Fireteam Team Leader may use the resulting Tactical Order to activate the Fireteam."
+                ],
+                "restrictions": [
+                    "An Isolated NCO cannot replace Special Lieutenant Orders or use the resulting Tactical Orders."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "nco"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "overrides-effects-of",
+                    "recordId": "rule:special-lieutenant-order"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "rule:tactical-order"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-nco-oldid-3594",
+                    "heading": "NCO"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:tactical-awareness",
+            "kind": "skill",
+            "name": "Tactical Awareness",
+            "summary": "An optional Automatic Special Skill that grants its user an additional Tactical Order.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user gains a Tactical Order in addition to the Order provided by Training.",
+                    "Place the Tactical Order during Order Count when the user is on the table as a Model or Marker, or when the user is placed on the table during the Orders Phase.",
+                    "A user acting as Fireteam Team Leader may spend this Tactical Order to activate the Fireteam."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "tactical-awareness"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "rule:tactical-order"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-tactical-awareness-oldid-3595",
+                    "heading": "Tactical Awareness"
                 }
             ],
             "review": {

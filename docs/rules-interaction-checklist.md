@@ -22,15 +22,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 152/180 complete (84.4%), 28 pending.**
-- Primary domains: Skill **67/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **24/24** complete, **0** pending.
-- Current authored outgoing relations: **198**.
-- Explicitly tracked future/deferred interactions: **101**.
+- **0.7.0 primary catalog: 159/180 complete (88.3%), 21 pending.**
+- Primary domains: Skill **74/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- Supporting semantic identities: **28/28** complete, **0** pending.
+- Current authored outgoing relations: **218**.
+- Explicitly tracked future/deferred interactions: **105**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (67/95)
+### Skill (74/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -53,8 +53,9 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **CC Attack** (`skill:cc-attack`) — reviewed
   - outgoing: none
-- [ ] **Chain of Command** (`skill:chain-of-command`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Chain of Command** (`skill:chain-of-command`) — reviewed
+  - `uses-effects-of` → Lieutenant (`skill:lieutenant`)
+  - `negates-effects-of` → Loss of Lieutenant (`rule:loss-of-lieutenant`)
 - [x] **Climb** (`skill:climb`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
@@ -72,8 +73,8 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] **Commlink** (`skill:commlink`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Counterintelligence** (`skill:counterintelligence`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Counterintelligence** (`skill:counterintelligence`) — reviewed
+  - `applies-effects-to` → Command Token: Strategic Use (`rule:command-token-strategic-use`)
 - [x] **Courage** (`skill:courage`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
@@ -162,8 +163,12 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → Hidden Deployment State (`state:hidden-deployment`) — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [ ] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Inspiring Leadership** (`skill:inspiring-leadership`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Inspiring Leadership** (`skill:inspiring-leadership`) — reviewed
+  - `uses-effects-of` → Regular (`training:regular`)
+  - `uses-effects-of` → Courage (`skill:courage`)
+  - `applies-effects-to` → Special Lieutenant Order (`rule:special-lieutenant-order`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat-situation` — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:fireteam-coherency` — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
 - [x] **Intuitive Attack** (`skill:intuitive-attack`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
@@ -172,8 +177,10 @@ review. `declaration-category` projection records are excluded.
 - [x] **Jump** (`skill:jump`) — reviewed
   - `cancels-state` → Prone State (`state:prone`)
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
-- [ ] **Lieutenant** (`skill:lieutenant`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Lieutenant** (`skill:lieutenant`) — reviewed
+  - `applies-effects-to` → Special Lieutenant Order (`rule:special-lieutenant-order`)
+  - `enables-use-of` → Inspiring Leadership (`skill:inspiring-leadership`)
+  - `enables-use-of` → Strategos (`skill:strategos`)
 - [x] **Limited Cover** (`skill:limited-cover`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
@@ -191,8 +198,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Minelayer** (`skill:minelayer`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Disposable (X) (`trait:disposable-x`) — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
-- [ ] **Mnemonica** (`skill:mnemonica`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Mnemonica** (`skill:mnemonica`) — reviewed
+  - `applies-effects-to` → Lieutenant (`skill:lieutenant`)
+  - `enters-state` → Dead State (`state:dead`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `equipment:cube` — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:troop-type:rem` — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
 - [ ] **Morpho-scan** (`skill:morpho-scan`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Move** (`skill:move`) — reviewed
@@ -200,8 +210,9 @@ review. `declaration-category` projection records are excluded.
 - [x] **Natural Born Warrior** (`skill:natural-born-warrior`) — reviewed
   - `ignores-modifiers-from` → Martial Arts (`skill:martial-arts`)
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
-- [ ] **NCO** (`skill:nco`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **NCO** (`skill:nco`) — reviewed
+  - `overrides-effects-of` → Special Lieutenant Order (`rule:special-lieutenant-order`)
+  - `uses-effects-of` → Tactical Order (`rule:tactical-order`)
 - [x] **Neurocinetics** (`skill:neurocinetics`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [x] **No Cover** (`skill:no-cover`) — reviewed
@@ -294,8 +305,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Surprise Attack** (`skill:surprise-attack`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `imposes-modifiers-on` → `rule:face-to-face-roll` — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
-- [ ] **Tactical Awareness** (`skill:tactical-awareness`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Tactical Awareness** (`skill:tactical-awareness`) — reviewed
+  - `uses-effects-of` → Tactical Order (`rule:tactical-order`)
 - [ ] **TAGCom** (`skill:tagcom`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Tech-recovery** (`skill:tech-recovery`) — pending: No curated rules definition yet.
@@ -319,7 +330,7 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Warhorse** (`skill:warhorse`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `relation type TBD` → `rule:loss-of-lieutenant` — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → Loss of Lieutenant (`rule:loss-of-lieutenant`) — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities.
   - future [post-0.7.0; deferred]: `relation type TBD` → Isolated State (`state:isolated`) — Warhorse prevents the user from entering Isolated State; the State exists, but the current relation vocabulary does not have a precise prevents-state edge.
   - future [post-0.7.0; planned]: `negates-effects-of` → `skill:bs-attack-negative-modifier` — Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally.
@@ -535,6 +546,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Isolated State** (`state:isolated`) — reviewed
   - `modifies-rolls-for` → Reset (`skill:reset`)
   - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+  - `restricts-use-of` → NCO (`skill:nco`)
   - future [post-0.7.0; deferred]: `causes-state` → Disconnected State (`state:disconnected`) — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
 - [x] **Normal State** (`state:normal`) — reviewed
   - outgoing: none
@@ -562,7 +574,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Suppressive Fire State** (`state:suppressive-fire`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `imposes-modifiers-on` → `rule:face-to-face-roll` — Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition.
-  - future [post-0.7.0; planned]: `relation type TBD` → `rule:loss-of-lieutenant` — Loss of Lieutenant cancels Suppressive Fire State, but the situation is not yet a canonical graph identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → Loss of Lieutenant (`rule:loss-of-lieutenant`) — Loss of Lieutenant cancels Suppressive Fire State, but the situation is not yet a canonical graph identity.
 - [x] **Targeted State** (`state:targeted`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
   - `modifies-rolls-for` → Discover (`skill:discover`)
@@ -600,8 +612,14 @@ review. `declaration-category` projection records are excluded.
   - `variant-of` → TinBot (`equipment:tinbot`)
   - `uses-effects-of` → Repeater (`equipment:repeater`)
 
-#### Rule (5/5)
+#### Rule (9/9)
 
+- [x] **Command Token: Strategic Use** (`rule:command-token-strategic-use`) — reviewed
+  - `causes-state` → Suppressive Fire State (`state:suppressive-fire`)
+  - `enables-use-of` → Request Speedball (`skill:request-speedball`)
+- [x] **Loss of Lieutenant** (`rule:loss-of-lieutenant`) — reviewed
+  - `uses-effects-of` → Irregular (`training:irregular`)
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
 - [x] **Peripheral (Ancillary)** (`rule:peripheral-type:ancillary`) — reviewed
   - `enables-use-of` → Place Deployable (`skill:place-deployable`)
 - [x] **Peripheral (Control)** (`rule:peripheral-type:control`) — reviewed
@@ -611,6 +629,10 @@ review. `declaration-category` projection records are excluded.
 - [x] **Peripheral (Servant)** (`rule:peripheral-type:servant`) — reviewed
   - outgoing: none
 - [x] **Peripheral (Synchronized)** (`rule:peripheral-type:synchronized`) — reviewed
+  - outgoing: none
+- [x] **Special Lieutenant Order** (`rule:special-lieutenant-order`) — reviewed
+  - outgoing: none
+- [x] **Tactical Order** (`rule:tactical-order`) — reviewed
   - outgoing: none
 
 #### Skill (10/10)
@@ -639,7 +661,7 @@ review. `declaration-category` projection records are excluded.
 #### Training (2/2)
 
 - [x] **Irregular** (`training:irregular`) — reviewed
-  - outgoing: none
+  - `restricts-use-of` → Lieutenant (`skill:lieutenant`)
 - [x] **Regular** (`training:regular`) — reviewed
   - outgoing: none
 
@@ -707,10 +729,14 @@ review. `declaration-category` projection records are excluded.
 - [ ] Impetuous (`skill:impetuous`) → Prone State (`state:prone`); `relation type TBD`; **post-0.7.0 / deferred** — Impetuous movement now has the current cancels-state edge, but its additional prevention of Prone re-entry needs a dedicated prevents-state-entry relation.
 - [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
 - [ ] Infiltration (`skill:infiltration`) → Hidden Deployment State (`state:hidden-deployment`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
+- [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
+- [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
 - [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
 - [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
+- [ ] Mnemonica (`skill:mnemonica`) → `equipment:cube`; `relation type TBD`; **post-0.7.0 / deferred** — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
+- [ ] Mnemonica (`skill:mnemonica`) → `rule:troop-type:rem`; `relation type TBD`; **post-0.7.0 / planned** — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Doctor (`skill:doctor`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Engineer (`skill:engineer`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
@@ -733,7 +759,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Terrain (`skill:terrain`) → `rule:special-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:partial-cover`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
 - [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:range-modifiers`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
-- [ ] Warhorse (`skill:warhorse`) → `rule:loss-of-lieutenant`; `relation type TBD`; **post-0.7.0 / planned** — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.
+- [ ] Warhorse (`skill:warhorse`) → Loss of Lieutenant (`rule:loss-of-lieutenant`); `relation type TBD`; **post-0.7.0 / planned** — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.
 - [ ] Warhorse (`skill:warhorse`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities.
 - [ ] Warhorse (`skill:warhorse`) → `skill:bs-attack-negative-modifier`; `negates-effects-of`; **post-0.7.0 / planned** — Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally.
 - [ ] Warhorse (`skill:warhorse`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — Warhorse prevents the user from entering Isolated State; the State exists, but the current relation vocabulary does not have a precise prevents-state edge.
@@ -748,7 +774,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
 - [ ] Stunned State (`state:stunned`) → `rule:roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception.
 - [ ] Suppressive Fire State (`state:suppressive-fire`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition.
-- [ ] Suppressive Fire State (`state:suppressive-fire`) → `rule:loss-of-lieutenant`; `relation type TBD`; **post-0.7.0 / planned** — Loss of Lieutenant cancels Suppressive Fire State, but the situation is not yet a canonical graph identity.
+- [ ] Suppressive Fire State (`state:suppressive-fire`) → Loss of Lieutenant (`rule:loss-of-lieutenant`); `relation type TBD`; **post-0.7.0 / planned** — Loss of Lieutenant cancels Suppressive Fire State, but the situation is not yet a canonical graph identity.
 - [ ] BioWeapon (`trait:bioweapon`) → `ammunition:da`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
 - [ ] BioWeapon (`trait:bioweapon`) → `ammunition:shock`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
 - [ ] BS Weapon (PH) (`trait:bs-weapon-ph`) → `skill:bs-attack-guided`; `restricts-use-of`; **post-0.7.0 / planned** — BS Attack (Guided) cannot use weapons with the BS Weapon (PH) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
