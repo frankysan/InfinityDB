@@ -1184,6 +1184,18 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:booty",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:metachemistry",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -2108,6 +2120,22 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD."
+    },
+    {
+      "sourceRecordId": "skill:booty",
+      "targetRecordId": "rule:booty-chart",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit."
+    },
+    {
+      "sourceRecordId": "skill:metachemistry",
+      "targetRecordId": "rule:metachemistry-chart",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts."
     }
   ]
 }

@@ -1260,6 +1260,8 @@ def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> N
     records = {record["id"]: record for record in document["records"]}
 
     expected_types = {
+        "skill:booty": ["deployment-skill"],
+        "skill:metachemistry": ["deployment-skill"],
         "skill:combat-jump": ["long-skill"],
         "skill:decoy": ["deployment-skill"],
         "skill:impersonation": ["deployment-skill"],
@@ -1290,6 +1292,11 @@ def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> N
     assert records["skill:request-speedball"]["relations"] == [
         {"type": "uses-effects-of", "recordId": "skill:combat-jump"}
     ]
+
+    assert records["skill:booty"]["labelIds"] == ["optional"]
+    assert records["skill:metachemistry"]["labelIds"] == ["optional"]
+    assert "relations" not in records["skill:booty"]
+    assert "relations" not in records["skill:metachemistry"]
 
     assert records["state:decoy"]["labelIds"] == ["marker"]
     for state_id in {"state:impersonation-1", "state:impersonation-2"}:

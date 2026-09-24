@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed Booty and MetaChemistry rules as optional Deployment Skills and preserve their
+  random chart-backed outcomes as deployment/session state. Track the Booty and MetaChemistry
+  Charts as planned structured reference identities instead of flattening possible rolls into
+  unconditional rules-graph relationships or static Unit facts.
 - Add reviewed Fireteam/scenario-support rules for FT Master, Number 2, Specialist
   Operative, Journalist, and TAGCom. Preserve their stable player-facing effects now while
   keeping participant-role triggers, Fireteam leadership/coherency, Specialist Troop,

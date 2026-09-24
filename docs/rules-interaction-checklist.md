@@ -22,15 +22,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 167/180 complete (92.8%), 13 pending.**
-- Primary domains: Skill **82/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 169/180 complete (93.9%), 11 pending.**
+- Primary domains: Skill **84/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **28/28** complete, **0** pending.
 - Current authored outgoing relations: **230**.
-- Explicitly tracked future/deferred interactions: **115**.
+- Explicitly tracked future/deferred interactions: **117**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (82/95)
+### Skill (84/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -43,8 +43,9 @@ review. `declaration-category` projection records are excluded.
 - [x] **Berserk** (`skill:berserk`) — reviewed
   - `uses-effects-of` → Move (`skill:move`)
   - `uses-effects-of` → CC Attack (`skill:cc-attack`)
-- [ ] **Booty** (`skill:booty`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Booty** (`skill:booty`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:booty-chart` — Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit.
 - [x] **BS Attack** (`skill:bs-attack`) — reviewed
   - outgoing: none
 - [x] **Camouflage** (`skill:camouflage`) — reviewed
@@ -195,8 +196,9 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [x] **Martial Arts** (`skill:martial-arts`) — reviewed
   - `modifies-rolls-for` → CC Attack (`skill:cc-attack`)
-- [ ] **MetaChemistry** (`skill:metachemistry`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **MetaChemistry** (`skill:metachemistry`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:metachemistry-chart` — MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts.
 - [x] **Mimetism** (`skill:mimetism`) — reviewed
   - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
   - `imposes-modifiers-on` → Discover (`skill:discover`)
@@ -730,6 +732,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] `rule:null-state` → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role.
 - [ ] Aerial (`skill:aerial`) → Engaged State (`state:engaged`); `relation type TBD`; **post-0.7.0 / deferred** — Aerial prevents its active user from being in Engaged State, but the relation vocabulary has no precise prevents-state-entry edge.
 - [ ] Aerial (`skill:aerial`) → Prone State (`state:prone`); `relation type TBD`; **post-0.7.0 / deferred** — Aerial prevents its active user from being in Prone State, but the relation vocabulary has no precise prevents-state-entry edge.
+- [ ] Booty (`skill:booty`) → `rule:booty-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit.
 - [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
 - [ ] Climbing Plus (`skill:climbing-plus`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
 - [ ] Climbing Plus (`skill:climbing-plus`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
@@ -758,6 +761,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Journalist (`skill:journalist`) → `rule:promotion-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
 - [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
 - [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
+- [ ] MetaChemistry (`skill:metachemistry`) → `rule:metachemistry-chart`; `uses-effects-of`; **post-0.7.0 / planned** — MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
 - [ ] Mnemonica (`skill:mnemonica`) → `equipment:cube`; `relation type TBD`; **post-0.7.0 / deferred** — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
 - [ ] Mnemonica (`skill:mnemonica`) → `rule:troop-type:rem`; `relation type TBD`; **post-0.7.0 / planned** — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
