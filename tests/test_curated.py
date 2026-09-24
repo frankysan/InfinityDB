@@ -1048,6 +1048,25 @@ def test_checked_in_n5_collection_links_reviewed_trait_skill_interactions() -> N
         } == relations
 
 
+def test_checked_in_n5_collection_links_armed_turret_rule_dependencies() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert {
+        (relation["type"], relation["recordId"])
+        for relation in records["weapon:armed-turret"]["relations"]
+    } == {
+        ("uses-effects-of", "trait:disposable-x"),
+        ("uses-effects-of", "trait:deployable"),
+        ("uses-effects-of", "trait:non-reloadable"),
+        ("uses-effects-of", "trait:perimeter"),
+        ("uses-effects-of", "equipment:360o-visor"),
+        ("enables-use-of", "skill:bs-attack"),
+        ("enables-use-of", "skill:cc-attack"),
+    }
+
+
 def test_checked_in_n5_collection_links_weapon_traits_to_required_common_skills() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

@@ -72,22 +72,26 @@
     {
       "recordId": "rule:peripheral-type:control",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "rule:peripheral-type:cyberplug",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "rule:peripheral-type:servant",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "rule:peripheral-type:synchronized",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:alert",
@@ -402,7 +406,8 @@
     {
       "recordId": "state:disconnected",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "state:hidden-deployment",
@@ -431,7 +436,8 @@
     {
       "recordId": "state:stunned",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "state:targeted",
@@ -442,22 +448,26 @@
     {
       "recordId": "state:unconscious",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "state:unloaded",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "training:irregular",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "training:regular",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:anti-materiel",
@@ -660,7 +670,8 @@
     {
       "recordId": "weapon:armed-turret",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "equipment:360o-visor",
@@ -1271,6 +1282,54 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge."
-    }
+    },
+  {
+    "sourceRecordId": "weapon:armed-turret",
+    "targetRecordId": "skill:total-reaction",
+    "relationType": "uses-effects-of",
+    "targetRelease": "0.7.0",
+    "status": "planned",
+    "reason": "The Armed Turret profile explicitly includes Total Reaction; materialize the reuse edge when Total Reaction gains its canonical Skill definition."
+  },
+  {
+    "sourceRecordId": "state:unconscious",
+    "targetRecordId": "state:prone",
+    "relationType": "causes-state",
+    "targetRelease": "post-0.7.0",
+    "status": "planned",
+    "reason": "Entering Unconscious State automatically puts eligible Troopers into Prone State, and canceling Unconscious also cancels that Prone State; materialize the state-to-state interaction when Prone State becomes canonical."
+  },
+  {
+    "sourceRecordId": "state:stunned",
+    "targetRecordId": "rule:attack-declaration",
+    "relationType": "restricts-use-of",
+    "targetRelease": "post-0.7.0",
+    "status": "planned",
+    "reason": "Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical."
+  },
+  {
+    "sourceRecordId": "state:stunned",
+    "targetRecordId": "rule:roll",
+    "relationType": "modifies-rolls-for",
+    "targetRelease": "post-0.7.0",
+    "status": "planned",
+    "reason": "Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception."
+  },
+  {
+    "sourceRecordId": "state:isolated",
+    "targetRecordId": "state:disconnected",
+    "relationType": "causes-state",
+    "targetRelease": "post-0.7.0",
+    "status": "deferred",
+    "reason": "Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition."
+  },
+  {
+    "sourceRecordId": "rule:null-state",
+    "targetRecordId": "state:disconnected",
+    "relationType": "causes-state",
+    "targetRelease": "post-0.7.0",
+    "status": "deferred",
+    "reason": "A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role."
+  }
   ]
 }

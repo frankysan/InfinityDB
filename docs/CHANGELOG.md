@@ -7,6 +7,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Complete interaction review for all 39 already-defined supporting rules identities; make Armed
+  Turret navigation expose its canonical Disposable, Deployable, Non-Reloadable, Perimeter,
+  360º Visor, BS Attack, and CC Attack dependencies while retaining Total Reaction and broad
+  State interactions in the long-lived future queue where their targets or scope are not yet
+  representable precisely.
 - Complete interaction review for all 28 currently defined public Traits and the five
   defined supporting Trait rules; link BS Weapon (PH/WIP) to the BS Attacks they modify,
   CC to CC Attack, and Non-Reloadable to Reload while retaining conditional ammunition,

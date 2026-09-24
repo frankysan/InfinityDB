@@ -23,9 +23,9 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 95/161 complete (59.0%), 66 pending.**
 - Primary domains: Skill **39/100**; Equipment **28/28**; Trait **28/33**.
-- Supporting semantic identities: **28/39** complete, **11** pending.
-- Current authored outgoing relations: **113**.
-- Explicitly tracked future/deferred interactions: **58**.
+- Supporting semantic identities: **39/39** complete, **0** pending.
+- Current authored outgoing relations: **120**.
+- Explicitly tracked future/deferred interactions: **64**.
 
 ## 0.7.0 primary catalog review
 
@@ -471,17 +471,17 @@ review. `declaration-category` projection records are excluded.
   - `variant-of` → TinBot (`equipment:tinbot`)
   - `uses-effects-of` → Repeater (`equipment:repeater`)
 
-#### Rule (1/5)
+#### Rule (5/5)
 
 - [x] **Peripheral (Ancillary)** (`rule:peripheral-type:ancillary`) — reviewed
   - `enables-use-of` → Place Deployable (`skill:place-deployable`)
-- [ ] **Peripheral (Control)** (`rule:peripheral-type:control`) — pending
+- [x] **Peripheral (Control)** (`rule:peripheral-type:control`) — reviewed
   - outgoing: none
-- [ ] **Peripheral (Cyberplug)** (`rule:peripheral-type:cyberplug`) — pending
+- [x] **Peripheral (Cyberplug)** (`rule:peripheral-type:cyberplug`) — reviewed
   - outgoing: none
-- [ ] **Peripheral (Servant)** (`rule:peripheral-type:servant`) — pending
+- [x] **Peripheral (Servant)** (`rule:peripheral-type:servant`) — reviewed
   - outgoing: none
-- [ ] **Peripheral (Synchronized)** (`rule:peripheral-type:synchronized`) — pending
+- [x] **Peripheral (Synchronized)** (`rule:peripheral-type:synchronized`) — reviewed
   - outgoing: none
 
 #### Skill (10/10)
@@ -507,11 +507,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Strategos L2** (`skill:strategos-l2`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
   - `variant-of` → Strategos (`skill:strategos`)
 
-#### State (6/10)
+#### State (10/10)
 
 - [x] **Camouflaged State** (`state:camouflaged`) — reviewed
   - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
-- [ ] **Disconnected State** (`state:disconnected`) — pending
+- [x] **Disconnected State** (`state:disconnected`) — reviewed
   - outgoing: none
 - [x] **Hidden Deployment State** (`state:hidden-deployment`) — reviewed
   - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
@@ -521,24 +521,28 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → Reset (`skill:reset`)
 - [x] **Isolated State** (`state:isolated`) — reviewed
   - `modifies-rolls-for` → Reset (`skill:reset`)
-- [ ] **Stunned State** (`state:stunned`) — pending
+  - future [post-0.7.0; deferred]: `causes-state` → Disconnected State (`state:disconnected`) — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
+- [x] **Stunned State** (`state:stunned`) — reviewed
   - outgoing: none
+  - future [post-0.7.0; planned]: `restricts-use-of` → `rule:attack-declaration` — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:roll` — Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception.
 - [x] **Targeted State** (`state:targeted`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
   - `modifies-rolls-for` → Discover (`skill:discover`)
   - `modifies-rolls-for` → Reset (`skill:reset`)
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
   - `restricts-use-of` → Stealth (`skill:stealth`)
-- [ ] **Unconscious State** (`state:unconscious`) — pending
+- [x] **Unconscious State** (`state:unconscious`) — reviewed
   - outgoing: none
-- [ ] **Unloaded State** (`state:unloaded`) — pending
+  - future [post-0.7.0; planned]: `causes-state` → `state:prone` — Entering Unconscious State automatically puts eligible Troopers into Prone State, and canceling Unconscious also cancels that Prone State; materialize the state-to-state interaction when Prone State becomes canonical.
+- [x] **Unloaded State** (`state:unloaded`) — reviewed
   - outgoing: none
 
-#### Training (0/2)
+#### Training (2/2)
 
-- [ ] **Irregular** (`training:irregular`) — pending
+- [x] **Irregular** (`training:irregular`) — reviewed
   - outgoing: none
-- [ ] **Regular** (`training:regular`) — pending
+- [x] **Regular** (`training:regular`) — reviewed
   - outgoing: none
 
 #### Trait (5/5)
@@ -554,10 +558,17 @@ review. `declaration-category` projection records are excluded.
 - [x] **Prior Deployment** (`trait:prior-deployment`) — reviewed
   - outgoing: none
 
-#### Weapon (0/1)
+#### Weapon (1/1)
 
-- [ ] **Armed Turret** (`weapon:armed-turret`) — pending
-  - outgoing: none
+- [x] **Armed Turret** (`weapon:armed-turret`) — reviewed
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Non-Reloadable (`trait:non-reloadable`)
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → 360º Visor (`equipment:360o-visor`)
+  - `enables-use-of` → BS Attack (`skill:bs-attack`)
+  - `enables-use-of` → CC Attack (`skill:cc-attack`)
+  - future [0.7.0; planned]: `uses-effects-of` → Total Reaction (`skill:total-reaction`) — The Armed Turret profile explicitly includes Total Reaction; materialize the reuse edge when Total Reaction gains its canonical Skill definition.
 
 ## Future interaction queue
 
@@ -567,6 +578,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] GizmoKit (`equipment:gizmokit`) → Tech-recovery (`skill:tech-recovery`); `enables-use-of`; **0.7.0 / planned** — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
 - [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
 - [ ] TinBot: Neurocinetics (`equipment:tinbot-neurocinetics`) → Neurocinetics (`skill:neurocinetics`); `uses-effects-of`; **0.7.0 / planned** — TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition.
+- [ ] Armed Turret (`weapon:armed-turret`) → Total Reaction (`skill:total-reaction`); `uses-effects-of`; **0.7.0 / planned** — The Armed Turret profile explicitly includes Total Reaction; materialize the reuse edge when Total Reaction gains its canonical Skill definition.
 - [ ] Biometric Visor (`equipment:biometric-visor`) → `state:impersonation-1`; `cancels-state`; **post-0.7.0 / planned** — A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
@@ -597,6 +609,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] `hacking-program:white-noise` → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] `hacking-program:white-noise` → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] `rule:marker-form` → Surprise Attack (`skill:surprise-attack`); `enables-use-of`; **post-0.7.0 / planned** — Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State.
+- [ ] `rule:null-state` → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role.
 - [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
@@ -610,6 +623,10 @@ review. `declaration-category` projection records are excluded.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.
 - [ ] Suppressive Fire (`skill:suppressive-fire`) → `state:suppressive-fire`; `enters-state`; **post-0.7.0 / planned** — Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog.
 - [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
+- [ ] Isolated State (`state:isolated`) → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
+- [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
+- [ ] Stunned State (`state:stunned`) → `rule:roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception.
+- [ ] Unconscious State (`state:unconscious`) → `state:prone`; `causes-state`; **post-0.7.0 / planned** — Entering Unconscious State automatically puts eligible Troopers into Prone State, and canceling Unconscious also cancels that Prone State; materialize the state-to-state interaction when Prone State becomes canonical.
 - [ ] BioWeapon (`trait:bioweapon`) → `ammunition:da`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
 - [ ] BioWeapon (`trait:bioweapon`) → `ammunition:shock`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
 - [ ] BS Weapon (PH) (`trait:bs-weapon-ph`) → `skill:bs-attack-guided`; `restricts-use-of`; **post-0.7.0 / planned** — BS Attack (Guided) cannot use weapons with the BS Weapon (PH) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.

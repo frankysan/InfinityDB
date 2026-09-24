@@ -21,15 +21,15 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
     assert report["summary"]["recordCount"] == 134
-    assert report["summary"]["authoredOutgoingRelationCount"] == 113
-    assert report["summary"]["futureInteractionCount"] == 58
+    assert report["summary"]["authoredOutgoingRelationCount"] == 120
+    assert report["summary"]["futureInteractionCount"] == 64
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 134,
-        "complete": 123,
-        "pending": 11,
-        "reviewed": 113,
+        "complete": 134,
+        "pending": 0,
+        "reviewed": 124,
         "inherited": 10,
-        "percentComplete": 91.8,
+        "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -65,8 +65,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         },
     }
     assert report["summary"]["supporting"]["total"] == 39
-    assert report["summary"]["supporting"]["complete"] == 28
-    assert report["summary"]["supporting"]["pending"] == 11
+    assert report["summary"]["supporting"]["complete"] == 39
+    assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
     equipment_items = [
@@ -112,6 +112,20 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         assert items[record_id]["status"] == "reviewed"
     assert items["skill:super-jump"]["futureInteractions"][0]["targetRecordId"] == ("skill:jump")
     assert items["trait:perimeter"]["futureInteractions"][0]["targetRelease"] == ("post-0.7.0")
+    for record_id in {
+        "rule:peripheral-type:control",
+        "rule:peripheral-type:cyberplug",
+        "rule:peripheral-type:servant",
+        "rule:peripheral-type:synchronized",
+        "state:disconnected",
+        "state:stunned",
+        "state:unconscious",
+        "state:unloaded",
+        "training:irregular",
+        "training:regular",
+        "weapon:armed-turret",
+    }:
+        assert items[record_id]["status"] == "reviewed"
     white_noise = [
         candidate
         for candidate in report["futureInteractions"]
@@ -145,6 +159,16 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("trait:indiscriminate", "state:camouflaged", None) in future_keys
     assert ("equipment:ai-motorcycle", "skill:transmutation", "uses-effects-of") in future_keys
     assert ("equipment:holomask", "state:holomask", "enters-state") in future_keys
+    assert ("weapon:armed-turret", "skill:total-reaction", "uses-effects-of") in future_keys
+    assert ("state:unconscious", "state:prone", "causes-state") in future_keys
+    assert (
+        "state:stunned",
+        "rule:attack-declaration",
+        "restricts-use-of",
+    ) in future_keys
+    assert ("state:stunned", "rule:roll", "modifies-rolls-for") in future_keys
+    assert ("state:isolated", "state:disconnected", "causes-state") in future_keys
+    assert ("rule:null-state", "state:disconnected", "causes-state") in future_keys
     assert ("equipment:symbiomate", "skill:immunity", "uses-effects-of") in future_keys
     assert (
         "equipment:hacking-device-plus",
@@ -174,7 +198,7 @@ def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 95/161 complete" in output
     assert "66 pending" in output
-    assert "11 supporting identities pending" in output
+    assert "0 supporting identities pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

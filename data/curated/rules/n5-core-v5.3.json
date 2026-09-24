@@ -1880,6 +1880,36 @@
                     "ccWeapon": "PARA CC Weapon (-3)"
                 }
             },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:deployable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:non-reloadable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:perimeter"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:360o-visor"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:bs-attack"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:cc-attack"
+                }
+            ],
             "armyLinks": [
                 {
                     "entity": "weapon",

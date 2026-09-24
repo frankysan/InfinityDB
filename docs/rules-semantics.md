@@ -1457,6 +1457,48 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Traits>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 
+### RS-GSG-STATE-004 — Broad State interactions stay fail-closed until generic targets exist
+
+**Classification:** source-native cross-domain semantics with an interaction-modeling consequence.
+
+Several reviewed States interact with broad game concepts rather than one specific Skill or
+Equipment identity. Stunned prevents every Attack declaration and applies a -3 MOD to every
+Roll except Saving Rolls. Disconnected is activated by Controller/Peripheral conditions, including
+Isolated and Null States, where the participant role is essential. Unconscious automatically puts
+eligible Troopers into Prone State and cancels that Prone State when Unconscious is cancelled.
+
+InfinityDB therefore does not approximate these rules with incomplete BS Attack / CC Attack or
+unconditional State-to-State edges. The interaction ledger retains Stunned toward generic Attack
+declaration and Roll abstractions, Unconscious toward Prone State, and the role-conditional
+Isolated / Null-State activation of Disconnected until the missing targets or participant-role
+semantics are canonical. Unloaded needs no new outbound edge: Disposable already causes the State,
+while Reload and Baggage cancel it and Non-Reloadable restricts that recovery path.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Stunned_State>
+- Wiki: <https://infinitythewiki.com/Disconnected_State>
+- Wiki: <https://infinitythewiki.com/Unconscious_State>
+- Wiki: <https://infinitythewiki.com/Unloaded_State>
+
+### RS-GSG-WEAPON-001 — Armed Turret composes existing rule identities
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+Armed Turret explicitly has Disposable (1), Deployable, Non-Reloadable, and Perimeter; its profile
+also has 360º Visor and Total Reaction, and the weapon reacts by declaring BS Attack or CC Attack
+under its own targeting conditions. These are existing rule dependencies rather than duplicated
+copies of those rules.
+
+InfinityDB therefore authors `uses-effects-of` from Armed Turret to the four canonical Trait
+families and 360º Visor, plus `enables-use-of` toward BS Attack and CC Attack. The exact Disposable
+value and all trigger/target conditions remain owned by the Armed Turret source rule. Total Reaction
+remains in the 0.7.0 future queue until that public Skill gains its canonical definition.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/Armed_Turret>
+
 ### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
 
 **Classification:** source-native cross-rule gameplay relationship semantics.

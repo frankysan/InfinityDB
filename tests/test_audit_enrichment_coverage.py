@@ -116,10 +116,11 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
         "stale_citation_source": 1,
+        "unresolved_related_item_link": 5,
     }
-    assert report["summary"]["classifiedGapCount"] == 2
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 2}
-    assert report["summary"]["releaseBlockerCount"] == 2
+    assert report["summary"]["classifiedGapCount"] == 7
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 7}
+    assert report["summary"]["releaseBlockerCount"] == 7
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -146,8 +147,17 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []
 
-    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 0
+    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 5
     assert report["summary"]["supportingRelationTargetCount"] == 0
+    assert {
+        item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
+    } == {
+        "trait:disposable-x",
+        "trait:deployable",
+        "trait:non-reloadable",
+        "trait:perimeter",
+        "equipment:360o-visor",
+    }
     assert report["relationCoverage"]["supporting"] == []
 
 
@@ -220,9 +230,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 1,
+        "release-blocker": 6,
     }
-    assert report["summary"]["releaseBlockerCount"] == 1
+    assert report["summary"]["releaseBlockerCount"] == 6
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:
