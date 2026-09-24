@@ -22,15 +22,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 162/180 complete (90.0%), 18 pending.**
-- Primary domains: Skill **77/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 167/180 complete (92.8%), 13 pending.**
+- Primary domains: Skill **82/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **28/28** complete, **0** pending.
 - Current authored outgoing relations: **230**.
-- Explicitly tracked future/deferred interactions: **105**.
+- Explicitly tracked future/deferred interactions: **115**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (77/95)
+### Skill (82/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -131,8 +131,10 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:wound` — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
   - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
-- [ ] **FT Master** (`skill:ft-master`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **FT Master** (`skill:ft-master`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `applies-effects-to` → Regular (`training:regular`) — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:fireteam-coherency` — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
 - [ ] **G: Jumper** (`skill:g-jumper`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Guard** (`skill:guard`) — reviewed
@@ -172,8 +174,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Intuitive Attack** (`skill:intuitive-attack`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
-- [ ] **Journalist** (`skill:journalist`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Journalist** (`skill:journalist`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:guts-roll` — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:cubevac-roll` — Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:promotion-roll` — Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
 - [x] **Jump** (`skill:jump`) — reviewed
   - `cancels-state` → Prone State (`state:prone`)
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
@@ -227,8 +232,11 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [x] **Non-Hackable** (`skill:non-hackable`) — reviewed: No current graph edge: its targeting restriction depends on Hacking Attack Requirements and Unit Type predicates that are not yet canonical interaction targets.
   - outgoing: none
-- [ ] **Number 2** (`skill:number-2`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Number 2** (`skill:number-2`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Isolated State (`state:isolated`) — Number 2 can take over when another participant, the current Fireteam Team Leader, enters Isolated State; the current graph cannot encode that participant-role trigger without implying that Isolated applies to the Number 2 user.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — Number 2 can take over when the current Fireteam Team Leader enters any Null State; Null State still needs a canonical abstraction and the trigger belongs to another Fireteam participant.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:fireteam-leader` — Number 2 changes the Fireteam Team Leader role rather than granting or modifying another Skill; model that role transition once Fireteam leadership has a canonical relationship identity.
 - [x] **Parachutist** (`skill:parachutist`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
@@ -285,8 +293,9 @@ review. `declaration-category` projection records are excluded.
   - `negates-effects-of` → Stealth (`skill:stealth`)
   - `modifies-rolls-for` → Dodge (`skill:dodge`)
   - `modifies-rolls-for` → Reset (`skill:reset`)
-- [ ] **Specialist Operative** (`skill:specialist-operative`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Specialist Operative** (`skill:specialist-operative`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:specialist-troop` — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
 - [x] **Speculative Attack** (`skill:speculative-attack`) — reviewed
   - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
 - [x] **Stealth** (`skill:stealth`) — reviewed
@@ -307,8 +316,9 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `imposes-modifiers-on` → `rule:face-to-face-roll` — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
 - [x] **Tactical Awareness** (`skill:tactical-awareness`) — reviewed
   - `uses-effects-of` → Tactical Order (`rule:tactical-order`)
-- [ ] **TAGCom** (`skill:tagcom`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **TAGCom** (`skill:tagcom`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `applies-effects-to` → `rule:troop-type:tag` — TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD.
 - [x] **Tech-recovery** (`skill:tech-recovery`) — reviewed
   - `applies-effects-to` → GizmoKit (`equipment:gizmokit`)
   - `cancels-state` → Disconnected State (`state:disconnected`)
@@ -731,6 +741,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] Frenzy (`skill:frenzy`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
 - [ ] Frenzy (`skill:frenzy`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
 - [ ] Frenzy (`skill:frenzy`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
+- [ ] FT Master (`skill:ft-master`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
+- [ ] FT Master (`skill:ft-master`) → Regular (`training:regular`); `applies-effects-to`; **post-0.7.0 / deferred** — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] Impetuous (`skill:impetuous`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States.
 - [ ] Impetuous (`skill:impetuous`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label.
@@ -741,6 +753,9 @@ review. `declaration-category` projection records are excluded.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
+- [ ] Journalist (`skill:journalist`) → `rule:cubevac-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
+- [ ] Journalist (`skill:journalist`) → `rule:guts-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
+- [ ] Journalist (`skill:journalist`) → `rule:promotion-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
 - [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
 - [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
@@ -750,6 +765,9 @@ review. `declaration-category` projection records are excluded.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Doctor (`skill:doctor`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Engineer (`skill:engineer`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
+- [ ] Number 2 (`skill:number-2`) → `rule:fireteam-leader`; `relation type TBD`; **post-0.7.0 / planned** — Number 2 changes the Fireteam Team Leader role rather than granting or modifying another Skill; model that role transition once Fireteam leadership has a canonical relationship identity.
+- [ ] Number 2 (`skill:number-2`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — Number 2 can take over when the current Fireteam Team Leader enters any Null State; Null State still needs a canonical abstraction and the trigger belongs to another Fireteam participant.
+- [ ] Number 2 (`skill:number-2`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — Number 2 can take over when another participant, the current Fireteam Team Leader, enters Isolated State; the current graph cannot encode that participant-role trigger without implying that Isolated applies to the Number 2 user.
 - [ ] Parachutist (`skill:parachutist`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Place Deployable (`skill:place-deployable`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable.
 - [ ] Protheion (`skill:protheion`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets.
@@ -760,10 +778,12 @@ review. `declaration-category` projection records are excluded.
 - [ ] Remote Presence (`skill:remote-presence`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
 - [ ] Shasvastii (`skill:shasvastii`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] Shasvastii (`skill:shasvastii`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
+- [ ] Specialist Operative (`skill:specialist-operative`) → `rule:specialist-troop`; `uses-effects-of`; **post-0.7.0 / planned** — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
 - [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Stealth (`skill:stealth`) → Move (`skill:move`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.
 - [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
+- [ ] TAGCom (`skill:tagcom`) → `rule:troop-type:tag`; `applies-effects-to`; **post-0.7.0 / deferred** — TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD.
 - [ ] Terrain (`skill:terrain`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
 - [ ] Terrain (`skill:terrain`) → `rule:special-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:partial-cover`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.

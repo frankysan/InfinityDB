@@ -7,6 +7,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed Fireteam/scenario-support rules for FT Master, Number 2, Specialist
+  Operative, Journalist, and TAGCom. Preserve their stable player-facing effects now while
+  keeping participant-role triggers, Fireteam leadership/coherency, Specialist Troop,
+  Guts/campaign-roll, and TAG/Combat Group-scoped relationships in the maintained future
+  queue where the current graph cannot represent them precisely.
 - Add reviewed recovery-support rules for Paramedic, Tech-Recovery, and Technorganic.
   Connect Paramedic to MediKit, expose Tech-Recovery's GizmoKit-driven cancellation of
   Engineer-recoverable States other than Unconscious, and show how Technorganic lets

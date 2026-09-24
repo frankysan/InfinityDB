@@ -20,31 +20,31 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 190
+    assert report["summary"]["recordCount"] == 195
     assert report["summary"]["authoredOutgoingRelationCount"] == 230
-    assert report["summary"]["futureInteractionCount"] == 105
+    assert report["summary"]["futureInteractionCount"] == 115
     assert report["summary"]["releases"]["0.7.0"] == {
-        "total": 190,
-        "complete": 190,
+        "total": 195,
+        "complete": 195,
         "pending": 0,
-        "reviewed": 180,
+        "reviewed": 185,
         "inherited": 10,
         "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 180,
-        "complete": 162,
-        "pending": 18,
-        "percentComplete": 90.0,
+        "complete": 167,
+        "pending": 13,
+        "percentComplete": 92.8,
         "catalogs": {
             "skills": {
                 "total": 95,
-                "complete": 77,
-                "pending": 18,
-                "defined": 77,
-                "missingRuleDefinition": 18,
-                "percentComplete": 81.1,
+                "complete": 82,
+                "pending": 13,
+                "defined": 82,
+                "missingRuleDefinition": 13,
+                "percentComplete": 86.3,
             },
             "equipment": {
                 "total": 28,
@@ -174,6 +174,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:regeneration",
         "skill:protheion",
         "skill:suppressive-fire",
+        "skill:ft-master",
+        "skill:number-2",
+        "skill:specialist-operative",
+        "skill:journalist",
+        "skill:tagcom",
     }:
         assert items[record_id]["status"] == "reviewed"
     assert items["skill:super-jump"]["futureInteractions"][0]["targetRecordId"] == ("skill:jump")
@@ -208,6 +213,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         (candidate["sourceRecordId"], candidate["targetRecordId"], candidate["relationType"])
         for candidate in report["futureInteractions"]
     }
+    assert ("skill:ft-master", "training:regular", "applies-effects-to") in future_keys
+    assert ("skill:number-2", "state:isolated", None) in future_keys
+    assert ("skill:specialist-operative", "rule:specialist-troop", "uses-effects-of") in future_keys
+    assert ("skill:journalist", "rule:guts-roll", "modifies-rolls-for") in future_keys
+    assert ("skill:tagcom", "rule:troop-type:tag", "applies-effects-to") in future_keys
+
     assert ("skill:request-speedball", "skill:combat-jump", "uses-effects-of") not in future_keys
     assert ("skill:suppressive-fire", "state:suppressive-fire", "enters-state") not in future_keys
     assert ("skill:jump", "state:prone", "cancels-state") not in future_keys
@@ -338,7 +349,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }
 
     expected = render_markdown(report)
-    assert "Skill **77/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
+    assert "Skill **82/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -357,8 +368,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 162/180 complete" in output
-    assert "18 pending" in output
+    assert "0.7.0 primary catalog: 167/180 complete" in output
+    assert "13 pending" in output
     assert "0 supporting identities pending" in output
 
 

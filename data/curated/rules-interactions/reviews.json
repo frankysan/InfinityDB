@@ -1154,6 +1154,36 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:ft-master",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:number-2",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:specialist-operative",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:journalist",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:tagcom",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1998,6 +2028,86 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific."
+    },
+    {
+      "sourceRecordId": "skill:ft-master",
+      "targetRecordId": "training:regular",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself."
+    },
+    {
+      "sourceRecordId": "skill:ft-master",
+      "targetRecordId": "rule:fireteam-coherency",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely."
+    },
+    {
+      "sourceRecordId": "skill:number-2",
+      "targetRecordId": "state:isolated",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Number 2 can take over when another participant, the current Fireteam Team Leader, enters Isolated State; the current graph cannot encode that participant-role trigger without implying that Isolated applies to the Number 2 user."
+    },
+    {
+      "sourceRecordId": "skill:number-2",
+      "targetRecordId": "rule:null-state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Number 2 can take over when the current Fireteam Team Leader enters any Null State; Null State still needs a canonical abstraction and the trigger belongs to another Fireteam participant."
+    },
+    {
+      "sourceRecordId": "skill:number-2",
+      "targetRecordId": "rule:fireteam-leader",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Number 2 changes the Fireteam Team Leader role rather than granting or modifying another Skill; model that role transition once Fireteam leadership has a canonical relationship identity."
+    },
+    {
+      "sourceRecordId": "skill:specialist-operative",
+      "targetRecordId": "rule:specialist-troop",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity."
+    },
+    {
+      "sourceRecordId": "skill:journalist",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved."
+    },
+    {
+      "sourceRecordId": "skill:journalist",
+      "targetRecordId": "rule:cubevac-roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities."
+    },
+    {
+      "sourceRecordId": "skill:journalist",
+      "targetRecordId": "rule:promotion-roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities."
+    },
+    {
+      "sourceRecordId": "skill:tagcom",
+      "targetRecordId": "rule:troop-type:tag",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD."
     }
   ]
 }

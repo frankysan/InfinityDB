@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 250
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 255
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -1214,6 +1214,37 @@ def test_state_recovery_interactions_are_bidirectional(tmp_path: Path) -> None:
         ("applies-effects-to", "outbound", "GizmoKit"),
         ("applies-effects-to", "outbound", "MediKit"),
     }
+
+
+def test_fireteam_and_scenario_support_skills_are_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        slug: next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+        for slug, record_id in {
+            "ft-master": "skill:ft-master",
+            "number-2": "skill:number-2",
+            "specialist-operative": "skill:specialist-operative",
+            "journalist": "skill:journalist",
+            "tagcom": "skill:tagcom",
+        }.items()
+    }
+
+    assert records["ft-master"]["label_ids"] == ["obligatory"]
+    assert "Regular" in " ".join(records["ft-master"]["facts"]["effects"])
+    assert records["number-2"]["label_ids"] == ["optional"]
+    assert "Isolated State" in " ".join(records["number-2"]["facts"]["requirements"])
+    assert "Specialist Troop" in " ".join(records["specialist-operative"]["facts"]["effects"])
+    assert "Guts Rolls" in " ".join(records["journalist"]["facts"]["effects"])
+    assert "Combat Group" in " ".join(records["tagcom"]["facts"]["effects"])
+    assert all(not record.get("display_relations") for record in records.values())
 
 
 def test_rules_database_preserves_variant_inheritance_and_variant_links(

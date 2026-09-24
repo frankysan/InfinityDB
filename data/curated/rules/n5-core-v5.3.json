@@ -1011,6 +1011,51 @@
             "url": "https://infinitythewiki.com/index.php?title=Technorganic&oldid=4089",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-ft-master-oldid-4114",
+            "kind": "wiki",
+            "title": "Infinity Wiki — FT Master revision 4114",
+            "version": "N5.3 / oldid 4114",
+            "url": "https://infinitythewiki.com/index.php?title=FT_Master&oldid=4114",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-number-2-oldid-3117",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Number 2 revision 3117",
+            "version": "N5.3 / oldid 3117",
+            "url": "https://infinitythewiki.com/index.php?title=Number_2&oldid=3117",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-specialist-operative-oldid-3136",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Specialist Operative revision 3136",
+            "version": "N5.3 / oldid 3136",
+            "url": "https://infinitythewiki.com/index.php?title=Specialist_Operative&oldid=3136",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-journalist-oldid-4086",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Journalist revision 4086",
+            "version": "N5.3 / oldid 4086",
+            "url": "https://infinitythewiki.com/index.php?title=Journalist&oldid=4086",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-tagcom-oldid-3144",
+            "kind": "wiki",
+            "title": "Infinity Wiki — TAGCom revision 3144",
+            "version": "N5.3 / oldid 3144",
+            "url": "https://infinitythewiki.com/index.php?title=TAGCom&oldid=3144",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -12479,6 +12524,264 @@
                 {
                     "sourceId": "wiki-technorganic-oldid-4089",
                     "heading": "Technorganic"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:ft-master",
+            "kind": "skill",
+            "name": "FT Master",
+            "summary": "An obligatory Automatic Special Skill that regularizes the user's Fireteam during Order Count and can improve its Coherency when its members are already Regular.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must be part of a Fireteam."
+                ],
+                "effects": [
+                    "During Order Count, all members of the user's Fireteam are Regular while the user is part of that Fireteam.",
+                    "If every Fireteam member already has the Regular Characteristic, add 2 inches to the Team Leader's Zone of Control for Fireteam Coherency Checks."
+                ],
+                "restrictions": [
+                    "The Coherency bonus is not cumulative with another bonus to the Team Leader's Zone of Control.",
+                    "If the Skill names a Unit in brackets and the Fireteam contains a member of that Unit, the Fireteam is canceled if the FT Master leaves the Fireteam."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "ft-master"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-ft-master-oldid-4114",
+                    "heading": "FT Master"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:number-2",
+            "kind": "skill",
+            "name": "Number 2",
+            "summary": "An optional Automatic Special Skill that can take over as Fireteam Team Leader when the current leader becomes Isolated or enters a Null State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must be part of a Fireteam.",
+                    "That Fireteam's current Team Leader must enter Isolated State or a Null State."
+                ],
+                "effects": [
+                    "The user may automatically become the new Fireteam Team Leader.",
+                    "The user remains Team Leader even if the previous Team Leader recovers, until the player chooses another Team Leader."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "number-2"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-number-2-oldid-3117",
+                    "heading": "Number 2"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:specialist-operative",
+            "kind": "skill",
+            "name": "Specialist Operative",
+            "summary": "An optional Automatic Special Skill that makes its user a Specialist Troop for scenario rules even without another qualifying specialist role.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "In missions and scenarios, the user is considered a Specialist Troop and may use rules that apply to Specialist Troops.",
+                    "This Specialist Troop status does not require the user to have another specialist role such as Engineer, Doctor, or Hacker."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "specialist-operative"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-specialist-operative-oldid-3136",
+                    "heading": "Specialist Operative"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:journalist",
+            "kind": "skill",
+            "name": "Journalist",
+            "summary": "An optional Automatic Special Skill that modifies nearby allied and enemy Guts Rolls and can provide campaign bonuses while the Journalist remains operational.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "Troopers inside an allied Journalist's Zone of Control apply +3 to their Guts Rolls.",
+                    "Troopers inside an enemy Journalist's Zone of Control apply -3 to their Guts Rolls.",
+                    "In campaign play, an eligible Journalist grants +3 to CUBEVAC Rolls and Promotion Rolls at the end of a scenario."
+                ],
+                "restrictions": [
+                    "Campaign bonuses require the Journalist to remain on the game table in a non-Null State at the end of the scenario.",
+                    "Multiple Journalist modifiers do not stack."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "journalist"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-journalist-oldid-4086",
+                    "heading": "Journalist"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:tagcom",
+            "kind": "skill",
+            "name": "TAGCom",
+            "summary": "An optional Automatic Special Skill that applies the user's profile-listed support MODs to TAGs in the same Combat Group while the user is operational.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "While the user is deployed on the table in a non-Null State, TAGs in the user's Combat Group receive the MODs listed in brackets with TAGCom on the user's Unit Profile."
+                ],
+                "restrictions": [
+                    "Identical TAGCom MODs are not cumulative; only different MODs may be applied together."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "tagcom"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-tagcom-oldid-3144",
+                    "heading": "TAGCom"
                 }
             ],
             "review": {

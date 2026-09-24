@@ -157,8 +157,8 @@ requiring a new top-level browser surface in 0.7.0.
     `Non-Hackable` remains in scope. States are now an explicit primary 0.7.0 domain rather
     than supporting-only semantics: the complete current N5.3 State vocabulary is modeled as
     24 canonical identities, with Impersonation intentionally split into IMP-1 and IMP-2.
-    The current gate is 162/180 primary identities complete (Skills 77/95, Equipment 28/28,
-    Traits 33/33, States 24/24), leaving 18 missing Skill definitions. Combat Jump, Decoy,
+    The current gate is 167/180 primary identities complete (Skills 82/95, Equipment 28/28,
+    Traits 33/33, States 24/24), leaving 13 missing Skill definitions. Combat Jump, Decoy,
     Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic Deployment now
     have canonical reviewed definitions. Berserk, Guard,
     Neurocinetics, Total Reaction, and Triangulated Fire are also canonical reviewed
@@ -178,6 +178,11 @@ requiring a new top-level browser surface in 0.7.0.
     slice: Paramedic reuses MediKit, Tech-Recovery exposes its GizmoKit-driven cancellation
     of Engineer-recoverable States other than Unconscious, and Technorganic links both
     medical and engineering recovery methods across the normal VITA/STR boundary.
+    FT Master, Number 2, Specialist Operative, Journalist, and TAGCom now complete a
+    reviewed Fireteam/scenario-support slice. Their stable Automatic-Skill semantics are
+    curated now, while participant-role triggers, Fireteam leadership/coherency, Specialist
+    Troop identity, Guts/campaign rolls, and TAG/Combat Group-scoped parameter effects remain
+    explicitly tracked for later graph/domain work rather than being flattened into broad edges.
     Chain of Command, Counterintelligence, Inspiring Leadership, Lieutenant, Mnemonica,
     NCO, and Tactical Awareness now complete the reviewed command/order slice. Loss of
     Lieutenant, Special Lieutenant Order, Tactical Order, and Command Token Strategic Use are
