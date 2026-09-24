@@ -555,6 +555,38 @@ def test_weapon_trait_skill_prerequisites_are_bidirectional(tmp_path: Path) -> N
         }
 
 
+def test_skill_roll_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record for record in database.composed_records_by_kind("skill")
+    }
+    expected_pairs = {
+        ("skill:martial-arts", "skill:cc-attack"),
+        ("skill:marksmanship", "skill:bs-attack"),
+        ("skill:sixth-sense", "skill:dodge"),
+        ("skill:sixth-sense", "skill:reset"),
+    }
+
+    for source_id, target_id in expected_pairs:
+        source = records[source_id]
+        target = records[target_id]
+        source_name = source["name"]
+        target_name = target["name"]
+
+        assert ("modifies-rolls-for", "outbound", target_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert ("modifies-rolls-for", "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
 def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"
@@ -690,7 +722,11 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
     assert {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in sixth_sense["display_relations"]
-    } == {("negates-effects-of", "outbound", "Stealth")}
+    } == {
+        ("modifies-rolls-for", "outbound", "Dodge"),
+        ("modifies-rolls-for", "outbound", "Reset"),
+        ("negates-effects-of", "outbound", "Stealth"),
+    }
     stealth_relations = {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in stealth["display_relations"]

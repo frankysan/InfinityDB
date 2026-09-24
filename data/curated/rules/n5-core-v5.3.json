@@ -4688,6 +4688,12 @@
                     "section": "Levels, Labels and Traits"
                 }
             ],
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:cc-attack"
+                }
+            ],
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
@@ -5981,6 +5987,14 @@
                 {
                     "type": "negates-effects-of",
                     "recordId": "skill:stealth"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:dodge"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:reset"
                 }
             ]
         },
@@ -6323,6 +6337,12 @@
                 {
                     "sourceId": "wiki-marksmanship-oldid-3812",
                     "heading": "Marksmanship"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
                 }
             ],
             "review": {

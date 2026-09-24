@@ -21,6 +21,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Link the Intuitive Attack, Speculative Attack, and Suppressive Fire weapon Traits
   bidirectionally to the Common Skills they enable, exposing those explicit weapon
   prerequisites without implying that all declaration requirements are satisfied.
+- Link Martial Arts, Marksmanship, and Sixth Sense bidirectionally to the Common Skills whose
+  Rolls they modify, making CC Attack, BS Attack, Dodge, and Reset interactions discoverable
+  from either endpoint.
 - Add bidirectional restrictive-State self-recovery interactions: Dodge now cancels IMM-A,
   Reset also cancels Isolated, and IMM-A / IMM-B / Isolated expose the State-specific Dodge
   or Reset roll interaction from both endpoints without duplicating the exact MOD values.

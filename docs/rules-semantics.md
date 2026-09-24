@@ -1366,6 +1366,34 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment&oldid=3084>
 - Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment_State&oldid=3835>
 
+### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Some Automatic Special Skills directly change the Roll or MOD processing of a named Common
+Skill without enabling that Common Skill or replacing its declaration. In the reviewed N5.3
+set, Martial Arts supplies Attack/Opponent/Burst MODs when CC Attack is declared, Marksmanship
+changes which negative BS MODs are applied when BS Attack is declared, and Sixth Sense removes
+most negative MODs from Dodge and Reset.
+
+InfinityDB therefore authors `modifies-rolls-for` from Martial Arts to CC Attack, from
+Marksmanship to BS Attack, and from Sixth Sense to Dodge and Reset. Exact Level values, Cover/
+Nanoscreen scope, and Sixth Sense exceptions remain in the owning Skill facts rather than the
+graph edges. `rules.db` derives the inverse navigation so each affected Common Skill identifies
+the Special Skills that can change its Roll.
+
+Super-Jump is intentionally not included in this relation family. It transforms how Jump is
+declared and executed rather than modifying a Roll, and the current relation vocabulary does not
+express that transformation precisely. Do not substitute `enables-use-of` merely because
+Super-Jump permits a Short-Skill form of Jump; Jump is already usable without Super-Jump.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Martial_Arts>
+- Wiki: <https://infinitythewiki.com/Marksmanship>
+- Wiki: <https://infinitythewiki.com/Sixth_Sense>
+- Wiki: <https://infinitythewiki.com/Super-Jump>
+
 ### RS-SE-MARKSMANSHIP-001 — Marksmanship and MSV have explicit counter-interactions
 
 **Classification:** source-native cross-rule gameplay relationship semantics.

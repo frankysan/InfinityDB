@@ -1047,6 +1047,27 @@ def test_checked_in_n5_collection_links_weapon_traits_to_required_common_skills(
         } == {("enables-use-of", skill_id)}
 
 
+def test_checked_in_n5_collection_links_skill_roll_interactions() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:martial-arts"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:cc-attack"}
+    ]
+    assert records["skill:marksmanship"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:bs-attack"}
+    ]
+    assert {
+        (relation["type"], relation["recordId"])
+        for relation in records["skill:sixth-sense"]["relations"]
+    } == {
+        ("negates-effects-of", "skill:stealth"),
+        ("modifies-rolls-for", "skill:dodge"),
+        ("modifies-rolls-for", "skill:reset"),
+    }
+
+
 def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
