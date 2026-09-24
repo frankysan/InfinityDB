@@ -68,10 +68,14 @@ and known future interactions that should survive beyond the current release. Th
 `futureInteractions` queue can also retain a provisional source/target ID that is not yet a
 current rules record, so future domain work does not lose already-reviewed interactions.
 
-A primary catalog item is complete only when its canonical typed rules identity exists and
-that identity's outgoing semantics are reviewed. Missing rules definitions therefore remain
-visible as pending catalog work instead of disappearing from the checklist denominator.
-Exact source variants and independently modeled supporting identities are reported separately.
+A primary catalog item is normally complete only when its canonical typed rules identity exists
+and that identity's outgoing semantics are reviewed. `catalog-scope.json` may declare a
+`releaseExceptions` entry when an item has been explicitly vetted but its authoritative rule
+belongs to a different publication/domain that is deliberately outside the current release. Such
+items remain visible in the denominator as deferred rather than being misclassified as missing
+current-release rules. Unclassified missing definitions remain pending, and an exception becomes
+stale and fails the audit if a current curated definition is later added. Exact source variants
+and independently modeled supporting identities are reported separately.
 
 The ledger deliberately does not duplicate authored `relations`: the current curated rules
 graph remains authoritative for edges that exist now. `tools/audit_rules_interactions.py`

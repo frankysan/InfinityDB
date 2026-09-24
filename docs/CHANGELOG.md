@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add the reviewed Hacker rule and complete the 0.7.0 catalog interaction-review gate. Preserve
+  Hacking Device, direct Program, Upgrade Program, and Null-State semantics without inventing
+  fixed Program-set edges, and keep Commlink visible as an explicit Reinforcements-scoped release
+  exception rather than presenting it as missing N5-core rules.
 - Add reviewed G: Jumper, Infinity Spec-Ops, Morpho-Scan, RemDriver, and Transmutation rules. Preserve multi-body/profile and list/session state in structured facts, expose Morpho-Scan's Reset MOD, and promote AI Motorcycle/Escape System reuse of Transmutation while retaining participant-role, Attribute-copying, SpecBall, Null-State, and variant-specific triggers in the maintained future queue.
 - Add reviewed Explode, Exrah, Immunity, and Vulnerability rules. Expose their stable
   Unconscious/Dead and Immunity interactions, including Dogged/NWI suppression of Explode and

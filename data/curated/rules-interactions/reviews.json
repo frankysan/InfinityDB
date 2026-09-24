@@ -1250,6 +1250,12 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:hacker",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -2374,6 +2380,30 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain."
+    },
+    {
+      "sourceRecordId": "skill:hacker",
+      "targetRecordId": "rule:hacking-area",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:hacker",
+      "targetRecordId": "equipment:hacking-device",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Hacker status permits use of equipped Hacking Devices, but the actual Device variant is occurrence/profile data and the current relation vocabulary has no precise eligibility/equipping edge."
+    },
+    {
+      "sourceRecordId": "skill:hacker",
+      "targetRecordId": "rule:upgrade-program",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; preserve this until Hacking Programs and Upgrade Programs have canonical identities."
     }
   ]
 }

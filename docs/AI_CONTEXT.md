@@ -1363,8 +1363,14 @@ compatibility references remain unambiguous JSON integers.
   are still the single source of truth for edges that currently exist. Every semantic rules
   identity except `declaration-category` projection records must have one ledger entry.
 - The primary 0.7.0 progress figure is catalog-based, not curated-record-based. A public catalog
-  item is complete only when its canonical typed rules identity exists and is reviewed; missing
-  rules definitions remain pending. Exact source variants plus independently modeled Rule,
+  item is normally complete when its canonical typed rules identity exists and is reviewed. The
+  maintained scope may carry an explicit release exception when an item has been vetted but its
+  authoritative rule belongs to a distinct publication/domain intentionally deferred beyond the
+  release. Such items stay visible in the denominator as deferred; unclassified missing
+  definitions remain pending, and an exception is stale if a current curated definition later
+  exists. Commlink is the sole 0.7.0 exception: it remains a public Skill identity but its
+  canonical rule belongs to Reinforcements Extra and is deferred to the separately scoped
+  post-0.7.0 Reinforcements collection. Exact source variants plus independently modeled Rule,
   Training, supporting Trait, and curated Weapon identities are reported separately as supporting
   semantics so they cannot inflate the public-catalog completion percentage. States are primary
   0.7.0 identities, not supporting-only records.

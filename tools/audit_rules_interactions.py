@@ -21,7 +21,7 @@ REPORT_FORMAT_VERSION = 2
 POLICY_FORMAT = "InfinityDB rules interaction review policy"
 POLICY_FORMAT_VERSION = 1
 CATALOG_SCOPE_FORMAT = "InfinityDB rules interaction catalog scope"
-CATALOG_SCOPE_FORMAT_VERSION = 1
+CATALOG_SCOPE_FORMAT_VERSION = 2
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RULES_DIRECTORY = PROJECT_ROOT / "data" / "curated" / "rules"
 DEFAULT_POLICY_PATH = (
@@ -62,7 +62,13 @@ def _load_catalog_scope(path: Path) -> dict[str, Any]:
         ) from exc
     if not isinstance(document, dict):
         raise RulesInteractionAuditError("Interaction catalog scope root must be an object")
-    expected = {"format", "formatVersion", "targetRelease", "catalogs"}
+    expected = {
+        "format",
+        "formatVersion",
+        "targetRelease",
+        "catalogs",
+        "releaseExceptions",
+    }
     if set(document) != expected:
         raise RulesInteractionAuditError(
             f"Interaction catalog scope must contain exactly {sorted(expected)}"
@@ -105,11 +111,64 @@ def _load_catalog_scope(path: Path) -> dict[str, Any]:
             seen.add(item_id)
             items.append({"id": item_id, "name": name})
         catalogs[catalog] = items
+
+    raw_exceptions = document.get("releaseExceptions")
+    if not isinstance(raw_exceptions, list):
+        raise RulesInteractionAuditError("releaseExceptions must be an array")
+    release_exceptions: list[dict[str, str]] = []
+    seen_exceptions: set[tuple[str, str]] = set()
+    scoped_ids = {
+        catalog: {item["id"] for item in items}
+        for catalog, items in catalogs.items()
+    }
+    for index, raw in enumerate(raw_exceptions):
+        context = f"releaseExceptions[{index}]"
+        expected_exception = {
+            "catalog",
+            "itemId",
+            "targetRelease",
+            "reason",
+        }
+        if not isinstance(raw, dict) or set(raw) != expected_exception:
+            raise RulesInteractionAuditError(
+                f"{context} must contain exactly {sorted(expected_exception)}"
+            )
+        catalog = raw.get("catalog")
+        if catalog not in PRIMARY_CATALOGS:
+            raise RulesInteractionAuditError(
+                f"{context}.catalog must be one of {sorted(PRIMARY_CATALOGS)}"
+            )
+        item_id = _require_string(raw.get("itemId"), f"{context}.itemId")
+        if item_id not in scoped_ids[str(catalog)]:
+            raise RulesInteractionAuditError(
+                f"{context} references unknown {catalog} catalog id {item_id!r}"
+            )
+        exception_release = _require_string(
+            raw.get("targetRelease"), f"{context}.targetRelease"
+        )
+        if exception_release == target_release:
+            raise RulesInteractionAuditError(
+                f"{context}.targetRelease must differ from {target_release!r}"
+            )
+        reason = _require_string(raw.get("reason"), f"{context}.reason")
+        key = (str(catalog), item_id)
+        if key in seen_exceptions:
+            raise RulesInteractionAuditError(f"Duplicate release exception for {key!r}")
+        seen_exceptions.add(key)
+        release_exceptions.append(
+            {
+                "catalog": str(catalog),
+                "itemId": item_id,
+                "targetRelease": exception_release,
+                "reason": reason,
+            }
+        )
     return {
         "format": CATALOG_SCOPE_FORMAT,
         "formatVersion": CATALOG_SCOPE_FORMAT_VERSION,
         "targetRelease": target_release,
         "catalogs": catalogs,
+        "releaseExceptions": release_exceptions,
     }
 
 
@@ -118,6 +177,7 @@ def _catalog_scope_from_databases(
     rules_database_path: Path,
     *,
     target_release: str,
+    release_exceptions: list[dict[str, str]],
 ) -> dict[str, Any]:
     try:
         database = Database(database_path)
@@ -159,6 +219,7 @@ def _catalog_scope_from_databases(
                 [{"id": str(item["slug"]), "name": str(item["name"])} for item in states]
             ),
         },
+        "releaseExceptions": release_exceptions,
     }
 
 
@@ -384,29 +445,58 @@ def audit_rules_interactions(
     primary_items: list[dict[str, Any]] = []
     catalog_summary: dict[str, dict[str, int | float]] = {}
     target_release = catalog_scope["targetRelease"]
+    release_exceptions = {
+        (item["catalog"], item["itemId"]): item
+        for item in catalog_scope["releaseExceptions"]
+    }
     for catalog, kind in PRIMARY_CATALOGS.items():
         catalog_items: list[dict[str, Any]] = []
         for scoped in catalog_scope["catalogs"][catalog]:
             record_id = f"{kind}:{scoped['id']}"
             primary_record_ids.add(record_id)
             record = semantic.get(record_id)
+            release_exception = release_exceptions.get((catalog, scoped["id"]))
             if record is None:
-                item = {
-                    "id": record_id,
-                    "catalog": catalog,
-                    "catalogId": scoped["id"],
-                    "kind": kind,
-                    "name": scoped["name"],
-                    "relations": [],
-                    "sourceVariant": False,
-                    "recordDefined": False,
-                    "targetRelease": target_release,
-                    "status": "pending",
-                    "reviewedOn": None,
-                    "note": "No curated rules definition yet.",
-                    "futureInteractions": future_by_source.get(record_id, []),
-                }
+                if release_exception is None:
+                    item = {
+                        "id": record_id,
+                        "catalog": catalog,
+                        "catalogId": scoped["id"],
+                        "kind": kind,
+                        "name": scoped["name"],
+                        "relations": [],
+                        "sourceVariant": False,
+                        "recordDefined": False,
+                        "targetRelease": target_release,
+                        "status": "pending",
+                        "reviewedOn": None,
+                        "note": "No curated rules definition yet.",
+                        "scopeException": False,
+                        "futureInteractions": future_by_source.get(record_id, []),
+                    }
+                else:
+                    item = {
+                        "id": record_id,
+                        "catalog": catalog,
+                        "catalogId": scoped["id"],
+                        "kind": kind,
+                        "name": scoped["name"],
+                        "relations": [],
+                        "sourceVariant": False,
+                        "recordDefined": False,
+                        "targetRelease": release_exception["targetRelease"],
+                        "status": "deferred",
+                        "reviewedOn": None,
+                        "note": release_exception["reason"],
+                        "scopeException": True,
+                        "futureInteractions": future_by_source.get(record_id, []),
+                    }
             else:
+                if release_exception is not None:
+                    raise RulesInteractionAuditError(
+                        f"{record_id}: release exception is stale because a curated rules "
+                        "definition now exists"
+                    )
                 review = policy[record_id]
                 if review["targetRelease"] != target_release:
                     raise RulesInteractionAuditError(
@@ -424,19 +514,25 @@ def audit_rules_interactions(
                     "catalogId": scoped["id"],
                     "name": scoped["name"],
                     "recordDefined": True,
+                    "scopeException": False,
                     "futureInteractions": future_by_source.get(record_id, []),
                 }
             catalog_items.append(item)
             primary_items.append(item)
         total = len(catalog_items)
-        complete = sum(item["status"] in COMPLETE_STATUSES for item in catalog_items)
+        complete = sum(
+            item["status"] in COMPLETE_STATUSES or bool(item.get("scopeException"))
+            for item in catalog_items
+        )
         defined = sum(bool(item["recordDefined"]) for item in catalog_items)
+        deferred = sum(bool(item.get("scopeException")) for item in catalog_items)
         catalog_summary[catalog] = {
             "total": total,
             "complete": complete,
             "pending": total - complete,
             "defined": defined,
             "missingRuleDefinition": total - defined,
+            "deferred": deferred,
             "percentComplete": round(100.0 * complete / total, 1) if total else 100.0,
         }
 
@@ -541,12 +637,21 @@ def _append_item(
     *,
     show_missing_definition: bool = False,
 ) -> None:
-    checked = "x" if item["status"] in COMPLETE_STATUSES else " "
+    checked = (
+        "x"
+        if item["status"] in COMPLETE_STATUSES or bool(item.get("scopeException"))
+        else " "
+    )
     suffix = f" — {item['status']}"
     if item.get("note"):
         suffix += f": {item['note']}"
     lines.append(f"- [{checked}] **{item['name']}** (`{item['id']}`){suffix}")
-    if show_missing_definition and not item.get("recordDefined", True):
+    if show_missing_definition and item.get("scopeException"):
+        lines.append(
+            "  - rules definition: intentionally deferred to "
+            f"{item['targetRelease']} by maintained scope decision"
+        )
+    elif show_missing_definition and not item.get("recordDefined", True):
         lines.append("  - rules definition: missing; outgoing interactions not yet reviewable")
     elif item["relations"]:
         for relation_type, target_id in item["relations"]:
@@ -581,9 +686,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         "The **0.7.0 progress gate is catalog-based**: every public Skill, Equipment item,",
         "Trait, and State is listed, including entries that do not yet have a curated rules",
         "definition.",
-        "A catalog item is complete only when its canonical rules identity exists and its",
-        "outgoing interaction semantics have been reviewed. Missing rules definitions therefore",
-        "remain visibly pending instead of disappearing from the denominator.",
+        "A catalog item is complete when its canonical rules identity exists and its outgoing",
+        "interaction semantics have been reviewed, or when a maintained release exception",
+        "explicitly defers an out-of-scope publication/domain to later work. Unclassified",
+        "missing definitions remain visibly pending instead of disappearing from the denominator.",
         "",
         "Exact source variants plus independently modeled Rule, Training, supporting Trait,",
         "and curated Weapon identities are tracked separately as supporting semantics.",
@@ -732,6 +838,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.database,
                 args.rules_database,
                 target_release=current_scope["targetRelease"],
+                release_exceptions=current_scope["releaseExceptions"],
             )
             if args.refresh_catalog_scope:
                 _write_catalog_scope(args.catalog_scope, runtime_scope)

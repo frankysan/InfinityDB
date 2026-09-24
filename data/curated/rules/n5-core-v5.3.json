@@ -1146,6 +1146,15 @@
             "url": "https://infinitythewiki.com/index.php?title=Transmutation&oldid=4109",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-hacker-oldid-3646",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Hacker revision 3646",
+            "version": "N5.3 / oldid 3646",
+            "url": "https://infinitythewiki.com/index.php?title=Hacker&oldid=3646",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -13526,6 +13535,57 @@
                 {
                     "sourceId": "wiki-transmutation-oldid-4109",
                     "heading": "Transmutation"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:hacker",
+            "kind": "skill",
+            "name": "Hacker",
+            "summary": "An obligatory Automatic Special Skill that identifies a Trooper as a Hacker, allowing Hacking Devices and assigned Hacking Programs or Upgrades to provide their documented quantronic capabilities.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "A Hacker may use a Hacking Device they are equipped with; the Device determines which Hacking Programs it grants.",
+                    "A Hacker may instead have Hacking Programs assigned directly without requiring a Hacking Device.",
+                    "Upgrade Programs may be assigned to the Hacker independently of the baseline Programs granted by a Hacking Device.",
+                    "The Hacker Special Skill remains active while its owner is in a Null State."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "hacker"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-hacker-oldid-3646",
+                    "heading": "Hacker"
                 }
             ],
             "review": {

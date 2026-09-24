@@ -110,8 +110,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 153
-    assert report["summary"]["completeCount"] == 151
+    assert report["summary"]["exposedCount"] == 154
+    assert report["summary"]["completeCount"] == 152
     assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,

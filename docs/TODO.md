@@ -146,7 +146,7 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Represent reviewed related-item relationships explicitly rather than
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.
-  - [ ] Complete the maintained outgoing-interaction review checklist for 0.7.0.
+  - [x] Complete the maintained outgoing-interaction review checklist for 0.7.0.
     The canonical Trait portion is complete at 33/33. `TraitCatalog` now roots the
     rules-backed catalog in the current curated Trait vocabulary instead of the mixed
     Army `properties` bucket, so zero-use canonical Traits remain in scope while Labels,
@@ -157,8 +157,11 @@ requiring a new top-level browser surface in 0.7.0.
     `Non-Hackable` remains in scope. States are now an explicit primary 0.7.0 domain rather
     than supporting-only semantics: the complete current N5.3 State vocabulary is modeled as
     24 canonical identities, with Impersonation intentionally split into IMP-1 and IMP-2.
-    The current gate is 178/180 primary identities complete (Skills 93/95, Equipment 28/28,
-    Traits 33/33, States 24/24), leaving 2 missing Skill definitions. Combat Jump, Decoy,
+    The maintained 0.7.0 interaction-review gate is now complete at 180/180 catalog items
+    vetted (Skills 95/95, Equipment 28/28, Traits 33/33, States 24/24). 179 catalog identities
+    have current canonical definitions; Commlink is the single explicit release exception because
+    its authoritative rule belongs to Reinforcements Extra and remains deferred to separately
+    scoped post-0.7.0 annex work. Combat Jump, Decoy,
     Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic Deployment now
     have canonical reviewed definitions. Berserk, Guard,
     Neurocinetics, Total Reaction, and Triangulated Fire are also canonical reviewed
@@ -199,9 +202,12 @@ requiring a new top-level browser surface in 0.7.0.
     System reuse of Transmutation are current graph relationships, while Proxy participant roles,
     Spec-Ops Chart/SpecBall behavior, copied Attribute values, RemDriver recipient/Null-State
     scoping, and variant-specific Transmutation triggers remain explicitly tracked for later
-    graph/domain work. The only catalog Skills still missing reviewed definitions are Hacker and
-    Commlink; Commlink remains intentionally reserved for the separately scoped Reinforcements
-    annex rather than being folded into the N5 core collection.
+    graph/domain work. Hacker completes the remaining N5-core Skill definition as an obligatory
+    Automatic Skill, preserving Hacking Device, direct Program, Upgrade Program, and Null-State
+    behavior in structured facts. Hacking Area, Device eligibility, and Program/Upgrade identities
+    remain planned follow-up work for the 0.8.0 domain audit rather than being flattened into
+    imprecise current graph edges. Commlink remains visible in the catalog denominator as a
+    reviewed scope exception reserved for the separately scoped Reinforcements annex.
     Chain of Command, Counterintelligence, Inspiring Leadership, Lieutenant, Mnemonica,
     NCO, and Tactical Awareness now complete the reviewed command/order slice. Loss of
     Lieutenant, Special Lieutenant Order, Tactical Order, and Command Token Strategic Use are

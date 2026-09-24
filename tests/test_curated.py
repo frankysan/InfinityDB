@@ -1344,6 +1344,22 @@ def test_checked_in_n5_collection_models_profile_runtime_identity_skill_slice() 
     assert "relations" not in records["skill:transmutation"]
 
 
+def test_checked_in_n5_collection_models_hacker_core_skill() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    hacker = records["skill:hacker"]
+    assert hacker["facts"]["typeIds"] == ["automatic"]
+    assert hacker["labelIds"] == ["obligatory"]
+    assert hacker["armyLinks"] == [{"entity": "skill", "id": "hacker"}]
+    effects = " ".join(hacker["facts"]["effects"])
+    assert "Hacking Device" in effects
+    assert "Upgrade Programs" in effects
+    assert "Null State" in effects
+    assert "relations" not in hacker
+
+
 def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

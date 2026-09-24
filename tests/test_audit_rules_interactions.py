@@ -20,31 +20,32 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 206
+    assert report["summary"]["recordCount"] == 207
     assert report["summary"]["authoredOutgoingRelationCount"] == 240
-    assert report["summary"]["futureInteractionCount"] == 140
+    assert report["summary"]["futureInteractionCount"] == 143
     assert report["summary"]["releases"]["0.7.0"] == {
-        "total": 206,
-        "complete": 206,
+        "total": 207,
+        "complete": 207,
         "pending": 0,
-        "reviewed": 196,
+        "reviewed": 197,
         "inherited": 10,
         "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 180,
-        "complete": 178,
-        "pending": 2,
-        "percentComplete": 98.9,
+        "complete": 180,
+        "pending": 0,
+        "percentComplete": 100.0,
         "catalogs": {
             "skills": {
                 "total": 95,
-                "complete": 93,
-                "pending": 2,
-                "defined": 93,
-                "missingRuleDefinition": 2,
-                "percentComplete": 97.9,
+                "complete": 95,
+                "pending": 0,
+                "defined": 94,
+                "missingRuleDefinition": 1,
+                "deferred": 1,
+                "percentComplete": 100.0,
             },
             "equipment": {
                 "total": 28,
@@ -52,6 +53,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
                 "pending": 0,
                 "defined": 28,
                 "missingRuleDefinition": 0,
+                "deferred": 0,
                 "percentComplete": 100.0,
             },
             "traits": {
@@ -60,6 +62,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
                 "pending": 0,
                 "defined": 33,
                 "missingRuleDefinition": 0,
+                "deferred": 0,
                 "percentComplete": 100.0,
             },
             "states": {
@@ -68,6 +71,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
                 "pending": 0,
                 "defined": 24,
                 "missingRuleDefinition": 0,
+                "deferred": 0,
                 "percentComplete": 100.0,
             },
         },
@@ -95,6 +99,13 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert primary["skill:aerial"]["recordDefined"] is True
     assert primary["skill:non-hackable"]["status"] == "reviewed"
     assert primary["skill:non-hackable"]["recordDefined"] is True
+    assert primary["skill:hacker"]["status"] == "reviewed"
+    assert primary["skill:hacker"]["recordDefined"] is True
+    assert primary["skill:hacker"]["scopeException"] is False
+    assert primary["skill:commlink"]["status"] == "deferred"
+    assert primary["skill:commlink"]["recordDefined"] is False
+    assert primary["skill:commlink"]["scopeException"] is True
+    assert primary["skill:commlink"]["targetRelease"] == "post-0.7.0"
     for non_skill_id in {
         "skill:bangbomb",
         "skill:bts-3",
@@ -190,6 +201,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:morpho-scan",
         "skill:remdriver",
         "skill:transmutation",
+        "skill:hacker",
     }:
         assert items[record_id]["status"] == "reviewed"
     assert items["skill:super-jump"]["futureInteractions"][0]["targetRecordId"] == ("skill:jump")
@@ -238,6 +250,9 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:explode", "state:unconscious", None) in future_keys
     assert ("skill:explode", "ammunition:shock", "uses-effects-of") in future_keys
     assert ("skill:immunity", "trait:non-lethal", None) in future_keys
+    assert ("skill:hacker", "rule:hacking-area", None) in future_keys
+    assert ("skill:hacker", "equipment:hacking-device", None) in future_keys
+    assert ("skill:hacker", "rule:upgrade-program", None) in future_keys
     assert ("equipment:symbiomate", "skill:immunity", "uses-effects-of") not in future_keys
 
     assert ("skill:request-speedball", "skill:combat-jump", "uses-effects-of") not in future_keys
@@ -402,7 +417,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }
 
     expected = render_markdown(report)
-    assert "Skill **93/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
+    assert "Skill **95/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -418,17 +433,55 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
         audit_rules_interactions(DEFAULT_RULES_DIRECTORY, policy)
 
 
-def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
-    assert main(["--require-release", "0.7.0"]) == 1
+def test_rules_interaction_review_rejects_stale_release_exception(tmp_path: Path) -> None:
+    document = json.loads(DEFAULT_CATALOG_SCOPE_PATH.read_text(encoding="utf-8"))
+    document["releaseExceptions"].append(
+        {
+            "catalog": "skills",
+            "itemId": "hacker",
+            "targetRelease": "post-0.7.0",
+            "reason": "Test-only stale exception.",
+        }
+    )
+    scope = tmp_path / "catalog-scope.json"
+    scope.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(
+        RulesInteractionAuditError,
+        match="skill:hacker: release exception is stale",
+    ):
+        audit_rules_interactions(
+            DEFAULT_RULES_DIRECTORY,
+            DEFAULT_POLICY_PATH,
+            scope,
+        )
+
+
+def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(capsys) -> None:
+    assert main(["--require-release", "0.7.0"]) == 0
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 178/180 complete" in output
-    assert "2 pending" in output
-    assert "0 supporting identities pending" in output
+    assert "0.7.0 primary catalog: 180/180 complete" in output
+    assert "0 pending" in output
+    assert "Supporting identities: 28/28 complete, 0 pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:
     document = json.loads(DEFAULT_CATALOG_SCOPE_PATH.read_text(encoding="utf-8"))
+    assert document["formatVersion"] == 2
     assert document["targetRelease"] == "0.7.0"
+    assert document["releaseExceptions"] == [
+        {
+            "catalog": "skills",
+            "itemId": "commlink",
+            "targetRelease": "post-0.7.0",
+            "reason": (
+                "Commlink belongs to the official Reinforcements Extra rather than the "
+                "N5 core rules. It is explicitly vetted for 0.7.0 but its canonical "
+                "definition is deferred until the Reinforcements annex is modeled as a "
+                "separately scoped collection."
+            ),
+        }
+    ]
     assert {key: len(value) for key, value in document["catalogs"].items()} == {
         "skills": 95,
         "equipment": 28,

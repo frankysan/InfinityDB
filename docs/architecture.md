@@ -157,8 +157,12 @@ public-catalog scope for the interaction-review denominator, tracks whether each
 identity has had its outgoing interactions audited, and preserves deferred/future candidates
 without becoming rules ontology or runtime input. Catalog progress is therefore measured
 against the actual public Skill/Equipment/Trait/State identities rather than only against the
-subset that already has curated rules records. States are part of the 0.7.0 primary denominator;
-exact source variants and other independently modeled supporting identities remain separate.
+subset that already has curated rules records. A maintained release exception may keep an
+explicitly vetted catalog identity in that denominator while deferring its canonical definition
+to a distinct publication/domain scope; unclassified missing definitions remain pending, and
+stale exceptions fail validation once a current definition exists. States are part of the 0.7.0
+primary denominator; exact source variants and other independently modeled supporting identities
+remain separate.
 `data/curated/identities/` contains reviewed source-derived presentation
 relationships consumed during Army normalization. `data/curated/peripherals/` owns
 the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed

@@ -10,9 +10,10 @@ python tools/audit_rules_interactions.py --output docs/rules-interaction-checkli
 The **0.7.0 progress gate is catalog-based**: every public Skill, Equipment item,
 Trait, and State is listed, including entries that do not yet have a curated rules
 definition.
-A catalog item is complete only when its canonical rules identity exists and its
-outgoing interaction semantics have been reviewed. Missing rules definitions therefore
-remain visibly pending instead of disappearing from the denominator.
+A catalog item is complete when its canonical rules identity exists and its outgoing
+interaction semantics have been reviewed, or when a maintained release exception
+explicitly defers an out-of-scope publication/domain to later work. Unclassified
+missing definitions remain visibly pending instead of disappearing from the denominator.
 
 Exact source variants plus independently modeled Rule, Training, supporting Trait,
 and curated Weapon identities are tracked separately as supporting semantics.
@@ -22,15 +23,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 178/180 complete (98.9%), 2 pending.**
-- Primary domains: Skill **93/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 180/180 complete (100.0%), 0 pending.**
+- Primary domains: Skill **95/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **28/28** complete, **0** pending.
 - Current authored outgoing relations: **240**.
-- Explicitly tracked future/deferred interactions: **140**.
+- Explicitly tracked future/deferred interactions: **143**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (93/95)
+### Skill (95/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -72,8 +73,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Combat Jump** (`skill:combat-jump`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
-- [ ] **Commlink** (`skill:commlink`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Commlink** (`skill:commlink`) — deferred: Commlink belongs to the official Reinforcements Extra rather than the N5 core rules. It is explicitly vetted for 0.7.0 but its canonical definition is deferred until the Reinforcements annex is modeled as a separately scoped collection.
+  - rules definition: intentionally deferred to post-0.7.0 by maintained scope decision
 - [x] **Counterintelligence** (`skill:counterintelligence`) — reviewed
   - `applies-effects-to` → Command Token: Strategic Use (`rule:command-token-strategic-use`)
 - [x] **Courage** (`skill:courage`) — reviewed
@@ -151,8 +152,11 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:combat-group` — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
 - [x] **Guard** (`skill:guard`) — reviewed
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
-- [ ] **Hacker** (`skill:hacker`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Hacker** (`skill:hacker`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:hacking-area` — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → Hacking Device (`equipment:hacking-device`) — Hacker status permits use of equipped Hacking Devices, but the actual Device variant is occurrence/profile data and the current relation vocabulary has no precise eligibility/equipping edge.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:upgrade-program` — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; preserve this until Hacking Programs and Upgrade Programs have canonical identities.
 - [x] **Hidden Deployment** (`skill:hidden-deployment`) — reviewed
   - `enters-state` → Hidden Deployment State (`state:hidden-deployment`)
 - [x] **Idle** (`skill:idle`) — reviewed
@@ -778,6 +782,9 @@ review. `declaration-category` projection records are excluded.
 - [ ] G: Jumper (`skill:g-jumper`) → Dodge (`skill:dodge`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
 - [ ] G: Jumper (`skill:g-jumper`) → Reset (`skill:reset`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
 - [ ] G: Jumper (`skill:g-jumper`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole.
+- [ ] Hacker (`skill:hacker`) → Hacking Device (`equipment:hacking-device`); `relation type TBD`; **post-0.7.0 / planned** — Hacker status permits use of equipped Hacking Devices, but the actual Device variant is occurrence/profile data and the current relation vocabulary has no precise eligibility/equipping edge.
+- [ ] Hacker (`skill:hacker`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / planned** — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+- [ ] Hacker (`skill:hacker`) → `rule:upgrade-program`; `relation type TBD`; **post-0.7.0 / planned** — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; preserve this until Hacking Programs and Upgrade Programs have canonical identities.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] Immunity (`skill:immunity`) → `rule:saving-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.
 - [ ] Immunity (`skill:immunity`) → Non-Lethal (`trait:non-lethal`); `relation type TBD`; **post-0.7.0 / deferred** — Non-Lethal explicitly bypasses Immunity for that Trait only; a broad negates-effects-of edge would incorrectly imply that it disables unrelated Immunity effects on the same Attack.

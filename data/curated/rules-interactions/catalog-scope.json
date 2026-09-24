@@ -1,6 +1,6 @@
 {
   "format": "InfinityDB rules interaction catalog scope",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "targetRelease": "0.7.0",
   "catalogs": {
     "skills": [
@@ -731,5 +731,13 @@
         "name": "Unloaded State"
       }
     ]
-  }
+  },
+  "releaseExceptions": [
+    {
+      "catalog": "skills",
+      "itemId": "commlink",
+      "targetRelease": "post-0.7.0",
+      "reason": "Commlink belongs to the official Reinforcements Extra rather than the N5 core rules. It is explicitly vetted for 0.7.0 but its canonical definition is deferred until the Reinforcements annex is modeled as a separately scoped collection."
+    }
+  ]
 }

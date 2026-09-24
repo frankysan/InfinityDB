@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 266
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 267
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -1303,6 +1303,27 @@ def test_profile_runtime_identity_skills_are_composed(tmp_path: Path) -> None:
             (relation["type"], relation["direction"], relation["record"]["name"])
             for relation in equipment["display_relations"]
         }
+
+
+def test_hacker_skill_is_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    hacker = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "hacker")
+        if item["id"] == "skill:hacker"
+    )
+
+    assert hacker["label_ids"] == ["obligatory"]
+    assert hacker["facts"]["typeIds"] == ["automatic"]
+    effects = " ".join(hacker["facts"]["effects"])
+    assert "Hacking Device" in effects
+    assert "Upgrade Programs" in effects
+    assert "Null State" in effects
+    assert not hacker.get("display_relations")
 
 
 def test_damage_resilience_skills_are_composed(tmp_path: Path) -> None:
