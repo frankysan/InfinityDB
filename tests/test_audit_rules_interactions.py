@@ -20,23 +20,23 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 113
-    assert report["summary"]["authoredOutgoingRelationCount"] == 91
-    assert report["summary"]["futureInteractionCount"] == 14
+    assert report["summary"]["recordCount"] == 120
+    assert report["summary"]["authoredOutgoingRelationCount"] == 97
+    assert report["summary"]["futureInteractionCount"] == 20
     assert report["summary"]["releases"]["0.7.0"] == {
-        "total": 113,
-        "complete": 73,
+        "total": 120,
+        "complete": 80,
         "pending": 40,
-        "reviewed": 57,
+        "reviewed": 64,
         "inherited": 16,
-        "percentComplete": 64.6,
+        "percentComplete": 66.7,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 161,
-        "complete": 50,
-        "pending": 111,
-        "percentComplete": 31.1,
+        "complete": 57,
+        "pending": 104,
+        "percentComplete": 35.4,
         "catalogs": {
             "skills": {
                 "total": 100,
@@ -48,11 +48,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
             "equipment": {
                 "total": 28,
-                "complete": 6,
-                "pending": 22,
-                "defined": 7,
-                "missingRuleDefinition": 21,
-                "percentComplete": 21.4,
+                "complete": 13,
+                "pending": 15,
+                "defined": 14,
+                "missingRuleDefinition": 14,
+                "percentComplete": 46.4,
             },
             "traits": {
                 "total": 33,
@@ -76,6 +76,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert primary["equipment:360o-visor"]["status"] == "reviewed"
     assert primary["equipment:360o-visor"]["recordDefined"] is True
     assert primary["equipment:baggage"]["status"] == "reviewed"
+    assert primary["equipment:biometric-visor"]["status"] == "reviewed"
+    assert primary["equipment:deployable-repeater"]["status"] == "reviewed"
+    assert primary["equipment:fastpanda"]["status"] == "reviewed"
+    assert primary["equipment:repeater"]["status"] == "reviewed"
     assert primary["skill:aerial"]["recordDefined"] is False
     assert primary["trait:cc-attack-3"]["recordDefined"] is False
 
@@ -123,7 +127,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:stealth", "skill:move", None) in future_keys
 
     expected = render_markdown(report)
-    assert "Skill **35/100**; Equipment **6/28**; Trait **9/33**" in expected
+    assert "Skill **35/100**; Equipment **13/28**; Trait **9/33**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -142,8 +146,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 50/161 complete" in output
-    assert "111 pending" in output
+    assert "0.7.0 primary catalog: 57/161 complete" in output
+    assert "104 pending" in output
     assert "16 supporting identities pending" in output
 
 

@@ -21,11 +21,11 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 50/161 complete (31.1%), 111 pending.**
-- Primary domains: Skill **35/100**; Equipment **6/28**; Trait **9/33**.
+- **0.7.0 primary catalog: 57/161 complete (35.4%), 104 pending.**
+- Primary domains: Skill **35/100**; Equipment **13/28**; Trait **9/33**.
 - Supporting semantic identities: **23/39** complete, **16** pending.
-- Current authored outgoing relations: **91**.
-- Explicitly tracked future/deferred interactions: **14**.
+- Current authored outgoing relations: **97**.
+- Explicitly tracked future/deferred interactions: **20**.
 
 ## 0.7.0 primary catalog review
 
@@ -267,7 +267,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Warhorse** (`skill:warhorse`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 
-### Equipment (6/28)
+### Equipment (13/28)
 
 - [x] **360º Visor** (`equipment:360o-visor`) — reviewed
   - outgoing: none
@@ -281,24 +281,30 @@ review. `declaration-category` projection records are excluded.
   - `cancels-state` → Unloaded State (`state:unloaded`)
 - [ ] **Bangbomb** (`equipment:bangbomb`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Biometric Visor** (`equipment:biometric-visor`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Dazer** (`equipment:dazer`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Deactivator** (`equipment:deactivator`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Deployable Cover** (`equipment:deployable-cover`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Deployable Repeater** (`equipment:deployable-repeater`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Biometric Visor** (`equipment:biometric-visor`) — reviewed
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+  - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
+  - future [post-0.7.0; planned]: `cancels-state` → `state:impersonation-1` — A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity.
+- [x] **Dazer** (`equipment:dazer`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:difficult-terrain` — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
+- [x] **Deactivator** (`equipment:deactivator`) — reviewed
+  - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Deployable (`trait:deployable`) — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
+  - future [post-0.7.0; planned]: `ignores-modifiers-from` → `rule:cover` — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
+- [x] **Deployable Cover** (`equipment:deployable-cover`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:partial-cover` — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
+- [x] **Deployable Repeater** (`equipment:deployable-repeater`) — reviewed
+  - `uses-effects-of` → Repeater (`equipment:repeater`)
 - [ ] **ECM** (`equipment:ecm`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Escape System** (`equipment:escape-system`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **EVO Hacking Device** (`equipment:evo-hacking-device`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **FastPanda** (`equipment:fastpanda`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **FastPanda** (`equipment:fastpanda`) — reviewed
+  - `uses-effects-of` → Repeater (`equipment:repeater`)
 - [ ] **GizmoKit** (`equipment:gizmokit`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Hacking Device** (`equipment:hacking-device`) — pending: No curated rules definition yet.
@@ -319,8 +325,9 @@ review. `declaration-category` projection records are excluded.
   - `reduces-modifiers-from` → Mimetism (`skill:mimetism`)
 - [x] **Nanoscreen** (`equipment:nanoscreen`) — reviewed
   - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
-- [ ] **Repeater** (`equipment:repeater`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Repeater** (`equipment:repeater`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:hacking-area` — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
 - [ ] **SymbioMate** (`equipment:symbiomate`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **TinBot** (`equipment:tinbot`) — pending
@@ -510,6 +517,12 @@ review. `declaration-category` projection records are excluded.
 
 ## Future interaction queue
 
+- [ ] Biometric Visor (`equipment:biometric-visor`) → `state:impersonation-1`; `cancels-state`; **post-0.7.0 / planned** — A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity.
+- [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
+- [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
+- [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
+- [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
+- [ ] Repeater (`equipment:repeater`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
 - [ ] `hacking-program:white-noise` → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] `hacking-program:white-noise` → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.

@@ -1314,3 +1314,26 @@ def test_checked_in_n5_collection_models_first_full_catalog_equipment_slice() ->
         {"type": "modifies-rolls-for", "recordId": "skill:discover"},
         {"type": "modifies-rolls-for", "recordId": "skill:suppressive-fire"},
     ]
+
+
+def test_checked_in_n5_collection_models_second_full_catalog_equipment_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["equipment:biometric-visor"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:discover"},
+        {"type": "ignores-modifiers-from", "recordId": "skill:surprise-attack"},
+    ]
+    assert records["equipment:dazer"].get("relations", []) == []
+    assert records["equipment:deactivator"]["relations"] == [
+        {"type": "ignores-modifiers-from", "recordId": "skill:mimetism"}
+    ]
+    assert records["equipment:deployable-cover"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:bs-attack"}
+    ]
+    assert records["equipment:repeater"].get("relations", []) == []
+    for record_id in {"equipment:deployable-repeater", "equipment:fastpanda"}:
+        assert records[record_id]["relations"] == [
+            {"type": "uses-effects-of", "recordId": "equipment:repeater"}
+        ]

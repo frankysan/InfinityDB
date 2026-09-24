@@ -655,6 +655,48 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:biometric-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:dazer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:deactivator",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:deployable-cover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:deployable-repeater",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:fastpanda",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:repeater",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -769,6 +811,54 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge."
+    },
+    {
+      "sourceRecordId": "equipment:biometric-visor",
+      "targetRecordId": "state:impersonation-1",
+      "relationType": "cancels-state",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity."
+    },
+    {
+      "sourceRecordId": "equipment:dazer",
+      "targetRecordId": "rule:difficult-terrain",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation."
+    },
+    {
+      "sourceRecordId": "equipment:deactivator",
+      "targetRecordId": "trait:deployable",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation."
+    },
+    {
+      "sourceRecordId": "equipment:deactivator",
+      "targetRecordId": "rule:cover",
+      "relationType": "ignores-modifiers-from",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "equipment:deployable-cover",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "equipment:repeater",
+      "targetRecordId": "rule:hacking-area",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge."
     }
   ]
 }

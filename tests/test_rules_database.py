@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 173
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 180
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -685,6 +685,7 @@ def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> Non
         ("imposes-modifiers-on", "outbound", "BS Attack"),
         ("imposes-modifiers-on", "outbound", "Discover"),
         ("reduces-modifiers-from", "inbound", "Multispectral Visor"),
+        ("ignores-modifiers-from", "inbound", "Deactivator"),
         ("ignores-modifiers-from", "inbound", "Sensor"),
         ("ignores-modifiers-from", "inbound", "Speculative Attack"),
     }
@@ -1280,3 +1281,81 @@ def test_equipment_roll_interactions_are_bidirectional(tmp_path: Path) -> None:
             (relation["type"], relation["direction"], relation["record"]["name"])
             for relation in target["display_relations"]
         }
+
+
+def test_second_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def equipment_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("equipment", slug)
+            if item["id"] == record_id
+        )
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    biometric = equipment_rule("biometric-visor", "equipment:biometric-visor")
+    deactivator = equipment_rule("deactivator", "equipment:deactivator")
+    cover = equipment_rule("deployable-cover", "equipment:deployable-cover")
+    deployable_repeater = equipment_rule(
+        "deployable-repeater", "equipment:deployable-repeater"
+    )
+    fastpanda = equipment_rule("fastpanda", "equipment:fastpanda")
+    repeater = equipment_rule("repeater", "equipment:repeater")
+    discover = skill_rule("discover", "skill:discover")
+    surprise_attack = skill_rule("surprise-attack", "skill:surprise-attack")
+    mimetism = skill_rule("mimetism", "skill:mimetism")
+    bs_attack = skill_rule("bs-attack", "skill:bs-attack")
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in biometric["display_relations"]
+    } == {
+        ("modifies-rolls-for", "outbound", "Discover"),
+        ("ignores-modifiers-from", "outbound", "Surprise Attack"),
+    }
+    assert ("modifies-rolls-for", "inbound", "Biometric Visor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in discover["display_relations"]
+    }
+    assert ("ignores-modifiers-from", "inbound", "Biometric Visor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in surprise_attack["display_relations"]
+    }
+    assert ("ignores-modifiers-from", "outbound", "Mimetism") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in deactivator["display_relations"]
+    }
+    assert ("ignores-modifiers-from", "inbound", "Deactivator") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in mimetism["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "BS Attack") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in cover["display_relations"]
+    }
+    assert ("modifies-rolls-for", "inbound", "Deployable Cover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in bs_attack["display_relations"]
+    }
+    for source in (deployable_repeater, fastpanda):
+        assert ("uses-effects-of", "outbound", "Repeater") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in repeater["display_relations"]
+    } == {
+        ("uses-effects-of", "inbound", "Deployable Repeater"),
+        ("uses-effects-of", "inbound", "FastPanda"),
+    }

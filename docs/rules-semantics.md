@@ -3106,6 +3106,36 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Nanoscreen&oldid=3187>
 - Wiki: <https://infinitythewiki.com/index.php?title=X-Visor&oldid=3193>
 
+### RS-EQ-CORE-002 — Equipment review distinguishes direct graph edges from contained or deferred rules
+
+**Classification:** source-native Equipment interaction semantics.
+
+Biometric Visor directly changes Discover processing and ignores qualifying Surprise Attack MODs,
+so it authors `modifies-rolls-for` toward Discover and `ignores-modifiers-from` toward Surprise
+Attack. Its successful-Discover cancellation of Impersonation-1 remains queued until that State has
+a canonical identity. Deactivator likewise authors `ignores-modifiers-from` toward Mimetism, while
+its generic ability to remove deployed items and ignore Cover remains deferred until those target
+semantics have precise graph identities/relations.
+
+Deployable Repeater and FastPanda explicitly contain a Repeater. InfinityDB models that reuse with
+`uses-effects-of` toward the canonical Repeater Equipment definition instead of duplicating the
+Hacking Area behavior in each deployable item. Repeater itself is review-complete with its Hacking
+Area extension retained as future work because the current relation vocabulary has no precise
+network-extension edge. Dazer is similarly review-complete while its Difficult Terrain area remains
+deferred. Deployable Cover authors `modifies-rolls-for` toward BS Attack for its variant-specific
+Cover MOD handling; its underlying Partial Cover reuse remains queued until Partial Cover is a
+canonical rule identity.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Biometric_Visor>
+- Wiki: <https://infinitythewiki.com/Dazer>
+- Wiki: <https://infinitythewiki.com/Deactivator>
+- Wiki: <https://infinitythewiki.com/Deployable_Cover>
+- Wiki: <https://infinitythewiki.com/Deployable_Repeater>
+- Wiki: <https://infinitythewiki.com/FastPanda>
+- Wiki: <https://infinitythewiki.com/Repeater>
+
 ## ITS FAQ
 
 ### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes

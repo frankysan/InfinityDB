@@ -7437,6 +7437,364 @@
             "variantSemantics": {
                 "inheritance": "family"
             }
+        },
+        {
+            "id": "equipment:biometric-visor",
+            "kind": "equipment",
+            "name": "Biometric Visor",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "Automatic Equipment that counters Impersonation penalties and qualifying Surprise Attack MODs.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "The user ignores the WIP -3 MOD imposed by Impersonation-1 State.",
+                    "A successful Discover Roll against a Trooper in Impersonation-1 State cancels that Impersonation State.",
+                    "The user ignores Surprise Attack MODs from attackers benefiting from Impersonation or Holoecho States when the rule conditions are met."
+                ],
+                "restrictions": [
+                    "The Surprise Attack protection is conditional on the attacker benefiting from Impersonation or Holoecho State; LoF is normally required, except against qualifying CC Attacks."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "biometric-visor"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:discover"
+                },
+                {
+                    "type": "ignores-modifiers-from",
+                    "recordId": "skill:surprise-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Biometric_Visor",
+                    "heading": "Biometric Visor"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:dazer",
+            "kind": "equipment",
+            "name": "Dazer",
+            "labelIds": [],
+            "summary": "Deployable Equipment that creates a Difficult Terrain area inside its Zone of Control.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "A deployed Dazer generates a Difficult Terrain area of infinite height inside its Zone of Control.",
+                    "Troopers with Terrain (Total) ignore the Dazer and apply their Terrain MOD when declaring Skills with the Movement Label.",
+                    "A deployed Dazer remains on the table until the end of the game or until destroyed."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "dazer"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Dazer",
+                    "heading": "Dazer"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:deactivator",
+            "kind": "equipment",
+            "name": "Deactivator",
+            "labelIds": [
+                "attack"
+            ],
+            "summary": "A Short Skill Equipment action that removes enemy deployed Weapons or Equipment after a successful WIP Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target must be inside the user's Line of Fire or Zone of Control.",
+                    "The target must be an enemy Deployable Weapon or deployed piece of Equipment, and cannot be a Camouflage Marker."
+                ],
+                "effects": [
+                    "On a successful Normal WIP Roll, the target deployed Weapon or Equipment is removed from the game table."
+                ],
+                "restrictions": [
+                    "The WIP Roll applies Range MODs only; Special Skill MODs such as Mimetism and Cover MODs are not applied.",
+                    "Passing the Roll does not prevent the target from triggering during the current Order."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "deactivator"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "ignores-modifiers-from",
+                    "recordId": "skill:mimetism"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Deactivator",
+                    "heading": "Deactivator"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:deployable-cover",
+            "kind": "equipment",
+            "name": "Deployable Cover",
+            "labelIds": [],
+            "summary": "Deployable Equipment that places a Scenery Element providing variant-specific Cover effects.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Place Deployable places the Deployable Cover Scenery Element completely inside the user's Zone of Control.",
+                    "Deployable Cover allows Partial Cover to be applied subject to the selected variant.",
+                    "Cutting Foam prevents enemy Troopers from claiming Partial Cover from that Deployable Cover.",
+                    "Vitroferro removes the usual -3 Cover MOD from the attacker's BS Attack Roll and instead improves the benefiting Trooper's Saving Roll by +6, subject to the documented cap."
+                ],
+                "restrictions": [
+                    "The player must declare the available Cutting Foam or Vitroferro variant when Place Deployable is declared."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "deployable-cover"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Deployable_Cover",
+                    "heading": "Deployable Cover"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:repeater",
+            "kind": "equipment",
+            "name": "Repeater",
+            "labelIds": [
+                "comms-equipment",
+                "obligatory"
+            ],
+            "summary": "Automatic Comms Equipment that extends allied Hacking Areas and can also be used by enemy Hackers with Firewall MODs.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "The Repeater extends the Hacking Area of all Hackers in the same Army List.",
+                    "Enemy Hackers inside its Zone of Control may use the Repeater to apply Hacking Programs against enemy Hackers, applying the documented Firewall MODs."
+                ],
+                "restrictions": [
+                    "The owner cannot voluntarily deactivate the Repeater; it becomes inactive when its carrier is Isolated or in a Null State."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "repeater"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Repeater",
+                    "heading": "Repeater"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:deployable-repeater",
+            "kind": "equipment",
+            "name": "Deployable Repeater",
+            "labelIds": [
+                "comms-equipment"
+            ],
+            "summary": "Deployable Comms Equipment that places a Repeater on the battlefield using Place Deployable.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Place Deployable places a Deployable Repeater Token on the game table.",
+                    "The deployed Equipment contains a Repeater and applies the Repeater rule while active."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "deployable-repeater"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:repeater"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Deployable_Repeater",
+                    "heading": "Deployable Repeater"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:fastpanda",
+            "kind": "equipment",
+            "name": "FastPanda",
+            "labelIds": [],
+            "summary": "Self-propelled Deployable Equipment that places a Repeater anywhere completely inside the user's Zone of Control.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "When Place Deployable is declared, the FastPanda may be placed completely inside the user's Zone of Control instead of in Silhouette contact.",
+                    "The deployed FastPanda contains a Repeater and applies the Repeater rule while active.",
+                    "The deployed FastPanda remains on the table until the end of the game or until destroyed."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "fastpanda"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:repeater"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "FastPanda",
+                    "heading": "FastPanda"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         }
 
     ]

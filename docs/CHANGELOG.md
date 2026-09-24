@@ -7,6 +7,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Continue the 0.7.0 Equipment interaction audit with reviewed Biometric Visor, Dazer,
+  Deactivator, Deployable Cover, Deployable Repeater, FastPanda, and Repeater definitions;
+  expose their current Discover, Surprise Attack, Mimetism, BS Attack, and contained-Repeater
+  interactions while retaining unresolved terrain, Cover, State, and target-removal semantics in
+  the future interaction queue.
 - Expand the 0.7.0 Equipment interaction audit with reviewed 360º Visor, Nanoscreen,
   and X-Visor definitions; Nanoscreen now links to the BS Attacks it modifies and X-Visor
   links to BS Attack, Discover, and Suppressive Fire range-roll processing.
