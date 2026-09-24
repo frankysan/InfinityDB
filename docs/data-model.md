@@ -2511,8 +2511,10 @@ available through `declaration-category` records, which use singular `facts.type
 deterministic display order, application-domain Skill/Equipment links, and printed-page
 citation. Where a full Skill definition and fallback declaration records overlap on the
 same authored Army reference, curated validation requires their ordered category IDs to
-match exactly, preventing a stale fallback from disagreeing with the authoritative full
-definition. `SkillCatalog` prefers categories from full Skill definitions and falls back
+match exactly. Application composition also resolves numeric source IDs and canonical
+Skill slugs to the same application identity and rejects category disagreement across
+those equivalent references, preventing a stale fallback from being hidden behind a
+different reference form. `SkillCatalog` prefers categories from full Skill definitions and falls back
 to those linked declarations; `CatalogRules` uses declarations for Equipment. Skills
 retain uncited `Unclassified` only when neither source is available; Equipment gets no
 invented fallback. The Army database does not materialize these rules facts.

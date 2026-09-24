@@ -55,8 +55,8 @@ class SkillCatalog:
             self._category_index = {}
             return
         index: dict[ArmyLinkRef, list[dict[str, Any]]] = {}
-        for category in self.rules_database.skill_declaration_categories():
-            index.setdefault(category["skill_ref"], []).append(category)
+        for category in self.rules_database.declaration_categories("skill"):
+            index.setdefault(category["army_ref"], []).append(category)
         for categories in index.values():
             categories.sort(key=lambda item: (item["order"], item["name"], item["page"]))
         self._category_index = index
@@ -119,6 +119,21 @@ class SkillCatalog:
                 f"Skill identity {sorted(skill_ids)} has conflicting curated categories"
             )
         chosen = candidates[0]
+        chosen_type_ids = tuple(category["type_id"] for category in chosen)
+
+        self._ensure_category_index()
+        assert self._category_index is not None
+        for skill_ref in self._army_refs_for_ids(skill_ids):
+            fallback = self._category_index.get(skill_ref)
+            if not fallback:
+                continue
+            fallback_type_ids = tuple(category["type_id"] for category in fallback)
+            if fallback_type_ids != chosen_type_ids:
+                raise ValueError(
+                    f"Skill identity {sorted(skill_ids)} has conflicting curated "
+                    f"categories across equivalent Army references"
+                )
+
         return [
             {
                 "name": category["name"],

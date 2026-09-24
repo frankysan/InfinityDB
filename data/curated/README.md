@@ -302,7 +302,10 @@ use singular `facts.typeId` plus `facts.order`, may link to Army `skill` or `equ
 identities, and require exactly one PDF citation with a positive printed page. When an
 Army Skill has both a full definition and fallback declaration records under the same
 authored Army reference, their ordered category identities must agree; curated loading
-fails closed on drift. Skills without either a full definition or a curated declaration
+fails closed on drift. During application composition, equivalent numeric source IDs and
+canonical Skill slugs are cross-checked as the same identity as well, so category drift
+cannot be hidden by authoring the two representations under different reference forms.
+Skills without either a full definition or a curated declaration
 fall back to `Unclassified`; Equipment receives no invented fallback category. Do not create uncited category
 records to represent missing rules classification.
 

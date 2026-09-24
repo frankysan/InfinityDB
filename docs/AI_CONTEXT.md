@@ -1253,8 +1253,10 @@ compatibility references remain unambiguous JSON integers.
 - `declaration-category` records remain valid fallback metadata for Army Skills without
   full curated definitions and for Equipment. Skill catalog composition prefers the full
   definition when both exist. If both representations overlap on the same authored Army
-  Skill reference, curated validation requires their ordered category IDs to match and
-  fails closed on drift.
+  Skill reference, curated validation requires their ordered category IDs to match. At
+  application composition time, equivalent numeric source IDs and canonical Skill slugs
+  are cross-checked as one identity as well, so reference-form differences cannot hide
+  category drift.
 - `rules.db` keeps schema version 7 but advances compatibility to revision 8 because
   older runtimes cannot interpret the multi-category Skill facts correctly.
 - Baggage/Reload is normalized as a complementary requirement: both the Baggage holder

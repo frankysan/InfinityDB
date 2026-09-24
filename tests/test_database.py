@@ -2743,6 +2743,48 @@ def test_skill_catalog_uses_curated_declaration_categories(
     ]
 
 
+def test_skill_catalog_rejects_category_drift_across_equivalent_army_refs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+    assert database.application_slug("skills", 1) == "skills"
+
+    root = Path(__file__).parents[1]
+    documents = copy.deepcopy(load_curated_directory(root / "data" / "curated"))
+    _, document = documents[0]
+
+    definition = copy.deepcopy(
+        next(record for record in document["records"] if record["id"] == "skill:alert")
+    )
+    definition["id"] = "skill:cross-reference-test"
+    definition["name"] = "skills"
+    definition["armyLinks"] = [{"entity": "skill", "id": "skills"}]
+    definition["variantSemantics"] = {"inheritance": "family"}
+    document["records"].append(definition)
+
+    fallback = copy.deepcopy(
+        next(
+            record
+            for record in document["records"]
+            if record["id"] == "declaration-category:short-skill:p90"
+        )
+    )
+    fallback["id"] = "declaration-category:short-skill:cross-ref-test"
+    fallback["armyLinks"] = [{"entity": "skill", "id": 1}]
+    document["records"].append(fallback)
+
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(documents, rules_path)
+    catalog = SkillCatalog(database, RulesDatabase(rules_path))
+
+    with pytest.raises(
+        ValueError, match="conflicting curated categories across equivalent Army references"
+    ):
+        catalog.get_skill(1)
+
+
 def test_skill_catalog_adds_curated_distance_parameter_semantics(
     tmp_path: Path, normalized: dict
 ) -> None:
