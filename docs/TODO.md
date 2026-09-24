@@ -333,20 +333,22 @@ requiring a new top-level browser surface in 0.7.0.
     already communicates them. The completed catalog review plus semantic-only deferred-link
     audit leaves future-ledger entries only where a missing domain, runtime/participant model,
     or more structured mechanic is still needed.
-  - [ ] Review information hierarchy on Skill, Equipment, Weapon, Trait, and
-    representative Unit/profile/loadout surfaces: the concise gameplay meaning and
-    applicable variant/occurrence context should be easier to find than provenance,
-    IDs, collection mechanics, or other developer-oriented context. The shared
-    rules-reference renderer now leads with gameplay summary/categories/facts/relations
-    and moves collection/applicability context beside the supporting citations; the
-    remaining work is composed-page and occurrence-level browser verification.
-  - [ ] Review whether family rules, exact-source variant rules, and occurrence
-    modifiers are shown at the point where a player needs them without implying
-    that occurrence-specific modifiers are universal properties of the base item.
+  - [x] Review information hierarchy on Skill, Equipment, Weapon, Trait, and
+    representative Unit/profile/loadout surfaces. Gameplay summaries, categories,
+    facts, and relationships now precede provenance; exact-source context remains
+    attached to the relevant usage disclosure; and Unit/profile/loadout rows keep
+    occurrence-specific extras at the occurrence where they apply.
+  - [x] Review family rules, exact-source variant rules, and occurrence modifiers.
+    Catalog usage summaries expose typed source-variant labels before expansion and
+    now flag when the disclosure contains dedicated Variant rules; occurrence extras
+    remain local to Unit/profile/loadout rows rather than being promoted onto the
+    canonical base rule.
   - [ ] Perform a representative browser audit against the complete generated
-    dataset, including narrow/mobile layouts, light/dark presentation, keyboard
-    navigation, and cases with multiple variants/supplements/relations. Record and
-    resolve every player-relevance/correctness issue classified as a 0.7.0 blocker.
+    dataset, including narrow/mobile layouts, the current light-theme presentation,
+    keyboard navigation, and cases with multiple variants/supplements/relations. Record
+    and resolve every player-relevance/correctness issue classified as a 0.7.0 blocker.
+    Dark-theme acceptance belongs to the separately planned theme implementation rather
+    than the 0.7.0 gate.
 
 0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
 every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid

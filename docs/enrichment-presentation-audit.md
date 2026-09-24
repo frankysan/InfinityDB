@@ -127,15 +127,17 @@ follow-ups.
   supporting provenance. The complete browser audit still needs to verify this
   hierarchy on representative composed pages and occurrence-heavy variants.
 - **Exact-source rule detail lives inside usage disclosures.** The typed variant
-  label is visible before expansion, while full variant rules appear only after a
-  usage section is opened. The complete-data audit must verify that this is
-  discoverable for Martial Arts/Strategos Levels, BS/CC Attribute replacements,
-  TinBot named variants, and future exact-source semantics.
+  label is visible before expansion, and disclosures that contain dedicated exact-source
+  rules now say **Variant rules** in the collapsed summary. Full variant rules remain
+  inside that same disclosure so Level, named-variant, and Attribute-replacement context
+  stays attached to the Unit-usage occurrence instead of reading as a universal family
+  rule. Usage summaries wrap independently from their title on narrow layouts.
 - **Unit pages navigate to enrichment rather than explaining it inline.** Profile
   Skills, Equipment, and Weapons link to their catalog detail pages, which avoids
-  duplicating rules prose. The browser audit should verify that this remains a
-  useful interaction for representative play questions and that occurrence
-  modifiers stay visible on the Unit where they apply.
+  duplicating rules prose. Army extras remain visible in parentheses on the specific
+  profile/loadout occurrence where Army supplied them, while canonical rule summaries
+  stay on the linked catalog surface. This preserves the base-rule versus occurrence
+  boundary without making the Unit page repeat the rules reference.
 - **Catalog list pages remain intentionally terse.** They currently prioritize
   identity and use counts rather than rules summaries. The audit should decide
   whether category/semantic cues improve scanning enough to justify adding them;
@@ -176,9 +178,15 @@ now backend-owned and covered across every current relation type. Structural `va
 edges remain deliberately suppressed by the generic Related-rules renderer.
 
 This is the catalog-level consistency audit, not the final rendered-browser
-acceptance pass. Responsive layout, exact-source/occurrence discoverability,
-representative Unit/profile composition, and complete generated-dataset browser
-inspection remain separate 0.7.0 presentation tasks.
+acceptance pass. A subsequent composed-page review confirmed the information hierarchy
+and exact-source/occurrence boundary across the shared catalog and Unit renderers: rule
+meaning precedes provenance, typed exact-source semantics remain on their usage
+disclosures, disclosures advertise dedicated Variant rules before expansion, and Army
+extras stay local to profile/loadout occurrences. The remaining 0.7.0 acceptance work is
+the representative pass against the complete generated dataset, including narrow/mobile
+layout and keyboard behavior. InfinityDB is currently light-theme only; dark-theme
+implementation and acceptance remain part of the separately planned theme work rather
+than being retroactively made a 0.7.0 prerequisite.
 
 ## Completion
 

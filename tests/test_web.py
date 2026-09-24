@@ -744,7 +744,9 @@ def test_landing_page_states_independence_and_asset_permission(app: Callable) ->
     assert b"non-commercial open-source community project" in body
     assert b"not affiliated with Corvus Belli S.L." in body
     assert b"explicitly granted InfinityDB permission" in body
-    assert b"use and redistribute the Infinity graphical assets" in body
+    assert b"permission to use and redistribute" in body
+    assert b"Infinity graphical" in body
+    assert b"assets used by the project" in body
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
@@ -1973,7 +1975,41 @@ def test_catalog_detail_frontend_renders_typed_source_variant_labels(
     assert status == 200
     assert b"function sourceVariantLabel(variant)" in body
     assert b'if (semantics.kind === "named") return semantics.label;' in body
-    assert b"semanticLabel ? `${semanticLabel} \xc2\xb7 ${unitCount}` : unitCount" in body
+    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
+
+
+def test_skill_detail_frontend_flags_exact_variant_rules_before_expansion(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/skill.js")
+
+    assert status == 200
+    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
+
+
+def test_catalog_usage_summaries_wrap_variant_context_on_narrow_layouts(
+    app: Callable,
+) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".usage-section-group .army-profile-title",
+        {"flex-wrap": "wrap"},
+    )
+    assert_css_rule(
+        styles,
+        ".usage-section-group .army-profile-title>h2",
+        {"flex": "1 1 220px", "min-width": "0"},
+    )
+    assert_css_rule(
+        styles,
+        ".usage-section-group .army-profile-title>.section-index",
+        {"margin-left": "auto", "text-align": "right"},
+    )
 
 
 def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> None:

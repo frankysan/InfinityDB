@@ -262,7 +262,9 @@ function usageSections(item) {
       count.className = "section-index";
       const semanticLabel = sourceVariantLabel(variant);
       const unitCount = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
-      count.textContent = semanticLabel ? `${semanticLabel} · ${unitCount}` : unitCount;
+      const summaryParts = [semanticLabel, variant.rules?.length ? "Variant rules" : null, unitCount]
+        .filter(Boolean);
+      count.textContent = summaryParts.join(" · ");
       summary.append(title, count);
       section.append(summary);
       section.addEventListener("toggle", () => {

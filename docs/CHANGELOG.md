@@ -122,6 +122,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Clarify exact-source rule discoverability on catalog detail pages: usage disclosures
+  now advertise when they contain dedicated Variant rules, keep typed variant labels
+  visible while collapsed, and wrap cleanly on narrow layouts. The presentation audit
+  also keeps occurrence-only Army extras on Unit/profile/loadout rows and treats dark
+  theme validation as part of the separately planned theme work rather than 0.7.0.
 - Make rules-enrichment presentation semantics backend-owned: curated summaries and
   semantic Labels are verified to pass through `rules.db` unchanged, Army-linked catalog
   definitions now require stable IDs/slugs rather than name-only routing, and

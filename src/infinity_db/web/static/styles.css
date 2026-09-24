@@ -1552,6 +1552,20 @@ h1>span {
   transition: transform .15s ease;
 }
 
+.usage-section-group .army-profile-title {
+  flex-wrap: wrap;
+}
+
+.usage-section-group .army-profile-title>h2 {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.usage-section-group .army-profile-title>.section-index {
+  margin-left: auto;
+  text-align: right;
+}
+
 .unit-detail .army-profile[open]>.army-profile-title::before {
   transform: rotate(90deg);
 }
