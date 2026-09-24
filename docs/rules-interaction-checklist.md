@@ -18,9 +18,9 @@ Equipment rather than representing independently reviewable gameplay identities.
 
 ## Progress
 
-- **0.7.0: 58/110 complete (52.7%), 52 pending.**
+- **0.7.0: 70/110 complete (63.6%), 40 pending.**
 - Current authored outgoing relations: **87**.
-- Explicitly tracked future/deferred interactions: **4**.
+- Explicitly tracked future/deferred interactions: **14**.
 
 ## 0.7.0 entity review
 
@@ -62,11 +62,11 @@ Equipment rather than representing independently reviewable gameplay identities.
 - [ ] **Peripheral (Synchronized)** (`rule:peripheral-type:synchronized`) — pending
   - outgoing: none
 
-### Skill (33/49)
+### Skill (45/49)
 
-- [ ] **Alert** (`skill:alert`) — pending
+- [x] **Alert** (`skill:alert`) — reviewed
   - outgoing: none
-- [ ] **BS Attack** (`skill:bs-attack`) — pending
+- [x] **BS Attack** (`skill:bs-attack`) — reviewed
   - outgoing: none
 - [x] **BS=11** (`skill:bs-11`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
   - `variant-of` → BS Attack (`skill:bs-attack`)
@@ -74,14 +74,15 @@ Equipment rather than representing independently reviewable gameplay identities.
   - `variant-of` → BS Attack (`skill:bs-attack`)
 - [x] **Camouflage** (`skill:camouflage`) — reviewed
   - `enters-state` → Camouflaged State (`state:camouflaged`)
-- [ ] **Cautious Movement** (`skill:cautious-movement`) — pending
+- [x] **Cautious Movement** (`skill:cautious-movement`) — reviewed
   - outgoing: none
-- [ ] **CC Attack** (`skill:cc-attack`) — pending
+- [x] **CC Attack** (`skill:cc-attack`) — reviewed
   - outgoing: none
 - [x] **CC=21** (`skill:cc-21`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
   - `variant-of` → CC Attack (`skill:cc-attack`)
-- [ ] **Climb** (`skill:climb`) — pending
+- [x] **Climb** (`skill:climb`) — reviewed
   - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
 - [x] **Combat Instinct** (`skill:combat-instinct`) — reviewed
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
   - `negates-effects-of` → Stealth (`skill:stealth`)
@@ -110,12 +111,16 @@ Equipment rather than representing independently reviewable gameplay identities.
   - `causes-state` → Targeted State (`state:targeted`)
 - [x] **Hidden Deployment** (`skill:hidden-deployment`) — reviewed
   - `enters-state` → Hidden Deployment State (`state:hidden-deployment`)
-- [ ] **Idle** (`skill:idle`) — pending
+- [x] **Idle** (`skill:idle`) — reviewed
   - outgoing: none
-- [ ] **Intuitive Attack** (`skill:intuitive-attack`) — pending
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
+- [x] **Intuitive Attack** (`skill:intuitive-attack`) — reviewed
   - outgoing: none
-- [ ] **Jump** (`skill:jump`) — pending
+  - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
+- [x] **Jump** (`skill:jump`) — reviewed
   - outgoing: none
+  - future [post-0.7.0; planned]: `cancels-state` → `state:prone` — Declaring Jump explicitly cancels Prone State; materialize this edge once Prone State is promoted to a canonical rules identity.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
 - [ ] **Limited Cover** (`skill:limited-cover`) — pending
   - outgoing: none
 - [x] **Look Out** (`skill:look-out`) — reviewed
@@ -137,7 +142,7 @@ Equipment rather than representing independently reviewable gameplay identities.
 - [x] **Mimetism** (`skill:mimetism`) — reviewed
   - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
   - `imposes-modifiers-on` → Discover (`skill:discover`)
-- [ ] **Move** (`skill:move`) — pending
+- [x] **Move** (`skill:move`) — reviewed
   - outgoing: none
 - [x] **Natural Born Warrior** (`skill:natural-born-warrior`) — reviewed
   - `ignores-modifiers-from` → Martial Arts (`skill:martial-arts`)
@@ -150,12 +155,14 @@ Equipment rather than representing independently reviewable gameplay identities.
   - `has-subtype` → Peripheral (Control) (`rule:peripheral-type:control`)
   - `has-subtype` → Peripheral (Ancillary) (`rule:peripheral-type:ancillary`)
   - `has-subtype` → Peripheral (Cyberplug) (`rule:peripheral-type:cyberplug`)
-- [ ] **Place Deployable** (`skill:place-deployable`) — pending
+- [x] **Place Deployable** (`skill:place-deployable`) — reviewed
   - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable.
 - [x] **Reload** (`skill:reload`) — reviewed
   - `cancels-state` → Unloaded State (`state:unloaded`)
-- [ ] **Request Speedball** (`skill:request-speedball`) — pending
+- [x] **Request Speedball** (`skill:request-speedball`) — reviewed
   - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `skill:combat-jump` — Request Speedball explicitly places its Tokens by applying the Combat Jump Skill rules; materialize the edge once Combat Jump has a full canonical Skill definition.
 - [x] **Reset** (`skill:reset`) — reviewed
   - `cancels-state` → Targeted State (`state:targeted`)
   - `cancels-state` → Immobilized-B State (`state:immobilized-b`)
@@ -174,6 +181,8 @@ Equipment rather than representing independently reviewable gameplay identities.
   - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
 - [x] **Stealth** (`skill:stealth`) — reviewed
   - `enables-use-of` → Cautious Movement (`skill:cautious-movement`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Idle (`skill:idle`) — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Move (`skill:move`) — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] **Strategos** (`skill:strategos`) — pending
   - outgoing: none
 - [x] **Strategos L1** (`skill:strategos-l1`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
@@ -183,8 +192,9 @@ Equipment rather than representing independently reviewable gameplay identities.
 - [x] **Super-Jump** (`skill:super-jump`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Jump (`skill:jump`) — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.
-- [ ] **Suppressive Fire** (`skill:suppressive-fire`) — pending
+- [x] **Suppressive Fire** (`skill:suppressive-fire`) — reviewed
   - outgoing: none
+  - future [post-0.7.0; planned]: `enters-state` → `state:suppressive-fire` — Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog.
 - [ ] **Surprise Attack** (`skill:surprise-attack`) — pending
   - outgoing: none
 
@@ -302,5 +312,15 @@ Equipment rather than representing independently reviewable gameplay identities.
 
 - [ ] `hacking-program:white-noise` → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] `hacking-program:white-noise` → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
+- [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
+- [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
+- [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
+- [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
+- [ ] Jump (`skill:jump`) → `state:prone`; `cancels-state`; **post-0.7.0 / planned** — Declaring Jump explicitly cancels Prone State; materialize this edge once Prone State is promoted to a canonical rules identity.
+- [ ] Place Deployable (`skill:place-deployable`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable.
+- [ ] Request Speedball (`skill:request-speedball`) → `skill:combat-jump`; `uses-effects-of`; **post-0.7.0 / planned** — Request Speedball explicitly places its Tokens by applying the Combat Jump Skill rules; materialize the edge once Combat Jump has a full canonical Skill definition.
+- [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
+- [ ] Stealth (`skill:stealth`) → Move (`skill:move`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.
+- [ ] Suppressive Fire (`skill:suppressive-fire`) → `state:suppressive-fire`; `enters-state`; **post-0.7.0 / planned** — Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog.
 - [ ] Perimeter (`trait:perimeter`) → Place Deployable (`skill:place-deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Perimeter changes Place Deployable placement behavior rather than enabling the Skill; the current relation vocabulary has no precise modifier edge.

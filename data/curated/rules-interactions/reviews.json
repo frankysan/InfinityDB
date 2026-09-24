@@ -96,12 +96,14 @@
     {
       "recordId": "skill:alert",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:bs-attack",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:bs-11",
@@ -126,12 +128,14 @@
     {
       "recordId": "skill:cautious-movement",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:cc-attack",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:cc-21",
@@ -143,7 +147,8 @@
     {
       "recordId": "skill:climb",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:combat-instinct",
@@ -201,17 +206,20 @@
     {
       "recordId": "skill:idle",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:intuitive-attack",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:jump",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:limited-cover",
@@ -280,7 +288,8 @@
     {
       "recordId": "skill:move",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:natural-born-warrior",
@@ -303,7 +312,8 @@
     {
       "recordId": "skill:place-deployable",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:reload",
@@ -314,7 +324,8 @@
     {
       "recordId": "skill:request-speedball",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:reset",
@@ -374,7 +385,8 @@
     {
       "recordId": "skill:suppressive-fire",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:surprise-attack",
@@ -659,6 +671,86 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first."
+    },
+    {
+      "sourceRecordId": "skill:climb",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly."
+    },
+    {
+      "sourceRecordId": "skill:idle",
+      "targetRecordId": "rule:marker-form",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States."
+    },
+    {
+      "sourceRecordId": "skill:intuitive-attack",
+      "targetRecordId": "state:camouflaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge."
+    },
+    {
+      "sourceRecordId": "skill:jump",
+      "targetRecordId": "state:prone",
+      "relationType": "cancels-state",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Declaring Jump explicitly cancels Prone State; materialize this edge once Prone State is promoted to a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:jump",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first."
+    },
+    {
+      "sourceRecordId": "skill:place-deployable",
+      "targetRecordId": "state:camouflaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable."
+    },
+    {
+      "sourceRecordId": "skill:request-speedball",
+      "targetRecordId": "skill:combat-jump",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Request Speedball explicitly places its Tokens by applying the Combat Jump Skill rules; materialize the edge once Combat Jump has a full canonical Skill definition."
+    },
+    {
+      "sourceRecordId": "skill:suppressive-fire",
+      "targetRecordId": "state:suppressive-fire",
+      "relationType": "enters-state",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog."
+    },
+    {
+      "sourceRecordId": "skill:stealth",
+      "targetRecordId": "skill:idle",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge."
+    },
+    {
+      "sourceRecordId": "skill:stealth",
+      "targetRecordId": "skill:move",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge."
     }
   ]
 }
