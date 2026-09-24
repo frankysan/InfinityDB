@@ -1029,6 +1029,24 @@ def test_checked_in_n5_collection_keeps_common_skill_labels_source_faithful() ->
     } == expected_labels
 
 
+def test_checked_in_n5_collection_links_weapon_traits_to_required_common_skills() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_targets = {
+        "trait:intuitive-attack": "skill:intuitive-attack",
+        "trait:speculative-attack": "skill:speculative-attack",
+        "trait:suppressive-fire": "skill:suppressive-fire",
+    }
+
+    for trait_id, skill_id in expected_targets.items():
+        assert {
+            (relation["type"], relation["recordId"])
+            for relation in records[trait_id]["relations"]
+        } == {("enables-use-of", skill_id)}
+
+
 def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

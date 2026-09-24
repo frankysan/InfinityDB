@@ -520,6 +520,41 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
 
 
 
+def test_weapon_trait_skill_prerequisites_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(kind: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_by_kind(kind)
+            if item["id"] == record_id
+        )
+
+    expected_pairs = {
+        "trait:intuitive-attack": "skill:intuitive-attack",
+        "trait:speculative-attack": "skill:speculative-attack",
+        "trait:suppressive-fire": "skill:suppressive-fire",
+    }
+
+    for trait_id, skill_id in expected_pairs.items():
+        trait = record("trait", trait_id)
+        skill = record("skill", skill_id)
+        skill_name = skill["name"]
+        trait_name = trait["name"]
+
+        assert ("enables-use-of", "outbound", skill_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in trait["display_relations"]
+        }
+        assert ("enables-use-of", "inbound", trait_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in skill["display_relations"]
+        }
+
+
 def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"

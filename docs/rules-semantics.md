@@ -988,6 +988,30 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110#Concealed>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 
+### RS-GSG-TRAIT-005 — Weapon Traits can enable same-named Common Skills
+
+**Classification:** source-native cross-domain prerequisite relationship.
+
+The Intuitive Attack and Speculative Attack Common Skills require the user to employ a BS
+Weapon with the corresponding same-named Trait. Suppressive Fire likewise requires the
+user to select a Weapon with the Suppressive Fire Trait. The Trait satisfies one explicit
+prerequisite for declaring the Skill, but does not by itself satisfy the Skill's remaining
+requirements.
+
+InfinityDB therefore authors `enables-use-of` from each Weapon Trait toward its Common
+Skill: Intuitive Attack, Speculative Attack, and Suppressive Fire. `rules.db` derives the
+reverse navigation so each Skill identifies the Trait that makes the declaration available.
+This is the same scoped prerequisite semantics already used for Stealth/Cautious Movement
+and State/Surprise Attack interactions; it does not mean possession of the Trait makes every
+declaration legal.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Intuitive_Attack>
+- Wiki: <https://infinitythewiki.com/Speculative_Attack>
+- Wiki: <https://infinitythewiki.com/Suppressive_Fire>
+- Wiki: <https://infinitythewiki.com/Traits>
+
 ## Skills and Equipment / Module semantics
 
 ### RS-SE-SCOPE-001 — Navigation membership does not determine rules scope
