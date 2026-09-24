@@ -22,15 +22,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 169/180 complete (93.9%), 11 pending.**
-- Primary domains: Skill **84/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 173/180 complete (96.1%), 7 pending.**
+- Primary domains: Skill **88/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **28/28** complete, **0** pending.
-- Current authored outgoing relations: **230**.
-- Explicitly tracked future/deferred interactions: **117**.
+- Current authored outgoing relations: **237**.
+- Explicitly tracked future/deferred interactions: **123**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (84/95)
+### Skill (88/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -102,6 +102,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Normal State (`state:normal`)
   - `enters-state` → Dead State (`state:dead`)
   - `applies-effects-to` → Remote Presence (`skill:remote-presence`)
+  - `negates-effects-of` → Explode (`skill:explode`)
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:healing` — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
   - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [x] **Engineer** (`skill:engineer`) — reviewed
@@ -113,10 +114,15 @@ review. `declaration-category` projection records are excluded.
   - `cancels-state` → Stunned State (`state:stunned`)
   - `cancels-state` → Targeted State (`state:targeted`)
   - `cancels-state` → Unconscious State (`state:unconscious`)
-- [ ] **Explode** (`skill:explode`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Exrah** (`skill:exrah`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Explode** (`skill:explode`) — reviewed
+  - `enters-state` → Dead State (`state:dead`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Unconscious State (`state:unconscious`) — Explode is triggered specifically by entering Unconscious State; the current graph has no state-entry trigger/precondition relation and an unconditional State edge would misstate the timing.
+  - future [post-0.7.0; planned]: `uses-effects-of` → `ammunition:shock` — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain.
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:direct-template-attack` — Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity.
+- [x] **Exrah** (`skill:exrah`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `enters-state` → Dead State (`state:dead`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:healing` — Exrah prevents later healing by sending the Trooper directly from Unconscious to Dead State; model the general recovery prohibition once healing/recovery has a canonical interaction abstraction.
 - [x] **Forward Deployment** (`skill:forward-deployment`) — reviewed
   - outgoing: none
 - [x] **Forward Observer** (`skill:forward-observer`) — reviewed
@@ -147,8 +153,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Idle** (`skill:idle`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
-- [ ] **Immunity** (`skill:immunity`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Immunity** (`skill:immunity`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:saving-roll` — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Non-Lethal (`trait:non-lethal`) — Non-Lethal explicitly bypasses Immunity for that Trait only; a broad negates-effects-of edge would incorrectly imply that it disables unrelated Immunity effects on the same Attack.
+  - future [post-0.7.0; deferred]: `relation type TBD` → State (`trait:state`) — The State: Stunned Trait explicitly bypasses Immunity, but the current canonical State Trait identity does not preserve the Stunned parameter, so a generic Trait edge would be overbroad.
 - [x] **Impersonation** (`skill:impersonation`) — reviewed
   - `enters-state` → Impersonation-1 State (`state:impersonation-1`)
   - `enters-state` → Impersonation-2 State (`state:impersonation-2`)
@@ -228,6 +237,7 @@ review. `declaration-category` projection records are excluded.
   - `overrides-effects-of` → Unconscious State (`state:unconscious`)
   - `uses-effects-of` → Normal State (`state:normal`)
   - `applies-effects-to` → Remote Presence (`skill:remote-presence`)
+  - `negates-effects-of` → Explode (`skill:explode`)
   - future [post-0.7.0; deferred]: `relation type TBD` → Doctor (`skill:doctor`) — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
   - future [post-0.7.0; deferred]: `relation type TBD` → Engineer (`skill:engineer`) — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
   - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
@@ -347,8 +357,8 @@ review. `declaration-category` projection records are excluded.
   - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
   - future [post-0.7.0; deferred]: `ignores-modifiers-from` → `rule:range-modifiers` — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
   - future [post-0.7.0; deferred]: `ignores-modifiers-from` → `rule:partial-cover` — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
-- [ ] **Vulnerability** (`skill:vulnerability`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Vulnerability** (`skill:vulnerability`) — reviewed
+  - `restricts-use-of` → Immunity (`skill:immunity`)
 - [x] **Warhorse** (`skill:warhorse`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `relation type TBD` → Loss of Lieutenant (`rule:loss-of-lieutenant`) — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.
@@ -441,8 +451,7 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:hacking-area` — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
 - [x] **SymbioMate** (`equipment:symbiomate`) — reviewed
-  - outgoing: none
-  - future [0.7.0; planned]: `uses-effects-of` → Immunity (`skill:immunity`) — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
+  - `uses-effects-of` → Immunity (`skill:immunity`)
 - [x] **TinBot** (`equipment:tinbot`) — reviewed: TinBot is a family container; exact source variants carry their own reviewed interaction semantics.
   - outgoing: none
 - [x] **X Visor** (`equipment:x-visor`) — reviewed
@@ -702,7 +711,6 @@ review. `declaration-category` projection records are excluded.
 
 - [ ] AI Motorcycle (`equipment:ai-motorcycle`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added.
 - [ ] Escape System (`equipment:escape-system`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition.
-- [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
@@ -741,12 +749,19 @@ review. `declaration-category` projection records are excluded.
 - [ ] Courage (`skill:courage`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
 - [ ] Dogged (`skill:dogged`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] Dogged (`skill:dogged`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
+- [ ] Explode (`skill:explode`) → `ammunition:shock`; `uses-effects-of`; **post-0.7.0 / planned** — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain.
+- [ ] Explode (`skill:explode`) → `rule:direct-template-attack`; `uses-effects-of`; **post-0.7.0 / planned** — Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity.
+- [ ] Explode (`skill:explode`) → Unconscious State (`state:unconscious`); `relation type TBD`; **post-0.7.0 / deferred** — Explode is triggered specifically by entering Unconscious State; the current graph has no state-entry trigger/precondition relation and an unconditional State edge would misstate the timing.
+- [ ] Exrah (`skill:exrah`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Exrah prevents later healing by sending the Trooper directly from Unconscious to Dead State; model the general recovery prohibition once healing/recovery has a canonical interaction abstraction.
 - [ ] Frenzy (`skill:frenzy`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
 - [ ] Frenzy (`skill:frenzy`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
 - [ ] Frenzy (`skill:frenzy`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
 - [ ] FT Master (`skill:ft-master`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
 - [ ] FT Master (`skill:ft-master`) → Regular (`training:regular`); `applies-effects-to`; **post-0.7.0 / deferred** — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
+- [ ] Immunity (`skill:immunity`) → `rule:saving-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.
+- [ ] Immunity (`skill:immunity`) → Non-Lethal (`trait:non-lethal`); `relation type TBD`; **post-0.7.0 / deferred** — Non-Lethal explicitly bypasses Immunity for that Trait only; a broad negates-effects-of edge would incorrectly imply that it disables unrelated Immunity effects on the same Attack.
+- [ ] Immunity (`skill:immunity`) → State (`trait:state`); `relation type TBD`; **post-0.7.0 / deferred** — The State: Stunned Trait explicitly bypasses Immunity, but the current canonical State Trait identity does not preserve the Stunned parameter, so a generic Trait edge would be overbroad.
 - [ ] Impetuous (`skill:impetuous`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States.
 - [ ] Impetuous (`skill:impetuous`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label.
 - [ ] Impetuous (`skill:impetuous`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — A player in Retreat does not carry out the Impetuous Phase; model this phase suppression when Retreat has a canonical rules identity.

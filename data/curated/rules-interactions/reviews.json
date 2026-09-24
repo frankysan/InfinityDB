@@ -1196,6 +1196,30 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:explode",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:exrah",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:immunity",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:vulnerability",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1478,14 +1502,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Motorcycle prevents its mounted user from entering Prone State; the current relation vocabulary has no precise state-entry restriction edge."
-    },
-    {
-      "sourceRecordId": "equipment:symbiomate",
-      "targetRecordId": "skill:immunity",
-      "relationType": "uses-effects-of",
-      "targetRelease": "0.7.0",
-      "status": "planned",
-      "reason": "SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition."
     },
     {
       "sourceRecordId": "equipment:tinbot-firewall",
@@ -2136,6 +2152,62 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts."
+    },
+    {
+      "sourceRecordId": "skill:explode",
+      "targetRecordId": "state:unconscious",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Explode is triggered specifically by entering Unconscious State; the current graph has no state-entry trigger/precondition relation and an unconditional State edge would misstate the timing."
+    },
+    {
+      "sourceRecordId": "skill:explode",
+      "targetRecordId": "ammunition:shock",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain."
+    },
+    {
+      "sourceRecordId": "skill:explode",
+      "targetRecordId": "rule:direct-template-attack",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:exrah",
+      "targetRecordId": "rule:healing",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Exrah prevents later healing by sending the Trooper directly from Unconscious to Dead State; model the general recovery prohibition once healing/recovery has a canonical interaction abstraction."
+    },
+    {
+      "sourceRecordId": "skill:immunity",
+      "targetRecordId": "rule:saving-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:immunity",
+      "targetRecordId": "trait:non-lethal",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Non-Lethal explicitly bypasses Immunity for that Trait only; a broad negates-effects-of edge would incorrectly imply that it disables unrelated Immunity effects on the same Attack."
+    },
+    {
+      "sourceRecordId": "skill:immunity",
+      "targetRecordId": "trait:state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "The State: Stunned Trait explicitly bypasses Immunity, but the current canonical State Trait identity does not preserve the Stunned parameter, so a generic Trait edge would be overbroad."
     }
   ]
 }

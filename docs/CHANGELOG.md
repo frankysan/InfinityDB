@@ -7,6 +7,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed Explode, Exrah, Immunity, and Vulnerability rules. Expose their stable
+  Unconscious/Dead and Immunity interactions, including Dogged/NWI suppression of Explode and
+  SymbioMate's Immunity (Enhanced), while retaining parameter-specific Ammunition, Trait,
+  Saving Roll, and recovery semantics in the maintained future queue where broader edges would
+  be misleading.
 - Add reviewed Booty and MetaChemistry rules as optional Deployment Skills and preserve their
   random chart-backed outcomes as deployment/session state. Track the Booty and MetaChemistry
   Charts as planned structured reference identities instead of flattening possible rolls into

@@ -1074,6 +1074,42 @@
             "url": "https://infinitythewiki.com/index.php?title=MetaChemistry&oldid=3855",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-explode-oldid-3731",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Explode revision 3731",
+            "version": "N5.3 / oldid 3731",
+            "url": "https://infinitythewiki.com/index.php?title=Explode&oldid=3731",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-exrah-oldid-3075",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Exrah revision 3075",
+            "version": "N5.3 / oldid 3075",
+            "url": "https://infinitythewiki.com/index.php?title=Exrah&oldid=3075",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-immunity-oldid-3643",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Immunity revision 3643",
+            "version": "N5.3 / oldid 3643",
+            "url": "https://infinitythewiki.com/index.php?title=Immunity&oldid=3643",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-vulnerability-oldid-3156",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Vulnerability revision 3156",
+            "version": "N5.3 / oldid 3156",
+            "url": "https://infinitythewiki.com/index.php?title=Vulnerability&oldid=3156",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -9354,6 +9390,12 @@
                     "id": "symbiomate"
                 }
             ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:immunity"
+                }
+            ],
             "citations": [
                 {
                     "sourceId": "wiki-en-20260918-130233",
@@ -11406,6 +11448,10 @@
                 {
                     "type": "applies-effects-to",
                     "recordId": "skill:remote-presence"
+                },
+                {
+                    "type": "negates-effects-of",
+                    "recordId": "skill:explode"
                 }
             ],
             "citations": [
@@ -11477,6 +11523,10 @@
                 {
                     "type": "applies-effects-to",
                     "recordId": "skill:remote-presence"
+                },
+                {
+                    "type": "negates-effects-of",
+                    "recordId": "skill:explode"
                 }
             ],
             "citations": [
@@ -12902,6 +12952,244 @@
                 {
                     "sourceId": "wiki-metachemistry-oldid-3855",
                     "heading": "MetaChemistry"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:explode",
+            "kind": "skill",
+            "name": "Explode",
+            "summary": "An obligatory Automatic Attack Skill that detonates when the user enters Unconscious State, resolves a Shock Direct Template Attack, and then sends the user to Dead State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must be in Unconscious State for Explode to activate."
+                ],
+                "effects": [
+                    "Explode activates automatically when the user enters Unconscious State.",
+                    "At the end of that Order, before Guts Rolls, the user makes a Direct Template Attack centered on its base with PS 7 Shock Ammunition against ARM.",
+                    "Enemy Troopers affected by the Attack that declared Dodge avoid it if they passed their PH Roll.",
+                    "After the Rolls are resolved, the user enters Dead State and is removed from the game table."
+                ],
+                "restrictions": [
+                    "Explode does not activate if the user enters Dead State directly instead of entering Unconscious State.",
+                    "If the user activates Dogged or No Wound Incapacitation when entering Unconscious State, Explode does not activate.",
+                    "If the template would affect an allied Model or Marker, the Template Attack is canceled, but the user still enters Dead State."
+                ]
+            },
+            "labelIds": [
+                "attack",
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "explode"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:dead"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-explode-oldid-3731",
+                    "heading": "Explode"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:exrah",
+            "kind": "skill",
+            "name": "Exrah",
+            "summary": "An obligatory Automatic Special Skill that causes an Exrah Trooper entering Unconscious State to pass directly to Dead State, preventing later recovery.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "If the user enters Unconscious State, it automatically passes directly to Dead State without receiving an additional Wound and is removed from the game table.",
+                    "Because the user passes directly to Dead State, it cannot subsequently be healed by Doctor, MediKit, Regeneration, or another recovery method.",
+                    "Exrah remains active while its owner is in a Null State."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "exrah"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "overrides-effects-of",
+                    "recordId": "state:unconscious"
+                },
+                {
+                    "type": "enters-state",
+                    "recordId": "state:dead"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-exrah-oldid-3075",
+                    "heading": "Exrah"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:immunity",
+            "kind": "skill",
+            "name": "Immunity",
+            "summary": "An obligatory Automatic Special Skill whose profile-listed category changes or ignores specified Ammunition, Traits, States, or Critical-hit effects when the matching condition applies.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "Immunity activates when the user must make a Saving Roll, or when the user is affected by the State named by an applicable Immunity (State) variant."
+                ],
+                "effects": [
+                    "The value in brackets on the Unit Profile determines which Ammunition, Trait, State, Attribute-based protection, or Critical-hit effect the Immunity applies to.",
+                    "Immunity (Trait) ignores the special effects of the listed Trait.",
+                    "Immunity (Ammunition) treats the listed Ammunition as Normal Ammunition, ignoring its special effects and its MODs to the Saving Roll Attribute and number of Saving Rolls.",
+                    "Immunity (ARM) or (BTS) treats Ammunition that uses the named Saving Roll Attribute as Normal Ammunition; Immunity (Enhanced) combines both protections.",
+                    "Immunity (State) prevents the listed State from being caused by Comms Attacks or special rule effects.",
+                    "Immunity (Critical) removes the additional Saving Roll normally caused by a Critical hit."
+                ],
+                "restrictions": [
+                    "Except for Immunity (State), Immunity does not apply against Comms Attacks.",
+                    "Immunity does not prevent the Non-Lethal or State: Stunned Traits, which are always applied.",
+                    "Unless the user has Immunity (Critical), a Critical hit still causes its additional Saving Roll even when the underlying Ammunition or effect is otherwise covered by Immunity."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "immunity"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-immunity-oldid-3643",
+                    "heading": "Immunity"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:vulnerability",
+            "kind": "skill",
+            "name": "Vulnerability",
+            "summary": "An obligatory Automatic Special Skill that disables the user’s Immunity against the profile-listed Attack, weapon, or Ammunition.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The value in brackets on the Unit Profile identifies an Attack, weapon, or Ammunition to which the user is vulnerable.",
+                    "When facing that listed Attack, weapon, or Ammunition, the user cannot apply its Immunity Special Skill."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "vulnerability"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:immunity"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-vulnerability-oldid-3156",
+                    "heading": "Vulnerability"
                 }
             ],
             "review": {

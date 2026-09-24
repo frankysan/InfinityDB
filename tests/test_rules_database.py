@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 257
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 261
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -1245,6 +1245,62 @@ def test_fireteam_and_scenario_support_skills_are_composed(tmp_path: Path) -> No
     assert "Guts Rolls" in " ".join(records["journalist"]["facts"]["effects"])
     assert "Combat Group" in " ".join(records["tagcom"]["facts"]["effects"])
     assert all(not record.get("display_relations") for record in records.values())
+
+
+def test_damage_resilience_skills_are_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        slug: next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+        for slug, record_id in {
+            "explode": "skill:explode",
+            "exrah": "skill:exrah",
+            "immunity": "skill:immunity",
+            "vulnerability": "skill:vulnerability",
+        }.items()
+    }
+    symbiomate = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "symbiomate")
+        if item["id"] == "equipment:symbiomate"
+    )
+
+    assert records["explode"]["label_ids"] == ["attack", "obligatory"]
+    assert ("enters-state", "outbound", "Dead State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["explode"]["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["exrah"]["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("enters-state", "outbound", "Dead State"),
+        ("overrides-effects-of", "outbound", "Unconscious State"),
+    }
+    assert ("restricts-use-of", "outbound", "Immunity") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["vulnerability"]["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Immunity") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in symbiomate["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["immunity"]["display_relations"]
+        if relation["direction"] == "inbound"
+    } >= {
+        ("restricts-use-of", "inbound", "Vulnerability"),
+        ("uses-effects-of", "inbound", "SymbioMate"),
+    }
 
 
 def test_rules_database_preserves_variant_inheritance_and_variant_links(

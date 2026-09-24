@@ -157,8 +157,8 @@ requiring a new top-level browser surface in 0.7.0.
     `Non-Hackable` remains in scope. States are now an explicit primary 0.7.0 domain rather
     than supporting-only semantics: the complete current N5.3 State vocabulary is modeled as
     24 canonical identities, with Impersonation intentionally split into IMP-1 and IMP-2.
-    The current gate is 169/180 primary identities complete (Skills 84/95, Equipment 28/28,
-    Traits 33/33, States 24/24), leaving 11 missing Skill definitions. Combat Jump, Decoy,
+    The current gate is 173/180 primary identities complete (Skills 88/95, Equipment 28/28,
+    Traits 33/33, States 24/24), leaving 7 missing Skill definitions. Combat Jump, Decoy,
     Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic Deployment now
     have canonical reviewed definitions. Berserk, Guard,
     Neurocinetics, Total Reaction, and Triangulated Fire are also canonical reviewed
@@ -188,6 +188,12 @@ requiring a new top-level browser surface in 0.7.0.
     the older Army-linked Automatic-category fallback, while their Booty/MetaChemistry Chart
     dependencies remain explicit planned follow-up identities so randomized deployment/session
     outcomes are not flattened into static Unit facts or unconditional Skill/Equipment edges.
+    Explode, Exrah, Immunity, and Vulnerability now complete the reviewed damage/resilience
+    slice. Stable Dead/Unconscious transitions, Dogged/NWI suppression of Explode,
+    Vulnerability→Immunity, and SymbioMate→Immunity are current graph relationships, while
+    state-entry triggers, Shock/Direct Template Attack, general healing, Saving Roll, and
+    parameter-specific Immunity exceptions remain explicitly tracked for later domains or more
+    precise relation semantics.
     Chain of Command, Counterintelligence, Inspiring Leadership, Lieutenant, Mnemonica,
     NCO, and Tactical Awareness now complete the reviewed command/order slice. Loss of
     Lieutenant, Special Lieutenant Order, Tactical Order, and Command Token Strategic Use are
