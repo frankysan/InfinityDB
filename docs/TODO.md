@@ -307,7 +307,7 @@ requiring a new top-level browser surface in 0.7.0.
     information rather than burying them in source metadata. Reuse the maintained
     Wiki category colors where useful, but always retain text labels so color is
     never the only cue.
-  - [ ] Present reviewed related-rule relationships as a bidirectional gameplay
+  - [x] Present reviewed related-rule relationships as a bidirectional gameplay
     graph when they help a player understand or navigate the current item. A relation
     is authored once in curated data and `rules.db` derives the reverse direction;
     both endpoints must expose useful player-facing context when both have browser
@@ -327,16 +327,19 @@ requiring a new top-level browser surface in 0.7.0.
     so both affected Skill pages identify the CC counter automatically while exact CC-only
     requirements remain on Natural Born Warrior. The sixth production interaction adds
     No Cover -> Limited Cover `overrides-effects-of`, making precedence visible from both
-    Skill pages without treating Limited Cover as globally negated. Continue translating further
-    semantic edge types into direction-aware player language and suppress
-    implementation-only relationships such as family bookkeeping when the existing
-    variant UI already communicates them. Systematic interaction coverage remains open
-    until the rules audit identifies and curates the other gameplay edges relevant to
-    currently exposed rules.
+    Skill pages without treating Limited Cover as globally negated. All current 0.7.0
+    gameplay edge types now have direction-aware player language, and implementation-only
+    relationships such as family bookkeeping remain suppressed when the existing variant UI
+    already communicates them. The completed catalog review plus semantic-only deferred-link
+    audit leaves future-ledger entries only where a missing domain, runtime/participant model,
+    or more structured mechanic is still needed.
   - [ ] Review information hierarchy on Skill, Equipment, Weapon, Trait, and
     representative Unit/profile/loadout surfaces: the concise gameplay meaning and
     applicable variant/occurrence context should be easier to find than provenance,
-    IDs, collection mechanics, or other developer-oriented context.
+    IDs, collection mechanics, or other developer-oriented context. The shared
+    rules-reference renderer now leads with gameplay summary/categories/facts/relations
+    and moves collection/applicability context beside the supporting citations; the
+    remaining work is composed-page and occurrence-level browser verification.
   - [ ] Review whether family rules, exact-source variant rules, and occurrence
     modifiers are shown at the point where a player needs them without implying
     that occurrence-specific modifiers are universal properties of the base item.
@@ -366,9 +369,14 @@ requiring a new top-level browser surface in 0.7.0.
     coding a second ontology into the frontend.
 
 - [ ] **Finish 0.7.0 with a catalog-consistency and project-presentation pass.**
-  - [ ] After all current catalog items have been vetted, audit them together for
+  - [x] After all current catalog items have been vetted, audit them together for
     consistency of semantics, terminology, information hierarchy, and player-facing
-    presentation.
+    presentation. The catalog-wide pass covers all 179 current canonical primary
+    definitions plus the vetted Commlink release exception: every current definition is
+    reviewed, summarized, and cited; defined-term capitalization is normalized; Related
+    rules are grouped consistently by gameplay meaning; and gameplay context now precedes
+    provenance in the shared renderer. Responsive/composed-page acceptance remains in
+    the dedicated presentation-audit tasks above.
   - [ ] Revise repository and application language about Corvus Belli assets to
     reflect the explicit permission to use and redistribute the graphical assets
     used by InfinityDB, while keeping those assets separate from the MIT-licensed

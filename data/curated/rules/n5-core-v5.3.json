@@ -46,8 +46,8 @@
                 "Deployment Skills"
             ],
             "descriptions": {
-                "singular": "A Deployment Skill is used during the Deployment Phase or when a trooper is deployed.",
-                "plural": "Deployment Skills are used during the Deployment Phase or when troopers are deployed."
+                "singular": "A Deployment Skill is used during the Deployment Phase or when a Trooper is deployed.",
+                "plural": "Deployment Skills are used during the Deployment Phase or when Troopers are deployed."
             }
         },
         {
@@ -94,8 +94,8 @@
                 "ARO Skills"
             ],
             "descriptions": {
-                "singular": "An ARO Skill is one that a trooper may perform as an ARO.",
-                "plural": "ARO Skills are those that troopers may perform as an ARO."
+                "singular": "An ARO Skill is one that a Trooper may perform as an ARO.",
+                "plural": "ARO Skills are those that Troopers may perform as an ARO."
             }
         }
     ],
@@ -158,7 +158,7 @@
         {
             "id": "marker",
             "name": "Marker",
-            "description": "This label indicates that a trooper, weapon, or piece of equipment can be represented by a Marker."
+            "description": "This label indicates that a Trooper, weapon, or piece of equipment can be represented by a Marker."
         },
         {
             "id": "movement",
@@ -4981,7 +4981,7 @@
             "id": "skill:cyberplug",
             "kind": "skill",
             "name": "Cyberplug",
-            "summary": "An Automatic Special Skill that grants access to Peripheral (Cyberplug) troopers.",
+            "summary": "An Automatic Special Skill that grants access to Peripheral (Cyberplug) Troopers.",
             "composition": {
                 "role": "definition"
             },
@@ -4996,10 +4996,10 @@
                 "typeIds": ["automatic"],
                 "requirements": [],
                 "effects": [
-                    "The user has access to Peripheral (Cyberplug) troopers as specified by the applicable profile."
+                    "The user has access to Peripheral (Cyberplug) Troopers as specified by the applicable profile."
                 ],
                 "restrictions": [
-                    "Peripheral (Cyberplug) rules and the profile's listed options govern the available troopers."
+                    "Peripheral (Cyberplug) rules and the profile's listed options govern the available Troopers."
                 ]
             },
             "labelIds": [
@@ -5351,7 +5351,7 @@
             "id": "training:regular",
             "kind": "training",
             "name": "Regular",
-            "summary": "The trooper contributes its Regular Order to the appropriate Combat Group Order Pool under normal conditions.",
+            "summary": "The Trooper contributes its Regular Order to the appropriate Combat Group Order Pool under normal conditions.",
             "composition": {
                 "role": "definition"
             },
@@ -5380,7 +5380,7 @@
             "id": "training:irregular",
             "kind": "training",
             "name": "Irregular",
-            "summary": "The trooper generates an Irregular Order that remains separate from the Combat Group Regular Order Pool.",
+            "summary": "The Trooper generates an Irregular Order that remains separate from the Combat Group Regular Order Pool.",
             "composition": {
                 "role": "definition"
             },
@@ -6908,7 +6908,7 @@
             "aliases": [
                 "Hidden Deployment"
             ],
-            "summary": "A deployment state in which a trooper's position is recorded privately without placing a Model or Marker on the table.",
+            "summary": "A deployment state in which a Trooper's position is recorded privately without placing a Model or Marker on the table.",
             "composition": {
                 "role": "definition"
             },
@@ -6924,11 +6924,11 @@
                     "Deployment Phase"
                 ],
                 "effects": [
-                    "The trooper is not placed on the table while the state is active and is generally treated as not being on the table.",
-                    "The state is canceled when the trooper is Discovered by a rule that explicitly allows it, such as Sensor."
+                    "The Trooper is not placed on the table while the state is active and is generally treated as not being on the table.",
+                    "The state is canceled when the Trooper is Discovered by a rule that explicitly allows it, such as Sensor."
                 ],
                 "requirements": [
-                    "The trooper has the Hidden Deployment Special Skill."
+                    "The Trooper has the Hidden Deployment Special Skill."
                 ],
                 "restrictions": [
                     "Once canceled, Hidden Deployment State cannot be regained."
@@ -7876,7 +7876,7 @@
             "aliases": [
                 "Unconscious"
             ],
-            "summary": "A Null State entered when a trooper has received as many Wounds as its VITA or STR Attribute.",
+            "summary": "A Null State entered when a Trooper has received as many Wounds as its VITA or STR Attribute.",
             "composition": {
                 "role": "definition"
             },
@@ -7889,9 +7889,9 @@
             "facts": {
                 "category": "state",
                 "effects": [
-                    "The trooper cannot declare Orders or AROs and does not contribute an Order during the Tactical Phase.",
+                    "The Trooper cannot declare Orders or AROs and does not contribute an Order during the Tactical Phase.",
                     "Automatic Special Skills and Automatic Equipment have no effect while the state is active.",
-                    "Removing a Wound so the trooper has fewer Wounds than its VITA or STR value cancels the state."
+                    "Removing a Wound so the Trooper has fewer Wounds than its VITA or STR value cancels the state."
                 ],
                 "requirements": [],
                 "restrictions": []
@@ -7975,7 +7975,7 @@
                 "Immobilized-A",
                 "IMM-A"
             ],
-            "summary": "A restrictive State that normally limits the trooper to Dodge at PH -6.",
+            "summary": "A restrictive State that normally limits the Trooper to Dodge at PH -6.",
             "composition": {
                 "role": "definition"
             },
@@ -7988,7 +7988,7 @@
             "facts": {
                 "category": "state",
                 "effects": [
-                    "The trooper cannot declare Skills or AROs except Dodge, applying a -6 PH MOD.",
+                    "The Trooper cannot declare Skills or AROs except Dodge, applying a -6 PH MOD.",
                     "A successful qualifying Dodge or an Engineer WIP Roll can cancel the state."
                 ],
                 "requirements": [],
@@ -8024,7 +8024,7 @@
                 "Immobilized-B",
                 "IMM-B"
             ],
-            "summary": "A restrictive State that normally limits the trooper to Reset at WIP -3.",
+            "summary": "A restrictive State that normally limits the Trooper to Reset at WIP -3.",
             "composition": {
                 "role": "definition"
             },
@@ -8037,7 +8037,7 @@
             "facts": {
                 "category": "state",
                 "effects": [
-                    "The trooper cannot declare Skills, Attacks, or AROs except Reset, applying a -3 WIP MOD.",
+                    "The Trooper cannot declare Skills, Attacks, or AROs except Reset, applying a -3 WIP MOD.",
                     "A successful qualifying Reset or an Engineer WIP Roll can cancel the state."
                 ],
                 "requirements": [],
@@ -8072,7 +8072,7 @@
             "aliases": [
                 "Isolated"
             ],
-            "summary": "A State that cuts a trooper off from its Order Pool and disables its Comms-related capabilities.",
+            "summary": "A State that cuts a Trooper off from its Order Pool and disables its Comms-related capabilities.",
             "composition": {
                 "role": "definition"
             },
@@ -8085,13 +8085,13 @@
             "facts": {
                 "category": "state",
                 "effects": [
-                    "The trooper cannot receive Orders from its Order Pool and becomes Irregular in following Active Turns while still Isolated.",
+                    "The Trooper cannot receive Orders from its Order Pool and becomes Irregular in following Active Turns while still Isolated.",
                     "Comms Attack and Comms Equipment capabilities, including Hacking Programs, are disabled.",
                     "Reset is made at WIP -9; a successful qualifying Reset or Engineer WIP Roll can cancel the state."
                 ],
                 "requirements": [],
                 "restrictions": [
-                    "An Isolated trooper cannot be part of a Fireteam or take part in a Coordinated Order."
+                    "An Isolated Trooper cannot be part of a Fireteam or take part in a Coordinated Order."
                 ]
             },
             "labelIds": [],
@@ -8140,7 +8140,7 @@
             "facts": {
                 "category": "state",
                 "effects": [
-                    "The trooper cannot declare Attacks and applies a -3 MOD to Rolls other than Saving Rolls.",
+                    "The Trooper cannot declare Attacks and applies a -3 MOD to Rolls other than Saving Rolls.",
                     "Doctor can cancel the state for VITA targets and Engineer can cancel it for STR targets.",
                     "The state also cancels automatically at the start of the States Phase of the Player Turn in which it was caused."
                 ],
@@ -8166,7 +8166,7 @@
             "aliases": [
                 "Targeted"
             ],
-            "summary": "A State that makes the trooper easier to attack or Discover and interferes with Reset, Cautious Movement, and Stealth.",
+            "summary": "A State that makes the Trooper easier to attack or Discover and interferes with Reset, Cautious Movement, and Stealth.",
             "composition": {
                 "role": "definition"
             },
@@ -8179,13 +8179,13 @@
             "facts": {
                 "category": "state",
                 "effects": [
-                    "BS Attack, Comms Attack, and Discover against the trooper gain a +3 MOD to the Attribute used.",
-                    "The trooper applies a -3 WIP MOD to Reset.",
+                    "BS Attack, Comms Attack, and Discover against the Trooper gain a +3 MOD to the Attribute used.",
+                    "The Trooper applies a -3 WIP MOD to Reset.",
                     "A successful qualifying Reset or an Engineer WIP Roll can cancel the state."
                 ],
                 "requirements": [],
                 "restrictions": [
-                    "The trooper cannot declare Cautious Movement or use the Stealth Special Skill."
+                    "The Trooper cannot declare Cautious Movement or use the Stealth Special Skill."
                 ]
             },
             "labelIds": [],

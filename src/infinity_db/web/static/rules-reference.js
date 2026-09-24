@@ -38,25 +38,39 @@ const relationGroupOrder = [
     name: "Creates & enables",
     types: new Set([
       "applies-effects-to",
-      "causes-state",
       "controller-eligible-for",
       "enables-use-of",
-      "enters-state",
       "has-subtype",
       "uses-effects-of",
     ]),
   },
   {
-    name: "Cancels & restricts",
+    name: "State interactions",
     types: new Set([
       "cancels-state",
-      "ignores-modifiers-from",
-      "negates-effects-of",
-      "overrides-effects-of",
+      "causes-state",
+      "enters-state",
       "prevents-state-entry",
-      "reduces-modifiers-from",
-      "restricts-use-of",
       "reveals-state",
+      "triggered-by-state-entry",
+    ]),
+  },
+  {
+    name: "MODs & changes",
+    types: new Set([
+      "ignores-modifiers-from",
+      "imposes-modifiers-on",
+      "modifies-rolls-for",
+      "modifies-use-of",
+      "overrides-effects-of",
+      "reduces-modifiers-from",
+    ]),
+  },
+  {
+    name: "Cancels & restricts",
+    types: new Set([
+      "negates-effects-of",
+      "restricts-use-of",
     ]),
   },
   { name: "Other interactions", types: null },
@@ -201,14 +215,6 @@ function appendRuleRelations(container, rule) {
 }
 
 function appendRuleDetails(container, rule) {
-  const applicability = applicabilityText(rule);
-  if (applicability) {
-    const context = document.createElement("p");
-    context.className = "detail-source";
-    context.textContent = applicability;
-    container.append(context);
-  }
-
   const summary = document.createElement("p");
   summary.className = "detail-copy";
   summary.textContent = rule.summary;
@@ -259,6 +265,14 @@ function appendRuleDetails(container, rule) {
   }
 
   appendRuleRelations(container, rule);
+
+  const applicability = applicabilityText(rule);
+  if (applicability) {
+    const context = document.createElement("p");
+    context.className = "detail-source";
+    context.textContent = applicability;
+    container.append(context);
+  }
 
   if (rule.citations?.length) {
     const citations = document.createElement("p");

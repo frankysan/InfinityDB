@@ -122,14 +122,18 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Complete the post-vetting catalog consistency pass: normalize Infinity rules terminology
+  across maintained editorial text, make gameplay summaries lead source/applicability
+  provenance, and regroup Related rules into clearer enabling, State, MOD/change, and
+  cancellation/restriction sections.
+
 - Treat full curated Skill definitions as authoritative for declaration categories when Army-linked
   fallback metadata disagrees, while retaining fallback categories only for Skills without a full
   definition. This preserves rules-native classifications such as Decoy as a Deployment Skill.
 - Improve rules-catalog scanning: Skill declaration/action types now use the maintained
   category colors on detail references and in a dedicated `/skills` Type(s) column;
-  related rules are grouped into constructive, cancelling/restricting, and other
-  interactions with deterministic alphabetical ordering; and rules-reference cards keep
-  clear spacing from following occurrence tables.
+  related rules use direction-aware gameplay grouping with deterministic alphabetical
+  ordering; and rules-reference cards keep clear spacing from following occurrence tables.
 - Make Skill action/declaration categories intrinsically multi-valued, so full curated
   Skills—including rules-only Common Skills—can expose combinations such as Short Skill /
   ARO without requiring an Army identity. Normalize the complementary Baggage/Reload

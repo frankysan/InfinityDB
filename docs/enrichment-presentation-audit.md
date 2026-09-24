@@ -111,17 +111,19 @@ follow-ups.
   already carries the maintained Wiki category colors; any use of those colors
   must retain text labels.
 - **Reviewed related-rule edges need first-class presentation.** Curated rule
-  records already author one-way typed edges and `rules.db` derives reverse
-  relations. The shared renderer now receives resolved endpoint metadata and can
-  present the currently reviewed State/Peripheral relationship vocabulary with
-  direction-aware player labels while suppressing bookkeeping edges such as
-  `variant-of`. The same model now covers the reviewed Multispectral Visor/Mimetism
-  interaction in both directions. The remaining audit must systematically identify
-  other player-relevant interactions and verify them against the generated browser.
-- **Source/applicability context currently precedes the concise summary.** This is
-  correct data, but the complete browser audit should determine whether the
-  normal reading order should lead with gameplay meaning and move provenance/
-  applicability into a secondary position.
+  records author one-way typed edges and `rules.db` derives reverse relations.
+  The shared renderer receives resolved endpoint metadata and presents every
+  current player-facing relation type with direction-aware language while
+  suppressing bookkeeping edges such as `variant-of`. After the complete 0.7.0
+  interaction review and semantic-only deferred-link pass, relationships are
+  grouped by player meaning: creation/enabling, State interactions, MOD/change
+  interactions, and cancellation/restriction. Supporting identities without a
+  browser surface remain readable text rather than dead links.
+- **Source/applicability context used to precede the concise summary.** The shared
+  renderer now leads with the gameplay summary, categories, facts, and related
+  rules, then presents collection/applicability context and citations as
+  supporting provenance. The complete browser audit still needs to verify this
+  hierarchy on representative composed pages and occurrence-heavy variants.
 - **Exact-source rule detail lives inside usage disclosures.** The typed variant
   label is visible before expansion, while full variant rules appear only after a
   usage section is opened. The complete-data audit must verify that this is
@@ -136,6 +138,37 @@ follow-ups.
   identity and use counts rather than rules summaries. The audit should decide
   whether category/semantic cues improve scanning enough to justify adding them;
   completeness alone is not a reason to make list rows denser.
+
+## Catalog-wide consistency pass
+
+After the 0.7.0 interaction gate reached 180/180, the complete current primary
+rules catalog was reviewed as one set against the generated `rules.db`. The
+review covered 179 current canonical definitions (94 Skills, 28 Equipment items,
+33 Traits, and 24 States) plus the explicitly vetted Commlink release exception.
+Every current primary definition has a non-empty concise summary, at least one
+authoritative citation, and reviewed status.
+
+The pass found no additional primary-catalog semantic identity gap. The
+remaining deferred interaction ledger entries still require a missing domain,
+participant/runtime model, or more structured mechanic rather than another
+simple catalog edge.
+
+Three presentation consistency issues were actionable without broadening scope:
+
+- Infinity editorial prose now consistently capitalizes the defined game term
+  **Trooper** across maintained summaries, fact text, Skill-type descriptions,
+  Label descriptions, and Training summaries.
+- The Related rules grouping had become semantically inconsistent as relation
+  vocabulary expanded. State lifecycle links and MOD/change links now have
+  dedicated groups instead of being split between cancellation and a generic
+  catch-all.
+- Gameplay meaning now precedes collection/applicability provenance in the
+  shared rules-reference renderer.
+
+This is the catalog-level consistency audit, not the final rendered-browser
+acceptance pass. Responsive layout, exact-source/occurrence discoverability,
+representative Unit/profile composition, and complete generated-dataset browser
+inspection remain separate 0.7.0 presentation tasks.
 
 ## Completion
 

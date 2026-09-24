@@ -1991,9 +1991,14 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert body.index(b'["requirements", "Requirements"]') < body.index(
         b'["effects", "Effects"]'
     )
+    assert body.index(b"summary.textContent = rule.summary") < body.index(
+        b"const applicability = applicabilityText(rule)"
+    )
     assert b'detail-fact-heading' in body
     assert b'heading.textContent = "Related rules"' in body
     assert b'name: "Creates & enables"' in body
+    assert b'name: "State interactions"' in body
+    assert b'name: "MODs & changes"' in body
     assert b'name: "Cancels & restricts"' in body
     assert b'name: "Other interactions"' in body
     assert b'left.record.name.localeCompare(right.record.name' in body

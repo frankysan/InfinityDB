@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -623,6 +624,19 @@ def test_checked_in_n5_collection_is_valid() -> None:
         set(skill_type["descriptions"]) == {"singular", "plural"}
         for skill_type in document["skillTypes"]
     )
+
+    editorial_text = [
+        description
+        for skill_type in document["skillTypes"]
+        for description in skill_type["descriptions"].values()
+    ]
+    editorial_text.extend(label["description"] for label in document["labels"])
+    for record in document["records"]:
+        editorial_text.append(record["summary"])
+        facts = record.get("facts", {})
+        for key in ("requirements", "effects", "restrictions"):
+            editorial_text.extend(facts.get(key, []))
+    assert not any(re.search(r"\btroopers?\b", text) for text in editorial_text)
 
 
 def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: Path) -> None:
