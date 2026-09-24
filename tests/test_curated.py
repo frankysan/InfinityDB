@@ -591,6 +591,8 @@ def test_checked_in_n5_collection_is_valid() -> None:
         {"type": "reveals-state", "recordId": "state:camouflaged"},
         {"type": "reveals-state", "recordId": "state:decoy"},
         {"type": "reveals-state", "recordId": "state:impersonation-2"},
+        {"type": "reveals-state", "recordId": "state:holoecho"},
+        {"type": "reveals-state", "recordId": "state:holomask"},
     ]
     assert records["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
     assert records["trait:bs-weapon-ph"]["aliases"] == ["Throwing Weapon"]
@@ -1327,9 +1329,14 @@ def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
         {"type": "cancels-state", "recordId": "state:decoy"},
         {"type": "cancels-state", "recordId": "state:impersonation-1"},
         {"type": "cancels-state", "recordId": "state:impersonation-2"},
+        {"type": "cancels-state", "recordId": "state:holoecho"},
     ]
     assert "relations" not in records["skill:courage"]
-    assert "relations" not in records["skill:impetuous"]
+    assert records["skill:impetuous"]["relations"] == [
+        {"type": "cancels-state", "recordId": "state:prone"},
+        {"type": "cancels-state", "recordId": "state:holoecho"},
+        {"type": "cancels-state", "recordId": "state:holomask"},
+    ]
     assert "relations" not in records["skill:religious-troop"]
 
 
@@ -1476,7 +1483,8 @@ def test_checked_in_n5_collection_models_state_self_recovery_rolls() -> None:
     records = {record["id"]: record for record in document["records"]}
 
     assert records["skill:dodge"]["relations"] == [
-        {"type": "cancels-state", "recordId": "state:immobilized-a"}
+        {"type": "cancels-state", "recordId": "state:immobilized-a"},
+        {"type": "cancels-state", "recordId": "state:engaged"},
     ]
     assert (
         "modifies-rolls-for",
@@ -1560,10 +1568,13 @@ def test_checked_in_n5_collection_models_remaining_catalog_equipment_slice() -> 
     assert records["equipment:bangbomb"]["relations"] == [
         {"type": "modifies-rolls-for", "recordId": "skill:dodge"}
     ]
-    for record_id in {"equipment:gizmokit", "equipment:medikit"}:
-        assert records[record_id]["relations"] == [
-            {"type": "cancels-state", "recordId": "state:unconscious"}
-        ]
+    assert records["equipment:gizmokit"]["relations"] == [
+        {"type": "cancels-state", "recordId": "state:unconscious"}
+    ]
+    assert records["equipment:medikit"]["relations"] == [
+        {"type": "cancels-state", "recordId": "state:unconscious"},
+        {"type": "causes-state", "recordId": "state:dead"},
+    ]
     assert records["equipment:motorcycle"]["relations"] == [
         {"type": "restricts-use-of", "recordId": "skill:climb"},
         {"type": "restricts-use-of", "recordId": "skill:jump"},

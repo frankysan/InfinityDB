@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 220
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 230
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -485,6 +485,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("reveals-state", "inbound", "skill:sensor"),
         ("uses-effects-of", "inbound", "trait:concealed"),
         ("cancels-state", "inbound", "skill:frenzy"),
+        ("cancels-state", "inbound", "state:retreat"),
     }
 
     camouflage = next(
@@ -523,6 +524,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
         ("uses-effects-of", "inbound", "Concealed", ()),
         ("cancels-state", "inbound", "Frenzy", (("skill", "frenzy"),)),
+        ("cancels-state", "inbound", "Retreat! State", ()),
     }
 
 
@@ -807,6 +809,7 @@ def test_morale_behavior_interactions_are_bidirectional(tmp_path: Path) -> None:
         ("cancels-state", "outbound", "state:decoy"),
         ("cancels-state", "outbound", "state:impersonation-1"),
         ("cancels-state", "outbound", "state:impersonation-2"),
+        ("cancels-state", "outbound", "state:holoecho"),
     }
     foxhole = record("state:foxhole")
     assert ("uses-effects-of", "outbound", "skill:courage") in {

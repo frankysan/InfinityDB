@@ -110,8 +110,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 111
-    assert report["summary"]["completeCount"] == 109
+    assert report["summary"]["exposedCount"] == 121
+    assert report["summary"]["completeCount"] == 119
     assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
@@ -143,6 +143,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert turret["familyRuleIds"] == ["weapon:armed-turret"]
     assert turret["gapCodes"] == ["stale_citation_source"]
     states = {item["name"]: item for item in report["domains"]["states"]["items"]}
+    assert len(states) == 24
     assert states["Camouflaged State"]["gapCodes"] == []
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []

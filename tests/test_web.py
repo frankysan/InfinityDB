@@ -1518,6 +1518,7 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     status, _, body = request(rules_app, "/api/states")
     assert status == 200
     states = {item["id"]: item for item in json.loads(body)["items"]}
+    assert len(states) == 24
     assert states["unconscious"]["name"] == "Unconscious State"
     assert states["targeted"]["name"] == "Targeted State"
 
@@ -1533,7 +1534,7 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     assert {
         relation["record"]["name"]
         for relation in state["rules"][0]["display_relations"]
-        if relation["type"] == "cancels-state"
+        if relation["type"] == "cancels-state" and relation["direction"] == "inbound"
     } == {"Doctor", "Engineer", "GizmoKit", "MediKit"}
 
     status, _, body = request(rules_app, "/api/states/not-a-state")

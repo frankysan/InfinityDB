@@ -1345,8 +1345,10 @@ compatibility references remain unambiguous JSON integers.
 
 - `data/curated/rules-interactions/catalog-scope.json` is the maintained public-catalog
   denominator for interaction-review progress. For 0.7.0 it contains all public Skills,
-  Equipment items, and Traits, including identities without a curated rule definition. The
-  current baseline is 95 Skills, 28 Equipment items, and 33 rules-native Traits. The Army
+  Equipment items, Traits, and States, including identities without a curated rule definition.
+  The current baseline is 95 Skills, 28 Equipment items, 33 rules-native Traits, and 24
+  canonical State identities. The State denominator follows the current N5.3 State vocabulary,
+  with Impersonation represented separately as IMP-1 and IMP-2. The Army
   skill-like source bucket contains 88 application identities, but six reviewed entries belong
   to other rules/presentation domains (`Bangbomb`, `GizmoKit`, `MediKit`, `Regular`, `BTS=3`,
   and `Infinity Team-Ops`). The rules-backed Skill catalog therefore contains 82 valid
@@ -1362,9 +1364,10 @@ compatibility references remain unambiguous JSON integers.
   identity except `declaration-category` projection records must have one ledger entry.
 - The primary 0.7.0 progress figure is catalog-based, not curated-record-based. A public catalog
   item is complete only when its canonical typed rules identity exists and is reviewed; missing
-  rules definitions remain pending. Exact source variants plus independently modeled Rule, State,
+  rules definitions remain pending. Exact source variants plus independently modeled Rule,
   Training, supporting Trait, and curated Weapon identities are reported separately as supporting
-  semantics so they cannot inflate the public-catalog completion percentage.
+  semantics so they cannot inflate the public-catalog completion percentage. States are primary
+  0.7.0 identities, not supporting-only records.
 - Review state is release-aware. `reviewed` means outgoing interactions were audited for the
   entry's target release; `inherited` means an exact source variant reuses its family's
   reviewed interaction semantics; `pending` remains release work. Zero outgoing edges are a

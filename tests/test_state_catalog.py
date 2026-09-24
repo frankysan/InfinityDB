@@ -12,6 +12,19 @@ def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: P
     catalog = StateCatalog(RulesDatabase(rules_path))
 
     states = {item["id"]: item for item in catalog.list_states()}
+    assert len(states) == 24
+    assert {
+        "dead",
+        "engaged",
+        "holoecho",
+        "holomask",
+        "normal",
+        "prone",
+        "possessed",
+        "retreat",
+        "sepsitorized",
+        "suppressive-fire",
+    } <= states.keys()
     assert "unconscious" in states
     assert "immobilized-a" in states
     assert "targeted" in states
@@ -40,6 +53,16 @@ def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: P
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in unloaded["rules"][0]["display_relations"]
     }
+
+    suppressive_fire = catalog.get_state("suppressive-fire")
+    assert suppressive_fire is not None
+    suppressive_relations = {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in suppressive_fire["rules"][0]["display_relations"]
+    }
+    assert ("enters-state", "inbound", "skill:suppressive-fire") in suppressive_relations
+    assert ("cancels-state", "inbound", "state:dead") in suppressive_relations
+    assert ("cancels-state", "inbound", "state:retreat") in suppressive_relations
 
 
 def test_state_catalog_without_rules_is_empty() -> None:

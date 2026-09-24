@@ -750,6 +750,96 @@
             "url": "https://infinitythewiki.com/index.php?title=Religious_Troop&oldid=3601",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-dead-state-oldid-3632",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Dead State revision 3632",
+            "version": "N5.3 / oldid 3632",
+            "url": "https://infinitythewiki.com/index.php?title=Dead_State&oldid=3632",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-engaged-state-oldid-4105",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Engaged State revision 4105",
+            "version": "N5.3 / oldid 4105",
+            "url": "https://infinitythewiki.com/index.php?title=Engaged_State&oldid=4105",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-holoecho-state-oldid-4069",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Holoecho State revision 4069",
+            "version": "N5.3 / oldid 4069",
+            "url": "https://infinitythewiki.com/index.php?title=Holoecho_State&oldid=4069",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-holomask-state-oldid-3973",
+            "kind": "wiki",
+            "title": "Infinity Wiki — HoloMask State revision 3973",
+            "version": "N5.3 / oldid 3973",
+            "url": "https://infinitythewiki.com/index.php?title=HoloMask_State&oldid=3973",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-normal-state-oldid-3311",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Normal State revision 3311",
+            "version": "N5.3 / oldid 3311",
+            "url": "https://infinitythewiki.com/index.php?title=Normal_State&oldid=3311",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-prone-state-oldid-4121",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Prone State revision 4121",
+            "version": "N5.3 / oldid 4121",
+            "url": "https://infinitythewiki.com/index.php?title=Prone_State&oldid=4121",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-possessed-state-oldid-3981",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Possessed State revision 3981",
+            "version": "N5.3 / oldid 3981",
+            "url": "https://infinitythewiki.com/index.php?title=Possessed_State&oldid=3981",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-retreat-state-oldid-3622",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Retreat! State revision 3622",
+            "version": "N5.3 / oldid 3622",
+            "url": "https://infinitythewiki.com/index.php?title=Retreat_State&oldid=3622",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-sepsitorized-state-oldid-3839",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Sepsitorized State revision 3839",
+            "version": "N5.3 / oldid 3839",
+            "url": "https://infinitythewiki.com/index.php?title=Sepsitorized_State&oldid=3839",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-suppressive-fire-state-oldid-3324",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Suppressive Fire State revision 3324",
+            "version": "N5.3 / oldid 3324",
+            "url": "https://infinitythewiki.com/index.php?title=Suppressive_Fire_State&oldid=3324",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -944,6 +1034,14 @@
                 {
                     "type": "reveals-state",
                     "recordId": "state:impersonation-2"
+                },
+                {
+                    "type": "reveals-state",
+                    "recordId": "state:holoecho"
+                },
+                {
+                    "type": "reveals-state",
+                    "recordId": "state:holomask"
                 }
             ],
             "citations": [
@@ -7105,7 +7203,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["short-skill", "aro"],
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ],
                 "requirements": [
                     "The user must be the Active Trooper or be allowed to declare an ARO."
                 ],
@@ -7130,6 +7231,10 @@
                 {
                     "type": "cancels-state",
                     "recordId": "state:immobilized-a"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:engaged"
                 }
             ],
             "citations": [
@@ -7264,7 +7369,60 @@
         {"id":"skill:climb","kind":"skill","name":"Climb","summary":"A Long Common Skill used to move on vertical surfaces.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must be in base contact with a vertical surface.","At least half of the user's base must remain in contact with the surface while moving.","The movement must finish on a surface at least as large as the base."],"effects":["The user moves on the vertical surface up to its first MOV value plus 2 inches; a Climb distance listed in the Unit Profile replaces the 2-inch bonus."],"restrictions":["Climb only permits movement on vertical surfaces and follows the General Movement Rules.","While holding onto a vertical surface, the Trooper cannot declare Skills other than Climb.","A Trooper performing Climb or holding onto a vertical surface cannot benefit from Partial Cover MODs."]},"labelIds":["movement","no-lof","no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Climb","heading":"Climb"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
         {"id":"skill:idle","kind":"skill","name":"Idle","summary":"A Common Skill that spends the declared action without another effect.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["basic-short-skill"],"requirements":[],"effects":["The user performs no action, although the declaration still activates the Trooper and may generate AROs.","A declared Skill whose Requirements are not met is resolved as Idle instead."],"restrictions":[]},"labelIds":["no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Idle","heading":"Idle"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
         {"id":"skill:intuitive-attack","kind":"skill","name":"Intuitive Attack","summary":"A Long Common Skill that uses a BS Weapon with the Intuitive Attack Trait against a target that normally cannot be attacked directly.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must employ a BS Weapon with the Intuitive Attack Trait.","The target must be outside the user's LoF because of a Zero Visibility Zone, or be in a State that normally requires Discover before it can be attacked."],"effects":["The user makes an unmodified WIP Roll; on success, the user performs a single BS Attack Roll against the target with Burst 1."],"restrictions":["MODs from Partial Cover, Special Skills, Equipment, and other sources do not apply to the required WIP Roll.","After a failed WIP Roll, the user cannot attempt another Intuitive Attack against the same target until the next Active Turn."]},"labelIds":["bs-attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Intuitive_Attack","heading":"Intuitive Attack"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
-        {"id":"skill:jump","kind":"skill","name":"Jump","summary":"A Long Common Skill used to clear obstacles and move through the air.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must be able to reach a horizontal landing surface at least as large as its base."],"effects":["The user may Jump up to its first MOV value plus 2 inches; a Jump distance listed in the Unit Profile replaces the 2-inch bonus.","Declaring Jump automatically cancels Prone State."],"restrictions":["The trajectory and landing must follow the Jump and General Movement Rules.","The user cannot benefit from Partial Cover MODs during an Order in which it declared Jump."]},"labelIds":["movement","no-lof","no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Jump","heading":"Jump"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
+        {
+            "id": "skill:jump",
+            "kind": "skill",
+            "name": "Jump",
+            "summary": "A Long Common Skill used to clear obstacles and move through the air.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The user must be able to reach a horizontal landing surface at least as large as its base."
+                ],
+                "effects": [
+                    "The user may Jump up to its first MOV value plus 2 inches; a Jump distance listed in the Unit Profile replaces the 2-inch bonus.",
+                    "Declaring Jump automatically cancels Prone State."
+                ],
+                "restrictions": [
+                    "The trajectory and landing must follow the Jump and General Movement Rules.",
+                    "The user cannot benefit from Partial Cover MODs during an Order in which it declared Jump."
+                ]
+            },
+            "labelIds": [
+                "movement",
+                "no-lof",
+                "no-roll"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Jump",
+                    "heading": "Jump"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:prone"
+                }
+            ]
+        },
         {"id":"skill:move","kind":"skill","name":"Move","summary":"A Common Skill used to move a Trooper up to its applicable MOV value.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["basic-short-skill"],"requirements":[],"effects":["The user moves up to the applicable MOV value."],"restrictions":["Movement must follow the general movement rules."]},"labelIds":["movement","no-lof","no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Move","heading":"Move"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
         {"id":"skill:look-out","kind":"skill","name":"Look Out","summary":"An ARO Common Skill that lets the user warn other Troopers so they can turn to face an acting enemy.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["aro"],"requirements":["The user must have LoF to an enemy Trooper or Marker that declares or performs an Order."],"effects":["Other Troopers of the same player may modify their LoF by making Dodge (PH-3) Rolls in the same Order."],"restrictions":["An alerted Trooper may make the Dodge (PH-3) Roll only if it has not declared another ARO."]},"labelIds":["no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Look_Out","heading":"Look Out"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"},"relations":[{"type":"modifies-rolls-for","recordId":"skill:dodge"}]},
         {"id":"skill:place-deployable","kind":"skill","name":"Place Deployable","summary":"A Common Skill used to place eligible Deployable Weapons, Equipment, or Peripheral (Ancillary) items on the table.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["short-skill","aro"],"requirements":["The user must have a Weapon or Equipment item with the Deployable Label, or a Peripheral (Ancillary).","In the Reactive Turn, the user must have LoF to the Active Trooper."],"effects":["The user places one eligible Token or Model without a Roll; it becomes active at the Conclusion of the Order."],"restrictions":["Placement must follow the active/reactive placement, support, and Deployment restrictions of Place Deployable.","A Deployable Weapon cannot be placed with an enemy Camouflaged Marker inside its Trigger Area unless the documented exception applies."]},"labelIds":["attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Place_Deployable","heading":"Place Deployable"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
@@ -7320,7 +7478,54 @@
             ]
         },
         {"id":"skill:speculative-attack","kind":"skill","name":"Speculative Attack","summary":"A Long Common Skill that uses a BS Weapon with the Speculative Attack Trait to attack without LoF.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must employ a BS Weapon with the Speculative Attack Trait.","A valid trajectory must exist between the user and the chosen impact point."],"effects":["The user makes a single BS Attack with Burst 1 against a target outside LoF; eligible Circular Templates may use a separate impact point that still affects the Main Target."],"restrictions":["Apply the Speculative Attack -6 MOD and Range MODs; other negative MODs such as Mimetism, Partial Cover, and Visibility Zones are not applied.","A Circular Template impact point cannot be placed on a vertical surface or in the air."]},"labelIds":["bs-attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Speculative_Attack","heading":"Speculative Attack"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"},"relations":[{"type":"ignores-modifiers-from","recordId":"skill:mimetism"}]},
-        {"id":"skill:suppressive-fire","kind":"skill","name":"Suppressive Fire","summary":"A Long Common Skill that places the user in Suppressive Fire State with a selected weapon.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must select a Weapon with the Suppressive Fire Trait."],"effects":["The user enters Suppressive Fire State using the selected Weapon."],"restrictions":[]},"labelIds":["attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Suppressive_Fire","heading":"Suppressive Fire"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
+        {
+            "id": "skill:suppressive-fire",
+            "kind": "skill",
+            "name": "Suppressive Fire",
+            "summary": "A Long Common Skill that places the user in Suppressive Fire State with a selected weapon.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The user must select a Weapon with the Suppressive Fire Trait."
+                ],
+                "effects": [
+                    "The user enters Suppressive Fire State using the selected Weapon."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "attack"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Suppressive_Fire",
+                    "heading": "Suppressive Fire"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ]
+        },
         {
             "id": "state:unconscious",
             "kind": "state",
@@ -7360,7 +7565,17 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
-            }
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:prone"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ]
         },
         {
             "id": "state:disconnected",
@@ -7401,7 +7616,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
-            }
+            },
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ]
         },
         {
             "id": "state:immobilized-a",
@@ -7445,6 +7666,10 @@
                 {
                     "type": "modifies-rolls-for",
                     "recordId": "skill:dodge"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
                 }
             ]
         },
@@ -7490,6 +7715,10 @@
                 {
                     "type": "modifies-rolls-for",
                     "recordId": "skill:reset"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
                 }
             ]
         },
@@ -7537,6 +7766,10 @@
                 {
                     "type": "modifies-rolls-for",
                     "recordId": "skill:reset"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
                 }
             ]
         },
@@ -8627,7 +8860,13 @@
             },
             "variantSemantics": {
                 "inheritance": "family"
-            }
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:holomask"
+                }
+            ]
         },
         {
             "id": "equipment:holoprojector",
@@ -8672,7 +8911,13 @@
             },
             "variantSemantics": {
                 "inheritance": "family"
-            }
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:holoecho"
+                }
+            ]
         },
         {
             "id": "equipment:killer-hacking-device",
@@ -8753,6 +8998,10 @@
                 {
                     "type": "cancels-state",
                     "recordId": "state:unconscious"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:dead"
                 }
             ],
             "citations": [
@@ -10224,6 +10473,10 @@
                 {
                     "type": "cancels-state",
                     "recordId": "state:impersonation-2"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:holoecho"
                 }
             ],
             "variantSemantics": {
@@ -10282,7 +10535,21 @@
             },
             "variantSemantics": {
                 "inheritance": "family"
-            }
+            },
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:prone"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:holoecho"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:holomask"
+                }
+            ]
         },
         {
             "id": "skill:religious-troop",
@@ -10335,6 +10602,506 @@
             },
             "variantSemantics": {
                 "inheritance": "family"
+            }
+        },
+        {
+            "id": "state:dead",
+            "kind": "state",
+            "name": "Dead State",
+            "aliases": [
+                "Dead"
+            ],
+            "summary": "An irreversible Null State entered after a Trooper receives more Wounds than its VITA or STR value.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The Trooper is removed from the game table and its Combat Group.",
+                    "The Trooper no longer generates Orders and does not count toward Victory Points."
+                ],
+                "requirements": [
+                    "The Trooper has received more Wounds than its VITA or STR value, including receiving further Wounds while Unconscious."
+                ],
+                "restrictions": [
+                    "Dead State is irreversible unless a mission or scenario rule explicitly provides a cancellation procedure."
+                ]
+            },
+            "labelIds": [
+                "null"
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-dead-state-oldid-3632",
+                    "heading": "Dead State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:engaged",
+            "kind": "state",
+            "name": "Engaged State",
+            "aliases": [
+                "Engaged"
+            ],
+            "summary": "A close-combat State entered through Silhouette contact with an eligible enemy Trooper.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The Trooper is considered to be in Close Combat.",
+                    "The Trooper may only declare Berserk, CC Attack, Dodge, Idle, Reset, or Skills that explicitly allow use in Close Combat or Engaged State.",
+                    "The Trooper cannot draw Line of Fire outside its Close Combat."
+                ],
+                "requirements": [
+                    "The Trooper is in Silhouette contact with an enemy and neither Trooper is Immobilized or in a Null State, except Sepsitorized or Possessed."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-engaged-state-oldid-4105",
+                    "heading": "Engaged State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:holoecho",
+            "kind": "state",
+            "name": "Holoecho State",
+            "aliases": [
+                "Holoecho"
+            ],
+            "summary": "A Marker State created by Holoprojector that conceals which of up to three representations is the real bearer.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The bearer is represented together with holographic decoys and the player records which representation is real as Private Information.",
+                    "The bearer and Holoechoes act together when the bearer is activated.",
+                    "Enemies must Discover the relevant representation to reveal the bearer without another cancellation condition."
+                ],
+                "requirements": [
+                    "Holoprojector places or restores the Holoechoes under the deployment, States Phase, or Active Turn conditions specified by the rule."
+                ],
+                "restrictions": [
+                    "Holoecho State is canceled by its listed revelation and coherency conditions, including declarations or events that reveal the bearer."
+                ]
+            },
+            "labelIds": [
+                "marker",
+                "private-information"
+            ],
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:surprise-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-holoecho-state-oldid-4069",
+                    "heading": "Holoecho State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:holomask",
+            "kind": "state",
+            "name": "HoloMask State",
+            "aliases": [
+                "HoloMask"
+            ],
+            "summary": "A disguise State that represents the bearer as another same-faction Trooper while retaining the bearer’s real profile.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The bearer is represented by an imitated same-faction or same-Sectorial Trooper with the same Silhouette value.",
+                    "The bearer continues to use its real Unit Profile.",
+                    "A successful Discover replaces the imitated Model with the real Model."
+                ],
+                "requirements": [
+                    "The imitated Trooper must belong to the bearer’s faction or Sectorial Army and have the same Silhouette value."
+                ],
+                "restrictions": [
+                    "HoloMask cannot copy Hacker or Hackable status or Deployable items represented by Tokens or Models.",
+                    "The State is canceled by its listed revelation conditions."
+                ]
+            },
+            "labelIds": [
+                "private-information"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-holomask-state-oldid-3973",
+                    "heading": "HoloMask State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:normal",
+            "kind": "state",
+            "name": "Normal State",
+            "aliases": [
+                "Normal"
+            ],
+            "summary": "The default State for Troopers and game elements unless another rule specifies otherwise.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The Trooper normally generates an Order during the Tactical Phase.",
+                    "The Trooper counts toward its player’s Victory Points."
+                ],
+                "requirements": [
+                    "Troopers normally deploy in this State and return to it when their Null State is canceled unless another rule applies."
+                ],
+                "restrictions": [
+                    "Normal State is canceled when the Trooper enters a Null State or another rule explicitly says so."
+                ]
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-normal-state-oldid-3311",
+                    "heading": "Normal State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:prone",
+            "kind": "state",
+            "name": "Prone State",
+            "aliases": [
+                "Prone"
+            ],
+            "summary": "A posture State that changes Silhouette and halves Movement-labelled movement while active.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The Trooper uses Silhouette X, matching the height and width of its base.",
+                    "Movement from Skills with the Movement Label and failed Guts Rolls is halved while Prone."
+                ],
+                "requirements": [
+                    "A Trooper may deploy Prone or change between Normal and Prone at the permitted points of Movement-labelled Skills or AROs; eligible Troopers also become Prone when entering Unconscious State."
+                ],
+                "restrictions": [
+                    "Jump cancels Prone State, and some troop types or Equipment cannot enter Prone State."
+                ]
+            },
+            "labelIds": [],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:foxhole"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-prone-state-oldid-4121",
+                    "heading": "Prone State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:possessed",
+            "kind": "state",
+            "name": "Possessed State",
+            "aliases": [
+                "Possessed"
+            ],
+            "summary": "A Null State in which control of the affected Trooper passes to the opposing player and the Possessed profile is used.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The owning player cannot activate the Trooper or give it Orders from the owner’s Order Pool.",
+                    "The opposing player that caused the State may activate it through that Trooper’s Combat Group, using the Possessed profile.",
+                    "The Trooper contributes no Orders, counts for neither player’s Victory Points, and cannot belong to a Fireteam."
+                ],
+                "requirements": [
+                    "A successful Attack, Effect, Hacking Program, scenario rule, or other game condition capable of causing Possessed State affects the Trooper."
+                ],
+                "restrictions": [
+                    "The owning player may cancel Possessed State with a Command Token in the specified Tactical Phase step, and Total Control can also cancel it."
+                ]
+            },
+            "labelIds": [
+                "null"
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-possessed-state-oldid-3981",
+                    "heading": "Possessed State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:retreat",
+            "kind": "state",
+            "name": "Retreat! State",
+            "aliases": [
+                "Retreat",
+                "Retreat State"
+            ],
+            "summary": "A State applied when an army enters Retreat! that restricts declarations and cancels Marker and holographic States.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The Trooper may only use Basic Short Skills, Cautious Movement, Dodge, Reset, or Special Skills that explicitly permit use in Retreat!.",
+                    "Entering Retreat! cancels Holoprojector/HoloMask presentation and Marker States."
+                ],
+                "requirements": [
+                    "The Trooper’s army enters the Retreat! situation at the beginning of the Player Turn."
+                ],
+                "restrictions": [
+                    "Troopers protected by Courage, Religious Troop, Warhorse, or another applicable rule do not enter Retreat! State."
+                ]
+            },
+            "labelIds": [],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:camouflaged"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:decoy"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:impersonation-1"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:impersonation-2"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:holoecho"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:holomask"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-retreat-state-oldid-3622",
+                    "heading": "Retreat! State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:sepsitorized",
+            "kind": "state",
+            "name": "Sepsitorized State",
+            "aliases": [
+                "Sepsitorized"
+            ],
+            "summary": "A Null State caused by a failed Saving Roll against Sepsitor that transfers practical control of the Trooper to the opposing player.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "The Trooper leaves its original Combat Group and cannot receive Orders from its owner.",
+                    "The opposing player that caused the State may activate the Trooper through that Trooper’s Combat Group.",
+                    "The Trooper contributes no Orders, counts for neither player’s Victory Points, and cannot belong to a Fireteam."
+                ],
+                "requirements": [
+                    "A Cube-wearing Trooper fails a Saving Roll against a Sepsitor Attack."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "null"
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-sepsitorized-state-oldid-3839",
+                    "heading": "Sepsitorized State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:suppressive-fire",
+            "kind": "state",
+            "name": "Suppressive Fire State",
+            "aliases": [
+                "Suppressive Fire"
+            ],
+            "summary": "A combat State entered through the Suppressive Fire Skill that uses the weapon’s SF Mode and penalizes nearby enemy Face to Face Rolls.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "effects": [
+                    "Enemies within 24 inches apply a -3 MOD to their Attribute in Face to Face Rolls against the Trooper.",
+                    "The selected weapon uses its Suppressive Fire Mode and may react in ARO with the full B3 against one target."
+                ],
+                "requirements": [
+                    "The Trooper declared the Suppressive Fire Long Skill."
+                ],
+                "restrictions": [
+                    "The State is canceled by the listed Order, ARO, weapon, Guts Roll, State, Loss of Lieutenant, or Fireteam conditions."
+                ]
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-suppressive-fire-state-oldid-3324",
+                    "heading": "Suppressive Fire State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
             }
         }
     ]

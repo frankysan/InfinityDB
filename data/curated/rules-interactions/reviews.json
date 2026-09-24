@@ -974,6 +974,66 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:dead",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:engaged",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:holoecho",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:holomask",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:normal",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:prone",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:possessed",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:retreat",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:sepsitorized",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:suppressive-fire",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1035,14 +1095,6 @@
     },
     {
       "sourceRecordId": "skill:jump",
-      "targetRecordId": "state:prone",
-      "relationType": "cancels-state",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Declaring Jump explicitly cancels Prone State; materialize this edge once Prone State is promoted to a canonical rules identity."
-    },
-    {
-      "sourceRecordId": "skill:jump",
       "targetRecordId": "rule:partial-cover",
       "relationType": null,
       "targetRelease": "post-0.7.0",
@@ -1056,14 +1108,6 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable."
-    },
-        {
-      "sourceRecordId": "skill:suppressive-fire",
-      "targetRecordId": "state:suppressive-fire",
-      "relationType": "enters-state",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog."
     },
     {
       "sourceRecordId": "skill:stealth",
@@ -1282,30 +1326,6 @@
       "reason": "GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available."
     },
     {
-      "sourceRecordId": "equipment:holomask",
-      "targetRecordId": "state:holomask",
-      "relationType": "enters-state",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "HoloMask explicitly lets its user deploy in or enter HoloMask State; materialize the State edge when that supporting State identity is added."
-    },
-    {
-      "sourceRecordId": "equipment:holoprojector",
-      "targetRecordId": "state:holoecho",
-      "relationType": "enters-state",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Holoprojector explicitly lets its user deploy in or enter Holoecho State; materialize the State edge when that supporting State identity is added."
-    },
-    {
-      "sourceRecordId": "equipment:medikit",
-      "targetRecordId": "state:dead",
-      "relationType": "causes-state",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "A failed MediKit target PH Roll makes the target enter Dead State; materialize the edge when Dead State has a canonical rules identity."
-    },
-    {
       "sourceRecordId": "equipment:motorcycle",
       "targetRecordId": "state:prone",
       "relationType": null,
@@ -1399,7 +1419,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "deferred",
-      "reason": "Continuous Damage can continue forcing Saving Rolls until the target enters Dead State, but the State is not yet canonical and the current relation vocabulary should not overstate that indirect transition as a simple causes-state edge."
+      "reason": "Continuous Damage can continue forcing Saving Rolls until the target enters Dead State; the current relation vocabulary should not overstate that indirect transition as a simple causes-state edge."
     },
     {
       "sourceRecordId": "trait:double-shot",
@@ -1417,14 +1437,6 @@
       "status": "deferred",
       "reason": "Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge."
     },
-  {
-    "sourceRecordId": "state:unconscious",
-    "targetRecordId": "state:prone",
-    "relationType": "causes-state",
-    "targetRelease": "post-0.7.0",
-    "status": "planned",
-    "reason": "Entering Unconscious State automatically puts eligible Troopers into Prone State, and canceling Unconscious also cancels that Prone State; materialize the state-to-state interaction when Prone State becomes canonical."
-  },
   {
     "sourceRecordId": "state:stunned",
     "targetRecordId": "rule:attack-declaration",
@@ -1528,7 +1540,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "deferred",
-      "reason": "Aerial prevents its active user from being in Prone State, but Prone is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge."
+      "reason": "Aerial prevents its active user from being in Prone State, but the relation vocabulary has no precise prevents-state-entry edge."
     },
     {
       "sourceRecordId": "skill:aerial",
@@ -1536,7 +1548,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "deferred",
-      "reason": "Aerial prevents its active user from being in Engaged State, but Engaged is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge."
+      "reason": "Aerial prevents its active user from being in Engaged State, but the relation vocabulary has no precise prevents-state-entry edge."
     },
     {
       "sourceRecordId": "skill:climbing-plus",
@@ -1632,7 +1644,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "deferred",
-      "reason": "Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this trigger until Dead State and trigger semantics are canonically modeled."
+      "reason": "Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled."
     },
     {
       "sourceRecordId": "skill:frenzy",
@@ -1649,14 +1661,6 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label."
-    },
-    {
-      "sourceRecordId": "skill:impetuous",
-      "targetRecordId": "state:prone",
-      "relationType": "cancels-state",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Move, Jump, or Climb in the Impetuous Phase cancels Prone State and prevents re-entry at the end of the movement; materialize once Prone State is canonical and the prevention half can be represented precisely."
     },
     {
       "sourceRecordId": "skill:impetuous",
@@ -1689,6 +1693,79 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics."
+    }
+  ,
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "state:prone",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Impetuous movement now has the current cancels-state edge, but its additional prevention of Prone re-entry needs a dedicated prevents-state-entry relation."
+    },
+    {
+      "sourceRecordId": "state:engaged",
+      "targetRecordId": "rule:close-combat-declaration-set",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Engaged State restricts declarations to a specific Close Combat/Engaged set; model this only after a canonical declaration-set abstraction can preserve the whitelist semantics."
+    },
+    {
+      "sourceRecordId": "state:holoecho",
+      "targetRecordId": "rule:roll",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Holoecho State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges."
+    },
+    {
+      "sourceRecordId": "state:holomask",
+      "targetRecordId": "rule:roll",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "HoloMask State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges."
+    },
+    {
+      "sourceRecordId": "state:prone",
+      "targetRecordId": "rule:movement-label",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Prone halves movement from every Movement-labelled Skill and from failed Guts Rolls; use a generic Movement-label target instead of incomplete Move/Dodge-only edges."
+    },
+    {
+      "sourceRecordId": "state:possessed",
+      "targetRecordId": "hacking-program:total-control",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Total Control can cancel Possessed State for the owning player, but the Hacking Program is not yet a canonical rules identity in the maintained graph."
+    },
+    {
+      "sourceRecordId": "state:retreat",
+      "targetRecordId": "rule:retreat-situation",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Retreat! State is entered and canceled through the army-level Retreat! situation; retain the distinction until that situation is modeled canonically."
+    },
+    {
+      "sourceRecordId": "state:suppressive-fire",
+      "targetRecordId": "rule:face-to-face-roll",
+      "relationType": "imposes-modifiers-on",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition."
+    },
+    {
+      "sourceRecordId": "state:suppressive-fire",
+      "targetRecordId": "rule:loss-of-lieutenant",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Loss of Lieutenant cancels Suppressive Fire State, but the situation is not yet a canonical graph identity."
     }
   ]
 }

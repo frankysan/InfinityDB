@@ -13,6 +13,7 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 
 REPORT_FORMAT = "InfinityDB rules interaction review"
@@ -34,7 +35,12 @@ EXCLUDED_RECORD_KINDS = frozenset({"declaration-category"})
 REVIEW_STATUSES = frozenset({"pending", "reviewed", "inherited"})
 FUTURE_STATUSES = frozenset({"deferred", "planned", "blocked"})
 COMPLETE_STATUSES = frozenset({"reviewed", "inherited"})
-PRIMARY_CATALOGS = {"skills": "skill", "equipment": "equipment", "traits": "trait"}
+PRIMARY_CATALOGS = {
+    "skills": "skill",
+    "equipment": "equipment",
+    "traits": "trait",
+    "states": "state",
+}
 
 
 class RulesInteractionAuditError(ValueError):
@@ -120,6 +126,7 @@ def _catalog_scope_from_databases(
         rules.validate()
         skills = SkillCatalog(database, rules).list_skills()
         traits = TraitCatalog(database, rules).list_traits()
+        states = StateCatalog(rules).list_states()
         equipment: list[dict[str, str]] = []
         for item in database.list_catalog_items("equipment"):
             slug = database.application_slug("equipment", int(item["id"]))
@@ -147,6 +154,9 @@ def _catalog_scope_from_databases(
             "equipment": ordered(equipment),
             "traits": ordered(
                 [{"id": str(item["slug"]), "name": str(item["name"])} for item in traits]
+            ),
+            "states": ordered(
+                [{"id": str(item["slug"]), "name": str(item["name"])} for item in states]
             ),
         },
     }
@@ -568,14 +578,15 @@ def render_markdown(report: dict[str, Any]) -> str:
         "python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md",
         "```",
         "",
-        "The **0.7.0 progress gate is catalog-based**: every public Skill, Equipment item, and",
-        "Trait is listed, including entries that do not yet have a curated rules definition.",
+        "The **0.7.0 progress gate is catalog-based**: every public Skill, Equipment item,",
+        "Trait, and State is listed, including entries that do not yet have a curated rules",
+        "definition.",
         "A catalog item is complete only when its canonical rules identity exists and its",
         "outgoing interaction semantics have been reviewed. Missing rules definitions therefore",
         "remain visibly pending instead of disappearing from the denominator.",
         "",
-        "Exact source variants plus independently modeled Rule, State, Training, supporting",
-        "Trait, and curated Weapon identities are tracked separately as supporting semantics.",
+        "Exact source variants plus independently modeled Rule, Training, supporting Trait,",
+        "and curated Weapon identities are tracked separately as supporting semantics.",
         "Ordinary Weapon catalog rows are covered through their Skill/Trait behavior rather than",
         "audited one-by-one; a Weapon with its own curated rules definition remains in supporting",
         "review. `declaration-category` projection records are excluded.",

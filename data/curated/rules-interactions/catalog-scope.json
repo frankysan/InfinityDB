@@ -632,6 +632,104 @@
         "id": "zone-of-control-zc",
         "name": "Zone of Control (ZoC)"
       }
+    ],
+    "states": [
+      {
+        "id": "camouflaged",
+        "name": "Camouflaged State"
+      },
+      {
+        "id": "dead",
+        "name": "Dead State"
+      },
+      {
+        "id": "decoy",
+        "name": "Decoy State"
+      },
+      {
+        "id": "disconnected",
+        "name": "Disconnected State"
+      },
+      {
+        "id": "engaged",
+        "name": "Engaged State"
+      },
+      {
+        "id": "foxhole",
+        "name": "Foxhole State"
+      },
+      {
+        "id": "hidden-deployment",
+        "name": "Hidden Deployment State"
+      },
+      {
+        "id": "holoecho",
+        "name": "Holoecho State"
+      },
+      {
+        "id": "holomask",
+        "name": "HoloMask State"
+      },
+      {
+        "id": "immobilized-a",
+        "name": "Immobilized-A State"
+      },
+      {
+        "id": "immobilized-b",
+        "name": "Immobilized-B State"
+      },
+      {
+        "id": "impersonation-1",
+        "name": "Impersonation-1 State"
+      },
+      {
+        "id": "impersonation-2",
+        "name": "Impersonation-2 State"
+      },
+      {
+        "id": "isolated",
+        "name": "Isolated State"
+      },
+      {
+        "id": "normal",
+        "name": "Normal State"
+      },
+      {
+        "id": "possessed",
+        "name": "Possessed State"
+      },
+      {
+        "id": "prone",
+        "name": "Prone State"
+      },
+      {
+        "id": "retreat",
+        "name": "Retreat! State"
+      },
+      {
+        "id": "sepsitorized",
+        "name": "Sepsitorized State"
+      },
+      {
+        "id": "stunned",
+        "name": "Stunned State"
+      },
+      {
+        "id": "suppressive-fire",
+        "name": "Suppressive Fire State"
+      },
+      {
+        "id": "targeted",
+        "name": "Targeted State"
+      },
+      {
+        "id": "unconscious",
+        "name": "Unconscious State"
+      },
+      {
+        "id": "unloaded",
+        "name": "Unloaded State"
+      }
     ]
   }
 }

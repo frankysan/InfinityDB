@@ -154,11 +154,13 @@ requiring a new top-level browser surface in 0.7.0.
     Skill denominator is likewise rules-aware: six reviewed Army skill-like source entries
     are retained as source occurrences but excluded from the rules Skill catalog because they
     are Equipment, Training, an Attribute override, or a Team-Ops marker; zero-use canonical
-    `Non-Hackable` remains in scope. The current gate is 122/156 primary identities complete
-    (Skills 61/95, Equipment 28/28, Traits 33/33), leaving 34 missing Skill definitions.
-    Combat Jump, Decoy, Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and
-    Strategic Deployment now have canonical reviewed definitions; Decoy, Impersonation-1/2,
-    and Foxhole States are tracked as reviewed supporting identities. Berserk, Guard,
+    `Non-Hackable` remains in scope. States are now an explicit primary 0.7.0 domain rather
+    than supporting-only semantics: the complete current N5.3 State vocabulary is modeled as
+    24 canonical identities, with Impersonation intentionally split into IMP-1 and IMP-2.
+    The current gate is 146/180 primary identities complete (Skills 61/95, Equipment 28/28,
+    Traits 33/33, States 24/24), leaving 34 missing Skill definitions. Combat Jump, Decoy,
+    Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic Deployment now
+    have canonical reviewed definitions. Berserk, Guard,
     Neurocinetics, Total Reaction, and Triangulated Fire are also canonical reviewed
     definitions; the previously deferred TinBot: Neurocinetics and Armed Turret reuse edges
     are now current graph relationships. Aerial, Climbing Plus, Terrain, and Warhorse now
@@ -170,18 +172,20 @@ requiring a new top-level browser surface in 0.7.0.
     semantics remain explicitly deferred.
     `docs/rules-interaction-checklist.md` is generated from the maintained public-catalog
     scope, curated graph, and long-lived `data/curated/rules-interactions/reviews.json`
-    ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, and
-    Traits** catalogs, including catalog items that do not yet have a curated rules record;
-    exact source variants and independently modeled Rule/State/Training/Weapon identities
-    are tracked separately as supporting semantics. Ordinary Weapon rows are covered through
+    ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, Traits,
+    and States** catalogs, including catalog items that do not yet have a curated rules record;
+    exact source variants and independently modeled Rule/Training/Weapon identities are tracked
+    separately as supporting semantics. Ordinary Weapon rows are covered through
     their Skill/Trait semantics unless they have an independent curated rules definition.
     Known post-0.7.0 candidates remain in the same ledger so later releases inherit the
     research instead of rediscovering it. The 0.7.0 gate is reached when no primary catalog
     item or supporting identity targeted at 0.7.0 remains pending; future-targeted
     interactions do not block that release.
-  - [x] Promote reviewed Game States to a lightweight rules-backed catalog and model
-    Doctor/Engineer recovery with authored `cancels-state` edges, so Unconscious, Stunned,
-    Targeted, IMM-A/B, Isolated, and Disconnected expose reverse cancellation navigation.
+  - [x] Promote the complete current N5.3 Game State vocabulary to a rules-backed primary
+    catalog for 0.7.0. InfinityDB models 24 canonical State identities (the 23 State pages,
+    with Impersonation represented separately as IMP-1 and IMP-2) and interaction-reviews all
+    of them. State pages expose reverse navigation from cancellation, revelation, entry, and
+    other modeled edges without inferring a Unit's current in-game State from static Army data.
   - [x] Make Targeted State a bidirectional interaction hub: Forward Observer causes it,
     Reset cancels it (and IMM-B), and Targeted exposes the reviewed roll/declaration
     interactions with BS Attack, Discover, Reset, Cautious Movement, and Stealth.
@@ -354,6 +358,11 @@ may still ship here when it does not displace completeness work.
 
 The Milestone 2B inventory also records non-relationship presentation gaps for this
 release-hardening pass:
+
+- [ ] Add a global search field spanning **every database domain**, targeted at 0.9.x and
+  retained in the 1.0 scope if it slips. Each result must show its domain explicitly and link
+  to the correct domain-specific detail surface, so identical or similar names across domains
+  remain unambiguous.
 
 - [ ] Add a simple wiki-like internal-link syntax for **all maintained text fields**,
   tentatively targeted at 0.9.x but deferrable to 1.0 if completeness work takes
@@ -789,13 +798,9 @@ work against that contract.
     without presenting it as current N5 terminology. In particular, map historical
     official `Linkable` and community `pure Fireteam` usage to the current
     chart-eligibility / Fireteam-Level concepts with provenance-aware aliases/help.
-- [ ] Add a Game States reference catalog and contextual state links.
-  - [ ] Create cited state pages and link them from skills, equipment, weapon
-    traits, and future Fireteam guidance.
-  - [ ] Surface interactions that affect the existing UI's concepts, especially
-    marker forms, Hidden Deployment, Suppressive Fire, Isolated, Unconscious,
-    Possessed, and Peripherals; do not infer a unit's current in-game state
-    from its static Army profile.
+- [ ] Extend the completed Game States reference catalog with any remaining contextual
+  state links needed by later Fireteam, Hacking, weapon/ammunition, and scenario guidance;
+  do not infer a Unit's current in-game State from its static Army profile.
 - [ ] Add a weapon-and-ammunition quick-reference view built from existing
   weapon profiles plus curated rules data.
   - [ ] Normalize display of multi-mode/multi-ammunition profiles, link ammunition
