@@ -1232,10 +1232,12 @@ compatibility references remain unambiguous JSON integers.
   `declaration-category` records. They may classify Army Skills or Equipment while
   preserving the catalog domain of the referenced item.
 - The six maintained N5.3 categories are Automatic, Deployment, Basic Short Skill,
-  Short Skill, Long Skill, and ARO. Full Skill definitions use ordered `facts.typeIds`
-  so every Skill can carry multiple categories directly. Partial `declaration-category`
-  records retain singular `facts.typeId` with deterministic display order
-  10/20/30/40/50/60. `Entire Order` is not a seventh category.
+  Short Skill, Long Skill, and ARO. In the v7 contract, both full Skill definitions
+  and partial `declaration-category` records used singular `facts.typeId`; declaration
+  records additionally carried deterministic display order 10/20/30/40/50/60.
+  Curated v19 later moved full Skill definitions to ordered `facts.typeIds` while
+  retaining singular `facts.typeId` only for partial declarations. `Entire Order` is
+  not a seventh category.
 - The focused reconciliation corrected BS Attack/CC Attack/Dodge/Forward Observer,
   Doctor/Engineer, Cyberplug/Paramedic, Parachutist, Triangulated Fire, and Berserk, and
   added Equipment-domain Short Skill classifications for Deactivator, GizmoKit, and
