@@ -3517,10 +3517,10 @@
             }
         },
         {
-            "id": "declaration-category:basic-short-skill:p112",
+            "id": "declaration-category:short-skill:p112",
             "kind": "declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -3531,8 +3531,8 @@
                 ]
             },
             "facts": {
-                "typeId": "basic-short-skill",
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
@@ -3548,7 +3548,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-09-24"
             }
         },
         {
@@ -4042,41 +4042,6 @@
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 103
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "declaration-category:aro:p112",
-            "kind": "declaration-category",
-            "name": "ARO",
-            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "typeId": "aro",
-                "order": 60
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "sensor"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 112
                 }
             ],
             "review": {
@@ -6239,7 +6204,7 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["basic-short-skill", "aro"],
+                "typeIds": ["short-skill"],
                 "effects": [
                     "The user may make a Normal WIP+6 Roll to simultaneously Discover enemy Troopers, Weapons, or Equipment in Hidden Deployment or Camouflaged State inside the user's Zone of Control.",
                     "The Sensor Roll does not apply Range or Mimetism MODs and does not require LoF or a designated target.",
@@ -6272,7 +6237,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-09-24"
             },
             "relations": [
                 {

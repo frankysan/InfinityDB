@@ -1070,6 +1070,27 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert "plus 4 inches" in super_jump["effects"][1]
 
 
+def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:sensor"]["facts"]["typeIds"] == ["short-skill"]
+    sensor_declarations = [
+        record
+        for record in document["records"]
+        if record["kind"] == "declaration-category"
+        and any(
+            link == {"entity": "skill", "id": "sensor"}
+            for link in record.get("armyLinks", [])
+        )
+    ]
+    assert [
+        (record["facts"]["typeId"], record["facts"]["order"])
+        for record in sensor_declarations
+    ] == [("short-skill", 40)]
+
+
 def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

@@ -30,8 +30,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
   prerequisite so both participating Troopers must be non-Null.
 - Audit the expanded Skills layer against current N5.3 source material: correct missing
   labels and concise facts across newly exposed Common Skills and touched Special Skills,
-  and make rules-only Skill relation targets such as Reload navigate to their catalog
-  detail pages.
+  correct Sensor from Basic Short Skill / ARO to Short Skill, and make rules-only Skill
+  relation targets such as Reload navigate to their catalog detail pages.
 - Expand the Common and Special Skills reference with concise, source-cited
   requirements, effects, and restrictions, including rules-only Common Skills.
 - Expand Targeted State into a bidirectional interaction hub: Forward Observer now causes

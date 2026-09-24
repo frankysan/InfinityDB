@@ -1317,6 +1317,10 @@ Sources:
 
 **Classification:** source-native cross-rule and cross-state gameplay relationship semantics.
 
+Sensor is classified as a Short Skill in N5.3, not as a Basic Short Skill or ARO.
+InfinityDB therefore assigns only the `short-skill` declaration category to both the full
+Skill definition and its Army-linked fallback classification.
+
 Sensor interacts with several independent rules at once. Its Sensor Roll ignores Mimetism
 MODs, can Discover enemies in Camouflaged or Hidden Deployment State inside the user's
 Zone of Control, restricts enemies with Camouflage from regaining Camouflaged State in
