@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import re
 from copy import deepcopy
 from typing import Any
 
-from infinity_db.database.repository import Database
+from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
+
+_SIGNED_MODIFIER = re.compile(r"^(?P<base>.+?)\s*\((?P<modifier>[+-]\d+)\)$")
 
 
 def _record_slug(record: dict[str, Any]) -> str:
@@ -33,7 +36,7 @@ def _source_prefixes(record: dict[str, Any]) -> tuple[str, ...]:
 
 
 class TraitCatalog:
-    """Resolve Army trait labels through optional curated rules data."""
+    """Compose Army profile properties with the canonical Trait vocabulary."""
 
     def __init__(self, database: Database, rules_database: RulesDatabase | None) -> None:
         self.database = database
@@ -41,6 +44,8 @@ class TraitCatalog:
         self._records: list[dict[str, Any]] | None = None
         self._exact: dict[str, dict[str, Any]] | None = None
         self._prefixes: list[tuple[str, dict[str, Any]]] | None = None
+        self._labels: dict[str, dict[str, Any]] | None = None
+        self._modifier_bases: set[str] | None = None
 
     def _ensure_index(self) -> None:
         if self._records is not None:
@@ -64,9 +69,28 @@ class TraitCatalog:
             for prefix in _source_prefixes(record):
                 prefixes.append((prefix.casefold(), record))
         prefixes.sort(key=lambda item: len(item[0]), reverse=True)
+        labels: dict[str, dict[str, Any]] = {}
+        modifier_bases: set[str] = set()
+        if self.rules_database is not None:
+            for label in self.rules_database.current_labels():
+                key = accent_insensitive_key(label["name"])
+                existing = labels.get(key)
+                if existing is not None and existing["id"] != label["id"]:
+                    raise ValueError(
+                        f"Rules label {label['name']!r} resolves to multiple identities"
+                    )
+                labels[key] = label
+            for kind in ("skill", "equipment"):
+                for record in self.rules_database.composed_records_by_kind(kind):
+                    for label in [record["name"], *record.get("aliases", [])]:
+                        key = accent_insensitive_key(label)
+                        if key:
+                            modifier_bases.add(key)
         self._records = records
         self._exact = exact
         self._prefixes = prefixes
+        self._labels = labels
+        self._modifier_bases = modifier_bases
 
     def _record_for_label(self, label: object) -> dict[str, Any] | None:
         text = str(label or "").strip()
@@ -87,6 +111,24 @@ class TraitCatalog:
             raise ValueError(f"Trait label {text!r} matches multiple curated prefix identities")
         return matches[0]
 
+    def _non_trait_source_property(self, label: object) -> dict[str, str] | None:
+        """Classify known Army property text that is not a rules-native Trait."""
+        text = str(label or "").strip()
+        if not text or self.rules_database is None:
+            return None
+        self._ensure_index()
+        assert self._labels is not None
+        assert self._modifier_bases is not None
+        rules_label = self._labels.get(accent_insensitive_key(text))
+        if rules_label is not None:
+            return {"kind": "label", "name": str(rules_label["name"])}
+        modifier = _SIGNED_MODIFIER.fullmatch(text)
+        if modifier is not None:
+            base_key = accent_insensitive_key(modifier.group("base"))
+            if base_key in self._modifier_bases:
+                return {"kind": "modifier", "name": text}
+        return None
+
     def reference(self, label: object) -> dict[str, Any]:
         """Return the API reference for one raw Army trait label."""
         text = str(label or "").strip()
@@ -94,6 +136,13 @@ class TraitCatalog:
             return {"label": text, "name": None, "slug": None}
         record = self._record_for_label(text)
         if record is None:
+            non_trait = self._non_trait_source_property(text)
+            if non_trait is not None:
+                return {
+                    "label": text,
+                    "name": non_trait["name"],
+                    "slug": None,
+                }
             source = next(
                 (item for item in self.database.list_traits() if item["name"] == text),
                 None,
@@ -112,13 +161,33 @@ class TraitCatalog:
     def _trait_groups(self) -> list[dict[str, Any]]:
         groups: dict[str, dict[str, Any]] = {}
         usage = self.database.trait_usage_index()
+        self._ensure_index()
+        if self.rules_database is not None:
+            assert self._records is not None
+            for record in self._records:
+                slug = _record_slug(record)
+                groups[slug] = {
+                    "id": slug,
+                    "name": record["name"],
+                    "description": record["summary"],
+                    "source_traits": [],
+                    "source_items": set(),
+                    "rule": record,
+                }
         for source in self.database.list_traits():
             record = self._record_for_label(source["name"])
             if record is None:
+                if self._non_trait_source_property(source["name"]) is not None:
+                    continue
                 slug = source["id"]
                 name = source["name"]
                 description = None
                 rule = None
+                existing = groups.get(slug)
+                if existing is not None and existing["rule"] is not None:
+                    raise ValueError(
+                        f"Raw Army property {name!r} collides with curated Trait slug {slug!r}"
+                    )
             else:
                 slug = _record_slug(record)
                 name = record["name"]
@@ -144,7 +213,7 @@ class TraitCatalog:
         return sorted(result, key=lambda item: (item["name"].casefold(), item["id"]))
 
     def list_traits(self) -> list[dict[str, Any]]:
-        """Return raw Army traits grouped under curated identities when available."""
+        """Return canonical Traits plus unresolved raw properties when necessary."""
         return [
             {
                 "id": group["id"],

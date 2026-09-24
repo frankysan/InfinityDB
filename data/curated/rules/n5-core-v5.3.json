@@ -993,6 +993,9 @@
             "id": "trait:bs-weapon-ph",
             "kind": "trait",
             "name": "BS Weapon (PH)",
+            "aliases": [
+                "Throwing Weapon"
+            ],
             "summary": "Makes BS Attacks using PH instead of BS; BS rules and MODs affect PH instead.",
             "composition": {
                 "role": "definition"
@@ -1024,6 +1027,9 @@
             "id": "trait:bs-weapon-wip",
             "kind": "trait",
             "name": "BS Weapon (WIP)",
+            "aliases": [
+                "Technical Weapon"
+            ],
             "summary": "Makes BS Attacks using WIP instead of BS; BS rules and MODs affect WIP instead.",
             "composition": {
                 "role": "definition"

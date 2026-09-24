@@ -1525,7 +1525,7 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
-        """Return raw Army trait labels mapped to the catalog items that carry them."""
+        """Return raw Army profile properties mapped to the catalog items carrying them."""
         with self._connect() as connection:
             source_rows = connection.execute(
                 "SELECT catalog, source_item_id, application_item_id "
@@ -1569,7 +1569,7 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def list_traits(self) -> list[dict[str, Any]]:
-        """Return distinct raw Army trait labels carried by catalogued profiles."""
+        """Return distinct raw Army profile properties from the source trait bucket."""
         traits = []
         usage = self.trait_usage_index()
         slugs = assign_domain_slugs(
@@ -1588,7 +1588,7 @@ class Database:
 
     @instance_lru_cache(maxsize=128)
     def get_trait(self, item_slug: str) -> dict[str, Any] | None:
-        """Return one raw Army trait label with matching visible unit usage."""
+        """Return one raw Army profile property with matching visible unit usage."""
         trait = next((item for item in self.list_traits() if item["id"] == item_slug), None)
         if trait is None:
             return None

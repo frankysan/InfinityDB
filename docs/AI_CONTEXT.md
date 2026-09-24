@@ -64,10 +64,14 @@ and serves a read-only browser and same-origin HTTP API.
 - The separate rules-reference database is built from validated curated rules
   collections, not from raw PDFs or wiki snapshots.
 - Trait rule identity is owned by curated `trait` records in `rules.db`: Army
-  storage preserves raw trait labels/usage, and the application composes them
-  with curated canonical names, aliases, parameterized prefixes, summaries, and
-  citations. If `rules.db` is unavailable, raw traits remain usable without
-  invented canonical rule knowledge.
+  storage preserves raw profile-property labels/usage, but that source bucket is
+  not treated as the canonical Trait vocabulary. With `rules.db`, `TraitCatalog`
+  starts from all current curated Traits (including zero-use identities), folds
+  matching Army properties through canonical names/aliases/parameterized prefixes,
+  and keeps rules Labels plus generic signed Skill/Equipment modifier notation out
+  of Trait routes. Unresolved raw properties remain provisional. If `rules.db` is
+  unavailable, the raw source-derived catalog remains usable without invented
+  canonical rule knowledge.
 - `infinity_db.web` validates HTTP input, serializes repository results, and
   contains the native-module browser UI.
 - Read-only application/runtime imports must not pull build-time normalization or
@@ -915,10 +919,21 @@ compatibility references remain unambiguous JSON integers.
   duplicating curated rules identity into the Army database. Curated Traits already own
   stable typed IDs in `rules.db`; a simple `trait:<slug>` ID projects directly to the
   public Trait route and remains stable across display-name changes. Trait list/detail
-  payloads expose `slug` explicitly. Uncurated raw Traits use the complete Army Trait
+  payloads expose `slug` explicitly. Unresolved raw Army properties use the source-derived
   catalog's shared normalization/collision pass, and application cross-links must reuse
   that assigned slug rather than normalize individual labels independently. Qualified
   typed IDs are not flattened implicitly into route slugs.
+
+- 2026-09-24: The Army `metadata_weapons.properties` bucket is not a rules-native
+  Trait ontology. The reviewed snapshot mixes canonical Traits with rules Labels
+  (`Comms. Attack`, `No LoF`), generic modifier notation (`CC Attack (+3)`), and
+  legacy property spellings (`Technical Weapon`, `Throwing Weapon`). Rules-backed
+  Trait composition is therefore rooted in all 33 current curated Trait identities,
+  including zero-use Traits. Legacy spellings resolve through curated aliases to
+  `BS Weapon (WIP)` / `BS Weapon (PH)`; current Labels and signed modifiers remain
+  unlinked source properties; unknown raw properties retain provisional source
+  identities. The maintained 0.7.0 Trait interaction scope consequently measures
+  the 33 rules-native Traits rather than the raw Army property bucket.
 
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
@@ -1331,8 +1346,10 @@ compatibility references remain unambiguous JSON integers.
 - `data/curated/rules-interactions/catalog-scope.json` is the maintained public-catalog
   denominator for interaction-review progress. For 0.7.0 it contains all public Skills,
   Equipment items, and Traits, including identities without a curated rule definition. The
-  current baseline is 100 Skills, 28 Equipment items, and 33 Traits; the Skill count includes
-  88 Army application identities plus 12 rules-only Common Skills exposed by `SkillCatalog`.
+  current baseline is 100 Skills, 28 Equipment items, and 33 rules-native Traits; the Skill
+  count includes 88 Army application identities plus 12 rules-only Common Skills exposed by
+  `SkillCatalog`. The Trait denominator comes from current curated Trait identity rather than
+  treating the mixed Army `properties` bucket as a rules vocabulary.
   Refresh/validate this scope against the generated `infinity.db` + `rules.db` whenever the
   application catalog snapshot changes.
 - `data/curated/rules-interactions/reviews.json` is the maintained semantic review ledger. It

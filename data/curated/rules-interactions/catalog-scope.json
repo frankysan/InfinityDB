@@ -525,6 +525,14 @@
         "name": "Anti-materiel"
       },
       {
+        "id": "arm-0",
+        "name": "ARM = 0"
+      },
+      {
+        "id": "aro",
+        "name": "ARO"
+      },
+      {
         "id": "bioweapon",
         "name": "BioWeapon"
       },
@@ -541,20 +549,20 @@
         "name": "BS Weapon (WIP)"
       },
       {
+        "id": "bts-0",
+        "name": "BTS = 0"
+      },
+      {
+        "id": "burst-b",
+        "name": "Burst (B)"
+      },
+      {
         "id": "burst-single-target",
         "name": "Burst: Single Target"
       },
       {
         "id": "cc",
         "name": "CC"
-      },
-      {
-        "id": "cc-attack-3",
-        "name": "CC Attack (+3)"
-      },
-      {
-        "id": "comms-attack",
-        "name": "Comms. Attack"
       },
       {
         "id": "concealed",
@@ -597,10 +605,6 @@
         "name": "Intuitive Attack"
       },
       {
-        "id": "no-lof",
-        "name": "No LoF"
-      },
-      {
         "id": "non-lethal",
         "name": "Non-Lethal"
       },
@@ -611,6 +615,10 @@
       {
         "id": "perimeter",
         "name": "Perimeter"
+      },
+      {
+        "id": "prior-deployment",
+        "name": "Prior Deployment"
       },
       {
         "id": "reflective",
@@ -639,14 +647,6 @@
       {
         "id": "targetless",
         "name": "Targetless"
-      },
-      {
-        "id": "technical-weapon",
-        "name": "Technical Weapon"
-      },
-      {
-        "id": "throwing-weapon",
-        "name": "Throwing Weapon"
       },
       {
         "id": "zone-of-control-zc",

@@ -914,13 +914,31 @@ The current N5.3 Traits page defines 33 Traits. The curated N5 V5.3 rules file
 contains 33 `kind: "trait"` records with matching canonical names. Current Trait
 **identity/name coverage is therefore complete**.
 
-This finding is about vocabulary coverage, not full rules coverage. Attachment
+The Army metadata `properties` field is not equivalent to that rules-native Trait
+vocabulary. The reviewed snapshot includes `Comms. Attack` and `No LoF`, which are
+current Labels; `CC Attack (+3)`, which is generic modifier notation; and the legacy
+property spellings `Technical Weapon` / `Throwing Weapon`, whose current N5.3
+semantics are represented by `BS Weapon (WIP)` / `BS Weapon (PH)`. Conversely, current
+canonical Traits such as `ARM = 0`, `ARO`, `BTS = 0`, `Burst (B)`, and
+`Prior Deployment` may have no Army-profile occurrence in a particular snapshot.
+
+InfinityDB must therefore anchor the rules-backed Trait catalog in the curated current
+Trait vocabulary rather than treating `metadata_weapons.properties` as its ontology.
+Raw Army properties contribute usage through canonical names, curated aliases, and
+parameterized prefixes. Values that resolve to Labels or generic signed
+Skill/Equipment modifier notation remain source properties without acquiring a Trait
+route. Unresolved source properties remain visible provisionally rather than being
+discarded.
+
+This finding is about vocabulary/identity coverage, not full rules coverage. Attachment
 of Traits to every relevant Weapon/Equipment/Skill and all structured effect
 relationships still need validation during the later domain audits.
 
 Sources:
 
-- Wiki: <https://infinitythewiki.com/Traits>
+- Wiki Traits: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110>
+- Wiki Labels: <https://infinitythewiki.com/Labels>
+- Wiki Weapon Chart: <https://infinitythewiki.com/Weapon_Chart_N5>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 - Curated data: `data/curated/rules/n5-core-v5.3.json`
 

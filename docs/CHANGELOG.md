@@ -12,10 +12,13 @@ Entries describe meaningful release outcomes rather than detailed implementation
   360º Visor, BS Attack, and CC Attack dependencies while retaining Total Reaction and broad
   State interactions in the long-lived future queue where their targets or scope are not yet
   representable precisely.
-- Complete interaction review for all 28 currently defined public Traits and the five
-  defined supporting Trait rules; link BS Weapon (PH/WIP) to the BS Attacks they modify,
-  CC to CC Attack, and Non-Reloadable to Reload while retaining conditional ammunition,
-  Marker, Disposable, and exact BS Attack interactions in the long-lived future queue.
+- Complete interaction review for all 33 canonical N5.3 Traits and make the public Trait
+  catalog follow that rules-native vocabulary even when a Trait has no current Army usage.
+  Legacy Army property spellings now fold into BS Weapon (PH/WIP), while rules Labels and
+  signed Skill modifiers no longer appear as standalone Traits. Reviewed current graph edges
+  link BS Weapon (PH/WIP) to the BS Attacks they modify, CC to CC Attack, and Non-Reloadable
+  to Reload while conditional ammunition, Marker, Disposable, and exact BS Attack semantics
+  remain in the long-lived future queue.
 - Complete the interaction review for all 39 public Skills that currently have canonical rules
   definitions; review Forward Deployment, Limited Cover, Strategos, and Surprise Attack while
   retaining the selective Partial Cover, generic Face to Face Roll, and broader Marker-form

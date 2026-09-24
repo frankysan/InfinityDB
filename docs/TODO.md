@@ -147,6 +147,10 @@ requiring a new top-level browser surface in 0.7.0.
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.
   - [ ] Complete the maintained outgoing-interaction review checklist for 0.7.0.
+    The canonical Trait portion is complete at 33/33. `TraitCatalog` now roots the
+    rules-backed catalog in the current curated Trait vocabulary instead of the mixed
+    Army `properties` bucket, so zero-use canonical Traits remain in scope while Labels,
+    generic signed modifiers, and reviewed legacy spellings are classified correctly.
     `docs/rules-interaction-checklist.md` is generated from the maintained public-catalog
     scope, curated graph, and long-lived `data/curated/rules-interactions/reviews.json`
     ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, and

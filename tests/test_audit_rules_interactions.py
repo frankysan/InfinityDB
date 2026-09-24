@@ -34,9 +34,9 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 161,
-        "complete": 95,
-        "pending": 66,
-        "percentComplete": 59.0,
+        "complete": 100,
+        "pending": 61,
+        "percentComplete": 62.1,
         "catalogs": {
             "skills": {
                 "total": 100,
@@ -56,16 +56,16 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
             "traits": {
                 "total": 33,
-                "complete": 28,
-                "pending": 5,
-                "defined": 28,
-                "missingRuleDefinition": 5,
-                "percentComplete": 84.8,
+                "complete": 33,
+                "pending": 0,
+                "defined": 33,
+                "missingRuleDefinition": 0,
+                "percentComplete": 100.0,
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 39
-    assert report["summary"]["supporting"]["complete"] == 39
+    assert report["summary"]["supporting"]["total"] == 34
+    assert report["summary"]["supporting"]["complete"] == 34
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -86,7 +86,16 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert primary["skill:aerial"]["recordDefined"] is False
     assert primary["trait:cc"]["status"] == "reviewed"
     assert primary["trait:non-reloadable"]["status"] == "reviewed"
-    assert primary["trait:cc-attack-3"]["recordDefined"] is False
+    assert primary["trait:arm-0"]["status"] == "reviewed"
+    assert primary["trait:aro"]["status"] == "reviewed"
+    assert primary["trait:bts-0"]["status"] == "reviewed"
+    assert primary["trait:burst-b"]["status"] == "reviewed"
+    assert primary["trait:prior-deployment"]["status"] == "reviewed"
+    assert "trait:cc-attack-3" not in primary
+    assert "trait:comms-attack" not in primary
+    assert "trait:no-lof" not in primary
+    assert "trait:technical-weapon" not in primary
+    assert "trait:throwing-weapon" not in primary
 
     items = {item["id"]: item for item in report["items"]}
     assert "declaration-category:skill:74:automatic" not in items
@@ -177,7 +186,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
 
     expected = render_markdown(report)
-    assert "Skill **39/100**; Equipment **28/28**; Trait **28/33**" in expected
+    assert "Skill **39/100**; Equipment **28/28**; Trait **33/33**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -196,8 +205,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 95/161 complete" in output
-    assert "66 pending" in output
+    assert "0.7.0 primary catalog: 100/161 complete" in output
+    assert "61 pending" in output
     assert "0 supporting identities pending" in output
 
 

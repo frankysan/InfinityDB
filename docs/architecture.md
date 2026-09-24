@@ -708,13 +708,18 @@ Traits share the public slug grammar and fail-closed collision policy but intent
 do not duplicate their canonical identity in `application_domain_slugs`. Curated Trait
 identity is already owned by `rules.db` as a stable typed ID of the form `trait:<slug>`;
 that single slug segment is therefore the canonical public route projection and remains
-stable when the curated display name changes. Trait list/detail payloads expose it
-explicitly as `slug`. Raw Army Traits without a curated record retain only a provisional
-source-derived identity: the Army Trait catalog assigns their slug across the complete
-raw Trait set with the shared collision checker, and cross-links are emitted only when
-that catalog actually assigned the label a slug. Application code must not independently
-normalize an arbitrary Trait label into a link, because that would bypass collision
-resolution and create a parallel identity scheme.
+stable when the curated display name changes. With a valid rules database, the public
+Trait catalog is rooted in the complete current curated Trait vocabulary, including
+canonical Traits with zero Army usage. Raw Army `metadata_weapons.properties` values
+then contribute usage to those identities through canonical names, exact curated aliases,
+and parameterized source prefixes. That source field is not itself treated as an
+authoritative Trait vocabulary: values that resolve to current rules Labels or to generic
+signed Skill/Equipment modifier notation remain source-profile properties and do not
+create Trait routes. Unresolved raw properties retain a provisional source-derived
+identity rather than being silently discarded. Without `rules.db`, the Army Trait catalog
+remains source-driven and usable. Application code must not independently normalize an
+arbitrary property label into a canonical Trait link, because that would bypass curated
+identity and collision resolution.
 
 The current reviewed 2026-09-18 snapshot resolves all initial registry candidates:
 57 Armies, 737 logical Units, 88 Skills, 28 Equipment items, and 132 Weapons
@@ -1298,13 +1303,16 @@ details additionally include metadata weapon profiles, such as ammunition,
 traits, and range data, when present in the supplied metadata snapshot.
 Metadata weapon/equipment profiles retain the raw `traits` value. The application
 composition layer also exposes `trait_references`: each reference preserves the
-raw `label` and, when a matching curated trait record is available in `rules.db`,
-adds that record's canonical `name` and stable trait-catalog `slug`. Exact source
+raw `label` and, when a matching curated Trait record is available in `rules.db`,
+adds that record's canonical `name` and stable Trait-catalog `slug`. Exact source
 aliases/misspellings and parameterized source-label prefixes are curated rule
-data rather than Python tables. Without a valid `rules.db`, raw Army trait labels
-remain browsable and linkable but no curated canonicalization or summary is
-invented. Browser rendering consumes these backend-derived references and does
-not canonicalize trait text or generate trait slugs independently.
+data rather than Python tables. Raw properties that instead match the curated
+Labels vocabulary, or generic signed modifier notation for a known Skill/Equipment,
+remain visible source text but receive no Trait slug. Without a valid `rules.db`,
+raw Army property labels remain browsable and linkable but no curated
+canonicalization or summary is invented. Browser rendering consumes these
+backend-derived references and does not canonicalize property text or generate
+Trait slugs independently.
 
 Skill list/detail responses obtain declaration categories from current curated
 `declaration-category` records in `rules.db`. Equipment detail responses use the same
@@ -1314,10 +1322,12 @@ other curated records remain available through that field. If rules data is unav
 or a Skill has no curated declaration, the Skill API reports an uncited `Unclassified`
 category; Equipment has no invented fallback.
 
-`GET /api/traits` returns the shared-traits catalog composed from raw Army usage
-and optional current curated trait records. `GET /api/traits/{slug}` returns a
-trait's usage grouped across skills, equipment, and weapons; when curated rules
-are available it also includes the cited rule record and its concise summary.
+`GET /api/traits` returns the canonical current Trait vocabulary from `rules.db`
+when available, enriched with matching raw Army usage; canonical zero-use Traits remain
+visible. If no rules database is supplied, the endpoint falls back to the raw Army
+property-derived catalog. `GET /api/traits/{slug}` returns a Trait's usage grouped across
+skills, equipment, and weapons and, for a curated identity, its cited rule record and
+concise summary.
 
 Future implementation work is tracked in `docs/TODO.md`; this document records
 current architecture and clearly labeled lasting design direction rather than

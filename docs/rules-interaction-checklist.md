@@ -21,9 +21,9 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 95/161 complete (59.0%), 66 pending.**
-- Primary domains: Skill **39/100**; Equipment **28/28**; Trait **28/33**.
-- Supporting semantic identities: **39/39** complete, **0** pending.
+- **0.7.0 primary catalog: 100/161 complete (62.1%), 61 pending.**
+- Primary domains: Skill **39/100**; Equipment **28/28**; Trait **33/33**.
+- Supporting semantic identities: **34/34** complete, **0** pending.
 - Current authored outgoing relations: **120**.
 - Explicitly tracked future/deferred interactions: **64**.
 
@@ -367,9 +367,13 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → Discover (`skill:discover`)
   - `modifies-rolls-for` → Suppressive Fire (`skill:suppressive-fire`)
 
-### Trait (28/33)
+### Trait (33/33)
 
 - [x] **Anti-materiel** (`trait:anti-materiel`) — reviewed
+  - outgoing: none
+- [x] **ARM = 0** (`trait:arm-0`) — reviewed
+  - outgoing: none
+- [x] **ARO** (`trait:aro`) — reviewed
   - outgoing: none
 - [x] **BioWeapon** (`trait:bioweapon`) — reviewed
   - outgoing: none
@@ -384,14 +388,14 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
   - future [post-0.7.0; planned]: `restricts-use-of` → `skill:bs-attack-guided` — BS Attack (Guided) cannot use weapons with the BS Weapon (WIP) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
   - future [post-0.7.0; planned]: `restricts-use-of` → `skill:bs-attack-shock` — The BS Weapon (WIP) Trait explicitly prevents use with BS Attack (Shock); retain the restriction until that exact BS Attack form has a canonical rules identity.
+- [x] **BTS = 0** (`trait:bts-0`) — reviewed
+  - outgoing: none
+- [x] **Burst (B)** (`trait:burst-b`) — reviewed
+  - outgoing: none
 - [x] **Burst: Single Target** (`trait:burst-single-target`) — reviewed
   - outgoing: none
 - [x] **CC** (`trait:cc`) — reviewed
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
-- [ ] **CC Attack (+3)** (`trait:cc-attack-3`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Comms. Attack** (`trait:comms-attack`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Concealed** (`trait:concealed`) — reviewed
   - `uses-effects-of` → Camouflaged State (`state:camouflaged`)
 - [x] **Continuous Damage** (`trait:continuous-damage`) — reviewed
@@ -415,8 +419,6 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge.
 - [x] **Intuitive Attack** (`trait:intuitive-attack`) — reviewed
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
-- [ ] **No LoF** (`trait:no-lof`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Non-Lethal** (`trait:non-lethal`) — reviewed
   - outgoing: none
 - [x] **Non-Reloadable** (`trait:non-reloadable`) — reviewed
@@ -424,6 +426,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Perimeter** (`trait:perimeter`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Place Deployable (`skill:place-deployable`) — Perimeter changes Place Deployable placement behavior rather than enabling the Skill; the current relation vocabulary has no precise modifier edge.
+- [x] **Prior Deployment** (`trait:prior-deployment`) — reviewed
+  - outgoing: none
 - [x] **Reflective** (`trait:reflective`) — reviewed
   - `applies-effects-to` → Multispectral Visor (`equipment:multispectral-visor`)
   - `applies-effects-to` → Marksmanship (`skill:marksmanship`)
@@ -439,10 +443,6 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Targetless** (`trait:targetless`) — reviewed
   - outgoing: none
-- [ ] **Technical Weapon** (`trait:technical-weapon`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Throwing Weapon** (`trait:throwing-weapon`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Zone of Control (ZoC)** (`trait:zone-of-control-zc`) — reviewed
   - outgoing: none
 
@@ -543,19 +543,6 @@ review. `declaration-category` projection records are excluded.
 - [x] **Irregular** (`training:irregular`) — reviewed
   - outgoing: none
 - [x] **Regular** (`training:regular`) — reviewed
-  - outgoing: none
-
-#### Trait (5/5)
-
-- [x] **ARM = 0** (`trait:arm-0`) — reviewed
-  - outgoing: none
-- [x] **ARO** (`trait:aro`) — reviewed
-  - outgoing: none
-- [x] **BTS = 0** (`trait:bts-0`) — reviewed
-  - outgoing: none
-- [x] **Burst (B)** (`trait:burst-b`) — reviewed
-  - outgoing: none
-- [x] **Prior Deployment** (`trait:prior-deployment`) — reviewed
   - outgoing: none
 
 #### Weapon (1/1)

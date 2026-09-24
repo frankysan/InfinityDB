@@ -2490,18 +2490,23 @@ and the current application slug for the Army item being enriched. The maintaine
 collection prefers slugs so links survive source-ID churn and remain human-readable.
 
 Trait identity is one implemented example of that composition boundary. Army
-metadata stores raw trait labels and usage, while current curated `trait` records
-own canonical names, aliases/misspellings, parameterized source-label prefixes,
-concise summaries, citations, and stable typed IDs such as
-`trait:continuous-damage`. For a route-backed curated Trait, the single slug segment
-after `trait:` is also its public route slug; the display name is not used to regenerate
-that identity. Trait API payloads expose this route value explicitly as `slug`. Raw
-Traits that lack curated identity use the Army Trait catalog's shared domain-slug
-normalization/collision pass and remain provisional rather than being copied into the
-application-domain slug registry. Cross-links to raw Traits are emitted only from that
-resolved catalog identity, never by independently normalizing an arbitrary label. The
-application joins Army and rules sources at read time; the Army database does not copy
-curated Trait knowledge into its snapshot.
+metadata stores raw weapon/profile property labels and usage, while current curated
+`trait` records own the authoritative rules-native Trait vocabulary, canonical names,
+aliases/misspellings, parameterized source-label prefixes, concise summaries, citations,
+and stable typed IDs such as `trait:continuous-damage`. With `rules.db`, Trait list/detail
+composition starts from every current curated Trait record, including zero-use identities,
+and then folds matching Army properties into those records. The Army `properties` bucket
+is intentionally not treated as a pure Trait vocabulary: current rules Labels and generic
+signed Skill/Equipment modifier notation remain raw profile properties without acquiring a
+Trait identity, while reviewed legacy spellings can resolve through curated Trait aliases.
+For a route-backed curated Trait, the single slug segment after `trait:` is also its public
+route slug; the display name is not used to regenerate that identity. Unresolved raw
+properties use the Army Trait catalog's shared domain-slug normalization/collision pass and
+remain provisional rather than being copied into the application-domain slug registry.
+Cross-links to unresolved properties are emitted only from that resolved source catalog
+identity, never by independently normalizing an arbitrary label. Without `rules.db`, the
+source-derived catalog remains available. The application joins Army and rules sources at
+read time; the Army database does not copy curated Trait knowledge into its snapshot.
 
 Declaration categories are another application-level composition. Army-derived Skill
 and Equipment usage remain source data. Full curated Skill definitions carry their

@@ -110,17 +110,17 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 37
-    assert report["summary"]["completeCount"] == 35
+    assert report["summary"]["exposedCount"] == 70
+    assert report["summary"]["completeCount"] == 68
     assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
         "stale_citation_source": 1,
-        "unresolved_related_item_link": 5,
+        "unresolved_related_item_link": 3,
     }
-    assert report["summary"]["classifiedGapCount"] == 7
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 7}
-    assert report["summary"]["releaseBlockerCount"] == 7
+    assert report["summary"]["classifiedGapCount"] == 5
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 5}
+    assert report["summary"]["releaseBlockerCount"] == 5
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -147,16 +147,14 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []
 
-    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 5
+    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 3
     assert report["summary"]["supportingRelationTargetCount"] == 0
     assert {
         item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
     } == {
-        "trait:disposable-x",
-        "trait:deployable",
-        "trait:non-reloadable",
-        "trait:perimeter",
+        "equipment:multispectral-visor",
         "equipment:360o-visor",
+        "skill:marksmanship",
     }
     assert report["relationCoverage"]["supporting"] == []
 
@@ -230,9 +228,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 6,
+        "release-blocker": 4,
     }
-    assert report["summary"]["releaseBlockerCount"] == 6
+    assert report["summary"]["releaseBlockerCount"] == 4
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:

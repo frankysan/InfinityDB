@@ -835,6 +835,28 @@ class RulesDatabase:
             self._attach_reverse_relations(connection, records)
             return records
 
+    def current_labels(self) -> list[dict[str, Any]]:
+        """Return labels from current rules collections with provenance."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.id, l.name, l.description, l.collection_id, "
+                "c.title AS collection_title "
+                "FROM labels AS l JOIN collections AS c ON c.id = l.collection_id "
+                "WHERE c.status = 'current' ORDER BY l.collection_id, l.id"
+            ).fetchall()
+            return [
+                {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "description": row["description"],
+                    "collection": {
+                        "id": row["collection_id"],
+                        "title": row["collection_title"],
+                    },
+                }
+                for row in rows
+            ]
+
     def relations_for_record(
         self, record_id: str, *, current_only: bool = True
     ) -> list[dict[str, Any]]:

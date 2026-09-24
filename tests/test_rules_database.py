@@ -81,6 +81,11 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
 
     assert len(traits) == 33
     assert traits["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
+    assert traits["trait:bs-weapon-ph"]["aliases"] == ["Throwing Weapon"]
+    assert traits["trait:bs-weapon-wip"]["aliases"] == ["Technical Weapon"]
+    labels = {label["id"]: label for label in database.current_labels()}
+    assert labels["comms-attack"]["name"] == "Comms Attack"
+    assert labels["no-lof"]["name"] == "No LoF"
     assert traits["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
         "Disposable ("
     ]

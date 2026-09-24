@@ -591,6 +591,8 @@ def test_checked_in_n5_collection_is_valid() -> None:
         {"type": "reveals-state", "recordId": "state:camouflaged"}
     ]
     assert records["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
+    assert records["trait:bs-weapon-ph"]["aliases"] == ["Throwing Weapon"]
+    assert records["trait:bs-weapon-wip"]["aliases"] == ["Technical Weapon"]
     assert records["trait:concealed"]["relations"] == [
         {"type": "uses-effects-of", "recordId": "state:camouflaged"}
     ]

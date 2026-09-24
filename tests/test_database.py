@@ -583,6 +583,75 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     assert detail["rules"][0]["citations"][0]["heading"] == "Continuous Damage"
 
 
+def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Source Properties",
+            "properties": [
+                "Technical Weapon",
+                "Throwing Weapon",
+                "Comms. Attack",
+                "No LoF",
+                "CC Attack (+3)",
+            ],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    assert catalog.reference("Technical Weapon") == {
+        "label": "Technical Weapon",
+        "name": "BS Weapon (WIP)",
+        "slug": "bs-weapon-wip",
+    }
+    assert catalog.reference("Throwing Weapon") == {
+        "label": "Throwing Weapon",
+        "name": "BS Weapon (PH)",
+        "slug": "bs-weapon-ph",
+    }
+    assert catalog.reference("Comms. Attack") == {
+        "label": "Comms. Attack",
+        "name": "Comms Attack",
+        "slug": None,
+    }
+    assert catalog.reference("No LoF") == {
+        "label": "No LoF",
+        "name": "No LoF",
+        "slug": None,
+    }
+    assert catalog.reference("CC Attack (+3)") == {
+        "label": "CC Attack (+3)",
+        "name": "CC Attack (+3)",
+        "slug": None,
+    }
+
+    traits = {item["id"]: item for item in catalog.list_traits()}
+    assert len(traits) == 33
+    assert "technical-weapon" not in traits
+    assert "throwing-weapon" not in traits
+    assert "comms-attack" not in traits
+    assert "no-lof" not in traits
+    assert "cc-attack-3" not in traits
+    assert traits["arm-0"]["use_count"] == 0
+    assert traits["bs-weapon-ph"]["use_count"] == 1
+    assert traits["bs-weapon-wip"]["use_count"] == 1
+
+    arm_zero = catalog.get_trait("arm-0")
+    assert arm_zero is not None
+    assert arm_zero["variants"] == []
+    assert arm_zero["rules"][0]["id"] == "trait:arm-0"
+
 def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     tmp_path: Path, normalized: dict
 ) -> None:
