@@ -53,6 +53,7 @@ const relationGroupOrder = [
       "ignores-modifiers-from",
       "negates-effects-of",
       "overrides-effects-of",
+      "prevents-state-entry",
       "reduces-modifiers-from",
       "restricts-use-of",
       "reveals-state",
@@ -83,12 +84,21 @@ const relationLabels = {
     outbound: "Modifies rolls for",
     inbound: "Rolls modified by",
   },
+  "modifies-use-of": { outbound: "Modifies use of", inbound: "Use modified by" },
+  "prevents-state-entry": {
+    outbound: "Prevents state entry",
+    inbound: "State entry prevented by",
+  },
   "reveals-state": { outbound: "Reveals state", inbound: "Revealed by" },
   "reduces-modifiers-from": {
     outbound: "Reduces MODs from",
     inbound: "MODs reduced by",
   },
   "restricts-use-of": { outbound: "Restricts use of", inbound: "Use restricted by" },
+  "triggered-by-state-entry": {
+    outbound: "Triggered by entering",
+    inbound: "State entry triggers",
+  },
   "uses-effects-of": { outbound: "Uses effects of", inbound: "Effects used by" },
 };
 

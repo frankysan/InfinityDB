@@ -14,7 +14,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 19,
+        "formatVersion": CURATED_FORMAT_VERSION,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -561,7 +561,8 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["state:camouflaged"]["labelIds"] == ["marker"]
     assert records["state:camouflaged"]["review"]["status"] == "reviewed"
     assert records["state:camouflaged"]["relations"] == [
-        {"type": "enables-use-of", "recordId": "skill:surprise-attack"}
+        {"type": "enables-use-of", "recordId": "skill:surprise-attack"},
+        {"type": "restricts-use-of", "recordId": "skill:place-deployable"},
     ]
     assert records["skill:camouflage"]["kind"] == "skill"
     assert records["skill:camouflage"]["review"]["status"] == "reviewed"
@@ -1244,6 +1245,8 @@ def test_checked_in_n5_collection_models_mobility_environment_skill_slice() -> N
         {"type": "restricts-use-of", "recordId": "skill:cautious-movement"},
         {"type": "restricts-use-of", "recordId": "skill:guard"},
         {"type": "negates-effects-of", "recordId": "trait:boost"},
+        {"type": "prevents-state-entry", "recordId": "state:prone"},
+        {"type": "prevents-state-entry", "recordId": "state:engaged"},
     ]
     assert records["skill:climbing-plus"]["relations"] == [
         {"type": "uses-effects-of", "recordId": "skill:climb"},
@@ -1251,7 +1254,10 @@ def test_checked_in_n5_collection_models_mobility_environment_skill_slice() -> N
         {"type": "applies-effects-to", "recordId": "skill:dodge"},
     ]
     assert "relations" not in records["skill:terrain"]
-    assert "relations" not in records["skill:warhorse"]
+    assert records["skill:warhorse"]["relations"] == [
+        {"type": "negates-effects-of", "recordId": "rule:loss-of-lieutenant"},
+        {"type": "prevents-state-entry", "recordId": "state:isolated"},
+    ]
 
 
 def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> None:
@@ -1344,6 +1350,26 @@ def test_checked_in_n5_collection_models_profile_runtime_identity_skill_slice() 
     assert "relations" not in records["skill:transmutation"]
 
 
+def test_checked_in_n5_collection_models_final_semantic_link_cleanup() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:super-jump"]["relations"] == [
+        {"type": "modifies-use-of", "recordId": "skill:jump"}
+    ]
+    assert records["trait:perimeter"]["relations"] == [
+        {"type": "modifies-use-of", "recordId": "skill:place-deployable"}
+    ]
+    assert records["trait:non-lethal"]["relations"] == [
+        {"type": "restricts-use-of", "recordId": "skill:immunity"}
+    ]
+    assert records["skill:explode"]["relations"] == [
+        {"type": "enters-state", "recordId": "state:dead"},
+        {"type": "triggered-by-state-entry", "recordId": "state:unconscious"},
+    ]
+
+
 def test_checked_in_n5_collection_models_hacker_core_skill() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
@@ -1357,7 +1383,9 @@ def test_checked_in_n5_collection_models_hacker_core_skill() -> None:
     assert "Hacking Device" in effects
     assert "Upgrade Programs" in effects
     assert "Null State" in effects
-    assert "relations" not in hacker
+    assert hacker["relations"] == [
+        {"type": "enables-use-of", "recordId": "equipment:hacking-device"}
+    ]
 
 
 def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
@@ -1393,6 +1421,7 @@ def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
         {"type": "cancels-state", "recordId": "state:prone"},
         {"type": "cancels-state", "recordId": "state:holoecho"},
         {"type": "cancels-state", "recordId": "state:holomask"},
+        {"type": "prevents-state-entry", "recordId": "state:prone"},
     ]
     assert "relations" not in records["skill:religious-troop"]
 
@@ -1636,6 +1665,7 @@ def test_checked_in_n5_collection_models_remaining_catalog_equipment_slice() -> 
         {"type": "restricts-use-of", "recordId": "skill:climb"},
         {"type": "restricts-use-of", "recordId": "skill:jump"},
         {"type": "restricts-use-of", "recordId": "skill:cautious-movement"},
+        {"type": "prevents-state-entry", "recordId": "state:prone"},
     ]
     assert records["equipment:ai-motorcycle"]["relations"] == [
         {"type": "uses-effects-of", "recordId": "equipment:motorcycle"},

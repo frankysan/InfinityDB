@@ -2020,6 +2020,11 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
         in body
     )
     assert b'"enables-use-of": { outbound: "Enables use of", inbound: "Enabled by" }' in body
+    assert b'"modifies-use-of": { outbound: "Modifies use of", inbound: "Use modified by" }' in body
+    assert b'outbound: "Prevents state entry"' in body
+    assert b'inbound: "State entry prevented by"' in body
+    assert b'outbound: "Triggered by entering"' in body
+    assert b'inbound: "State entry triggers"' in body
     assert b'"uses-effects-of": { outbound: "Uses effects of", inbound: "Effects used by" }' in body
     assert b'const labels = relationLabels[relation.type]' in body
     assert b"citation.source_url" in body

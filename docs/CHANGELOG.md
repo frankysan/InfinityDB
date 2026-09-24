@@ -7,6 +7,13 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Promote the remaining catalog-to-catalog interactions that require only semantic links,
+  adding precise relationships for State-entry prevention, Skill-use modification, and
+  State-entry triggers. This makes Super-Jump/Jump, Perimeter/Place Deployable,
+  Motorcycle/Aerial/Warhorse/Impetuous State restrictions, Explode/Unconscious,
+  Camouflaged placement restrictions, Non-Lethal/Immunity, Hacker/Hacking Device, and
+  Warhorse/Loss of Lieutenant navigable from the existing rules surfaces without adding
+  new catalog domains.
 - Add the reviewed Hacker rule and complete the 0.7.0 catalog interaction-review gate. Preserve
   Hacking Device, direct Program, Upgrade Program, and Null-State semantics without inventing
   fixed Program-set edges, and keep Commlink visible as an explicit Reinforcements-scoped release

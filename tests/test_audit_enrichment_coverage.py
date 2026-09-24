@@ -116,11 +116,11 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
         "stale_citation_source": 1,
-        "unresolved_related_item_link": 7,
+        "unresolved_related_item_link": 8,
     }
-    assert report["summary"]["classifiedGapCount"] == 9
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 9}
-    assert report["summary"]["releaseBlockerCount"] == 9
+    assert report["summary"]["classifiedGapCount"] == 10
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 10}
+    assert report["summary"]["releaseBlockerCount"] == 10
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -148,12 +148,13 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []
 
-    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 7
+    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 8
     assert report["summary"]["supportingRelationTargetCount"] == 10
     assert {
         item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
     } == {
         "equipment:gizmokit",
+        "equipment:hacking-device",
         "equipment:medikit",
         "equipment:multispectral-visor",
         "equipment:360o-visor",
@@ -243,9 +244,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 8,
+        "release-blocker": 9,
     }
-    assert report["summary"]["releaseBlockerCount"] == 8
+    assert report["summary"]["releaseBlockerCount"] == 9
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:

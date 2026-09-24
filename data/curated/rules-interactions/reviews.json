@@ -1260,22 +1260,6 @@
   ],
   "futureInteractions": [
     {
-      "sourceRecordId": "skill:super-jump",
-      "targetRecordId": "skill:jump",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge."
-    },
-    {
-      "sourceRecordId": "trait:perimeter",
-      "targetRecordId": "skill:place-deployable",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Perimeter changes Place Deployable placement behavior rather than enabling the Skill; the current relation vocabulary has no precise modifier edge."
-    },
-    {
       "sourceRecordId": "hacking-program:white-noise",
       "targetRecordId": "skill:marksmanship",
       "relationType": null,
@@ -1322,14 +1306,6 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first."
-    },
-    {
-      "sourceRecordId": "skill:place-deployable",
-      "targetRecordId": "state:camouflaged",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable."
     },
     {
       "sourceRecordId": "skill:stealth",
@@ -1514,14 +1490,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:motorcycle",
-      "targetRecordId": "state:prone",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Motorcycle prevents its mounted user from entering Prone State; the current relation vocabulary has no precise state-entry restriction edge."
     },
     {
       "sourceRecordId": "equipment:tinbot-firewall",
@@ -1717,22 +1685,6 @@
         "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
     },
     {
-      "sourceRecordId": "skill:aerial",
-      "targetRecordId": "state:prone",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Aerial prevents its active user from being in Prone State, but the relation vocabulary has no precise prevents-state-entry edge."
-    },
-    {
-      "sourceRecordId": "skill:aerial",
-      "targetRecordId": "state:engaged",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Aerial prevents its active user from being in Engaged State, but the relation vocabulary has no precise prevents-state-entry edge."
-    },
-    {
       "sourceRecordId": "skill:climbing-plus",
       "targetRecordId": "rule:partial-cover",
       "relationType": null,
@@ -1766,27 +1718,11 @@
     },
     {
       "sourceRecordId": "skill:warhorse",
-      "targetRecordId": "rule:loss-of-lieutenant",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity."
-    },
-    {
-      "sourceRecordId": "skill:warhorse",
       "targetRecordId": "rule:retreat",
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities."
-    },
-    {
-      "sourceRecordId": "skill:warhorse",
-      "targetRecordId": "state:isolated",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Warhorse prevents the user from entering Isolated State; the State exists, but the current relation vocabulary does not have a precise prevents-state edge."
     },
     {
       "sourceRecordId": "skill:warhorse",
@@ -1878,14 +1814,6 @@
     }
   ,
     {
-      "sourceRecordId": "skill:impetuous",
-      "targetRecordId": "state:prone",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Impetuous movement now has the current cancels-state edge, but its additional prevention of Prone re-entry needs a dedicated prevents-state-entry relation."
-    },
-    {
       "sourceRecordId": "state:engaged",
       "targetRecordId": "rule:close-combat-declaration-set",
       "relationType": null,
@@ -1940,14 +1868,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition."
-    },
-    {
-      "sourceRecordId": "state:suppressive-fire",
-      "targetRecordId": "rule:loss-of-lieutenant",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Loss of Lieutenant cancels Suppressive Fire State, but the situation is not yet a canonical graph identity."
     },
     {
       "sourceRecordId": "skill:dogged",
@@ -2175,14 +2095,6 @@
     },
     {
       "sourceRecordId": "skill:explode",
-      "targetRecordId": "state:unconscious",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Explode is triggered specifically by entering Unconscious State; the current graph has no state-entry trigger/precondition relation and an unconditional State edge would misstate the timing."
-    },
-    {
-      "sourceRecordId": "skill:explode",
       "targetRecordId": "ammunition:shock",
       "relationType": "uses-effects-of",
       "targetRelease": "post-0.7.0",
@@ -2212,14 +2124,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity."
-    },
-    {
-      "sourceRecordId": "skill:immunity",
-      "targetRecordId": "trait:non-lethal",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "deferred",
-      "reason": "Non-Lethal explicitly bypasses Immunity for that Trait only; a broad negates-effects-of edge would incorrectly imply that it disables unrelated Immunity effects on the same Attack."
     },
     {
       "sourceRecordId": "skill:immunity",
@@ -2388,14 +2292,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity."
-    },
-    {
-      "sourceRecordId": "skill:hacker",
-      "targetRecordId": "equipment:hacking-device",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Hacker status permits use of equipped Hacking Devices, but the actual Device variant is occurrence/profile data and the current relation vocabulary has no precise eligibility/equipping edge."
     },
     {
       "sourceRecordId": "skill:hacker",

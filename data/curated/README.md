@@ -213,13 +213,13 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v19 contract
+### Current v20 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `19`
+- `formatVersion`: `20`
 - `collection`: collection identity/scope/authority
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
@@ -253,7 +253,7 @@ ignored MODs separately from effects that become ineffective. Format v12 adds
 Skill's Roll or constrain one specific use without implying that the whole target rule
 is negated. Format v13 adds `applies-effects-to` and `imposes-modifiers-on` so rules such
 as Reflective and Albedo can expose who they affect without collapsing those different
-mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state. Format v16 adds `causes-state` for explicit activation paths such as Forward Observer causing Targeted State and Disposable (X) causing the item-specific Unloaded State, while existing roll/restriction relations make the affected State useful from both directions. Format v17 adds `enables-use-of` when a reviewed rule or State satisfies a documented prerequisite for another rule without claiming that all of the target rule's requirements are met. Format v18 adds `uses-effects-of` when a rule reuses another rule's effects without claiming that it enters the target State; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior. Format v19 replaces the singular Skill-definition `facts.typeId` with ordered `facts.typeIds`, allowing every full Skill definition to own one or more declaration categories directly.
+mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state. Format v16 adds `causes-state` for explicit activation paths such as Forward Observer causing Targeted State and Disposable (X) causing the item-specific Unloaded State, while existing roll/restriction relations make the affected State useful from both directions. Format v17 adds `enables-use-of` when a reviewed rule or State satisfies a documented prerequisite for another rule without claiming that all of the target rule's requirements are met. Format v18 adds `uses-effects-of` when a rule reuses another rule's effects without claiming that it enters the target State; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior. Format v19 replaces the singular Skill-definition `facts.typeId` with ordered `facts.typeIds`, allowing every full Skill definition to own one or more declaration categories directly. Format v20 adds `modifies-use-of` for rules that change how another rule is used without simply enabling or restricting it, `prevents-state-entry` for explicit prohibitions on entering a State, and `triggered-by-state-entry` for rules that activate when a State is entered.
 
 Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 `{"orderType": "irregular"}` and canonical IDs `training:regular` /
@@ -271,7 +271,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 19,
+    "formatVersion": 20,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -437,7 +437,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v19 are no longer accepted by the loader and must
+Curated-rule files older than format v20 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

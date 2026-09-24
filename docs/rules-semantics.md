@@ -1134,7 +1134,10 @@ Curated format v19 makes multi-category Skill classification intrinsic to full S
 definitions through ordered `facts.typeIds`. Browser/API composition therefore exposes
 all categories for rules-native Skills as well as Army-linked Skills. Linked
 `declaration-category` records remain only as the partial-classification path for Army
-Skills without a full definition and for Equipment.
+Skills without a full definition and for Equipment. Curated format v20 additionally
+distinguishes rules that modify another rule's use, prohibit entry into a State, or
+trigger specifically on State entry, so those interactions no longer remain deferred
+solely because the older relation vocabulary was too coarse.
 
 Sources:
 

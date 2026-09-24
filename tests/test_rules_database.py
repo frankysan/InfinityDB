@@ -480,6 +480,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         for item in relations
     } == {
         ("enables-use-of", "outbound", "skill:surprise-attack"),
+        ("restricts-use-of", "outbound", "skill:place-deployable"),
         ("enters-state", "inbound", "skill:camouflage"),
         ("reveals-state", "inbound", "skill:discover"),
         ("reveals-state", "inbound", "skill:sensor"),
@@ -519,6 +520,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         for relation in camouflaged["display_relations"]
     } == {
         ("enables-use-of", "outbound", "Surprise Attack", (("skill", "surprise-attack"),)),
+        ("restricts-use-of", "outbound", "Place Deployable", ()),
         ("enters-state", "inbound", "Camouflage", (("skill", "camouflage"),)),
         ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
         ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
@@ -767,6 +769,8 @@ def test_mobility_environment_interactions_are_bidirectional(tmp_path: Path) -> 
         ("restricts-use-of", "outbound", "skill:cautious-movement"),
         ("restricts-use-of", "outbound", "skill:guard"),
         ("negates-effects-of", "outbound", "trait:boost"),
+        ("prevents-state-entry", "outbound", "state:prone"),
+        ("prevents-state-entry", "outbound", "state:engaged"),
     }
     assert ("restricts-use-of", "inbound", "skill:aerial") in {
         (relation["type"], relation["direction"], relation["record"]["id"])
@@ -1305,6 +1309,45 @@ def test_profile_runtime_identity_skills_are_composed(tmp_path: Path) -> None:
         }
 
 
+def test_final_semantic_link_cleanup_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(record_id: str) -> dict:
+        kind = record_id.split(":", 1)[0]
+        return next(
+            candidate
+            for candidate in database.composed_records_by_kind(kind)
+            if candidate["id"] == record_id
+        )
+
+    expected = [
+        ("state:camouflaged", "restricts-use-of", "skill:place-deployable"),
+        ("skill:warhorse", "negates-effects-of", "rule:loss-of-lieutenant"),
+        ("skill:super-jump", "modifies-use-of", "skill:jump"),
+        ("trait:perimeter", "modifies-use-of", "skill:place-deployable"),
+        ("equipment:motorcycle", "prevents-state-entry", "state:prone"),
+        ("skill:aerial", "prevents-state-entry", "state:prone"),
+        ("skill:aerial", "prevents-state-entry", "state:engaged"),
+        ("skill:warhorse", "prevents-state-entry", "state:isolated"),
+        ("skill:impetuous", "prevents-state-entry", "state:prone"),
+        ("skill:explode", "triggered-by-state-entry", "state:unconscious"),
+        ("trait:non-lethal", "restricts-use-of", "skill:immunity"),
+        ("skill:hacker", "enables-use-of", "equipment:hacking-device"),
+    ]
+    for source_id, relation_type, target_id in expected:
+        assert (relation_type, "outbound", target_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in record(source_id)["display_relations"]
+        }
+        assert (relation_type, "inbound", source_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in record(target_id)["display_relations"]
+        }
+
+
 def test_hacker_skill_is_composed(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"
@@ -1323,7 +1366,10 @@ def test_hacker_skill_is_composed(tmp_path: Path) -> None:
     assert "Hacking Device" in effects
     assert "Upgrade Programs" in effects
     assert "Null State" in effects
-    assert not hacker.get("display_relations")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in hacker["display_relations"]
+    } == {("enables-use-of", "outbound", "Hacking Device")}
 
 
 def test_damage_resilience_skills_are_composed(tmp_path: Path) -> None:
@@ -1747,6 +1793,7 @@ def test_remaining_equipment_slice_relations_are_bidirectional(tmp_path: Path) -
         ("restricts-use-of", "outbound", "Cautious Movement"),
         ("restricts-use-of", "outbound", "Climb"),
         ("restricts-use-of", "outbound", "Jump"),
+        ("prevents-state-entry", "outbound", "Prone State"),
     }
     assert {
         (relation["type"], relation["direction"], relation["record"]["name"])

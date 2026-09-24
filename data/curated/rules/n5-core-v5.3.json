@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 19,
+    "formatVersion": 20,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -1230,6 +1230,10 @@
                 {
                     "type": "enables-use-of",
                     "recordId": "skill:surprise-attack"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:place-deployable"
                 }
             ]
         },
@@ -1434,7 +1438,13 @@
                         "positiveSign": "omit"
                     }
                 ]
-            }
+            },
+            "relations": [
+                {
+                    "type": "modifies-use-of",
+                    "recordId": "skill:jump"
+                }
+            ]
         },
         {
             "id": "skill:forward-deployment",
@@ -2125,7 +2135,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:immunity"
+                }
+            ]
         },
         {
             "id": "trait:non-reloadable",
@@ -2181,7 +2197,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "modifies-use-of",
+                    "recordId": "skill:place-deployable"
+                }
+            ]
         },
         {
             "id": "trait:prior-deployment",
@@ -9395,6 +9417,10 @@
                 {
                     "type": "restricts-use-of",
                     "recordId": "skill:cautious-movement"
+                },
+                {
+                    "type": "prevents-state-entry",
+                    "recordId": "state:prone"
                 }
             ],
             "citations": [
@@ -10507,6 +10533,14 @@
                 {
                     "type": "negates-effects-of",
                     "recordId": "trait:boost"
+                },
+                {
+                    "type": "prevents-state-entry",
+                    "recordId": "state:prone"
+                },
+                {
+                    "type": "prevents-state-entry",
+                    "recordId": "state:engaged"
                 }
             ],
             "variantSemantics": {
@@ -10687,7 +10721,17 @@
             },
             "variantSemantics": {
                 "inheritance": "family"
-            }
+            },
+            "relations": [
+                {
+                    "type": "negates-effects-of",
+                    "recordId": "rule:loss-of-lieutenant"
+                },
+                {
+                    "type": "prevents-state-entry",
+                    "recordId": "state:isolated"
+                }
+            ]
         },
         {
             "id": "skill:courage",
@@ -10889,6 +10933,10 @@
                 {
                     "type": "cancels-state",
                     "recordId": "state:holomask"
+                },
+                {
+                    "type": "prevents-state-entry",
+                    "recordId": "state:prone"
                 }
             ]
         },
@@ -13065,6 +13113,10 @@
                 {
                     "type": "enters-state",
                     "recordId": "state:dead"
+                },
+                {
+                    "type": "triggered-by-state-entry",
+                    "recordId": "state:unconscious"
                 }
             ],
             "citations": [
@@ -13594,7 +13646,13 @@
             },
             "variantSemantics": {
                 "inheritance": "family"
-            }
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "equipment:hacking-device"
+                }
+            ]
         }
     ]
 }

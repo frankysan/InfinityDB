@@ -21,8 +21,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
     assert report["summary"]["recordCount"] == 207
-    assert report["summary"]["authoredOutgoingRelationCount"] == 240
-    assert report["summary"]["futureInteractionCount"] == 143
+    assert report["summary"]["authoredOutgoingRelationCount"] == 252
+    assert report["summary"]["futureInteractionCount"] == 130
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 207,
         "complete": 207,
@@ -204,8 +204,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:hacker",
     }:
         assert items[record_id]["status"] == "reviewed"
-    assert items["skill:super-jump"]["futureInteractions"][0]["targetRecordId"] == ("skill:jump")
-    assert items["trait:perimeter"]["futureInteractions"][0]["targetRelease"] == ("post-0.7.0")
+    assert items["skill:super-jump"]["relations"] == [
+        ("modifies-use-of", "skill:jump")
+    ]
+    assert items["trait:perimeter"]["relations"] == [
+        ("modifies-use-of", "skill:place-deployable")
+    ]
     for record_id in {
         "rule:peripheral-type:control",
         "rule:peripheral-type:cyberplug",
@@ -247,11 +251,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "rule:metachemistry-chart",
         "uses-effects-of",
     ) in future_keys
-    assert ("skill:explode", "state:unconscious", None) in future_keys
+    assert ("skill:explode", "state:unconscious", None) not in future_keys
     assert ("skill:explode", "ammunition:shock", "uses-effects-of") in future_keys
-    assert ("skill:immunity", "trait:non-lethal", None) in future_keys
+    assert ("skill:immunity", "trait:non-lethal", None) not in future_keys
     assert ("skill:hacker", "rule:hacking-area", None) in future_keys
-    assert ("skill:hacker", "equipment:hacking-device", None) in future_keys
+    assert ("skill:hacker", "equipment:hacking-device", None) not in future_keys
     assert ("skill:hacker", "rule:upgrade-program", None) in future_keys
     assert ("equipment:symbiomate", "skill:immunity", "uses-effects-of") not in future_keys
 
@@ -302,9 +306,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("restricts-use-of", "skill:cautious-movement"),
         ("restricts-use-of", "skill:guard"),
         ("negates-effects-of", "trait:boost"),
+        ("prevents-state-entry", "state:prone"),
+        ("prevents-state-entry", "state:engaged"),
     }
-    assert ("skill:aerial", "state:prone", None) in future_keys
-    assert ("skill:aerial", "state:engaged", None) in future_keys
+    assert ("skill:aerial", "state:prone", None) not in future_keys
+    assert ("skill:aerial", "state:engaged", None) not in future_keys
     assert ("skill:climbing-plus", "rule:partial-cover", None) in future_keys
     assert (
         "skill:climbing-plus",
@@ -313,7 +319,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
     assert ("skill:terrain", "rule:movement-label", "applies-effects-to") in future_keys
     assert ("skill:terrain", "rule:special-terrain", None) in future_keys
-    assert ("skill:warhorse", "state:isolated", None) in future_keys
+    assert ("skill:warhorse", "state:isolated", None) not in future_keys
     assert (
         "skill:triangulated-fire",
         "rule:range-modifiers",
@@ -340,7 +346,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
     assert ("skill:courage", "rule:guts-roll", "applies-effects-to") in future_keys
     assert ("skill:impetuous", "state:prone", "cancels-state") not in future_keys
-    assert ("skill:impetuous", "state:prone", None) in future_keys
+    assert ("skill:impetuous", "state:prone", None) not in future_keys
     assert ("equipment:gizmokit", "skill:remote-presence", None) not in future_keys
     assert ("skill:dogged", "rule:healing", None) in future_keys
     assert ("skill:no-wound-incapacitation", "state:dead", None) in future_keys
@@ -376,7 +382,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("applies-effects-to", "skill:cc-attack")
     }
     assert set(items["skill:explode"]["relations"]) == {
-        ("enters-state", "state:dead")
+        ("enters-state", "state:dead"),
+        ("triggered-by-state-entry", "state:unconscious"),
     }
     assert set(items["skill:exrah"]["relations"]) == {
         ("overrides-effects-of", "state:unconscious"),

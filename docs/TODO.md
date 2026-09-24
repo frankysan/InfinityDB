@@ -161,7 +161,12 @@ requiring a new top-level browser surface in 0.7.0.
     vetted (Skills 95/95, Equipment 28/28, Traits 33/33, States 24/24). 179 catalog identities
     have current canonical definitions; Commlink is the single explicit release exception because
     its authoritative rule belongs to Reinforcements Extra and remains deferred to separately
-    scoped post-0.7.0 annex work. Combat Jump, Decoy,
+    scoped post-0.7.0 annex work. A final deferred-link audit promotes interactions that
+    need only existing catalog identities: Camouflaged State constrains Place Deployable,
+    Warhorse negates Loss of Lieutenant and prevents Isolated, Non-Lethal constrains
+    Immunity, Hacker enables use of Hacking Device, Motorcycle/Aerial/Impetuous prevent
+    specific State entry, Super-Jump and Perimeter modify existing Skill use, and Explode
+    is explicitly triggered by entering Unconscious State. Combat Jump, Decoy,
     Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic Deployment now
     have canonical reviewed definitions. Berserk, Guard,
     Neurocinetics, Total Reaction, and Triangulated Fire are also canonical reviewed

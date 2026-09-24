@@ -559,10 +559,13 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v19 rules contract includes collection/source metadata,
+The current curated-v20 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, exact-source variant semantics, and citations.
+Curated v20 adds `modifies-use-of`, `prevents-state-entry`, and
+`triggered-by-state-entry` for transformations, State-entry prohibitions, and
+State-entry activation triggers that do not fit the earlier generic relation vocabulary.
 Older formats must be migrated before ingestion. The
 reserved `rules/example.json` template is excluded from directory ingestion.
 
