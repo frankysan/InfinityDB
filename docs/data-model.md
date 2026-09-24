@@ -2509,7 +2509,10 @@ ordered canonical `skillTypes` identities in `facts.typeIds`, allowing any Skill
 multiple categories even when no Army identity exists. Partial classification remains
 available through `declaration-category` records, which use singular `facts.typeId`, a
 deterministic display order, application-domain Skill/Equipment links, and printed-page
-citation. `SkillCatalog` prefers categories from full Skill definitions and falls back
+citation. Where a full Skill definition and fallback declaration records overlap on the
+same authored Army reference, curated validation requires their ordered category IDs to
+match exactly, preventing a stale fallback from disagreeing with the authoritative full
+definition. `SkillCatalog` prefers categories from full Skill definitions and falls back
 to those linked declarations; `CatalogRules` uses declarations for Equipment. Skills
 retain uncited `Unclassified` only when neither source is available; Equipment gets no
 invented fallback. The Army database does not materialize these rules facts.

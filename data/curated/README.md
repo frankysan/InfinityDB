@@ -299,9 +299,11 @@ category only for compatibility projections that still expose singular `skill_ty
 `declaration-category` records remain the partial-curation mechanism for Army Skills
 that do not yet have a full Skill definition, and for Equipment action categories. They
 use singular `facts.typeId` plus `facts.order`, may link to Army `skill` or `equipment`
-identities, and require exactly one PDF citation with a positive printed page. Skills
-without either a full definition or a curated declaration fall back to `Unclassified`;
-Equipment receives no invented fallback category. Do not create uncited category
+identities, and require exactly one PDF citation with a positive printed page. When an
+Army Skill has both a full definition and fallback declaration records under the same
+authored Army reference, their ordered category identities must agree; curated loading
+fails closed on drift. Skills without either a full definition or a curated declaration
+fall back to `Unclassified`; Equipment receives no invented fallback category. Do not create uncited category
 records to represent missing rules classification.
 
 Army-linked Skill, Equipment, and Weapon definitions declare

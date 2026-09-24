@@ -129,6 +129,59 @@ def test_skill_definition_supports_multiple_categories(tmp_path: Path) -> None:
         load_curated_document(path)
 
 
+def test_full_skill_categories_must_match_fallback_declarations(tmp_path: Path) -> None:
+    document = valid_document()
+    document["skillTypes"].append(
+        {
+            "id": "aro",
+            "name": "ARO",
+            "labels": ["ARO Skill", "ARO Skills"],
+            "descriptions": {
+                "singular": "An ARO Skill may be declared as an ARO.",
+                "plural": "ARO Skills may be declared as AROs.",
+            },
+        }
+    )
+    skill = document["records"][0]
+    skill["facts"]["typeIds"] = ["automatic", "aro"]
+    skill["armyLinks"] = [{"entity": "skill", "id": "example"}]
+    skill["variantSemantics"] = {"inheritance": "family"}
+
+    def declaration(record_id: str, type_id: str, order: int, page: int) -> dict:
+        return {
+            "id": record_id,
+            "kind": "declaration-category",
+            "name": type_id,
+            "summary": "Fallback declaration category.",
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {"typeId": type_id, "order": order},
+            "armyLinks": [{"entity": "skill", "id": "example"}],
+            "citations": [{"sourceId": "n5-core-v5.3", "page": page}],
+            "composition": {"role": "definition"},
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+        }
+
+    document["records"].extend(
+        [
+            declaration(
+                "declaration-category:automatic:p12", "automatic", 10, 12
+            ),
+            declaration("declaration-category:aro:p13", "aro", 20, 13),
+        ]
+    )
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][0]["facts"]["typeIds"] == [
+        "automatic",
+        "aro",
+    ]
+
+    document["records"][-1]["facts"]["order"] = 5
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="conflicting declaration categories"):
+        load_curated_document(path)
+
+
 def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Path) -> None:
     document = valid_document()
     del document["records"][0]["scope"]
