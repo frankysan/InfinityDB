@@ -896,6 +896,36 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:berserk",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:guard",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:neurocinetics",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:total-reaction",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:triangulated-fire",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1252,14 +1282,6 @@
       "reason": "TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule."
     },
     {
-      "sourceRecordId": "equipment:tinbot-neurocinetics",
-      "targetRecordId": "skill:neurocinetics",
-      "relationType": "uses-effects-of",
-      "targetRelease": "0.7.0",
-      "status": "planned",
-      "reason": "TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition."
-    },
-    {
       "sourceRecordId": "skill:limited-cover",
       "targetRecordId": "rule:partial-cover",
       "relationType": null,
@@ -1347,14 +1369,6 @@
       "status": "deferred",
       "reason": "Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge."
     },
-  {
-    "sourceRecordId": "weapon:armed-turret",
-    "targetRecordId": "skill:total-reaction",
-    "relationType": "uses-effects-of",
-    "targetRelease": "0.7.0",
-    "status": "planned",
-    "reason": "The Armed Turret profile explicitly includes Total Reaction; materialize the reuse edge when Total Reaction gains its canonical Skill definition."
-  },
   {
     "sourceRecordId": "state:unconscious",
     "targetRecordId": "state:prone",
@@ -1451,6 +1465,30 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge."
+    },
+    {
+        "sourceRecordId": "skill:guard",
+        "targetRecordId": "skill:aerial",
+        "relationType": "restricts-use-of",
+        "targetRelease": "0.7.0",
+        "status": "planned",
+        "reason": "Guard cannot be used against a Trooper while Aerial is active unless that Trooper is Unconscious; materialize the edge when Aerial gains its canonical Skill definition."
+    },
+    {
+        "sourceRecordId": "skill:triangulated-fire",
+        "targetRecordId": "rule:range-modifiers",
+        "relationType": "ignores-modifiers-from",
+        "targetRelease": "post-0.7.0",
+        "status": "deferred",
+        "reason": "Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity."
+    },
+    {
+        "sourceRecordId": "skill:triangulated-fire",
+        "targetRecordId": "rule:partial-cover",
+        "relationType": "ignores-modifiers-from",
+        "targetRelease": "post-0.7.0",
+        "status": "deferred",
+        "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
     }
   ]
 }

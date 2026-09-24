@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed combat/reaction rules for Berserk, Guard, Neurocinetics, Total Reaction,
+  and Triangulated Fire. Expose their stable Move, CC Attack, BS Attack, and Mimetism
+  interactions, and promote TinBot: Neurocinetics→Neurocinetics plus Armed Turret→Total
+  Reaction from deferred work into current graph relationships.
 - Add reviewed deployment/arrival rules for Combat Jump, Decoy, Impersonation, Infiltration,
   Minelayer, Parachutist, Sapper, and Strategic Deployment, plus canonical Decoy,
   Impersonation-1/2, and Foxhole States. Promote Request Speedball→Combat Jump and

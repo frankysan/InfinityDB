@@ -20,31 +20,31 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 147
-    assert report["summary"]["authoredOutgoingRelationCount"] == 132
-    assert report["summary"]["futureInteractionCount"] == 69
+    assert report["summary"]["recordCount"] == 152
+    assert report["summary"]["authoredOutgoingRelationCount"] == 141
+    assert report["summary"]["futureInteractionCount"] == 70
     assert report["summary"]["releases"]["0.7.0"] == {
-        "total": 147,
-        "complete": 147,
+        "total": 152,
+        "complete": 152,
         "pending": 0,
-        "reviewed": 137,
+        "reviewed": 142,
         "inherited": 10,
         "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 156,
-        "complete": 109,
-        "pending": 47,
-        "percentComplete": 69.9,
+        "complete": 114,
+        "pending": 42,
+        "percentComplete": 73.1,
         "catalogs": {
             "skills": {
                 "total": 95,
-                "complete": 48,
-                "pending": 47,
-                "defined": 48,
-                "missingRuleDefinition": 47,
-                "percentComplete": 50.5,
+                "complete": 53,
+                "pending": 42,
+                "defined": 53,
+                "missingRuleDefinition": 42,
+                "percentComplete": 55.8,
             },
             "equipment": {
                 "total": 28,
@@ -135,6 +135,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:parachutist",
         "skill:sapper",
         "skill:strategic-deployment",
+        "skill:berserk",
+        "skill:guard",
+        "skill:neurocinetics",
+        "skill:total-reaction",
+        "skill:triangulated-fire",
         "skill:suppressive-fire",
     }:
         assert items[record_id]["status"] == "reviewed"
@@ -205,7 +210,23 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("trait:indiscriminate", "state:camouflaged", None) in future_keys
     assert ("equipment:ai-motorcycle", "skill:transmutation", "uses-effects-of") in future_keys
     assert ("equipment:holomask", "state:holomask", "enters-state") in future_keys
-    assert ("weapon:armed-turret", "skill:total-reaction", "uses-effects-of") in future_keys
+    assert ("weapon:armed-turret", "skill:total-reaction", "uses-effects-of") not in future_keys
+    assert (
+        "equipment:tinbot-neurocinetics",
+        "skill:neurocinetics",
+        "uses-effects-of",
+    ) not in future_keys
+    assert ("skill:guard", "skill:aerial", "restricts-use-of") in future_keys
+    assert (
+        "skill:triangulated-fire",
+        "rule:range-modifiers",
+        "ignores-modifiers-from",
+    ) in future_keys
+    assert (
+        "skill:triangulated-fire",
+        "rule:partial-cover",
+        "ignores-modifiers-from",
+    ) in future_keys
     assert ("state:unconscious", "state:prone", "causes-state") in future_keys
     assert (
         "state:stunned",
@@ -223,7 +244,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
 
     expected = render_markdown(report)
-    assert "Skill **48/95**; Equipment **28/28**; Trait **33/33**" in expected
+    assert "Skill **53/95**; Equipment **28/28**; Trait **33/33**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -242,8 +263,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 109/156 complete" in output
-    assert "47 pending" in output
+    assert "0.7.0 primary catalog: 114/156 complete" in output
+    assert "42 pending" in output
     assert "0 supporting identities pending" in output
 
 

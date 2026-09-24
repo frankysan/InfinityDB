@@ -633,7 +633,53 @@
             "url": "https://infinitythewiki.com/index.php?title=Strategic_Deployment&oldid=3137",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
-        }],
+        },
+        {
+            "id": "wiki-berserk-oldid-3236",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Berserk revision 3236",
+            "version": "N5.3 / oldid 3236",
+            "url": "https://infinitythewiki.com/index.php?title=Berserk&oldid=3236",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-guard-oldid-3952",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Guard revision 3952",
+            "version": "N5.3 / oldid 3952",
+            "url": "https://infinitythewiki.com/index.php?title=Guard&oldid=3952",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-neurocinetics-oldid-3111",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Neurocinetics revision 3111",
+            "version": "N5.3 / oldid 3111",
+            "url": "https://infinitythewiki.com/index.php?title=Neurocinetics&oldid=3111",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-total-reaction-oldid-3147",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Total Reaction revision 3147",
+            "version": "N5.3 / oldid 3147",
+            "url": "https://infinitythewiki.com/index.php?title=Total_Reaction&oldid=3147",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-triangulated-fire-oldid-3873",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Triangulated Fire revision 3873",
+            "version": "N5.3 / oldid 3873",
+            "url": "https://infinitythewiki.com/index.php?title=Triangulated_Fire&oldid=3873",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        }
+    ],
     "records": [
         {
             "id": "state:camouflaged",
@@ -2024,6 +2070,10 @@
                 {
                     "type": "enables-use-of",
                     "recordId": "skill:cc-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:total-reaction"
                 }
             ],
             "armyLinks": [
@@ -5769,6 +5819,10 @@
                 {
                     "type": "variant-of",
                     "recordId": "equipment:tinbot"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:neurocinetics"
                 }
             ]
         },
@@ -9422,5 +9476,309 @@
                     "recordId": "skill:mimetism"
                 }
             ]
-        }]
+        },
+        {
+            "id": "skill:berserk",
+            "kind": "skill",
+            "name": "Berserk",
+            "summary": "A Long CC Special Skill that combines an extended Move with a CC Attack against a visible target.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The target must be inside the user's Line of Fire when Berserk is declared."
+                ],
+                "effects": [
+                    "The user declares Move and CC Attack as one Long Skill and may move up to the sum of both MOV values to reach Silhouette contact with the target.",
+                    "If the target cannot be reached, the declaration becomes Idle and neither the Move nor the CC Attack is performed.",
+                    "A Berserk MOD shown in the Unit Profile applies to the CC Attack."
+                ],
+                "restrictions": [
+                    "The user declares the movement route and CC Attack target before ARO declarations."
+                ]
+            },
+            "labelIds": [
+                "attack",
+                "cc-attack",
+                "cc-special-skill",
+                "movement",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "berserk"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-berserk-oldid-3236",
+                    "heading": "Berserk"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:move"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:cc-attack"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:guard",
+            "kind": "skill",
+            "name": "Guard",
+            "summary": "An Automatic CC Special Skill that lets the user make a CC Attack against a target in Line of Fire and Zone of Control without Silhouette contact.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The CC Attack target must be inside the user’s Line of Fire and Zone of Control."
+                ],
+                "effects": [
+                    "The user may perform a CC Attack without reaching or being in Silhouette contact with the target.",
+                    "The user and target may apply Skills and MODs whose normal requirements include Silhouette contact."
+                ],
+                "restrictions": [
+                    "Guard cannot be used against an active Aerial Trooper unless that Trooper is Unconscious."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "guard"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-guard-oldid-3952",
+                    "heading": "Guard"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:cc-attack"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:neurocinetics",
+            "kind": "skill",
+            "name": "Neurocinetics",
+            "summary": "An Automatic Special Skill that shifts BS Weapon Burst from the Active Turn to the Reactive Turn.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "During the Active Turn, the Burst of all the user’s BS Weapons is reduced to 1.",
+                    "During the Reactive Turn, the user may apply each BS Weapon’s full Burst against a single target.",
+                    "Burst MODs apply in the Reactive Turn instead of the Active Turn."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "neurocinetics"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-neurocinetics-oldid-3111",
+                    "heading": "Neurocinetics"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:total-reaction",
+            "kind": "skill",
+            "name": "Total Reaction",
+            "summary": "An Automatic Special Skill that lets BS Attack AROs use a weapon’s full Burst against one activated target.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "When declaring a BS Attack ARO, the user may apply the full Burst of the selected weapon, including Burst MODs."
+                ],
+                "restrictions": [
+                    "The ARO must target one of the Troopers activated by the Order."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "total-reaction"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-total-reaction-oldid-3147",
+                    "heading": "Total Reaction"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:triangulated-fire",
+            "kind": "skill",
+            "name": "Triangulated Fire",
+            "summary": "A Long Attack Skill that performs a BS Attack without applying Roll MODs other than Burst MODs.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The user must have Line of Fire to the target."
+                ],
+                "effects": [
+                    "The user performs a BS Attack without applying Range, Cover, or Special Skill MODs to the Roll.",
+                    "Burst MODs are still applied normally."
+                ],
+                "restrictions": [
+                    "The attack cannot target beyond the selected weapon’s Maximum Range."
+                ]
+            },
+            "labelIds": [
+                "attack",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "triangulated-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-triangulated-fire-oldid-3873",
+                    "heading": "Triangulated Fire"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:bs-attack"
+                },
+                {
+                    "type": "ignores-modifiers-from",
+                    "recordId": "skill:mimetism"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        }
+    ]
 }

@@ -1066,6 +1066,7 @@ def test_checked_in_n5_collection_links_armed_turret_rule_dependencies() -> None
         ("uses-effects-of", "trait:non-reloadable"),
         ("uses-effects-of", "trait:perimeter"),
         ("uses-effects-of", "equipment:360o-visor"),
+        ("uses-effects-of", "skill:total-reaction"),
         ("enables-use-of", "skill:bs-attack"),
         ("enables-use-of", "skill:cc-attack"),
     }
@@ -1178,6 +1179,47 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     super_jump = records["skill:super-jump"]["facts"]
     assert "Basic Short Skill" in super_jump["effects"][0]
     assert "plus 4 inches" in super_jump["effects"][1]
+
+
+
+def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_types = {
+        "skill:berserk": ["long-skill"],
+        "skill:guard": ["automatic"],
+        "skill:neurocinetics": ["automatic"],
+        "skill:total-reaction": ["automatic"],
+        "skill:triangulated-fire": ["long-skill"],
+    }
+    assert {
+        record_id: records[record_id]["facts"]["typeIds"]
+        for record_id in expected_types
+    } == expected_types
+
+    assert records["skill:berserk"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:move"},
+        {"type": "uses-effects-of", "recordId": "skill:cc-attack"},
+    ]
+    assert records["skill:guard"]["relations"] == [
+        {"type": "enables-use-of", "recordId": "skill:cc-attack"}
+    ]
+    assert records["skill:neurocinetics"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:bs-attack"}
+    ]
+    assert records["skill:total-reaction"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:bs-attack"}
+    ]
+    assert records["skill:triangulated-fire"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:bs-attack"},
+        {"type": "ignores-modifiers-from", "recordId": "skill:mimetism"},
+    ]
+    assert records["equipment:tinbot-neurocinetics"]["relations"] == [
+        {"type": "variant-of", "recordId": "equipment:tinbot"},
+        {"type": "uses-effects-of", "recordId": "skill:neurocinetics"},
+    ]
 
 
 def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> None:

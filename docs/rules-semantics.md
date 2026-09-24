@@ -3328,6 +3328,32 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Foxhole_State&oldid=3834>
 - Wiki: <https://infinitythewiki.com/index.php?title=Strategic_Deployment&oldid=3137>
 
+### RS-SK-COMBAT-001 — Combat/reaction Skills reuse existing attack semantics without flattening conditional MOD scope
+
+**Classification:** source-native Skill interaction semantics.
+
+Berserk reuses Move and CC Attack as the two actions combined by its Long Skill. Guard enables
+CC Attack without the normal Silhouette-contact requirement, while its Aerial restriction remains
+queued until Aerial has a canonical Skill definition. Neurocinetics and Total Reaction both alter
+BS Attack Burst processing across Active/Reactive Turn contexts, so they author
+`modifies-rolls-for` toward BS Attack without turning their turn-specific conditions into universal
+BS Attack behavior.
+
+Triangulated Fire reuses BS Attack and explicitly ignores Mimetism MODs. Its broader suppression
+of Range and Cover MODs stays in the maintained future ledger because InfinityDB does not yet have
+canonical generic Range MOD / Partial Cover targets suitable for those edges. With canonical
+Neurocinetics and Total Reaction identities now available, the previously planned
+TinBot: Neurocinetics and Armed Turret dependencies are promoted to current `uses-effects-of`
+relationships.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Berserk&oldid=3236>
+- Wiki: <https://infinitythewiki.com/index.php?title=Guard&oldid=3952>
+- Wiki: <https://infinitythewiki.com/index.php?title=Neurocinetics&oldid=3111>
+- Wiki: <https://infinitythewiki.com/index.php?title=Total_Reaction&oldid=3147>
+- Wiki: <https://infinitythewiki.com/index.php?title=Triangulated_Fire&oldid=3873>
+
 ### RS-EQ-CORE-003 — Recovery Equipment authors only stable current-State interactions
 
 **Classification:** source-native Equipment interaction semantics.

@@ -21,22 +21,23 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 109/156 complete (69.9%), 47 pending.**
-- Primary domains: Skill **48/95**; Equipment **28/28**; Trait **33/33**.
+- **0.7.0 primary catalog: 114/156 complete (73.1%), 42 pending.**
+- Primary domains: Skill **53/95**; Equipment **28/28**; Trait **33/33**.
 - Supporting semantic identities: **38/38** complete, **0** pending.
-- Current authored outgoing relations: **132**.
-- Explicitly tracked future/deferred interactions: **69**.
+- Current authored outgoing relations: **141**.
+- Explicitly tracked future/deferred interactions: **70**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (48/95)
+### Skill (53/95)
 
 - [ ] **Aerial** (`skill:aerial`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Alert** (`skill:alert`) — reviewed
   - outgoing: none
-- [ ] **Berserk** (`skill:berserk`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Berserk** (`skill:berserk`) — reviewed
+  - `uses-effects-of` → Move (`skill:move`)
+  - `uses-effects-of` → CC Attack (`skill:cc-attack`)
 - [ ] **Booty** (`skill:booty`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **BS Attack** (`skill:bs-attack`) — reviewed
@@ -105,8 +106,9 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **G: Jumper** (`skill:g-jumper`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Guard** (`skill:guard`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Guard** (`skill:guard`) — reviewed
+  - `enables-use-of` → CC Attack (`skill:cc-attack`)
+  - future [0.7.0; planned]: `restricts-use-of` → Aerial (`skill:aerial`) — Guard cannot be used against a Trooper while Aerial is active unless that Trooper is Unconscious; materialize the edge when Aerial gains its canonical Skill definition.
 - [ ] **Hacker** (`skill:hacker`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Hidden Deployment** (`skill:hidden-deployment`) — reviewed
@@ -168,8 +170,8 @@ review. `declaration-category` projection records are excluded.
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
 - [ ] **NCO** (`skill:nco`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Neurocinetics** (`skill:neurocinetics`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Neurocinetics** (`skill:neurocinetics`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [x] **No Cover** (`skill:no-cover`) — reviewed
   - `overrides-effects-of` → Limited Cover (`skill:limited-cover`)
 - [ ] **No Wound Incapacitation** (`skill:no-wound-incapacitation`) — pending: No curated rules definition yet.
@@ -255,12 +257,15 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Terrain** (`skill:terrain`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Total Reaction** (`skill:total-reaction`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Total Reaction** (`skill:total-reaction`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [ ] **Transmutation** (`skill:transmutation`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Triangulated Fire** (`skill:triangulated-fire`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Triangulated Fire** (`skill:triangulated-fire`) — reviewed
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+  - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
+  - future [post-0.7.0; deferred]: `ignores-modifiers-from` → `rule:range-modifiers` — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
+  - future [post-0.7.0; deferred]: `ignores-modifiers-from` → `rule:partial-cover` — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
 - [ ] **Vulnerability** (`skill:vulnerability`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Warhorse** (`skill:warhorse`) — pending: No curated rules definition yet.
@@ -463,7 +468,7 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `uses-effects-of` → `equipment:firewall` — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
 - [x] **TinBot: Neurocinetics** (`equipment:tinbot-neurocinetics`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-  - future [0.7.0; planned]: `uses-effects-of` → Neurocinetics (`skill:neurocinetics`) — TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition.
+  - `uses-effects-of` → Neurocinetics (`skill:neurocinetics`)
 - [x] **TinBot: Repeater** (`equipment:tinbot-repeater`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
   - `uses-effects-of` → Repeater (`equipment:repeater`)
@@ -562,7 +567,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → 360º Visor (`equipment:360o-visor`)
   - `enables-use-of` → BS Attack (`skill:bs-attack`)
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
-  - future [0.7.0; planned]: `uses-effects-of` → Total Reaction (`skill:total-reaction`) — The Armed Turret profile explicitly includes Total Reaction; materialize the reuse edge when Total Reaction gains its canonical Skill definition.
+  - `uses-effects-of` → Total Reaction (`skill:total-reaction`)
 
 ## Future interaction queue
 
@@ -571,9 +576,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] GizmoKit (`equipment:gizmokit`) → Remote Presence (`skill:remote-presence`); `relation type TBD`; **0.7.0 / planned** — GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available.
 - [ ] GizmoKit (`equipment:gizmokit`) → Tech-recovery (`skill:tech-recovery`); `enables-use-of`; **0.7.0 / planned** — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
 - [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
-- [ ] TinBot: Neurocinetics (`equipment:tinbot-neurocinetics`) → Neurocinetics (`skill:neurocinetics`); `uses-effects-of`; **0.7.0 / planned** — TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition.
+- [ ] Guard (`skill:guard`) → Aerial (`skill:aerial`); `restricts-use-of`; **0.7.0 / planned** — Guard cannot be used against a Trooper while Aerial is active unless that Trooper is Unconscious; materialize the edge when Aerial gains its canonical Skill definition.
 - [ ] Foxhole State (`state:foxhole`) → Courage (`skill:courage`); `uses-effects-of`; **0.7.0 / planned** — Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition.
-- [ ] Armed Turret (`weapon:armed-turret`) → Total Reaction (`skill:total-reaction`); `uses-effects-of`; **0.7.0 / planned** — The Armed Turret profile explicitly includes Total Reaction; materialize the reuse edge when Total Reaction gains its canonical Skill definition.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
@@ -621,6 +625,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.
 - [ ] Suppressive Fire (`skill:suppressive-fire`) → `state:suppressive-fire`; `enters-state`; **post-0.7.0 / planned** — Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog.
 - [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
+- [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:partial-cover`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
+- [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:range-modifiers`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
 - [ ] Foxhole State (`state:foxhole`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model.
 - [ ] Isolated State (`state:isolated`) → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
 - [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
