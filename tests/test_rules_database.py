@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 195
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 207
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -724,6 +724,7 @@ def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> Non
         ("imposes-modifiers-on", "outbound", "BS Attack"),
         ("imposes-modifiers-on", "outbound", "Discover"),
         ("reduces-modifiers-from", "inbound", "Multispectral Visor"),
+        ("uses-effects-of", "inbound", "Foxhole State"),
         ("ignores-modifiers-from", "inbound", "Deactivator"),
         ("ignores-modifiers-from", "inbound", "Sensor"),
         ("ignores-modifiers-from", "inbound", "Speculative Attack"),
@@ -1362,6 +1363,7 @@ def test_second_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> N
     } == {
         ("modifies-rolls-for", "outbound", "Discover"),
         ("ignores-modifiers-from", "outbound", "Surprise Attack"),
+        ("cancels-state", "outbound", "Impersonation-1 State"),
     }
     assert ("modifies-rolls-for", "inbound", "Biometric Visor") in {
         (relation["type"], relation["direction"], relation["record"]["name"])

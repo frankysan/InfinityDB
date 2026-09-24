@@ -20,31 +20,31 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 135
-    assert report["summary"]["authoredOutgoingRelationCount"] == 120
-    assert report["summary"]["futureInteractionCount"] == 64
+    assert report["summary"]["recordCount"] == 147
+    assert report["summary"]["authoredOutgoingRelationCount"] == 132
+    assert report["summary"]["futureInteractionCount"] == 69
     assert report["summary"]["releases"]["0.7.0"] == {
-        "total": 135,
-        "complete": 135,
+        "total": 147,
+        "complete": 147,
         "pending": 0,
-        "reviewed": 125,
+        "reviewed": 137,
         "inherited": 10,
         "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 156,
-        "complete": 101,
-        "pending": 55,
-        "percentComplete": 64.7,
+        "complete": 109,
+        "pending": 47,
+        "percentComplete": 69.9,
         "catalogs": {
             "skills": {
                 "total": 95,
-                "complete": 40,
-                "pending": 55,
-                "defined": 40,
-                "missingRuleDefinition": 55,
-                "percentComplete": 42.1,
+                "complete": 48,
+                "pending": 47,
+                "defined": 48,
+                "missingRuleDefinition": 47,
+                "percentComplete": 50.5,
             },
             "equipment": {
                 "total": 28,
@@ -64,8 +64,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 34
-    assert report["summary"]["supporting"]["complete"] == 34
+    assert report["summary"]["supporting"]["total"] == 38
+    assert report["summary"]["supporting"]["complete"] == 38
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -127,6 +127,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:move",
         "skill:place-deployable",
         "skill:request-speedball",
+        "skill:combat-jump",
+        "skill:decoy",
+        "skill:impersonation",
+        "skill:infiltration",
+        "skill:minelayer",
+        "skill:parachutist",
+        "skill:sapper",
+        "skill:strategic-deployment",
         "skill:suppressive-fire",
     }:
         assert items[record_id]["status"] == "reviewed"
@@ -137,7 +145,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "rule:peripheral-type:cyberplug",
         "rule:peripheral-type:servant",
         "rule:peripheral-type:synchronized",
+        "state:decoy",
         "state:disconnected",
+        "state:foxhole",
+        "state:impersonation-1",
+        "state:impersonation-2",
         "state:stunned",
         "state:unconscious",
         "state:unloaded",
@@ -155,16 +167,30 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:marksmanship",
         "equipment:multispectral-visor",
     }
+    assert set(items["skill:request-speedball"]["relations"]) == {
+        ("uses-effects-of", "skill:combat-jump")
+    }
+    assert ("cancels-state", "state:impersonation-1") in set(
+        items["equipment:biometric-visor"]["relations"]
+    )
+
     future_keys = {
         (candidate["sourceRecordId"], candidate["targetRecordId"], candidate["relationType"])
         for candidate in report["futureInteractions"]
     }
-    assert ("skill:request-speedball", "skill:combat-jump", "uses-effects-of") in future_keys
+    assert ("skill:request-speedball", "skill:combat-jump", "uses-effects-of") not in future_keys
     assert ("skill:suppressive-fire", "state:suppressive-fire", "enters-state") in future_keys
     assert ("skill:jump", "state:prone", "cancels-state") in future_keys
     assert ("skill:stealth", "skill:idle", None) in future_keys
     assert ("skill:stealth", "skill:move", None) in future_keys
     assert ("skill:limited-cover", "rule:partial-cover", None) in future_keys
+    assert ("skill:combat-jump", "rule:partial-cover", None) in future_keys
+    assert ("skill:parachutist", "rule:partial-cover", None) in future_keys
+    assert ("skill:infiltration", "state:camouflaged", None) in future_keys
+    assert ("skill:infiltration", "state:hidden-deployment", None) in future_keys
+    assert ("state:foxhole", "skill:courage", "uses-effects-of") in future_keys
+    assert ("state:foxhole", "rule:partial-cover", None) in future_keys
+    assert ("skill:minelayer", "trait:disposable-x", None) in future_keys
     assert (
         "skill:surprise-attack",
         "rule:face-to-face-roll",
@@ -197,7 +223,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
 
     expected = render_markdown(report)
-    assert "Skill **40/95**; Equipment **28/28**; Trait **33/33**" in expected
+    assert "Skill **48/95**; Equipment **28/28**; Trait **33/33**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -216,8 +242,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 101/156 complete" in output
-    assert "55 pending" in output
+    assert "0.7.0 primary catalog: 109/156 complete" in output
+    assert "47 pending" in output
     assert "0 supporting identities pending" in output
 
 

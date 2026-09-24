@@ -277,9 +277,11 @@ canonical `skillTypes` vocabulary, so every Skill definition can carry multiple
 categories regardless of whether it has an Army identity. `declaration-category`
 records remain for partial classification of Army Skills without full definitions and
 for Equipment; those records use singular `facts.typeId` plus deterministic order.
-`SkillCatalog` prefers categories from a full Skill definition and falls back to linked
-declaration records, while `CatalogRules` composes Equipment categories from
-`rules.db`. With rules data available, the Skill list is also composed from the canonical
+`SkillCatalog` treats categories from a full Skill definition as authoritative and falls back
+to linked declaration records only when no full definition is available; Army-linked fallback
+metadata may legitimately disagree with the rules classification. `CatalogRules` composes
+Equipment categories from `rules.db`. With rules data available, the Skill list is also
+composed from the canonical
 Common/Special Skill vocabulary rather than blindly mirroring Army's skill-like source bucket:
 reviewed cross-domain/metadata rows are filtered by maintained classification, and rules-native
 zero-use Skills remain visible. Without a valid rules database, raw Army Skills remain browsable

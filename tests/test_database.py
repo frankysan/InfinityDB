@@ -2767,8 +2767,16 @@ def test_skill_catalog_uses_curated_declaration_categories(
     ]
     multi = next(item for item in catalog.list_skills() if item["id"] == 89)
     assert multi["categories"] == [
-        {"name": "Deployment", "source": "N5 Core Rules v5.3", "page": 111},
-        {"name": "Long Skill", "source": "N5 Core Rules v5.3", "page": 111},
+        {
+            "name": "Deployment",
+            "source": "Infinity Wiki — Sapper revision 3286 vN5.3 / oldid 3286",
+            "page": None,
+        },
+        {
+            "name": "Long Skill",
+            "source": "Infinity Wiki — Sapper revision 3286 vN5.3 / oldid 3286",
+            "page": None,
+        },
     ]
     mixed = catalog.get_skill(278)
     assert mixed is not None
@@ -2812,7 +2820,7 @@ def test_skill_catalog_uses_curated_declaration_categories(
     ]
 
 
-def test_skill_catalog_rejects_category_drift_across_equivalent_army_refs(
+def test_skill_catalog_full_definition_overrides_fallback_across_equivalent_army_refs(
     tmp_path: Path, normalized: dict
 ) -> None:
     database_path = tmp_path / "army.sqlite3"
@@ -2848,10 +2856,9 @@ def test_skill_catalog_rejects_category_drift_across_equivalent_army_refs(
     export_rules_database(documents, rules_path)
     catalog = SkillCatalog(database, RulesDatabase(rules_path))
 
-    with pytest.raises(
-        ValueError, match="conflicting curated categories across equivalent Army references"
-    ):
-        catalog.get_skill(1)
+    detail = catalog.get_skill(1)
+    assert detail is not None
+    assert [category["name"] for category in detail["categories"]] == ["Automatic"]
 
 
 def test_skill_catalog_adds_curated_distance_parameter_semantics(

@@ -21,15 +21,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 101/156 complete (64.7%), 55 pending.**
-- Primary domains: Skill **40/95**; Equipment **28/28**; Trait **33/33**.
-- Supporting semantic identities: **34/34** complete, **0** pending.
-- Current authored outgoing relations: **120**.
-- Explicitly tracked future/deferred interactions: **64**.
+- **0.7.0 primary catalog: 109/156 complete (69.9%), 47 pending.**
+- Primary domains: Skill **48/95**; Equipment **28/28**; Trait **33/33**.
+- Supporting semantic identities: **38/38** complete, **0** pending.
+- Current authored outgoing relations: **132**.
+- Explicitly tracked future/deferred interactions: **69**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (40/95)
+### Skill (48/95)
 
 - [ ] **Aerial** (`skill:aerial`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
@@ -57,8 +57,9 @@ review. `declaration-category` projection records are excluded.
 - [x] **Combat Instinct** (`skill:combat-instinct`) — reviewed
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
   - `negates-effects-of` → Stealth (`skill:stealth`)
-- [ ] **Combat Jump** (`skill:combat-jump`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Combat Jump** (`skill:combat-jump`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] **Commlink** (`skill:commlink`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Counterintelligence** (`skill:counterintelligence`) — pending: No curated rules definition yet.
@@ -67,10 +68,12 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Cyberplug** (`skill:cyberplug`) — reviewed
   - `controller-eligible-for` → Peripheral (Cyberplug) (`rule:peripheral-type:cyberplug`)
-- [ ] **Decoy** (`skill:decoy`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Decoy** (`skill:decoy`) — reviewed
+  - `enters-state` → Decoy State (`state:decoy`)
 - [x] **Discover** (`skill:discover`) — reviewed
   - `reveals-state` → Camouflaged State (`state:camouflaged`)
+  - `reveals-state` → Decoy State (`state:decoy`)
+  - `reveals-state` → Impersonation-2 State (`state:impersonation-2`)
 - [x] **Doctor** (`skill:doctor`) — reviewed
   - `controller-eligible-for` → Peripheral (Servant) (`rule:peripheral-type:servant`)
   - `cancels-state` → Unconscious State (`state:unconscious`)
@@ -113,12 +116,15 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] **Immunity** (`skill:immunity`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Impersonation** (`skill:impersonation`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Impersonation** (`skill:impersonation`) — reviewed
+  - `enters-state` → Impersonation-1 State (`state:impersonation-1`)
+  - `enters-state` → Impersonation-2 State (`state:impersonation-2`)
 - [ ] **Impetuous** (`skill:impetuous`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Infiltration** (`skill:infiltration`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Infiltration** (`skill:infiltration`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Hidden Deployment State (`state:hidden-deployment`) — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [ ] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Inspiring Leadership** (`skill:inspiring-leadership`) — pending: No curated rules definition yet.
@@ -148,8 +154,9 @@ review. `declaration-category` projection records are excluded.
 - [x] **Mimetism** (`skill:mimetism`) — reviewed
   - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
   - `imposes-modifiers-on` → Discover (`skill:discover`)
-- [ ] **Minelayer** (`skill:minelayer`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Minelayer** (`skill:minelayer`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Disposable (X) (`trait:disposable-x`) — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
 - [ ] **Mnemonica** (`skill:mnemonica`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Morpho-scan** (`skill:morpho-scan`) — pending: No curated rules definition yet.
@@ -171,8 +178,9 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [ ] **Number 2** (`skill:number-2`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Parachutist** (`skill:parachutist`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Parachutist** (`skill:parachutist`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] **Paramedic** (`skill:paramedic`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Peripheral** (`skill:peripheral`) — reviewed
@@ -197,14 +205,13 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Remote Presence** (`skill:remote-presence`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Request Speedball** (`skill:request-speedball`) — reviewed
-  - outgoing: none
-  - future [post-0.7.0; planned]: `uses-effects-of` → Combat Jump (`skill:combat-jump`) — Request Speedball explicitly places its Tokens by applying the Combat Jump Skill rules; materialize the edge once Combat Jump has a full canonical Skill definition.
+  - `uses-effects-of` → Combat Jump (`skill:combat-jump`)
 - [x] **Reset** (`skill:reset`) — reviewed
   - `cancels-state` → Targeted State (`state:targeted`)
   - `cancels-state` → Immobilized-B State (`state:immobilized-b`)
   - `cancels-state` → Isolated State (`state:isolated`)
-- [ ] **Sapper** (`skill:sapper`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Sapper** (`skill:sapper`) — reviewed
+  - `enters-state` → Foxhole State (`state:foxhole`)
 - [x] **Sensor** (`skill:sensor`) — reviewed
   - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
   - `modifies-rolls-for` → Discover (`skill:discover`)
@@ -225,8 +232,8 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Cautious Movement (`skill:cautious-movement`)
   - future [post-0.7.0; deferred]: `relation type TBD` → Idle (`skill:idle`) — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
   - future [post-0.7.0; deferred]: `relation type TBD` → Move (`skill:move`) — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
-- [ ] **Strategic Deployment** (`skill:strategic-deployment`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Strategic Deployment** (`skill:strategic-deployment`) — reviewed
+  - `enables-use-of` → Forward Deployment (`skill:forward-deployment`)
 - [x] **Strategos** (`skill:strategos`) — reviewed
   - outgoing: none
 - [x] **Super-Jump** (`skill:super-jump`) — reviewed
@@ -278,7 +285,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Biometric Visor** (`equipment:biometric-visor`) — reviewed
   - `modifies-rolls-for` → Discover (`skill:discover`)
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
-  - future [post-0.7.0; planned]: `cancels-state` → `state:impersonation-1` — A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity.
+  - `cancels-state` → Impersonation-1 State (`state:impersonation-1`)
 - [x] **Dazer** (`equipment:dazer`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:difficult-terrain` — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
@@ -497,18 +504,28 @@ review. `declaration-category` projection records are excluded.
 - [x] **Strategos L2** (`skill:strategos-l2`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
   - `variant-of` → Strategos (`skill:strategos`)
 
-#### State (10/10)
+#### State (14/14)
 
 - [x] **Camouflaged State** (`state:camouflaged`) — reviewed
   - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
+- [x] **Decoy State** (`state:decoy`) — reviewed
+  - outgoing: none
 - [x] **Disconnected State** (`state:disconnected`) — reviewed
   - outgoing: none
+- [x] **Foxhole State** (`state:foxhole`) — reviewed
+  - `uses-effects-of` → Mimetism (`skill:mimetism`)
+  - future [0.7.0; planned]: `uses-effects-of` → Courage (`skill:courage`) — Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model.
 - [x] **Hidden Deployment State** (`state:hidden-deployment`) — reviewed
   - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
 - [x] **Immobilized-A State** (`state:immobilized-a`) — reviewed
   - `modifies-rolls-for` → Dodge (`skill:dodge`)
 - [x] **Immobilized-B State** (`state:immobilized-b`) — reviewed
   - `modifies-rolls-for` → Reset (`skill:reset`)
+- [x] **Impersonation-1 State** (`state:impersonation-1`) — reviewed
+  - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
+- [x] **Impersonation-2 State** (`state:impersonation-2`) — reviewed
+  - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
 - [x] **Isolated State** (`state:isolated`) — reviewed
   - `modifies-rolls-for` → Reset (`skill:reset`)
   - future [post-0.7.0; deferred]: `causes-state` → Disconnected State (`state:disconnected`) — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
@@ -555,8 +572,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] GizmoKit (`equipment:gizmokit`) → Tech-recovery (`skill:tech-recovery`); `enables-use-of`; **0.7.0 / planned** — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
 - [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
 - [ ] TinBot: Neurocinetics (`equipment:tinbot-neurocinetics`) → Neurocinetics (`skill:neurocinetics`); `uses-effects-of`; **0.7.0 / planned** — TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition.
+- [ ] Foxhole State (`state:foxhole`) → Courage (`skill:courage`); `uses-effects-of`; **0.7.0 / planned** — Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition.
 - [ ] Armed Turret (`weapon:armed-turret`) → Total Reaction (`skill:total-reaction`); `uses-effects-of`; **0.7.0 / planned** — The Armed Turret profile explicitly includes Total Reaction; materialize the reuse edge when Total Reaction gains its canonical Skill definition.
-- [ ] Biometric Visor (`equipment:biometric-visor`) → `state:impersonation-1`; `cancels-state`; **post-0.7.0 / planned** — A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
@@ -588,18 +605,23 @@ review. `declaration-category` projection records are excluded.
 - [ ] `rule:marker-form` → Surprise Attack (`skill:surprise-attack`); `enables-use-of`; **post-0.7.0 / planned** — Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State.
 - [ ] `rule:null-state` → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role.
 - [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
+- [ ] Combat Jump (`skill:combat-jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
+- [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
+- [ ] Infiltration (`skill:infiltration`) → Hidden Deployment State (`state:hidden-deployment`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
 - [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
 - [ ] Jump (`skill:jump`) → `state:prone`; `cancels-state`; **post-0.7.0 / planned** — Declaring Jump explicitly cancels Prone State; materialize this edge once Prone State is promoted to a canonical rules identity.
 - [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
+- [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
+- [ ] Parachutist (`skill:parachutist`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Place Deployable (`skill:place-deployable`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable.
-- [ ] Request Speedball (`skill:request-speedball`) → Combat Jump (`skill:combat-jump`); `uses-effects-of`; **post-0.7.0 / planned** — Request Speedball explicitly places its Tokens by applying the Combat Jump Skill rules; materialize the edge once Combat Jump has a full canonical Skill definition.
 - [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Stealth (`skill:stealth`) → Move (`skill:move`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.
 - [ ] Suppressive Fire (`skill:suppressive-fire`) → `state:suppressive-fire`; `enters-state`; **post-0.7.0 / planned** — Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog.
 - [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
+- [ ] Foxhole State (`state:foxhole`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model.
 - [ ] Isolated State (`state:isolated`) → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
 - [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
 - [ ] Stunned State (`state:stunned`) → `rule:roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception.

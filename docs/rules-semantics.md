@@ -3271,8 +3271,8 @@ Sources:
 
 Biometric Visor directly changes Discover processing and ignores qualifying Surprise Attack MODs,
 so it authors `modifies-rolls-for` toward Discover and `ignores-modifiers-from` toward Surprise
-Attack. Its successful-Discover cancellation of Impersonation-1 remains queued until that State has
-a canonical identity. Deactivator likewise authors `ignores-modifiers-from` toward Mimetism, while
+Attack. With Impersonation-1 now canonical, its successful-Discover cancellation also authors
+`cancels-state` toward that State. Deactivator likewise authors `ignores-modifiers-from` toward Mimetism, while
 its generic ability to remove deployed items and ignore Cover remains deferred until those target
 semantics have precise graph identities/relations.
 
@@ -3295,6 +3295,38 @@ Sources:
 - Wiki: <https://infinitythewiki.com/FastPanda>
 - Wiki: <https://infinitythewiki.com/Repeater>
 
+
+### RS-SK-DEPLOY-001 — Deployment and arrival Skills keep State entry distinct from conditional failure effects
+
+**Classification:** source-native Skill/State interaction semantics.
+
+Combat Jump, Decoy, Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic
+Deployment are canonical Skill definitions. State-producing rules author stable `enters-state`
+edges: Decoy enters Decoy State, Impersonation can enter its distinct IMP-1 or IMP-2 State according
+to the profile variant, and Sapper enters Foxhole State. IMP-1 and IMP-2 remain separate identities
+because their Discover transitions differ. Both Impersonation States can enable Surprise Attack,
+while Discover reveals Decoy and IMP-2; Biometric Visor carries the special cancellation edge for
+IMP-1.
+
+Request Speedball now authors `uses-effects-of` toward Combat Jump, and Strategic Deployment
+authors `enables-use-of` toward Forward Deployment. Conditional consequences that the current
+graph cannot state precisely remain in the maintained future ledger: failed Infiltration losing
+Marker/Hidden Deployment options, temporary loss of Partial Cover during airborne arrival,
+Foxhole's Partial Cover semantics, and Minelayer's item-dependent Disposable consumption.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Combat_Jump&oldid=3456>
+- Wiki: <https://infinitythewiki.com/index.php?title=Decoy&oldid=3069>
+- Wiki: <https://infinitythewiki.com/index.php?title=Decoy_State&oldid=4071>
+- Wiki: <https://infinitythewiki.com/index.php?title=Impersonation&oldid=3303>
+- Wiki: <https://infinitythewiki.com/index.php?title=Impersonation_State&oldid=3929>
+- Wiki: <https://infinitythewiki.com/index.php?title=Infiltration&oldid=3909>
+- Wiki: <https://infinitythewiki.com/index.php?title=Minelayer&oldid=4124>
+- Wiki: <https://infinitythewiki.com/index.php?title=Parachutist&oldid=4047>
+- Wiki: <https://infinitythewiki.com/index.php?title=Sapper&oldid=3286>
+- Wiki: <https://infinitythewiki.com/index.php?title=Foxhole_State&oldid=3834>
+- Wiki: <https://infinitythewiki.com/index.php?title=Strategic_Deployment&oldid=3137>
 
 ### RS-EQ-CORE-003 — Recovery Equipment authors only stable current-State interactions
 

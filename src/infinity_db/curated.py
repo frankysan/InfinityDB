@@ -582,7 +582,6 @@ def load_curated_document(path: Path) -> dict[str, Any]:
     record_kind_by_id: dict[str, str] = {}
     peripheral_type_skill_refs: dict[str, set[str]] = {}
     skill_definition_type_ids: dict[int | str, tuple[str, ...]] = {}
-    skill_declaration_type_ids: dict[int | str, list[tuple[int, str]]] = {}
     for index, record in enumerate(records):
         context = f"records[{index}]"
         if not isinstance(record, dict):
@@ -855,39 +854,6 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                                 "full-definition declaration categories"
                             )
                         skill_definition_type_ids[skill_ref] = normalized_type_ids
-        elif record["kind"] == "declaration-category":
-            facts = record.get("facts")
-            if isinstance(facts, dict):
-                type_id = facts.get("typeId")
-                order = facts.get("order")
-                if isinstance(type_id, str) and type(order) is int:
-                    for link in army_links:
-                        if link.get("entity") != "skill" or "id" not in link:
-                            continue
-                        skill_ref = link["id"]
-                        if not isinstance(skill_ref, (int, str)):
-                            continue
-                        skill_declaration_type_ids.setdefault(skill_ref, []).append(
-                            (order, type_id)
-                        )
-
-    for skill_ref, definition_type_ids in skill_definition_type_ids.items():
-        declarations = skill_declaration_type_ids.get(skill_ref)
-        if not declarations:
-            continue
-        declaration_type_ids = tuple(
-            type_id
-            for _, type_id in sorted(
-                declarations, key=lambda item: (item[0], item[1])
-            )
-        )
-        if definition_type_ids != declaration_type_ids:
-            raise ValueError(
-                f"Army Skill {skill_ref!r} has conflicting declaration categories: "
-                f"full definition {list(definition_type_ids)!r} versus fallback "
-                f"{list(declaration_type_ids)!r}"
-            )
-
     for record_id, skill_refs in peripheral_type_skill_refs.items():
         for skill_id in skill_refs:
             if record_kind_by_id.get(skill_id) != "skill":

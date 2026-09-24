@@ -129,7 +129,7 @@ def test_skill_definition_supports_multiple_categories(tmp_path: Path) -> None:
         load_curated_document(path)
 
 
-def test_full_skill_categories_must_match_fallback_declarations(tmp_path: Path) -> None:
+def test_full_skill_categories_override_fallback_declarations(tmp_path: Path) -> None:
     document = valid_document()
     document["skillTypes"].append(
         {
@@ -178,8 +178,8 @@ def test_full_skill_categories_must_match_fallback_declarations(tmp_path: Path) 
 
     document["records"][-1]["facts"]["order"] = 5
     path.write_text(json.dumps(document), encoding="utf-8")
-    with pytest.raises(ValueError, match="conflicting declaration categories"):
-        load_curated_document(path)
+    loaded = load_curated_document(path)
+    assert loaded["records"][0]["facts"]["typeIds"] == ["automatic", "aro"]
 
 
 def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Path) -> None:
@@ -588,7 +588,9 @@ def test_checked_in_n5_collection_is_valid() -> None:
     }
     assert records["skill:discover"]["facts"]["typeIds"] == ["basic-short-skill", "aro"]
     assert records["skill:discover"]["relations"] == [
-        {"type": "reveals-state", "recordId": "state:camouflaged"}
+        {"type": "reveals-state", "recordId": "state:camouflaged"},
+        {"type": "reveals-state", "recordId": "state:decoy"},
+        {"type": "reveals-state", "recordId": "state:impersonation-2"},
     ]
     assert records["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
     assert records["trait:bs-weapon-ph"]["aliases"] == ["Throwing Weapon"]
@@ -1178,6 +1180,54 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert "plus 4 inches" in super_jump["effects"][1]
 
 
+def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_types = {
+        "skill:combat-jump": ["long-skill"],
+        "skill:decoy": ["deployment-skill"],
+        "skill:impersonation": ["deployment-skill"],
+        "skill:infiltration": ["deployment-skill"],
+        "skill:minelayer": ["deployment-skill"],
+        "skill:parachutist": ["long-skill"],
+        "skill:sapper": ["deployment-skill", "long-skill"],
+        "skill:strategic-deployment": ["deployment-skill"],
+    }
+    assert {
+        record_id: records[record_id]["facts"]["typeIds"]
+        for record_id in expected_types
+    } == expected_types
+
+    assert records["skill:decoy"]["relations"] == [
+        {"type": "enters-state", "recordId": "state:decoy"}
+    ]
+    assert records["skill:impersonation"]["relations"] == [
+        {"type": "enters-state", "recordId": "state:impersonation-1"},
+        {"type": "enters-state", "recordId": "state:impersonation-2"},
+    ]
+    assert records["skill:sapper"]["relations"] == [
+        {"type": "enters-state", "recordId": "state:foxhole"}
+    ]
+    assert records["skill:strategic-deployment"]["relations"] == [
+        {"type": "enables-use-of", "recordId": "skill:forward-deployment"}
+    ]
+    assert records["skill:request-speedball"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:combat-jump"}
+    ]
+
+    assert records["state:decoy"]["labelIds"] == ["marker"]
+    for state_id in {"state:impersonation-1", "state:impersonation-2"}:
+        assert records[state_id]["labelIds"] == ["marker"]
+        assert records[state_id]["relations"] == [
+            {"type": "enables-use-of", "recordId": "skill:surprise-attack"}
+        ]
+    assert records["state:foxhole"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:mimetism"}
+    ]
+
+
 def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
@@ -1364,6 +1414,7 @@ def test_checked_in_n5_collection_models_second_full_catalog_equipment_slice() -
     assert records["equipment:biometric-visor"]["relations"] == [
         {"type": "modifies-rolls-for", "recordId": "skill:discover"},
         {"type": "ignores-modifiers-from", "recordId": "skill:surprise-attack"},
+        {"type": "cancels-state", "recordId": "state:impersonation-1"},
     ]
     assert records["equipment:dazer"].get("relations", []) == []
     assert records["equipment:deactivator"]["relations"] == [

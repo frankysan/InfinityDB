@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed deployment/arrival rules for Combat Jump, Decoy, Impersonation, Infiltration,
+  Minelayer, Parachutist, Sapper, and Strategic Deployment, plus canonical Decoy,
+  Impersonation-1/2, and Foxhole States. Promote Request Speedball→Combat Jump and
+  Biometric Visor→Impersonation-1 from deferred work into current graph relationships.
 - Align the rules-backed Skill catalog with the canonical N5.3 Skill vocabulary instead of
   treating Army's mixed skill-like source bucket as the ontology. Bangbomb, GizmoKit, MediKit,
   Regular, BTS=3, and Infinity Team-Ops remain preserved source occurrences but no longer appear
@@ -66,6 +70,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Treat full curated Skill definitions as authoritative for declaration categories when Army-linked
+  fallback metadata disagrees, while retaining fallback categories only for Skills without a full
+  definition. This preserves rules-native classifications such as Decoy as a Deployment Skill.
 - Improve rules-catalog scanning: Skill declaration/action types now use the maintained
   category colors on detail references and in a dedicated `/skills` Type(s) column;
   related rules are grouped into constructive, cancelling/restricting, and other

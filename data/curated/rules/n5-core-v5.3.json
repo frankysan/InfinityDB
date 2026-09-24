@@ -534,7 +534,106 @@
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
         }
-    ],
+    ,
+        {
+            "id": "wiki-combat-jump-oldid-3456",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Combat Jump revision 3456",
+            "version": "N5.3 / oldid 3456",
+            "url": "https://infinitythewiki.com/index.php?title=Combat_Jump&oldid=3456",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-decoy-oldid-3069",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Decoy revision 3069",
+            "version": "N5.3 / oldid 3069",
+            "url": "https://infinitythewiki.com/index.php?title=Decoy&oldid=3069",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-decoy-state-oldid-4071",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Decoy State revision 4071",
+            "version": "N5.3 / oldid 4071",
+            "url": "https://infinitythewiki.com/index.php?title=Decoy_State&oldid=4071",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-impersonation-oldid-3303",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Impersonation revision 3303",
+            "version": "N5.3 / oldid 3303",
+            "url": "https://infinitythewiki.com/index.php?title=Impersonation&oldid=3303",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-impersonation-state-oldid-3929",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Impersonation State revision 3929",
+            "version": "N5.3 / oldid 3929",
+            "url": "https://infinitythewiki.com/index.php?title=Impersonation_State&oldid=3929",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-infiltration-oldid-3909",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Infiltration revision 3909",
+            "version": "N5.3 / oldid 3909",
+            "url": "https://infinitythewiki.com/index.php?title=Infiltration&oldid=3909",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-minelayer-oldid-4124",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Minelayer revision 4124",
+            "version": "N5.3 / oldid 4124",
+            "url": "https://infinitythewiki.com/index.php?title=Minelayer&oldid=4124",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-parachutist-oldid-4047",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Parachutist revision 4047",
+            "version": "N5.3 / oldid 4047",
+            "url": "https://infinitythewiki.com/index.php?title=Parachutist&oldid=4047",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-sapper-oldid-3286",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Sapper revision 3286",
+            "version": "N5.3 / oldid 3286",
+            "url": "https://infinitythewiki.com/index.php?title=Sapper&oldid=3286",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-foxhole-state-oldid-3834",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Foxhole State revision 3834",
+            "version": "N5.3 / oldid 3834",
+            "url": "https://infinitythewiki.com/index.php?title=Foxhole_State&oldid=3834",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-strategic-deployment-oldid-3137",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Strategic Deployment revision 3137",
+            "version": "N5.3 / oldid 3137",
+            "url": "https://infinitythewiki.com/index.php?title=Strategic_Deployment&oldid=3137",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        }],
     "records": [
         {
             "id": "state:camouflaged",
@@ -678,7 +777,7 @@
                 "inheritance": "family"
             }
         },
-        {
+                {
             "id": "skill:discover",
             "kind": "skill",
             "name": "Discover",
@@ -694,7 +793,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["basic-short-skill", "aro"],
+                "typeIds": [
+                    "basic-short-skill",
+                    "aro"
+                ],
                 "requirements": [
                     "The user must meet the target and visibility requirements for the Marker."
                 ],
@@ -716,6 +818,14 @@
                 {
                     "type": "reveals-state",
                     "recordId": "state:camouflaged"
+                },
+                {
+                    "type": "reveals-state",
+                    "recordId": "state:decoy"
+                },
+                {
+                    "type": "reveals-state",
+                    "recordId": "state:impersonation-2"
                 }
             ],
             "citations": [
@@ -7033,7 +7143,56 @@
         {"id":"skill:look-out","kind":"skill","name":"Look Out","summary":"An ARO Common Skill that lets the user warn other Troopers so they can turn to face an acting enemy.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["aro"],"requirements":["The user must have LoF to an enemy Trooper or Marker that declares or performs an Order."],"effects":["Other Troopers of the same player may modify their LoF by making Dodge (PH-3) Rolls in the same Order."],"restrictions":["An alerted Trooper may make the Dodge (PH-3) Roll only if it has not declared another ARO."]},"labelIds":["no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Look_Out","heading":"Look Out"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"},"relations":[{"type":"modifies-rolls-for","recordId":"skill:dodge"}]},
         {"id":"skill:place-deployable","kind":"skill","name":"Place Deployable","summary":"A Common Skill used to place eligible Deployable Weapons, Equipment, or Peripheral (Ancillary) items on the table.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["short-skill","aro"],"requirements":["The user must have a Weapon or Equipment item with the Deployable Label, or a Peripheral (Ancillary).","In the Reactive Turn, the user must have LoF to the Active Trooper."],"effects":["The user places one eligible Token or Model without a Roll; it becomes active at the Conclusion of the Order."],"restrictions":["Placement must follow the active/reactive placement, support, and Deployment restrictions of Place Deployable.","A Deployable Weapon cannot be placed with an enemy Camouflaged Marker inside its Trigger Area unless the documented exception applies."]},"labelIds":["attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Place_Deployable","heading":"Place Deployable"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
         {"id":"skill:reload","kind":"skill","name":"Reload","summary":"A Common Skill that cancels Unloaded State or restores expended Disposable uses when its requirements are met.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["short-skill","aro"],"requirements":["The user and the Allied Trooper or game element with Baggage must both be in non-Null States, and the user must be inside that Baggage holder's Zone of Control.","The user is in Unloaded State or has expended uses of a Disposable Weapon or piece of Equipment."],"effects":["Without a Roll, the user cancels Unloaded State or regains all expended uses of eligible Disposable Weapons or Equipment."],"restrictions":["Only one Allied Trooper can receive this effect per Order.","Recovering Disposable uses does not affect Weapons or Equipment already deployed on the table.","Non-Reloadable Weapons or Equipment cannot cancel Unloaded State or regain expended uses through Reload."]},"labelIds":["attack"],"relations":[{"type":"cancels-state","recordId":"state:unloaded"}],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Reload","heading":"Reload"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
-        {"id":"skill:request-speedball","kind":"skill","name":"Request Speedball","summary":"An Automatic Common Skill that calls airborne support by placing two Speedball Tokens.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["automatic"],"requirements":["The player must have two Speedball Tokens."],"effects":["During the Active Turn, place two 55 mm Speedball Tokens using the Combat Jump rules and make a PH 15 Roll for each token."],"restrictions":["Request Speedball cannot be performed partway through the Order Expenditure Sequence."]},"labelIds":["optional"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Request_Speedball","heading":"Request Speedball"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
+                {
+            "id": "skill:request-speedball",
+            "kind": "skill",
+            "name": "Request Speedball",
+            "summary": "An Automatic Common Skill that calls airborne support by placing two Speedball Tokens.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The player must have two Speedball Tokens."
+                ],
+                "effects": [
+                    "During the Active Turn, place two 55 mm Speedball Tokens using the Combat Jump rules and make a PH 15 Roll for each token."
+                ],
+                "restrictions": [
+                    "Request Speedball cannot be performed partway through the Order Expenditure Sequence."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Request_Speedball",
+                    "heading": "Request Speedball"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:combat-jump"
+                }
+            ]
+        },
         {"id":"skill:speculative-attack","kind":"skill","name":"Speculative Attack","summary":"A Long Common Skill that uses a BS Weapon with the Speculative Attack Trait to attack without LoF.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must employ a BS Weapon with the Speculative Attack Trait.","A valid trajectory must exist between the user and the chosen impact point."],"effects":["The user makes a single BS Attack with Burst 1 against a target outside LoF; eligible Circular Templates may use a separate impact point that still affects the Main Target."],"restrictions":["Apply the Speculative Attack -6 MOD and Range MODs; other negative MODs such as Mimetism, Partial Cover, and Visibility Zones are not applied.","A Circular Template impact point cannot be placed on a vertical surface or in the air."]},"labelIds":["bs-attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Speculative_Attack","heading":"Speculative Attack"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"},"relations":[{"type":"ignores-modifiers-from","recordId":"skill:mimetism"}]},
         {"id":"skill:suppressive-fire","kind":"skill","name":"Suppressive Fire","summary":"A Long Common Skill that places the user in Suppressive Fire State with a selected weapon.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must select a Weapon with the Suppressive Fire Trait."],"effects":["The user enters Suppressive Fire State using the selected Weapon."],"restrictions":[]},"labelIds":["attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Suppressive_Fire","heading":"Suppressive Fire"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
         {
@@ -7555,7 +7714,7 @@
                 "inheritance": "family"
             }
         },
-        {
+                {
             "id": "equipment:biometric-visor",
             "kind": "equipment",
             "name": "Biometric Visor",
@@ -7596,6 +7755,10 @@
                 {
                     "type": "ignores-modifiers-from",
                     "recordId": "skill:surprise-attack"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:impersonation-1"
                 }
             ],
             "citations": [
@@ -8588,5 +8751,676 @@
             }
         }
 
-    ]
+    ,
+        {
+            "id": "skill:combat-jump",
+            "kind": "skill",
+            "name": "Combat Jump",
+            "labelIds": [
+                "airborne-deployment",
+                "private-information",
+                "optional"
+            ],
+            "summary": "A Long Special Skill that keeps the user off-table until they attempt an airborne landing during their Active Turn.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user may remain off-table after Deployment and later spend their own Order to enter the table.",
+                    "The user is placed on a valid horizontal landing surface and makes the Combat Jump PH Roll; a successful Roll keeps that position.",
+                    "A failed landing moves the user to the player's Deployment Zone edge and removes any Deployables placed with the attempted landing.",
+                    "Combat Jump (Explosion) adds a single-use PS 8 Normal Direct Template Attack after the landing position is resolved."
+                ],
+                "restrictions": [
+                    "The landing cannot place the user Prone, in prohibited Silhouette contact, inside enclosed scenery, or in contact with a scenario objective.",
+                    "The user cannot benefit from Partial Cover during the Order in which Combat Jump is used."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "combat-jump"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-combat-jump-oldid-3456",
+                    "heading": "Combat Jump"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:decoy",
+            "kind": "skill",
+            "name": "Decoy",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "A Deployment Skill that lets the user deploy with false replicas represented through Decoy State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "deployment-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "When placed on the table, the user may deploy in Decoy State.",
+                    "The value shown with Decoy determines whether one or two replica Decoys may be placed."
+                ],
+                "restrictions": []
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "decoy"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-decoy-oldid-3069",
+                    "heading": "Decoy"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:decoy"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:impersonation",
+            "kind": "skill",
+            "name": "Impersonation",
+            "labelIds": [
+                "optional",
+                "negative-feedback",
+                "superior-deployment"
+            ],
+            "summary": "A Deployment Skill that lets the user deploy forward while disguised in an Impersonation Marker State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "deployment-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user may deploy outside the enemy Deployment Zone in Impersonation-1 State.",
+                    "The user may attempt a WIP Roll to deploy inside the enemy Deployment Zone.",
+                    "A profile with Impersonation (IMP-2) deploys and activates only Impersonation-2 State."
+                ],
+                "restrictions": [
+                    "A failed WIP Roll places the user in their own Deployment Zone at the table edge as a Model and removes Deployables placed with the attempt.",
+                    "The user cannot deploy in prohibited contact with enemy or neutral game elements or mission objectives."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "impersonation"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-impersonation-oldid-3303",
+                    "heading": "Impersonation"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:impersonation-1"
+                },
+                {
+                    "type": "enters-state",
+                    "recordId": "state:impersonation-2"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:infiltration",
+            "kind": "skill",
+            "name": "Infiltration",
+            "labelIds": [
+                "superior-deployment",
+                "optional"
+            ],
+            "summary": "A Deployment Skill that allows forward deployment in the user's half and a PH-based attempt to deploy into the opponent's half.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "deployment-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "During Deployment, the user may deploy anywhere in the player's half of the table.",
+                    "Deploying in the opponent's half requires the Infiltration Roll, normally PH-3, with any profile-specific PH replacement applied as stated.",
+                    "If the Roll fails, the user is moved to their own Deployment Zone edge and Deployables placed with the attempt are removed."
+                ],
+                "restrictions": [
+                    "Infiltration cannot be used to deploy inside the enemy Deployment Zone.",
+                    "After a failed Infiltration Roll, the attempted deployment cannot remain in Marker or Hidden Deployment State."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "infiltration"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-infiltration-oldid-3909",
+                    "heading": "Infiltration"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:minelayer",
+            "kind": "skill",
+            "name": "Minelayer",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "A Deployment Skill that lets the user place carried Deployable Weapons or Equipment near their deployment position.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "deployment-skill"
+                ],
+                "requirements": [
+                    "The Deployable must satisfy the normal Deployment conditions and remain within the area where the Minelayer user may deploy.",
+                    "Its Trigger Area or Perimeter area must satisfy the rule's enemy-presence restrictions when placed."
+                ],
+                "effects": [
+                    "When the user deploys, they may place the allowed number of carried Deployable Weapons or Equipment inside their Zone of Control.",
+                    "Placing an item with the Disposable Trait consumes the corresponding available use.",
+                    "If the user's Superior Deployment Roll fails, a Minelayer item placed with that deployment is removed and any Disposable use is consumed."
+                ],
+                "restrictions": []
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "minelayer"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-minelayer-oldid-4124",
+                    "heading": "Minelayer"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:parachutist",
+            "kind": "skill",
+            "name": "Parachutist",
+            "labelIds": [
+                "airborne-deployment",
+                "optional",
+                "private-information"
+            ],
+            "summary": "A Long Special Skill that keeps the user off-table until they enter from a valid table-edge position during their Active Turn.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user may remain off-table after Deployment and later spend their own Order to enter the table.",
+                    "The entry point must be on a surface large enough for the base and in contact with the table edge.",
+                    "Parachutist (Deployment Zone) permits entry within the enemy Deployment Zone."
+                ],
+                "restrictions": [
+                    "Without the Deployment Zone variant, the user cannot enter inside the enemy Deployment Zone.",
+                    "The entry cannot place the user Prone or in prohibited contact with enemy or neutral game elements or mission objectives.",
+                    "The user cannot benefit from Partial Cover during the Order in which Parachutist is used."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "parachutist"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-parachutist-oldid-4047",
+                    "heading": "Parachutist"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:sapper",
+            "kind": "skill",
+            "name": "Sapper",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "A Deployment/Long Special Skill that lets its user begin or later enter Foxhole State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "deployment-skill",
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The space used to enter Foxhole State must accommodate that State's Silhouette."
+                ],
+                "effects": [
+                    "During Deployment, the user may begin in Foxhole State.",
+                    "During the Active Turn, the user may spend a Long Skill to enter Foxhole State."
+                ],
+                "restrictions": [
+                    "If the required space is unavailable, the attempted Active-Turn use becomes Idle instead."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "sapper"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-sapper-oldid-3286",
+                    "heading": "Sapper"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:foxhole"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:strategic-deployment",
+            "kind": "skill",
+            "name": "Strategic Deployment",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "A Deployment Skill that grants Forward Deployment to its user and the rest of that user's Fireteam during deployment.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "deployment-skill"
+                ],
+                "requirements": [
+                    "The user must be the first Fireteam member deployed and must deploy as that Fireteam's Team Leader."
+                ],
+                "effects": [
+                    "The user and the rest of their Fireteam deploy as if they had Forward Deployment (+4 inches).",
+                    "If a scenario or tournament rule already grants Forward Deployment (+4 inches) to a Fireteam member, the Fireteam instead applies Forward Deployment (+8 inches)."
+                ],
+                "restrictions": []
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "strategic-deployment"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-strategic-deployment-oldid-3137",
+                    "heading": "Strategic Deployment"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:forward-deployment"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "state:decoy",
+            "kind": "state",
+            "name": "Decoy State",
+            "labelIds": [
+                "marker"
+            ],
+            "aliases": [
+                "Decoy"
+            ],
+            "summary": "A deployment Marker State that conceals which of several colocated replicas represents the real user.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "timing": [
+                    "Deployment Phase"
+                ],
+                "effects": [
+                    "The user deploys with one or two replica Decoys in Coherency, according to the Decoy value.",
+                    "The controlling player secretly records which representation is the real user.",
+                    "Replica Decoys are removed by successful Discover, a successful Attack, or prohibited Silhouette contact; revealing the real user removes the remaining replicas."
+                ],
+                "requirements": [
+                    "The Trooper has the Decoy Special Skill."
+                ],
+                "restrictions": [
+                    "A Trooper using Decoy cannot remain part of a Fireteam or participate in a Coordinated Order.",
+                    "The real user is revealed by the State's listed revealing declarations, failed deployment Rolls, enemy Silhouette contact, or forced Saving Rolls."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-decoy-state-oldid-4071",
+                    "heading": "Decoy State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "state:impersonation-1",
+            "kind": "state",
+            "name": "Impersonation-1 State",
+            "labelIds": [
+                "marker"
+            ],
+            "aliases": [
+                "Impersonation-1",
+                "IMP-1"
+            ],
+            "summary": "The stronger Impersonation Marker State, which represents the user as an apparent ally and requires a penalized Discover Roll to reduce.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "timing": [
+                    "Deployment Phase",
+                    "Active Turn"
+                ],
+                "effects": [
+                    "The Model is replaced by an IMP-1 Marker and enemies perceive it as Allied.",
+                    "A normal successful Discover Roll against IMP-1 applies the State's WIP -3 MOD and changes the user to Impersonation-2 State."
+                ],
+                "requirements": [
+                    "The Trooper can activate Impersonation-1 State through Impersonation or another qualifying rule."
+                ],
+                "restrictions": [
+                    "Attacks and Intuitive Attacks cannot be declared against an IMP-1 Marker under the normal Impersonation rules.",
+                    "A Trooper in Impersonation State cannot be part of a Fireteam."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-impersonation-state-oldid-3929",
+                    "heading": "Impersonation-1"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:surprise-attack"
+                }
+            ]
+        },
+        {
+            "id": "state:impersonation-2",
+            "kind": "state",
+            "name": "Impersonation-2 State",
+            "labelIds": [
+                "marker"
+            ],
+            "aliases": [
+                "Impersonation-2",
+                "IMP-2"
+            ],
+            "summary": "The second Impersonation Marker State, which still disguises the user but is removed by a successful unmodified Discover Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "timing": [
+                    "Deployment Phase",
+                    "Active Turn"
+                ],
+                "effects": [
+                    "The Model is replaced by an IMP-2 Marker and enemies perceive it as Allied.",
+                    "A successful Discover Roll removes IMP-2 and replaces the Marker with the corresponding Model."
+                ],
+                "requirements": [
+                    "The Trooper can activate Impersonation-2 State through Impersonation or another qualifying rule."
+                ],
+                "restrictions": [
+                    "Attacks and Intuitive Attacks cannot normally be declared against an IMP-2 Marker until it is Discovered.",
+                    "A Trooper in Impersonation State cannot be part of a Fireteam."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-impersonation-state-oldid-3929",
+                    "heading": "Impersonation-2"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:surprise-attack"
+                }
+            ]
+        },
+        {
+            "id": "state:foxhole",
+            "kind": "state",
+            "name": "Foxhole State",
+            "aliases": [
+                "Foxhole"
+            ],
+            "summary": "A fixed fortified State that changes the user's Silhouette, grants all-round Partial Cover and Mimetism, and prevents movement while active.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "state",
+                "timing": [
+                    "Deployment Phase",
+                    "Active Turn"
+                ],
+                "effects": [
+                    "The user's Silhouette becomes S3 unless their profile Silhouette is higher.",
+                    "The user has Partial Cover in a 360-degree arc and gains Mimetism (-3) and Courage while the State is active.",
+                    "The user cannot perform movement while Foxhole State remains active."
+                ],
+                "requirements": [
+                    "Foxhole State is entered through Sapper and requires space for the State's Silhouette."
+                ],
+                "restrictions": [
+                    "Entering Prone State cancels Foxhole State.",
+                    "In the Active Turn, declaring a Movement-labelled Skill or beginning a Dodge move can cancel Foxhole State before that movement."
+                ]
+            },
+            "labelIds": [],
+            "citations": [
+                {
+                    "sourceId": "wiki-foxhole-state-oldid-3834",
+                    "heading": "Foxhole State"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:mimetism"
+                }
+            ]
+        }]
 }

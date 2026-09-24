@@ -136,20 +136,6 @@ class SkillCatalog:
                 f"Skill identity {sorted(skill_ids)} has conflicting curated categories"
             )
         chosen = candidates[0]
-        chosen_type_ids = tuple(category["type_id"] for category in chosen)
-
-        self._ensure_category_index()
-        assert self._category_index is not None
-        for skill_ref in self._army_refs_for_ids(skill_ids):
-            fallback = self._category_index.get(skill_ref)
-            if not fallback:
-                continue
-            fallback_type_ids = tuple(category["type_id"] for category in fallback)
-            if fallback_type_ids != chosen_type_ids:
-                raise ValueError(
-                    f"Skill identity {sorted(skill_ids)} has conflicting curated "
-                    f"categories across equivalent Army references"
-                )
 
         return [
             {

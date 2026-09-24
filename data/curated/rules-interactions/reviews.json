@@ -824,6 +824,79 @@
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
     }
+  ,
+    {
+      "recordId": "skill:combat-jump",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:decoy",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:impersonation",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:infiltration",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:minelayer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:parachutist",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:sapper",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:strategic-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:decoy",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:impersonation-1",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:impersonation-2",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:foxhole",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    }
   ],
   "futureInteractions": [
     {
@@ -906,15 +979,7 @@
       "status": "deferred",
       "reason": "Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable."
     },
-    {
-      "sourceRecordId": "skill:request-speedball",
-      "targetRecordId": "skill:combat-jump",
-      "relationType": "uses-effects-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Request Speedball explicitly places its Tokens by applying the Combat Jump Skill rules; materialize the edge once Combat Jump has a full canonical Skill definition."
-    },
-    {
+        {
       "sourceRecordId": "skill:suppressive-fire",
       "targetRecordId": "state:suppressive-fire",
       "relationType": "enters-state",
@@ -938,15 +1003,7 @@
       "status": "deferred",
       "reason": "Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge."
     },
-    {
-      "sourceRecordId": "equipment:biometric-visor",
-      "targetRecordId": "state:impersonation-1",
-      "relationType": "cancels-state",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity."
-    },
-    {
+        {
       "sourceRecordId": "equipment:dazer",
       "targetRecordId": "rule:difficult-terrain",
       "relationType": null,
@@ -1338,5 +1395,62 @@
     "status": "deferred",
     "reason": "A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role."
   }
+  ,
+    {
+      "sourceRecordId": "skill:combat-jump",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely."
+    },
+    {
+      "sourceRecordId": "skill:parachutist",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely."
+    },
+    {
+      "sourceRecordId": "skill:infiltration",
+      "targetRecordId": "state:camouflaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation."
+    },
+    {
+      "sourceRecordId": "skill:infiltration",
+      "targetRecordId": "state:hidden-deployment",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction."
+    },
+    {
+      "sourceRecordId": "state:foxhole",
+      "targetRecordId": "skill:courage",
+      "relationType": "uses-effects-of",
+      "targetRelease": "0.7.0",
+      "status": "planned",
+      "reason": "Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition."
+    },
+    {
+      "sourceRecordId": "state:foxhole",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model."
+    },
+    {
+      "sourceRecordId": "skill:minelayer",
+      "targetRecordId": "trait:disposable-x",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge."
+    }
   ]
 }
