@@ -520,6 +520,40 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
 
 
 
+def test_reviewed_trait_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record
+        for kind in ("trait", "skill")
+        for record in database.composed_records_by_kind(kind)
+    }
+    expected = {
+        ("trait:bs-weapon-ph", "modifies-rolls-for", "skill:bs-attack"),
+        ("trait:bs-weapon-wip", "modifies-rolls-for", "skill:bs-attack"),
+        ("trait:cc", "enables-use-of", "skill:cc-attack"),
+        ("trait:non-reloadable", "restricts-use-of", "skill:reload"),
+    }
+
+    for source_id, relation_type, target_id in expected:
+        source = records[source_id]
+        target = records[target_id]
+        source_name = source["name"]
+        target_name = target["name"]
+
+        assert (relation_type, "outbound", target_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert (relation_type, "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
 def test_weapon_trait_skill_prerequisites_are_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"

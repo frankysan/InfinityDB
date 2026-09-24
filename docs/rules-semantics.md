@@ -1388,6 +1388,75 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Peripheral>
 - Wiki: <https://infinitythewiki.com/Traits#Deployable>
 
+
+### RS-GSG-TRAIT-007 — BS Weapon Attribute substitution is a BS Attack roll interaction
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+`BS Weapon (PH)` and `BS Weapon (WIP)` are still BS Weapons, but they replace the
+Attribute used for their BS Attacks. Rules and MODs that normally affect BS instead affect
+PH or WIP for the corresponding weapon. InfinityDB therefore authors
+`modifies-rolls-for` from each Trait to the canonical BS Attack Skill; the exact replacement
+Attribute remains part of the Trait definition rather than being encoded in the edge.
+
+The additional prohibitions involving BS Attack (Guided), and BS Attack (Shock) for the WIP
+form, remain in the future-interaction ledger until those exact BS Attack forms have canonical
+rules identities. They must not be flattened into a restriction on ordinary BS Attack.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28PH.29>
+- Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28WIP.29>
+- Wiki: <https://infinitythewiki.com/BS_Attack#Guided_Mode>
+- PDF: Infinity N5 V5.3, printed pages 33 and 174
+
+### RS-GSG-TRAIT-008 — CC and Non-Reloadable expose direct Skill relationships
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+The `CC` Trait identifies a weapon that can be used when making CC Attacks. InfinityDB
+models that explicit capability as `enables-use-of` toward CC Attack, using the same scoped
+prerequisite semantics as other Trait-to-Skill edges: the relation does not satisfy the
+remaining declaration requirements by itself.
+
+`Non-Reloadable` explicitly prevents eligible Disposable uses from being recovered and
+prevents Unloaded State from being cancelled through Reload. InfinityDB therefore authors
+`restricts-use-of` toward Reload. The edge is deliberately Skill-facing rather than a generic
+State restriction: Unloaded State remains the condition that Reload would otherwise cancel.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits#CC>
+- Wiki: <https://infinitythewiki.com/Traits#Non-Reloadable>
+- Wiki: <https://infinitythewiki.com/Reload>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
+### RS-GSG-TRAIT-009 — Conditional Trait interactions must not be over-generalized
+
+**Classification:** source-native semantics with an interaction-modeling consequence.
+
+Several reviewed Traits have real cross-rule interactions that the current graph cannot yet
+represent without losing important conditions. The long-lived interaction ledger therefore
+retains them explicitly instead of creating broader current edges:
+
+- BioWeapon applies the combined effects of DA and Shock Special Ammunition, pending the
+  canonical Ammunition domain;
+- Double Shot has a specific interaction with Disposable (2) that consumes both remaining
+  uses and results in Unloaded State;
+- Indiscriminate bypasses the normal restriction created by Camouflage and Hiding Markers in
+  its Area of Effect; and
+- Continuous Damage can continue Saving Rolls until Dead State, but that indirect outcome is
+  not equivalent to an unconditional `causes-state` edge.
+
+This is the same fail-closed policy used elsewhere in the rules graph: keep exact behavior in
+the owning definition and preserve unresolved relationships in the future queue until both
+target identity and relation semantics are precise enough.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
 ### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
 
 **Classification:** source-native cross-rule gameplay relationship semantics.

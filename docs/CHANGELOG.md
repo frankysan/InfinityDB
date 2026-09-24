@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Complete interaction review for all 28 currently defined public Traits and the five
+  defined supporting Trait rules; link BS Weapon (PH/WIP) to the BS Attacks they modify,
+  CC to CC Attack, and Non-Reloadable to Reload while retaining conditional ammunition,
+  Marker, Disposable, and exact BS Attack interactions in the long-lived future queue.
 - Complete the interaction review for all 39 public Skills that currently have canonical rules
   definitions; review Forward Deployment, Limited Cover, Strategos, and Surprise Attack while
   retaining the selective Partial Cover, generic Face to Face Roll, and broader Marker-form

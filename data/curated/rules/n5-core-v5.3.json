@@ -1012,7 +1012,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
+                }
+            ]
         },
         {
             "id": "trait:bs-weapon-wip",
@@ -1037,7 +1043,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
+                }
+            ]
         },
         {
             "id": "trait:bts-0",
@@ -1137,7 +1149,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:cc-attack"
+                }
+            ]
         },
         {
             "id": "trait:concealed",
@@ -1485,7 +1503,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:reload"
+                }
+            ]
         },
         {
             "id": "trait:perimeter",

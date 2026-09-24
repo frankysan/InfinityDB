@@ -1029,6 +1029,25 @@ def test_checked_in_n5_collection_keeps_common_skill_labels_source_faithful() ->
     } == expected_labels
 
 
+def test_checked_in_n5_collection_links_reviewed_trait_skill_interactions() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected = {
+        "trait:bs-weapon-ph": {("modifies-rolls-for", "skill:bs-attack")},
+        "trait:bs-weapon-wip": {("modifies-rolls-for", "skill:bs-attack")},
+        "trait:cc": {("enables-use-of", "skill:cc-attack")},
+        "trait:non-reloadable": {("restricts-use-of", "skill:reload")},
+    }
+
+    for trait_id, relations in expected.items():
+        assert {
+            (relation["type"], relation["recordId"])
+            for relation in records[trait_id]["relations"]
+        } == relations
+
+
 def test_checked_in_n5_collection_links_weapon_traits_to_required_common_skills() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

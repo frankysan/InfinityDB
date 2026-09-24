@@ -462,57 +462,68 @@
     {
       "recordId": "trait:anti-materiel",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:arm-0",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:aro",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:bioweapon",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:boost",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:bs-weapon-ph",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:bs-weapon-wip",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:bts-0",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:burst-b",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:burst-single-target",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:cc",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:concealed",
@@ -523,7 +534,8 @@
     {
       "recordId": "trait:continuous-damage",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:deployable",
@@ -534,7 +546,8 @@
     {
       "recordId": "trait:direct-template",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:disposable-x",
@@ -545,22 +558,26 @@
     {
       "recordId": "trait:double-shot",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:impact-template",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:improvised",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:indiscriminate",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:intuitive-attack",
@@ -571,12 +588,14 @@
     {
       "recordId": "trait:non-lethal",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:non-reloadable",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:perimeter",
@@ -587,7 +606,8 @@
     {
       "recordId": "trait:prior-deployment",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:reflective",
@@ -610,7 +630,8 @@
     {
       "recordId": "trait:state",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:suppressive-fire",
@@ -621,17 +642,20 @@
     {
       "recordId": "trait:target-attribute",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:targetless",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "trait:zone-of-control-zc",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "weapon:armed-turret",
@@ -1183,6 +1207,70 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State."
+    },
+    {
+      "sourceRecordId": "trait:bioweapon",
+      "targetRecordId": "ammunition:da",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain."
+    },
+    {
+      "sourceRecordId": "trait:bioweapon",
+      "targetRecordId": "ammunition:shock",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain."
+    },
+    {
+      "sourceRecordId": "trait:bs-weapon-ph",
+      "targetRecordId": "skill:bs-attack-guided",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BS Attack (Guided) cannot use weapons with the BS Weapon (PH) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "trait:bs-weapon-wip",
+      "targetRecordId": "skill:bs-attack-guided",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BS Attack (Guided) cannot use weapons with the BS Weapon (WIP) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "trait:bs-weapon-wip",
+      "targetRecordId": "skill:bs-attack-shock",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The BS Weapon (WIP) Trait explicitly prevents use with BS Attack (Shock); retain the restriction until that exact BS Attack form has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "trait:continuous-damage",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Continuous Damage can continue forcing Saving Rolls until the target enters Dead State, but the State is not yet canonical and the current relation vocabulary should not overstate that indirect transition as a simple causes-state edge."
+    },
+    {
+      "sourceRecordId": "trait:double-shot",
+      "targetRecordId": "trait:disposable-x",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Double Shot has a specific conditional interaction with Disposable (2), consuming both remaining uses and resulting in Unloaded State; the current relation vocabulary has no precise conditional Trait-to-Trait interaction edge."
+    },
+    {
+      "sourceRecordId": "trait:indiscriminate",
+      "targetRecordId": "state:camouflaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge."
     }
   ]
 }
