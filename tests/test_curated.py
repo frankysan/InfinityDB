@@ -1298,3 +1298,19 @@ def test_checked_in_n5_collection_models_state_self_recovery_rolls() -> None:
         (relation["type"], relation["recordId"])
         for relation in records["state:isolated"]["relations"]
     } >= {("modifies-rolls-for", "skill:reset")}
+
+
+def test_checked_in_n5_collection_models_first_full_catalog_equipment_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["equipment:360o-visor"].get("relations", []) == []
+    assert records["equipment:nanoscreen"]["relations"] == [
+        {"type": "imposes-modifiers-on", "recordId": "skill:bs-attack"}
+    ]
+    assert records["equipment:x-visor"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:bs-attack"},
+        {"type": "modifies-rolls-for", "recordId": "skill:discover"},
+        {"type": "modifies-rolls-for", "recordId": "skill:suppressive-fire"},
+    ]

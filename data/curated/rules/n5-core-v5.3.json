@@ -506,6 +506,33 @@
             "url": "https://infinitythewiki.com/index.php?title=Cautious_Movement&oldid=3931",
             "authority": "secondary",
             "retrievedDate": "2026-09-23"
+        },
+        {
+            "id": "wiki-360-visor-oldid-3511",
+            "kind": "wiki",
+            "title": "Infinity Wiki — 360º Visor revision 3511",
+            "version": "N5.3 / oldid 3511",
+            "url": "https://infinitythewiki.com/index.php?title=360º_Visor&oldid=3511",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-nanoscreen-oldid-3187",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Nanoscreen revision 3187",
+            "version": "N5.3 / oldid 3187",
+            "url": "https://infinitythewiki.com/index.php?title=Nanoscreen&oldid=3187",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-x-visor-oldid-3193",
+            "kind": "wiki",
+            "title": "Infinity Wiki — X-Visor revision 3193",
+            "version": "N5.3 / oldid 3193",
+            "url": "https://infinitythewiki.com/index.php?title=X-Visor&oldid=3193",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -7255,6 +7282,162 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-09-23"
             }
+        },
+        {
+            "id": "equipment:360o-visor",
+            "kind": "equipment",
+            "name": "360º Visor",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "Automatic Equipment that expands the user's Line of Fire arc to 360º instead of the usual 180º.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "The user has a 360º LoF arc instead of the usual 180º arc."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "360o-visor"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-360-visor-oldid-3511",
+                    "heading": "360º Visor"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:nanoscreen",
+            "kind": "equipment",
+            "name": "Nanoscreen",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "Automatic Equipment that protects its user against eligible BS Attacks by penalizing the attacker and improving the user's Saving Rolls.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The user must be the target of a BS Attack."
+                ],
+                "effects": [
+                    "A -3 BS MOD is imposed on BS Attack Rolls against the user.",
+                    "+3 applies to the user's Saving Rolls against those BS Attacks."
+                ],
+                "restrictions": [
+                    "The MODs do not apply to BS Attacks with the Comms. Attack Trait.",
+                    "Nanoscreen cannot be used against CC Attacks."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "nanoscreen"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "imposes-modifiers-on",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-nanoscreen-oldid-3187",
+                    "heading": "Nanoscreen"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:x-visor",
+            "kind": "equipment",
+            "name": "X-Visor",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "Automatic Equipment that improves the user's negative Range MODs for ranged attacks and other Range-band actions.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "For the user's BS Weapons, Special Skills, and Equipment, a -3 Range MOD becomes 0 and a -6 Range MOD becomes -3.",
+                    "The same benefit applies to Common Skills with Range bands, including Discover and Suppressive Fire."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "x-visor"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:bs-attack"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:discover"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-x-visor-oldid-3193",
+                    "heading": "X-Visor"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
         }
+
     ]
 }

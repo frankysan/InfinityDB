@@ -21,10 +21,10 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 47/161 complete (29.2%), 114 pending.**
-- Primary domains: Skill **35/100**; Equipment **3/28**; Trait **9/33**.
+- **0.7.0 primary catalog: 50/161 complete (31.1%), 111 pending.**
+- Primary domains: Skill **35/100**; Equipment **6/28**; Trait **9/33**.
 - Supporting semantic identities: **23/39** complete, **16** pending.
-- Current authored outgoing relations: **87**.
+- Current authored outgoing relations: **91**.
 - Explicitly tracked future/deferred interactions: **14**.
 
 ## 0.7.0 primary catalog review
@@ -267,10 +267,10 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Warhorse** (`skill:warhorse`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 
-### Equipment (3/28)
+### Equipment (6/28)
 
-- [ ] **360º Visor** (`equipment:360o-visor`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **360º Visor** (`equipment:360o-visor`) — reviewed
+  - outgoing: none
 - [ ] **AI Motorcycle** (`equipment:ai-motorcycle`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Albedo** (`equipment:albedo`) — reviewed
@@ -317,16 +317,18 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Multispectral Visor** (`equipment:multispectral-visor`) — reviewed
   - `reduces-modifiers-from` → Mimetism (`skill:mimetism`)
-- [ ] **Nanoscreen** (`equipment:nanoscreen`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Nanoscreen** (`equipment:nanoscreen`) — reviewed
+  - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
 - [ ] **Repeater** (`equipment:repeater`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **SymbioMate** (`equipment:symbiomate`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **TinBot** (`equipment:tinbot`) — pending
   - outgoing: none
-- [ ] **X Visor** (`equipment:x-visor`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **X Visor** (`equipment:x-visor`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+  - `modifies-rolls-for` → Suppressive Fire (`skill:suppressive-fire`)
 
 ### Trait (9/33)
 

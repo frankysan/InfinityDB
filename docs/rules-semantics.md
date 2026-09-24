@@ -3083,6 +3083,29 @@ Source:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
 
+### RS-EQ-CORE-001 — Equipment interaction review uses the same typed graph as Skills and Traits
+
+**Classification:** source-native Equipment interaction semantics.
+
+The 0.7.0 interaction audit covers public Equipment identities independently of Skill and Trait
+coverage. A reviewed Equipment definition may legitimately have no outgoing gameplay edge when
+its rule is self-contained, while Equipment that changes a named action authors the same typed
+relations used elsewhere in the graph.
+
+For the first full-catalog Equipment slice, 360º Visor is reviewed with no outgoing relation
+because its effect is entirely local to the user's LoF arc. Nanoscreen authors
+`imposes-modifiers-on` toward BS Attack because it directly applies a -3 MOD to eligible BS
+Attack Rolls. X-Visor authors `modifies-rolls-for` toward BS Attack, Discover, and Suppressive
+Fire because it changes the user's negative Range MOD processing for those ranged actions.
+Exact numerical and eligibility conditions remain in the Equipment facts rather than being
+duplicated on reverse edges.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=360º_Visor&oldid=3511>
+- Wiki: <https://infinitythewiki.com/index.php?title=Nanoscreen&oldid=3187>
+- Wiki: <https://infinitythewiki.com/index.php?title=X-Visor&oldid=3193>
+
 ## ITS FAQ
 
 ### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes

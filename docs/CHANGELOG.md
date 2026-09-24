@@ -7,6 +7,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Expand the 0.7.0 Equipment interaction audit with reviewed 360º Visor, Nanoscreen,
+  and X-Visor definitions; Nanoscreen now links to the BS Attacks it modifies and X-Visor
+  links to BS Attack, Discover, and Suppressive Fire range-roll processing.
 - Add all core Common Skills to the rules-backed Skills catalog and present them ahead
   of Special Skills, including rules that never appear as Army profile entries.
 - Add Baggage rules and link its conditional reload and Unloaded-State recovery

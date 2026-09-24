@@ -637,6 +637,24 @@
       "recordId": "weapon:armed-turret",
       "targetRelease": "0.7.0",
       "status": "pending"
+    },
+    {
+      "recordId": "equipment:360o-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:nanoscreen",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:x-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
