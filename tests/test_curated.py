@@ -1081,6 +1081,22 @@ def test_checked_in_n5_collection_links_common_skill_interactions() -> None:
     ]
 
 
+def test_checked_in_n5_collection_links_place_deployable_prerequisites() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_sources = (
+        "trait:deployable",
+        "rule:peripheral-type:ancillary",
+    )
+    for source_id in expected_sources:
+        assert {
+            (relation["type"], relation["recordId"])
+            for relation in records[source_id]["relations"]
+        } == {("enables-use-of", "skill:place-deployable")}
+
+
 def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

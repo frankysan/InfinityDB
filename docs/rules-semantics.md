@@ -1366,6 +1366,28 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment&oldid=3084>
 - Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment_State&oldid=3835>
 
+### RS-GSG-TRAIT-006 — Deployable and Peripheral (Ancillary) enable Place Deployable
+
+**Classification:** source-native cross-domain prerequisite relationship.
+
+Place Deployable requires the user to have a Weapon or piece of Equipment with the
+Deployable Label, or to have a Peripheral (Ancillary). The Peripheral rules likewise state
+that a Controller deploys an undeployed Peripheral (Ancillary) by performing Place
+Deployable. Each endpoint therefore satisfies one explicit prerequisite for the Common
+Skill without making every declaration automatically legal.
+
+InfinityDB authors `enables-use-of` from Deployable and Peripheral (Ancillary) toward Place
+Deployable. `rules.db` derives the reverse navigation so the Common Skill exposes both ways
+it can become available. Reactive-Turn LoF, placement geometry, Camouflage-Marker
+restrictions, and the Perimeter placement exception remain facts of the owning rules rather
+than being flattened into these edges.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Place_Deployable>
+- Wiki: <https://infinitythewiki.com/Peripheral>
+- Wiki: <https://infinitythewiki.com/Traits#Deployable>
+
 ### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
 
 **Classification:** source-native cross-rule gameplay relationship semantics.

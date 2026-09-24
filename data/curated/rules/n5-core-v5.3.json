@@ -1194,7 +1194,13 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-17"
-            }
+            },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:place-deployable"
+                }
+            ]
         },
         {
             "id": "trait:direct-template",
@@ -4511,6 +4517,12 @@
                 },
                 "operatingDistance": "unlimited"
             },
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:place-deployable"
+                }
+            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",

@@ -587,6 +587,35 @@ def test_skill_roll_modifier_interactions_are_bidirectional(tmp_path: Path) -> N
         }
 
 
+def test_place_deployable_prerequisites_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record
+        for kind in ("trait", "rule", "skill")
+        for record in database.composed_records_by_kind(kind)
+    }
+    place_deployable = records["skill:place-deployable"]
+    expected_sources = {
+        "trait:deployable": "Deployable",
+        "rule:peripheral-type:ancillary": "Peripheral (Ancillary)",
+    }
+
+    for source_id, source_name in expected_sources.items():
+        source = records[source_id]
+        assert ("enables-use-of", "outbound", "Place Deployable") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert ("enables-use-of", "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in place_deployable["display_relations"]
+        }
+
+
 def test_common_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"
