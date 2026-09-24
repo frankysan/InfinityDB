@@ -15,9 +15,14 @@ provenance under `data/manifests/`.
   endpoints that cannot be resolved from the current Army snapshot alone.
 - `enrichment-coverage/` contains maintained release-scope classifications consumed by
   the rules-enrichment coverage audit; these decisions classify audit gaps without becoming
-  runtime game semantics. These categories
-  have separate schemas and loaders; no loader treats arbitrary JSON from another
-  curated category as valid input. Curated identifiers are stable project/domain identities.
+  runtime game semantics.
+- `rules-interactions/` contains the long-lived outgoing-interaction review policy used to
+  track current-release progress and known deferred/future relation candidates without
+  becoming runtime game semantics.
+
+These curated categories have separate schemas and loaders; no loader treats arbitrary JSON
+from another curated category as valid input. Curated identifiers are stable project/domain
+identities.
 - `armyLinks` are cross-domain references rather than curated record identities: Skill,
   Equipment, and Weapon links may use either a positive numeric source ID or the owning
   application-domain slug, with slugs preferred in maintained rules data. Numeric references
@@ -50,6 +55,35 @@ must match a gap in the selected `infinity.db` + `rules.db` pair; stale or misty
 fail the audit instead of silently surviving after the underlying data changes. The policy is
 release-planning metadata only. It must not be consumed as rules ontology or application
 runtime behavior.
+
+### Rules-interaction review policy
+
+`rules-interactions/reviews.json` is the maintained review ledger for outgoing semantic
+relationships. Every semantic rules identity other than `declaration-category` projection
+records must have exactly one ledger entry. Entries record the release whose outgoing
+interactions are being reviewed, whether that review is pending/reviewed/inherited, and
+known future interactions that should survive beyond the current release. The top-level
+`futureInteractions` queue can also retain a provisional source/target ID that is not yet a
+current rules record, so future domain work does not lose already-reviewed interactions.
+
+The ledger deliberately does not duplicate authored `relations`: the current curated rules
+graph remains authoritative for edges that exist now. `tools/audit_rules_interactions.py`
+combines the graph with the ledger and generates `docs/rules-interaction-checklist.md`. A
+source-specific variant may use `inherited` when its outgoing interaction semantics are
+fully inherited from its family; this does not prevent adding a future exact-variant review
+if a source exception is discovered. Deferred candidates may leave `relationType` null when
+the current relation vocabulary cannot represent the interaction precisely.
+
+Regenerate/check the maintained checklist with:
+
+```powershell
+python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md
+python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md
+```
+
+A release gate may be inspected explicitly with `--require-release <version>`. Pending
+reviews make that command fail; future candidates targeting another release remain visible
+without blocking the selected release.
 
 ### Curated Peripheral identities
 

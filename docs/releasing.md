@@ -74,6 +74,11 @@ player-relevant information required by this definition.
 
 - [ ] Confirm the target version and the intended release scope.
 - [ ] Complete the release-specific requirements recorded in `docs/TODO.md`.
+- [ ] For releases with a maintained rules-interaction review target, run the interaction
+  audit with both `--check-output docs/rules-interaction-checklist.md` and
+  `--require-release <version>`, then resolve every pending entity for that release. Deferred
+  candidates explicitly targeting later releases remain tracked and do not block the current
+  release.
 - [ ] Resolve known release-blocking defects. Explicitly defer non-blocking work to
   `docs/TODO.md` rather than leaving its status ambiguous.
 - [ ] Confirm that any schema, compatibility, data-rebuild, deployment, or asset

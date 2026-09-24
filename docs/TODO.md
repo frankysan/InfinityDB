@@ -146,6 +146,13 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Represent reviewed related-item relationships explicitly rather than
     deriving them from display-name matching; curated v5 uses typed one-way edges and
     `rules.db` derives reverse links without mirrored authored rows.
+  - [ ] Complete the maintained outgoing-interaction review checklist for 0.7.0.
+    `docs/rules-interaction-checklist.md` is generated from the curated graph plus the
+    long-lived `data/curated/rules-interactions/reviews.json` ledger. Every semantic rules
+    identity must be tracked even when review concludes that it has no outgoing edge. Known
+    post-0.7.0 candidates remain in the same ledger so later releases inherit the research
+    instead of rediscovering it. The 0.7.0 gate is reached when no entity targeted at 0.7.0
+    remains `pending`; future-targeted interactions do not block that release.
   - [x] Promote reviewed Game States to a lightweight rules-backed catalog and model
     Doctor/Engineer recovery with authored `cancels-state` edges, so Unconscious, Stunned,
     Targeted, IMM-A/B, Isolated, and Disconnected expose reverse cancellation navigation.

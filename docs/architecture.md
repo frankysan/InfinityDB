@@ -137,6 +137,7 @@ config/                      = maintained project/domain knowledge
 raw source data              = immutable external input
 data/manifests/snapshots/    = generated acquisition provenance
 data/curated/rules/          = source-controlled human-reviewed rules data
+data/curated/rules-interactions/ = maintained rules-interaction review policy
 data/curated/identities/     = source-controlled reviewed presentation identities
 data/curated/peripherals/    = reviewed Army-to-Peripheral identity mappings
 data/curated/snapshot-notes/ = source-controlled human snapshot annotations
@@ -151,6 +152,9 @@ code that interprets them.
 `data/curated/` is different from configuration: it contains human-reviewed
 information derived from identified external sources and retains source
 provenance. `data/curated/rules/` is consumed by the rules-database build, while
+`data/curated/rules-interactions/` is project review metadata: it tracks whether each
+semantic identity has had its outgoing interactions audited and preserves deferred/future
+candidates without becoming rules ontology or runtime input.
 `data/curated/identities/` contains reviewed source-derived presentation
 relationships consumed during Army normalization. `data/curated/peripherals/` owns
 the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed

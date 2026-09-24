@@ -1326,6 +1326,37 @@ compatibility references remain unambiguous JSON integers.
   ontology; semantic classifications remain owned by canonical application identity plus
   curated rules data.
 
+## Long-lived rules interaction review ledger (2026-09-24)
+
+- `data/curated/rules-interactions/reviews.json` is the maintained review ledger for
+  outgoing rules relationships. It is planning/review metadata, not runtime ontology;
+  authored `relations` in curated rules remain the single source of truth for edges that
+  currently exist.
+- Every semantic rules identity except `declaration-category` projection records must have
+  a ledger entry. Adding or removing a Skill, Equipment item, Weapon, Trait, State, Training
+  identity, supporting Rule, or future semantic kind therefore makes the audit fail until
+  the review ledger is reconciled.
+- Review state is release-aware. `reviewed` means outgoing interactions were audited for the
+  entry's target release; `inherited` means an exact source variant reuses its family's
+  reviewed interaction semantics; `pending` remains release work. Zero outgoing edges are a
+  valid reviewed result and must not be inferred from edge count alone.
+- The initial 0.7.0 baseline backfills current sources of authored non-`variant-of` gameplay
+  edges as reviewed because those edges already have explicit semantic review decisions, marks
+  exact source variants as `inherited`, and leaves other identities pending. Zero-edge entries
+  become reviewed only after an explicit audit decision; Super-Jump and Perimeter are the first
+  such examples because their known interactions are deliberately deferred rather than absent.
+- Known later interactions stay in the policy's top-level `futureInteractions` queue with
+  source/target IDs, target release, status, and reason. This preserves post-0.7.0 research
+  while allowing the 0.7.0 gate to measure only entries targeted at 0.7.0. A future candidate
+  may omit `relationType` when the current vocabulary cannot express it precisely. The initial
+  queue retains Super-Jump -> Jump, Perimeter -> Place Deployable, and the documented White
+  Noise counter-interactions with Marksmanship and Multispectral Visor even though White Noise
+  does not yet have a 0.7.0 catalog identity.
+- `tools/audit_rules_interactions.py` combines the ledger with the current curated graph and
+  generates `docs/rules-interaction-checklist.md`. `--check-output` detects a stale committed
+  checklist; `--require-release <version>` is the release gate and fails while that release has
+  pending entity reviews.
+
 - Rules-interaction relationships are a core 0.7.0 product feature. Author semantic
   edges once, derive reverse navigation in `rules.db`, and present useful context from
   both endpoints. Multispectral Visor/Mimetism is the first production example: MSV authors

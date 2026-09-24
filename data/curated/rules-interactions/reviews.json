@@ -1,0 +1,664 @@
+{
+  "format": "InfinityDB rules interaction review policy",
+  "formatVersion": 1,
+  "records": [
+    {
+      "recordId": "equipment:albedo",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:baggage",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:multispectral-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:tinbot",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "equipment:tinbot-albedo",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "equipment:tinbot-discover",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "equipment:tinbot-ecm-guided",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "equipment:tinbot-firewall",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "equipment:tinbot-neurocinetics",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "equipment:tinbot-repeater",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "rule:peripheral-type:ancillary",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:peripheral-type:control",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "rule:peripheral-type:cyberplug",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "rule:peripheral-type:servant",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "rule:peripheral-type:synchronized",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:alert",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:bs-attack",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:bs-11",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:bs-12",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:camouflage",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:cautious-movement",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:cc-attack",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:cc-21",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:climb",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:combat-instinct",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:cyberplug",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:discover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:doctor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:dodge",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:engineer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:forward-deployment",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:forward-observer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:hidden-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:idle",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:intuitive-attack",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:jump",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:limited-cover",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:look-out",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:marksmanship",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:martial-arts",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:martial-arts-l1",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l2",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l3",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l4",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l5",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:mimetism",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:move",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:natural-born-warrior",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:no-cover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:peripheral",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:place-deployable",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:reload",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:request-speedball",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:reset",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:sensor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:sixth-sense",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:speculative-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:stealth",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:strategos",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:strategos-l1",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:strategos-l2",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:super-jump",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:suppressive-fire",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "skill:surprise-attack",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "state:camouflaged",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:disconnected",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "state:hidden-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:immobilized-a",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:immobilized-b",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:isolated",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:stunned",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "state:targeted",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:unconscious",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "state:unloaded",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "training:irregular",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "training:regular",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:anti-materiel",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:arm-0",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:aro",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:bioweapon",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:boost",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:bs-weapon-ph",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:bs-weapon-wip",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:bts-0",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:burst-b",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:burst-single-target",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:cc",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:concealed",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:continuous-damage",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:deployable",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:direct-template",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:disposable-x",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:double-shot",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:impact-template",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:improvised",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:indiscriminate",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:intuitive-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:non-lethal",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:non-reloadable",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:perimeter",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:prior-deployment",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:reflective",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:silent-x",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:speculative-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:state",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:suppressive-fire",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:target-attribute",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:targetless",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "trait:zone-of-control-zc",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    },
+    {
+      "recordId": "weapon:armed-turret",
+      "targetRelease": "0.7.0",
+      "status": "pending"
+    }
+  ],
+  "futureInteractions": [
+    {
+      "sourceRecordId": "skill:super-jump",
+      "targetRecordId": "skill:jump",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge."
+    },
+    {
+      "sourceRecordId": "trait:perimeter",
+      "targetRecordId": "skill:place-deployable",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Perimeter changes Place Deployable placement behavior rather than enabling the Skill; the current relation vocabulary has no precise modifier edge."
+    },
+    {
+      "sourceRecordId": "hacking-program:white-noise",
+      "targetRecordId": "skill:marksmanship",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first."
+    },
+    {
+      "sourceRecordId": "hacking-program:white-noise",
+      "targetRecordId": "equipment:multispectral-visor",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first."
+    }
+  ]
+}
