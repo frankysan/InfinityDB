@@ -368,29 +368,6 @@ requiring a new top-level browser surface in 0.7.0.
     semantics and canonical Army relationships rather than independently hard-
     coding a second ontology into the frontend.
 
-- [ ] **Finish 0.7.0 with a catalog-consistency and project-presentation pass.**
-  - [x] After all current catalog items have been vetted, audit them together for
-    consistency of semantics, terminology, information hierarchy, and player-facing
-    presentation. The catalog-wide pass covers all 179 current canonical primary
-    definitions plus the vetted Commlink release exception: every current definition is
-    reviewed, summarized, and cited; defined-term capitalization is normalized; Related
-    rules are grouped consistently by gameplay meaning; and gameplay context now precedes
-    provenance in the shared renderer. Responsive/composed-page acceptance remains in
-    the dedicated presentation-audit tasks above.
-  - [x] Revise repository and application language about Corvus Belli assets to
-    reflect the explicit permission granted on 2026-09-24 to use and redistribute
-    the graphical assets used by InfinityDB. The maintained policy now distinguishes
-    the permitted processed SVG publication from raw Army/wiki/PDF/source-symbol
-    archives, keeps Corvus Belli material outside the MIT License, records the
-    attribution/non-commercial requirements, and treats the current ignored asset
-    layout as an implementation detail rather than a rights restriction.
-  - [ ] Rewrite the landing page and About page to reflect the current state of the
-    project and give users a concise indication of the planned direction.
-  - [ ] Make the landing page explicitly identify InfinityDB as an open-source
-    community project that is not affiliated with Corvus Belli S.L., while also
-    stating that InfinityDB has explicit permission to use the Corvus Belli assets
-    it distributes.
-
 0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
 every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
 charts, saved-list guidance, organizer tooling, a live action-legality engine, or

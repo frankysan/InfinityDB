@@ -122,6 +122,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Rewrite the landing and About pages around InfinityDB's current rules-enriched state and
+  public roadmap direction. The landing page now identifies InfinityDB prominently as an
+  open-source, non-commercial community project that is not affiliated with Corvus Belli S.L.,
+  while also stating Corvus Belli's explicit permission for the graphical assets InfinityDB uses
+  and redistributes.
 - Update the project-wide Corvus Belli asset policy to reflect the explicit 2026-09-24
   permission to use and redistribute Infinity graphical assets for InfinityDB's
   non-commercial scope. Processed SVGs may be included in public repositories and

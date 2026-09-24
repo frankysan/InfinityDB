@@ -736,6 +736,17 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert f"Version {__display_version__}".encode() in body
 
 
+def test_landing_page_states_independence_and_asset_permission(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    assert b"Open-source Infinity community reference" in body
+    assert b"non-commercial open-source community project" in body
+    assert b"not affiliated with Corvus Belli S.L." in body
+    assert b"explicitly granted InfinityDB permission" in body
+    assert b"use and redistribute the Infinity graphical assets" in body
+
+
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
     status, _, body = request(app, "/")
 
@@ -935,12 +946,13 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
     assert f"Version {__display_version__}".encode() in body
-    assert b"Support questions, suggestions, or" in body
-    assert b"feedback can be submitted on the project's GitHub page." in body
-    assert b"mailto:johannes@haglund.info" not in body
+    assert b"developed in the open" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
-    assert b"better companion for choosing, collecting, and playing your army" in body
+    assert b"Version 0.7 focuses on rules context" in body
+    assert b"player-data-complete 1.0 reference" in body
+    assert b"not affiliated with Corvus Belli S.L." in body
+    assert b"explicitly permitted InfinityDB to use and redistribute" in body
     assert b'href="/about" aria-current="page"' in body
     assert b"about.js" in body
 
