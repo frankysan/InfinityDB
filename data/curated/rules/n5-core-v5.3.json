@@ -714,6 +714,42 @@
             "url": "https://infinitythewiki.com/index.php?title=Warhorse&oldid=3155",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-courage-oldid-3600",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Courage revision 3600",
+            "version": "N5.3 / oldid 3600",
+            "url": "https://infinitythewiki.com/index.php?title=Courage&oldid=3600",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-frenzy-oldid-3806",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Frenzy revision 3806",
+            "version": "N5.3 / oldid 3806",
+            "url": "https://infinitythewiki.com/index.php?title=Frenzy&oldid=3806",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-impetuous-oldid-4039",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Impetuous revision 4039",
+            "version": "N5.3 / oldid 4039",
+            "url": "https://infinitythewiki.com/index.php?title=Impetuous&oldid=4039",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-religious-troop-oldid-3601",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Religious Troop revision 3601",
+            "version": "N5.3 / oldid 3601",
+            "url": "https://infinitythewiki.com/index.php?title=Religious_Troop&oldid=3601",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -9510,6 +9546,10 @@
                 {
                     "type": "uses-effects-of",
                     "recordId": "skill:mimetism"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:courage"
                 }
             ]
         },
@@ -10049,6 +10089,244 @@
                 {
                     "sourceId": "wiki-warhorse-oldid-3155",
                     "heading": "Warhorse"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:courage",
+            "kind": "skill",
+            "name": "Courage",
+            "summary": "An optional Automatic Special Skill that lets the user choose to automatically pass Guts Rolls and remain operational during Retreat.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user may choose to automatically pass any Guts Roll.",
+                    "The user is unaffected by Retreat situations, cannot enter Retreat State, and acts normally until the end of the game."
+                ],
+                "restrictions": [
+                    "The user is still affected by Loss of Lieutenant, including during Retreat."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "courage"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-courage-oldid-3600",
+                    "heading": "Courage"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:frenzy",
+            "kind": "skill",
+            "name": "Frenzy",
+            "summary": "An obligatory Automatic Special Skill that, after the user directly wounds or kills an enemy, grants Impetuous and Limited Cover and removes Marker States.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must directly inflict at least one Wound on an Enemy Trooper or cause that Trooper to enter Dead State."
+                ],
+                "effects": [
+                    "In the States Phase of the Player Turn where the Requirement is met, the user gains Impetuous and Limited Cover and retains them for the remainder of the game.",
+                    "When the user gains Impetuous through Frenzy, they cancel any Marker State they are in and cannot re-enter those States."
+                ],
+                "restrictions": [
+                    "Wounds caused by the user’s Deployable Weapons do not satisfy the Requirement."
+                ]
+            },
+            "labelIds": [
+                "obligatory",
+                "states-phase"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "frenzy"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-frenzy-oldid-3806",
+                    "heading": "Frenzy"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:impetuous"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:limited-cover"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:camouflaged"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:decoy"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:impersonation-1"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:impersonation-2"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:impetuous",
+            "kind": "skill",
+            "name": "Impetuous",
+            "summary": "An obligatory Automatic Special Skill that grants one activation in the Impetuous Phase while tightly constraining its legal Skill combinations and movement.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "During the Tactical Phase, place an Impetuous Token next to the user; during the Impetuous Phase the user may activate once by removing that Token without spending an Order.",
+                    "An Impetuous activation follows the normal Order Expenditure Sequence and permits only the Skill combinations listed by the rule.",
+                    "Movement-labelled Skills declared in the Impetuous Phase must follow the rule’s mandatory movement priorities and normally use the full corresponding MOV value."
+                ],
+                "restrictions": [
+                    "In the Impetuous Phase, Move, Jump, or Climb cancels Prone State and the user cannot enter Prone State at the end of the movement.",
+                    "Impetuous Troopers cannot enter Marker States or any other States that explicitly prohibit entry.",
+                    "A player in Retreat does not carry out the Impetuous Phase."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "impetuous"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-impetuous-oldid-4039",
+                    "heading": "Impetuous"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:religious-troop",
+            "kind": "skill",
+            "name": "Religious Troop",
+            "summary": "An obligatory Automatic Special Skill that automatically passes Guts Rolls while allowing a WIP Roll to apply failed-Guts movement, and ignores Retreat.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user automatically passes Guts Rolls and therefore normally holds position after surviving an Attack.",
+                    "The user may instead make a WIP Roll; on success, they may apply the effects of failing the Guts Roll.",
+                    "The user is unaffected by Retreat situations, does not enter Retreat State, and acts normally until the end of the game."
+                ],
+                "restrictions": [
+                    "During Retreat, the user cannot voluntarily leave the game table unless scenario rules allow it.",
+                    "The user remains affected by Loss of Lieutenant, including during Retreat."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "religious-troop"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-religious-troop-oldid-3601",
+                    "heading": "Religious Troop"
                 }
             ],
             "review": {

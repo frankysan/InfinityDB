@@ -3385,6 +3385,39 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Terrain&oldid=3146>
 - Wiki: <https://infinitythewiki.com/index.php?title=Warhorse&oldid=3155>
 
+
+### RS-SK-MORALE-001 — Morale/behavior Skills separate stable reuse from phase- and situation-scoped effects
+
+**Classification:** source-native Skill interaction semantics.
+
+Courage and Religious Troop both alter Guts Roll and Retreat behavior, but in materially different
+ways: Courage optionally lets its user pass a Guts Roll automatically, while Religious Troop
+automatically passes and allows a WIP Roll to apply failed-Guts effects. Both ignore Retreat while
+remaining affected by Loss of Lieutenant. Guts Roll, Retreat, and Loss of Lieutenant are not yet
+canonical graph targets, so those interactions remain in the maintained future ledger rather than
+being approximated through unrelated Skills or States. Foxhole State explicitly grants Courage, so
+that existing planned edge is now a current `uses-effects-of` relationship.
+
+Frenzy grants Impetuous and Limited Cover after its direct-Wound/Dead-State trigger, so it authors
+`uses-effects-of` edges to those canonical Skills. When Frenzy grants Impetuous it also cancels
+Marker States and prevents re-entry; InfinityDB authors `cancels-state` edges to the currently
+modeled Camouflaged, Decoy, and Impersonation-1/2 States while retaining the generic all-Marker
+State/prevention semantics in the future ledger. The Wound/Dead trigger also remains deferred until
+event-trigger relationships are modeled precisely.
+
+Impetuous is intentionally a reviewed zero-edge definition at the current graph boundary. Its
+allowed activation combinations, mandatory Movement-labelled behavior, Prone cancellation/re-entry
+restriction, Marker-State prohibition, and Retreat suppression are phase- or category-scoped
+semantics that the current relation vocabulary cannot represent without suggesting the Skill grants
+or universally disables the referenced declarations.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Courage&oldid=3600>
+- Wiki: <https://infinitythewiki.com/index.php?title=Frenzy&oldid=3806>
+- Wiki: <https://infinitythewiki.com/index.php?title=Impetuous&oldid=4039>
+- Wiki: <https://infinitythewiki.com/index.php?title=Religious_Troop&oldid=3601>
+
 ### RS-EQ-CORE-003 — Recovery Equipment authors only stable current-State interactions
 
 **Classification:** source-native Equipment interaction semantics.

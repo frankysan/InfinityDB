@@ -154,8 +154,8 @@ requiring a new top-level browser surface in 0.7.0.
     Skill denominator is likewise rules-aware: six reviewed Army skill-like source entries
     are retained as source occurrences but excluded from the rules Skill catalog because they
     are Equipment, Training, an Attribute override, or a Team-Ops marker; zero-use canonical
-    `Non-Hackable` remains in scope. The current gate is 118/156 primary identities complete
-    (Skills 57/95, Equipment 28/28, Traits 33/33), leaving 38 missing Skill definitions.
+    `Non-Hackable` remains in scope. The current gate is 122/156 primary identities complete
+    (Skills 61/95, Equipment 28/28, Traits 33/33), leaving 34 missing Skill definitions.
     Combat Jump, Decoy, Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and
     Strategic Deployment now have canonical reviewed definitions; Decoy, Impersonation-1/2,
     and Foxhole States are tracked as reviewed supporting identities. Berserk, Guard,
@@ -163,7 +163,11 @@ requiring a new top-level browser surface in 0.7.0.
     definitions; the previously deferred TinBot: Neurocinetics and Armed Turret reuse edges
     are now current graph relationships. Aerial, Climbing Plus, Terrain, and Warhorse now
     complete the reviewed mobility/environment slice, with only graph semantics that need
-    missing State/situation identities or a more precise relation type left deferred.
+    missing State/situation identities or a more precise relation type left deferred. Courage,
+    Frenzy, Impetuous, and Religious Troop now complete the reviewed morale/behavior slice;
+    Foxhole→Courage and Frenzy's current Impetuous/Limited Cover plus modeled Marker-State
+    interactions are current graph relationships, while Guts/Retreat and phase-scoped movement
+    semantics remain explicitly deferred.
     `docs/rules-interaction-checklist.md` is generated from the maintained public-catalog
     scope, curated graph, and long-lived `data/curated/rules-interactions/reviews.json`
     ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, and

@@ -950,6 +950,30 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:courage",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:frenzy",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:impetuous",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:religious-troop",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1468,14 +1492,6 @@
     },
     {
       "sourceRecordId": "state:foxhole",
-      "targetRecordId": "skill:courage",
-      "relationType": "uses-effects-of",
-      "targetRelease": "0.7.0",
-      "status": "planned",
-      "reason": "Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition."
-    },
-    {
-      "sourceRecordId": "state:foxhole",
       "targetRecordId": "rule:partial-cover",
       "relationType": null,
       "targetRelease": "post-0.7.0",
@@ -1585,6 +1601,94 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally."
+    },
+    {
+      "sourceRecordId": "skill:courage",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:courage",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation."
+    },
+    {
+      "sourceRecordId": "skill:frenzy",
+      "targetRecordId": "rule:wound",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation."
+    },
+    {
+      "sourceRecordId": "skill:frenzy",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this trigger until Dead State and trigger semantics are canonically modeled."
+    },
+    {
+      "sourceRecordId": "skill:frenzy",
+      "targetRecordId": "rule:marker-form",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation."
+    },
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "rule:movement-label",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label."
+    },
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "state:prone",
+      "relationType": "cancels-state",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Move, Jump, or Climb in the Impetuous Phase cancels Prone State and prevents re-entry at the end of the movement; materialize once Prone State is canonical and the prevention half can be represented precisely."
+    },
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "rule:marker-form",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States."
+    },
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A player in Retreat does not carry out the Impetuous Phase; model this phase suppression when Retreat has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:religious-troop",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical."
+    },
+    {
+      "sourceRecordId": "skill:religious-troop",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics."
     }
   ]
 }

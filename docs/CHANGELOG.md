@@ -7,6 +7,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed morale/behavior rules for Courage, Frenzy, Impetuous, and Religious Troop.
+  Promote Foxhole→Courage into the current graph and expose Frenzy's Impetuous, Limited Cover,
+  and modeled Marker-State cancellation interactions while retaining Guts, Retreat, Prone, and
+  phase-/label-scoped movement semantics in the maintained future queue where the current graph
+  cannot express them precisely.
 - Add reviewed mobility/environment rules for Aerial, Climbing Plus, Terrain, and Warhorse.
   Expose Aerial restrictions against Cautious Movement, Guard, and Boost, and link Climbing
   Plus to the Climb, Move, and Dodge rules it extends while retaining State-entry prevention,

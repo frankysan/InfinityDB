@@ -21,15 +21,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 118/156 complete (75.6%), 38 pending.**
-- Primary domains: Skill **57/95**; Equipment **28/28**; Trait **33/33**.
+- **0.7.0 primary catalog: 122/156 complete (78.2%), 34 pending.**
+- Primary domains: Skill **61/95**; Equipment **28/28**; Trait **33/33**.
 - Supporting semantic identities: **38/38** complete, **0** pending.
-- Current authored outgoing relations: **147**.
-- Explicitly tracked future/deferred interactions: **79**.
+- Current authored outgoing relations: **154**.
+- Explicitly tracked future/deferred interactions: **89**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (57/95)
+### Skill (61/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -73,8 +73,10 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Counterintelligence** (`skill:counterintelligence`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Courage** (`skill:courage`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Courage** (`skill:courage`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
 - [x] **Cyberplug** (`skill:cyberplug`) — reviewed
   - `controller-eligible-for` → Peripheral (Cyberplug) (`rule:peripheral-type:cyberplug`)
 - [x] **Decoy** (`skill:decoy`) — reviewed
@@ -108,8 +110,16 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Forward Observer** (`skill:forward-observer`) — reviewed
   - `causes-state` → Targeted State (`state:targeted`)
-- [ ] **Frenzy** (`skill:frenzy`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Frenzy** (`skill:frenzy`) — reviewed
+  - `uses-effects-of` → Impetuous (`skill:impetuous`)
+  - `uses-effects-of` → Limited Cover (`skill:limited-cover`)
+  - `cancels-state` → Camouflaged State (`state:camouflaged`)
+  - `cancels-state` → Decoy State (`state:decoy`)
+  - `cancels-state` → Impersonation-1 State (`state:impersonation-1`)
+  - `cancels-state` → Impersonation-2 State (`state:impersonation-2`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:wound` — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `state:dead` — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this trigger until Dead State and trigger semantics are canonically modeled.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
 - [ ] **FT Master** (`skill:ft-master`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **G: Jumper** (`skill:g-jumper`) — pending: No curated rules definition yet.
@@ -128,8 +138,12 @@ review. `declaration-category` projection records are excluded.
 - [x] **Impersonation** (`skill:impersonation`) — reviewed
   - `enters-state` → Impersonation-1 State (`state:impersonation-1`)
   - `enters-state` → Impersonation-2 State (`state:impersonation-2`)
-- [ ] **Impetuous** (`skill:impetuous`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Impetuous** (`skill:impetuous`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:movement-label` — Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label.
+  - future [post-0.7.0; planned]: `cancels-state` → `state:prone` — Move, Jump, or Climb in the Impetuous Phase cancels Prone State and prevents re-entry at the end of the movement; materialize once Prone State is canonical and the prevention half can be represented precisely.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — A player in Retreat does not carry out the Impetuous Phase; model this phase suppression when Retreat has a canonical rules identity.
 - [x] **Infiltration** (`skill:infiltration`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
@@ -205,8 +219,10 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Regeneration** (`skill:regeneration`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Religious Troop** (`skill:religious-troop`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Religious Troop** (`skill:religious-troop`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
 - [x] **Reload** (`skill:reload`) — reviewed
   - `cancels-state` → Unloaded State (`state:unloaded`)
 - [ ] **RemDriver** (`skill:remdriver`) — pending: No curated rules definition yet.
@@ -532,7 +548,7 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Foxhole State** (`state:foxhole`) — reviewed
   - `uses-effects-of` → Mimetism (`skill:mimetism`)
-  - future [0.7.0; planned]: `uses-effects-of` → Courage (`skill:courage`) — Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition.
+  - `uses-effects-of` → Courage (`skill:courage`)
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model.
 - [x] **Hidden Deployment State** (`state:hidden-deployment`) — reviewed
   - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
@@ -589,7 +605,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] GizmoKit (`equipment:gizmokit`) → Remote Presence (`skill:remote-presence`); `relation type TBD`; **0.7.0 / planned** — GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available.
 - [ ] GizmoKit (`equipment:gizmokit`) → Tech-recovery (`skill:tech-recovery`); `enables-use-of`; **0.7.0 / planned** — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
 - [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
-- [ ] Foxhole State (`state:foxhole`) → Courage (`skill:courage`); `uses-effects-of`; **0.7.0 / planned** — Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
@@ -626,7 +641,16 @@ review. `declaration-category` projection records are excluded.
 - [ ] Climbing Plus (`skill:climbing-plus`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
 - [ ] Climbing Plus (`skill:climbing-plus`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
 - [ ] Combat Jump (`skill:combat-jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
+- [ ] Courage (`skill:courage`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
+- [ ] Courage (`skill:courage`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
+- [ ] Frenzy (`skill:frenzy`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
+- [ ] Frenzy (`skill:frenzy`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
+- [ ] Frenzy (`skill:frenzy`) → `state:dead`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this trigger until Dead State and trigger semantics are canonically modeled.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
+- [ ] Impetuous (`skill:impetuous`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States.
+- [ ] Impetuous (`skill:impetuous`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label.
+- [ ] Impetuous (`skill:impetuous`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — A player in Retreat does not carry out the Impetuous Phase; model this phase suppression when Retreat has a canonical rules identity.
+- [ ] Impetuous (`skill:impetuous`) → `state:prone`; `cancels-state`; **post-0.7.0 / planned** — Move, Jump, or Climb in the Impetuous Phase cancels Prone State and prevents re-entry at the end of the movement; materialize once Prone State is canonical and the prevention half can be represented precisely.
 - [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
 - [ ] Infiltration (`skill:infiltration`) → Hidden Deployment State (`state:hidden-deployment`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
@@ -636,6 +660,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
 - [ ] Parachutist (`skill:parachutist`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Place Deployable (`skill:place-deployable`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable.
+- [ ] Religious Troop (`skill:religious-troop`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
+- [ ] Religious Troop (`skill:religious-troop`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
 - [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Stealth (`skill:stealth`) → Move (`skill:move`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.

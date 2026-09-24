@@ -1296,8 +1296,41 @@ def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> N
             {"type": "enables-use-of", "recordId": "skill:surprise-attack"}
         ]
     assert records["state:foxhole"]["relations"] == [
-        {"type": "uses-effects-of", "recordId": "skill:mimetism"}
+        {"type": "uses-effects-of", "recordId": "skill:mimetism"},
+        {"type": "uses-effects-of", "recordId": "skill:courage"},
     ]
+
+
+def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_labels = {
+        "skill:courage": ["optional"],
+        "skill:frenzy": ["obligatory", "states-phase"],
+        "skill:impetuous": ["obligatory"],
+        "skill:religious-troop": ["obligatory"],
+    }
+    assert {
+        record_id: records[record_id]["labelIds"]
+        for record_id in expected_labels
+    } == expected_labels
+    assert all(
+        records[record_id]["facts"]["typeIds"] == ["automatic"]
+        for record_id in expected_labels
+    )
+    assert records["skill:frenzy"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:impetuous"},
+        {"type": "uses-effects-of", "recordId": "skill:limited-cover"},
+        {"type": "cancels-state", "recordId": "state:camouflaged"},
+        {"type": "cancels-state", "recordId": "state:decoy"},
+        {"type": "cancels-state", "recordId": "state:impersonation-1"},
+        {"type": "cancels-state", "recordId": "state:impersonation-2"},
+    ]
+    assert "relations" not in records["skill:courage"]
+    assert "relations" not in records["skill:impetuous"]
+    assert "relations" not in records["skill:religious-troop"]
 
 
 def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> None:
