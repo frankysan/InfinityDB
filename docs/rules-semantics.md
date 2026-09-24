@@ -3136,6 +3136,89 @@ Sources:
 - Wiki: <https://infinitythewiki.com/FastPanda>
 - Wiki: <https://infinitythewiki.com/Repeater>
 
+
+### RS-EQ-CORE-003 — Recovery Equipment authors only stable current-State interactions
+
+**Classification:** source-native Equipment interaction semantics.
+
+MediKit and GizmoKit can both cancel Unconscious State through their successful recovery
+procedure, so each authors `cancels-state` toward the canonical Unconscious State identity.
+InfinityDB keeps the remaining outcome semantics at their natural boundary instead of flattening
+them into that edge: MediKit failure entering Dead State stays queued until Dead is modeled, and
+GizmoKit's Tech-Recovery / Remote Presence interactions stay queued until those identities and
+relationship semantics are available.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/MediKit>
+- Wiki: <https://infinitythewiki.com/GizmoKit>
+
+### RS-EQ-CORE-004 — Motorcycle restrictions and AI Motorcycle composition are separate semantics
+
+**Classification:** source-native Equipment interaction semantics.
+
+Motorcycle directly prevents use of Climb, upward Jump, and Cautious Movement while mounted, so
+it authors `restricts-use-of` edges toward those Skills. Its prohibition on entering Prone remains
+queued because the current relation vocabulary does not yet distinguish a restriction on entering
+a State from ordinary Skill-use restriction.
+
+AI Motorcycle reuses the Motorcycle rules while mounted and Peripheral (Synchronized) rules while
+dismounted, so it authors `uses-effects-of` edges toward those canonical identities. Its
+Transmutation (Auto) transition remains queued until Transmutation has a canonical rules identity.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Motorcycle>
+- Wiki: <https://infinitythewiki.com/AI_Motorcycle>
+
+### RS-EQ-CORE-005 — TinBot family browsing does not erase exact-variant interactions
+
+**Classification:** source-native Equipment family/variant interaction semantics.
+
+TinBot is a browsing family whose actual gameplay effect is defined by the Equipment or MOD shown
+in the exact source variant. Exact variants therefore carry their own reviewed relationships rather
+than inheriting one generic TinBot interaction set. Current canonical targets allow TinBot Albedo
+to `uses-effects-of` Albedo, TinBot Discover to `modifies-rolls-for` Discover, TinBot ECM Guided to
+`uses-effects-of` ECM, and TinBot Repeater to `uses-effects-of` Repeater. Firewall and
+Neurocinetics variants remain queued until their target identities are canonically modeled.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/TinBot>
+
+### RS-EQ-CORE-006 — Hacking Devices are reviewed even while Hacking Programs remain deferred
+
+**Classification:** source-native Equipment-to-program semantics.
+
+Hacking Device, Hacking Device Plus, Killer Hacking Device, and EVO Hacking Device are valid
+reviewed Equipment identities in the 0.7.0 catalog. Their defining outgoing interactions are the
+Hacking Programs they grant, but the Hacking Program domain is outside the current 0.7.0 canonical
+rules set. Those grants therefore remain explicitly tracked in the future-interaction queue rather
+than being represented as unresolved current graph targets or omitted from the audit.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Device>
+
+### RS-EQ-CORE-007 — Self-contained or parameterized Equipment may review to zero current edges
+
+**Classification:** source-native Equipment interaction semantics.
+
+A reviewed Equipment item does not need an authored outgoing edge when its external semantics are
+not representable as one stable target. ECM is parameterized by the attack type and MOD listed in
+the Unit Profile, so InfinityDB must not invent one fixed affected Skill. HoloMask and Holoprojector
+are reviewed with their HoloMask/Holoecho State-entry interactions retained in the future queue;
+Escape System similarly retains its Transmutation reuse there. SymbioMate retains its Immunity
+reuse in the future queue until the canonical Immunity definition exists.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/ECM>
+- Wiki: <https://infinitythewiki.com/HoloMask>
+- Wiki: <https://infinitythewiki.com/Holoprojector>
+- Wiki: <https://infinitythewiki.com/Escape_System>
+- Wiki: <https://infinitythewiki.com/SymbioMate>
+
 ## ITS FAQ
 
 ### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes

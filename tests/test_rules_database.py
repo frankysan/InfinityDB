@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 180
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 194
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -917,6 +917,7 @@ def test_marksmanship_counter_interactions_are_bidirectional(tmp_path: Path) -> 
     } == {
         ("imposes-modifiers-on", "outbound", "Marksmanship"),
         ("imposes-modifiers-on", "outbound", "Multispectral Visor"),
+        ("uses-effects-of", "inbound", "TinBot: Albedo"),
     }
     assert {
         (relation["type"], relation["direction"], relation["record"]["name"])
@@ -1358,4 +1359,89 @@ def test_second_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> N
     } == {
         ("uses-effects-of", "inbound", "Deployable Repeater"),
         ("uses-effects-of", "inbound", "FastPanda"),
+        ("uses-effects-of", "inbound", "TinBot: Repeater"),
+    }
+
+
+def test_remaining_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def equipment_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("equipment", slug)
+            if item["id"] == record_id
+        )
+
+    bangbomb = equipment_rule("bangbomb", "equipment:bangbomb")
+    gizmokit = equipment_rule("gizmokit", "equipment:gizmokit")
+    medikit = equipment_rule("medikit", "equipment:medikit")
+    motorcycle = equipment_rule("motorcycle", "equipment:motorcycle")
+    ai_motorcycle = equipment_rule("ai-motorcycle", "equipment:ai-motorcycle")
+
+    assert ("modifies-rolls-for", "outbound", "Dodge") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in bangbomb["display_relations"]
+    }
+    for source in (gizmokit, medikit):
+        assert ("cancels-state", "outbound", "Unconscious State") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in motorcycle["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("restricts-use-of", "outbound", "Cautious Movement"),
+        ("restricts-use-of", "outbound", "Climb"),
+        ("restricts-use-of", "outbound", "Jump"),
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in ai_motorcycle["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("uses-effects-of", "outbound", "Motorcycle"),
+        ("uses-effects-of", "outbound", "Peripheral (Synchronized)"),
+    }
+
+    tinbot_albedo = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 193)
+        if item["id"] == "equipment:tinbot-albedo"
+    )
+    tinbot_discover = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 244)
+        if item["id"] == "equipment:tinbot-discover"
+    )
+    tinbot_ecm = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 247)
+        if item["id"] == "equipment:tinbot-ecm-guided"
+    )
+    tinbot_repeater = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 248)
+        if item["id"] == "equipment:tinbot-repeater"
+    )
+    assert ("uses-effects-of", "outbound", "Albedo") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_albedo["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "Discover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_discover["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "ECM") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_ecm["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Repeater") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_repeater["display_relations"]
     }

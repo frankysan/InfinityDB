@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Complete the 0.7.0 Equipment interaction audit across all 28 public Equipment items; add
+  canonical recovery, Motorcycle, AI Motorcycle, and exact TinBot variant interactions while
+  retaining Hacking Programs, Holo States, Transmutation, Immunity, and other not-yet-modeled
+  semantics in the long-lived future interaction queue.
 - Continue the 0.7.0 Equipment interaction audit with reviewed Biometric Visor, Dazer,
   Deactivator, Deployable Cover, Deployable Repeater, FastPanda, and Repeater definitions;
   expose their current Discover, Surprise Attack, Mimetism, BS Attack, and contained-Repeater

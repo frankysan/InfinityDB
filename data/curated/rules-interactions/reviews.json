@@ -23,49 +23,45 @@
     {
       "recordId": "equipment:tinbot",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24",
+      "note": "TinBot is a family container; exact source variants carry their own reviewed interaction semantics."
     },
     {
       "recordId": "equipment:tinbot-albedo",
       "targetRelease": "0.7.0",
-      "status": "inherited",
-      "reviewedOn": "2026-09-24",
-      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "equipment:tinbot-discover",
       "targetRelease": "0.7.0",
-      "status": "inherited",
-      "reviewedOn": "2026-09-24",
-      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "equipment:tinbot-ecm-guided",
       "targetRelease": "0.7.0",
-      "status": "inherited",
-      "reviewedOn": "2026-09-24",
-      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "equipment:tinbot-firewall",
       "targetRelease": "0.7.0",
-      "status": "inherited",
-      "reviewedOn": "2026-09-24",
-      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "equipment:tinbot-neurocinetics",
       "targetRelease": "0.7.0",
-      "status": "inherited",
-      "reviewedOn": "2026-09-24",
-      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "equipment:tinbot-repeater",
       "targetRelease": "0.7.0",
-      "status": "inherited",
-      "reviewedOn": "2026-09-24",
-      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "rule:peripheral-type:ancillary",
@@ -697,6 +693,90 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:ai-motorcycle",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:bangbomb",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:ecm",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:escape-system",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:evo-hacking-device",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:gizmokit",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:hacking-device",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:hacking-device-plus",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:holomask",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:holoprojector",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:killer-hacking-device",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:medikit",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:motorcycle",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:symbiomate",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -859,6 +939,222 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge."
+    },
+    {
+      "sourceRecordId": "equipment:ai-motorcycle",
+      "targetRecordId": "skill:transmutation",
+      "relationType": "uses-effects-of",
+      "targetRelease": "0.7.0",
+      "status": "planned",
+      "reason": "AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added."
+    },
+    {
+      "sourceRecordId": "equipment:escape-system",
+      "targetRecordId": "skill:transmutation",
+      "relationType": "uses-effects-of",
+      "targetRelease": "0.7.0",
+      "status": "planned",
+      "reason": "Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:carbonite",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:oblivion",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:spotlight",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:total-control",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:carbonite",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:cybermask",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:oblivion",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:spotlight",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:total-control",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:white-noise",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:killer-hacking-device",
+      "targetRecordId": "hacking-program:cybermask",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:killer-hacking-device",
+      "targetRecordId": "hacking-program:trinity",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:assisted-fire",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:controlled-jump",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:enhanced-reaction",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:fairy-dust",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:gizmokit",
+      "targetRecordId": "skill:tech-recovery",
+      "relationType": "enables-use-of",
+      "targetRelease": "0.7.0",
+      "status": "planned",
+      "reason": "Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition."
+    },
+    {
+      "sourceRecordId": "equipment:gizmokit",
+      "targetRecordId": "skill:remote-presence",
+      "relationType": null,
+      "targetRelease": "0.7.0",
+      "status": "planned",
+      "reason": "GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available."
+    },
+    {
+      "sourceRecordId": "equipment:holomask",
+      "targetRecordId": "state:holomask",
+      "relationType": "enters-state",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "HoloMask explicitly lets its user deploy in or enter HoloMask State; materialize the State edge when that supporting State identity is added."
+    },
+    {
+      "sourceRecordId": "equipment:holoprojector",
+      "targetRecordId": "state:holoecho",
+      "relationType": "enters-state",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Holoprojector explicitly lets its user deploy in or enter Holoecho State; materialize the State edge when that supporting State identity is added."
+    },
+    {
+      "sourceRecordId": "equipment:medikit",
+      "targetRecordId": "state:dead",
+      "relationType": "causes-state",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A failed MediKit target PH Roll makes the target enter Dead State; materialize the edge when Dead State has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "equipment:motorcycle",
+      "targetRecordId": "state:prone",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Motorcycle prevents its mounted user from entering Prone State; the current relation vocabulary has no precise state-entry restriction edge."
+    },
+    {
+      "sourceRecordId": "equipment:symbiomate",
+      "targetRecordId": "skill:immunity",
+      "relationType": "uses-effects-of",
+      "targetRelease": "0.7.0",
+      "status": "planned",
+      "reason": "SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition."
+    },
+    {
+      "sourceRecordId": "equipment:tinbot-firewall",
+      "targetRecordId": "equipment:firewall",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule."
+    },
+    {
+      "sourceRecordId": "equipment:tinbot-neurocinetics",
+      "targetRecordId": "skill:neurocinetics",
+      "relationType": "uses-effects-of",
+      "targetRelease": "0.7.0",
+      "status": "planned",
+      "reason": "TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition."
     }
   ]
 }

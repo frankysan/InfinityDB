@@ -201,4 +201,4 @@ def test_equipment_catalog_adds_curated_declaration_categories(tmp_path: Path) -
     assert result["categories"] == [
         {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 124}
     ]
-    assert "rules" not in result
+    assert [rule["id"] for rule in result["rules"]] == ["equipment:medikit"]

@@ -5649,6 +5649,10 @@
                 {
                     "type": "variant-of",
                     "recordId": "equipment:tinbot"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:albedo"
                 }
             ]
         },
@@ -5699,6 +5703,10 @@
                 {
                     "type": "variant-of",
                     "recordId": "equipment:tinbot"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:discover"
                 }
             ]
         },
@@ -5749,6 +5757,10 @@
                 {
                     "type": "variant-of",
                     "recordId": "equipment:tinbot"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:ecm"
                 }
             ]
         },
@@ -5799,6 +5811,10 @@
                 {
                     "type": "variant-of",
                     "recordId": "equipment:tinbot"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:repeater"
                 }
             ]
         },
@@ -7786,6 +7802,680 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "FastPanda",
                     "heading": "FastPanda"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:ai-motorcycle",
+            "kind": "equipment",
+            "name": "AI Motorcycle",
+            "labelIds": [],
+            "summary": "Automatic Equipment that uses Motorcycle rules while mounted and becomes a Peripheral (Synchronized) when the rider dismounts.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "The mounted profile applies the Motorcycle Equipment rules.",
+                    "The dismounted profile applies Peripheral (Synchronized) to the AI Motorcycle and uses Transmutation (Auto) to change between mounted and dismounted profiles."
+                ],
+                "restrictions": [
+                    "The Trooper cannot return to the mounted profile while the Peripheral is Isolated, Immobilized, or in a Null State.",
+                    "Supportware affecting the Peripheral is canceled for the Trooper when the mounted profile is applied."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "ai-motorcycle"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:motorcycle"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "rule:peripheral-type:synchronized"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "AI_Motorcycle",
+                    "heading": "AI Motorcycle"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:bangbomb",
+            "kind": "equipment",
+            "name": "Bangbomb",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "Optional Automatic Equipment that applies its listed positive MOD to eligible Dodge Rolls against nearby enemy attacks.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The user declares Dodge."
+                ],
+                "effects": [
+                    "Apply the MOD listed after Bangbomb in the Unit Profile to eligible Dodge Rolls."
+                ],
+                "restrictions": [
+                    "The MOD only applies against attacks declared by enemy Troopers inside the user’s LoF or Zone of Control.",
+                    "The MOD does not apply against Template Weapon attacks."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "bangbomb"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:dodge"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Bangbomb",
+                    "heading": "Bangbomb"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:ecm",
+            "kind": "equipment",
+            "name": "ECM",
+            "labelIds": [],
+            "summary": "Automatic Equipment that imposes the listed negative MOD on enemy attacks of the type specified in the bearer’s Unit Profile.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The owner is the target of the Attack type listed in brackets after ECM in the Unit Profile."
+                ],
+                "effects": [
+                    "The Enemy applies the listed negative ECM MOD when attempting that Attack against the owner."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "ecm"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "ECM",
+                    "heading": "ECM"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:escape-system",
+            "kind": "equipment",
+            "name": "Escape System",
+            "labelIds": [],
+            "summary": "Army Equipment identity whose game effect is defined by the Transmutation (Escape System-X) rules for changing to the alternate Unit Profile.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "When the Escape System threshold is reached, the Trooper changes to the alternate Unit Profile under Transmutation (Escape System-X).",
+                    "The profile change places an Eclipse Special Ammo Circular Template centered on the replacement Model."
+                ],
+                "restrictions": [
+                    "The threshold is the value listed after Escape System in the source profile."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "escape-system"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Escape_System",
+                    "heading": "Transmutation (Escape System-X)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:evo-hacking-device",
+            "kind": "equipment",
+            "name": "EVO Hacking Device",
+            "labelIds": [
+                "comms-equipment"
+            ],
+            "summary": "Automatic Comms Equipment that grants access to the EVO support Hacking Programs.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Allows the use of Assisted Fire, Controlled Jump, Enhanced Reaction, and Fairy Dust Hacking Programs."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "evo-hacking-device"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Hacking_Device",
+                    "heading": "EVO Hacking Device"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:gizmokit",
+            "kind": "equipment",
+            "name": "GizmoKit",
+            "labelIds": [],
+            "summary": "Short-Skill Equipment that repairs allied Models with STR by removing a Wound on a successful target PH Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an Allied Model with the STR Attribute.",
+                    "Remote use requires LoF; contact use requires Silhouette contact."
+                ],
+                "effects": [
+                    "Remote use is a Non-Lethal BS Weapon; contact use spends a Short Skill without an attack Roll.",
+                    "On a successful target PH Roll, remove one Wound and cancel Unconscious State if applicable.",
+                    "On a failed target PH Roll, the target receives a Wound instead."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "gizmokit"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:unconscious"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "GizmoKit",
+                    "heading": "GizmoKit"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:hacking-device",
+            "kind": "equipment",
+            "name": "Hacking Device",
+            "labelIds": [
+                "comms-equipment"
+            ],
+            "summary": "Automatic Comms Equipment that grants access to the standard offensive and control Hacking Programs.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Allows the use of Carbonite, Oblivion, Spotlight, and Total Control Hacking Programs."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "hacking-device"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Hacking_Device",
+                    "heading": "Hacking Device"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:hacking-device-plus",
+            "kind": "equipment",
+            "name": "Hacking Device Plus",
+            "labelIds": [
+                "comms-equipment"
+            ],
+            "summary": "Automatic Comms Equipment that expands the standard Hacking Device program set with Cybermask and White Noise.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Allows the use of Carbonite, Cybermask, Oblivion, Spotlight, Total Control, and White Noise Hacking Programs."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "hacking-device-plus"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Hacking_Device",
+                    "heading": "Hacking Device Plus"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:holomask",
+            "kind": "equipment",
+            "name": "Holomask",
+            "labelIds": [
+                "optional"
+            ],
+            "summary": "Optional Automatic Equipment that lets its user deploy in or enter HoloMask State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "During Deployment, the user may deploy in HoloMask State.",
+                    "During the game, the user may enter HoloMask State."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "holomask"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "HoloMask",
+                    "heading": "HoloMask"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:holoprojector",
+            "kind": "equipment",
+            "name": "Holoprojector",
+            "labelIds": [
+                "optional",
+                "negative-feedback"
+            ],
+            "summary": "Optional NFB Automatic Equipment that lets its user deploy in or enter Holoecho State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "When placed on the table, the bearer may deploy in Holoecho State.",
+                    "During the game, the user may enter Holoecho State."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "holoprojector"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Holoprojector",
+                    "heading": "Holoprojector"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:killer-hacking-device",
+            "kind": "equipment",
+            "name": "Killer Hacking Device",
+            "labelIds": [
+                "comms-equipment"
+            ],
+            "summary": "Automatic Comms Equipment specialized for Cybermask and Trinity Hacking Programs.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Allows the use of Cybermask and Trinity Hacking Programs."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "killer-hacking-device"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Hacking_Device",
+                    "heading": "Killer Hacking Device"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:medikit",
+            "kind": "equipment",
+            "name": "MediKit",
+            "labelIds": [],
+            "summary": "Short-Skill Equipment that can recover allied Models with VITA from Unconscious State through a target PH Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an Allied Model with the VITA Attribute in Unconscious State, unless a scenario rule says otherwise.",
+                    "Remote use requires LoF; contact use requires Silhouette contact."
+                ],
+                "effects": [
+                    "Remote use is a Non-Lethal BS Weapon; contact use spends a Short Skill without an attack Roll.",
+                    "On a successful target PH Roll, remove one Wound and cancel Unconscious State.",
+                    "On a failed target PH Roll, the target enters Dead State."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "medikit"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:unconscious"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "MediKit",
+                    "heading": "MediKit"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:motorcycle",
+            "kind": "equipment",
+            "name": "Motorcycle",
+            "labelIds": [],
+            "summary": "Automatic Equipment whose mounted movement rules restrict Climb, Cautious Movement, upward Jump movement, and entry into Prone State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "restrictions": [
+                    "A mounted Trooper cannot enter Prone State.",
+                    "A mounted Trooper cannot declare Climb or use ladders.",
+                    "A mounted Trooper cannot Jump vertically or diagonally upward; horizontal and downward Jump movement remains allowed.",
+                    "A mounted Trooper cannot declare Cautious Movement."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "motorcycle"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:climb"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:jump"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:cautious-movement"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Motorcycle",
+                    "heading": "Motorcycle"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "equipment:symbiomate",
+            "kind": "equipment",
+            "name": "SymbioMate",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "Single-use assignable Equipment that temporarily replaces the user’s ARM and BTS with 9 and grants Immunity (Enhanced) for eligible Saving Rolls.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The SymbioMate must be used when its assigned user is forced to make a Saving Roll."
+                ],
+                "effects": [
+                    "For ARM/BTS Saving Rolls during the Order, use ARM/BTS 9 and apply Immunity (Enhanced) when applicable.",
+                    "Against Comms Attacks, ARM/BTS 9 applies but Immunity (Enhanced) does not.",
+                    "Remove the SymbioMate at the end of the Order in which it is used."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": "symbiomate"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "SymbioMate",
+                    "heading": "SymbioMate"
                 }
             ],
             "review": {

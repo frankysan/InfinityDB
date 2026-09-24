@@ -1534,7 +1534,7 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
         relation["record"]["name"]
         for relation in state["rules"][0]["display_relations"]
         if relation["type"] == "cancels-state"
-    } == {"Doctor", "Engineer"}
+    } == {"Doctor", "Engineer", "GizmoKit", "MediKit"}
 
     status, _, body = request(rules_app, "/api/states/not-a-state")
     assert status == 404

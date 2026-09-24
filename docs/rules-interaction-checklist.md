@@ -21,11 +21,11 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 57/161 complete (35.4%), 104 pending.**
-- Primary domains: Skill **35/100**; Equipment **13/28**; Trait **9/33**.
+- **0.7.0 primary catalog: 72/161 complete (44.7%), 89 pending.**
+- Primary domains: Skill **35/100**; Equipment **28/28**; Trait **9/33**.
 - Supporting semantic identities: **23/39** complete, **16** pending.
-- Current authored outgoing relations: **97**.
-- Explicitly tracked future/deferred interactions: **20**.
+- Current authored outgoing relations: **109**.
+- Explicitly tracked future/deferred interactions: **47**.
 
 ## 0.7.0 primary catalog review
 
@@ -267,20 +267,22 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Warhorse** (`skill:warhorse`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 
-### Equipment (13/28)
+### Equipment (28/28)
 
 - [x] **360º Visor** (`equipment:360o-visor`) — reviewed
   - outgoing: none
-- [ ] **AI Motorcycle** (`equipment:ai-motorcycle`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **AI Motorcycle** (`equipment:ai-motorcycle`) — reviewed
+  - `uses-effects-of` → Motorcycle (`equipment:motorcycle`)
+  - `uses-effects-of` → Peripheral (Synchronized) (`rule:peripheral-type:synchronized`)
+  - future [0.7.0; planned]: `uses-effects-of` → Transmutation (`skill:transmutation`) — AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added.
 - [x] **Albedo** (`equipment:albedo`) — reviewed
   - `imposes-modifiers-on` → Multispectral Visor (`equipment:multispectral-visor`)
   - `imposes-modifiers-on` → Marksmanship (`skill:marksmanship`)
 - [x] **Baggage** (`equipment:baggage`) — reviewed
   - `enables-use-of` → Reload (`skill:reload`)
   - `cancels-state` → Unloaded State (`state:unloaded`)
-- [ ] **Bangbomb** (`equipment:bangbomb`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Bangbomb** (`equipment:bangbomb`) — reviewed
+  - `modifies-rolls-for` → Dodge (`skill:dodge`)
 - [x] **Biometric Visor** (`equipment:biometric-visor`) — reviewed
   - `modifies-rolls-for` → Discover (`skill:discover`)
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
@@ -297,30 +299,55 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `uses-effects-of` → `rule:partial-cover` — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
 - [x] **Deployable Repeater** (`equipment:deployable-repeater`) — reviewed
   - `uses-effects-of` → Repeater (`equipment:repeater`)
-- [ ] **ECM** (`equipment:ecm`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Escape System** (`equipment:escape-system`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **EVO Hacking Device** (`equipment:evo-hacking-device`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **ECM** (`equipment:ecm`) — reviewed
+  - outgoing: none
+- [x] **Escape System** (`equipment:escape-system`) — reviewed
+  - outgoing: none
+  - future [0.7.0; planned]: `uses-effects-of` → Transmutation (`skill:transmutation`) — Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition.
+- [x] **EVO Hacking Device** (`equipment:evo-hacking-device`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:assisted-fire` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:controlled-jump` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:enhanced-reaction` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:fairy-dust` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
 - [x] **FastPanda** (`equipment:fastpanda`) — reviewed
   - `uses-effects-of` → Repeater (`equipment:repeater`)
-- [ ] **GizmoKit** (`equipment:gizmokit`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Hacking Device** (`equipment:hacking-device`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Hacking Device Plus** (`equipment:hacking-device-plus`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Holomask** (`equipment:holomask`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Holoprojector** (`equipment:holoprojector`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Killer Hacking Device** (`equipment:killer-hacking-device`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **MediKit** (`equipment:medikit`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Motorcycle** (`equipment:motorcycle`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **GizmoKit** (`equipment:gizmokit`) — reviewed
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+  - future [0.7.0; planned]: `enables-use-of` → Tech-recovery (`skill:tech-recovery`) — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
+  - future [0.7.0; planned]: `relation type TBD` → Remote Presence (`skill:remote-presence`) — GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available.
+- [x] **Hacking Device** (`equipment:hacking-device`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:carbonite` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:oblivion` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:spotlight` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:total-control` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [x] **Hacking Device Plus** (`equipment:hacking-device-plus`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:carbonite` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:cybermask` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:oblivion` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:spotlight` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:total-control` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:white-noise` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [x] **Holomask** (`equipment:holomask`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enters-state` → `state:holomask` — HoloMask explicitly lets its user deploy in or enter HoloMask State; materialize the State edge when that supporting State identity is added.
+- [x] **Holoprojector** (`equipment:holoprojector`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enters-state` → `state:holoecho` — Holoprojector explicitly lets its user deploy in or enter Holoecho State; materialize the State edge when that supporting State identity is added.
+- [x] **Killer Hacking Device** (`equipment:killer-hacking-device`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:cybermask` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:trinity` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [x] **MediKit** (`equipment:medikit`) — reviewed
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+  - future [post-0.7.0; planned]: `causes-state` → `state:dead` — A failed MediKit target PH Roll makes the target enter Dead State; materialize the edge when Dead State has a canonical rules identity.
+- [x] **Motorcycle** (`equipment:motorcycle`) — reviewed
+  - `restricts-use-of` → Climb (`skill:climb`)
+  - `restricts-use-of` → Jump (`skill:jump`)
+  - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `state:prone` — Motorcycle prevents its mounted user from entering Prone State; the current relation vocabulary has no precise state-entry restriction edge.
 - [x] **Multispectral Visor** (`equipment:multispectral-visor`) — reviewed
   - `reduces-modifiers-from` → Mimetism (`skill:mimetism`)
 - [x] **Nanoscreen** (`equipment:nanoscreen`) — reviewed
@@ -328,9 +355,10 @@ review. `declaration-category` projection records are excluded.
 - [x] **Repeater** (`equipment:repeater`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:hacking-area` — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
-- [ ] **SymbioMate** (`equipment:symbiomate`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **TinBot** (`equipment:tinbot`) — pending
+- [x] **SymbioMate** (`equipment:symbiomate`) — reviewed
+  - outgoing: none
+  - future [0.7.0; planned]: `uses-effects-of` → Immunity (`skill:immunity`) — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
+- [x] **TinBot** (`equipment:tinbot`) — reviewed: TinBot is a family container; exact source variants carry their own reviewed interaction semantics.
   - outgoing: none
 - [x] **X Visor** (`equipment:x-visor`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
@@ -414,18 +442,24 @@ review. `declaration-category` projection records are excluded.
 
 #### Equipment (6/6)
 
-- [x] **TinBot: Albedo** (`equipment:tinbot-albedo`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+- [x] **TinBot: Albedo** (`equipment:tinbot-albedo`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-- [x] **TinBot: Discover** (`equipment:tinbot-discover`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `uses-effects-of` → Albedo (`equipment:albedo`)
+- [x] **TinBot: Discover** (`equipment:tinbot-discover`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-- [x] **TinBot: ECM Guided** (`equipment:tinbot-ecm-guided`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+- [x] **TinBot: ECM Guided** (`equipment:tinbot-ecm-guided`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-- [x] **TinBot: Firewall** (`equipment:tinbot-firewall`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `uses-effects-of` → ECM (`equipment:ecm`)
+- [x] **TinBot: Firewall** (`equipment:tinbot-firewall`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-- [x] **TinBot: Neurocinetics** (`equipment:tinbot-neurocinetics`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - future [post-0.7.0; planned]: `uses-effects-of` → `equipment:firewall` — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
+- [x] **TinBot: Neurocinetics** (`equipment:tinbot-neurocinetics`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-- [x] **TinBot: Repeater** (`equipment:tinbot-repeater`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - future [0.7.0; planned]: `uses-effects-of` → Neurocinetics (`skill:neurocinetics`) — TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition.
+- [x] **TinBot: Repeater** (`equipment:tinbot-repeater`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
+  - `uses-effects-of` → Repeater (`equipment:repeater`)
 
 #### Rule (1/5)
 
@@ -517,12 +551,39 @@ review. `declaration-category` projection records are excluded.
 
 ## Future interaction queue
 
+- [ ] AI Motorcycle (`equipment:ai-motorcycle`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added.
+- [ ] Escape System (`equipment:escape-system`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition.
+- [ ] GizmoKit (`equipment:gizmokit`) → Remote Presence (`skill:remote-presence`); `relation type TBD`; **0.7.0 / planned** — GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available.
+- [ ] GizmoKit (`equipment:gizmokit`) → Tech-recovery (`skill:tech-recovery`); `enables-use-of`; **0.7.0 / planned** — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
+- [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
+- [ ] TinBot: Neurocinetics (`equipment:tinbot-neurocinetics`) → Neurocinetics (`skill:neurocinetics`); `uses-effects-of`; **0.7.0 / planned** — TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition.
 - [ ] Biometric Visor (`equipment:biometric-visor`) → `state:impersonation-1`; `cancels-state`; **post-0.7.0 / planned** — A successful Discover Roll with Biometric Visor cancels Impersonation-1 State; materialize the State edge once Impersonation-1 has a canonical State identity.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
 - [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:assisted-fire`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:controlled-jump`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:enhanced-reaction`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:fairy-dust`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:carbonite`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:oblivion`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:spotlight`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:total-control`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:carbonite`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:cybermask`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:oblivion`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:spotlight`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:total-control`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:white-noise`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Holomask (`equipment:holomask`) → `state:holomask`; `enters-state`; **post-0.7.0 / planned** — HoloMask explicitly lets its user deploy in or enter HoloMask State; materialize the State edge when that supporting State identity is added.
+- [ ] Holoprojector (`equipment:holoprojector`) → `state:holoecho`; `enters-state`; **post-0.7.0 / planned** — Holoprojector explicitly lets its user deploy in or enter Holoecho State; materialize the State edge when that supporting State identity is added.
+- [ ] Killer Hacking Device (`equipment:killer-hacking-device`) → `hacking-program:cybermask`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Killer Hacking Device (`equipment:killer-hacking-device`) → `hacking-program:trinity`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] MediKit (`equipment:medikit`) → `state:dead`; `causes-state`; **post-0.7.0 / planned** — A failed MediKit target PH Roll makes the target enter Dead State; materialize the edge when Dead State has a canonical rules identity.
+- [ ] Motorcycle (`equipment:motorcycle`) → `state:prone`; `relation type TBD`; **post-0.7.0 / planned** — Motorcycle prevents its mounted user from entering Prone State; the current relation vocabulary has no precise state-entry restriction edge.
 - [ ] Repeater (`equipment:repeater`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
+- [ ] TinBot: Firewall (`equipment:tinbot-firewall`) → `equipment:firewall`; `uses-effects-of`; **post-0.7.0 / planned** — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
 - [ ] `hacking-program:white-noise` → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] `hacking-program:white-noise` → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.

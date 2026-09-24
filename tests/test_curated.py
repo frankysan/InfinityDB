@@ -1337,3 +1337,59 @@ def test_checked_in_n5_collection_models_second_full_catalog_equipment_slice() -
         assert records[record_id]["relations"] == [
             {"type": "uses-effects-of", "recordId": "equipment:repeater"}
         ]
+
+
+def test_checked_in_n5_collection_models_remaining_catalog_equipment_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_equipment = {
+        "equipment:ai-motorcycle",
+        "equipment:bangbomb",
+        "equipment:ecm",
+        "equipment:escape-system",
+        "equipment:evo-hacking-device",
+        "equipment:gizmokit",
+        "equipment:hacking-device",
+        "equipment:hacking-device-plus",
+        "equipment:holomask",
+        "equipment:holoprojector",
+        "equipment:killer-hacking-device",
+        "equipment:medikit",
+        "equipment:motorcycle",
+        "equipment:symbiomate",
+    }
+    assert expected_equipment <= records.keys()
+    assert records["equipment:bangbomb"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:dodge"}
+    ]
+    for record_id in {"equipment:gizmokit", "equipment:medikit"}:
+        assert records[record_id]["relations"] == [
+            {"type": "cancels-state", "recordId": "state:unconscious"}
+        ]
+    assert records["equipment:motorcycle"]["relations"] == [
+        {"type": "restricts-use-of", "recordId": "skill:climb"},
+        {"type": "restricts-use-of", "recordId": "skill:jump"},
+        {"type": "restricts-use-of", "recordId": "skill:cautious-movement"},
+    ]
+    assert records["equipment:ai-motorcycle"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "equipment:motorcycle"},
+        {"type": "uses-effects-of", "recordId": "rule:peripheral-type:synchronized"},
+    ]
+    assert ("uses-effects-of", "equipment:albedo") in {
+        (relation["type"], relation["recordId"])
+        for relation in records["equipment:tinbot-albedo"]["relations"]
+    }
+    assert ("modifies-rolls-for", "skill:discover") in {
+        (relation["type"], relation["recordId"])
+        for relation in records["equipment:tinbot-discover"]["relations"]
+    }
+    assert ("uses-effects-of", "equipment:ecm") in {
+        (relation["type"], relation["recordId"])
+        for relation in records["equipment:tinbot-ecm-guided"]["relations"]
+    }
+    assert ("uses-effects-of", "equipment:repeater") in {
+        (relation["type"], relation["recordId"])
+        for relation in records["equipment:tinbot-repeater"]["relations"]
+    }
