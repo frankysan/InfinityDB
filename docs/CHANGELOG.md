@@ -7,6 +7,13 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed survivability/recovery rules for Dogged, No Wound Incapacitation, Remote
+  Presence, Shasvastii, Regeneration, and Protheion. Expose their stable Unconscious/Normal/Dead,
+  repair, and CC Attack interactions while retaining conditional healing, Wound-threshold,
+  Retreat-situation, Shock, and participant-role semantics in the maintained future queue.
+- Complete the 0.7.0 State reference with all 24 canonical current State identities, including
+  the deliberate IMP-1/IMP-2 split, and make States a first-class primary interaction-review
+  domain with typed entry, cancellation, revelation, and effect relationships.
 - Add reviewed morale/behavior rules for Courage, Frenzy, Impetuous, and Religious Troop.
   Promote Foxhole→Courage into the current graph and expose Frenzy's Impetuous, Limited Cover,
   and modeled Marker-State cancellation interactions while retaining Guts, Retreat, Prone, and

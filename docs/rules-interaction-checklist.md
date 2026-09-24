@@ -22,15 +22,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 146/180 complete (81.1%), 34 pending.**
-- Primary domains: Skill **61/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 152/180 complete (84.4%), 28 pending.**
+- Primary domains: Skill **67/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **24/24** complete, **0** pending.
-- Current authored outgoing relations: **185**.
-- Explicitly tracked future/deferred interactions: **91**.
+- Current authored outgoing relations: **198**.
+- Explicitly tracked future/deferred interactions: **101**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (61/95)
+### Skill (67/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -95,8 +95,13 @@ review. `declaration-category` projection records are excluded.
 - [x] **Dodge** (`skill:dodge`) — reviewed
   - `cancels-state` → Immobilized-A State (`state:immobilized-a`)
   - `cancels-state` → Engaged State (`state:engaged`)
-- [ ] **Dogged** (`skill:dogged`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Dogged** (`skill:dogged`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `uses-effects-of` → Normal State (`state:normal`)
+  - `enters-state` → Dead State (`state:dead`)
+  - `applies-effects-to` → Remote Presence (`skill:remote-presence`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:healing` — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
+  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [x] **Engineer** (`skill:engineer`) — reviewed
   - `controller-eligible-for` → Peripheral (Servant) (`rule:peripheral-type:servant`)
   - `cancels-state` → Disconnected State (`state:disconnected`)
@@ -201,8 +206,14 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [x] **No Cover** (`skill:no-cover`) — reviewed
   - `overrides-effects-of` → Limited Cover (`skill:limited-cover`)
-- [ ] **No Wound Incapacitation** (`skill:no-wound-incapacitation`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **No Wound Incapacitation** (`skill:no-wound-incapacitation`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `uses-effects-of` → Normal State (`state:normal`)
+  - `applies-effects-to` → Remote Presence (`skill:remote-presence`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Doctor (`skill:doctor`) — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Engineer (`skill:engineer`) — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
+  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [x] **Non-Hackable** (`skill:non-hackable`) — reviewed: No current graph edge: its targeting restriction depends on Hacking Attack Requirements and Unit Type predicates that are not yet canonical interaction targets.
   - outgoing: none
 - [ ] **Number 2** (`skill:number-2`) — pending: No curated rules definition yet.
@@ -221,10 +232,12 @@ review. `declaration-category` projection records are excluded.
 - [x] **Place Deployable** (`skill:place-deployable`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable.
-- [ ] **Protheion** (`skill:protheion`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Regeneration** (`skill:regeneration`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Protheion** (`skill:protheion`) — reviewed
+  - `applies-effects-to` → CC Attack (`skill:cc-attack`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:wound` — Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets.
+- [x] **Regeneration** (`skill:regeneration`) — reviewed
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:wound` — Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity.
 - [x] **Religious Troop** (`skill:religious-troop`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
@@ -233,8 +246,12 @@ review. `declaration-category` projection records are excluded.
   - `cancels-state` → Unloaded State (`state:unloaded`)
 - [ ] **RemDriver** (`skill:remdriver`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Remote Presence** (`skill:remote-presence`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Remote Presence** (`skill:remote-presence`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `applies-effects-to` → Engineer (`skill:engineer`)
+  - `applies-effects-to` → GizmoKit (`equipment:gizmokit`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:command-token` — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
 - [x] **Request Speedball** (`skill:request-speedball`) — reviewed
   - `uses-effects-of` → Combat Jump (`skill:combat-jump`)
 - [x] **Reset** (`skill:reset`) — reviewed
@@ -249,8 +266,10 @@ review. `declaration-category` projection records are excluded.
   - `restricts-use-of` → Camouflage (`skill:camouflage`)
   - `reveals-state` → Camouflaged State (`state:camouflaged`)
   - `reveals-state` → Hidden Deployment State (`state:hidden-deployment`)
-- [ ] **Shasvastii** (`skill:shasvastii`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Shasvastii** (`skill:shasvastii`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat-situation` — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
+  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [x] **Sixth Sense** (`skill:sixth-sense`) — reviewed
   - `negates-effects-of` → Stealth (`skill:stealth`)
   - `modifies-rolls-for` → Dodge (`skill:dodge`)
@@ -352,8 +371,6 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Repeater (`equipment:repeater`)
 - [x] **GizmoKit** (`equipment:gizmokit`) — reviewed
   - `cancels-state` → Unconscious State (`state:unconscious`)
-  - future [0.7.0; planned]: `enables-use-of` → Tech-recovery (`skill:tech-recovery`) — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
-  - future [0.7.0; planned]: `relation type TBD` → Remote Presence (`skill:remote-presence`) — GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available.
 - [x] **Hacking Device** (`equipment:hacking-device`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:carbonite` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
@@ -642,8 +659,6 @@ review. `declaration-category` projection records are excluded.
 
 - [ ] AI Motorcycle (`equipment:ai-motorcycle`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added.
 - [ ] Escape System (`equipment:escape-system`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition.
-- [ ] GizmoKit (`equipment:gizmokit`) → Remote Presence (`skill:remote-presence`); `relation type TBD`; **0.7.0 / planned** — GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available.
-- [ ] GizmoKit (`equipment:gizmokit`) → Tech-recovery (`skill:tech-recovery`); `enables-use-of`; **0.7.0 / planned** — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
 - [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
@@ -680,6 +695,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] Combat Jump (`skill:combat-jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Courage (`skill:courage`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
 - [ ] Courage (`skill:courage`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
+- [ ] Dogged (`skill:dogged`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [ ] Dogged (`skill:dogged`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
 - [ ] Frenzy (`skill:frenzy`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
 - [ ] Frenzy (`skill:frenzy`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
 - [ ] Frenzy (`skill:frenzy`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
@@ -694,10 +711,20 @@ review. `declaration-category` projection records are excluded.
 - [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
 - [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Doctor (`skill:doctor`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Engineer (`skill:engineer`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
 - [ ] Parachutist (`skill:parachutist`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Place Deployable (`skill:place-deployable`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Enemy Camouflaged Markers can restrict legal Deployable placement through Trigger Area rules, but this is a placement constraint rather than a general restriction on declaring Place Deployable.
+- [ ] Protheion (`skill:protheion`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets.
+- [ ] Regeneration (`skill:regeneration`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity.
 - [ ] Religious Troop (`skill:religious-troop`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
 - [ ] Religious Troop (`skill:religious-troop`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
+- [ ] Remote Presence (`skill:remote-presence`) → `rule:command-token`; `relation type TBD`; **post-0.7.0 / planned** — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
+- [ ] Remote Presence (`skill:remote-presence`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
+- [ ] Shasvastii (`skill:shasvastii`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [ ] Shasvastii (`skill:shasvastii`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
 - [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Stealth (`skill:stealth`) → Move (`skill:move`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.

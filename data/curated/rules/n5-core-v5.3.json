@@ -840,6 +840,60 @@
             "url": "https://infinitythewiki.com/index.php?title=Suppressive_Fire_State&oldid=3324",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-dogged-oldid-3071",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Dogged revision 3071",
+            "version": "N5.3 / oldid 3071",
+            "url": "https://infinitythewiki.com/index.php?title=Dogged&oldid=3071",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-no-wound-incapacitation-oldid-3813",
+            "kind": "wiki",
+            "title": "Infinity Wiki — No Wound Incapacitation revision 3813",
+            "version": "N5.3 / oldid 3813",
+            "url": "https://infinitythewiki.com/index.php?title=No_Wound_Incapacitation&oldid=3813",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-remote-presence-oldid-3126",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Remote Presence revision 3126",
+            "version": "N5.3 / oldid 3126",
+            "url": "https://infinitythewiki.com/index.php?title=Remote_Presence&oldid=3126",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-shasvastii-oldid-3976",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Shasvastii revision 3976",
+            "version": "N5.3 / oldid 3976",
+            "url": "https://infinitythewiki.com/index.php?title=Shasvastii&oldid=3976",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-regeneration-oldid-3123",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Regeneration revision 3123",
+            "version": "N5.3 / oldid 3123",
+            "url": "https://infinitythewiki.com/index.php?title=Regeneration&oldid=3123",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-protheion-oldid-3908",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Protheion revision 3908",
+            "version": "N5.3 / oldid 3908",
+            "url": "https://infinitythewiki.com/index.php?title=Protheion&oldid=3908",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -11102,6 +11156,394 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "skill:dogged",
+            "kind": "skill",
+            "name": "Dogged",
+            "summary": "An optional Automatic Special Skill that lets an Unconscious Trooper keep acting temporarily before entering Dead State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must enter Unconscious State and declare Dogged immediately, in either the Active or Reactive Turn."
+                ],
+                "effects": [
+                    "While Dogged is active, ignore the effects and Null Label of Unconscious State and treat the Trooper as being in Normal State for the rest of that Player Turn.",
+                    "In the States Phase of that Player Turn, the Trooper automatically enters Dead State.",
+                    "If the Trooper receives another Wound while Dogged is active, it enters Dead State directly.",
+                    "A Remote Presence Trooper with STR may activate Dogged when entering any level of Unconscious State."
+                ],
+                "restrictions": [
+                    "Once Dogged is activated, the Trooper cannot be healed.",
+                    "A Remote Presence Trooper cannot activate Dogged merely because it was already in Unconscious State before the triggering event."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "dogged"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "overrides-effects-of",
+                    "recordId": "state:unconscious"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "state:normal"
+                },
+                {
+                    "type": "enters-state",
+                    "recordId": "state:dead"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:remote-presence"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-dogged-oldid-3071",
+                    "heading": "Dogged"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:no-wound-incapacitation",
+            "kind": "skill",
+            "name": "No Wound Incapacitation",
+            "summary": "An optional Automatic Special Skill that lets an Unconscious Trooper ignore that State's normal restrictions while remaining healable.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must enter Unconscious State and declare No Wound Incapacitation immediately, in either the Active or Reactive Turn."
+                ],
+                "effects": [
+                    "While active, ignore the effects and Null Label of Unconscious State and treat the Trooper as being in Normal State.",
+                    "The user can be healed; removing one Wound returns it to Normal State and removes the NWI Token.",
+                    "A Remote Presence Trooper with STR may activate No Wound Incapacitation when entering any level of Unconscious State.",
+                    "A user that also has Doctor or Engineer may use that Skill on itself, applying the corresponding Effects."
+                ],
+                "restrictions": [
+                    "If the user receives another Wound, it enters Dead State directly.",
+                    "If a Roll to heal the user fails, it enters Dead State directly.",
+                    "A Remote Presence Trooper cannot activate No Wound Incapacitation merely because it was already in Unconscious State before the triggering event."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "no-wound-incapacitation"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "overrides-effects-of",
+                    "recordId": "state:unconscious"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "state:normal"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:remote-presence"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-no-wound-incapacitation-oldid-3813",
+                    "heading": "No Wound Incapacitation"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:remote-presence",
+            "kind": "skill",
+            "name": "Remote Presence",
+            "summary": "An obligatory Automatic Special Skill for STR Troopers that adds a second Unconscious level and changes repair behavior.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "A Remote Presence Trooper with STR has two distinct levels of Unconscious State before entering Dead State.",
+                    "From either Unconscious level, one successful Engineer WIP Roll or GizmoKit PH Roll removes all Wounds necessary to cancel Unconscious State.",
+                    "When Engineer or another rule explicitly permits it, Command Tokens may reroll the failed repair Roll.",
+                    "Remote Presence remains active while its owner is in a Null State."
+                ],
+                "restrictions": [
+                    "The second Unconscious level applies to Troopers with both Remote Presence and the STR Attribute."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "remote-presence"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "overrides-effects-of",
+                    "recordId": "state:unconscious"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:engineer"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "equipment:gizmokit"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-remote-presence-oldid-3126",
+                    "heading": "Remote Presence"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:shasvastii",
+            "kind": "skill",
+            "name": "Shasvastii",
+            "summary": "An obligatory Automatic Special Skill that changes how a Shasvastii Trooper's Unconscious State counts for Victory Point conditions during the game.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must enter Unconscious State and activate Shasvastii immediately, in either the Active or Reactive Turn."
+                ],
+                "effects": [
+                    "While the Shasvastii-Embryo form is active, the Unconscious Trooper still counts when calculating Victory Points for Retreat and other scenario rules or conditions.",
+                    "At the end of the game, these special Unconscious rules end and the Trooper no longer counts when calculating Victory Points."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "shasvastii"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "overrides-effects-of",
+                    "recordId": "state:unconscious"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-shasvastii-oldid-3976",
+                    "heading": "Shasvastii"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:regeneration",
+            "kind": "skill",
+            "name": "Regeneration",
+            "summary": "An optional States Phase Automatic Special Skill that makes a PH Roll to remove a Wound, potentially cancelling Unconscious State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "During the States Phase, the user makes a Normal PH Roll.",
+                    "On success, remove one Wound and cancel Unconscious State if applicable.",
+                    "On failure, the user receives one additional Wound.",
+                    "Regeneration remains active while its owner is in a Null State."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "states-phase",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "regeneration"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:unconscious"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-regeneration-oldid-3123",
+                    "heading": "Regeneration"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:protheion",
+            "kind": "skill",
+            "name": "Protheion",
+            "summary": "An optional Automatic CC Special Skill that converts Wounds inflicted in Close Combat into recovered Wounds or temporary VITA increases.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must be in Silhouette contact with a target that has VITA and declare a CC Attack."
+                ],
+                "effects": [
+                    "For each Wound inflicted on the target by the user's CC Attack, or each Coup de Grâce performed, remove one Wound the user has received.",
+                    "If the user has no Wounds to remove, remaining eligible Wounds increase VITA by one each, to a maximum of two points above the original value.",
+                    "When Wounds are inflicted both by and on the user in the same Order, Protheion recovery and VITA increases are resolved before Wounds inflicted on the user."
+                ],
+                "restrictions": [
+                    "VITA can be increased by at most two points above the user's original value."
+                ]
+            },
+            "labelIds": [
+                "cc-special-skill",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "protheion"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:cc-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-protheion-oldid-3908",
+                    "heading": "Protheion"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
             }
         }
     ]

@@ -157,8 +157,8 @@ requiring a new top-level browser surface in 0.7.0.
     `Non-Hackable` remains in scope. States are now an explicit primary 0.7.0 domain rather
     than supporting-only semantics: the complete current N5.3 State vocabulary is modeled as
     24 canonical identities, with Impersonation intentionally split into IMP-1 and IMP-2.
-    The current gate is 146/180 primary identities complete (Skills 61/95, Equipment 28/28,
-    Traits 33/33, States 24/24), leaving 34 missing Skill definitions. Combat Jump, Decoy,
+    The current gate is 152/180 primary identities complete (Skills 67/95, Equipment 28/28,
+    Traits 33/33, States 24/24), leaving 28 missing Skill definitions. Combat Jump, Decoy,
     Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic Deployment now
     have canonical reviewed definitions. Berserk, Guard,
     Neurocinetics, Total Reaction, and Triangulated Fire are also canonical reviewed
@@ -169,7 +169,11 @@ requiring a new top-level browser surface in 0.7.0.
     Frenzy, Impetuous, and Religious Troop now complete the reviewed morale/behavior slice;
     Foxhole→Courage and Frenzy's current Impetuous/Limited Cover plus modeled Marker-State
     interactions are current graph relationships, while Guts/Retreat and phase-scoped movement
-    semantics remain explicitly deferred.
+    semantics remain explicitly deferred. Dogged, No Wound Incapacitation, Remote Presence,
+    Shasvastii, Regeneration, and Protheion now complete the reviewed survivability/recovery
+    slice against the full State catalog, with Unconscious/Normal/Dead behavior and stable
+    repair/CC interactions in the current graph and conditional healing, Wound-threshold,
+    Retreat-situation, Shock, and participant-role semantics retained in the future ledger.
     `docs/rules-interaction-checklist.md` is generated from the maintained public-catalog
     scope, curated graph, and long-lived `data/curated/rules-interactions/reviews.json`
     ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, Traits,

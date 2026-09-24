@@ -1034,6 +1034,42 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:dogged",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:no-wound-incapacitation",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:remote-presence",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:shasvastii",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:regeneration",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:protheion",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1308,22 +1344,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:gizmokit",
-      "targetRecordId": "skill:tech-recovery",
-      "relationType": "enables-use-of",
-      "targetRelease": "0.7.0",
-      "status": "planned",
-      "reason": "Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition."
-    },
-    {
-      "sourceRecordId": "equipment:gizmokit",
-      "targetRecordId": "skill:remote-presence",
-      "relationType": null,
-      "targetRelease": "0.7.0",
-      "status": "planned",
-      "reason": "GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available."
     },
     {
       "sourceRecordId": "equipment:motorcycle",
@@ -1766,6 +1786,102 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Loss of Lieutenant cancels Suppressive Fire State, but the situation is not yet a canonical graph identity."
+    },
+    {
+      "sourceRecordId": "skill:dogged",
+      "targetRecordId": "rule:healing",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules."
+    },
+    {
+      "sourceRecordId": "skill:dogged",
+      "targetRecordId": "ammunition:shock",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "skill:doctor",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "skill:engineer",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "ammunition:shock",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+    },
+    {
+      "sourceRecordId": "skill:remote-presence",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation."
+    },
+    {
+      "sourceRecordId": "skill:remote-presence",
+      "targetRecordId": "rule:command-token",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target."
+    },
+    {
+      "sourceRecordId": "skill:shasvastii",
+      "targetRecordId": "rule:retreat-situation",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State."
+    },
+    {
+      "sourceRecordId": "skill:shasvastii",
+      "targetRecordId": "ammunition:shock",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+    },
+    {
+      "sourceRecordId": "skill:regeneration",
+      "targetRecordId": "rule:wound",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity."
+    },
+    {
+      "sourceRecordId": "skill:protheion",
+      "targetRecordId": "rule:wound",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets."
     }
   ]
 }

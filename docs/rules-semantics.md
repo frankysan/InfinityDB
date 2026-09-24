@@ -3418,16 +3418,56 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Impetuous&oldid=4039>
 - Wiki: <https://infinitythewiki.com/index.php?title=Religious_Troop&oldid=3601>
 
+### RS-SK-SURVIVAL-001 — Survivability Skills separate State overrides from conditional recovery outcomes
+
+**Classification:** source-native Skill and State interaction semantics.
+
+Dogged and No Wound Incapacitation both activate as the user enters Unconscious State, override
+that State's normal effects, and let the Trooper operate using Normal State behavior. InfinityDB
+therefore authors `overrides-effects-of` toward Unconscious and `uses-effects-of` toward Normal.
+Dogged additionally sends its user to Dead State automatically in the States Phase, so that stable
+transition authors `enters-state`; NWI's additional-Wound and failed-healing Dead outcomes remain
+future-tracked because they are conditional rather than automatic Skill transitions.
+
+Remote Presence changes Unconscious into a two-level progression for STR users and changes how
+Engineer and GizmoKit recovery removes Wounds, so it authors `overrides-effects-of` toward
+Unconscious and `applies-effects-to` toward Engineer and GizmoKit. Dogged and NWI each carry a
+Remote Presence-specific activation clause, represented by `applies-effects-to` toward Remote
+Presence. Command-Token rerolls and the modified Dead-entry threshold remain deferred until the
+graph has precise targets and relation semantics for those rules.
+
+Shasvastii overrides the normal Victory Point consequences of Unconscious State while the game is
+in progress, and therefore authors `overrides-effects-of` toward Unconscious. Regeneration has a
+stable successful path that cancels Unconscious State, so it authors `cancels-state`. Protheion is
+an Automatic CC Special Skill whose recovery/VITA effect is driven by Wounds inflicted through
+CC Attack, so it authors `applies-effects-to` toward CC Attack while Wound/VITA event semantics
+remain in the future ledger.
+
+Healing prevention, self-use exceptions, Shock interactions, Wound thresholds, and the Shasvastii
+Retreat calculation are deliberately not flattened into broader current edges: those interactions
+need participant-role, event, ammunition, or army-situation semantics that the current relation
+vocabulary does not yet encode safely.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Dogged&oldid=3071>
+- Wiki: <https://infinitythewiki.com/index.php?title=No_Wound_Incapacitation&oldid=3813>
+- Wiki: <https://infinitythewiki.com/index.php?title=Remote_Presence&oldid=3126>
+- Wiki: <https://infinitythewiki.com/index.php?title=Shasvastii&oldid=3976>
+- Wiki: <https://infinitythewiki.com/index.php?title=Regeneration&oldid=3123>
+- Wiki: <https://infinitythewiki.com/index.php?title=Protheion&oldid=3908>
+
 ### RS-EQ-CORE-003 — Recovery Equipment authors only stable current-State interactions
 
 **Classification:** source-native Equipment interaction semantics.
 
 MediKit and GizmoKit can both cancel Unconscious State through their successful recovery
 procedure, so each authors `cancels-state` toward the canonical Unconscious State identity.
-InfinityDB keeps the remaining outcome semantics at their natural boundary instead of flattening
-them into that edge: MediKit failure entering Dead State stays queued until Dead is modeled, and
-GizmoKit's Tech-Recovery / Remote Presence interactions stay queued until those identities and
-relationship semantics are available.
+InfinityDB keeps remaining outcome semantics at their natural boundary instead of flattening
+them into the cancellation edge. MediKit's failed Roll already authors its direct Dead-State
+outcome now that Dead is canonical. Remote Presence now owns the current GizmoKit recovery
+modifier through `applies-effects-to`; GizmoKit's Tech-Recovery prerequisite remains queued until
+Tech-Recovery gains its canonical Skill definition.
 
 Sources:
 

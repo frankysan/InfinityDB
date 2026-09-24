@@ -20,31 +20,31 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 170
-    assert report["summary"]["authoredOutgoingRelationCount"] == 185
-    assert report["summary"]["futureInteractionCount"] == 91
+    assert report["summary"]["recordCount"] == 176
+    assert report["summary"]["authoredOutgoingRelationCount"] == 198
+    assert report["summary"]["futureInteractionCount"] == 101
     assert report["summary"]["releases"]["0.7.0"] == {
-        "total": 170,
-        "complete": 170,
+        "total": 176,
+        "complete": 176,
         "pending": 0,
-        "reviewed": 160,
+        "reviewed": 166,
         "inherited": 10,
         "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 180,
-        "complete": 146,
-        "pending": 34,
-        "percentComplete": 81.1,
+        "complete": 152,
+        "pending": 28,
+        "percentComplete": 84.4,
         "catalogs": {
             "skills": {
                 "total": 95,
-                "complete": 61,
-                "pending": 34,
-                "defined": 61,
-                "missingRuleDefinition": 34,
-                "percentComplete": 64.2,
+                "complete": 67,
+                "pending": 28,
+                "defined": 67,
+                "missingRuleDefinition": 28,
+                "percentComplete": 70.5,
             },
             "equipment": {
                 "total": 28,
@@ -167,6 +167,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:climbing-plus",
         "skill:terrain",
         "skill:warhorse",
+        "skill:dogged",
+        "skill:no-wound-incapacitation",
+        "skill:remote-presence",
+        "skill:shasvastii",
+        "skill:regeneration",
+        "skill:protheion",
         "skill:suppressive-fire",
     }:
         assert items[record_id]["status"] == "reviewed"
@@ -280,9 +286,41 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:courage", "rule:guts-roll", "applies-effects-to") in future_keys
     assert ("skill:impetuous", "state:prone", "cancels-state") not in future_keys
     assert ("skill:impetuous", "state:prone", None) in future_keys
+    assert ("equipment:gizmokit", "skill:remote-presence", None) not in future_keys
+    assert ("skill:dogged", "rule:healing", None) in future_keys
+    assert ("skill:no-wound-incapacitation", "state:dead", None) in future_keys
+    assert ("skill:remote-presence", "state:dead", None) in future_keys
+    assert ("skill:shasvastii", "rule:retreat-situation", None) in future_keys
+    assert ("skill:regeneration", "rule:wound", None) in future_keys
+    assert ("skill:protheion", "rule:wound", None) in future_keys
+    assert set(items["skill:dogged"]["relations"]) == {
+        ("overrides-effects-of", "state:unconscious"),
+        ("uses-effects-of", "state:normal"),
+        ("enters-state", "state:dead"),
+        ("applies-effects-to", "skill:remote-presence"),
+    }
+    assert set(items["skill:no-wound-incapacitation"]["relations"]) == {
+        ("overrides-effects-of", "state:unconscious"),
+        ("uses-effects-of", "state:normal"),
+        ("applies-effects-to", "skill:remote-presence"),
+    }
+    assert set(items["skill:remote-presence"]["relations"]) == {
+        ("overrides-effects-of", "state:unconscious"),
+        ("applies-effects-to", "skill:engineer"),
+        ("applies-effects-to", "equipment:gizmokit"),
+    }
+    assert set(items["skill:shasvastii"]["relations"]) == {
+        ("overrides-effects-of", "state:unconscious")
+    }
+    assert set(items["skill:regeneration"]["relations"]) == {
+        ("cancels-state", "state:unconscious")
+    }
+    assert set(items["skill:protheion"]["relations"]) == {
+        ("applies-effects-to", "skill:cc-attack")
+    }
 
     expected = render_markdown(report)
-    assert "Skill **61/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
+    assert "Skill **67/95**; Equipment **28/28**; Trait **33/33**; State **24/24**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -301,8 +339,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 146/180 complete" in output
-    assert "34 pending" in output
+    assert "0.7.0 primary catalog: 152/180 complete" in output
+    assert "28 pending" in output
     assert "0 supporting identities pending" in output
 
 
