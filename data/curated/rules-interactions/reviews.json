@@ -185,7 +185,8 @@
     {
       "recordId": "skill:forward-deployment",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:forward-observer",
@@ -220,7 +221,8 @@
     {
       "recordId": "skill:limited-cover",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:look-out",
@@ -356,7 +358,8 @@
     {
       "recordId": "skill:strategos",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:strategos-l1",
@@ -387,7 +390,8 @@
     {
       "recordId": "skill:surprise-attack",
       "targetRelease": "0.7.0",
-      "status": "pending"
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "state:camouflaged",
@@ -1155,6 +1159,30 @@
       "targetRelease": "0.7.0",
       "status": "planned",
       "reason": "TinBot: Neurocinetics grants that Special Skill; materialize the edge when Neurocinetics gains its canonical Skill definition."
+    },
+    {
+      "sourceRecordId": "skill:limited-cover",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule."
+    },
+    {
+      "sourceRecordId": "skill:surprise-attack",
+      "targetRecordId": "rule:face-to-face-roll",
+      "relationType": "imposes-modifiers-on",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills."
+    },
+    {
+      "sourceRecordId": "rule:marker-form",
+      "targetRecordId": "skill:surprise-attack",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State."
     }
   ]
 }

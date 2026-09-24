@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Complete the interaction review for all 39 public Skills that currently have canonical rules
+  definitions; review Forward Deployment, Limited Cover, Strategos, and Surprise Attack while
+  retaining the selective Partial Cover, generic Face to Face Roll, and broader Marker-form
+  interactions in the long-lived future queue.
 - Complete the 0.7.0 Equipment interaction audit across all 28 public Equipment items; add
   canonical recovery, Motorcycle, AI Motorcycle, and exact TinBot variant interactions while
   retaining Hacking Programs, Holo States, Transmutation, Immunity, and other not-yet-modeled

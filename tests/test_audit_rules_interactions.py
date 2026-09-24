@@ -22,29 +22,29 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
 
     assert report["summary"]["recordCount"] == 134
     assert report["summary"]["authoredOutgoingRelationCount"] == 109
-    assert report["summary"]["futureInteractionCount"] == 47
+    assert report["summary"]["futureInteractionCount"] == 50
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 134,
-        "complete": 95,
-        "pending": 39,
-        "reviewed": 85,
+        "complete": 99,
+        "pending": 35,
+        "reviewed": 89,
         "inherited": 10,
-        "percentComplete": 70.9,
+        "percentComplete": 73.9,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
         "total": 161,
-        "complete": 72,
-        "pending": 89,
-        "percentComplete": 44.7,
+        "complete": 76,
+        "pending": 85,
+        "percentComplete": 47.2,
         "catalogs": {
             "skills": {
                 "total": 100,
-                "complete": 35,
-                "pending": 65,
+                "complete": 39,
+                "pending": 61,
                 "defined": 39,
                 "missingRuleDefinition": 61,
-                "percentComplete": 35.0,
+                "percentComplete": 39.0,
             },
             "equipment": {
                 "total": 28,
@@ -98,6 +98,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "skill:idle",
         "skill:intuitive-attack",
         "skill:jump",
+        "skill:forward-deployment",
+        "skill:limited-cover",
+        "skill:strategos",
+        "skill:surprise-attack",
         "skill:move",
         "skill:place-deployable",
         "skill:request-speedball",
@@ -124,6 +128,13 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:jump", "state:prone", "cancels-state") in future_keys
     assert ("skill:stealth", "skill:idle", None) in future_keys
     assert ("skill:stealth", "skill:move", None) in future_keys
+    assert ("skill:limited-cover", "rule:partial-cover", None) in future_keys
+    assert (
+        "skill:surprise-attack",
+        "rule:face-to-face-roll",
+        "imposes-modifiers-on",
+    ) in future_keys
+    assert ("rule:marker-form", "skill:surprise-attack", "enables-use-of") in future_keys
     assert ("equipment:ai-motorcycle", "skill:transmutation", "uses-effects-of") in future_keys
     assert ("equipment:holomask", "state:holomask", "enters-state") in future_keys
     assert ("equipment:symbiomate", "skill:immunity", "uses-effects-of") in future_keys
@@ -134,7 +145,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
 
     expected = render_markdown(report)
-    assert "Skill **35/100**; Equipment **28/28**; Trait **9/33**" in expected
+    assert "Skill **39/100**; Equipment **28/28**; Trait **9/33**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected
@@ -153,8 +164,8 @@ def test_rules_interaction_review_rejects_missing_entity(tmp_path: Path) -> None
 def test_rules_interaction_release_gate_reports_pending_reviews(capsys) -> None:
     assert main(["--require-release", "0.7.0"]) == 1
     output = capsys.readouterr().out
-    assert "0.7.0 primary catalog: 72/161 complete" in output
-    assert "89 pending" in output
+    assert "0.7.0 primary catalog: 76/161 complete" in output
+    assert "85 pending" in output
     assert "16 supporting identities pending" in output
 
 
