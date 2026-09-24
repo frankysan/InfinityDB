@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Align the rules-backed Skill catalog with the canonical N5.3 Skill vocabulary instead of
+  treating Army's mixed skill-like source bucket as the ontology. Bangbomb, GizmoKit, MediKit,
+  Regular, BTS=3, and Infinity Team-Ops remain preserved source occurrences but no longer appear
+  as rules Skills; zero-use Non-Hackable is now exposed as a canonical Special Skill.
 - Complete interaction review for all 39 already-defined supporting rules identities; make Armed
   Turret navigation expose its canonical Disposable, Deployable, Non-Reloadable, Perimeter,
   360º Visor, BS Attack, and CC Attack dependencies while retaining Total Reaction and broad

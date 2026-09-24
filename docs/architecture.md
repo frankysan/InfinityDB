@@ -279,8 +279,12 @@ records remain for partial classification of Army Skills without full definition
 for Equipment; those records use singular `facts.typeId` plus deterministic order.
 `SkillCatalog` prefers categories from a full Skill definition and falls back to linked
 declaration records, while `CatalogRules` composes Equipment categories from
-`rules.db`. Without a valid rules database, Skills remain browsable with uncited
-`Unclassified` fallback while Equipment receives no invented category.
+`rules.db`. With rules data available, the Skill list is also composed from the canonical
+Common/Special Skill vocabulary rather than blindly mirroring Army's skill-like source bucket:
+reviewed cross-domain/metadata rows are filtered by maintained classification, and rules-native
+zero-use Skills remain visible. Without a valid rules database, raw Army Skills remain browsable
+with uncited `Unclassified` fallback and no source occurrence is discarded; Equipment receives
+no invented category.
 
 Skill-extra distance semantics are split according to source authority. Army
 `extras.type` is authoritative for whether an extra is a distance; the repository

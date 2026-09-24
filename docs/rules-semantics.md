@@ -2953,6 +2953,36 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Ammunition_Summary_Chart>
 - PDF: Infinity N5 V5.3, printed pages 176-188 and 193
 
+### RS-SE-CAT-003 — Army's skill-like source bucket is not the rules Skill ontology
+
+**Classification:** source-presentation encoding with a catalog-composition consequence.
+
+The reviewed Army application catalog contains several values in its skill-like source bucket
+that current N5.3 does not classify as Common or Special Skills. `Bangbomb`, `GizmoKit`, and
+`MediKit` are Equipment; `Regular` is Training; `BTS=3` is a loadout-specific Attribute
+override; and `Infinity Team-Ops` is a source marker for Team-Ops presentation. InfinityDB
+preserves those raw occurrences for provenance and compatibility but excludes their application
+identities from the rules-backed Skill catalog when a valid `rules.db` is available.
+
+Conversely, rules-native Skills do not need an Army occurrence to be catalog identities. The
+current core catalog therefore includes the canonical Special Skill `Non-Hackable` with zero
+Army uses, just as Common Skills can exist without profile rows. The Reinforcements-only
+`Request Reinforcements` Skill remains outside the core 0.7.0 denominator until the separately
+scoped Reinforcements annex is promoted into that catalog surface. Unknown future Army
+skill-like values remain visible provisionally rather than being silently dropped.
+
+The cross-domain source classifications are maintained in
+`config/catalogs/skill-source-classifications.json`; they are presentation/catalog policy, not
+rewrites of the preserved Army snapshot.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- Wiki: <https://infinitythewiki.com/Special_Skills>
+- Wiki: <https://infinitythewiki.com/Equipment>
+- Wiki: <https://infinitythewiki.com/Unit_Profile>
+- Wiki: <https://infinitythewiki.com/Non-Hackable>
+
 ### RS-QR-ACTION-001 — Orders/AROs is a cross-domain declaration-category matrix
 
 **Classification:** source-native relationship projection with a validation

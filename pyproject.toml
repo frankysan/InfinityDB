@@ -43,6 +43,7 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "share/infinity-db/config/catalogs" = [
   "config/catalogs/weapon-categories.json",
   "config/catalogs/weapon-overrides.json",
+  "config/catalogs/skill-source-classifications.json",
 ]
 "share/infinity-db/config/identity" = [
   "config/identity/source-identities.json",

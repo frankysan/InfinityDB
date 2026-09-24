@@ -300,6 +300,13 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "skill:non-hackable",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24",
+      "note": "No current graph edge: its targeting restriction depends on Hacking Attack Requirements and Unit Type predicates that are not yet canonical interaction targets."
+    },
+    {
       "recordId": "skill:no-cover",
       "targetRelease": "0.7.0",
       "status": "reviewed",

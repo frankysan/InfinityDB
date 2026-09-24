@@ -6699,6 +6699,47 @@
             }
         },
         {
+            "id": "skill:non-hackable",
+            "kind": "skill",
+            "name": "Non-Hackable",
+            "labelIds": [
+                "obligatory"
+            ],
+            "summary": "An Automatic Special Skill that prevents Unit-Type-dependent Hacking Attacks from targeting the user.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": ["automatic"],
+                "requirements": [],
+                "effects": [
+                    "The user cannot be targeted by Hacking Attacks whose Requirements depend on the target having a specific Unit Type.",
+                    "The Skill remains active while the user is in a Null State."
+                ],
+                "restrictions": [
+                    "The protection applies to Hacking Attacks whose Requirements specify a Unit Type; it does not create a general immunity to every Hacking effect."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Non-Hackable",
+                    "member": "Non-Hackable"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            }
+        },
+        {
             "id": "skill:no-cover",
             "kind": "skill",
             "name": "No Cover",

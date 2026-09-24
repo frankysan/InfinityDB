@@ -110,17 +110,17 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 70
-    assert report["summary"]["completeCount"] == 68
+    assert report["summary"]["exposedCount"] == 86
+    assert report["summary"]["completeCount"] == 84
     assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
         "stale_citation_source": 1,
-        "unresolved_related_item_link": 3,
+        "unresolved_related_item_link": 2,
     }
-    assert report["summary"]["classifiedGapCount"] == 5
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 5}
-    assert report["summary"]["releaseBlockerCount"] == 5
+    assert report["summary"]["classifiedGapCount"] == 4
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 4}
+    assert report["summary"]["releaseBlockerCount"] == 4
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -147,16 +147,23 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []
 
-    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 3
-    assert report["summary"]["supportingRelationTargetCount"] == 0
+    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 2
+    assert report["summary"]["supportingRelationTargetCount"] == 5
     assert {
         item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
     } == {
         "equipment:multispectral-visor",
         "equipment:360o-visor",
-        "skill:marksmanship",
     }
-    assert report["relationCoverage"]["supporting"] == []
+    assert {
+        item["recordId"] for item in report["relationCoverage"]["supporting"]
+    } == {
+        "rule:peripheral-type:ancillary",
+        "rule:peripheral-type:control",
+        "rule:peripheral-type:cyberplug",
+        "rule:peripheral-type:servant",
+        "rule:peripheral-type:synchronized",
+    }
 
 
 def test_enrichment_coverage_default_details_only_list_gaps(tmp_path: Path) -> None:
@@ -228,9 +235,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 4,
+        "release-blocker": 3,
     }
-    assert report["summary"]["releaseBlockerCount"] == 4
+    assert report["summary"]["releaseBlockerCount"] == 3
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:

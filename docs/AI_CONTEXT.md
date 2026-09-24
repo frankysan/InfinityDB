@@ -1346,10 +1346,14 @@ compatibility references remain unambiguous JSON integers.
 - `data/curated/rules-interactions/catalog-scope.json` is the maintained public-catalog
   denominator for interaction-review progress. For 0.7.0 it contains all public Skills,
   Equipment items, and Traits, including identities without a curated rule definition. The
-  current baseline is 100 Skills, 28 Equipment items, and 33 rules-native Traits; the Skill
-  count includes 88 Army application identities plus 12 rules-only Common Skills exposed by
-  `SkillCatalog`. The Trait denominator comes from current curated Trait identity rather than
-  treating the mixed Army `properties` bucket as a rules vocabulary.
+  current baseline is 95 Skills, 28 Equipment items, and 33 rules-native Traits. The Army
+  skill-like source bucket contains 88 application identities, but six reviewed entries belong
+  to other rules/presentation domains (`Bangbomb`, `GizmoKit`, `MediKit`, `Regular`, `BTS=3`,
+  and `Infinity Team-Ops`). The rules-backed Skill catalog therefore contains 82 valid
+  source-backed Skill identities plus 12 rules-only Common Skills and the zero-use canonical
+  Special Skill `Non-Hackable`. `Request Reinforcements` remains scoped to the separately
+  modeled Reinforcements annex. The Trait denominator likewise comes from current curated
+  Trait identity rather than treating the mixed Army `properties` bucket as a rules vocabulary.
   Refresh/validate this scope against the generated `infinity.db` + `rules.db` whenever the
   application catalog snapshot changes.
 - `data/curated/rules-interactions/reviews.json` is the maintained semantic review ledger. It

@@ -2915,6 +2915,70 @@ def test_skill_catalog_without_rules_keeps_source_distance_typing(
     assert extra["is_distance"] is True
     assert "parameter_semantics" not in extra
 
+def test_skill_catalog_rules_view_excludes_known_non_skills_and_adds_rules_only_special_skill(
+    tmp_path: Path, normalized: dict
+) -> None:
+    source_items = [
+        (501, "Bangbomb"),
+        (502, "BTS=3"),
+        (503, "GizmoKit"),
+        (504, "Infinity Team-Ops"),
+        (505, "MediKit"),
+        (506, "Regular"),
+    ]
+    normalized["tables"]["skills"].extend(
+        {"id": item_id, "name": name, "source_defined": True}
+        for item_id, name in source_items
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    items = {item["slug"]: item for item in catalog.list_skills()}
+    for excluded_slug in {
+        "bangbomb",
+        "bts-3",
+        "gizmokit",
+        "infinity-team-ops",
+        "medikit",
+        "regular",
+    }:
+        assert excluded_slug not in items
+        assert catalog.get_skill(excluded_slug) is None
+
+    non_hackable = items["non-hackable"]
+    assert non_hackable["name"] == "Non-Hackable"
+    assert non_hackable["category"] == "Special Skills"
+    assert non_hackable["use_count"] == 0
+    detail = catalog.get_skill("non-hackable")
+    assert detail is not None
+    assert detail["categories"] == [
+        {
+            "name": "Automatic",
+            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "page": None,
+        }
+    ]
+    assert [rule["id"] for rule in detail["rules"]] == ["skill:non-hackable"]
+
+
+def test_skill_catalog_without_rules_keeps_army_skill_like_source_rows(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 501, "name": "Bangbomb", "source_defined": True}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    catalog = SkillCatalog(Database(database_path), None)
+
+    assert any(item["slug"] == "bangbomb" for item in catalog.list_skills())
+    assert catalog.get_skill("bangbomb") is not None
+
+
 def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
     tmp_path: Path, normalized: dict
 ) -> None:

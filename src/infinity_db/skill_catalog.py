@@ -9,6 +9,7 @@ from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
 from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
+from infinity_db.skill_config import load_skill_source_config
 
 UNCLASSIFIED_CATEGORY = {"name": "Unclassified", "source": None, "page": None}
 DECLARATION_KIND = "declaration-category"
@@ -47,6 +48,22 @@ class SkillCatalog:
         self._parameter_index: dict[ArmyLinkRef, dict[str, str]] | None = None
         self._source_variant_index: dict[ArmyLinkRef, dict[str, Any]] | None = None
         self._training_index: dict[str, dict[str, Any]] | None = None
+        self._excluded_rules_catalog_ids: set[int] | None = None
+
+    def _rules_catalog_excluded_source_ids(self) -> set[int]:
+        """Return Army skill-like application identities excluded from rules Skills."""
+        if self._excluded_rules_catalog_ids is not None:
+            return self._excluded_rules_catalog_ids
+        excluded: set[int] = set()
+        if self.rules_database is not None:
+            for classification in load_skill_source_config():
+                application_id = self.database.application_catalog_id(
+                    "skills", classification.skill_ref
+                )
+                if application_id is not None:
+                    excluded.add(application_id)
+        self._excluded_rules_catalog_ids = excluded
+        return excluded
 
     def _ensure_category_index(self) -> None:
         if self._category_index is not None:
@@ -244,43 +261,58 @@ class SkillCatalog:
         ]
 
     def list_skills(self) -> list[dict[str, Any]]:
-        """Return Army and rules-native Skills grouped by source category."""
-        items = deepcopy(self.database.list_catalog_items("skills"))
-        curated_by_ref: dict[ArmyLinkRef, dict[str, Any]] = {}
-        common_records: list[dict[str, Any]] = []
+        """Return rules-domain Skills plus unresolved Army Skill identities."""
+        excluded = self._rules_catalog_excluded_source_ids()
+        items = [
+            item
+            for item in deepcopy(self.database.list_catalog_items("skills"))
+            if int(item["id"]) not in excluded
+        ]
+        definition_records: list[dict[str, Any]] = []
         if self.rules_database is not None:
             for record in self.rules_database.composed_records_by_kind("skill"):
-                if (
-                    record.get("facts", {}).get("category") != "common-skill"
-                    or (record.get("variant_semantics") or {}).get("inheritance")
-                    == "source"
-                ):
+                if (record.get("variant_semantics") or {}).get("inheritance") == "source":
                     continue
-                common_records.append(record)
-                links = record.get("army_links", [])
-                for link in links:
-                    if link.get("entity") == "skill" and "id" in link:
-                        curated_by_ref[link["id"]] = record
-        common_by_name = {record["name"].casefold(): record for record in common_records}
-        represented_common_ids: set[str] = set()
+                if record.get("facts", {}).get("category") not in {
+                    "common-skill",
+                    "special-skill",
+                }:
+                    continue
+                definition_records.append(record)
+        definitions_by_ref: dict[ArmyLinkRef, dict[str, Any]] = {}
+        for record in definition_records:
+            for link in record.get("army_links", []):
+                if link.get("entity") == "skill" and "id" in link:
+                    definitions_by_ref[link["id"]] = record
+        definitions_by_slug = {
+            record["id"].removeprefix("skill:"): record for record in definition_records
+        }
+        definitions_by_name = {
+            " ".join(record["name"].split()).casefold(): record
+            for record in definition_records
+        }
+        represented_definition_ids: set[str] = set()
         for item in items:
             item["categories"] = self._categories_for_ids({int(item["id"])})
             self._enrich_skill_item(item)
             record = next(
                 (
-                    curated_by_ref[reference]
+                    definitions_by_ref[reference]
                     for reference in self._army_refs_for_ids({int(item["id"])})
-                    if reference in curated_by_ref
+                    if reference in definitions_by_ref
                 ),
                 None,
             )
             if record is None:
-                record = common_by_name.get(str(item.get("name", "")).casefold())
+                record = definitions_by_slug.get(str(item.get("slug", "")))
+            if record is None:
+                normalized_name = " ".join(str(item.get("name", "")).split()).casefold()
+                record = definitions_by_name.get(normalized_name)
             if record is not None:
-                represented_common_ids.add(record["id"])
+                represented_definition_ids.add(record["id"])
             item["category"] = _skill_category(record)
-        for record in common_records:
-            if record["id"] in represented_common_ids:
+        for record in definition_records:
+            if record["id"] in represented_definition_ids:
                 continue
             semantic_id = record["id"].removeprefix("skill:")
             items.append(
@@ -289,7 +321,7 @@ class SkillCatalog:
                     "slug": semantic_id,
                     "name": record["name"],
                     "use_count": 0,
-                    "category": COMMON_SKILL_CATEGORY,
+                    "category": _skill_category(record),
                     "categories": self._categories_for_record(record),
                 }
             )
@@ -298,6 +330,12 @@ class SkillCatalog:
     def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
         """Return one Army Skill reference enriched with curated declarations and rules."""
         item = self.database.get_skill(skill_ref)
+        if (
+            item is not None
+            and self.rules_database is not None
+            and int(item["id"]) in self._rules_catalog_excluded_source_ids()
+        ):
+            return None
         if item is None:
             if not isinstance(skill_ref, str) or self.rules_database is None:
                 return None
@@ -309,14 +347,15 @@ class SkillCatalog:
                         "slug": skill_ref,
                         "name": record["name"],
                         "use_count": 0,
-                        "category": COMMON_SKILL_CATEGORY,
+                        "category": _skill_category(record),
                         "categories": self._categories_for_record(record),
                         "rules": [record],
                         "variants": [],
                     }
                     for record in self.rules_database.composed_records_by_kind("skill")
                     if record["id"] == record_id
-                    and record.get("facts", {}).get("category") == "common-skill"
+                    and record.get("facts", {}).get("category")
+                    in {"common-skill", "special-skill"}
                     and (record.get("variant_semantics") or {}).get("inheritance")
                     != "source"
                 ),

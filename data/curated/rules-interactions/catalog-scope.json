@@ -13,10 +13,6 @@
         "name": "Alert"
       },
       {
-        "id": "bangbomb",
-        "name": "Bangbomb"
-      },
-      {
         "id": "berserk",
         "name": "Berserk"
       },
@@ -27,10 +23,6 @@
       {
         "id": "bs-attack",
         "name": "BS Attack"
-      },
-      {
-        "id": "bts-3",
-        "name": "BTS=3"
       },
       {
         "id": "camouflage",
@@ -133,10 +125,6 @@
         "name": "G: Jumper"
       },
       {
-        "id": "gizmokit",
-        "name": "Gizmokit"
-      },
-      {
         "id": "guard",
         "name": "Guard"
       },
@@ -173,10 +161,6 @@
         "name": "Infinity Spec-Ops"
       },
       {
-        "id": "infinity-team-ops",
-        "name": "Infinity Team-Ops"
-      },
-      {
         "id": "inspiring-leadership",
         "name": "Inspiring Leadership"
       },
@@ -211,10 +195,6 @@
       {
         "id": "martial-arts",
         "name": "Martial Arts"
-      },
-      {
-        "id": "medikit",
-        "name": "MediKit"
       },
       {
         "id": "metachemistry",
@@ -261,6 +241,10 @@
         "name": "No Wound Incapacitation"
       },
       {
+        "id": "non-hackable",
+        "name": "Non-Hackable"
+      },
+      {
         "id": "number-2",
         "name": "Number 2"
       },
@@ -287,10 +271,6 @@
       {
         "id": "regeneration",
         "name": "Regeneration"
-      },
-      {
-        "id": "regular",
-        "name": "Regular"
       },
       {
         "id": "religious-troop",

@@ -150,7 +150,12 @@ requiring a new top-level browser surface in 0.7.0.
     The canonical Trait portion is complete at 33/33. `TraitCatalog` now roots the
     rules-backed catalog in the current curated Trait vocabulary instead of the mixed
     Army `properties` bucket, so zero-use canonical Traits remain in scope while Labels,
-    generic signed modifiers, and reviewed legacy spellings are classified correctly.
+    generic signed modifiers, and reviewed legacy spellings are classified correctly. The
+    Skill denominator is likewise rules-aware: six reviewed Army skill-like source entries
+    are retained as source occurrences but excluded from the rules Skill catalog because they
+    are Equipment, Training, an Attribute override, or a Team-Ops marker; zero-use canonical
+    `Non-Hackable` remains in scope. The current gate is 101/156 primary identities complete
+    (Skills 40/95, Equipment 28/28, Traits 33/33), leaving 55 missing Skill definitions.
     `docs/rules-interaction-checklist.md` is generated from the maintained public-catalog
     scope, curated graph, and long-lived `data/curated/rules-interactions/reviews.json`
     ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, and

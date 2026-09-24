@@ -21,30 +21,26 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 100/161 complete (62.1%), 61 pending.**
-- Primary domains: Skill **39/100**; Equipment **28/28**; Trait **33/33**.
+- **0.7.0 primary catalog: 101/156 complete (64.7%), 55 pending.**
+- Primary domains: Skill **40/95**; Equipment **28/28**; Trait **33/33**.
 - Supporting semantic identities: **34/34** complete, **0** pending.
 - Current authored outgoing relations: **120**.
 - Explicitly tracked future/deferred interactions: **64**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (39/100)
+### Skill (40/95)
 
 - [ ] **Aerial** (`skill:aerial`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Alert** (`skill:alert`) — reviewed
   - outgoing: none
-- [ ] **Bangbomb** (`skill:bangbomb`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Berserk** (`skill:berserk`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Booty** (`skill:booty`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **BS Attack** (`skill:bs-attack`) — reviewed
   - outgoing: none
-- [ ] **BTS=3** (`skill:bts-3`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Camouflage** (`skill:camouflage`) — reviewed
   - `enters-state` → Camouflaged State (`state:camouflaged`)
 - [x] **Cautious Movement** (`skill:cautious-movement`) — reviewed
@@ -106,8 +102,6 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **G: Jumper** (`skill:g-jumper`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Gizmokit** (`skill:gizmokit`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Guard** (`skill:guard`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Hacker** (`skill:hacker`) — pending: No curated rules definition yet.
@@ -126,8 +120,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Infiltration** (`skill:infiltration`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Infinity Team-Ops** (`skill:infinity-team-ops`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Inspiring Leadership** (`skill:inspiring-leadership`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
@@ -151,8 +143,6 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [x] **Martial Arts** (`skill:martial-arts`) — reviewed
   - `modifies-rolls-for` → CC Attack (`skill:cc-attack`)
-- [ ] **MediKit** (`skill:medikit`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **MetaChemistry** (`skill:metachemistry`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Mimetism** (`skill:mimetism`) — reviewed
@@ -177,6 +167,8 @@ review. `declaration-category` projection records are excluded.
   - `overrides-effects-of` → Limited Cover (`skill:limited-cover`)
 - [ ] **No Wound Incapacitation** (`skill:no-wound-incapacitation`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Non-Hackable** (`skill:non-hackable`) — reviewed: No current graph edge: its targeting restriction depends on Hacking Attack Requirements and Unit Type predicates that are not yet canonical interaction targets.
+  - outgoing: none
 - [ ] **Number 2** (`skill:number-2`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Parachutist** (`skill:parachutist`) — pending: No curated rules definition yet.
@@ -195,8 +187,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Protheion** (`skill:protheion`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Regeneration** (`skill:regeneration`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Regular** (`skill:regular`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Religious Troop** (`skill:religious-troop`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
