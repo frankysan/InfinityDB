@@ -61,6 +61,7 @@ def _fixture_database(tmp_path: Path) -> Path:
                 {"id": 3015, "name": "Cautious Movement"},
                 {"id": 3016, "name": "Surprise Attack"},
                 {"id": 3017, "name": "Dodge"},
+                {"id": 3018, "name": "Mimetism"},
                 {"id": 999, "name": "Missing Skill"},
             ],
             "equip": [
@@ -109,8 +110,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         include_complete=True,
     )
 
-    assert report["summary"]["exposedCount"] == 36
-    assert report["summary"]["completeCount"] == 34
+    assert report["summary"]["exposedCount"] == 37
+    assert report["summary"]["completeCount"] == 35
     assert report["summary"]["gapCount"] == 2
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,

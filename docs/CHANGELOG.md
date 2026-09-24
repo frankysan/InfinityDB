@@ -24,6 +24,8 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Link Martial Arts, Marksmanship, and Sixth Sense bidirectionally to the Common Skills whose
   Rolls they modify, making CC Attack, BS Attack, Dodge, and Reset interactions discoverable
   from either endpoint.
+- Link Look Out bidirectionally to the Dodge Rolls it modifies and Speculative Attack to the
+  Mimetism MOD it ignores, exposing both interactions from either rules page.
 - Add bidirectional restrictive-State self-recovery interactions: Dodge now cancels IMM-A,
   Reset also cancels Isolated, and IMM-A / IMM-B / Isolated expose the State-specific Dodge
   or Reset roll interaction from both endpoints without duplicating the exact MOD values.

@@ -1394,6 +1394,30 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Sixth_Sense>
 - Wiki: <https://infinitythewiki.com/Super-Jump>
 
+### RS-SE-ROLL-002 — Common Skills can expose downstream roll interactions
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Some Common Skills do not merely carry a source label; their own effects explicitly change
+how another reviewed Skill is rolled or which reviewed modifier source applies. Look Out!
+allows alerted Troopers to make Dodge Rolls at PH-3 in the same Order. Speculative Attack
+explicitly applies its own -6 MOD and Range MODs while excluding other negative MODs such as
+Mimetism.
+
+InfinityDB therefore authors `modifies-rolls-for` from Look Out to Dodge and
+`ignores-modifiers-from` from Speculative Attack to Mimetism. `rules.db` derives inverse
+navigation so Dodge and Mimetism expose those interactions without reciprocal curated rows.
+The exact PH-3 and Speculative Attack -6 values remain in the owning Skill facts.
+
+The BS Attack labels on Intuitive Attack and Speculative Attack remain source-native labels,
+not graph edges: the current relation vocabulary describes gameplay effects between records,
+not an `is-a` or label-membership relationship.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Look_Out>
+- Wiki: <https://infinitythewiki.com/Speculative_Attack>
+
 ### RS-SE-MARKSMANSHIP-001 — Marksmanship and MSV have explicit counter-interactions
 
 **Classification:** source-native cross-rule gameplay relationship semantics.

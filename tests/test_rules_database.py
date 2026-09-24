@@ -587,6 +587,36 @@ def test_skill_roll_modifier_interactions_are_bidirectional(tmp_path: Path) -> N
         }
 
 
+def test_common_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record for record in database.composed_records_by_kind("skill")
+    }
+    expected_pairs = {
+        ("skill:look-out", "modifies-rolls-for", "skill:dodge"),
+        ("skill:speculative-attack", "ignores-modifiers-from", "skill:mimetism"),
+    }
+
+    for source_id, relation_type, target_id in expected_pairs:
+        source = records[source_id]
+        target = records[target_id]
+        source_name = source["name"]
+        target_name = target["name"]
+
+        assert (relation_type, "outbound", target_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert (relation_type, "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
 def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"
@@ -627,6 +657,7 @@ def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> Non
         ("imposes-modifiers-on", "outbound", "Discover"),
         ("reduces-modifiers-from", "inbound", "Multispectral Visor"),
         ("ignores-modifiers-from", "inbound", "Sensor"),
+        ("ignores-modifiers-from", "inbound", "Speculative Attack"),
     }
     for target in (bs_attack, discover):
         assert (

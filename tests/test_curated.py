@@ -1068,6 +1068,19 @@ def test_checked_in_n5_collection_links_skill_roll_interactions() -> None:
     }
 
 
+def test_checked_in_n5_collection_links_common_skill_interactions() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    assert records["skill:look-out"]["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:dodge"}
+    ]
+    assert records["skill:speculative-attack"]["relations"] == [
+        {"type": "ignores-modifiers-from", "recordId": "skill:mimetism"}
+    ]
+
+
 def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
