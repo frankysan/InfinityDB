@@ -34,6 +34,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Improve rules-catalog scanning: Skill declaration/action types now use the maintained
+  category colors on detail references and in a dedicated `/skills` Type(s) column;
+  related rules are grouped into constructive, cancelling/restricting, and other
+  interactions with deterministic alphabetical ordering; and rules-reference cards keep
+  clear spacing from following occurrence tables.
 - Make Skill action/declaration categories intrinsically multi-valued, so full curated
   Skills—including rules-only Common Skills—can expose combinations such as Short Skill /
   ARO without requiring an Army identity. Normalize the complementary Baggage/Reload

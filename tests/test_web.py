@@ -1549,6 +1549,10 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert b"catalog-list.js" in body
     assert f'href="/{catalog}" aria-current="page"'.encode() in body
     assert b'<th scope="col">Uses</th>' in body
+    if catalog == "skills":
+        assert b'<th scope="col">Type(s)</th>' in body
+    else:
+        assert b'<th scope="col">Type(s)</th>' not in body
     assert b"Reference</th>" not in body
 
     status, headers, body = request(app, f"/api/{catalog}")
@@ -1988,6 +1992,11 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     )
     assert b'detail-fact-heading' in body
     assert b'heading.textContent = "Related rules"' in body
+    assert b'name: "Creates & enables"' in body
+    assert b'name: "Cancels & restricts"' in body
+    assert b'name: "Other interactions"' in body
+    assert b'left.record.name.localeCompare(right.record.name' in body
+    assert b'left.label.localeCompare(right.label)' in body
     assert b'"enters-state": { outbound: "Enters state", inbound: "Entered by" }' in body
     assert b'"reveals-state": { outbound: "Reveals state", inbound: "Revealed by" }' in body
     assert b'outbound: "Reduces MODs from"' in body
@@ -2015,6 +2024,42 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body
+
+
+def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) -> None:
+    status, _, body = request(app, "/static/catalog-list.js")
+    assert status == 200
+    assert b'from "./skill-categories.js"' in body
+    assert b'page === "skills" ? 4 : 3' in body
+    assert b'types.className = "skill-category-cell"' in body
+    assert b'types.append(skillCategoryBadge(category))' in body
+
+    status, _, body = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'from "./skill-categories.js"' in body
+    assert b'skillCategoryBadge(skillType' in body
+
+    status, _, body = request(app, "/static/skill-categories.js")
+    assert status == 200
+    for token in (b"automatic", b"deployment", b"basic-short", b"short", b"long", b"aro"):
+        assert token in body
+
+    status, _, body = request(app, "/static/styles.css")
+    assert status == 200
+    assert b".skill-category-badge--automatic" in body
+    assert b"var(--color-skill-category-automatic)" in body
+    assert b".skill-category-badge--deployment" in body
+    assert b"var(--color-skill-category-deployment)" in body
+    assert b".skill-category-badge--basic-short" in body
+    assert b"var(--color-skill-category-basic-short)" in body
+    assert b".skill-category-badge--short" in body
+    assert b"var(--color-skill-category-short)" in body
+    assert b".skill-category-badge--long" in body
+    assert b"var(--color-skill-category-long)" in body
+    assert b".skill-category-badge--aro" in body
+    assert b"var(--color-skill-category-aro)" in body
+    assert b".rules-reference" in body
+    assert b"margin-bottom: var(--space-2);" in body
 
 
 @pytest.mark.full_assets

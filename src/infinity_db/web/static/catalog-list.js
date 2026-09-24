@@ -1,5 +1,6 @@
 import { getCatalogItems } from "./api.js";
 import { initializeDistanceUnitToggle } from "./preferences.js";
+import { skillCategoryBadge } from "./skill-categories.js";
 
 const page = document.body.dataset.catalog;
 const title = page === "traits" ? "traits" : page;
@@ -52,7 +53,7 @@ function render() {
       const categoryRow = document.createElement("tr");
       categoryRow.className = "catalog-category-row";
       const categoryCell = document.createElement("th");
-      categoryCell.colSpan = 3;
+      categoryCell.colSpan = page === "skills" ? 4 : 3;
       categoryCell.scope = "rowgroup";
       categoryCell.textContent = category;
       categoryRow.append(categoryCell);
@@ -76,7 +77,16 @@ function render() {
     if (hasUsage) {
       const useCount = document.createElement("td");
       useCount.textContent = Number(item.use_count || 0).toLocaleString();
-      row.append(name, useCount, id);
+      if (page === "skills") {
+        const types = document.createElement("td");
+        types.className = "skill-category-cell";
+        for (const category of item.categories || []) {
+          types.append(skillCategoryBadge(category));
+        }
+        row.append(name, types, useCount, id);
+      } else {
+        row.append(name, useCount, id);
+      }
     } else {
       row.append(name, id);
     }

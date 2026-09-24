@@ -223,7 +223,7 @@ requiring a new top-level browser surface in 0.7.0.
   - [x] Distinguish Requirements, Effects, and Restrictions visibly in the shared
     rules-reference renderer instead of presenting those semantically different
     facts as unlabeled consecutive bullet lists.
-  - [ ] Make declaration/action categories prominent enough to scan as gameplay
+  - [x] Make declaration/action categories prominent enough to scan as gameplay
     information rather than burying them in source metadata. Reuse the maintained
     Wiki category colors where useful, but always retain text labels so color is
     never the only cue.
@@ -329,6 +329,19 @@ may still ship here when it does not displace completeness work.
 The Milestone 2B inventory also records non-relationship presentation gaps for this
 release-hardening pass:
 
+- [ ] Add a simple wiki-like internal-link syntax for **all maintained text fields**,
+  tentatively targeted at 0.9.x but deferrable to 1.0 if completeness work takes
+  priority. A text value should be able to reference another semantic identity inline,
+  for example: `Apply the [[skill:speculative-attack]] -6 MOD and Range MODs; other
+  negative MODs such as [[skill:mimetism]], [[rule:partial-cover]], and
+  [[rule:visibility-zone:plural]] are not applied.` Display-form modifiers such as
+  `:plural` should be supported where useful. The exact namespace vocabulary still
+  needs design—the example `rule:` namespace is only a placeholder, not an accepted
+  ontology decision. Render resolved links with subtle visual emphasis and a
+  small summary tooltip/popover so users can inspect the target without leaving the
+  current context. Define escaping, unresolved-link validation, plural/display-text
+  behavior, accessibility/keyboard interaction, and which semantic identity resolver
+  owns each namespace before implementation.
 - [ ] Present source-attributed Unit notes, including meaningful variant-specific notes
   that do not belong only to the representative source Unit.
 - [ ] Resolve and present the semantics of the 18 current top-level composite

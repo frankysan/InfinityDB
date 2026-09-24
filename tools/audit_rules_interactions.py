@@ -39,7 +39,7 @@ def _require_string(value: object, context: str) -> str:
 
 def _semantic_records(rules_directory: Path) -> dict[str, dict[str, Any]]:
     records: dict[str, dict[str, Any]] = {}
-    for path, document in load_curated_directory(rules_directory):
+    for _path, document in load_curated_directory(rules_directory):
         for raw in document["records"]:
             if raw["kind"] in EXCLUDED_RECORD_KINDS:
                 continue

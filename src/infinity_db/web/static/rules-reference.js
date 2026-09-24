@@ -1,3 +1,5 @@
+import { skillCategoryBadge } from "./skill-categories.js";
+
 function citationLabel(citation) {
   const source = citation.source_title || citation.source_id || "Source";
   const version = citation.source_version && !source.toLowerCase().includes(
@@ -30,6 +32,34 @@ function applicabilityText(rule) {
   }
   return parts.join(" · ");
 }
+
+const relationGroupOrder = [
+  {
+    name: "Creates & enables",
+    types: new Set([
+      "applies-effects-to",
+      "causes-state",
+      "controller-eligible-for",
+      "enables-use-of",
+      "enters-state",
+      "has-subtype",
+      "uses-effects-of",
+    ]),
+  },
+  {
+    name: "Cancels & restricts",
+    types: new Set([
+      "cancels-state",
+      "ignores-modifiers-from",
+      "negates-effects-of",
+      "overrides-effects-of",
+      "reduces-modifiers-from",
+      "restricts-use-of",
+      "reveals-state",
+    ]),
+  },
+  { name: "Other interactions", types: null },
+];
 
 const relationLabels = {
   "applies-effects-to": { outbound: "Effects apply to", inbound: "Affected by" },
@@ -91,12 +121,16 @@ function relationHref(record) {
   return null;
 }
 
-function relationNode(relation) {
+function relationPresentation(relation) {
   const labels = relationLabels[relation.type];
   const label = labels?.[relation.direction];
   const record = relation.record;
   if (!label || !record?.name) return null;
+  return { relation, label, record };
+}
 
+function relationNode(presentation) {
+  const { label, record } = presentation;
   const item = document.createElement("li");
   const relationLabel = document.createElement("span");
   relationLabel.className = "rules-relation-label";
@@ -115,19 +149,44 @@ function relationNode(relation) {
   return item;
 }
 
+function relationGroup(relation) {
+  return relationGroupOrder.find((group) => group.types?.has(relation.type))
+    || relationGroupOrder.at(-1);
+}
+
 function appendRuleRelations(container, rule) {
-  const items = (rule.display_relations || []).map(relationNode).filter(Boolean);
-  if (!items.length) return;
+  const relations = (rule.display_relations || [])
+    .map(relationPresentation)
+    .filter(Boolean);
+  if (!relations.length) return;
 
   const group = document.createElement("div");
   group.className = "detail-fact-group rules-relations";
   const heading = document.createElement("h4");
   heading.className = "detail-fact-heading";
   heading.textContent = "Related rules";
-  const list = document.createElement("ul");
-  list.className = "detail-list";
-  list.append(...items);
-  group.append(heading, list);
+  group.append(heading);
+
+  for (const relationGroupDefinition of relationGroupOrder) {
+    const grouped = relations
+      .filter((presentation) => relationGroup(presentation.relation) === relationGroupDefinition)
+      .sort((left, right) => (
+        left.record.name.localeCompare(right.record.name, undefined, { numeric: true })
+        || left.label.localeCompare(right.label)
+      ));
+    if (!grouped.length) continue;
+
+    const relationGroupElement = document.createElement("div");
+    relationGroupElement.className = "rules-relation-group";
+    const groupHeading = document.createElement("h5");
+    groupHeading.className = "rules-relation-group-heading";
+    groupHeading.textContent = relationGroupDefinition.name;
+    const list = document.createElement("ul");
+    list.className = "detail-list";
+    list.append(...grouped.map(relationNode));
+    relationGroupElement.append(groupHeading, list);
+    group.append(relationGroupElement);
+  }
   container.append(group);
 }
 
@@ -145,21 +204,22 @@ function appendRuleDetails(container, rule) {
   summary.textContent = rule.summary;
   container.append(summary);
 
-  const badges = [];
   const skillTypes = rule.skill_types || (rule.skill_type ? [rule.skill_type] : []);
-  for (const skillType of skillTypes) {
-    if (skillType?.category_name || skillType?.name) {
-      badges.push(skillType.category_name || skillType.name);
-    }
-  }
-  for (const label of rule.labels || []) badges.push(label.name);
-  if (badges.length) {
+  const labels = (rule.labels || []).map((label) => label.name);
+  if (skillTypes.length || labels.length) {
     const badgeRow = document.createElement("p");
     badgeRow.className = "detail-badges";
-    for (const badge of badges) {
+    for (const skillType of skillTypes) {
+      if (skillType?.category_name || skillType?.name) {
+        badgeRow.append(
+          skillCategoryBadge(skillType, skillType.category_name || skillType.name)
+        );
+      }
+    }
+    for (const label of labels) {
       const element = document.createElement("span");
       element.className = "badge";
-      element.textContent = badge;
+      element.textContent = label;
       badgeRow.append(element);
     }
     container.append(badgeRow);
