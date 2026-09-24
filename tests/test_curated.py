@@ -1222,6 +1222,36 @@ def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
     ]
 
 
+def test_checked_in_n5_collection_models_mobility_environment_skill_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_types = {
+        "skill:aerial": ["automatic"],
+        "skill:climbing-plus": ["automatic"],
+        "skill:terrain": ["automatic"],
+        "skill:warhorse": ["automatic"],
+    }
+    assert {
+        record_id: records[record_id]["facts"]["typeIds"]
+        for record_id in expected_types
+    } == expected_types
+
+    assert records["skill:aerial"]["relations"] == [
+        {"type": "restricts-use-of", "recordId": "skill:cautious-movement"},
+        {"type": "restricts-use-of", "recordId": "skill:guard"},
+        {"type": "negates-effects-of", "recordId": "trait:boost"},
+    ]
+    assert records["skill:climbing-plus"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:climb"},
+        {"type": "applies-effects-to", "recordId": "skill:move"},
+        {"type": "applies-effects-to", "recordId": "skill:dodge"},
+    ]
+    assert "relations" not in records["skill:terrain"]
+    assert "relations" not in records["skill:warhorse"]
+
+
 def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

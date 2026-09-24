@@ -926,6 +926,30 @@
         "targetRelease": "0.7.0",
         "status": "reviewed",
         "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:aerial",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:climbing-plus",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:terrain",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:warhorse",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1467,14 +1491,6 @@
       "reason": "Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge."
     },
     {
-        "sourceRecordId": "skill:guard",
-        "targetRecordId": "skill:aerial",
-        "relationType": "restricts-use-of",
-        "targetRelease": "0.7.0",
-        "status": "planned",
-        "reason": "Guard cannot be used against a Trooper while Aerial is active unless that Trooper is Unconscious; materialize the edge when Aerial gains its canonical Skill definition."
-    },
-    {
         "sourceRecordId": "skill:triangulated-fire",
         "targetRecordId": "rule:range-modifiers",
         "relationType": "ignores-modifiers-from",
@@ -1489,6 +1505,86 @@
         "targetRelease": "post-0.7.0",
         "status": "deferred",
         "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
+    },
+    {
+      "sourceRecordId": "skill:aerial",
+      "targetRecordId": "state:prone",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Aerial prevents its active user from being in Prone State, but Prone is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge."
+    },
+    {
+      "sourceRecordId": "skill:aerial",
+      "targetRecordId": "state:engaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Aerial prevents its active user from being in Engaged State, but Engaged is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge."
+    },
+    {
+      "sourceRecordId": "skill:climbing-plus",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation."
+    },
+    {
+      "sourceRecordId": "skill:climbing-plus",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:terrain",
+      "targetRecordId": "rule:movement-label",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations."
+    },
+    {
+      "sourceRecordId": "skill:terrain",
+      "targetRecordId": "rule:special-terrain",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge."
+    },
+    {
+      "sourceRecordId": "skill:warhorse",
+      "targetRecordId": "rule:loss-of-lieutenant",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:warhorse",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities."
+    },
+    {
+      "sourceRecordId": "skill:warhorse",
+      "targetRecordId": "state:isolated",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Warhorse prevents the user from entering Isolated State; the State exists, but the current relation vocabulary does not have a precise prevents-state edge."
+    },
+    {
+      "sourceRecordId": "skill:warhorse",
+      "targetRecordId": "skill:bs-attack-negative-modifier",
+      "relationType": "negates-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally."
     }
   ]
 }

@@ -7,6 +7,12 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed mobility/environment rules for Aerial, Climbing Plus, Terrain, and Warhorse.
+  Expose Aerial restrictions against Cautious Movement, Guard, and Boost, and link Climbing
+  Plus to the Climb, Move, and Dodge rules it extends while retaining State-entry prevention,
+  Partial Cover, Special Terrain, Loss of Lieutenant, Retreat, Isolation, and exact BS Attack
+  modifier semantics in the long-lived future queue where the current graph cannot express them
+  precisely.
 - Add reviewed combat/reaction rules for Berserk, Guard, Neurocinetics, Total Reaction,
   and Triangulated Fire. Expose their stable Move, CC Attack, BS Attack, and Mimetism
   interactions, and promote TinBot: Neurocinetics→Neurocinetics plus Armed Turret→Total

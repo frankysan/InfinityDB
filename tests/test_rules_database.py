@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 212
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 216
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -739,6 +739,45 @@ def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> Non
             (relation["type"], relation["direction"], relation["record"]["name"])
             for relation in target["display_relations"]
         }
+
+
+def test_mobility_environment_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(record_id: str) -> dict:
+        kind = record_id.split(":", 1)[0]
+        return next(
+            candidate
+            for candidate in database.composed_records_by_kind(kind)
+            if candidate["id"] == record_id
+        )
+
+    aerial = record("skill:aerial")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in aerial["display_relations"]
+    } == {
+        ("restricts-use-of", "outbound", "skill:cautious-movement"),
+        ("restricts-use-of", "outbound", "skill:guard"),
+        ("negates-effects-of", "outbound", "trait:boost"),
+    }
+    assert ("restricts-use-of", "inbound", "skill:aerial") in {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in record("skill:guard")["display_relations"]
+    }
+
+    climbing = record("skill:climbing-plus")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in climbing["display_relations"]
+    } == {
+        ("uses-effects-of", "outbound", "skill:climb"),
+        ("applies-effects-to", "outbound", "skill:move"),
+        ("applies-effects-to", "outbound", "skill:dodge"),
+    }
 
 
 def test_silent_dodge_modifier_interaction_is_bidirectional(tmp_path: Path) -> None:

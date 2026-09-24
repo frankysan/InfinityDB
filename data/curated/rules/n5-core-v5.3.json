@@ -678,6 +678,42 @@
             "url": "https://infinitythewiki.com/index.php?title=Triangulated_Fire&oldid=3873",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-aerial-oldid-4040",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Aerial revision 4040",
+            "version": "N5.3 / oldid 4040",
+            "url": "https://infinitythewiki.com/index.php?title=Aerial&oldid=4040",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-climbing-plus-oldid-3993",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Climbing Plus revision 3993",
+            "version": "N5.3 / oldid 3993",
+            "url": "https://infinitythewiki.com/index.php?title=Climbing_Plus&oldid=3993",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-terrain-oldid-3146",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Terrain revision 3146",
+            "version": "N5.3 / oldid 3146",
+            "url": "https://infinitythewiki.com/index.php?title=Terrain&oldid=3146",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-warhorse-oldid-3155",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Warhorse revision 3155",
+            "version": "N5.3 / oldid 3155",
+            "url": "https://infinitythewiki.com/index.php?title=Warhorse&oldid=3155",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -9776,6 +9812,249 @@
                     "recordId": "skill:mimetism"
                 }
             ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:aerial",
+            "kind": "skill",
+            "name": "Aerial",
+            "summary": "An obligatory Automatic Special Skill representing a Trooper whose flight prevents normal contact and several ground-based interactions.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "While Aerial is active, the user is never in Silhouette contact with other Models, Objectives, scenery items, or game elements, even if physically touching them."
+                ],
+                "restrictions": [
+                    "While Aerial is active, the user cannot be in Prone State or Engaged State.",
+                    "The user cannot declare Cautious Movement.",
+                    "Guard cannot be used against the user unless the user is Unconscious.",
+                    "Weapons with the Boost Trait do not activate against the user."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "aerial"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-aerial-oldid-4040",
+                    "heading": "Aerial"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:cautious-movement"
+                },
+                {
+                    "type": "restricts-use-of",
+                    "recordId": "skill:guard"
+                },
+                {
+                    "type": "negates-effects-of",
+                    "recordId": "trait:boost"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:climbing-plus",
+            "kind": "skill",
+            "name": "Climbing Plus",
+            "summary": "An optional Automatic Movement Special Skill that makes Climb faster to declare and extends normal movement actions onto vertical surfaces.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "At the end of the movement, the user must be able to place itself on a surface at least as large as its base."
+                ],
+                "effects": [
+                    "If declared as the first Basic Short Skill of the Order, Climb is treated as a Basic Short Skill instead of a Long Skill.",
+                    "The user may move on vertical surfaces as though they were horizontal while declaring Move or Dodge, and while moving because of a failed Guts Roll.",
+                    "The user may declare other compatible Basic Short Skills or Short Skills while moving on a vertical surface or hanging from a height.",
+                    "During the Reactive Turn, the user may declare an ARO while on a vertical surface when otherwise permitted."
+                ],
+                "restrictions": [
+                    "Climb can be declared as a Basic Short Skill only once per Order; a following Move uses the second MOV value.",
+                    "The user cannot benefit from Partial Cover MODs while on a vertical surface.",
+                    "Troopers cannot deploy on vertical surfaces during the Deployment Phase or during the game."
+                ]
+            },
+            "labelIds": [
+                "movement",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "climbing-plus"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-climbing-plus-oldid-3993",
+                    "heading": "Climbing Plus"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:climb"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:move"
+                },
+                {
+                    "type": "applies-effects-to",
+                    "recordId": "skill:dodge"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:terrain",
+            "kind": "skill",
+            "name": "Terrain",
+            "summary": "An optional Automatic Special Skill that improves movement in one matching Terrain Type, or every Terrain Type with Terrain (Total).",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The Terrain area must match a Terrain Type listed by the user’s Terrain Special Skill."
+                ],
+                "effects": [
+                    "When declaring a Skill with the Movement Label inside a matching Terrain area, the user gains +1 inch to the first value of its MOV Attribute.",
+                    "The user may move normally through matching Terrain areas without applying that Terrain area’s movement restrictions.",
+                    "If several Terrain Types are listed, the player chooses one when placing the Trooper on the game table.",
+                    "Terrain (Total) applies these effects to every Terrain Type defined by the rules."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "terrain"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-terrain-oldid-3146",
+                    "heading": "Terrain"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:warhorse",
+            "kind": "skill",
+            "name": "Warhorse",
+            "summary": "An optional Automatic Special Skill that keeps the user operational through Loss of Lieutenant, Retreat, Isolation, and certain BS Attack penalties.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user is not affected by Loss of Lieutenant and remains Regular.",
+                    "The user is not affected by Retreat, remains Regular, and does not enter Retreat State.",
+                    "The user cannot enter Isolated State.",
+                    "BS Attack (-X) Special Skill MODs have no effect against the user."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "warhorse"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-warhorse-oldid-3155",
+                    "heading": "Warhorse"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
             "variantSemantics": {
                 "inheritance": "family"
             }

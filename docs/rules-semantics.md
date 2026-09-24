@@ -3354,6 +3354,37 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Total_Reaction&oldid=3147>
 - Wiki: <https://infinitythewiki.com/index.php?title=Triangulated_Fire&oldid=3873>
 
+### RS-SK-MOBILITY-001 — Mobility/environment Skills expose only stable cross-rule effects
+
+**Classification:** source-native Skill interaction semantics.
+
+Aerial directly prevents Cautious Movement, prevents Guard from being used against the active
+Aerial Trooper unless it is Unconscious, and stops Boost weapons from activating against it.
+Those interactions therefore author `restricts-use-of` toward Cautious Movement and Guard, and
+`negates-effects-of` toward Boost. The Aerial rule is the source endpoint for the Guard edge so
+reverse navigation on Guard correctly reads as being restricted by Aerial. Aerial's Prone and
+Engaged restrictions stay in the future ledger until those States and a precise prevents-state
+relation are modeled.
+
+Climbing Plus reuses Climb while changing its declaration timing, and explicitly extends its
+vertical-movement effects to Move and Dodge. It therefore authors `uses-effects-of` toward Climb
+and `applies-effects-to` toward Move and Dodge. Its failed-Guts movement and Partial Cover
+interactions stay deferred where the current graph lacks the required generic identity or
+benefit-suppression relation.
+
+Terrain and Warhorse are valid reviewed zero-edge definitions at the current graph boundary.
+Terrain's MOV bonus targets any Movement-labeled Skill and bypasses matching Special Terrain
+movement restrictions; Warhorse interacts with Loss of Lieutenant, Retreat, Isolated State, and
+the exact BS Attack (-X) modifier form. Those concepts are kept in the maintained future ledger
+rather than approximated with incomplete Skill-specific or State-effect edges.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Aerial&oldid=4040>
+- Wiki: <https://infinitythewiki.com/index.php?title=Climbing_Plus&oldid=3993>
+- Wiki: <https://infinitythewiki.com/index.php?title=Terrain&oldid=3146>
+- Wiki: <https://infinitythewiki.com/index.php?title=Warhorse&oldid=3155>
+
 ### RS-EQ-CORE-003 — Recovery Equipment authors only stable current-State interactions
 
 **Classification:** source-native Equipment interaction semantics.

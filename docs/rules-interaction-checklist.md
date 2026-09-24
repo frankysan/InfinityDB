@@ -21,18 +21,22 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 114/156 complete (73.1%), 42 pending.**
-- Primary domains: Skill **53/95**; Equipment **28/28**; Trait **33/33**.
+- **0.7.0 primary catalog: 118/156 complete (75.6%), 38 pending.**
+- Primary domains: Skill **57/95**; Equipment **28/28**; Trait **33/33**.
 - Supporting semantic identities: **38/38** complete, **0** pending.
-- Current authored outgoing relations: **141**.
-- Explicitly tracked future/deferred interactions: **70**.
+- Current authored outgoing relations: **147**.
+- Explicitly tracked future/deferred interactions: **79**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (53/95)
+### Skill (57/95)
 
-- [ ] **Aerial** (`skill:aerial`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Aerial** (`skill:aerial`) — reviewed
+  - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
+  - `restricts-use-of` → Guard (`skill:guard`)
+  - `negates-effects-of` → Boost (`trait:boost`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `state:prone` — Aerial prevents its active user from being in Prone State, but Prone is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `state:engaged` — Aerial prevents its active user from being in Engaged State, but Engaged is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge.
 - [x] **Alert** (`skill:alert`) — reviewed
   - outgoing: none
 - [x] **Berserk** (`skill:berserk`) — reviewed
@@ -53,8 +57,12 @@ review. `declaration-category` projection records are excluded.
 - [x] **Climb** (`skill:climb`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
-- [ ] **Climbing Plus** (`skill:climbing-plus`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Climbing Plus** (`skill:climbing-plus`) — reviewed
+  - `uses-effects-of` → Climb (`skill:climb`)
+  - `applies-effects-to` → Move (`skill:move`)
+  - `applies-effects-to` → Dodge (`skill:dodge`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
 - [x] **Combat Instinct** (`skill:combat-instinct`) — reviewed
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
   - `negates-effects-of` → Stealth (`skill:stealth`)
@@ -108,7 +116,6 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Guard** (`skill:guard`) — reviewed
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
-  - future [0.7.0; planned]: `restricts-use-of` → Aerial (`skill:aerial`) — Guard cannot be used against a Trooper while Aerial is active unless that Trooper is Unconscious; materialize the edge when Aerial gains its canonical Skill definition.
 - [ ] **Hacker** (`skill:hacker`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [x] **Hidden Deployment** (`skill:hidden-deployment`) — reviewed
@@ -255,8 +262,10 @@ review. `declaration-category` projection records are excluded.
   - rules definition: missing; outgoing interactions not yet reviewable
 - [ ] **Technorganic** (`skill:technorganic`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Terrain** (`skill:terrain`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Terrain** (`skill:terrain`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:movement-label` — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:special-terrain` — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [x] **Total Reaction** (`skill:total-reaction`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [ ] **Transmutation** (`skill:transmutation`) — pending: No curated rules definition yet.
@@ -268,8 +277,12 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `ignores-modifiers-from` → `rule:partial-cover` — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
 - [ ] **Vulnerability** (`skill:vulnerability`) — pending: No curated rules definition yet.
   - rules definition: missing; outgoing interactions not yet reviewable
-- [ ] **Warhorse** (`skill:warhorse`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Warhorse** (`skill:warhorse`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:loss-of-lieutenant` — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Isolated State (`state:isolated`) — Warhorse prevents the user from entering Isolated State; the State exists, but the current relation vocabulary does not have a precise prevents-state edge.
+  - future [post-0.7.0; planned]: `negates-effects-of` → `skill:bs-attack-negative-modifier` — Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally.
 
 ### Equipment (28/28)
 
@@ -576,7 +589,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] GizmoKit (`equipment:gizmokit`) → Remote Presence (`skill:remote-presence`); `relation type TBD`; **0.7.0 / planned** — GizmoKit has a specific interaction with Remote Presence that changes how many Wounds are removed when Unconscious State is canceled; choose the precise relation after the Remote Presence rule definition is available.
 - [ ] GizmoKit (`equipment:gizmokit`) → Tech-recovery (`skill:tech-recovery`); `enables-use-of`; **0.7.0 / planned** — Tech-Recovery requires a successful allied GizmoKit use; materialize the prerequisite edge when Tech-Recovery gains its canonical Skill definition.
 - [ ] SymbioMate (`equipment:symbiomate`) → Immunity (`skill:immunity`); `uses-effects-of`; **0.7.0 / planned** — SymbioMate grants Immunity (Enhanced) for eligible Saving Rolls; materialize the reuse edge when Immunity has its canonical Skill definition.
-- [ ] Guard (`skill:guard`) → Aerial (`skill:aerial`); `restricts-use-of`; **0.7.0 / planned** — Guard cannot be used against a Trooper while Aerial is active unless that Trooper is Unconscious; materialize the edge when Aerial gains its canonical Skill definition.
 - [ ] Foxhole State (`state:foxhole`) → Courage (`skill:courage`); `uses-effects-of`; **0.7.0 / planned** — Foxhole State grants the effects of Courage; materialize this edge when Courage receives its canonical Skill definition.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
@@ -608,7 +620,11 @@ review. `declaration-category` projection records are excluded.
 - [ ] `hacking-program:white-noise` → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
 - [ ] `rule:marker-form` → Surprise Attack (`skill:surprise-attack`); `enables-use-of`; **post-0.7.0 / planned** — Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State.
 - [ ] `rule:null-state` → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role.
+- [ ] Aerial (`skill:aerial`) → `state:engaged`; `relation type TBD`; **post-0.7.0 / deferred** — Aerial prevents its active user from being in Engaged State, but Engaged is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge.
+- [ ] Aerial (`skill:aerial`) → `state:prone`; `relation type TBD`; **post-0.7.0 / deferred** — Aerial prevents its active user from being in Prone State, but Prone is not yet a canonical State identity and the relation vocabulary has no precise prevents-state edge.
 - [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
+- [ ] Climbing Plus (`skill:climbing-plus`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
+- [ ] Climbing Plus (`skill:climbing-plus`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
 - [ ] Combat Jump (`skill:combat-jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
@@ -625,8 +641,14 @@ review. `declaration-category` projection records are excluded.
 - [ ] Super-Jump (`skill:super-jump`) → Jump (`skill:jump`); `relation type TBD`; **post-0.7.0 / deferred** — Super-Jump changes how Jump is declared/executed; the current relation vocabulary has no precise transformation edge.
 - [ ] Suppressive Fire (`skill:suppressive-fire`) → `state:suppressive-fire`; `enters-state`; **post-0.7.0 / planned** — Suppressive Fire explicitly places the user in Suppressive Fire State; materialize the edge once that State is promoted to the canonical State catalog.
 - [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
+- [ ] Terrain (`skill:terrain`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
+- [ ] Terrain (`skill:terrain`) → `rule:special-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:partial-cover`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
 - [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:range-modifiers`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
+- [ ] Warhorse (`skill:warhorse`) → `rule:loss-of-lieutenant`; `relation type TBD`; **post-0.7.0 / planned** — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.
+- [ ] Warhorse (`skill:warhorse`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities.
+- [ ] Warhorse (`skill:warhorse`) → `skill:bs-attack-negative-modifier`; `negates-effects-of`; **post-0.7.0 / planned** — Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally.
+- [ ] Warhorse (`skill:warhorse`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — Warhorse prevents the user from entering Isolated State; the State exists, but the current relation vocabulary does not have a precise prevents-state edge.
 - [ ] Foxhole State (`state:foxhole`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model.
 - [ ] Isolated State (`state:isolated`) → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
 - [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
