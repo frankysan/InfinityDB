@@ -9,7 +9,7 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 18
+CURATED_FORMAT_VERSION = 19
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -629,10 +629,29 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             raise ValueError(f"{context}: 'facts' must be an object")
         if record["kind"] == "skill":
             facts = record.get("facts")
-            if composition_role == "definition" and (
-                not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids
-            ):
-                raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
+            if composition_role == "definition":
+                type_ids = facts.get("typeIds") if isinstance(facts, dict) else None
+                if (
+                    not isinstance(type_ids, list)
+                    or not type_ids
+                    or any(
+                        not isinstance(type_id, str) or type_id not in skill_type_ids
+                        for type_id in type_ids
+                    )
+                ):
+                    raise ValueError(
+                        f"{context}: skill 'facts.typeIds' must be a non-empty array "
+                        "referencing skillTypes"
+                    )
+                if len(type_ids) != len(set(type_ids)):
+                    raise ValueError(
+                        f"{context}: skill 'facts.typeIds' must not contain duplicates"
+                    )
+                if isinstance(facts, dict) and "typeId" in facts:
+                    raise ValueError(
+                        f"{context}: skill definitions must use 'facts.typeIds', "
+                        "not singular 'facts.typeId'"
+                    )
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict) and facts.get("category") == "peripheral-type":

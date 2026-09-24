@@ -1235,18 +1235,19 @@ Source:
 
 ## Baggage and Reload
 
-### RR-BR-RELOAD-001 — N5.3 disagrees on which Trooper must be non-Null
+### RR-BR-RELOAD-001 — Baggage and Reload state the prerequisite from opposite perspectives
 
 **Scope:** core N5.3 Baggage / Reload interaction.
 
-The current Baggage rule requires the *affected Allied Trooper* to be in a
-non-Null State, while the current Reload rule requires the Allied Trooper or
-game element *with Baggage* to be in a non-Null State. These are not equivalent
-requirements. InfinityDB therefore preserves each rule's own source wording and
-does not infer a shared prerequisite or choose one formulation as authoritative.
+The Baggage rule states the requirement from the receiving Allied Trooper's
+perspective, while Reload states it from the Baggage holder's perspective. InfinityDB
+normalizes the combined interaction as requiring **both participants to be in non-Null
+States** when the Reload/Baggage effect is used. The curated records retain citations to
+both source formulations and state the combined requirement explicitly rather than
+discarding either side.
 
-An official clarification or later rules revision is required before this can be
-promoted to a normalized cross-rule semantic relationship.
+**Resolution:** reviewed domain interpretation supplied 2026-09-23; encode both
+non-Null requirements as complementary prerequisites.
 
 Sources:
 

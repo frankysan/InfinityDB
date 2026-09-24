@@ -265,21 +265,22 @@ without updating a hard-coded global range table.
 
 Declaration categories follow the same composition boundary. Army snapshots identify
 Skills/Equipment and their usage but do not provide the N5 action/declaration category.
-The curated N5 collection stores those rule-derived declarations as
-`declaration-category` records linked to Army Skill or Equipment identities and cited by
-printed rulebook page. Each record references the canonical `skillTypes` vocabulary by
-`facts.typeId`; display text is not itself the semantic category key. `SkillCatalog` composes Skill categories and `CatalogRules`
-composes Equipment categories from `rules.db`; declaration records themselves are not
-returned as ordinary rule summaries. Without a valid rules database, Skills remain
-browsable with uncited `Unclassified` fallback while Equipment receives no invented
-category.
+Full curated Skill definitions own an ordered `facts.typeIds` array referencing the
+canonical `skillTypes` vocabulary, so every Skill definition can carry multiple
+categories regardless of whether it has an Army identity. `declaration-category`
+records remain for partial classification of Army Skills without full definitions and
+for Equipment; those records use singular `facts.typeId` plus deterministic order.
+`SkillCatalog` prefers categories from a full Skill definition and falls back to linked
+declaration records, while `CatalogRules` composes Equipment categories from
+`rules.db`. Without a valid rules database, Skills remain browsable with uncited
+`Unclassified` fallback while Equipment receives no invented category.
 
 Skill-extra distance semantics are split according to source authority. Army
 `extras.type` is authoritative for whether an extra is a distance; the repository
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v18 makes applicability, review state, contribution role, typed
+Curated rules format v19 makes applicability, review state, contribution role, typed
 related-item edges, explicit catalog-variant inheritance, typed exact-source variants, and
 cross-domain declaration categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
@@ -1127,8 +1128,7 @@ persistent user-authored data is future work; database rebuilds currently
 replace a complete imported snapshot.
 
 Rules-reference data uses a distinct SQLite database with its own schema,
-compatibility/versioning, importer, and atomic replacement policy. The current
-`rules.db` schema and compatibility versions are both 7. This database is not an
+compatibility/versioning, importer, and atomic replacement policy. The current `rules.db` schema version is 7 and its database compatibility revision is 8. This database is not an
 extension of `infinity.db` or `infinity.raw.db`.
 
 The source-controlled `data/curated/rules/` JSON layer is the only
@@ -1137,7 +1137,7 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v16 rules contract stores collection scope, source metadata,
+The current curated-v19 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, typed related-rule edges,
 explicit variant inheritance and exact-source variant semantics, composition role, review
 state, and source-specific citations. PDF sources carry both the local
@@ -1147,7 +1147,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v18 must be migrated before ingestion.
+Curated-rule files older than format v19 must be migrated before ingestion.
 
 ## HTTP API
 

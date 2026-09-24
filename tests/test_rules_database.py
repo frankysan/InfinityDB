@@ -345,6 +345,17 @@ def test_current_declaration_categories_match_reviewed_n5_3_semantics(
     assert skill_categories["triangulated-fire"] == ["Long Skill"]
     assert skill_categories["berserk"] == ["Long Skill"]
 
+    reload = next(
+        record
+        for record in database.composed_records_by_kind("skill")
+        if record["id"] == "skill:reload"
+    )
+    assert [skill_type["id"] for skill_type in reload["skill_types"]] == [
+        "short-skill",
+        "aro",
+    ]
+    assert reload["skill_type"]["id"] == "short-skill"
+
 
 def test_army_link_records_use_current_collections_by_default(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
@@ -901,7 +912,7 @@ def test_rules_database_preserves_variant_inheritance_and_variant_links(
         "kind": "skill",
         "summary": "Variant contract test.",
         "scope": {"game": "N5", "seasons": ["current"]},
-        "facts": {"category": "special-skill", "typeId": "automatic"},
+        "facts": {"category": "special-skill", "typeIds": ["automatic"]},
         "labelIds": [],
         "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 76}],
         "composition": {"role": "definition"},
@@ -970,7 +981,7 @@ def test_export_rejects_source_specific_variant_without_family_relation(
             "name": "Orphan Variant Test",
             "summary": "Invalid source-specific variant.",
             "scope": {"game": "N5", "seasons": ["current"]},
-            "facts": {"category": "special-skill", "typeId": "automatic"},
+            "facts": {"category": "special-skill", "typeIds": ["automatic"]},
             "labelIds": [],
             "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 76}],
             "composition": {"role": "definition"},

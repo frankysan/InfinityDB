@@ -24,10 +24,14 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Changed
 
+- Make Skill action/declaration categories intrinsically multi-valued, so full curated
+  Skills—including rules-only Common Skills—can expose combinations such as Short Skill /
+  ARO without requiring an Army identity. Normalize the complementary Baggage/Reload
+  prerequisite so both participating Troopers must be non-Null.
 - Audit the expanded Skills layer against current N5.3 source material: correct missing
   labels and concise facts across newly exposed Common Skills and touched Special Skills,
-  preserve the documented Baggage/Reload ambiguity, and make rules-only Skill relation
-  targets such as Reload navigate to their catalog detail pages.
+  and make rules-only Skill relation targets such as Reload navigate to their catalog
+  detail pages.
 - Expand the Common and Special Skills reference with concise, source-cited
   requirements, effects, and restrictions, including rules-only Common Skills.
 - Expand Targeted State into a bidirectional interaction hub: Forward Observer now causes

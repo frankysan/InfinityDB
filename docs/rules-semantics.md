@@ -1088,11 +1088,11 @@ loadout Order-generation entries. They are presented per loadout with core
 N5.3 citations. Tactical and Lieutenant Orders remain separate facts, and no
 rule-engine or temporary Isolated/Loss-of-Lieutenant state is inferred.
 
-The declaration-category validator/query layer now accepts `skill` and `equipment` Army
-links. Browser/API composition surfaces those Army-linked classifications from `rules.db`;
-rules-native Common Skills without an Army identity currently expose their primary
-`facts.typeId` only. Secondary categories for those rules-native Skills remain explicit
-follow-up work rather than being inferred from display names.
+Curated format v19 makes multi-category Skill classification intrinsic to full Skill
+definitions through ordered `facts.typeIds`. Browser/API composition therefore exposes
+all categories for rules-native Skills as well as Army-linked Skills. Linked
+`declaration-category` records remain only as the partial-classification path for Army
+Skills without a full definition and for Equipment.
 
 Sources:
 

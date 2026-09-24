@@ -1808,8 +1808,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     payload = json.loads(body)
     assert payload["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
     ]
     assert payload["rules"][0]["id"] == "skill:test-stealth-fixture"
     assert payload["rules"][0]["collection"]["id"] == "n5-core-v5.3"
@@ -1821,8 +1820,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     stealth = next(item for item in json.loads(body)["items"] if item["id"] == 11)
     assert stealth["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
     ]
 
     status, _, body = request(rules_app, "/api/skills/alert")
@@ -1830,8 +1828,27 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     alert = json.loads(body)
     assert alert["id"] == "alert"
     assert alert["category"] == "Common Skills"
+    assert alert["categories"] == [
+        {
+            "name": "Automatic",
+            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "page": None,
+        }
+    ]
     assert alert["variants"] == []
     assert [rule["id"] for rule in alert["rules"]] == ["skill:alert"]
+
+    status, _, body = request(rules_app, "/api/skills/reload")
+    assert status == 200
+    reload = json.loads(body)
+    assert [category["name"] for category in reload["categories"]] == [
+        "Short Skill",
+        "ARO",
+    ]
+    assert [
+        skill_type["category_name"]
+        for skill_type in reload["rules"][0]["skill_types"]
+    ] == ["Short Skill", "ARO"]
 
 
 

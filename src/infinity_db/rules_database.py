@@ -14,7 +14,7 @@ from typing import Any
 
 RULES_APPLICATION_ID = 0x49445231
 RULES_SCHEMA_VERSION = 7
-RULES_COMPATIBILITY_VERSION = 7
+RULES_COMPATIBILITY_VERSION = 8
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -524,6 +524,7 @@ class RulesDatabase:
     ) -> list[dict[str, Any]]:
         records = []
         collections: dict[str, dict[str, Any]] = {}
+        skill_type_category_names: dict[str, dict[str, str]] = {}
         for row in rows:
             collection_id = str(row["collection_id"])
             collection = collections.get(collection_id)
@@ -537,6 +538,19 @@ class RulesDatabase:
                     raise ValueError(f"Rules record {row['id']!r} has no collection")
                 collection = dict(collection_row)
                 collections[collection_id] = collection
+            if collection_id not in skill_type_category_names:
+                category_names: dict[str, str] = {}
+                for category_row in connection.execute(
+                    "SELECT name, facts_json FROM records "
+                    "WHERE collection_id = ? AND kind = 'declaration-category' "
+                    "ORDER BY id",
+                    (collection_id,),
+                ).fetchall():
+                    category_facts = _decode_json(category_row["facts_json"], {})
+                    type_id = category_facts.get("typeId")
+                    if isinstance(type_id, str):
+                        category_names.setdefault(type_id, category_row["name"])
+                skill_type_category_names[collection_id] = category_names
             record = {
                 "id": row["id"],
                 "kind": row["kind"],
@@ -561,19 +575,53 @@ class RulesDatabase:
                 ).fetchall()
                 record["labels"] = [dict(label) for label in label_rows]
             facts = record["facts"]
-            if isinstance(facts, dict) and facts.get("typeId"):
-                skill_type = connection.execute(
-                    "SELECT id, name, labels_json, descriptions_json FROM skill_types "
-                    "WHERE collection_id = ? AND id = ?",
-                    (row["collection_id"], facts["typeId"]),
-                ).fetchone()
-                if skill_type is not None:
-                    record["skill_type"] = {
-                        "id": skill_type["id"],
-                        "name": skill_type["name"],
-                        "labels": _decode_json(skill_type["labels_json"], []),
-                        "descriptions": _decode_json(skill_type["descriptions_json"], {}),
-                    }
+            if isinstance(facts, dict):
+                type_ids = facts.get("typeIds")
+                if isinstance(type_ids, list) and type_ids:
+                    skill_types = []
+                    for type_id in type_ids:
+                        skill_type = connection.execute(
+                            "SELECT id, name, labels_json, descriptions_json FROM skill_types "
+                            "WHERE collection_id = ? AND id = ?",
+                            (row["collection_id"], type_id),
+                        ).fetchone()
+                        if skill_type is not None:
+                            skill_types.append(
+                                {
+                                    "id": skill_type["id"],
+                                    "name": skill_type["name"],
+                                    "category_name": skill_type_category_names[collection_id].get(
+                                        skill_type["id"], skill_type["name"]
+                                    ),
+                                    "labels": _decode_json(skill_type["labels_json"], []),
+                                    "descriptions": _decode_json(
+                                        skill_type["descriptions_json"], {}
+                                    ),
+                                }
+                            )
+                    if skill_types:
+                        record["skill_types"] = skill_types
+                        # Compatibility projection for API consumers that only know the
+                        # former primary-category field. New code must use skill_types.
+                        record["skill_type"] = skill_types[0]
+                elif facts.get("typeId"):
+                    skill_type = connection.execute(
+                        "SELECT id, name, labels_json, descriptions_json FROM skill_types "
+                        "WHERE collection_id = ? AND id = ?",
+                        (row["collection_id"], facts["typeId"]),
+                    ).fetchone()
+                    if skill_type is not None:
+                        record["skill_type"] = {
+                            "id": skill_type["id"],
+                            "name": skill_type["name"],
+                            "category_name": skill_type_category_names[collection_id].get(
+                                skill_type["id"], skill_type["name"]
+                            ),
+                            "labels": _decode_json(skill_type["labels_json"], []),
+                            "descriptions": _decode_json(
+                                skill_type["descriptions_json"], {}
+                            ),
+                        }
             record["citations"] = [
                 dict(citation)
                 for citation in connection.execute(
@@ -934,6 +982,70 @@ class RulesDatabase:
                         f"{entity.title()} {army_ref!r} has conflicting source variant semantics"
                     )
                 result[army_ref] = dict(source_variant)
+            return result
+
+    def skill_definition_categories(self) -> list[dict[str, Any]]:
+        """Return ordered categories owned directly by current Skill definitions."""
+        with self._connect() as connection:
+            category_names: dict[tuple[str, str], str] = {}
+            for category_row in connection.execute(
+                "SELECT collection_id, name, facts_json FROM records "
+                "WHERE kind = 'declaration-category' ORDER BY collection_id, id"
+            ).fetchall():
+                category_facts = _decode_json(category_row["facts_json"], {})
+                type_id = category_facts.get("typeId")
+                if isinstance(type_id, str):
+                    category_names.setdefault(
+                        (category_row["collection_id"], type_id), category_row["name"]
+                    )
+            rows = connection.execute(
+                "SELECT l.external_id AS army_ref, r.collection_id, r.id, r.facts_json "
+                "FROM records AS r JOIN collections AS col ON col.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND r.composition_role = 'definition' "
+                "AND col.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result = []
+            for row in rows:
+                facts = _decode_json(row["facts_json"], {})
+                type_ids = facts.get("typeIds")
+                if not isinstance(type_ids, list) or not type_ids:
+                    continue
+                citation = connection.execute(
+                    "SELECT s.title AS source_title, s.version AS source_version, c.page "
+                    "FROM record_citations AS c JOIN sources AS s "
+                    "ON s.collection_id = c.collection_id AND s.id = c.source_id "
+                    "WHERE c.collection_id = ? AND c.record_id = ? "
+                    "ORDER BY (c.page IS NULL), c.position LIMIT 1",
+                    (row["collection_id"], row["id"]),
+                ).fetchone()
+                for order, type_id in enumerate(type_ids):
+                    skill_type = connection.execute(
+                        "SELECT name FROM skill_types WHERE collection_id = ? AND id = ?",
+                        (row["collection_id"], type_id),
+                    ).fetchone()
+                    if skill_type is None:
+                        continue
+                    result.append(
+                        {
+                            "skill_ref": _army_link_ref(row["army_ref"]),
+                            "type_id": type_id,
+                            "name": category_names.get(
+                                (row["collection_id"], type_id), skill_type["name"]
+                            ),
+                            "order": order,
+                            "source_title": (
+                                citation["source_title"] if citation is not None else None
+                            ),
+                            "source_version": (
+                                citation["source_version"] if citation is not None else None
+                            ),
+                            "page": citation["page"] if citation is not None else None,
+                        }
+                    )
             return result
 
     def declaration_categories(self, entity: str) -> list[dict[str, Any]]:

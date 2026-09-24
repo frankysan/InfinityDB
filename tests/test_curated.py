@@ -14,7 +14,7 @@ from infinity_db.curated import (
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",
-        "formatVersion": 18,
+        "formatVersion": 19,
         "collection": {
             "id": "n5-core-v5.3",
             "title": "N5 Core Rules v5.3",
@@ -79,7 +79,7 @@ def valid_document() -> dict:
                 "name": "Example skill",
                 "summary": "A concise human-written summary.",
                 "scope": {"game": "N5", "seasons": ["current"]},
-                "facts": {"typeId": "automatic"},
+                "facts": {"typeIds": ["automatic"]},
                 "labelIds": ["example-label"],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 12}],
                 "composition": {"role": "definition"},
@@ -94,6 +94,39 @@ def test_load_curated_document_requires_provenance(tmp_path: Path) -> None:
     path.write_text(json.dumps(valid_document()), encoding="utf-8")
 
     assert load_curated_document(path)["records"][0]["citations"][0]["page"] == 12
+
+
+def test_skill_definition_supports_multiple_categories(tmp_path: Path) -> None:
+    document = valid_document()
+    document["skillTypes"].append(
+        {
+            "id": "aro",
+            "name": "ARO",
+            "labels": ["ARO Skill", "ARO Skills"],
+            "descriptions": {
+                "singular": "An ARO Skill may be declared as an ARO.",
+                "plural": "ARO Skills may be declared as AROs.",
+            },
+        }
+    )
+    document["records"][0]["facts"]["typeIds"] = ["automatic", "aro"]
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    assert load_curated_document(path)["records"][0]["facts"]["typeIds"] == [
+        "automatic",
+        "aro",
+    ]
+
+    document["records"][0]["facts"]["typeIds"] = ["automatic", "automatic"]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="typeIds.*duplicates"):
+        load_curated_document(path)
+
+    document["records"][0]["facts"] = {"typeId": "automatic"}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.typeIds.*non-empty array"):
+        load_curated_document(path)
 
 
 def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Path) -> None:
@@ -480,7 +513,7 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["skill:camouflage"]["kind"] == "skill"
     assert records["skill:camouflage"]["review"]["status"] == "reviewed"
     assert records["skill:camouflage"]["labelIds"] == ["optional"]
-    assert records["skill:camouflage"]["facts"]["typeId"] == "automatic"
+    assert records["skill:camouflage"]["facts"]["typeIds"] == ["automatic"]
     assert records["skill:camouflage"]["relations"] == [
         {"type": "enters-state", "recordId": "state:camouflaged"}
     ]
@@ -500,7 +533,7 @@ def test_checked_in_n5_collection_is_valid() -> None:
             }
         ],
     }
-    assert records["skill:discover"]["facts"]["typeId"] == "basic-short-skill"
+    assert records["skill:discover"]["facts"]["typeIds"] == ["basic-short-skill", "aro"]
     assert records["skill:discover"]["relations"] == [
         {"type": "reveals-state", "recordId": "state:camouflaged"}
     ]
@@ -734,7 +767,7 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 "name": "Doctor",
                 "summary": "Doctor skill.",
                 "scope": {"game": "N5", "seasons": ["current"]},
-                "facts": {"typeId": "automatic"},
+                "facts": {"typeIds": ["automatic"]},
                 "labelIds": [],
                 "relations": [
                     {
@@ -752,7 +785,7 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 "name": "Engineer",
                 "summary": "Engineer skill.",
                 "scope": {"game": "N5", "seasons": ["current"]},
-                "facts": {"typeId": "automatic"},
+                "facts": {"typeIds": ["automatic"]},
                 "labelIds": [],
                 "relations": [
                     {
@@ -770,7 +803,7 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
                 "name": "Peripheral",
                 "summary": "Peripheral skill.",
                 "scope": {"game": "N5", "seasons": ["current"]},
-                "facts": {"typeId": "automatic"},
+                "facts": {"typeIds": ["automatic"]},
                 "labelIds": [],
                 "relations": [
                     {
@@ -834,7 +867,7 @@ def test_peripheral_type_rejects_unknown_controller_skill(tmp_path: Path) -> Non
                 "name": "Peripheral",
                 "summary": "Peripheral skill.",
                 "scope": {"game": "N5", "seasons": ["current"]},
-                "facts": {"typeId": "automatic"},
+                "facts": {"typeIds": ["automatic"]},
                 "labelIds": [],
                 "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
                 "composition": {"role": "definition"},
@@ -869,10 +902,10 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
     document = load_curated_document(path)
     records = {record["id"]: record for record in document["records"]}
 
-    assert records["skill:doctor"]["facts"]["typeId"] == "short-skill"
-    assert records["skill:engineer"]["facts"]["typeId"] == "short-skill"
-    assert records["skill:cyberplug"]["facts"]["typeId"] == "automatic"
-    assert records["skill:peripheral"]["facts"]["typeId"] == "automatic"
+    assert records["skill:doctor"]["facts"]["typeIds"] == ["short-skill"]
+    assert records["skill:engineer"]["facts"]["typeIds"] == ["short-skill"]
+    assert records["skill:cyberplug"]["facts"]["typeIds"] == ["automatic"]
+    assert records["skill:peripheral"]["facts"]["typeIds"] == ["automatic"]
     assert records["skill:doctor"]["armyLinks"] == [{"entity": "skill", "id": "doctor"}]
 
     peripheral_types = {
@@ -999,7 +1032,7 @@ def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful()
     assert "PH 15" in speedball["effects"][0]
 
     reload = records["skill:reload"]["facts"]
-    assert "Baggage holder must be in a non-Null State" in reload["requirements"][0]
+    assert "must both be in non-Null States" in reload["requirements"][0]
     assert any("Non-Reloadable" in restriction for restriction in reload["restrictions"])
 
 

@@ -146,7 +146,12 @@ function appendRuleDetails(container, rule) {
   container.append(summary);
 
   const badges = [];
-  if (rule.skill_type?.name) badges.push(rule.skill_type.name);
+  const skillTypes = rule.skill_types || (rule.skill_type ? [rule.skill_type] : []);
+  for (const skillType of skillTypes) {
+    if (skillType?.category_name || skillType?.name) {
+      badges.push(skillType.category_name || skillType.name);
+    }
+  }
   for (const label of rule.labels || []) badges.push(label.name);
   if (badges.length) {
     const badgeRow = document.createElement("p");

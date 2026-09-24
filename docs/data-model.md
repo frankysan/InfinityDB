@@ -2458,7 +2458,7 @@ identities and structured effects; FAQs yield dated rulings; ITS material is
 isolated by season; wiki material supplies discovery, aliases, and cross-links.
 Historical documents must not be silently merged into current rules.
 
-The current curated-v16 document has collection identity, source records, typed
+The current curated-v19 document has collection identity, source records, typed
 fact records, maintained vocabularies, scope, Army links, typed relations, explicit
 variant inheritance and exact-source variant semantics, composition role, review state,
 and source-specific citations. PDF sources record the local
@@ -2479,7 +2479,7 @@ curated facts in a separate SQLite database rather than either Army-derived
 database. Directory ingestion skips `example.json`. Other curated subtrees are
 not rules-database inputs. The rules database has an independent schema,
 application ID, compatibility version, and replaceable snapshot lifecycle; its
-current schema and compatibility versions are both 7.
+current schema version is 7 and compatibility revision is 8.
 
 A curated rule fact may reference stable application-level identities, but neither
 database is an import source for the other; any combined view is assembled by
@@ -2504,14 +2504,15 @@ application joins Army and rules sources at read time; the Army database does no
 curated Trait knowledge into its snapshot.
 
 Declaration categories are another application-level composition. Army-derived Skill
-and Equipment usage remain source data, while current curated `declaration-category`
-records carry a canonical `skillTypes` identity in `facts.typeId`, the N5 declaration
-label, deterministic display order, application-domain Skill/Equipment links, and
-printed-page citation. `SkillCatalog` joins Skill categories
-at read time and `CatalogRules` does the same for Equipment, accepting logical slugs
-while retaining numeric-link compatibility. Skills retain uncited `Unclassified` as the
-fallback only when no curated declaration exists; Equipment gets no invented fallback.
-The Army database does not materialize these rules facts.
+and Equipment usage remain source data. Full curated Skill definitions carry their
+ordered canonical `skillTypes` identities in `facts.typeIds`, allowing any Skill to own
+multiple categories even when no Army identity exists. Partial classification remains
+available through `declaration-category` records, which use singular `facts.typeId`, a
+deterministic display order, application-domain Skill/Equipment links, and printed-page
+citation. `SkillCatalog` prefers categories from full Skill definitions and falls back
+to those linked declarations; `CatalogRules` uses declarations for Equipment. Skills
+retain uncited `Unclassified` only when neither source is available; Equipment gets no
+invented fallback. The Army database does not materialize these rules facts.
 
 Variant and parameter interpretation follow the same source/curated split. Every
 Army-linked Skill, Equipment, or Weapon definition must declare
@@ -2596,7 +2597,7 @@ specific use of another rule without claiming full negation. Sensor is the first
 to combine those edge types with existing state/reduction semantics. Format v13 adds
 `applies-effects-to` when another rule's effects explicitly extend to the target and
 `imposes-modifiers-on` when the source rule applies MODs to the target rule's user;
-Reflective and Albedo use those distinct semantics toward Marksmanship and MSV. Format v14 adds `overrides-effects-of` for cases where one reviewed rule explicitly takes precedence over another without claiming the target rule is globally negated. Format v15 adds `cancels-state` for reviewed Skills that remove a State; Doctor and Engineer author those edges and State records receive the inverse relation automatically. Format v16 adds `causes-state` for reviewed effects that explicitly place a target in a State; Forward Observer uses it for Targeted, while Targeted's own outbound `modifies-rolls-for` and `restricts-use-of` edges expose the consequences from the affected Skills as well. Disposable (X) also uses `causes-state` for Unloaded State, whose item-specific target remains part of the owning Trait/State facts. Format v17 adds `enables-use-of` for documented prerequisite/permission relationships; Camouflaged and Hidden Deployment States use it toward Surprise Attack, and Stealth uses it toward Cautious Movement for the documented ZoC/Hacking Area exception, without asserting that the targets' other declaration requirements are satisfied. Format v18 adds `uses-effects-of` for a rule that reuses another rule's effects without implying State entry; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior.
+Reflective and Albedo use those distinct semantics toward Marksmanship and MSV. Format v14 adds `overrides-effects-of` for cases where one reviewed rule explicitly takes precedence over another without claiming the target rule is globally negated. Format v15 adds `cancels-state` for reviewed Skills that remove a State; Doctor and Engineer author those edges and State records receive the inverse relation automatically. Format v16 adds `causes-state` for reviewed effects that explicitly place a target in a State; Forward Observer uses it for Targeted, while Targeted's own outbound `modifies-rolls-for` and `restricts-use-of` edges expose the consequences from the affected Skills as well. Disposable (X) also uses `causes-state` for Unloaded State, whose item-specific target remains part of the owning Trait/State facts. Format v17 adds `enables-use-of` for documented prerequisite/permission relationships; Camouflaged and Hidden Deployment States use it toward Surprise Attack, and Stealth uses it toward Cautious Movement for the documented ZoC/Hacking Area exception, without asserting that the targets' other declaration requirements are satisfied. Format v18 adds `uses-effects-of` for a rule that reuses another rule's effects without implying State entry; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior. Format v19 moves Skill classification from singular definition `facts.typeId` to ordered `facts.typeIds`, while retaining singular `typeId` only on partial `declaration-category` records.
 The edge describes the relationship itself; conditional details remain in the owning rule
 facts rather than being duplicated onto the reverse edge.
 

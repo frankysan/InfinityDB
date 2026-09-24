@@ -555,7 +555,7 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v16 rules contract includes collection/source metadata,
+The current curated-v19 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, exact-source variant semantics, and citations.
@@ -1232,9 +1232,10 @@ compatibility references remain unambiguous JSON integers.
   `declaration-category` records. They may classify Army Skills or Equipment while
   preserving the catalog domain of the referenced item.
 - The six maintained N5.3 categories are Automatic, Deployment, Basic Short Skill,
-  Short Skill, Long Skill, and ARO. `facts.typeId` must resolve to the canonical
-  `skillTypes` vocabulary; deterministic display order is 10/20/30/40/50/60. `Entire
-  Order` is not a seventh category.
+  Short Skill, Long Skill, and ARO. Full Skill definitions use ordered `facts.typeIds`
+  so every Skill can carry multiple categories directly. Partial `declaration-category`
+  records retain singular `facts.typeId` with deterministic display order
+  10/20/30/40/50/60. `Entire Order` is not a seventh category.
 - The focused reconciliation corrected BS Attack/CC Attack/Dodge/Forward Observer,
   Doctor/Engineer, Cyberplug/Paramedic, Parachutist, Triangulated Fire, and Berserk, and
   added Equipment-domain Short Skill classifications for Deactivator, GizmoKit, and
@@ -1242,6 +1243,20 @@ compatibility references remain unambiguous JSON integers.
 - Declaration records are composition metadata, not ordinary rule-summary records.
   Skills without a reviewed declaration retain the uncited `Unclassified` fallback;
   Equipment receives no invented fallback category.
+
+## 0.7.0 multi-category Skill definitions (2026-09-23)
+
+- Curated rules format v19 replaces singular Skill-definition `facts.typeId` with an
+  ordered non-empty `facts.typeIds` array. All full Skill definitions can therefore own
+  multiple action/declaration categories, including rules-native Skills with no Army
+  identity.
+- `declaration-category` records remain valid fallback metadata for Army Skills without
+  full curated definitions and for Equipment. Skill catalog composition prefers the full
+  definition when both exist.
+- `rules.db` keeps schema version 7 but advances compatibility to revision 8 because
+  older runtimes cannot interpret the multi-category Skill facts correctly.
+- Baggage/Reload is normalized as a complementary requirement: both the Baggage holder
+  and the affected/user Trooper must be non-Null.
 
 ## 0.7.0 typed exact-source semantics (2026-09-23)
 

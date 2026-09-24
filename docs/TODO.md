@@ -605,14 +605,6 @@ work against that contract.
     chart. Make the projection source/scope-aware so scenario-only Skills/AROs can be
     represented without appearing in the core N5 matrix or being flagged as missing
     core categories.
-    - [ ] Extend declaration-category composition to rules-native Skills without Army
-      identities. Current N5.3 classifies `Place Deployable` and `Reload` as Short
-      Skill / ARO, but their rules-only records can currently expose only the primary
-      `facts.typeId`; the existing secondary-category mechanism is Army-link based.
-  - [ ] Resolve the N5.3 Baggage/Reload non-Null subject discrepancy before encoding
-    a cross-rule prerequisite: Baggage requires the affected Allied Trooper to be
-    non-Null, while Reload requires the Baggage holder to be non-Null. Preserve each
-    source's wording until an authoritative clarification determines precedence.
   - [ ] Model Ammunition rules as first-class cited identities and relationships.
     Distinguish the eleven base Ammunition types from source-defined combined
     forms, preserve component relationships for combined Ammunition, and keep

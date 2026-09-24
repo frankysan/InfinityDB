@@ -41,6 +41,9 @@ class SkillCatalog:
         self.database = database
         self.rules_database = rules_database
         self._category_index: dict[ArmyLinkRef, list[dict[str, Any]]] | None = None
+        self._skill_record_category_index: (
+            dict[ArmyLinkRef, list[dict[str, Any]]] | None
+        ) = None
         self._parameter_index: dict[ArmyLinkRef, dict[str, str]] | None = None
         self._source_variant_index: dict[ArmyLinkRef, dict[str, Any]] | None = None
         self._training_index: dict[str, dict[str, Any]] | None = None
@@ -57,6 +60,73 @@ class SkillCatalog:
         for categories in index.values():
             categories.sort(key=lambda item: (item["order"], item["name"], item["page"]))
         self._category_index = index
+
+    @staticmethod
+    def _categories_for_record(record: dict[str, Any]) -> list[dict[str, Any]]:
+        skill_types = record.get("skill_types")
+        if not isinstance(skill_types, list) or not skill_types:
+            return []
+        citations = record.get("citations") or []
+        citation = next(
+            (item for item in citations if item.get("page") is not None),
+            citations[0] if citations else {},
+        )
+        source = _source_label(citation) if citation else None
+        page = citation.get("page") if citation else None
+        return [
+            {
+                "name": skill_type.get("category_name", skill_type["name"]),
+                "source": source,
+                "page": page,
+            }
+            for skill_type in skill_types
+        ]
+
+    def _ensure_skill_record_category_index(self) -> None:
+        if self._skill_record_category_index is not None:
+            return
+        if self.rules_database is None:
+            self._skill_record_category_index = {}
+            return
+        index: dict[ArmyLinkRef, list[dict[str, Any]]] = {}
+        for category in self.rules_database.skill_definition_categories():
+            index.setdefault(category["skill_ref"], []).append(category)
+        for categories in index.values():
+            categories.sort(key=lambda item: item["order"])
+        self._skill_record_category_index = index
+
+    def _record_categories_for_ids(
+        self, skill_ids: set[int]
+    ) -> list[dict[str, Any]] | None:
+        self._ensure_skill_record_category_index()
+        assert self._skill_record_category_index is not None
+        candidates: list[list[dict[str, Any]]] = []
+        for skill_ref in sorted(
+            self._army_refs_for_ids(skill_ids),
+            key=lambda value: (0 if isinstance(value, int) else 1, str(value)),
+        ):
+            categories = self._skill_record_category_index.get(skill_ref)
+            if categories:
+                candidates.append(categories)
+        if not candidates:
+            return None
+        category_sets = {
+            tuple(category["type_id"] for category in categories)
+            for categories in candidates
+        }
+        if len(category_sets) > 1:
+            raise ValueError(
+                f"Skill identity {sorted(skill_ids)} has conflicting curated categories"
+            )
+        chosen = candidates[0]
+        return [
+            {
+                "name": category["name"],
+                "source": _source_label(category),
+                "page": category["page"],
+            }
+            for category in chosen
+        ]
 
     def _ensure_parameter_index(self) -> None:
         if self._parameter_index is not None:
@@ -129,6 +199,9 @@ class SkillCatalog:
             item["source_variant"] = source_variant
 
     def _categories_for_ids(self, skill_ids: set[int]) -> list[dict[str, Any]]:
+        record_categories = self._record_categories_for_ids(skill_ids)
+        if record_categories is not None:
+            return record_categories
         self._ensure_category_index()
         assert self._category_index is not None
         categories: dict[tuple[str, str | None, int | None], tuple[int, dict[str, Any]]] = {}
@@ -202,6 +275,7 @@ class SkillCatalog:
                     "name": record["name"],
                     "use_count": 0,
                     "category": COMMON_SKILL_CATEGORY,
+                    "categories": self._categories_for_record(record),
                 }
             )
         return items
@@ -221,6 +295,7 @@ class SkillCatalog:
                         "name": record["name"],
                         "use_count": 0,
                         "category": COMMON_SKILL_CATEGORY,
+                        "categories": self._categories_for_record(record),
                         "rules": [record],
                         "variants": [],
                     }
