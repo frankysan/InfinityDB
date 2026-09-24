@@ -3484,8 +3484,9 @@ queued because the current relation vocabulary does not yet distinguish a restri
 a State from ordinary Skill-use restriction.
 
 AI Motorcycle reuses the Motorcycle rules while mounted and Peripheral (Synchronized) rules while
-dismounted, so it authors `uses-effects-of` edges toward those canonical identities. Its
-Transmutation (Auto) transition remains queued until Transmutation has a canonical rules identity.
+dismounted, so it authors `uses-effects-of` edges toward those canonical identities. With
+Transmutation now canonical, the Transmutation (Auto) transition is also a current
+`uses-effects-of` edge rather than a queued dependency.
 
 Sources:
 
@@ -3528,9 +3529,10 @@ Source:
 A reviewed Equipment item does not need an authored outgoing edge when its external semantics are
 not representable as one stable target. ECM is parameterized by the attack type and MOD listed in
 the Unit Profile, so InfinityDB must not invent one fixed affected Skill. HoloMask and Holoprojector
-are reviewed with their HoloMask/Holoecho State-entry interactions retained in the future queue;
-Escape System similarly retains its Transmutation reuse there. SymbioMate retains its Immunity
-reuse in the future queue until the canonical Immunity definition exists.
+are reviewed with their HoloMask/Holoecho State-entry interactions retained in the future queue.
+Escape System now authors its stable `uses-effects-of` edge to canonical Transmutation, and
+SymbioMate likewise authors its stable `uses-effects-of` edge to canonical Immunity; only
+conditional or not-yet-canonical parts of those rules remain deferred.
 
 Sources:
 

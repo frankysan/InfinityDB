@@ -1110,6 +1110,42 @@
             "url": "https://infinitythewiki.com/index.php?title=Vulnerability&oldid=3156",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-infinity-spec-ops-oldid-4120",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Infinity Spec-Ops revision 4120",
+            "version": "N5.3 / oldid 4120",
+            "url": "https://infinitythewiki.com/index.php?title=Infinity_Spec-Ops&oldid=4120",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-morpho-scan-oldid-3106",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Morpho-Scan revision 3106",
+            "version": "N5.3 / oldid 3106",
+            "url": "https://infinitythewiki.com/index.php?title=Morpho-Scan&oldid=3106",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-remdriver-oldid-3634",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Remdriver revision 3634",
+            "version": "N5.3 / oldid 3634",
+            "url": "https://infinitythewiki.com/index.php?title=Remdriver&oldid=3634",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-transmutation-oldid-4109",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Transmutation revision 4109",
+            "version": "N5.3 / oldid 4109",
+            "url": "https://infinitythewiki.com/index.php?title=Transmutation&oldid=4109",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-24"
         }
     ],
     "records": [
@@ -8754,6 +8790,10 @@
                 {
                     "type": "uses-effects-of",
                     "recordId": "rule:peripheral-type:synchronized"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:transmutation"
                 }
             ],
             "citations": [
@@ -8899,6 +8939,12 @@
                 {
                     "entity": "equipment",
                     "id": "escape-system"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:transmutation"
                 }
             ],
             "citations": [
@@ -13190,6 +13236,296 @@
                 {
                     "sourceId": "wiki-vulnerability-oldid-3156",
                     "heading": "Vulnerability"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:g-jumper",
+            "kind": "skill",
+            "name": "G: Jumper",
+            "summary": "An obligatory Automatic Special Skill that represents one Trooper through two or three Proxy Models, with only one Proxy fully active at a time.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The player must enlist either two or three Proxies available to the G: Jumper Trooper.",
+                    "All Proxies of the G: Jumper Trooper must belong to the same Combat Group, where they count as one Trooper."
+                ],
+                "effects": [
+                    "The user is represented by several Proxy Models but provides only one Order regardless of how many Proxies are deployed.",
+                    "During the Active Turn, the player chooses the Proxy that becomes Active when declaring the Order; only that Active Proxy can declare Orders.",
+                    "During the Reactive Turn, only one eligible Proxy becomes Active for the Order and reacts normally; other reacting Proxies may only declare Dodge or Reset.",
+                    "If the Active Proxy enters Isolated State or any Null State, the Active Proxy may be moved to another Proxy that is not in one of those States at the end of the Order.",
+                    "Marker and Hidden Deployment status are not canceled merely by placing or assigning the Active Proxy Token.",
+                    "Moving the G: Jumper Trooper between Combat Groups moves all of its Proxies together."
+                ],
+                "restrictions": [
+                    "A Proxy in Isolated State or any Null State cannot be activated until that State is canceled.",
+                    "If all Proxies are in Isolated State or any Null State, the G: Jumper Trooper is treated as a casualty until at least one Proxy recovers."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "g-jumper"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "G:_Jumper",
+                    "heading": "G: Jumper"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:infinity-spec-ops",
+            "kind": "skill",
+            "name": "Infinity Spec-Ops",
+            "summary": "An optional Automatic Special Skill that lets a player customize one Spec-Ops Trooper during Army List creation and later replace its Initial Profile with its Enhanced Profile through SpecBall support.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [],
+                "effects": [
+                    "During Army List creation, the player selects one normal Skill, Weapon, or Equipment option and two different options from the Spec-Ops Chart.",
+                    "The selected Spec-Ops Chart options apply to both the Initial Profile and the Enhanced Profile.",
+                    "The Trooper always deploys using its Initial Profile and may replace it with the Enhanced Profile by collecting its SpecBall through the Request SpecBall rules.",
+                    "Wounds and applicable States are shared between the Initial and Enhanced Profiles."
+                ],
+                "restrictions": [
+                    "An Army List cannot include more than one Trooper with Infinity Spec-Ops.",
+                    "The current ITS season does not allow the use of Spec-Ops rules in official tournaments."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "infinity-spec-ops"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-infinity-spec-ops-oldid-4120",
+                    "heading": "Infinity Spec-Ops"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:morpho-scan",
+            "kind": "skill",
+            "name": "Morpho-Scan",
+            "aliases": [
+                "Morpho-scan"
+            ],
+            "summary": "An optional no-roll Comms Attack that permanently replaces the user's MOV, CC, BS, and PH values with those of an eligible enemy Model in Zone of Control.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "short-skill"
+                ],
+                "requirements": [
+                    "The target must be an enemy Model with the VITA Attribute in the user's Zone of Control."
+                ],
+                "effects": [
+                    "Morpho-Scan requires no Roll.",
+                    "The user's MOV, CC, BS, and PH Attribute values are replaced by the target's corresponding values.",
+                    "If the target declares Reset as an ARO to prevent Morpho-Scan, that Reset suffers a -9 MOD even without Line of Fire.",
+                    "After Morpho-Scan successfully replaces the user's Attribute values, it cannot be used again during the game."
+                ],
+                "restrictions": [
+                    "Morpho-Scan has no effect on enemy Markers or enemy Troopers with the STR Attribute."
+                ]
+            },
+            "labelIds": [
+                "comms-attack",
+                "no-roll",
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "morpho-scan"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "imposes-modifiers-on",
+                    "recordId": "skill:reset"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-morpho-scan-oldid-3106",
+                    "heading": "Morpho-Scan"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:remdriver",
+            "kind": "skill",
+            "name": "RemDriver",
+            "aliases": [
+                "Remdriver"
+            ],
+            "summary": "An optional Deployment Skill that assigns the user's profile-listed MODs to one deployed Remote in the same Army List while the RemDriver remains operational.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "deployment-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "When the user is deployed, the player places a RemDriver Token beside one Remote already deployed on the game table.",
+                    "The Remote with that Token receives the MODs shown in round brackets in the RemDriver user's Unit Profile."
+                ],
+                "restrictions": [
+                    "A Remote cannot have more than one RemDriver Token.",
+                    "The RemDriver Token is removed at the end of the Order in which the user enters any Null State."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "remdriver"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-remdriver-oldid-3634",
+                    "heading": "Remdriver"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-24"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "skill:transmutation",
+            "kind": "skill",
+            "name": "Transmutation",
+            "summary": "An Automatic Special Skill family that changes a Trooper between Unit Profiles according to the listed Transmutation variant while sharing Wounds and applicable States across those profiles.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user must satisfy the trigger or condition specified by the Transmutation variant shown in brackets on the Unit Profile."
+                ],
+                "effects": [
+                    "When Transmutation occurs, the first Unit Profile and its Model or representation are replaced by the second Unit Profile and corresponding Model or Token.",
+                    "VITA or STR points and Wounds are shared across the user's Unit Profiles.",
+                    "Applicable States are shared across the user's Unit Profiles.",
+                    "Transmutation (X) changes to the second Unit Profile after the listed Wound threshold is reached.",
+                    "Transmutation (Escape System-X) follows the threshold transition and also places an Eclipse Special Ammo Circular Template; if the Trooper is Possessed when it changes profile, Possessed State is canceled.",
+                    "Transmutation (Hatching) begins with a Seed-Embryo representation and changes to the Developed Form when its documented Movement or successful Dodge ARO trigger occurs.",
+                    "Transmutation (Auto) allows deployment in either Unit Profile and profile switching at the start of Movement generated by a Skill with the Movement Label.",
+                    "Transmutation (WIP) allows a WIP Roll before an Order or ARO to use the second Unit Profile for the rest of the Player Turn, returning to the first profile in the States Phase."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [],
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "transmutation"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-transmutation-oldid-4109",
+                    "heading": "Transmutation"
                 }
             ],
             "review": {

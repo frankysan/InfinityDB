@@ -7,6 +7,7 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Add reviewed G: Jumper, Infinity Spec-Ops, Morpho-Scan, RemDriver, and Transmutation rules. Preserve multi-body/profile and list/session state in structured facts, expose Morpho-Scan's Reset MOD, and promote AI Motorcycle/Escape System reuse of Transmutation while retaining participant-role, Attribute-copying, SpecBall, Null-State, and variant-specific triggers in the maintained future queue.
 - Add reviewed Explode, Exrah, Immunity, and Vulnerability rules. Expose their stable
   Unconscious/Dead and Immunity interactions, including Dogged/NWI suppression of Explode and
   SymbioMate's Immunity (Enhanced), while retaining parameter-specific Ammunition, Trait,

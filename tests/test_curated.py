@@ -1310,6 +1310,40 @@ def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> N
     ]
 
 
+def test_checked_in_n5_collection_models_profile_runtime_identity_skill_slice() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    expected_types = {
+        "skill:g-jumper": ["automatic"],
+        "skill:infinity-spec-ops": ["automatic"],
+        "skill:morpho-scan": ["short-skill"],
+        "skill:remdriver": ["deployment-skill"],
+        "skill:transmutation": ["automatic"],
+    }
+    assert {
+        record_id: records[record_id]["facts"]["typeIds"]
+        for record_id in expected_types
+    } == expected_types
+    assert records["skill:g-jumper"]["labelIds"] == ["obligatory"]
+    assert records["skill:infinity-spec-ops"]["labelIds"] == ["optional"]
+    assert records["skill:morpho-scan"]["labelIds"] == [
+        "comms-attack",
+        "no-roll",
+        "optional",
+    ]
+    assert records["skill:morpho-scan"]["relations"] == [
+        {"type": "imposes-modifiers-on", "recordId": "skill:reset"}
+    ]
+    assert records["skill:remdriver"]["labelIds"] == ["optional"]
+    assert records["skill:transmutation"]["labelIds"] == []
+    assert "relations" not in records["skill:g-jumper"]
+    assert "relations" not in records["skill:infinity-spec-ops"]
+    assert "relations" not in records["skill:remdriver"]
+    assert "relations" not in records["skill:transmutation"]
+
+
 def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
@@ -1590,6 +1624,10 @@ def test_checked_in_n5_collection_models_remaining_catalog_equipment_slice() -> 
     assert records["equipment:ai-motorcycle"]["relations"] == [
         {"type": "uses-effects-of", "recordId": "equipment:motorcycle"},
         {"type": "uses-effects-of", "recordId": "rule:peripheral-type:synchronized"},
+        {"type": "uses-effects-of", "recordId": "skill:transmutation"},
+    ]
+    assert records["equipment:escape-system"]["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:transmutation"}
     ]
     assert ("uses-effects-of", "equipment:albedo") in {
         (relation["type"], relation["recordId"])

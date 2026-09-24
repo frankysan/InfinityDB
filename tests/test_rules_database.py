@@ -26,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 261
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 266
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -1247,6 +1247,64 @@ def test_fireteam_and_scenario_support_skills_are_composed(tmp_path: Path) -> No
     assert all(not record.get("display_relations") for record in records.values())
 
 
+def test_profile_runtime_identity_skills_are_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        slug: next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+        for slug, record_id in {
+            "g-jumper": "skill:g-jumper",
+            "infinity-spec-ops": "skill:infinity-spec-ops",
+            "morpho-scan": "skill:morpho-scan",
+            "remdriver": "skill:remdriver",
+            "transmutation": "skill:transmutation",
+        }.items()
+    }
+    ai_motorcycle = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "ai-motorcycle")
+        if item["id"] == "equipment:ai-motorcycle"
+    )
+    escape_system = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "escape-system")
+        if item["id"] == "equipment:escape-system"
+    )
+
+    assert records["g-jumper"]["label_ids"] == ["obligatory"]
+    assert "Proxies" in " ".join(records["g-jumper"]["facts"]["effects"])
+    assert records["infinity-spec-ops"]["label_ids"] == ["optional"]
+    assert "Enhanced Profile" in " ".join(records["infinity-spec-ops"]["facts"]["effects"])
+    assert records["morpho-scan"]["label_ids"] == ["comms-attack", "no-roll", "optional"]
+    assert ("imposes-modifiers-on", "outbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["morpho-scan"]["display_relations"]
+    }
+    assert records["remdriver"]["facts"]["typeIds"] == ["deployment-skill"]
+    assert "Null State" in " ".join(records["remdriver"]["facts"]["restrictions"])
+    assert records["transmutation"]["facts"]["typeIds"] == ["automatic"]
+    assert ("uses-effects-of", "inbound", "AI Motorcycle") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["transmutation"]["display_relations"]
+    }
+    assert ("uses-effects-of", "inbound", "Escape System") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["transmutation"]["display_relations"]
+    }
+    for equipment in (ai_motorcycle, escape_system):
+        assert ("uses-effects-of", "outbound", "Transmutation") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in equipment["display_relations"]
+        }
+
+
 def test_damage_resilience_skills_are_composed(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     output = tmp_path / "rules.db"
@@ -1676,6 +1734,7 @@ def test_remaining_equipment_slice_relations_are_bidirectional(tmp_path: Path) -
     } == {
         ("uses-effects-of", "outbound", "Motorcycle"),
         ("uses-effects-of", "outbound", "Peripheral (Synchronized)"),
+        ("uses-effects-of", "outbound", "Transmutation"),
     }
 
     tinbot_albedo = next(

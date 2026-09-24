@@ -22,15 +22,15 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 173/180 complete (96.1%), 7 pending.**
-- Primary domains: Skill **88/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 178/180 complete (98.9%), 2 pending.**
+- Primary domains: Skill **93/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **28/28** complete, **0** pending.
-- Current authored outgoing relations: **237**.
-- Explicitly tracked future/deferred interactions: **123**.
+- Current authored outgoing relations: **240**.
+- Explicitly tracked future/deferred interactions: **140**.
 
 ## 0.7.0 primary catalog review
 
-### Skill (88/95)
+### Skill (93/95)
 
 - [x] **Aerial** (`skill:aerial`) — reviewed
   - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
@@ -142,8 +142,13 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
   - future [post-0.7.0; deferred]: `applies-effects-to` → Regular (`training:regular`) — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:fireteam-coherency` — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
-- [ ] **G: Jumper** (`skill:g-jumper`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **G: Jumper** (`skill:g-jumper`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Isolated State (`state:isolated`) — G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dodge (`skill:dodge`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Reset (`skill:reset`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:combat-group` — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
 - [x] **Guard** (`skill:guard`) — reviewed
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
 - [ ] **Hacker** (`skill:hacker`) — pending: No curated rules definition yet.
@@ -173,8 +178,10 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
   - future [post-0.7.0; deferred]: `relation type TBD` → Hidden Deployment State (`state:hidden-deployment`) — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
-- [ ] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:spec-ops-chart` — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
+  - future [post-0.7.0; planned]: `enables-use-of` → `skill:request-specball` — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
 - [x] **Inspiring Leadership** (`skill:inspiring-leadership`) — reviewed
   - `uses-effects-of` → Regular (`training:regular`)
   - `uses-effects-of` → Courage (`skill:courage`)
@@ -219,8 +226,14 @@ review. `declaration-category` projection records are excluded.
   - `enters-state` → Dead State (`state:dead`)
   - future [post-0.7.0; deferred]: `relation type TBD` → `equipment:cube` — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:troop-type:rem` — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
-- [ ] **Morpho-scan** (`skill:morpho-scan`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Morpho-scan** (`skill:morpho-scan`) — reviewed
+  - `imposes-modifiers-on` → Reset (`skill:reset`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:vita` — Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:str` — Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:mov` — Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:cc` — Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:bs` — Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:ph` — Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
 - [x] **Move** (`skill:move`) — reviewed
   - outgoing: none
 - [x] **Natural Born Warrior** (`skill:natural-born-warrior`) — reviewed
@@ -275,8 +288,10 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
 - [x] **Reload** (`skill:reload`) — reviewed
   - `cancels-state` → Unloaded State (`state:unloaded`)
-- [ ] **RemDriver** (`skill:remdriver`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **RemDriver** (`skill:remdriver`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `applies-effects-to` → `rule:troop-type:rem` — RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — A RemDriver Token is removed when the RemDriver user enters any Null State; retain this trigger until Null State is modeled as a canonical umbrella concept with event/timing semantics.
 - [x] **Remote Presence** (`skill:remote-presence`) — reviewed
   - `overrides-effects-of` → Unconscious State (`state:unconscious`)
   - `applies-effects-to` → Engineer (`skill:engineer`)
@@ -350,8 +365,11 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:special-terrain` — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [x] **Total Reaction** (`skill:total-reaction`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
-- [ ] **Transmutation** (`skill:transmutation`) — pending: No curated rules definition yet.
-  - rules definition: missing; outgoing interactions not yet reviewable
+- [x] **Transmutation** (`skill:transmutation`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `cancels-state` → Possessed State (`state:possessed`) — Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:movement-label` — Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:unit-profile` — All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain.
 - [x] **Triangulated Fire** (`skill:triangulated-fire`) — reviewed
   - `uses-effects-of` → BS Attack (`skill:bs-attack`)
   - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
@@ -373,7 +391,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **AI Motorcycle** (`equipment:ai-motorcycle`) — reviewed
   - `uses-effects-of` → Motorcycle (`equipment:motorcycle`)
   - `uses-effects-of` → Peripheral (Synchronized) (`rule:peripheral-type:synchronized`)
-  - future [0.7.0; planned]: `uses-effects-of` → Transmutation (`skill:transmutation`) — AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added.
+  - `uses-effects-of` → Transmutation (`skill:transmutation`)
 - [x] **Albedo** (`equipment:albedo`) — reviewed
   - `imposes-modifiers-on` → Multispectral Visor (`equipment:multispectral-visor`)
   - `imposes-modifiers-on` → Marksmanship (`skill:marksmanship`)
@@ -401,8 +419,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **ECM** (`equipment:ecm`) — reviewed
   - outgoing: none
 - [x] **Escape System** (`equipment:escape-system`) — reviewed
-  - outgoing: none
-  - future [0.7.0; planned]: `uses-effects-of` → Transmutation (`skill:transmutation`) — Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition.
+  - `uses-effects-of` → Transmutation (`skill:transmutation`)
 - [x] **EVO Hacking Device** (`equipment:evo-hacking-device`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:assisted-fire` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
@@ -709,8 +726,6 @@ review. `declaration-category` projection records are excluded.
 
 ## Future interaction queue
 
-- [ ] AI Motorcycle (`equipment:ai-motorcycle`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added.
-- [ ] Escape System (`equipment:escape-system`) → Transmutation (`skill:transmutation`); `uses-effects-of`; **0.7.0 / planned** — Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
@@ -758,6 +773,11 @@ review. `declaration-category` projection records are excluded.
 - [ ] Frenzy (`skill:frenzy`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
 - [ ] FT Master (`skill:ft-master`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
 - [ ] FT Master (`skill:ft-master`) → Regular (`training:regular`); `applies-effects-to`; **post-0.7.0 / deferred** — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
+- [ ] G: Jumper (`skill:g-jumper`) → `rule:combat-group`; `relation type TBD`; **post-0.7.0 / planned** — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
+- [ ] G: Jumper (`skill:g-jumper`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
+- [ ] G: Jumper (`skill:g-jumper`) → Dodge (`skill:dodge`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+- [ ] G: Jumper (`skill:g-jumper`) → Reset (`skill:reset`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+- [ ] G: Jumper (`skill:g-jumper`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] Immunity (`skill:immunity`) → `rule:saving-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.
 - [ ] Immunity (`skill:immunity`) → Non-Lethal (`trait:non-lethal`); `relation type TBD`; **post-0.7.0 / deferred** — Non-Lethal explicitly bypasses Immunity for that Trait only; a broad negates-effects-of edge would incorrectly imply that it disables unrelated Immunity effects on the same Attack.
@@ -768,6 +788,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] Impetuous (`skill:impetuous`) → Prone State (`state:prone`); `relation type TBD`; **post-0.7.0 / deferred** — Impetuous movement now has the current cancels-state edge, but its additional prevention of Prone re-entry needs a dedicated prevents-state-entry relation.
 - [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
 - [ ] Infiltration (`skill:infiltration`) → Hidden Deployment State (`state:hidden-deployment`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
+- [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `rule:spec-ops-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
+- [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `skill:request-specball`; `enables-use-of`; **post-0.7.0 / planned** — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
@@ -780,6 +802,12 @@ review. `declaration-category` projection records are excluded.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
 - [ ] Mnemonica (`skill:mnemonica`) → `equipment:cube`; `relation type TBD`; **post-0.7.0 / deferred** — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
 - [ ] Mnemonica (`skill:mnemonica`) → `rule:troop-type:rem`; `relation type TBD`; **post-0.7.0 / planned** — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:bs`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:cc`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:mov`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:ph`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:str`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:vita`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Doctor (`skill:doctor`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Engineer (`skill:engineer`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
@@ -793,8 +821,11 @@ review. `declaration-category` projection records are excluded.
 - [ ] Regeneration (`skill:regeneration`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity.
 - [ ] Religious Troop (`skill:religious-troop`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
 - [ ] Religious Troop (`skill:religious-troop`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
+- [ ] RemDriver (`skill:remdriver`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — A RemDriver Token is removed when the RemDriver user enters any Null State; retain this trigger until Null State is modeled as a canonical umbrella concept with event/timing semantics.
+- [ ] RemDriver (`skill:remdriver`) → `rule:troop-type:rem`; `applies-effects-to`; **post-0.7.0 / deferred** — RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values.
 - [ ] Remote Presence (`skill:remote-presence`) → `rule:command-token`; `relation type TBD`; **post-0.7.0 / planned** — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
 - [ ] Remote Presence (`skill:remote-presence`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
+- [ ] `skill:request-specball` → Combat Jump (`skill:combat-jump`); `uses-effects-of`; **post-0.7.0 / planned** — Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity.
 - [ ] Shasvastii (`skill:shasvastii`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] Shasvastii (`skill:shasvastii`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
 - [ ] Specialist Operative (`skill:specialist-operative`) → `rule:specialist-troop`; `uses-effects-of`; **post-0.7.0 / planned** — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
@@ -805,6 +836,9 @@ review. `declaration-category` projection records are excluded.
 - [ ] TAGCom (`skill:tagcom`) → `rule:troop-type:tag`; `applies-effects-to`; **post-0.7.0 / deferred** — TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD.
 - [ ] Terrain (`skill:terrain`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
 - [ ] Terrain (`skill:terrain`) → `rule:special-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
+- [ ] Transmutation (`skill:transmutation`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity.
+- [ ] Transmutation (`skill:transmutation`) → `rule:unit-profile`; `relation type TBD`; **post-0.7.0 / planned** — All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain.
+- [ ] Transmutation (`skill:transmutation`) → Possessed State (`state:possessed`); `cancels-state`; **post-0.7.0 / deferred** — Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X.
 - [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:partial-cover`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
 - [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:range-modifiers`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
 - [ ] Warhorse (`skill:warhorse`) → Loss of Lieutenant (`rule:loss-of-lieutenant`); `relation type TBD`; **post-0.7.0 / planned** — Warhorse makes the user unaffected by Loss of Lieutenant and keeps it Regular; materialize the interaction when Loss of Lieutenant is a canonical rules identity.

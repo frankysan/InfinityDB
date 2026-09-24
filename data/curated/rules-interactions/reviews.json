@@ -1220,6 +1220,36 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:g-jumper",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:infinity-spec-ops",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:morpho-scan",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:remdriver",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:transmutation",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     }
   ],
   "futureInteractions": [
@@ -1350,22 +1380,6 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge."
-    },
-    {
-      "sourceRecordId": "equipment:ai-motorcycle",
-      "targetRecordId": "skill:transmutation",
-      "relationType": "uses-effects-of",
-      "targetRelease": "0.7.0",
-      "status": "planned",
-      "reason": "AI Motorcycle explicitly applies Transmutation (Auto); materialize the edge once the canonical Transmutation Skill definition is added."
-    },
-    {
-      "sourceRecordId": "equipment:escape-system",
-      "targetRecordId": "skill:transmutation",
-      "relationType": "uses-effects-of",
-      "targetRelease": "0.7.0",
-      "status": "planned",
-      "reason": "Escape System is the Army Equipment identity for Transmutation (Escape System-X); materialize the reuse edge once Transmutation has a canonical Skill definition."
     },
     {
       "sourceRecordId": "equipment:hacking-device",
@@ -2208,6 +2222,158 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "The State: Stunned Trait explicitly bypasses Immunity, but the current canonical State Trait identity does not preserve the Stunned parameter, so a generic Trait edge would be overbroad."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "state:isolated",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "rule:null-state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "skill:dodge",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "skill:reset",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "rule:combat-group",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities."
+    },
+    {
+      "sourceRecordId": "skill:infinity-spec-ops",
+      "targetRecordId": "rule:spec-ops-chart",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts."
+    },
+    {
+      "sourceRecordId": "skill:infinity-spec-ops",
+      "targetRecordId": "skill:request-specball",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity."
+    },
+    {
+      "sourceRecordId": "skill:request-specball",
+      "targetRecordId": "skill:combat-jump",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:vita",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:str",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:mov",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:cc",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:bs",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:ph",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:remdriver",
+      "targetRecordId": "rule:troop-type:rem",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values."
+    },
+    {
+      "sourceRecordId": "skill:remdriver",
+      "targetRecordId": "rule:null-state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A RemDriver Token is removed when the RemDriver user enters any Null State; retain this trigger until Null State is modeled as a canonical umbrella concept with event/timing semantics."
+    },
+    {
+      "sourceRecordId": "skill:transmutation",
+      "targetRecordId": "state:possessed",
+      "relationType": "cancels-state",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X."
+    },
+    {
+      "sourceRecordId": "skill:transmutation",
+      "targetRecordId": "rule:movement-label",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity."
+    },
+    {
+      "sourceRecordId": "skill:transmutation",
+      "targetRecordId": "rule:unit-profile",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain."
     }
   ]
 }
