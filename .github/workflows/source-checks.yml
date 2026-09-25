@@ -75,7 +75,7 @@ jobs:
 
       - name: Upload deterministic-output manifest
         if: matrix.determinism
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: determinism-${{ runner.os }}
           path: reports/determinism-manifest.json
@@ -95,7 +95,7 @@ jobs:
           python-version: "3.11.9"
 
       - name: Download platform manifests
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           pattern: determinism-*
           path: determinism-manifests

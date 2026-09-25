@@ -36,6 +36,11 @@ from ..peripheral_identities import (
     PeripheralIdentityCurated,
     peripheral_identity_metadata,
 )
+from ..sqlite_determinism import (
+    configure_deterministic_sqlite,
+    normalize_sqlite_header,
+    vacuum_deterministic_sqlite,
+)
 from .application_armies import materialize_application_armies
 from .application_catalogs import materialize_application_catalogs
 from .application_domain_slugs import materialize_application_domain_slugs
@@ -338,6 +343,7 @@ def _publish_application_database(
 
     connection = sqlite3.connect(destination)
     try:
+        configure_deterministic_sqlite(connection)
         connection.execute("PRAGMA foreign_keys = OFF")
         connection.execute("ATTACH DATABASE ? AS staging", (str(staging_path),))
         with connection:
@@ -361,8 +367,16 @@ def _publish_application_database(
         violation = connection.execute("PRAGMA foreign_key_check").fetchone()
         if violation is not None:
             raise ValueError(f"Published database contains broken foreign keys: {tuple(violation)}")
+        vacuum_deterministic_sqlite(connection)
     finally:
         connection.close()
+    normalize_sqlite_header(destination)
+    check = sqlite3.connect(destination)
+    try:
+        if check.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+            raise ValueError("Published database integrity check failed after finalization")
+    finally:
+        check.close()
 
 
 def export_database(
@@ -406,6 +420,7 @@ def export_database(
     try:
         connection = sqlite3.connect(staging_temporary)
         try:
+            configure_deterministic_sqlite(connection)
             connection.execute("PRAGMA foreign_keys = ON")
             with connection:
                 create_schema(connection, data["tables"], table_columns=table_columns)
@@ -474,17 +489,26 @@ def export_database(
 
         archive_connection = sqlite3.connect(archive_temporary)
         try:
+            configure_deterministic_sqlite(archive_connection)
             archive_connection.execute("PRAGMA foreign_keys = ON")
             with archive_connection:
                 create_raw_archive(
                     archive_connection, data, identity_config, metadata=metadata
                 )
+            vacuum_deterministic_sqlite(archive_connection)
             if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Raw archive integrity check failed")
             if archive_connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Raw archive contains broken foreign keys")
         finally:
             archive_connection.close()
+        normalize_sqlite_header(archive_temporary)
+        archive_check = sqlite3.connect(archive_temporary)
+        try:
+            if archive_check.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+                raise ValueError("Raw archive integrity check failed after finalization")
+        finally:
+            archive_check.close()
 
         _publish_application_database(
             staging_temporary, published_temporary, data, metadata

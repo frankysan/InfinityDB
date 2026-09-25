@@ -73,7 +73,11 @@ SHA-256 identities. The cross-platform comparison pins the same exact CPython pa
 version on every runner; floating minor-version selectors are not a valid determinism
 test because they can resolve to different Python/SQLite toolchains by platform.
 Repository-managed text is checked out with LF line endings on every supported platform
-so the compared fixtures are byte-identical inputs.
+so the compared fixtures are byte-identical inputs. Generated SQLite artifacts likewise use
+explicit page/file settings, are repacked with `VACUUM`, and normalize SQLite's
+transaction-history-only file-change/version-valid-for header counters after the database is
+closed. The normalized counters remain equal so SQLite can still trust the in-header database
+size; schema/user/application version fields and database contents are not rewritten.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in
