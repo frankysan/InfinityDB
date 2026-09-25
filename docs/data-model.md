@@ -2582,7 +2582,6 @@ The rules-reference browsers query the global `skills`, `equipment`, and
 display, but the underlying source IDs and individual occurrences remain
 available for validation and detail rendering.
 
-
 `StateCatalog` is a rules-backed application projection, not an Army-source table. It lists
 current composed `state` definitions directly from `rules.db` and exposes them through the
 read-only `/api/states` and `/api/states/<slug>` surfaces. State identities therefore can be
@@ -2731,7 +2730,7 @@ must remain verbatim because chart notes can specialize the general Fireteam rul
 snapshot drift in chart shape, member resolution, FTO option matching, Reinforcement parent/type
 context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. The
 audit does not yet introduce a first-class Fireteam repository/API/browser model; that presentation
-question belongs to the remaining 1.0 relationship-completeness work.
+work is planned for the 0.8.x connected-data milestone within the 1.0 completeness program.
 
 #### Normalization-only link semantic evidence
 

@@ -23,6 +23,7 @@ provenance under `data/manifests/`.
 These curated categories have separate schemas and loaders; no loader treats arbitrary JSON
 from another curated category as valid input. Curated identifiers are stable project/domain
 identities.
+
 - `armyLinks` are cross-domain references rather than curated record identities: Skill,
   Equipment, and Weapon links may use either a positive numeric source ID or the owning
   application-domain slug, with slugs preferred in maintained rules data. Numeric references
@@ -39,14 +40,13 @@ separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
 
-
 ### Rules-enrichment coverage classifications
 
 `enrichment-coverage/classifications.json` is the maintained release-scope policy for
 `tools/audit_enrichment_coverage.py`. Every gap code known to the audit must have an explicit
 default classification: `release-blocker`, `intentional-omission`, `supporting-identity`,
-or `later-product-work`. The checked-in defaults are deliberately conservative: detected
-user-facing coverage gaps block 0.7.0 until reviewed otherwise, while rules-only relation
+or `later-product-work`. The checked-in 0.7.0 policy is deliberately conservative: detected
+user-facing coverage gaps block that release unless reviewed otherwise, while rules-only relation
 targets that already support an exposed item are classified separately as
 `supporting-identity`.
 
@@ -60,20 +60,21 @@ runtime behavior.
 
 `rules-interactions/catalog-scope.json` is the maintained public-catalog denominator for
 the interaction review. It lists every public Skill, Equipment item, and Trait targeted by
-the current release, including catalog identities that do not yet have a curated rules
-definition. `rules-interactions/reviews.json` separately tracks every semantic rules identity
-other than `declaration-category` projection records. Entries record the release whose
-outgoing interactions are being reviewed, whether that review is pending/reviewed/inherited,
-and known future interactions that should survive beyond the current release. The top-level
+the release named in that scope file, including catalog identities that do not yet have a
+curated rules definition. `rules-interactions/reviews.json` separately tracks every semantic
+rules identity other than `declaration-category` projection records. Entries record the target
+release whose outgoing interactions are being reviewed, whether that review is
+pending/reviewed/inherited, and known future interactions that should survive beyond that
+release. The top-level
 `futureInteractions` queue can also retain a provisional source/target ID that is not yet a
 current rules record, so future domain work does not lose already-reviewed interactions.
 
 A primary catalog item is normally complete only when its canonical typed rules identity exists
 and that identity's outgoing semantics are reviewed. `catalog-scope.json` may declare a
 `releaseExceptions` entry when an item has been explicitly vetted but its authoritative rule
-belongs to a different publication/domain that is deliberately outside the current release. Such
-items remain visible in the denominator as deferred rather than being misclassified as missing
-current-release rules. Unclassified missing definitions remain pending, and an exception becomes
+belongs to a different publication/domain that is deliberately outside the selected target release.
+Such items remain visible in the denominator as deferred rather than being misclassified as missing
+target-release rules. Unclassified missing definitions remain pending, and an exception becomes
 stale and fails the audit if a current curated definition is later added. Exact source variants
 and independently modeled supporting identities are reported separately.
 

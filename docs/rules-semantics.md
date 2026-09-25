@@ -1409,7 +1409,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Peripheral>
 - Wiki: <https://infinitythewiki.com/Traits#Deployable>
 
-
 ### RS-GSG-TRAIT-007 — BS Weapon Attribute substitution is a BS Attack roll interaction
 
 **Classification:** source-native cross-domain gameplay relationship semantics.
@@ -1512,9 +1511,10 @@ under its own targeting conditions. These are existing rule dependencies rather 
 copies of those rules.
 
 InfinityDB therefore authors `uses-effects-of` from Armed Turret to the four canonical Trait
-families and 360º Visor, plus `enables-use-of` toward BS Attack and CC Attack. The exact Disposable
-value and all trigger/target conditions remain owned by the Armed Turret source rule. Total Reaction
-remains in the 0.7.0 future queue until that public Skill gains its canonical definition.
+families, 360º Visor, and Total Reaction, plus `enables-use-of` toward BS Attack and CC Attack.
+The exact Disposable value and all trigger/target conditions remain owned by the Armed Turret
+source rule; the Total Reaction edge reuses the canonical reviewed Skill rather than duplicating
+its Burst/ARO behavior.
 
 Source:
 
@@ -1597,7 +1597,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Albedo&oldid=3163>
 - Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110>
 
-
 ### RS-SE-NBW-001 — Natural Born Warrior ignores opposing negative CC MODs
 
 **Classification:** source-native cross-rule gameplay relationship semantics.
@@ -1620,7 +1619,6 @@ Sources:
 - PDF: Infinity N5 V5.3, printed page 101
 - Wiki: <https://infinitythewiki.com/index.php?title=Natural_Born_Warrior&oldid=3109>
 
-
 ### RS-SE-COVER-001 — No Cover takes precedence over Limited Cover
 
 **Classification:** source-native cross-rule gameplay relationship semantics.
@@ -1640,7 +1638,6 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=No_Cover&oldid=3969>
 - Wiki: <https://infinitythewiki.com/index.php?title=Limited_Cover&oldid=3970>
-
 
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
@@ -3302,7 +3299,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/FastPanda>
 - Wiki: <https://infinitythewiki.com/Repeater>
 
-
 ### RS-SK-DEPLOY-001 — Deployment and arrival Skills keep State entry distinct from conditional failure effects
 
 **Classification:** source-native Skill/State interaction semantics.
@@ -3392,18 +3388,19 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Terrain&oldid=3146>
 - Wiki: <https://infinitythewiki.com/index.php?title=Warhorse&oldid=3155>
 
-
 ### RS-SK-MORALE-001 — Morale/behavior Skills separate stable reuse from phase- and situation-scoped effects
 
 **Classification:** source-native Skill interaction semantics.
 
 Courage and Religious Troop both alter Guts Roll and Retreat behavior, but in materially different
 ways: Courage optionally lets its user pass a Guts Roll automatically, while Religious Troop
-automatically passes and allows a WIP Roll to apply failed-Guts effects. Both ignore Retreat while
-remaining affected by Loss of Lieutenant. Guts Roll, Retreat, and Loss of Lieutenant are not yet
-canonical graph targets, so those interactions remain in the maintained future ledger rather than
-being approximated through unrelated Skills or States. Foxhole State explicitly grants Courage, so
-that existing planned edge is now a current `uses-effects-of` relationship.
+automatically passes and allows a WIP Roll to apply failed-Guts effects. Both ignore the army-level
+Retreat situation while remaining affected by Loss of Lieutenant. Guts Roll and the Retreat
+situation are not yet canonical graph targets, so those interactions remain in the maintained
+future ledger rather than being approximated through unrelated Skills or States. Loss of Lieutenant
+is canonical, but these Skills do not negate it, so their explicit continued susceptibility remains
+a fact rather than a special graph edge. Foxhole State explicitly grants Courage, so that existing
+planned edge is now a current `uses-effects-of` relationship.
 
 Frenzy grants Impetuous and Limited Cover after its direct-Wound/Dead-State trigger, so it authors
 `uses-effects-of` edges to those canonical Skills. When Frenzy grants Impetuous it also cancels
@@ -3472,9 +3469,10 @@ MediKit and GizmoKit can both cancel Unconscious State through their successful 
 procedure, so each authors `cancels-state` toward the canonical Unconscious State identity.
 InfinityDB keeps remaining outcome semantics at their natural boundary instead of flattening
 them into the cancellation edge. MediKit's failed Roll already authors its direct Dead-State
-outcome now that Dead is canonical. Remote Presence now owns the current GizmoKit recovery
-modifier through `applies-effects-to`; GizmoKit's Tech-Recovery prerequisite remains queued until
-Tech-Recovery gains its canonical Skill definition.
+outcome now that Dead is canonical. Remote Presence owns its GizmoKit recovery modifier through
+`applies-effects-to`, while the canonical Tech-Recovery Skill now authors `applies-effects-to`
+toward GizmoKit and its reviewed State cancellations. This keeps Tech-Recovery eligibility/effects
+on the owning Skill instead of duplicating them on the Equipment record.
 
 Sources:
 

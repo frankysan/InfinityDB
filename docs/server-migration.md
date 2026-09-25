@@ -42,25 +42,16 @@ data/generated/rules.db
 data/manifests/army-symbol-build.json
 ```
 
-If the installation uses locally published Corvus Belli graphical assets, also
-transfer the complete published asset contract:
-
-```text
-src/infinity_db/web/static/armies/
-src/infinity_db/web/static/characteristics/
-src/infinity_db/web/static/orders/
-src/infinity_db/web/static/units/
-src/infinity_db/web/static/symbol-inventory.json
-```
-
-The terminal `army-symbol-build.json` and `symbol-inventory.json` are both
-required for a guarded graphical deployment: the manifest binds the published set
-to its Army snapshot and processing state, while the inventory records every
-published SVG path and SHA-256. The tracked `army-symbols.js` and
-`unit-symbol-map.js` files come from
-the Git revision and must correspond to that publication. If those files contain
-uncommitted local changes on the old server, preserve those changes explicitly
-rather than assuming a clean checkout will reproduce them.
+The processed Corvus Belli SVG publication and `symbol-inventory.json` are tracked
+release content, so checking out the same Git revision supplies the exact published
+asset bytes; do not copy those tracked files separately during a normal migration.
+The local terminal `army-symbol-build.json` is still required for a guarded production
+`--published-assets` deployment because it binds that tracked publication to its Army
+snapshot and processing state. The tracked `army-symbols.js` and `unit-symbol-map.js`
+files come from the same Git revision and must correspond to the publication. If an
+old installation has uncommitted modifications to any tracked publication/mapping file,
+preserve them separately for investigation rather than treating them as the canonical
+release state.
 
 For the supported Compose deployment, also preserve local deployment state when
 applicable:
@@ -164,8 +155,8 @@ recreate the same environment as closely as practical, including:
 Do not commit or redistribute third-party font files merely to make a rebuild
 portable. Preserve or reinstall them according to their own licensing terms.
 
-For an exact runtime migration, copy the already-published SVGs and inventory
-instead of relying on cross-machine SVG regeneration.
+For an exact runtime migration, use the release-matched tracked SVG publication and
+inventory instead of relying on cross-machine SVG regeneration.
 
 ## State that does not need to move for a clean rebuild
 
@@ -196,17 +187,17 @@ or rules runtime databases.
 
 Before deploying, verify that the new checkout is on the intended revision. On
 a validation checkout with `.[dev,symbols]` installed, run the normal project
-checks. When a complete local symbol publication was transferred, require full
-assets rather than allowing a hermetic fallback:
+checks. Because the processed publication is tracked release content, require the
+complete release-matched assets rather than allowing a hermetic fallback:
 
 ```text
 python tools/run_checks.py --profile all --assets required --report
 ```
 
-A complete asset check validates the full `symbol-inventory.json` publication,
-including published variants that the browser does not yet reference. A partial
-or hash-mismatched transferred symbol set fails rather than silently downgrading
-to asset-free testing.
+A complete asset check validates the full tracked `symbol-inventory.json` publication,
+including published variants that the browser does not yet reference. Missing, extra,
+or hash-mismatched tracked symbols fail rather than silently downgrading to asset-free
+testing.
 
 For an exact transferred-runtime migration, deploy with
 `sh ./scripts/deploy-transferred.sh` after the validation above. For rebuild-mode

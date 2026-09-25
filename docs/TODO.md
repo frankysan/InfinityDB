@@ -20,11 +20,11 @@ history retains implementation detail.
 
 ## Current milestone
 
-The current milestone is **0.7.0 — rules-enriched catalog data**, which applies the
-completed Wiki/PDF/FAQ research to data InfinityDB already exposes. Milestone 2B
-shipped in 0.6.3; its durable canonical-relationship, storage-boundary, and
-source-to-presentation conclusions are maintained in `docs/data-model.md` and
-`docs/CHANGELOG.md`.
+The current milestone is **0.8.0 — connected game relationships**. With 0.7.0's
+rules/context enrichment complete, the next work focuses on making already modeled
+structural relationships directly useful to players: Fireteams, Peripheral/Controller
+structure, profile/loadout includes, selection/dependency constraints, Reinforcement
+parentage, and useful cross-army navigation.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
@@ -112,204 +112,6 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-## Release target 0.7.0 — rules-enriched catalog data
-
-0.7.0 is the first semantic-enrichment release. Its goal is to make the data
-InfinityDB already exposes materially more informative by applying the completed
-N5.3 Wiki/PDF/FAQ research through the existing curated-rules infrastructure and
-canonical application relationships.
-
-The release is deliberately **not** a requirement to implement a complete rules
-engine, scenario library, live-game state model, or every possible standalone
-rules-reference catalog. Supporting rule identities may be added when they are
-needed to summarize, label, cite, or cross-link an already exposed item without
-requiring a new top-level browser surface in 0.7.0.
-
-- [x] **Define and implement the structured enrichment contract for existing
-  catalog/application data.**
-  - [x] Store original concise summaries rather than copied rulebook/wiki prose.
-    Corvus Belli has explicitly permitted redistribution of the graphical assets; rules-derived
-    editorial text remains original InfinityDB prose with authoritative citations and attribution,
-    preserving the project's non-commercial scope and license separation.
-  - [x] Store authoritative source links and provenance, including applicable
-    rulebook/publication version, printed PDF page when available, and Wiki links.
-  - [x] Reconcile N5.3 declaration/action categories across Skills and Equipment,
-    including Automatic/Deployment/Basic Short/Short/Long/ARO semantics and the
-    Equipment-domain Deactivator/GizmoKit/MediKit actions.
-  - [x] Add the reviewed semantic labels/classifications required for 0.7.0 and explicitly
-    classify the remaining opaque MOD/parameter forms as later semantic work. Regular and
-    Irregular Training are already classified per loadout Order occurrence. Curated v11
-    preserves Martial Arts L1-L5 / Strategos L1-L2 as typed exact-source Levels,
-    adds reviewed BS=12, BS=11, and CC=21 numeric Attribute replacements, and models
-    the six non-base TinBot source variants as named exact-source variants; Equipment
-    detail composition now exposes those typed variants directly to the API/browser;
-    special generated Orders remain separate.
-  - [x] Represent reviewed related-item relationships explicitly rather than
-    deriving them from display-name matching; curated v5 uses typed one-way edges and
-    `rules.db` derives reverse links without mirrored authored rows.
-  - [x] Complete the maintained outgoing-interaction review checklist for 0.7.0.
-    The canonical Trait portion is complete at 33/33. `TraitCatalog` now roots the
-    rules-backed catalog in the current curated Trait vocabulary instead of the mixed
-    Army `properties` bucket, so zero-use canonical Traits remain in scope while Labels,
-    generic signed modifiers, and reviewed legacy spellings are classified correctly. The
-    Skill denominator is likewise rules-aware: six reviewed Army skill-like source entries
-    are retained as source occurrences but excluded from the rules Skill catalog because they
-    are Equipment, Training, an Attribute override, or a Team-Ops marker; zero-use canonical
-    `Non-Hackable` remains in scope. States are now an explicit primary 0.7.0 domain rather
-    than supporting-only semantics: the complete current N5.3 State vocabulary is modeled as
-    24 canonical identities, with Impersonation intentionally split into IMP-1 and IMP-2.
-    The maintained 0.7.0 interaction-review gate is now complete at 182/182 catalog items
-    vetted (Skills 95/95, Equipment 30/30, Traits 33/33, States 24/24). 181 catalog identities
-    have current canonical definitions; Cube and Cube 2.0 are now first-class Equipment identities
-    resolved from their Army profile-symbol occurrences, while Commlink is the single explicit
-    release exception because
-    its authoritative rule belongs to Reinforcements Extra and remains deferred to separately
-    scoped post-0.7.0 annex work. A final deferred-link audit promotes interactions that
-    need only existing catalog identities: Camouflaged State constrains Place Deployable,
-    Warhorse negates Loss of Lieutenant and prevents Isolated, Non-Lethal constrains
-    Immunity, Hacker enables use of Hacking Device, Motorcycle/Aerial/Impetuous prevent
-    specific State entry, Super-Jump and Perimeter modify existing Skill use, and Explode
-    is explicitly triggered by entering Unconscious State. Combat Jump, Decoy,
-    Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic Deployment now
-    have canonical reviewed definitions. Berserk, Guard,
-    Neurocinetics, Total Reaction, and Triangulated Fire are also canonical reviewed
-    definitions; the previously deferred TinBot: Neurocinetics and Armed Turret reuse edges
-    are now current graph relationships. Aerial, Climbing Plus, Terrain, and Warhorse now
-    complete the reviewed mobility/environment slice, with only graph semantics that need
-    missing State/situation identities or a more precise relation type left deferred. Courage,
-    Frenzy, Impetuous, and Religious Troop now complete the reviewed morale/behavior slice;
-    Foxhole→Courage and Frenzy's current Impetuous/Limited Cover plus modeled Marker-State
-    interactions are current graph relationships, while Guts/Retreat and phase-scoped movement
-    semantics remain explicitly deferred. Dogged, No Wound Incapacitation, Remote Presence,
-    Shasvastii, Regeneration, and Protheion now complete the reviewed survivability/recovery
-    slice against the full State catalog, with Unconscious/Normal/Dead behavior and stable
-    repair/CC interactions in the current graph and conditional healing, Wound-threshold,
-    Retreat-situation, Shock, and participant-role semantics retained in the future ledger.
-    Paramedic, Tech-Recovery, and Technorganic now complete the reviewed recovery-support
-    slice: Paramedic reuses MediKit, Tech-Recovery exposes its GizmoKit-driven cancellation
-    of Engineer-recoverable States other than Unconscious, and Technorganic links both
-    medical and engineering recovery methods across the normal VITA/STR boundary.
-    FT Master, Number 2, Specialist Operative, Journalist, and TAGCom now complete a
-    reviewed Fireteam/scenario-support slice. Their stable Automatic-Skill semantics are
-    curated now, while participant-role triggers, Fireteam leadership/coherency, Specialist
-    Troop identity, Guts/campaign rolls, and TAG/Combat Group-scoped parameter effects remain
-    explicitly tracked for later graph/domain work rather than being flattened into broad edges.
-    Booty and MetaChemistry now complete the reviewed random deployment-chart slice. Their
-    canonical definitions correctly classify them as optional Deployment Skills, overriding
-    the older Army-linked Automatic-category fallback, while their Booty/MetaChemistry Chart
-    dependencies remain explicit planned follow-up identities so randomized deployment/session
-    outcomes are not flattened into static Unit facts or unconditional Skill/Equipment edges.
-    Explode, Exrah, Immunity, and Vulnerability now complete the reviewed damage/resilience
-    slice. Stable Dead/Unconscious transitions, Dogged/NWI suppression of Explode,
-    Vulnerability→Immunity, and SymbioMate→Immunity are current graph relationships, while
-    state-entry triggers, Shock/Direct Template Attack, general healing, Saving Roll, and
-    parameter-specific Immunity exceptions remain explicitly tracked for later domains or more
-    precise relation semantics.
-    G: Jumper, Infinity Spec-Ops, Morpho-Scan, RemDriver, and Transmutation now complete the
-    reviewed profile/runtime-identity slice. Morpho-Scan's Reset MOD and AI Motorcycle/Escape
-    System reuse of Transmutation are current graph relationships, while Proxy participant roles,
-    Spec-Ops Chart/SpecBall behavior, copied Attribute values, RemDriver recipient/Null-State
-    scoping, and variant-specific Transmutation triggers remain explicitly tracked for later
-    graph/domain work. Hacker completes the remaining N5-core Skill definition as an obligatory
-    Automatic Skill, preserving Hacking Device, direct Program, Upgrade Program, and Null-State
-    behavior in structured facts. Hacking Area, Device eligibility, and Program/Upgrade identities
-    remain planned follow-up work for the 0.8.0 domain audit rather than being flattened into
-    imprecise current graph edges. Commlink remains visible in the catalog denominator as a
-    reviewed scope exception reserved for the separately scoped Reinforcements annex.
-    Chain of Command, Counterintelligence, Inspiring Leadership, Lieutenant, Mnemonica,
-    NCO, and Tactical Awareness now complete the reviewed command/order slice. Loss of
-    Lieutenant, Special Lieutenant Order, Tactical Order, and Command Token Strategic Use are
-    modeled as reviewed supporting rule identities so command Skills link to the actual rules
-    concepts they modify; Lieutenant/Strategos/Inspiring Leadership prerequisites, NCO
-    isolation, Order conversion, and Strategic Use/Speedball/Suppressive Fire interactions are
-    represented without introducing a general-purpose Order engine.
-    `docs/rules-interaction-checklist.md` is generated from the maintained public-catalog
-    scope, curated graph, and long-lived `data/curated/rules-interactions/reviews.json`
-    ledger. The primary 0.7.0 denominator is the actual public **Skills, Equipment, Traits,
-    and States** catalogs, including catalog items that do not yet have a curated rules record;
-    exact source variants and independently modeled Rule/Training/Weapon identities are tracked
-    separately as supporting semantics. Ordinary Weapon rows are covered through
-    their Skill/Trait semantics unless they have an independent curated rules definition.
-    Known post-0.7.0 candidates remain in the same ledger so later releases inherit the
-    research instead of rediscovering it. The 0.7.0 gate is reached when no primary catalog
-    item or supporting identity targeted at 0.7.0 remains pending; future-targeted
-    interactions do not block that release.
-  - [x] Promote the complete current N5.3 Game State vocabulary to a rules-backed primary
-    catalog for 0.7.0. InfinityDB models 24 canonical State identities (the 23 State pages,
-    with Impersonation represented separately as IMP-1 and IMP-2) and interaction-reviews all
-    of them. State pages expose reverse navigation from cancellation, revelation, entry, and
-    other modeled edges without inferring a Unit's current in-game State from static Army data.
-  - [x] Make Targeted State a bidirectional interaction hub: Forward Observer causes it,
-    Reset cancels it (and IMM-B), and Targeted exposes the reviewed roll/declaration
-    interactions with BS Attack, Discover, Reset, Cautious Movement, and Stealth.
-  - [x] Review Camouflage/Camouflaged State and model the documented Surprise Attack
-    prerequisite bidirectionally: Camouflaged and Hidden Deployment States enable use of
-    Surprise Attack while the Skill retains its remaining Active Turn/Attack requirements.
-  - [x] Model Stealth's documented Cautious Movement exception bidirectionally: Stealth
-    enables Cautious Movement inside enemy Zones of Control/Hacking Areas without claiming
-    that its other declaration and ARO conditions are automatically satisfied.
-  - [x] Model reviewed self-recovery interactions for restrictive States: Dodge cancels
-    IMM-A at PH -6; Reset cancels IMM-B at WIP -3 and Isolated at WIP -9. State pages
-    expose both the cancellation path and the State-specific roll modifier bidirectionally.
-  - [x] Keep semantic identity, source publication provenance, and applicability
-    scope separate so core, annex, FAQ, season, or scenario material can enrich the
-    same canonical item without duplication or collection-load-order semantics.
-    Current composition requires exactly one definition contribution per semantic ID
-    and permits scoped supplements that retain their own facts/citations/provenance;
-    fields are never merged by priority or load order.
-  - [x] Make enrichment variant-aware: curated v6 requires explicit `family` versus
-    exact `source` inheritance, source-only records use typed `variant-of` edges, and
-    reviewed occurrence parameters remain separate from source-variant identity. Unknown
-    MOD/value forms stay opaque until their typed semantics are reviewed.
-
-- [x] **Systematically enrich the data currently available through InfinityDB.**
-  - [x] Reconcile existing Skills, Equipment, Weapons, Traits, States, and relevant
-    Unit/Profile/loadout concepts against the completed rules audit; include supporting
-    Ammunition, Hacking, Fireteam, glossary, or scenario identities where required to
-    explain or relate those existing items. States are now a first-class rules-backed
-    browser surface because bidirectional interaction discovery requires useful navigation
-    from the affected State as well as from the cancelling/revealing Skill.
-  - [x] Add cited summaries, rules links, user-facing labels, related catalog
-    items, relevant state/ammunition/trait relationships, and Unit/profile/loadout
-    usage links where the audited evidence supports them.
-  - [x] Classify remaining profile/loadout annotations such as `(+1B)`, `(-3)`, `PH=`,
-    rerolls, and Special Dice explicit enough that an occurrence modifier is not
-    mistaken for a universal property of the base rule or Unit. Explicit Skill Levels,
-    BS/CC numeric Attribute replacements, and named TinBot variants are now typed at
-    the exact source-variant layer rather than inferred from names. TinBot occurrence
-    modifiers remain separate; PH replacements, generic signed MODs, rerolls, and
-    Special Dice remain intentionally opaque pending their own review.
-  - [x] Reconcile N5 weapon-profile presentation terminology with the current
-    Combat rules: Army's source `damage` field remains intact for provenance/API
-    compatibility, while the shared ranged/melee profile renderer now exposes the
-    rules-native Possibility of Survival (`PS`) label instead of `DAM`.
-  - [x] Normalize non-textual Army presentation encodings into canonical
-    relationships where appropriate. Cube and Cube 2.0 are now canonical rules-backed
-    Equipment catalog identities whose Unit usage and Equipment filtering are derived from
-    the maintained profile-symbol encoding map. Unit API occurrences preserve the source
-    characteristic symbol and attach the canonical Equipment reference; no textual Army
-    Equipment row is invented.
-  - [x] Consume Army's structured Hacking Program, Martial Arts, Booty, and
-    MetaChemistry reference rows through maintained application models instead of
-    leaving them available only in the raw archive. Hacking Program Device/target/
-    declaration context is preserved structurally, Martial Arts levels retain their
-    profile MODs, and Booty/MetaChemistry remain roll-result reference data rather
-    than being flattened into Unit facts.
-  - [x] Surface the resulting enrichment through the existing API/detail/catalog
-    experiences; enrichment required for 0.7.0 must not remain available only in
-    curated JSON, `rules.db`, raw source data, or developer tooling. The structured
-    Hacking Program, Martial Arts, Booty, and MetaChemistry references are now
-    presented on their existing Skill detail pages.
-
-0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
-every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
-charts, saved-list guidance, organizer tooling, a live action-legality engine, or
-game/session state tracking. Those features may build on the same enrichment data
-later. The release is ready when every currently exposed catalog/application
-surface has been systematically reconciled with the relevant audited rules
-knowledge, useful reviewed enrichment is presented to users, and every remaining
-gap is explicitly classified.
-
 ## Release direction 0.8.0 — connected game relationships
 
 0.8.0 should make InfinityDB's already modeled relationships directly useful to
@@ -330,8 +132,15 @@ rather than duplicating source-specific interpretations.
 The Milestone 2B completeness inventory currently makes these relationship families
 explicit 0.8.x candidates:
 
-- [ ] Add first-class Fireteam chart browsing/presentation from the audited source
-  semantics rather than exposing raw chart rows directly.
+- [ ] Add a rule-aware Fireteams feature from the audited source semantics rather
+  than exposing raw chart rows directly. Present each Army's current Army-data chart
+  as authoritative for membership restrictions, min/max requirements, FTO/Wildcard
+  notes, and source provenance; pair it with concise general Fireteam rules while
+  keeping Army-specific chart exceptions separate. Generate Fireteam Level bonuses
+  from the same curated general-rule facts rather than hard-coding a second Quick
+  Reference table, and make historical/community vocabulary such as `Linkable` and
+  `pure Fireteam` discoverable as provenance-aware aliases/help rather than current
+  N5 terminology.
 - [ ] Present canonical Peripheral attachments and Controller access pools with
   navigable links between Controllers and Peripheral targets.
 - [ ] Present profile/loadout/top-level Unit-option include relationships.
@@ -497,8 +306,8 @@ work is limited to:
   restructuring project.
   - [ ] Establish one pinned production audit baseline before inspecting behavior:
     the Git commit, Army snapshot/provenance, generated `infinity.db` and
-    `rules.db`, terminal symbol manifest/inventory, and locally published symbol
-    set. Verify that the runtime database and symbol publication derive from the
+    `rules.db`, local terminal symbol manifest, and the tracked release-matched
+    symbol publication/inventory. Verify that the runtime database and symbol publication derive from the
     same Army snapshot. Record the evidence and audit results in a durable audit
     document (for example, `docs/audits/web-consistency-YYYY-MM.md`); do not mix
     production observations with synthetic test fixtures.
@@ -534,21 +343,23 @@ work is limited to:
     deep-link state, cross-links, optional-unit behavior, source/rules links,
     catalog-item unit usage, and symbol identity. Use a deliberate manual browser
     pass unless lightweight browser automation is added for a concrete audit need.
-  - [ ] Treat Fireteams as preserved source data whose 1.0 presentation remains a
+  - [ ] Treat Fireteams as preserved source data whose 0.8.x presentation remains a
     separate implementation task. Verify their imported data is retained, record
     the current absence of a Fireteam repository/API/browser surface, and feed
-    confirmed player-relevant Fireteam information into the 1.0 completeness
-    backlog.
+    confirmed player-relevant Fireteam information into the connected-data backlog.
   - [ ] Exercise degraded states deliberately: rules database available versus
-    unavailable; clean source checkout without the processed graphical publication;
-    complete published assets; unknown unit/catalog/trait IDs; empty search
+    unavailable; asset validation disabled versus required; complete tracked published
+    assets versus an intentionally asset-free specialized package/test layout; unknown
+    unit/catalog/trait IDs; empty search
     or filter results; invalid query parameters; missing catalog enrichment;
     stale version/snapshot detection; and database/symbol snapshot mismatch.
-  - [ ] Verify the three supported runtime contexts independently: a clean source
-    checkout without the processed Corvus Belli graphical publication, local
-    development with explicitly supplied generated artifacts, and production
-    deployment that fails closed for incomplete or mismatched databases/assets. Passing one context does
-    not establish the others.
+  - [ ] Verify the supported validation/runtime contexts independently: a normal
+    source checkout with the tracked processed publication, a specialized package/test
+    layout where the third-party SVG tree is deliberately absent and asset checks are
+    disabled or allowed to fall back, local development with explicitly supplied
+    generated runtime artifacts, and production deployment that fails closed for
+    incomplete or mismatched databases/assets. Passing one context does not establish
+    the others.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
     coverage where practical. Record intentional deferrals in the audit document
     and TODO rather than silently leaving them unresolved. Keep CI hardening,
@@ -776,21 +587,6 @@ work against that contract.
     the General profile.
   - [ ] Also mark the General profile stat with a small superscript `*` and a
     descriptive tooltip whenever one or more Army profiles differ from it.
-- [ ] Build a rule-aware Fireteams feature covering both unit eligibility and
-  army Fireteam list/detail views.
-  - [ ] The imported schema already retains `fireteams`, types, members, and
-    descriptions, but the browser does not expose them. Present each army's
-    current Army-data chart as authoritative, with membership restrictions,
-    min/max requirements, FTO/wildcard notes, and source-data provenance.
-  - [ ] Pair it with concise general Fireteam rules while clearly separating general
-    rules from army-specific chart exceptions and retaining Infinity Army as the
-    current chart authority. Generate the Fireteam Level -> bonuses matrix from the
-    same curated general-rule facts rather than hard-coding the Quick Reference
-    chart separately.
-  - [ ] Make historically/community-significant Fireteam vocabulary discoverable
-    without presenting it as current N5 terminology. In particular, map historical
-    official `Linkable` and community `pure Fireteam` usage to the current
-    chart-eligibility / Fireteam-Level concepts with provenance-aware aliases/help.
 - [ ] Extend the completed Game States reference catalog with any remaining contextual
   state links needed by later Fireteam, Hacking, weapon/ammunition, and scenario guidance;
   do not infer a Unit's current in-game State from its static Army profile.

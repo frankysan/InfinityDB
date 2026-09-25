@@ -19,9 +19,11 @@ acquisition and symbol processing/publication are explicit workflows separate
 from deployment. Production has two intentionally separate data modes:
 
 - `install-or-update.sh` rebuilds runtime databases from raw source already present
-  on the server, then deploys them with the existing local symbol publication.
-- `deploy-transferred.sh` consumes a commit-matched database/symbol artifact set
-  transferred from a development checkout and never rebuilds runtime data.
+  on the server, then deploys them with the tracked symbol publication from the
+  checked-out release plus the matching local terminal symbol manifest.
+- `deploy-transferred.sh` consumes commit-matched runtime databases and terminal
+  symbol provenance transferred from a development checkout; the processed symbol
+  publication itself comes from the matching Git revision.
 
 Do not mix those modes in one update: rebuilding after an artifact transfer can replace
 the transferred database with one from a different Army snapshot, which the provenance
@@ -49,13 +51,13 @@ sh ./scripts/install-or-update.sh
 
 The interactive script fetches tags from `origin`, checks out the newest
 version tag in detached-HEAD mode, asks for the public domain and image
-retention count, builds both runtime databases, validates the existing local
-symbol publication against terminal version-8 `data/manifests/army-symbol-build.json`,
+retention count, builds both runtime databases, validates the tracked symbol
+publication against terminal version-8 `data/manifests/army-symbol-build.json`,
 and deploys only after the exact built image passes production startup and
 installed-symbol validation. It can save the domain and retention settings to
 the ignored `.infinity-db-deploy.env` file for subsequent runs. It stops before
 changing tags when tracked local edits are present, but leaves untracked raw data,
-generated manifests, published symbols, and the optional config file intact.
+generated manifests, generated databases, and the optional config file intact.
 
 The image build deliberately requires both `data/generated/infinity.db` and
 `data/generated/rules.db`. This makes an incomplete runtime-data build fail
@@ -90,17 +92,15 @@ The stop helper always targets the `infinitydb-test` Compose project and leaves 
 named volumes intact for the next test run. It does not target the production Compose
 project or run the production image-pruning policy.
 
-## Local graphical symbols
+## Published graphical symbols
 
-The deployment scripts do not acquire Corvus Belli graphical assets. When a local
-installation should serve symbols, prepare the complete published asset set
-separately before building the Docker image. A deployable publication currently
-consists of the locally generated/ignored `armies/`, `characteristics/`, `orders/`,
-and `units/` trees,
-`src/infinity_db/web/static/symbol-inventory.json`, and the terminal version-8
-`data/manifests/army-symbol-build.json` that promoted them. The tracked
-`army-symbols.js` and `unit-symbol-map.js` files must be the exact SHA-bound maps
-recorded by that manifest.
+The deployment scripts do not acquire or regenerate Corvus Belli graphical assets.
+The processed `armies/`, `characteristics/`, `orders/`, and `units/` SVG trees,
+`src/infinity_db/web/static/symbol-inventory.json`, `army-symbols.js`, and
+`unit-symbol-map.js` are tracked release content and therefore come from the exact
+Git revision being deployed. Production additionally requires the local terminal
+version-8 `data/manifests/army-symbol-build.json` that promoted that publication;
+the manifest's SHA-bound inventory and browser maps must match the tracked files.
 
 `deploy.sh` runs `tools/verify_deployment_assets.py` before Docker is allowed to
 build. That guard verifies the v8 manifest bindings and the complete inventory by
@@ -126,13 +126,13 @@ the deployment guard is narrower and specifically binds deployment to one promot
 publication.
 
 For routine deployment from a development checkout, `tools/send_deployment_artifacts.py`
-transfers only the ignored runtime databases, terminal symbol manifest, published
-symbol inventory, and four published SVG trees. It validates the local databases,
-database-to-symbol snapshot provenance, and manifest-bound symbol publication first,
-requires the remote checkout to be at the
-exact same Git commit with no tracked edits, stages the incoming files, and uses one
-SSH session so password authentication prompts only once. Run a dry-run first to
-inspect the exact transfer set:
+transfers only the ignored runtime databases and terminal symbol manifest. The symbol
+publication, inventory, and browser maps are already supplied by the exact matching Git
+commit. The helper validates the local databases, database-to-symbol snapshot provenance,
+and manifest-bound tracked publication first, requires the remote checkout to be at the
+exact same commit with no tracked edits, stages the incoming files, and uses one SSH
+session so password authentication prompts only once. Run a dry-run first to inspect
+the exact transfer set:
 
 ```powershell
 .\.venv\Scripts\python.exe tools\send_deployment_artifacts.py `
@@ -158,12 +158,12 @@ validation/deployment path. It deliberately does not call `infinity-db build` or
 `build-rules`. `install-or-update.sh` remains the separate server-rebuild workflow and
 requires its own raw Army snapshot.
 
-For an exact server replacement, copy the already-published local asset set rather
-than relying on cross-machine SVG regeneration. See
-[server migration](server-migration.md) for the full transfer checklist and the
-current reproducibility limits. The processed publication may be redistributed
-with InfinityDB under Corvus Belli's permission; raw acquisition archives remain
-separate from that distributable publication.
+For an exact server replacement, check out the same Git revision so the processed
+publication is restored byte-for-byte, then transfer only the generated runtime and
+local provenance state documented in [server migration](server-migration.md). Do not
+regenerate SVGs merely to reproduce an existing release. The processed publication
+may be redistributed with InfinityDB under Corvus Belli's permission; raw acquisition
+archives remain separate from that distributable publication.
 
 ## Deployment smoke validation
 
@@ -179,24 +179,20 @@ The verifier requires `/app/data/` to contain exactly `infinity.db` and
 `rules.db`, validates both database formats, checks the configured runtime paths
 and non-root image user, and starts Gunicorn with a read-only root filesystem,
 `/tmp` tmpfs, and `no-new-privileges`. It waits for the image health check and
-then exercises Army, rules-enriched Skill, and version API endpoints. In the legacy
-`--redistributable` mode it rejects the currently ignored `armies/`,
-`characteristics/`, `orders/`, and `units/` graphical trees so the existing
-asset-free deployment-smoke contract remains deterministic. The flag name reflects
-the older repository policy; it is no longer a statement that the processed Corvus
-Belli publication is legally non-redistributable. In `--published-assets` mode the
-verifier instead requires the installed package to contain exactly the
-`symbol-inventory.json` publication, re-hashes every SVG, verifies the published
-byte total, and requests one served symbol from each namespace. The two modes now
-exercise asset-free versus complete-publication packaging until the approved
-processed SVG set is migrated into the tracked release layout.
+then exercises Army, rules-enriched Skill, and version API endpoints.
+`--packaged-assets` requires the installed package to contain exactly the tracked
+`symbol-inventory.json` publication, re-hashes every SVG, verifies the published byte
+total, and requests one served symbol from each namespace. Production
+`--published-assets` performs the same package checks and additionally binds the
+runtime database to the ignored terminal symbol-build manifest, preserving the
+snapshot-provenance deployment guard.
 
 The same image verifier can be run manually after preparing the two generated
 databases and building an image:
 
 ```sh
 docker build -t infinity-db:smoke .
-sh ./scripts/verify-container-image.sh infinity-db:smoke --redistributable
+sh ./scripts/verify-container-image.sh infinity-db:smoke --packaged-assets
 ```
 
 ## Operations

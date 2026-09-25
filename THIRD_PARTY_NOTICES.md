@@ -36,14 +36,12 @@ grant to republish Infinity Army snapshot archives, wiki mirrors, rules PDFs, or
 other source/reference collections. InfinityDB therefore keeps raw Army, wiki,
 PDF, and source-symbol archives outside the public repository by project policy.
 
-The processed graphical publication used by InfinityDB may be committed to the
-public repository and included in wheels, Docker images, releases, deployment
+The processed graphical publication used by InfinityDB is tracked in the public
+repository and may be included in wheels, Docker images, releases, deployment
 packages, or other non-commercial InfinityDB distributions under that permission.
-Until the repository's asset-layout migration is completed, those published SVG
-trees may still be locally generated/ignored as an implementation detail; that
-current layout is not a redistribution-rights restriction. Generated databases
-and raw snapshots likewise remain replaceable data rather than original
-MIT-licensed project material.
+Generated databases, the local terminal symbol-build manifest, raw snapshots, and
+other acquisition/provenance inputs remain replaceable local data rather than
+original MIT-licensed project material.
 
 ## Infinity Wiki and rules documents
 

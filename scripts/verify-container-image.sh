@@ -3,18 +3,18 @@
 set -eu
 
 usage() {
-  echo "Usage: $0 IMAGE [--redistributable|--published-assets]" >&2
+  echo "Usage: $0 IMAGE [--packaged-assets|--published-assets]" >&2
   exit 2
 }
 
 [ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
 image="$1"
-redistributable=0
+packaged_assets=0
 published_assets=0
 if [ "$#" -eq 2 ]; then
   case "$2" in
-    --redistributable)
-      redistributable=1
+    --packaged-assets)
+      packaged_assets=1
       ;;
     --published-assets)
       published_assets=1
@@ -60,28 +60,12 @@ Database(data_dir / "infinity.db").validate()
 RulesDatabase(data_dir / "rules.db").validate()
 '
 
-if [ "$redistributable" -eq 1 ]; then
-  # A redistributable CI/release image must not accidentally pick up ignored,
-  # locally acquired Corvus Belli graphical assets from the build context.
-  docker run --rm --entrypoint python "$image" -c '
-from importlib.resources import files
-from pathlib import Path
-
-blocked = ("armies", "characteristics", "orders", "units")
-roots = [
-    Path("/app/src/infinity_db/web/static"),
-    files("infinity_db.web").joinpath("static"),
-]
-for root in roots:
-    for name in blocked:
-        candidate = root.joinpath(name)
-        if candidate.is_dir():
-            raise SystemExit(f"Redistributable image contains third-party asset tree: {candidate}")
-'
+if [ "$published_assets" -eq 1 ]; then
+  packaged_assets=1
 fi
 
-if [ "$published_assets" -eq 1 ]; then
-  # Deployment images with local third-party symbols must contain the complete
+if [ "$packaged_assets" -eq 1 ]; then
+  # Images that package the tracked third-party symbols must contain the complete
   # publication that was validated before the Docker build. Revalidate the
   # installed package so package-data omissions cannot reach production.
   docker run --rm --entrypoint python "$image" -c '
@@ -146,6 +130,9 @@ for relative, digest in sorted(expected.items()):
 if summary.get("publishedBytes") != published_bytes:
     raise SystemExit("Installed symbol inventory byte total does not match installed files")
 '
+fi
+
+if [ "$published_assets" -eq 1 ]; then
   # The manifest is an ignored deployment artifact, not image content. Bind it
   # while validating the exact image so its embedded database is proven to be
   # from the same Army ZIP as the published symbols.
@@ -248,7 +235,7 @@ if expected_display_version:
         )
 '
 
-if [ "$published_assets" -eq 1 ]; then
+if [ "$packaged_assets" -eq 1 ]; then
   docker exec "$container" python -c '
 import json
 from importlib.resources import files

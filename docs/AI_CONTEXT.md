@@ -86,13 +86,13 @@ and serves a read-only browser and same-origin HTTP API.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
 - Server migration distinguishes exact runtime transfer from rebuildability.
-  Exact runtime preservation copies the generated databases, terminal symbol
-  build manifest, and complete local published symbol inventory on the same Git
-  revision; reproducible rebuilds
-  additionally preserve immutable Army/SYMBOLS snapshots, generated provenance,
-  `army-symbol-build.json`, and local overrides. Cross-machine SVG regeneration
-  is not promised byte-identical because fonts and external processor versions
-  remain environment-sensitive; see `docs/server-migration.md`.
+  Exact runtime preservation checks out the same Git revision for the tracked
+  processed symbol publication and copies only the generated databases plus local
+  terminal symbol-build manifest; reproducible rebuilds additionally preserve
+  immutable Army/SYMBOLS snapshots, generated provenance, and local overrides.
+  Cross-machine SVG regeneration is not promised byte-identical because fonts and
+  external processor versions remain environment-sensitive; see
+  `docs/server-migration.md`.
 - Local tests separate hermetic and full-asset coverage explicitly.
   `run_checks.py --assets off|auto|required` validates the complete generated
   publication inventory (`symbol-inventory.json`, path + SHA-256 for every
@@ -109,8 +109,9 @@ and serves a read-only browser and same-origin HTTP API.
 - GitHub `Source checks` is configured to run hermetic checks on clean Windows,
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
-  uses the tracked synthetic Army fixture rather than live acquisition or ignored
-  graphical assets. Ubuntu/Python 3.11 owns the complete pytest/Ruff/Pyright/
+  uses the tracked synthetic Army fixture rather than live acquisition, while the
+  tracked processed graphical publication is validated directly. Ubuntu/Python 3.11
+  owns the complete pytest/Ruff/Pyright/
   build/rules gate; the other matrix legs retain pytest plus Army/rules build
   compatibility coverage without repeating lint/type checks. Hosted Windows
   Actions explicitly uses serial pytest (`--test-workers 0`) because automatic
@@ -125,13 +126,12 @@ and serves a read-only browser and same-origin HTTP API.
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases
   through the runtime application outside the checkout.
-- `Full-asset checks` is configured as dispatch-only, restricted to `main`, and stages a private
-  checksum-pinned published-asset ZIP from the existing `full-assets` GitHub
-  environment before running `run_checks.py --assets required`. It does not
-  upload the graphical tree as an artifact, and it intentionally does not rerun
-  the network/external-tool-sensitive symbol pipeline from raw inputs. The
-  environment exists, but its authorized bundle URL/digest secrets still must be
-  configured before the manual job can succeed. See `docs/ci.md`.
+- The processed SVG publication is tracked release content. Required `Source checks`
+  runs `run_checks.py --assets required` directly from the checkout and still does not
+  rerun network/external-tool symbol acquisition from raw inputs. The dispatch-only
+  `Full-asset checks` workflow remains available as an independent checksum-pinned
+  external-bundle validation path and still uses the `full-assets` environment. See
+  `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 
@@ -425,8 +425,8 @@ including public Git repository/build-package inclusion and technical SVG
 optimization. The processed publication may therefore be tracked and distributed,
 but it remains Corvus Belli property and outside the MIT License. Raw Army, wiki,
 PDF, and source-symbol archives remain outside the public repository by project
-policy. The current generated SVG trees and local corrected image overrides remain
-ignored until a deliberate tracked-asset migration changes that layout.
+policy. The processed SVG trees and publication inventory are now tracked
+release content; local corrected image overrides remain ignored build inputs.
 
 Army-symbol acquisition is now source-semantic and URL/reference based.
 `tools/download_army_symbols.py` discovers every
@@ -646,8 +646,8 @@ compatibility references remain unambiguous JSON integers.
   packages. The assets remain outside MIT; raw Army/wiki/PDF/source-symbol archives
   remain untracked by project policy.
 - 2026-09-18: CI/testing design separates required hermetic source checks from
-  explicit full-asset integration. Clean public CI does not depend on the processed
-  graphical publication or live acquisition; full-asset runs require a validated
+  explicit published-asset integration. Clean public CI validates the tracked processed
+  graphical publication without live acquisition; asset-backed runs require a validated
   complete asset set. Installed-package, deployment, and cross-platform checks are
   separate validation layers.
 - 2026-09-12: Database builds require validated Army API metadata. The importer
@@ -793,22 +793,24 @@ compatibility references remain unambiguous JSON integers.
   inputs.
 - 2026-09-19: Local production deployment with symbols is fail-closed. `deploy.sh`
   requires a terminal v8 `army-symbol-build.json` whose SHA-bound inventory and
-  browser maps match the local publication, verifies the complete published set,
-  then validates the exact built image in `--published-assets` mode before Compose
-  activation. Redistributable-image verification remains the inverse contract and
-  rejects third-party graphical trees.
-- 2026-09-19: Deployment artifact transfer is also commit-bound.
-  `tools/send_deployment_artifacts.py` sends only the ignored runtime databases,
-  terminal symbol manifest/inventory, and published SVG trees over one staged SSH
-  session, and refuses a remote checkout whose commit or tracked state differs from
-  the clean local checkout. Tracked browser maps travel through Git, not the artifact
-  transfer, so exact commit identity is part of the transfer contract.
+  browser maps match the publication, verifies the complete published set, then
+  validates the exact built image in `--published-assets` mode before Compose
+  activation. The 0.7.0 tracked-asset migration later replaced the old
+  asset-free/redistributable-image inverse contract with `--packaged-assets`
+  verification for distributable container smoke tests.
+- 2026-09-19: Deployment artifact transfer is commit-bound. The 0.7.0 tracked-asset
+  migration narrowed `tools/send_deployment_artifacts.py` to the ignored runtime
+  databases and terminal symbol manifest; the processed SVG publication, inventory,
+  and browser maps now travel through Git. The helper still uses one staged SSH
+  session and refuses a remote checkout whose commit or tracked state differs from
+  the clean local checkout.
 - 2026-09-20: Production deployment has two explicit data modes.
   `install-or-update.sh` is the server-rebuild path and may replace generated runtime
   databases from server-local raw source. `deploy-transferred.sh` is the no-rebuild
   path for the commit-matched artifact bundle produced by
-  `send_deployment_artifacts.py`; it must preserve that transferred database/symbol
-  pairing. `deploy-local-test.sh` reuses the no-rebuild path under a separate Compose
+  `send_deployment_artifacts.py`; it must preserve the transferred database/manifest
+  pairing with the tracked publication from that same commit. `deploy-local-test.sh`
+  reuses the no-rebuild path under a separate Compose
   project, binds only to `127.0.0.1`, and disables production image pruning.
   `stop-local-test.sh` is the matching teardown path: it always targets only the
   `infinitydb-test` Compose project and retains its named volumes by default.
@@ -1126,8 +1128,9 @@ compatibility references remain unambiguous JSON integers.
   chart description and four team observations verbatim because chart notes can override/specialize
   general rules. Wildcards (52 teams / 51 Armies) have no Fireteam type rows. Bracketed equivalence
   wording appears on 406 member rows (453 references / 146 labels) and must not feed Unit identity.
-- `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this boundary.
-  First-class Fireteam repository/API/browser presentation remains a separate 1.0 completeness task.
+- `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this
+  boundary. First-class Fireteam repository/API/browser presentation remains a separate
+  0.8.x connected-data task within the 1.0 completeness program.
 
 ### Milestone 2B normalization-link boundary (2026-09-22)
 
@@ -1193,8 +1196,9 @@ compatibility references remain unambiguous JSON integers.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
-- Milestone 2B shipped in 0.6.3. The next active milestone is 0.7.0 rules-enriched
-  catalog data, not further canonicalization.
+- Milestone 2B shipped in 0.6.3, and the rules-enriched catalog-data milestone shipped
+  in 0.7.0. The next active milestone is 0.8.0 connected game relationships, not further
+  canonicalization or expansion of the completed 0.7.0 release gate.
 
 ## 0.7.0 structured Army reference projections (2026-09-25)
 

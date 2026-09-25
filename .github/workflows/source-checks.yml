@@ -52,8 +52,8 @@ jobs:
       - name: Verify symbol Python dependencies
         run: python -c "import cssselect2, fontTools.ttLib, PIL.Image, tinycss2"
 
-      - name: Run hermetic source checks
+      - name: Run source checks
         run: >-
           python tools/run_checks.py ${{ matrix.check_args }}
           --test-workers ${{ matrix.test_workers }}
-          --assets off --build-source tests/fixtures/deployment-smoke
+          --assets required --build-source tests/fixtures/deployment-smoke

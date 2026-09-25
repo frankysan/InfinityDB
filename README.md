@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.6.3** (2026-09-22).
+Current release: **0.7.0** (2026-09-25).
 
 ## Guiding principles
 
@@ -202,8 +202,9 @@ prevents replacement.
 The supported Docker Compose deployment packages the application and validated
 runtime databases into an immutable image. Production has two explicit data paths:
 `install-or-update.sh` rebuilds runtime databases from raw source already present on
-the server, while `deploy-transferred.sh` deploys a commit-matched database/symbol
-artifact set transferred from a development checkout without rebuilding it.
+the server, while `deploy-transferred.sh` deploys commit-matched runtime databases and
+terminal symbol provenance transferred from a development checkout without rebuilding
+them. The processed symbol publication itself comes from that matching Git revision.
 
 ```sh
 # Server-rebuild deployment

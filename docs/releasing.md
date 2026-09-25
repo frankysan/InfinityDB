@@ -151,9 +151,10 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   reproducibility checks required by `docs/TODO.md` or the affected subsystem docs.
 - [ ] Confirm the required hosted workflows are green for the exact release commit.
   `Source checks`, `Deployment smoke test`, and `Installed wheel smoke` provide the
-  normal clean-source/package/deployment evidence; use `Full-asset checks` where the
-  release scope requires that private asset-backed validation. See `docs/ci.md` for
-  the authoritative workflow contract.
+  normal clean-source/package/deployment evidence. Source checks now validate the tracked
+  processed SVG publication with required asset coverage; use `Full-asset checks` when
+  release evidence should also cover the configured checksum-pinned external bundle.
+  See `docs/ci.md` for the authoritative workflow contract.
 - [ ] Confirm the working tree contains only the intentional release-preparation
   changes before creating the release commit.
 

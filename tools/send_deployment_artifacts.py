@@ -23,15 +23,8 @@ DEPLOYMENT_FILES = (
     "data/generated/infinity.db",
     "data/generated/rules.db",
     "data/manifests/army-symbol-build.json",
-    "src/infinity_db/web/static/symbol-inventory.json",
 )
-DEPLOYMENT_TREES = (
-    "src/infinity_db/web/static/armies",
-    "src/infinity_db/web/static/characteristics",
-    "src/infinity_db/web/static/orders",
-    "src/infinity_db/web/static/units",
-)
-GIT_PATHS = (*DEPLOYMENT_FILES, *DEPLOYMENT_TREES)
+GIT_PATHS = DEPLOYMENT_FILES
 
 
 class DeploymentTransferError(RuntimeError):
@@ -107,17 +100,6 @@ def _validate_paths(project_root: Path, files: Iterable[PurePosixPath]) -> list[
                 f"Required ignored deployment artifact is missing or no longer ignored: {relative}"
             )
 
-    for tree in DEPLOYMENT_TREES:
-        prefix = PurePosixPath(tree)
-        tree_files = [path for path in selected if path.is_relative_to(prefix)]
-        if not tree_files:
-            raise DeploymentTransferError(f"Required ignored deployment tree is empty: {tree}")
-        invalid = [path for path in tree_files if path.suffix.lower() != ".svg"]
-        if invalid:
-            raise DeploymentTransferError(
-                f"Deployment symbol tree contains non-SVG ignored file: {invalid[0]}"
-            )
-
     for relative in selected:
         local = project_root.joinpath(*relative.parts)
         if not local.is_file():
@@ -172,17 +154,6 @@ def _remote_script(remote_root: str, expected_commit: str) -> str:
         )
         for path in DEPLOYMENT_FILES
     )
-    tree_checks = "\n".join(
-        f"[ -d \"$stage/{path}\" ] || {{ echo 'Missing transferred tree: {path}' >&2; exit 4; }}"
-        for path in DEPLOYMENT_TREES
-    )
-    replace_trees = "\n".join(
-        f'''target="$root/{path}"
-mkdir -p "$(dirname "$target")"
-rm -rf "$target"
-mv "$stage/{path}" "$target"'''
-        for path in DEPLOYMENT_TREES
-    )
     replace_files = "\n".join(
         f'''target="$root/{path}"
 mkdir -p "$(dirname "$target")"
@@ -210,8 +181,6 @@ cleanup() {{ rm -rf "$stage"; }}
 trap cleanup EXIT HUP INT TERM
 tar -xf - -C "$stage"
 {file_checks}
-{tree_checks}
-{replace_trees}
 {replace_files}
 printf 'Deployment artifacts installed for commit %s.\n' "$expected_commit"
 '''

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import subprocess
 import zipfile
 from pathlib import Path
@@ -30,11 +31,30 @@ def work_archive_files(root: Path) -> list[Path]:
     return [path for path in paths if path.is_file()]
 
 
+def _worktree_dirty(root: Path) -> bool:
+    """Return whether tracked or non-ignored untracked work differs from HEAD."""
+    return bool(
+        _git_output(
+            root,
+            "status",
+            "--porcelain=v1",
+            "-z",
+            "--untracked-files=all",
+        )
+    )
+
+
 def create_work_archive(root: Path, destination: Path | None = None) -> Path:
     """Create a deterministic work-tree ZIP without Git metadata or ignored files."""
     root = root.resolve()
     revision = _git_output(root, "rev-parse", "--short=12", "HEAD").decode().strip()
-    archive = destination or root.parent / f"InfinityDB-work-{revision}.zip"
+    default_destination = destination is None
+    archive = (
+        root.parent / f".InfinityDB-work-{revision}.tmp.zip"
+        if default_destination
+        else destination
+    )
+    assert archive is not None
     archive = archive.resolve()
     archive.parent.mkdir(parents=True, exist_ok=True)
 
@@ -53,7 +73,17 @@ def create_work_archive(root: Path, destination: Path | None = None) -> Path:
                 compress_type=_COMPRESSION,
                 compresslevel=_COMPRESSLEVEL,
             )
-    return archive
+
+    if not default_destination:
+        return archive
+
+    if _worktree_dirty(root):
+        fingerprint = hashlib.sha256(archive.read_bytes()).hexdigest()[:12]
+        final_archive = root.parent / f"InfinityDB-work-{revision}-dirty-{fingerprint}.zip"
+    else:
+        final_archive = root.parent / f"InfinityDB-work-{revision}.zip"
+    archive.replace(final_archive)
+    return final_archive.resolve()
 
 
 def main() -> int:

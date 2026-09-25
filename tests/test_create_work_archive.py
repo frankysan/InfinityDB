@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import subprocess
 import zipfile
 from pathlib import Path
@@ -72,3 +73,33 @@ def test_work_archive_script_runs_from_repository_root(tmp_path: Path) -> None:
 
     assert output.is_file()
     assert "Created" in result.stdout
+
+
+def test_default_name_marks_dirty_worktree_with_content_fingerprint(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    revision = subprocess.run(
+        ["git", "rev-parse", "--short=12", "HEAD"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    clean = create_work_archive(root)
+    assert clean.name == f"InfinityDB-work-{revision}.zip"
+
+    (root / "tracked.txt").write_text("changed", encoding="utf-8")
+    dirty = create_work_archive(root)
+    assert dirty.name.startswith(f"InfinityDB-work-{revision}-dirty-")
+    assert dirty.name.endswith(".zip")
+    fingerprint = dirty.stem.rsplit("-", maxsplit=1)[-1]
+    assert len(fingerprint) == 12
+    assert fingerprint == hashlib.sha256(dirty.read_bytes()).hexdigest()[:12]
+
+    same = create_work_archive(root)
+    assert same == dirty
+    assert same.read_bytes() == dirty.read_bytes()
+
+    (root / "tracked.txt").write_text("changed again", encoding="utf-8")
+    changed_again = create_work_archive(root)
+    assert changed_again.name != dirty.name

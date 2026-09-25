@@ -927,22 +927,19 @@ later passed build state. Where retry is supported, the stage performs an explic
 in-memory retry transition and replaces persistent state only after the new result
 validates.
 
-Production deployment with locally published third-party symbols is fail-closed.
-The host-side deployment guard requires terminal version-8 symbol-build state and
-verifies that its SHA-bound `symbol-inventory.json`, `army-symbols.js`, and
-`unit-symbol-map.js` artifacts are the exact local files being packaged. The
-inventory must then validate the complete ignored publication by path, SVG
-parseability, byte count, and SHA-256. After Docker builds the application image,
-the image verifier revalidates the installed package against that inventory and
-exercises one served asset from each publication namespace before Compose may
-replace the running service. The legacy asset-free CI/release image mode uses
-the opposite explicit check and must contain none of the currently ignored
-graphical trees. That remains a useful
-packaging invariant for clean-checkout smoke coverage, but it is no longer a rights
-boundary: Corvus Belli has explicitly permitted InfinityDB to redistribute its
-processed graphical publication for this non-commercial project. This keeps
-publication, packaging, and deployment separate while the approved SVG set is
-migrated into the tracked release layout.
+Production deployment with the processed third-party symbol publication is
+fail-closed. The approved SVG publication and `symbol-inventory.json` are tracked
+release content, so clean source/package validation verifies them directly by path,
+SVG parseability, byte count, and SHA-256. The host-side production deployment guard
+additionally requires terminal version-8 symbol-build state and verifies that its
+SHA-bound `symbol-inventory.json`, `army-symbols.js`, and `unit-symbol-map.js` artifacts
+match the files being packaged and that database/publication provenance agrees. After
+Docker builds the application image, the image verifier revalidates the installed
+package against that inventory and exercises one served asset from each publication
+namespace before Compose may replace the running service. Raw Army/wiki/PDF/source-
+symbol archives remain excluded from Git and routine packages; Corvus Belli's explicit
+permission covers redistribution of InfinityDB's processed graphical publication for
+this non-commercial project, not a change in ownership or MIT-license scope.
 
 ## Module boundaries
 
@@ -996,21 +993,20 @@ completely absent tree is valid for hermetic testing.
 The `Source checks` GitHub Actions workflow is configured to run the hermetic
 project check runner across clean Windows, Ubuntu/Linux, and macOS Python 3.11
 checkouts, with
-an additional Linux Python 3.14 compatibility leg. It uses the tracked synthetic
-Army fixture for database construction and no live acquisition or third-party
-graphical assets. `Installed wheel smoke` is configured to separately install
+an additional Linux Python 3.14 compatibility leg. It uses the tracked synthetic Army fixture for database construction, performs no
+live acquisition, and validates the tracked processed graphical publication. `Installed wheel smoke` is configured to separately install
 the built wheel in a fresh virtual environment, verify installed build CLIs and
 runtime startup,
 and consumes maintained build configuration from
 `<sys.prefix>/share/infinity-db/config/` rather than repository-relative paths.
-`Full-asset checks` defines a dispatch-only GitHub layer restricted to `main`.
-Once its `full-assets` environment is configured, it stages a private
-checksum-pinned published-asset bundle and validates it before running the normal checks with
-`--assets required`; CI deliberately validates a private published bundle rather
-than rerunning the network/external-tool-sensitive symbol pipeline. The graphical
-asset tree is never uploaded as a workflow artifact. The configured container
-smoke test validates deployment packaging separately when hosted CI executes it.
-See `docs/ci.md`.
+The processed SVG publication is tracked release content, so required source CI runs
+with `--assets required` directly from the checkout. CI validates that approved
+published output rather than rerunning the network/external-tool-sensitive symbol
+pipeline. The configured container smoke test validates that the same publication
+survives deployment packaging when hosted CI executes it. The dispatch-only
+`Full-asset checks` workflow is retained as a separate checksum-pinned external-bundle
+validation path; it is supplementary rather than required to supply assets to normal
+source CI. See `docs/ci.md`.
 
 ## Portability and filesystem policy
 
@@ -1149,8 +1145,8 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 23 and database compatibility revision
-31; it rejects incompatible databases with a rebuild instruction. The importer
+application database has schema version 24 and database compatibility revision
+32; it rejects incompatible databases with a rebuild instruction. The importer
 validates a complete relational staging database, publishes a self-contained
 application database and a lossless sibling raw archive, creates read-path indexes
 after loading, and persists SQLite planner statistics. Migration of

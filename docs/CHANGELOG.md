@@ -5,248 +5,70 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+## [0.7.0] - 2026-09-25
+
 ### Added
 
-- Complete the 0.7.0 rules-enrichment scope audit: all release-target catalog semantics are
-  reconciled and player-facing, while unresolved generic MOD/parameter interpretation remains
-  explicitly classified as later semantic work rather than an implicit release blocker.
+- Complete the 0.7.0 rules/context enrichment gate across the public Skill, Equipment,
+  Trait, State, and supporting rules catalogs. The maintained interaction review now
+  covers all 182 primary release identities plus supporting identities, while genuinely
+  unresolved cross-domain or runtime-scoped interactions remain explicit future work.
+- Add the complete current State reference, including the deliberate IMP-1/IMP-2 split,
+  and expose reviewed typed relationships for State entry, cancellation, recovery,
+  restrictions, modifiers, and effect reuse with derived reverse navigation.
+- Expand the rules-backed Skill and Equipment reference with reviewed N5.3 Common/Special
+  Skills and Equipment semantics, including recovery, deployment, mobility, morale,
+  survivability, reaction/combat, Peripheral, and exact-variant interactions.
 - Surface Infinity Army's structured Hacking Program, Martial Arts, Booty, and
-  MetaChemistry reference data on the existing Skill detail pages. Preserve Hacking
-  Device applicability, targets, declaration types, PS/Burst/MOD profile fields, and
-  random chart outcomes as reference data instead of flattening them into static Unit
-  properties.
-- Normalize Cube and Cube 2.0 from Infinity Army's profile-symbol presentation into
-  canonical rules-backed Equipment identities. Preserve the original characteristic
-  occurrence while exposing Equipment catalog/detail usage, canonical Unit API references,
-  profile-symbol navigation, and Equipment filtering without inventing textual Army rows.
-- Promote the remaining catalog-to-catalog interactions that require only semantic links,
-  adding precise relationships for State-entry prevention, Skill-use modification, and
-  State-entry triggers. This makes Super-Jump/Jump, Perimeter/Place Deployable,
-  Motorcycle/Aerial/Warhorse/Impetuous State restrictions, Explode/Unconscious,
-  Camouflaged placement restrictions, Non-Lethal/Immunity, Hacker/Hacking Device, and
-  Warhorse/Loss of Lieutenant navigable from the existing rules surfaces without adding
-  new catalog domains.
-- Add the reviewed Hacker rule and complete the 0.7.0 catalog interaction-review gate. Preserve
-  Hacking Device, direct Program, Upgrade Program, and Null-State semantics without inventing
-  fixed Program-set edges, and keep Commlink visible as an explicit Reinforcements-scoped release
-  exception rather than presenting it as missing N5-core rules.
-- Add reviewed G: Jumper, Infinity Spec-Ops, Morpho-Scan, RemDriver, and Transmutation rules. Preserve multi-body/profile and list/session state in structured facts, expose Morpho-Scan's Reset MOD, and promote AI Motorcycle/Escape System reuse of Transmutation while retaining participant-role, Attribute-copying, SpecBall, Null-State, and variant-specific triggers in the maintained future queue.
-- Add reviewed Explode, Exrah, Immunity, and Vulnerability rules. Expose their stable
-  Unconscious/Dead and Immunity interactions, including Dogged/NWI suppression of Explode and
-  SymbioMate's Immunity (Enhanced), while retaining parameter-specific Ammunition, Trait,
-  Saving Roll, and recovery semantics in the maintained future queue where broader edges would
-  be misleading.
-- Add reviewed Booty and MetaChemistry rules as optional Deployment Skills and preserve their
-  random chart-backed outcomes as deployment/session state. Track the Booty and MetaChemistry
-  Charts as planned structured reference identities instead of flattening possible rolls into
-  unconditional rules-graph relationships or static Unit facts.
-- Add reviewed Fireteam/scenario-support rules for FT Master, Number 2, Specialist
-  Operative, Journalist, and TAGCom. Preserve their stable player-facing effects now while
-  keeping participant-role triggers, Fireteam leadership/coherency, Specialist Troop,
-  Guts/campaign-roll, and TAG/Combat Group-scoped relationships in the maintained future
-  queue where the current graph cannot represent them precisely.
-- Add reviewed recovery-support rules for Paramedic, Tech-Recovery, and Technorganic.
-  Connect Paramedic to MediKit, expose Tech-Recovery's GizmoKit-driven cancellation of
-  Engineer-recoverable States other than Unconscious, and show how Technorganic lets
-  medical and engineering recovery cross the normal VITA/STR eligibility boundary.
-- Add reviewed survivability/recovery rules for Dogged, No Wound Incapacitation, Remote
-  Presence, Shasvastii, Regeneration, and Protheion. Expose their stable Unconscious/Normal/Dead,
-  repair, and CC Attack interactions while retaining conditional healing, Wound-threshold,
-  Retreat-situation, Shock, and participant-role semantics in the maintained future queue.
-- Complete the 0.7.0 State reference with all 24 canonical current State identities, including
-  the deliberate IMP-1/IMP-2 split, and make States a first-class primary interaction-review
-  domain with typed entry, cancellation, revelation, and effect relationships.
-- Add reviewed morale/behavior rules for Courage, Frenzy, Impetuous, and Religious Troop.
-  Promote Foxhole→Courage into the current graph and expose Frenzy's Impetuous, Limited Cover,
-  and modeled Marker-State cancellation interactions while retaining Guts, Retreat, Prone, and
-  phase-/label-scoped movement semantics in the maintained future queue where the current graph
-  cannot express them precisely.
-- Add reviewed mobility/environment rules for Aerial, Climbing Plus, Terrain, and Warhorse.
-  Expose Aerial restrictions against Cautious Movement, Guard, and Boost, and link Climbing
-  Plus to the Climb, Move, and Dodge rules it extends while retaining State-entry prevention,
-  Partial Cover, Special Terrain, Loss of Lieutenant, Retreat, Isolation, and exact BS Attack
-  modifier semantics in the long-lived future queue where the current graph cannot express them
-  precisely.
-- Add reviewed combat/reaction rules for Berserk, Guard, Neurocinetics, Total Reaction,
-  and Triangulated Fire. Expose their stable Move, CC Attack, BS Attack, and Mimetism
-  interactions, and promote TinBot: Neurocinetics→Neurocinetics plus Armed Turret→Total
-  Reaction from deferred work into current graph relationships.
-- Add reviewed deployment/arrival rules for Combat Jump, Decoy, Impersonation, Infiltration,
-  Minelayer, Parachutist, Sapper, and Strategic Deployment, plus canonical Decoy,
-  Impersonation-1/2, and Foxhole States. Promote Request Speedball→Combat Jump and
-  Biometric Visor→Impersonation-1 from deferred work into current graph relationships.
-- Align the rules-backed Skill catalog with the canonical N5.3 Skill vocabulary instead of
-  treating Army's mixed skill-like source bucket as the ontology. Bangbomb, GizmoKit, MediKit,
-  Regular, BTS=3, and Infinity Team-Ops remain preserved source occurrences but no longer appear
-  as rules Skills; zero-use Non-Hackable is now exposed as a canonical Special Skill.
-- Complete interaction review for all 39 already-defined supporting rules identities; make Armed
-  Turret navigation expose its canonical Disposable, Deployable, Non-Reloadable, Perimeter,
-  360º Visor, BS Attack, and CC Attack dependencies while retaining Total Reaction and broad
-  State interactions in the long-lived future queue where their targets or scope are not yet
-  representable precisely.
-- Complete interaction review for all 33 canonical N5.3 Traits and make the public Trait
-  catalog follow that rules-native vocabulary even when a Trait has no current Army usage.
-  Legacy Army property spellings now fold into BS Weapon (PH/WIP), while rules Labels and
-  signed Skill modifiers no longer appear as standalone Traits. Reviewed current graph edges
-  link BS Weapon (PH/WIP) to the BS Attacks they modify, CC to CC Attack, and Non-Reloadable
-  to Reload while conditional ammunition, Marker, Disposable, and exact BS Attack semantics
-  remain in the long-lived future queue.
-- Complete the interaction review for all 39 public Skills that currently have canonical rules
-  definitions; review Forward Deployment, Limited Cover, Strategos, and Surprise Attack while
-  retaining the selective Partial Cover, generic Face to Face Roll, and broader Marker-form
-  interactions in the long-lived future queue.
-- Complete the 0.7.0 Equipment interaction audit across all 28 public Equipment items; add
-  canonical recovery, Motorcycle, AI Motorcycle, and exact TinBot variant interactions while
-  retaining Hacking Programs, Holo States, Transmutation, Immunity, and other not-yet-modeled
-  semantics in the long-lived future interaction queue.
-- Continue the 0.7.0 Equipment interaction audit with reviewed Biometric Visor, Dazer,
-  Deactivator, Deployable Cover, Deployable Repeater, FastPanda, and Repeater definitions;
-  expose their current Discover, Surprise Attack, Mimetism, BS Attack, and contained-Repeater
-  interactions while retaining unresolved terrain, Cover, State, and target-removal semantics in
-  the future interaction queue.
-- Expand the 0.7.0 Equipment interaction audit with reviewed 360º Visor, Nanoscreen,
-  and X-Visor definitions; Nanoscreen now links to the BS Attacks it modifies and X-Visor
-  links to BS Attack, Discover, and Suppressive Fire range-roll processing.
-- Add all core Common Skills to the rules-backed Skills catalog and present them ahead
-  of Special Skills, including rules that never appear as Army profile entries.
-- Add Baggage rules and link its conditional reload and Unloaded-State recovery
-  effects to the relevant Common Skill and State.
-- Add the item-specific Unloaded State and link it bidirectionally with Disposable (X),
-  making exhausted-use behavior discoverable without asserting current game state on a Trooper.
-- Link Concealed bidirectionally to Camouflaged State, making its reuse of that State's
-  effects discoverable without incorrectly representing it as State entry.
-- Link Stealth bidirectionally to Cautious Movement using the existing `enables-use-of`
-  relationship, exposing the documented ZoC/Hacking Area exception without flattening the
-  remaining declaration, LoF, and ARO conditions into the graph edge.
-- Link the Intuitive Attack, Speculative Attack, and Suppressive Fire weapon Traits
-  bidirectionally to the Common Skills they enable, exposing those explicit weapon
-  prerequisites without implying that all declaration requirements are satisfied.
-- Link Martial Arts, Marksmanship, and Sixth Sense bidirectionally to the Common Skills whose
-  Rolls they modify, making CC Attack, BS Attack, Dodge, and Reset interactions discoverable
-  from either endpoint.
-- Link Look Out bidirectionally to the Dodge Rolls it modifies and Speculative Attack to the
-  Mimetism MOD it ignores, exposing both interactions from either rules page.
-- Link Deployable and Peripheral (Ancillary) bidirectionally to Place Deployable, exposing
-  both explicit prerequisites from the Common Skill and their source rule pages.
-- Add bidirectional restrictive-State self-recovery interactions: Dodge now cancels IMM-A,
-  Reset also cancels Isolated, and IMM-A / IMM-B / Isolated expose the State-specific Dodge
-  or Reset roll interaction from both endpoints without duplicating the exact MOD values.
+  MetaChemistry reference data on Skill detail pages while preserving applicability,
+  declaration categories, profile fields, conditional/random outcomes, and provenance.
+- Normalize Cube and Cube 2.0 profile-symbol occurrences into canonical Equipment
+  identities without inventing textual Army rows, so their usage is available through
+  Equipment browsing, filtering, Unit references, and symbol navigation.
+- Add deterministic enrichment/presentation audits and the long-lived interaction ledger
+  so release-target coverage, source freshness, unresolved targets, supporting identities,
+  and explicitly deferred relationships fail closed or remain visibly classified.
 
 ### Changed
 
-- Clarify exact-source rule discoverability on catalog detail pages: usage disclosures
-  now advertise when they contain dedicated Variant rules, keep typed variant labels
-  visible while collapsed, and wrap cleanly on narrow layouts. The presentation audit
-  also keeps occurrence-only Army extras on Unit/profile/loadout rows and treats dark
-  theme validation as part of the separately planned theme work rather than 0.7.0.
-- Make rules-enrichment presentation semantics backend-owned: curated summaries and
-  semantic Labels are verified to pass through `rules.db` unchanged, Army-linked catalog
-  definitions now require stable IDs/slugs rather than name-only routing, and
-  `display_relations` carries canonical player-facing group/label metadata so the browser
-  no longer maintains a parallel relation ontology.
-- Rewrite the landing and About pages around InfinityDB's current rules-enriched state and
-  public roadmap direction. The landing page now identifies InfinityDB prominently as an
-  open-source, non-commercial community project that is not affiliated with Corvus Belli S.L.,
-  while also stating Corvus Belli's explicit permission for the graphical assets InfinityDB uses
-  and redistributes.
-- Update the project-wide Corvus Belli asset policy to reflect the explicit 2026-09-24
-  permission to use and redistribute Infinity graphical assets for InfinityDB's
-  non-commercial scope. Processed SVGs may be included in public repositories and
-  build/deployment packages with attribution and license separation, while raw
-  Army/wiki/PDF/source-symbol archives remain outside Git by project policy.
-- Complete the post-vetting catalog consistency pass: normalize Infinity rules terminology
-  across maintained editorial text, make gameplay summaries lead source/applicability
-  provenance, and regroup Related rules into clearer enabling, State, MOD/change, and
-  cancellation/restriction sections.
-
-- Treat full curated Skill definitions as authoritative for declaration categories when Army-linked
-  fallback metadata disagrees, while retaining fallback categories only for Skills without a full
-  definition. This preserves rules-native classifications such as Decoy as a Deployment Skill.
-- Improve rules-catalog scanning: Skill declaration/action types now use the maintained
-  category colors on detail references and in a dedicated `/skills` Type(s) column;
-  related rules use direction-aware gameplay grouping with deterministic alphabetical
-  ordering; and rules-reference cards keep clear spacing from following occurrence tables.
-- Make Skill action/declaration categories intrinsically multi-valued, so full curated
-  Skills—including rules-only Common Skills—can expose combinations such as Short Skill /
-  ARO without requiring an Army identity. Normalize the complementary Baggage/Reload
-  prerequisite so both participating Troopers must be non-Null.
-- Audit the expanded Skills layer against current N5.3 source material: correct missing
-  labels and concise facts across newly exposed Common Skills and touched Special Skills,
-  correct Sensor from Basic Short Skill / ARO to Short Skill, and make rules-only Skill
-  relation targets such as Reload navigate to their catalog detail pages.
-- Expand the Common and Special Skills reference with concise, source-cited
-  requirements, effects, and restrictions, including rules-only Common Skills.
-- Expand Targeted State into a bidirectional interaction hub: Forward Observer now causes
-  Targeted, Reset cancels Targeted/IMM-B, and Targeted exposes which player-facing Skills
-  receive its roll modifiers or declaration restrictions. Reverse navigation is derived
-  automatically from the one-way curated graph.
-- Add a first-class rules-backed States catalog and bidirectional recovery graph: Doctor
-  and Engineer now author typed State-cancellation relationships, while affected State
-  pages expose derived `Cancelled by` navigation. The enrichment coverage audit now treats
-  States as a normal audited player-facing surface.
-- Expand the bidirectional gameplay-interaction graph with Sensor as the first multi-edge
-  hub: Sensor now links to Mimetism, Discover, Camouflage, Camouflaged State, and Hidden
-  Deployment State, while affected pages receive derived reverse relationships. Add
-  reviewed Hidden Deployment Skill/State identities so Sensor's hidden-state interaction
-  resolves to stable rules concepts.
-- Add bidirectional gameplay-interaction enrichment so players can discover rule
-  interactions from either endpoint: Multispectral Visor reduces Mimetism MODs; Sixth
-  Sense and Combat Instinct negate Stealth; and Combat Instinct ignores Surprise Attack
-  MODs. Reverse relationships are derived automatically rather than maintained twice.
-- Add a deterministic rules-enrichment coverage audit across the currently exposed
-  Skill, Equipment, Weapon, Trait, and State catalogs, reporting missing definitions,
-  review/source freshness gaps, ambiguous family/exact-source mappings, and unresolved
-  related-item targets against a pinned `infinity.db` + `rules.db` pair. A maintained
-  fail-closed classification policy now labels every detected gap as release-blocking or as
-  an explicitly reviewed scope exception, while rules-only relation targets remain identified
-  as supporting identities without requiring standalone UI.
-- Add reviewed exact-source Level semantics for Martial Arts L1-L5 and Strategos L1-L2,
-  preserving their shared browsing families while exposing the applicable Level on each
-  source variant and Unit occurrence.
-- Show the existing curated rules reference on Skill, Trait, Equipment, and Weapon
-  detail pages through one shared renderer, including applicability context and linked
-  authoritative citations.
-- Add typed rules relationships with derived reverse navigation, replacing generic
-  related-record lists with explicit semantic edges for state transitions, Peripheral
-  subtype/controller relationships, and exact source variants linked to their rule
-  family.
-- Explain Regular and Irregular Training alongside the corresponding Unit loadout
-  Orders, with reviewed rules summaries and cited sources while keeping special
-  Order-generation types separate.
-
-- Add reviewed No Cover / Limited Cover rules and a bidirectional precedence relationship so players can see immediately that No Cover overrides Limited Cover when both restrictions apply.
-
-- Expand the bidirectional CC interaction graph with Natural Born Warrior as a counter
-  hub for Martial Arts and Surprise Attack MODs, deriving reverse navigation on both
-  affected Skill pages while preserving the rule's CC-only activation conditions.
-
-- Expanded the 0.7.0 bidirectional interaction graph with reviewed
-  Marksmanship/Multispectral Visor counter relationships from Albedo and Reflective.
-
-- Surface reviewed rules relationships with resolved endpoint metadata and
-  direction-aware player-facing labels, preserving one-way curated authorship while
-  using derived reverse navigation.
-- Improve rules-reference readability for players by labeling Requirements,
-  Effects, and Restrictions explicitly and presenting Requirements before rule
-  effects rather than rendering semantically different facts as anonymous lists.
-- Expose reviewed exact-source semantics directly on Equipment/Weapon usage variants,
-  allowing detail pages to label named variants such as TinBot Firewall/Discover from
-  structured rules data while keeping occurrence modifiers separate.
-- Present the Army weapon-profile `damage` value using the N5 Possibility of Survival
-  (`PS`) label across ranged and melee/Equipment profile details while preserving the
-  upstream field name in application data for compatibility and provenance.
-- Strengthen the structured rules contract with deterministic multi-publication
-  composition, typed related-item links, explicit family-versus-source variant
-  inheritance, and cross-domain declaration categories. N5.3 action classifications are
-  reconciled for the audited Skill mismatches and for Deactivator, GizmoKit, and MediKit
-  as Equipment actions; non-current collections remain excluded from normal enrichment.
+- Make rules presentation semantics backend-owned: curated summaries, labels, declaration
+  categories, exact-source variants, and direction-aware related-rule metadata now flow
+  through the maintained rules/application contracts instead of parallel browser logic.
+- Improve catalog readability with multi-category Skill types, explicit Requirements /
+  Effects / Restrictions, clearer related-rule grouping, exact variant labels, and stable
+  links from rules-only relation targets to their detail pages.
+- Present Army weapon-profile `damage` as N5 Possibility of Survival (`PS`) while preserving
+  the upstream field name in stored/application data for compatibility and provenance.
+- Rewrite the landing/About framing around InfinityDB's current rules-enriched scope and
+  roadmap, including prominent open-source/non-commercial/non-affiliation wording and the
+  explicit Corvus Belli graphical-asset permission.
+- Track the validated processed Corvus Belli SVG publication and `symbol-inventory.json` as
+  release content. Required source/package/container validation now checks the tracked
+  publication directly; transferred-artifact deployment sends only generated databases plus
+  the terminal symbol manifest while the matching Git revision supplies tracked symbols. Raw
+  Army/wiki/PDF/source-symbol archives remain local provenance inputs, and the checksum-pinned
+  external-bundle workflow remains supplementary.
+- Complete the post-vetting presentation consistency pass: normalize maintained rules
+  terminology, keep occurrence-only Army extras on their source rows, preserve source and
+  applicability context, and improve narrow-layout catalog/detail presentation.
 
 ### Fixed
 
-- Complete the 0.7.0 full-data browser presentation audit and keep very narrow Unit
-  details readable: long page titles may wrap within the viewport, and General profile
-  labels stack above their value areas at 400 px and below instead of compressing
-  the Attribute statline into overlapping columns.
+- Keep very narrow Unit details readable: long titles may wrap within the viewport and
+  General-profile labels stack above their value areas at 400 px and below instead of
+  compressing the Attribute statline into overlapping columns.
+
+### Upgrade notes
+
+- Rebuild the generated Army databases before deploying 0.7.0. Schema 24 / compatibility
+  revision 32 adds the structured Hacking Program, Martial Arts, Booty, and MetaChemistry
+  application projections used by the enriched Skill surfaces.
+- Rebuild `rules.db` from the tracked curated rules collections so the deployed reference
+  includes the complete 0.7.0 Skill, Equipment, Trait, State, and interaction enrichment.
+- The processed Corvus Belli SVG publication and `symbol-inventory.json` are now tracked
+  release content. Raw Army/wiki/PDF/source-symbol archives remain local build/provenance
+  inputs; guarded production deployment still requires the local terminal symbol-build
+  manifest to bind the runtime Army database to the tracked publication.
 
 ## [0.6.3] - 2026-09-22
 
