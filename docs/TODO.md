@@ -35,10 +35,10 @@ application behavior.
 - [ ] Complete a focused UI/presentation maintenance pass after 0.7.1.
   - [x] Align Cube/Cube 2.0 characteristic symbols with the order-symbol row so the
     symbols share a consistent baseline and spacing.
-  - [ ] Remove the remaining inline-script dependency that violates the current CSP;
-    keep the restrictive same-origin policy rather than adding `unsafe-inline`, a nonce,
-    or a fixed hash unless a concrete requirement makes that necessary. Add regression
-    coverage for the affected page shell/static loading path.
+  - [x] Keep the browser page shell free of inline-script execution dependencies and
+    enforce an explicit same-origin `script-src` policy without `unsafe-inline`, nonces,
+    or fixed hashes. Regression coverage checks every browser route for external-only
+    script elements and inline event handlers.
   - [x] Widen the Name column for Equipment, Weapons, and Traits so ordinary catalog
     names are not unnecessarily compressed.
   - [x] Present Unit troop-type codes using their long forms in the UI, for example
@@ -50,7 +50,7 @@ application behavior.
     preferences continue to override those defaults.
   - [x] Make the entire secondary metadata line beneath detail-page titles Developer-mode
     only, rather than showing the line normally and hiding only its optional IDs.
-  - [ ] Raise the smallest UI font sizes and reduce unnecessary size variation across
+  - [x] Raise the smallest UI font sizes and reduce unnecessary size variation across
     ordinary body, metadata, table, and detail text; keep page titles intentionally
     distinct.
   - [x] Make catalog relation ordering semantic and deterministic: relationships that

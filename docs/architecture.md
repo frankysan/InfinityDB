@@ -1009,7 +1009,10 @@ repository; browser code calls the API. Neither web layer parses raw Army files.
 requests live in `api.js`; shared unit-row rendering lives in `unit-list.js`;
 page-specific state and rendering live in the corresponding module (for
 example, `app.js` or `catalog-detail.js`). The current UI uses native modules
-and requires no JavaScript build step. When Corvus Belli graphical symbols are
+and requires no JavaScript build step. Browser pages execute only same-origin external
+modules: the HTTP Content Security Policy explicitly restricts scripts to `self`, and
+page-shell templates must not introduce inline script bodies or event-handler attributes.
+When Corvus Belli graphical symbols are
 published, army and unit symbols are addressed by stable ID-and-slug paths while
 JavaScript maps source identities to those paths. Corvus Belli has explicitly
 permitted InfinityDB to redistribute the processed graphical publication in the

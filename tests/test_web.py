@@ -952,6 +952,48 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'menu.classList.contains("settings-menu")' in navigation
 
 
+def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> None:
+    paths = (
+        "/",
+        "/units",
+        "/units/ranger-prototype",
+        "/skill-extras",
+        "/skills",
+        "/skills/11",
+        "/equipment",
+        "/equipment/21",
+        "/weapons",
+        "/weapons/31",
+        "/traits",
+        "/traits/suppressive-fire",
+        "/states",
+        "/states/unconscious",
+        "/about",
+    )
+    expected_csp = (
+        "default-src 'self'; script-src 'self'; object-src 'none'; "
+        "base-uri 'none'; frame-ancestors 'none'"
+    )
+
+    for path in paths:
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-security-policy"] == expected_csp
+        assert re.search(rb"\son[a-z]+\s*=", body, flags=re.IGNORECASE) is None
+
+        scripts = list(
+            re.finditer(
+                rb"<script\b(?P<attrs>[^>]*)>(?P<body>.*?)</script\s*>",
+                body,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+        )
+        assert scripts
+        for script in scripts:
+            assert re.search(rb"\bsrc\s*=", script.group("attrs"), flags=re.IGNORECASE)
+            assert not script.group("body").strip()
+
+
 def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> None:
     status, _, body = request(app, "/units")
 
@@ -1369,7 +1411,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert_css_rule(
         styles,
         ".data-table--compact",
-        {"--table-cell-size": "11px"},
+        {"--table-cell-size": "12px", "--table-heading-size": "11px"},
     )
 
     for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
@@ -2307,6 +2349,21 @@ def test_072_detail_and_catalog_presentation_contract(
         'body[data-catalog="traits"] #catalog-table-container thead th:first-child',
         {"width": "68%"},
     )
+    for undersized in (
+        b"font-size: 8px",
+        b"font-size: 9px",
+        b"font-size: 10px",
+        b"--table-heading-size: 8px",
+        b"--table-heading-size: 9px",
+    ):
+        assert undersized not in styles
+    assert_css_rule(styles, "table", {"--table-heading-size": "11px"})
+    assert_css_rule(
+        styles,
+        ".data-table--compact",
+        {"--table-heading-size": "11px", "--table-cell-size": "12px"},
+    )
+
 
 def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-list.js")

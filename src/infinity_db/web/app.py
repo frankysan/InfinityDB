@@ -809,7 +809,8 @@ class Application:
             ("X-Content-Type-Options", "nosniff"),
             (
                 "Content-Security-Policy",
-                "default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+                "default-src 'self'; script-src 'self'; object-src 'none'; "
+                "base-uri 'none'; frame-ancestors 'none'",
             ),
             *etag_headers,
             *extra_headers,
