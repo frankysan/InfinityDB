@@ -5,6 +5,18 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+### Changed
+
+- Make generated build/report/archive outputs portable at the byte level across supported
+  operating systems: canonical text uses UTF-8/LF, validation ordering is stable, work
+  archives normalize Git-managed text bytes, and CI compares representative artifact
+  SHA-256 identities across Windows, Linux, and macOS.
+
+### Fixed
+
+- Preserve the checksum-bound symbol inventory and browser-map files byte-for-byte in Git
+  so Windows line-ending conversion cannot invalidate a promoted publication manifest.
+
 ## [0.7.0] - 2026-09-25
 
 ### Added

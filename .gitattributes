@@ -7,3 +7,8 @@ src/infinity_db/web/static/armies/** binary
 src/infinity_db/web/static/characteristics/** binary
 src/infinity_db/web/static/orders/** binary
 src/infinity_db/web/static/units/** binary
+
+# Manifest-bound publication metadata is also byte-exact release content.
+src/infinity_db/web/static/symbol-inventory.json binary
+src/infinity_db/web/static/army-symbols.js binary
+src/infinity_db/web/static/unit-symbol-map.js binary

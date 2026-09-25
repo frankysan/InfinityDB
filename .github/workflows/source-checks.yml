@@ -57,3 +57,37 @@ jobs:
           python tools/run_checks.py ${{ matrix.check_args }}
           --test-workers ${{ matrix.test_workers }}
           --assets required --build-source tests/fixtures/deployment-smoke
+
+      - name: Build deterministic-output manifest
+        if: matrix.python == '3.11'
+        run: python tools/build_determinism_manifest.py --output reports/determinism-manifest.json
+
+      - name: Upload deterministic-output manifest
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: determinism-${{ runner.os }}
+          path: reports/determinism-manifest.json
+          if-no-files-found: error
+
+  deterministic-outputs:
+    name: Cross-platform deterministic outputs
+    needs: source-checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Download platform manifests
+        uses: actions/download-artifact@v5
+        with:
+          pattern: determinism-*
+          path: determinism-manifests
+
+      - name: Compare artifact hashes
+        run: python tools/compare_determinism_manifests.py determinism-manifests

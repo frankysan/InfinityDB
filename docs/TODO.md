@@ -20,15 +20,35 @@ history retains implementation detail.
 
 ## Current milestone
 
-The current milestone is **0.8.0 — connected game relationships**. With 0.7.0's
-rules/context enrichment complete, the next work focuses on making already modeled
-structural relationships directly useful to players: Fireteams, Peripheral/Controller
-structure, profile/loadout includes, selection/dependency constraints, Reinforcement
-parentage, and useful cross-army navigation.
+The current milestone is **0.7.1 — deterministic cross-platform outputs**. Before
+starting the 0.8.0 feature work, generated artifacts and helper archives must be
+byte-identical across Windows, Linux, and macOS for the same inputs, configuration,
+InfinityDB revision, and declared tool versions. This is a correctness/portability
+maintenance release prompted by the 0.7.0 checksum-bound publication deployment
+issue.
 
-General performance and storage experiments remain deferred unless they become
-necessary to establish semantic correctness, losslessness, or acceptable
-application behavior during this work.
+0.8.0 — connected game relationships remains the next feature milestone after this
+maintenance gate. General performance and storage experiments remain deferred unless
+they become necessary to establish semantic correctness, losslessness, or acceptable
+application behavior.
+
+### 0.7.1 deterministic-output gate
+
+- [ ] Complete the deterministic-output portability release.
+  - [x] Canonicalize persistent generated text/JSON to UTF-8 + LF rather than host
+    newline defaults.
+  - [x] Make validation-report ordering deterministic rather than dependent on Python
+    hash/set iteration order.
+  - [x] Canonicalize Git text bytes in work archives while preserving byte-exact
+    binary assets.
+  - [x] Mark the checksum-bound symbol inventory/browser maps as byte-exact Git
+    release artifacts alongside the published SVG trees.
+  - [x] Add a Windows/Linux/macOS SHA-256 comparison gate covering representative
+    Army/rules databases, JSON outputs, snapshot/work archives, and publication metadata.
+  - [ ] Confirm the hosted cross-platform determinism comparison is green for the
+    release candidate; resolve any remaining archive, SQLite, or external-tool byte drift.
+  - [ ] Add `Cross-platform deterministic outputs` to the hosted `Protect main` required
+    checks after its first successful run establishes the check context.
 
 ## Release roadmap through 1.0
 

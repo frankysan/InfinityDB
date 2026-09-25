@@ -675,7 +675,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     document = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(document, encoding="utf-8")
+        args.output.write_text(document, encoding="utf-8", newline="\n")
     else:
         print(document, end="")
     summary = report["summary"]

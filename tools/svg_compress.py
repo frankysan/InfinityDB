@@ -412,7 +412,7 @@ export default {
 
 def write_config(directory: Path, name: str, text: str) -> Path:
     path = directory / name
-    path.write_text(text + "\n", encoding="utf-8")
+    path.write_text(text + "\n", encoding="utf-8", newline="\n")
     return path
 
 
@@ -1343,8 +1343,9 @@ def write_reports(
     )
 
     (reports_root / "compression-run.json").write_text(
-        json.dumps(run_info, indent=2),
+        json.dumps(run_info, indent=2) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 

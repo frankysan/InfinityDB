@@ -39,6 +39,7 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
+from .deterministic_io import write_json_lf
 from .metadata import METADATA_TABLES, MetadataError, normalize_metadata, validate_metadata_envelope
 from .normalized_format import FORMAT_NAME, FORMAT_VERSION
 from .weapon_categories import weapon_category
@@ -1526,14 +1527,14 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
         )
 
     # Parent FK helpers for nested tables.
-    profile_parent_tables = {
+    profile_parent_tables = (
         "profile_characteristics",
         "profile_skills",
         "profile_equipment",
         "profile_weapons",
         "profile_peripherals",
         "profile_includes",
-    }
+    )
     for table in profile_parent_tables:
         check(
             f"{table} -> profile",
@@ -1544,7 +1545,7 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
             f"all {table} rows have a profile parent",
         )
 
-    option_parent_tables = {
+    option_parent_tables = (
         "option_characteristics",
         "option_skills",
         "option_equipment",
@@ -1552,7 +1553,7 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
         "option_peripherals",
         "option_includes",
         "option_orders",
-    }
+    )
     for table in option_parent_tables:
         check(
             f"{table} -> option",
@@ -1563,14 +1564,14 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
             f"all {table} rows have a loadout-option parent",
         )
 
-    unit_option_parent_tables = {
+    unit_option_parent_tables = (
         "unit_option_characteristics",
         "unit_option_skills",
         "unit_option_equipment",
         "unit_option_weapons",
         "unit_option_includes",
         "unit_option_orders",
-    }
+    )
     for table in unit_option_parent_tables:
         check(
             f"{table} -> unit_option",
@@ -1753,15 +1754,7 @@ def validate_normalized(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def write_json(path: Path, data: Any, compact: bool = False) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    with tmp.open("w", encoding="utf-8", newline="\n") as handle:
-        if compact:
-            json.dump(data, handle, ensure_ascii=False, separators=(",", ":"))
-        else:
-            json.dump(data, handle, ensure_ascii=False, indent=2)
-            handle.write("\n")
-    tmp.replace(path)
+    write_json_lf(path, data, compact=compact, atomic=True)
 
 
 def build_parser() -> argparse.ArgumentParser:

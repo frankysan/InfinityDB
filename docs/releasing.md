@@ -149,7 +149,8 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   `docs/testing.md`.
 - [ ] Run any additional release-specific acceptance, benchmark, migration, or
   reproducibility checks required by `docs/TODO.md` or the affected subsystem docs.
-- [ ] Confirm the required hosted workflows are green for the exact release commit.
+- [ ] Confirm the required hosted workflows are green for the exact release commit,
+  including the `Source checks` cross-platform deterministic-output comparison.
   `Source checks`, `Deployment smoke test`, and `Installed wheel smoke` provide the
   normal clean-source/package/deployment evidence. Source checks now validate the tracked
   processed SVG publication with required asset coverage; use `Full-asset checks` when

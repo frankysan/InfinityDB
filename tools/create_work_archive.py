@@ -31,6 +31,36 @@ def work_archive_files(root: Path) -> list[Path]:
     return [path for path in paths if path.is_file()]
 
 
+def _text_attributes(root: Path, files: list[Path]) -> dict[str, str]:
+    """Return Git's text attribute for every archive member without argv size limits."""
+    relative = [path.relative_to(root).as_posix() for path in files]
+    payload = b"\0".join(item.encode("utf-8") for item in relative) + (b"\0" if relative else b"")
+    result = subprocess.run(
+        ["git", "check-attr", "-z", "--stdin", "text"],
+        cwd=root,
+        input=payload,
+        check=True,
+        capture_output=True,
+    ).stdout
+    fields = result.split(b"\0")
+    if fields and fields[-1] == b"":
+        fields.pop()
+    if len(fields) % 3 != 0:
+        raise RuntimeError("git check-attr returned malformed NUL-delimited output")
+    return {
+        fields[index].decode("utf-8"): fields[index + 2].decode("utf-8")
+        for index in range(0, len(fields), 3)
+    }
+
+
+def _archive_bytes(path: Path, *, text_attribute: str) -> bytes:
+    """Return platform-neutral work-tree bytes according to Git text attributes."""
+    data = path.read_bytes()
+    if text_attribute in {"set", "auto"} and b"\0" not in data[:8000]:
+        return data.replace(b"\r\n", b"\n")
+    return data
+
+
 def _worktree_dirty(root: Path) -> bool:
     """Return whether tracked or non-ignored untracked work differs from HEAD."""
     return bool(
@@ -59,6 +89,7 @@ def create_work_archive(root: Path, destination: Path | None = None) -> Path:
     archive.parent.mkdir(parents=True, exist_ok=True)
 
     files = work_archive_files(root)
+    text_attributes = _text_attributes(root, files)
     with zipfile.ZipFile(
         archive,
         "w",
@@ -69,7 +100,10 @@ def create_work_archive(root: Path, destination: Path | None = None) -> Path:
             arcname = path.relative_to(root).as_posix()
             output.writestr(
                 _archive_info(arcname),
-                path.read_bytes(),
+                _archive_bytes(
+                    path,
+                    text_attribute=text_attributes.get(arcname, "unspecified"),
+                ),
                 compress_type=_COMPRESSION,
                 compresslevel=_COMPRESSLEVEL,
             )

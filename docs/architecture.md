@@ -54,13 +54,22 @@
 9. **Separate stages and responsibilities.** Acquisition, validation,
    normalization, processing, publishing, and deployment should remain
    independently understandable and testable.
-10. **Be deterministic and portable.** Given the same inputs and configuration,
-   the project should produce the same logical result on Windows, Linux, and
-   macOS.
+10. **Be deterministic and portable.** Given the same inputs, configuration,
+   InfinityDB revision, and declared tool versions, persistent generated artifacts
+   must be byte-identical on Windows, Linux, and macOS. Canonical text output uses
+   UTF-8 with LF line endings; archive member ordering/metadata and database/export
+   ordering must likewise be explicit rather than inherited from the host platform.
 
 These principles are the canonical engineering decision criteria for the
 project. `AGENTS.md` contains immediate operational instructions, while
 `docs/AI_CONTEXT.md` records durable invariants and non-obvious decisions.
+
+Cross-platform determinism is enforced as an artifact contract, not only as logical
+equality. Git attributes protect checksum-bound release files from checkout
+rewrites, but generators themselves remain responsible for canonical bytes. Required
+CI builds representative Army/rules databases, JSON reports, snapshot/work archives,
+and publication metadata on all three supported operating systems and compares their
+SHA-256 identities.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in

@@ -640,6 +640,12 @@ compatibility references remain unambiguous JSON integers.
 
 ## Decision log
 
+- 2026-09-25: Cross-platform reproducibility is a byte-level artifact invariant, not
+  only logical equivalence. For identical inputs, configuration, InfinityDB revision,
+  and declared tool versions, maintained generators must emit identical persistent
+  bytes on Windows, Linux, and macOS. Canonical text is UTF-8/LF; ordering and archive
+  metadata must be explicit; checksum-bound tracked publication files are byte-exact;
+  required CI compares SHA-256 manifests across all three platforms.
 - 2026-09-24: Corvus Belli granted explicit permission for InfinityDB to use and
   redistribute the requested graphical assets for the project's non-commercial
   scope, including processed SVGs in the public repository and build/deployment

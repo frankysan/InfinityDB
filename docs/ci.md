@@ -73,9 +73,11 @@ merge blocking remains a repository setting rather than a workflow-YAML property
 The repository currently has an active `Protect main` branch ruleset targeting
 `main`. It requires pull requests with resolved review threads and an up-to-date
 set of required checks: the four `Source checks` matrix jobs, `deployment-smoke`,
-and `installed-wheel`. The ruleset also blocks branch deletion and non-fast-forward
-updates and has no bypass actors. These settings live on GitHub and therefore must
-be reviewed there if repository administration changes.
+and `installed-wheel`. The 0.7.1 deterministic-output job is additionally mandatory
+for release acceptance; after its first hosted run establishes the check context, it
+must also be added to the `Protect main` required checks. The ruleset blocks branch
+deletion and non-fast-forward updates and has no bypass actors. These settings live
+on GitHub and therefore cannot be completed by workflow YAML alone.
 
 ### Cross-platform CI (current)
 
@@ -93,6 +95,12 @@ The matrix is intended to expose real portability differences such as path
 case handling, path separators, line endings, subprocess behavior, and Windows
 `spawn` semantics. External-tool tests may remain conditional where the
 required executable is intentionally optional.
+
+The three Python 3.11 platform legs additionally produce a deterministic-output SHA-256
+manifest from the same synthetic inputs. The workflow compares those manifests after
+the matrix completes and fails if any representative database, JSON/report artifact,
+snapshot/work archive, or checksum-bound publication metadata differs byte-for-byte.
+This comparison is a required portability check, not diagnostic-only evidence.
 
 ### Installed-package smoke (configured)
 
