@@ -216,6 +216,22 @@ To update Army data, download or place the new raw snapshot and its required
 The same deployment run rebuilds `rules.db` from the tracked collections under
 `data/curated/rules/`. Do not edit either SQLite file inside a running container.
 
+### Privacy and observability
+
+InfinityDB's accepted monitoring direction is aggregate-only observability: normalized
+route/request counts, status classes, latency distributions, response sizes, active
+requests, version identity, and host/container resource use. Production monitoring must
+not retain IP addresses, user agents/fingerprints, referrers, cookies/session or preference
+values, query strings/search terms, persistent visitor identifiers, or per-user request
+histories. See `docs/architecture.md` for the canonical policy.
+
+The current Docker image still enables Gunicorn's standard access log on stdout. That
+predates the aggregate-only policy and must not be treated as the intended monitoring
+implementation. Until it is replaced or sanitized, operators should avoid exporting or
+retaining that raw request stream beyond the minimum needed for immediate operations.
+Error logs and host/container health data remain appropriate when they do not embed
+request-identifying values.
+
 `deploy.sh` retains the current build and the two newest rollback builds by
 default. After Compose has successfully started and health-checked the new
 application container, it removes only older `infinity-db:app-*` tags. It does

@@ -15,6 +15,8 @@ Current release: **0.7.1** (2026-09-25).
   keeping the application simple, fast, and customizable.
 - **Transparency:** keep InfinityDB open source and clearly distinguish project
   code from third-party data, quoted text, and graphical assets.
+- **Privacy:** collect only the aggregate operational information needed to run
+  and improve the service; do not build visitor profiles or persistent tracking.
 
 ## Current features
 

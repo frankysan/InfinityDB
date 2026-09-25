@@ -5,6 +5,12 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+### Changed
+
+- Define privacy-preserving, aggregate-only production observability as the project policy;
+  visitor-identifying telemetry and long-lived raw access-log analytics are explicitly out
+  of scope, with the current Gunicorn access log tracked for replacement.
+
 ## [0.7.1] - 2026-09-25
 
 ### Changed

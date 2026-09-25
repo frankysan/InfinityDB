@@ -18,6 +18,9 @@
 3. **Transparency:** keep the project open source under the MIT License and
    clearly distinguish InfinityDB's work from outside data, quoted text, and
    image assets, which remain the property of their respective owners.
+4. **Privacy:** collect only the aggregate operational information needed to run
+   and improve the service. Do not identify, profile, or persistently track
+   visitors.
 
 ## Engineering principles
 
@@ -78,6 +81,28 @@ explicit page/file settings, are repacked with `VACUUM`, and normalize SQLite's
 transaction-history-only file-change/version-valid-for header counters after the database is
 closed. The normalized counters remain equal so SQLite can still trust the in-header database
 size; schema/user/application version fields and database contents are not rewritten.
+
+### Design direction: privacy-preserving observability
+
+Production observability should be aggregate-first and must not require personal or
+visitor-identifying data. InfinityDB may collect bounded operational metrics such as
+normalized-route request counts, status classes, latency distributions, response sizes,
+active-request counts, application/database versions, and host/container resource use.
+Routes must be normalized before aggregation (for example `/units/:id`), query strings
+must not become metric labels, and all label vocabularies must remain bounded.
+
+Routine monitoring must not collect or retain IP addresses or derived geolocation, user
+agents or browser fingerprints, referrers, cookies, session or preference values, query
+strings or search terms, persistent visitor identifiers, or other data intended to
+correlate requests from the same person over time. InfinityDB therefore deliberately
+forgoes unique-visitor counts, returning-user analytics, geographic/demographic reports,
+and per-user navigation histories.
+
+Raw request logging is not the normal analytics path. If temporarily enabled to diagnose
+a concrete production incident, it must be minimized to the fields needed for that
+incident, sanitized where practical, access-restricted, and retained only briefly.
+Operational dashboards should derive from aggregate counters/histograms rather than from
+long-lived access-log archives.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in

@@ -642,6 +642,12 @@ compatibility references remain unambiguous JSON integers.
 
 ## Decision log
 
+- 2026-09-25: Production observability must be privacy-preserving and aggregate-first.
+  Normal monitoring may use normalized-route request counts, status/latency/response-size
+  metrics, version identity, and host/container resource measurements, but must not collect
+  IP/geolocation, user-agent fingerprints, referrers, cookies/session/preference values,
+  query/search terms, persistent visitor IDs, or per-user histories. Raw request logging is
+  exceptional, minimized/sanitized, access-restricted, and short-retained.
 - 2026-09-25: MediKit and GizmoKit remain canonical Equipment even though each exposes
   a Short Skill action. Declaration category describes the Equipment-provided action; it
   does not create duplicate `skill:medikit` / `skill:gizmokit` identities. Paramedic

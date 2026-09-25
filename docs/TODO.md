@@ -20,15 +20,13 @@ history retains implementation detail.
 
 ## Current milestone
 
-The current milestone is **0.7.2 — UI/presentation cleanup**. Before
-starting the 0.8.0 feature work, generated artifacts and helper archives must be
-byte-identical across Windows, Linux, and macOS for the same inputs, configuration,
-InfinityDB revision, and declared tool versions. This is a correctness/portability
-maintenance release prompted by the 0.7.0 checksum-bound publication deployment
-issue.
+The current milestone is **0.7.2 — UI/presentation cleanup**. This maintenance pass
+focuses on presentation consistency, browser defaults, readability, CSP correctness,
+deterministic relation ordering, and privacy-preserving monitoring groundwork before
+the next larger relationship feature milestone.
 
 0.8.0 — connected game relationships remains the next feature milestone after this
-maintenance gate. General performance and storage experiments remain deferred unless
+maintenance pass. General performance and storage experiments remain deferred unless
 they become necessary to establish semantic correctness, losslessness, or acceptable
 application behavior.
 
@@ -63,6 +61,9 @@ application behavior.
   - [ ] Measure the SQLite canonical-finalization cost under pytest-xdist, especially on
     Linux CI, and avoid repeated `VACUUM` work in tests that do not need byte-level artifact
     finalization while preserving the release-build determinism guarantee.
+  - [ ] Replace the current routine raw Gunicorn access log with privacy-preserving
+    aggregate request instrumentation before expanding production usage monitoring.
+    Preserve operational error diagnostics without creating visitor-identifying telemetry.
 
 ## Release roadmap through 1.0
 
@@ -447,15 +448,22 @@ work against that contract.
 
 ## Reliability and operations
 
-- [ ] Establish production load monitoring and a repeatable capacity test for
-  the Docker deployment.
+- [ ] Establish privacy-preserving production monitoring and a repeatable capacity test
+  for the Docker deployment.
   - [ ] Record host and container CPU, memory, swap, disk-space/inode, disk-I/O,
-    and network utilization; retain Docker restart/OOM events and Caddy and
-    Gunicorn error logs. Alert on sustained CPU saturation, memory pressure or
-    OOM kills, low disk space, elevated 5xx responses, and failed health checks.
-  - [ ] Publish Caddy access-log metrics (request rate, status code, latency, and
-    active connections) and application metrics for dynamic API latency. Keep
-    dashboards split between static assets and `/api/` requests.
+    and network utilization; retain Docker restart/OOM events and sanitized Caddy/Gunicorn
+    error diagnostics. Alert on sustained CPU saturation, memory pressure or OOM kills,
+    low disk space, elevated 5xx responses, and failed health checks.
+  - [ ] Publish aggregate request counters/histograms using normalized bounded route
+    labels: request rate, status class, latency, response size, and active requests. Keep
+    dashboards split between static assets and `/api/` requests where useful.
+  - [ ] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
+    preference values, query/search terms, persistent visitor IDs, unique/returning-user
+    analytics, or per-user navigation histories. Do not place raw URLs or unbounded request
+    values in metric labels.
+  - [ ] Disable or replace the current routine Gunicorn access-log stream. If raw request
+    logging is temporarily required for a concrete incident, minimize/sanitize its fields,
+    restrict access, and define short retention before enabling it.
   - [ ] Define a representative load-test scenario: browse the unit list, search,
     open unit/catalog details, and fetch API endpoints using a current
     production-like SQLite snapshot. Include a warm-cache steady-state run and
