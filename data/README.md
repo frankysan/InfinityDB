@@ -1,5 +1,7 @@
 # Data directories
 
+**Project domains:** Acquisition, Data processing
+
 InfinityDB separates external inputs, human-reviewed material, generated
 provenance/state, and build outputs.
 

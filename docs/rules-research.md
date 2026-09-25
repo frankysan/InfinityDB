@@ -1,5 +1,7 @@
 # Rules research
 
+**Project domain:** Data processing
+
 This document holds verified rules findings that may become useful to InfinityDB
 but do not yet have a confirmed processing, validation, query, presentation, or
 data-model consumer.

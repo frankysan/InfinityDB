@@ -1,5 +1,7 @@
 # Linux deployment
 
+**Project domain:** Deployment
+
 InfinityDB is deployed as an immutable Docker image: it contains the web
 application, tracked static UI assets, and validated `infinity.db` and `rules.db`
 snapshots. Caddy listens on HTTP and proxies traffic to the application, which is not exposed

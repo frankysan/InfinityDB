@@ -16,7 +16,9 @@ Keep completed substeps while their parent task is still open because they
 clarify progress and remaining scope. Once a standalone or parent task is
 complete, remove it after any durable outcome is recorded in `CHANGELOG.md`,
 architecture/data-model documentation, or another appropriate reference. Git
-history retains implementation detail.
+history retains implementation detail. New or materially revised work items use the
+canonical project-domain labels defined in `docs/project-domains.md`; section-level
+domain declarations may be used when all contained work shares the same owner.
 
 ## Current milestone
 
@@ -32,40 +34,47 @@ application behavior.
 
 ### 0.7.2 UI/presentation cleanup
 
+**Project domains:** Web frontend, Web backend, Data processing, Deployment,
+Project infrastructure
+
 - [ ] Complete a focused UI/presentation maintenance pass after 0.7.1.
-  - [x] Align Cube/Cube 2.0 characteristic symbols with the order-symbol row so the
-    symbols share a consistent baseline and spacing.
-  - [x] Keep the browser page shell free of inline-script execution dependencies and
-    enforce an explicit same-origin `script-src` policy without `unsafe-inline`, nonces,
-    or fixed hashes. Regression coverage checks every browser route for external-only
-    script elements and inline event handlers.
-  - [x] Widen the Name column for Equipment, Weapons, and Traits so ordinary catalog
-    names are not unnecessarily compressed.
-  - [x] Present Unit troop-type codes using their long forms in the UI, for example
-    `LI` as `Light Infantry`, while preserving the source code in stored/API data.
-  - [x] Label Unit health attributes as `VITA` by default and `STR` for Structure
-    profiles, using the canonical `is_structure` source flag rather than a fixed `W` label.
-  - [x] Make Settings collapsible in the sidebar. When no persisted browser preferences
-    exist, default distances to inches and enable all optional Unit types; existing saved
-    preferences continue to override those defaults.
-  - [x] Make the entire secondary metadata line beneath detail-page titles Developer-mode
-    only, rather than showing the line normally and hiding only its optional IDs.
-  - [x] Raise the smallest UI font sizes and reduce unnecessary size variation across
-    ordinary body, metadata, table, and detail text; keep page titles intentionally
-    distinct.
-  - [x] Make catalog relation ordering semantic and deterministic: relationships that
-    enable, cause, enter, or otherwise positively establish a condition come first;
-    within the remaining presentation groups sort alphabetically by interaction label,
-    then by related-record name. Preserve the intended result for the reviewed example:
-    `Caused by: Unconscious State`; `Cancelled by: Impetuous`; `Cancelled by: Jump`;
-    `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
+  - [x] **Web frontend:** Align Cube/Cube 2.0 characteristic symbols with the
+    order-symbol row so the symbols share a consistent baseline and spacing.
+  - [x] **Web backend + Web frontend:** Keep the browser page shell free of inline-script
+    execution dependencies and enforce an explicit same-origin `script-src` policy without
+    `unsafe-inline`, nonces, or fixed hashes. Regression coverage checks every browser route
+    for external-only script elements and inline event handlers.
+  - [x] **Web frontend:** Widen the Name column for Equipment, Weapons, and Traits so
+    ordinary catalog names are not unnecessarily compressed.
+  - [x] **Web frontend:** Present Unit troop-type codes using their long forms in the UI,
+    for example `LI` as `Light Infantry`, while preserving the source code in stored/API data.
+  - [x] **Web backend + Web frontend:** Label Unit health attributes as `VITA` by default
+    and `STR` for Structure profiles, using the canonical `is_structure` source flag rather
+    than a fixed `W` label.
+  - [x] **Web frontend:** Make Settings collapsible in the sidebar. When no persisted
+    browser preferences exist, default distances to inches and enable all optional Unit
+    types; existing saved preferences continue to override those defaults.
+  - [x] **Web frontend:** Make the entire secondary metadata line beneath detail-page
+    titles Developer-mode only, rather than showing the line normally and hiding only its
+    optional IDs.
+  - [x] **Web frontend:** Raise the smallest UI font sizes and reduce unnecessary size
+    variation across ordinary body, metadata, table, and detail text; keep page titles
+    intentionally distinct.
+  - [x] **Web backend + Web frontend:** Make catalog relation ordering semantic and
+    deterministic: relationships that enable, cause, enter, or otherwise positively
+    establish a condition come first; within the remaining presentation groups sort
+    alphabetically by interaction label, then by related-record name. Preserve the intended
+    result for the reviewed example: `Caused by: Unconscious State`; `Cancelled by: Impetuous`;
+    `Cancelled by: Jump`; `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
     `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
-  - [ ] Measure the SQLite canonical-finalization cost under pytest-xdist, especially on
-    Linux CI, and avoid repeated `VACUUM` work in tests that do not need byte-level artifact
-    finalization while preserving the release-build determinism guarantee.
-  - [ ] Replace the current routine raw Gunicorn access log with privacy-preserving
-    aggregate request instrumentation before expanding production usage monitoring.
-    Preserve operational error diagnostics without creating visitor-identifying telemetry.
+  - [ ] **Data processing + Project infrastructure:** Measure the SQLite
+    canonical-finalization cost under pytest-xdist, especially on Linux CI, and avoid
+    repeated `VACUUM` work in tests that do not need byte-level artifact finalization while
+    preserving the release-build determinism guarantee.
+  - [ ] **Deployment:** Replace the current routine raw Gunicorn access log with
+    privacy-preserving aggregate request instrumentation before expanding production usage
+    monitoring. Preserve operational error diagnostics without creating visitor-identifying
+    telemetry.
 
 ## Release roadmap through 1.0
 

@@ -1,5 +1,7 @@
 # Development checks
 
+**Project domain:** Project infrastructure
+
 InfinityDB provides `tools/run_checks.py` as the standard local entry point for
 Python tests, Ruff linting, Pyright type checking, Army data-build validation,
 and curated rules-database validation. The runner only

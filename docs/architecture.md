@@ -54,9 +54,10 @@
 8. **Build conservatively.** When validation or interpretation is uncertain,
    preserve source or existing valid data rather than guessing or
    destructively correcting it.
-9. **Separate stages and responsibilities.** Acquisition, validation,
-   normalization, processing, publishing, and deployment should remain
-   independently understandable and testable.
+9. **Separate stages and responsibilities.** Use the canonical project-domain
+   boundaries in `docs/project-domains.md`; acquisition, data processing,
+   deployment, web-backend, web-frontend, and project-infrastructure concerns
+   should remain independently understandable and testable.
 10. **Be deterministic and portable.** Given the same inputs, configuration,
    InfinityDB revision, and declared tool versions, persistent generated artifacts
    must be byte-identical on Windows, Linux, and macOS. Canonical text output uses
@@ -109,6 +110,18 @@ inspection, validation, and rebuilding snapshots. The standalone scripts in
 `tools/` keep their own dedicated regression coverage under `tests/` so their
 filesystem safety, URL handling, and cross-platform naming remain validated
 independently from the core database and web pipeline.
+
+## Project domains
+
+InfinityDB uses six canonical project domains for engineering ownership and
+documentation: **Acquisition**, **Data processing**, **Deployment**, **Web backend**,
+**Web frontend**, and **Project infrastructure**. The definitions, boundaries, and
+documentation-label convention are maintained in `docs/project-domains.md`.
+
+These domains classify where a change or durable contract belongs; they do not
+replace the semantic game-data domains described by the data model. Cross-domain
+work should name multiple project domains only when it materially changes the
+contract between them.
 
 ## Documentation status
 
@@ -988,18 +1001,19 @@ this non-commercial project, not a change in ownership or MIT-license scope.
 
 ## Module boundaries
 
-| Layer | Responsibility | Extension point |
-| --- | --- | --- |
-| `infinity_army_data` | Interpret and validate source data | Source-format changes and additional normalization |
-| `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
-| `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
-| `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
-| `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
-| `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
-| `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
-| `infinity_db.web.static` | UI, shared page-shell components, URL state, loading and error handling | New screens, filters, and catalogs |
-| standalone `tools/` | Explicit acquisition, validation, and asset-processing workflows | New independent build/input tools |
-| deployment scripts | Package and deploy validated application output | Additional deployment targets |
+| Project domain | Layer | Responsibility | Extension point |
+| --- | --- | --- | --- |
+| Data processing | `infinity_army_data` | Interpret and validate source data | Source-format changes and additional normalization |
+| Data processing | `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
+| Data processing | `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
+| Data processing | `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
+| Data processing | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
+| Web backend | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
+| Web backend | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
+| Web frontend | `infinity_db.web.static` | UI, shared page-shell components, URL state, loading and error handling | New screens, filters, and catalogs |
+| Acquisition | acquisition/asset `tools/` | Explicit source download, snapshot, archive, and asset-processing workflows | New independent source/asset tooling |
+| Project infrastructure | shared development `tools/` and `.github/` | Checks, CI, work archives, and repository-wide engineering support | New development/release automation |
+| Deployment | deployment scripts, Docker/Compose, server configuration | Package and operate validated application output | Additional deployment targets |
 
 Only the importer consumes normalized JSON. Read-only runtime imports must not
 load the importer, Army normalizer, or maintained build-policy configuration as a

@@ -1,5 +1,7 @@
 # Continuous integration strategy
 
+**Project domain:** Project infrastructure
+
 This document records the InfinityDB continuous-integration and automated
 validation contract. Sections explicitly marked design direction remain planned;
 the deployment smoke, required cross-platform source workflow, installed-wheel

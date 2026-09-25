@@ -1,5 +1,7 @@
 # Data model notes
 
+**Project domain:** Data processing
+
 This document distinguishes implemented data semantics from accepted but
 unimplemented design direction. Unqualified descriptions are current; future
 shape is labeled **Design direction** and concrete work remains in

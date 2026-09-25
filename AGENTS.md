@@ -16,6 +16,8 @@ Before making substantial changes, read:
 
 - `docs/architecture.md` — architecture, engineering principles, and subsystem
   boundaries.
+- `docs/project-domains.md` — canonical project-domain ownership and documentation
+  labels.
 - `docs/data-model.md` — normalized data and persistence semantics.
 - `docs/AI_CONTEXT.md` — durable project decisions, invariants, and development
   context.
@@ -78,7 +80,8 @@ instructions must not depend on a particular user's machine configuration.
   generated outputs.
 - Do not silently discard ambiguous, unresolved, or source-specific information.
 - Keep source-format, database, HTTP, browser, and deployment concerns in their
-  established layers.
+  established layers. Classify durable work using the canonical project domains in
+  `docs/project-domains.md`.
 - For an application domain with a stable canonical slug, treat numeric IDs and
   domain-local slugs as interchangeable lookup forms. Application-facing calls should
   accept either; generated links, browser state, API references, and human-authored
@@ -162,6 +165,9 @@ Before finalizing **any release**, follow the canonical checklist in `docs/relea
   invariant or development constraint.
 - Add identified future work to `docs/TODO.md`.
 - Record meaningful changes under `Unreleased` in `docs/CHANGELOG.md`.
+- Label new or materially revised change/feature/design/backlog documentation with
+  its canonical project domain. Use the exact labels and multi-domain rules from
+  `docs/project-domains.md`; do not invent near-synonyms.
 - Update `README.md` for user-visible behavior, setup, or major capabilities.
 - When changing the Army database schema or compatibility revision, update all
   documented current schema/compatibility values and related rebuild guidance in

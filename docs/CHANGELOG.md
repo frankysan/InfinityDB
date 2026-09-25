@@ -2,22 +2,28 @@
 
 All notable user- or operator-relevant changes to InfinityDB are documented here.
 Entries describe meaningful release outcomes rather than detailed implementation history.
+New or materially revised entries use the project-domain labels defined in
+`docs/project-domains.md`; historical release notes are not retroactively relabeled.
 
 ## Unreleased
 
 ### Changed
 
-- Define privacy-preserving, aggregate-only production observability as the project policy;
+- **Deployment:** Define privacy-preserving, aggregate-only production observability as the
+  project policy;
   visitor-identifying telemetry and long-lived raw access-log analytics are explicitly out
   of scope, with the current Gunicorn access log tracked for replacement.
-- Improve 0.7.2 presentation defaults and consistency: Settings is collapsible on the
+- **Web backend + Web frontend:** Improve 0.7.2 presentation defaults and consistency:
+  Settings is collapsible on the
   desktop sidebar, first-use preferences default to inches and all optional Unit types,
   Unit troop-type abbreviations expand to their rules-facing names, Unit health attributes
   use `VITA` or `STR` from canonical profile semantics, detail metadata is Developer-mode
   only, and small labels/table/detail text use a more legible, less fragmented type scale.
-- Improve catalog and rules presentation with wider Equipment/Weapon/Trait name columns,
+- **Web backend + Web frontend:** Improve catalog and rules presentation with wider
+  Equipment/Weapon/Trait name columns,
   aligned linked characteristic symbols, and deterministic semantic relation ordering.
-- Harden the browser page shell so executable scripts remain same-origin external
+- **Web backend + Web frontend:** Harden the browser page shell so executable scripts
+  remain same-origin external
   modules under an explicit Content Security Policy, without permitting inline scripts.
 
 ## [0.7.1] - 2026-09-25

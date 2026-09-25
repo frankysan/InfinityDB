@@ -53,6 +53,16 @@ itself establish game-wide ownership, army membership, availability, playability
 or canonical equality. Any new or changed InfinityDB abstraction must document
 its source inputs, derivation, assumptions/fallbacks, and limits.
 
+## Project-domain ownership
+
+Project work and maintained documentation use six canonical ownership domains:
+**Acquisition**, **Data processing**, **Deployment**, **Web backend**, **Web frontend**,
+and **Project infrastructure**. Their exact boundaries and documentation-label
+syntax are defined in `docs/project-domains.md`. Use those names rather than
+introducing overlapping subsystem labels. Tests and documentation normally inherit
+the domain of the behavior they cover; shared test/CI/release/documentation machinery
+is Project infrastructure.
+
 ## Purpose and subsystem boundaries
 
 InfinityDB builds validated local reference databases from Infinity source data

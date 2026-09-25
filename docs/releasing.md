@@ -1,5 +1,7 @@
 # Release process
 
+**Project domain:** Project infrastructure
+
 This document is the canonical release checklist for InfinityDB. **Every release**
 must pass this checklist unless a step is explicitly inapplicable to that release.
 Active version-specific implementation/release blockers belong in `docs/TODO.md`;
@@ -108,6 +110,9 @@ During the audit:
 - [ ] Review `docs/architecture.md` and `docs/data-model.md` against the implemented
   architectural and semantic boundaries, including any new InfinityDB-specific
   abstractions and their derivation/provenance rules.
+- [ ] Verify new or materially revised change/feature/design/backlog documentation uses
+  the canonical project-domain labels from `docs/project-domains.md`, including
+  multi-domain labels only where responsibility genuinely crosses a boundary.
 - [ ] Review `docs/testing.md`, `docs/ci.md`, `docs/deployment.md`, and
   `docs/server-migration.md` against the actual validation and operational workflows.
 - [ ] Review `docs/TODO.md`: remove completed standalone work after recording its

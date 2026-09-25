@@ -1,5 +1,7 @@
 # 0.7.0 player-facing enrichment presentation audit
 
+**Project domains:** Data processing, Web backend, Web frontend
+
 This audit is the presentation gate for the rules-enrichment work in 0.7.0.
 Coverage and schema correctness are necessary but are not sufficient: the added
 information must help an Infinity player understand the game data they are
