@@ -18,21 +18,25 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python: "3.11"
+            python: "3.11.9"
             check_args: "--all"
             test_workers: "auto"
+            determinism: true
           - os: windows-latest
-            python: "3.11"
+            python: "3.11.9"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "0"
+            determinism: true
           - os: macos-latest
-            python: "3.11"
+            python: "3.11.9"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "auto"
+            determinism: true
           - os: ubuntu-latest
             python: "3.14"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "auto"
+            determinism: false
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
@@ -58,12 +62,19 @@ jobs:
           --test-workers ${{ matrix.test_workers }}
           --assets required --build-source tests/fixtures/deployment-smoke
 
+      - name: Report deterministic-output toolchain
+        if: matrix.determinism
+        run: >-
+          python -c "import sqlite3, sys, zlib;
+          print('Python', sys.version.split()[0], 'SQLite', sqlite3.sqlite_version,
+          'zlib', zlib.ZLIB_RUNTIME_VERSION)"
+
       - name: Build deterministic-output manifest
-        if: matrix.python == '3.11'
+        if: matrix.determinism
         run: python tools/build_determinism_manifest.py --output reports/determinism-manifest.json
 
       - name: Upload deterministic-output manifest
-        if: matrix.python == '3.11'
+        if: matrix.determinism
         uses: actions/upload-artifact@v4
         with:
           name: determinism-${{ runner.os }}
@@ -81,7 +92,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11"
+          python-version: "3.11.9"
 
       - name: Download platform manifests
         uses: actions/download-artifact@v5

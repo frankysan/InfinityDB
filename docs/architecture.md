@@ -69,7 +69,11 @@ equality. Git attributes protect checksum-bound release files from checkout
 rewrites, but generators themselves remain responsible for canonical bytes. Required
 CI builds representative Army/rules databases, JSON reports, snapshot/work archives,
 and publication metadata on all three supported operating systems and compares their
-SHA-256 identities.
+SHA-256 identities. The cross-platform comparison pins the same exact CPython patch
+version on every runner; floating minor-version selectors are not a valid determinism
+test because they can resolve to different Python/SQLite toolchains by platform.
+Repository-managed text is checked out with LF line endings on every supported platform
+so the compared fixtures are byte-identical inputs.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in

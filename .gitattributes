@@ -1,5 +1,5 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Keep repository-managed text bytes LF on every supported platform.
+* text=auto eol=lf
 
 # Processed Corvus Belli symbol publications are byte-exact, checksum-bound assets.
 # Treat them as binary so Git never rewrites line endings across platforms.
