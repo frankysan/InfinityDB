@@ -50,6 +50,35 @@ application behavior.
   - [ ] Add `Cross-platform deterministic outputs` to the hosted `Protect main` required
     checks after its first successful run establishes the check context.
 
+### 0.7.2 UI/presentation cleanup
+
+- [ ] Complete a focused UI/presentation maintenance pass after 0.7.1.
+  - [ ] Align Cube/Cube 2.0 characteristic symbols with the order-symbol row so the
+    symbols share a consistent baseline and spacing.
+  - [ ] Remove the remaining inline-script dependency that violates the current CSP;
+    keep the restrictive same-origin policy rather than adding `unsafe-inline`, a nonce,
+    or a fixed hash unless a concrete requirement makes that necessary. Add regression
+    coverage for the affected page shell/static loading path.
+  - [ ] Widen the Name column for Equipment, Weapons, and Traits so ordinary catalog
+    names are not unnecessarily compressed.
+  - [ ] Present Unit troop-type codes using their long forms in the UI, for example
+    `LI` as `Light Infantry`, while preserving the source code in stored/API data.
+  - [ ] Make Settings collapsible in the sidebar. When no persisted browser preferences
+    exist, default distances to inches and enable all optional Unit types; existing saved
+    preferences continue to override those defaults.
+  - [ ] Make the entire secondary metadata line beneath detail-page titles Developer-mode
+    only, rather than showing the line normally and hiding only its optional IDs.
+  - [ ] Raise the smallest UI font sizes and reduce unnecessary size variation across
+    ordinary body, metadata, table, and detail text; keep page titles intentionally
+    distinct.
+  - [ ] Make catalog relation ordering semantic and deterministic: relationships that
+    enable, cause, enter, or otherwise positively establish a condition come first;
+    within the remaining presentation groups sort alphabetically by interaction label,
+    then by related-record name. Preserve the intended result for the reviewed example:
+    `Caused by: Unconscious State`; `Cancelled by: Impetuous`; `Cancelled by: Jump`;
+    `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
+    `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
+
 ## Release roadmap through 1.0
 
 This roadmap describes product direction, not a rigid promise that every item will
