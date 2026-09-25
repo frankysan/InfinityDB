@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -15,11 +16,19 @@ from infinity_db.snapshot_provenance import (
     load_snapshot_manifest,
     portable_project_path,
     sha256_file,
+    snapshot_content_sha256,
     validate_snapshot_note,
     write_snapshot_manifest,
 )
 
 ACQUIRED_AT = datetime(2026, 9, 17, 16, 20, 30, tzinfo=UTC)
+
+
+def _write_archive(path: Path, body: bytes, *, member: str = "payload.bin") -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    info = zipfile.ZipInfo(member, date_time=(2020, 1, 1, 0, 0, 0))
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED) as output:
+        output.writestr(info, body)
 
 
 @pytest.mark.parametrize(
@@ -37,8 +46,7 @@ def test_write_snapshot_manifest_for_all_snapshot_types(
     language: str | None,
 ) -> None:
     archive = tmp_path / "data" / "raw" / f"{snapshot_type}.zip"
-    archive.parent.mkdir(parents=True)
-    archive.write_bytes(f"{snapshot_type}-archive".encode())
+    _write_archive(archive, f"{snapshot_type}-archive".encode())
 
     path = write_snapshot_manifest(
         archive,
@@ -62,6 +70,7 @@ def test_write_snapshot_manifest_for_all_snapshot_types(
             "path": f"data/raw/{snapshot_type}.zip",
             "sha256": sha256_file(archive),
         },
+        "contentSha256": snapshot_content_sha256(archive),
         "documentCount": 3,
         "type": snapshot_type,
     }
@@ -78,10 +87,8 @@ def test_write_snapshot_manifest_for_all_snapshot_types(
 def test_symbol_manifest_can_bind_to_input_artifact(tmp_path: Path) -> None:
     source = tmp_path / "data" / "raw" / "JSON 20260917-120000.zip"
     archive = tmp_path / "data" / "raw" / "symbols" / "SYMBOLS 20260917-130000.zip"
-    source.parent.mkdir(parents=True)
-    archive.parent.mkdir(parents=True)
-    source.write_bytes(b"army")
-    archive.write_bytes(b"symbols")
+    _write_archive(source, b"army")
+    _write_archive(archive, b"symbols")
 
     path = write_snapshot_manifest(
         archive,
@@ -104,7 +111,7 @@ def test_symbol_manifest_can_bind_to_input_artifact(tmp_path: Path) -> None:
 
 def test_manifest_load_rejects_changed_archive(tmp_path: Path) -> None:
     archive = tmp_path / "snapshot.zip"
-    archive.write_bytes(b"first")
+    _write_archive(archive, b"first")
     path = write_snapshot_manifest(
         archive,
         tmp_path / "manifests",
@@ -114,17 +121,15 @@ def test_manifest_load_rejects_changed_archive(tmp_path: Path) -> None:
         document_count=1,
         project_root=tmp_path,
     )
-    archive.write_bytes(b"changed")
+    _write_archive(archive, b"changed")
 
     with pytest.raises(SnapshotProvenanceError, match="SHA-256 mismatch"):
         load_snapshot_manifest(path, archive=archive)
 
 
-
-
 def test_manifest_archive_label_is_not_authoritative_identity(tmp_path: Path) -> None:
     archive = tmp_path / "JSON 20260917-120000.zip"
-    archive.write_bytes(b"snapshot")
+    _write_archive(archive, b"snapshot")
     path = write_snapshot_manifest(
         archive,
         tmp_path / "manifests",
@@ -146,7 +151,7 @@ def test_manifest_is_archive_labeled_and_not_rewritten_with_different_provenance
     tmp_path: Path,
 ) -> None:
     archive = tmp_path / "snapshot.zip"
-    archive.write_bytes(b"same archive")
+    _write_archive(archive, b"same archive")
     manifest_directory = tmp_path / "manifests"
     first = write_snapshot_manifest(
         archive,
@@ -190,7 +195,7 @@ def test_external_paths_are_not_persisted_as_machine_specific_paths(tmp_path: Pa
 
 def test_snapshot_note_contract_binds_to_snapshot_manifest(tmp_path: Path) -> None:
     archive = tmp_path / "WIKI 20260917-120000.zip"
-    archive.write_bytes(b"wiki snapshot")
+    _write_archive(archive, b"wiki snapshot")
     manifest_path = write_snapshot_manifest(
         archive,
         tmp_path / "manifests",
@@ -237,8 +242,8 @@ def test_snapshot_note_rejects_unknown_fields_and_self_comparison() -> None:
 def test_identical_archive_bytes_can_have_distinct_acquisition_records(tmp_path: Path) -> None:
     first_archive = tmp_path / "JSON 20260917-120000.zip"
     second_archive = tmp_path / "JSON 20260917-130000.zip"
-    first_archive.write_bytes(b"same snapshot")
-    second_archive.write_bytes(b"same snapshot")
+    _write_archive(first_archive, b"same snapshot")
+    _write_archive(second_archive, b"same snapshot")
     manifests = tmp_path / "manifests"
 
     first = write_snapshot_manifest(
@@ -267,3 +272,51 @@ def test_identical_archive_bytes_can_have_distinct_acquisition_records(tmp_path:
     assert load_snapshot_manifest(second)["snapshot"]["archive"]["sha256"] == sha256_file(
         first_archive
     )
+
+
+def test_manifest_loader_accepts_legacy_v1_without_content_hash(tmp_path: Path) -> None:
+    archive = tmp_path / "legacy.zip"
+    _write_archive(archive, b"legacy")
+    manifest = tmp_path / "legacy.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "format": SNAPSHOT_MANIFEST_FORMAT,
+                "formatVersion": 1,
+                "snapshot": {
+                    "type": "army",
+                    "archive": {"name": archive.name, "sha256": sha256_file(archive)},
+                    "acquiredAt": "2026-09-17T16:20:30+00:00",
+                    "documentCount": 1,
+                },
+                "source": {"url": "https://api.corvusbelli.com/army", "language": "en"},
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    document = load_snapshot_manifest(manifest, archive=archive)
+
+    assert document["formatVersion"] == 1
+    assert "contentSha256" not in document["snapshot"]
+
+
+def test_manifest_load_rejects_wrong_content_hash(tmp_path: Path) -> None:
+    archive = tmp_path / "snapshot.zip"
+    _write_archive(archive, b"snapshot")
+    path = write_snapshot_manifest(
+        archive,
+        tmp_path / "manifests",
+        snapshot_type="army",
+        acquired_at=ACQUIRED_AT,
+        source_url="https://api.corvusbelli.com/army",
+        document_count=1,
+        project_root=tmp_path,
+    )
+    document = json.loads(path.read_text(encoding="utf-8"))
+    document["snapshot"]["contentSha256"] = "0" * 64
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(SnapshotProvenanceError, match="content SHA-256 mismatch"):
+        load_snapshot_manifest(path, archive=archive)
