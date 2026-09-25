@@ -833,6 +833,38 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
     )
 
 
+def test_very_narrow_detail_layout_wraps_titles_and_stacks_general_profiles(
+    app: Callable,
+) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+
+    assert status == 200
+    assert b"@media (max-width: 400px)" in styles
+    assert_css_rule(styles, "h1", {"overflow-wrap": "anywhere"})
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .statline, "
+        ".unit-detail .general-profile .statline tbody",
+        {"display": "block", "width": "100%"},
+    )
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .statline tr",
+        {"display": "grid", "grid-template-columns": "minmax(0, 1fr)"},
+    )
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .general-item-label, "
+        ".unit-detail .general-profile .profile-attributes-label",
+        {"padding": "10px 16px 4px"},
+    )
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .general-item-list, "
+        ".unit-detail .general-profile .profile-attributes",
+        {"padding": "4px 16px 12px"},
+    )
+
 def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     app: Callable,
 ) -> None:

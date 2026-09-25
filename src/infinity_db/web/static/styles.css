@@ -3323,6 +3323,38 @@ tbody tr:hover {
   }
 }
 
+@media (max-width: 400px) {
+  h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .unit-detail .general-profile .statline,
+  .unit-detail .general-profile .statline tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .unit-detail .general-profile .statline tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .unit-detail .general-profile .statline th,
+  .unit-detail .general-profile .statline td {
+    width: auto;
+  }
+
+  .unit-detail .general-profile .general-item-label,
+  .unit-detail .general-profile .profile-attributes-label {
+    padding: 10px 16px 4px;
+  }
+
+  .unit-detail .general-profile .general-item-list,
+  .unit-detail .general-profile .profile-attributes {
+    padding: 4px 16px 12px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   *,

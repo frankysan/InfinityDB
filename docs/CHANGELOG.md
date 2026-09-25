@@ -229,6 +229,13 @@ Entries describe meaningful release outcomes rather than detailed implementation
   reconciled for the audited Skill mismatches and for Deactivator, GizmoKit, and MediKit
   as Equipment actions; non-current collections remain excluded from normal enrichment.
 
+### Fixed
+
+- Complete the 0.7.0 full-data browser presentation audit and keep very narrow Unit
+  details readable: long page titles may wrap within the viewport, and General profile
+  labels stack above their value areas at 400 px and below instead of compressing
+  the Attribute statline into overlapping columns.
+
 ## [0.6.3] - 2026-09-22
 
 ### Added

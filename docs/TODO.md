@@ -293,63 +293,6 @@ requiring a new top-level browser surface in 0.7.0.
     experiences; enrichment required for 0.7.0 must not remain available only in
     curated JSON, `rules.db`, raw source data, or developer tooling.
 
-- [ ] **Audit the player-facing presentation of rules enrichment before 0.7.0.**
-  The release is not complete merely because reviewed enrichment exists in
-  `rules.db` or the API. Audit the browser from a player's point of view so the
-  added context answers useful gameplay questions without exposing the internal
-  ontology as UI.
-  - [x] Define the presentation-review rubric and record the initial source-level
-    findings in `docs/enrichment-presentation-audit.md`.
-  - [x] Distinguish Requirements, Effects, and Restrictions visibly in the shared
-    rules-reference renderer instead of presenting those semantically different
-    facts as unlabeled consecutive bullet lists.
-  - [x] Make declaration/action categories prominent enough to scan as gameplay
-    information rather than burying them in source metadata. Reuse the maintained
-    Wiki category colors where useful, but always retain text labels so color is
-    never the only cue.
-  - [x] Present reviewed related-rule relationships as a bidirectional gameplay
-    graph when they help a player understand or navigate the current item. A relation
-    is authored once in curated data and `rules.db` derives the reverse direction;
-    both endpoints must expose useful player-facing context when both have browser
-    surfaces. Multispectral Visor -> Mimetism is now the first production acceptance
-    example: curated v11 authors `reduces-modifiers-from` once on Multispectral Visor,
-    the MSV surface presents “Reduces MODs from: Mimetism”, and the Mimetism surface
-    receives the derived “MODs reduced by: Multispectral Visor” relationship. The second
-    production cluster adds Sixth Sense/Combat Instinct -> Stealth `negates-effects-of`
-    edges plus Combat Instinct -> Surprise Attack `ignores-modifiers-from`, with reverse
-    navigation derived on Stealth and Surprise Attack. The third production cluster makes
-    Sensor a multi-edge hub: it ignores Mimetism MODs, modifies Discover rolls, restricts
-    Camouflage use, and reveals Camouflaged/Hidden Deployment States, with all reverse
-    relationships derived automatically. The fourth production cluster links Albedo and
-    Reflective to both Marksmanship and Multispectral Visor, distinguishing imposed MODs
-    from effects that explicitly extend to those users. The fifth production cluster adds
-    Natural Born Warrior -> Martial Arts / Surprise Attack `ignores-modifiers-from` edges,
-    so both affected Skill pages identify the CC counter automatically while exact CC-only
-    requirements remain on Natural Born Warrior. The sixth production interaction adds
-    No Cover -> Limited Cover `overrides-effects-of`, making precedence visible from both
-    Skill pages without treating Limited Cover as globally negated. All current 0.7.0
-    gameplay edge types now have direction-aware player language, and implementation-only
-    relationships such as family bookkeeping remain suppressed when the existing variant UI
-    already communicates them. The completed catalog review plus semantic-only deferred-link
-    audit leaves future-ledger entries only where a missing domain, runtime/participant model,
-    or more structured mechanic is still needed.
-  - [x] Review information hierarchy on Skill, Equipment, Weapon, Trait, and
-    representative Unit/profile/loadout surfaces. Gameplay summaries, categories,
-    facts, and relationships now precede provenance; exact-source context remains
-    attached to the relevant usage disclosure; and Unit/profile/loadout rows keep
-    occurrence-specific extras at the occurrence where they apply.
-  - [x] Review family rules, exact-source variant rules, and occurrence modifiers.
-    Catalog usage summaries expose typed source-variant labels before expansion and
-    now flag when the disclosure contains dedicated Variant rules; occurrence extras
-    remain local to Unit/profile/loadout rows rather than being promoted onto the
-    canonical base rule.
-  - [ ] Perform a representative browser audit against the complete generated
-    dataset, including narrow/mobile layouts, the current light-theme presentation,
-    keyboard navigation, and cases with multiple variants/supplements/relations. Record
-    and resolve every player-relevance/correctness issue classified as a 0.7.0 blocker.
-    Dark-theme acceptance belongs to the separately planned theme implementation rather
-    than the 0.7.0 gate.
-
 0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
 every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
 charts, saved-list guidance, organizer tooling, a live action-legality engine, or

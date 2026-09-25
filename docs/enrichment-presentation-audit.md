@@ -91,7 +91,7 @@ reveal, and other interactions directly.
 references should be easy to reach. Provenance is supporting evidence rather
 than the primary explanation of the rule.
 
-**Accessibility and responsive use.** Meaning must survive light/dark themes,
+**Accessibility and responsive use.** Meaning must survive the current light theme,
 narrow layouts, keyboard navigation, and non-color presentation. Category colors
 may reinforce familiar Infinity/Wiki semantics but must always accompany readable
 text.
@@ -177,23 +177,38 @@ relationship. The remaining duplicated ontology was relation presentation itself
 now backend-owned and covered across every current relation type. Structural `variant-of`
 edges remain deliberately suppressed by the generic Related-rules renderer.
 
-This is the catalog-level consistency audit, not the final rendered-browser
-acceptance pass. A subsequent composed-page review confirmed the information hierarchy
-and exact-source/occurrence boundary across the shared catalog and Unit renderers: rule
-meaning precedes provenance, typed exact-source semantics remain on their usage
-disclosures, disclosures advertise dedicated Variant rules before expansion, and Army
-extras stay local to profile/loadout occurrences. The remaining 0.7.0 acceptance work is
-the representative pass against the complete generated dataset, including narrow/mobile
-layout and keyboard behavior. InfinityDB is currently light-theme only; dark-theme
-implementation and acceptance remain part of the separately planned theme work rather
-than being retroactively made a 0.7.0 prerequisite.
+This catalog-level consistency audit was followed by a composed-page review confirming
+the information hierarchy and exact-source/occurrence boundary across the shared catalog
+and Unit renderers: rule meaning precedes provenance, typed exact-source semantics remain
+on their usage disclosures, disclosures advertise dedicated Variant rules before
+expansion, and Army extras stay local to profile/loadout occurrences.
+
+## Full-dataset browser acceptance
+
+The final 0.7.0 presentation pass used a built application database from the current
+2026-09-18 Army snapshot: 58 Army source documents (36 at `7.26246.158` and 22 at
+`7.26246.159`), 925 source Unit rows normalized to 737 logical Units, and 5,020 profile
+occurrences. The catalog renderer was exercised across all 207 current composed rules
+records at 320 px, 390 px, and 1280 px widths. Representative Unit stress cases covered
+high-multiplicity Army availability, multiple General profiles, dense loadouts, exact-source
+variants, Team-Ops data, and relationship-heavy enrichment.
+
+The audit found no catalog-renderer horizontal-overflow blocker and confirmed that keyboard
+focus remains visible and reaches rules links and Unit disclosure controls in document
+order. Two very-narrow Unit presentation blockers were found at 320 px: long unbroken page
+titles could widen the document, and the General profile retained a desktop-style
+two-column row that compressed its Attribute grid. The narrow breakpoint now allows page
+titles to wrap and stacks each General-profile label above its value area at 400 px and
+below. The corrected layout was rechecked against the same full-data stress records at
+320 px and 390 px, with desktop controls retained at 1280 px.
+
+InfinityDB is currently light-theme only. Dark-theme implementation and acceptance remain
+part of the separately planned theme work rather than a 0.7.0 prerequisite.
 
 ## Completion
 
-This document records the review method and durable presentation principles.
-Active findings and release blockers remain tracked in `docs/TODO.md`.
-
-The 0.7.0 presentation audit is complete only after a representative pass against
-the full generated dataset and browser has resolved every issue classified as a
-0.7.0 player-relevance or correctness blocker. A field being present in an API
-payload is not, by itself, evidence that the player-facing requirement is met.
+The 0.7.0 player-facing enrichment presentation audit is complete. Reviewed enrichment is
+not considered presented merely because it exists in an API payload: the completed gate
+now includes source semantics, composed-page hierarchy, exact-source/occurrence context,
+full-dataset responsive rendering, and keyboard navigation. No unresolved presentation
+issue from this audit remains classified as a 0.7.0 blocker.
