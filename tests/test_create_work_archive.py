@@ -47,3 +47,28 @@ def test_work_archive_is_deterministic_and_excludes_git_metadata(tmp_path: Path)
         names = archive.namelist()
         assert names == [".gitignore", "tracked.txt", "untracked.txt"]
         assert not any(name == ".git" or name.startswith(".git/") for name in names)
+
+
+def test_work_archive_script_runs_from_repository_root(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    tools_dir = root / "tools"
+    tools_dir.mkdir()
+    source_root = Path(__file__).resolve().parents[1]
+    (tools_dir / "create_work_archive.py").write_bytes(
+        (source_root / "tools" / "create_work_archive.py").read_bytes()
+    )
+    (tools_dir / "snapshot_archive.py").write_bytes(
+        (source_root / "tools" / "snapshot_archive.py").read_bytes()
+    )
+    output = tmp_path / "script.zip"
+
+    result = subprocess.run(
+        ["python", "tools/create_work_archive.py", "--output", str(output)],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert output.is_file()
+    assert "Created" in result.stdout

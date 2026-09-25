@@ -5,7 +5,10 @@ import subprocess
 import zipfile
 from pathlib import Path
 
-from tools.snapshot_archive import _archive_info
+try:
+    from tools.snapshot_archive import _archive_info
+except ModuleNotFoundError:
+    from snapshot_archive import _archive_info
 
 _COMPRESSION = zipfile.ZIP_DEFLATED
 _COMPRESSLEVEL = 6
