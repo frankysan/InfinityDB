@@ -10,6 +10,12 @@ Entries describe meaningful release outcomes rather than detailed implementation
 - Define privacy-preserving, aggregate-only production observability as the project policy;
   visitor-identifying telemetry and long-lived raw access-log analytics are explicitly out
   of scope, with the current Gunicorn access log tracked for replacement.
+- Improve 0.7.2 presentation defaults and consistency: Settings is collapsible on the
+  desktop sidebar, first-use preferences default to inches and all optional Unit types,
+  Unit troop-type abbreviations expand to their rules-facing names, and detail metadata is
+  Developer-mode only.
+- Improve catalog and rules presentation with wider Equipment/Weapon/Trait name columns,
+  aligned linked characteristic symbols, and deterministic semantic relation ordering.
 
 ## [0.7.1] - 2026-09-25
 

@@ -311,7 +311,6 @@ function render(item) {
   if (meta) {
     const categories = (item.categories || []).map((category) => category.name).join(", ");
     if (item.wiki) {
-      meta.classList.remove("developer-only");
       const link = document.createElement("a");
       link.href = item.wiki;
       link.target = "_blank";
@@ -320,7 +319,6 @@ function render(item) {
       meta.replaceChildren(link);
       if (categories) meta.append(` · ${categories}`);
     } else {
-      meta.classList.add("developer-only");
       const domain = catalog === "equipment"
         ? "Equipment"
         : catalog === "weapons"

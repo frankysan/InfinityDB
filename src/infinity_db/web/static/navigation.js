@@ -23,9 +23,11 @@ menus.forEach((menu) => {
   const closeMenu = () => setMenuOpen(menu, false);
 
   button.addEventListener("click", () => {
-    if (!compactMenuMedia.matches) return;
+    const isDesktopSettings = menu.classList.contains("settings-menu")
+      && !compactMenuMedia.matches;
+    if (!compactMenuMedia.matches && !isDesktopSettings) return;
     const isOpen = menu.dataset.open !== "true";
-    closeMenus();
+    if (compactMenuMedia.matches) closeMenus();
     setMenuOpen(menu, isOpen);
   });
 

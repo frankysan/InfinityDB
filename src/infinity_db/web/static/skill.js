@@ -191,7 +191,6 @@ function render(skill) {
   name.firstChild.textContent = skill.name;
   const categories = (skill.categories || []).map((category) => category.name).join(", ");
   if (skill.wiki) {
-    meta.classList.remove("developer-only");
     const link = document.createElement("a");
     link.href = skill.wiki;
     link.target = "_blank";
@@ -200,7 +199,6 @@ function render(skill) {
     meta.replaceChildren(link);
     if (categories) meta.append(` · ${categories}`);
   } else {
-    meta.classList.add("developer-only");
     meta.textContent = `Skill #${skill.id}${categories ? ` · ${categories}` : ""}`;
   }
   const variants = [...skill.variants].sort((left, right) => (

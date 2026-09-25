@@ -1530,6 +1530,16 @@ h1>span {
   flex: 0 0 auto;
 }
 
+.profile-symbol-link {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.profile-symbol-link .order-symbol {
+  display: block;
+}
+
 .order-symbol+.order-symbol {
   margin-left: -5px;
 }
@@ -2604,6 +2614,45 @@ tbody tr:hover {
 
   #table-container thead th:last-child {
     width: 145px;
+  }
+}
+
+@media (min-width: 921px) {
+  .settings-menu>.menu-label {
+    display: none;
+  }
+
+  .settings-menu>.menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 14px 12px;
+    border: 0;
+    background: transparent;
+    color: var(--color-nav-text-muted);
+    font-size: 10px;
+    font-weight: 550;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+  }
+
+  .settings-menu>.compact-menu-panel {
+    display: none;
+  }
+
+  .settings-menu[data-open="true"]>.compact-menu-panel {
+    display: flex;
+  }
+
+  .settings-menu[data-open="true"]>.menu-button span {
+    transform: rotate(180deg);
+  }
+
+  body[data-catalog="equipment"] #catalog-table-container thead th:first-child,
+  body[data-catalog="weapons"] #catalog-table-container thead th:first-child,
+  body[data-catalog="traits"] #catalog-table-container thead th:first-child {
+    width: 68%;
   }
 }
 

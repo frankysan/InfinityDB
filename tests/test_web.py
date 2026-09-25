@@ -904,6 +904,16 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         ".compact-menu-panel",
         {"position": "static", "display": "flex"},
     )
+    assert_css_rule(
+        styles,
+        ".settings-menu>.compact-menu-panel",
+        {"display": "none"},
+    )
+    assert_css_rule(
+        styles,
+        '.settings-menu[data-open="true"]>.compact-menu-panel',
+        {"display": "flex"},
+    )
     assert_css_rule(styles, ".menu-label", {"display": "none"})
     assert_css_rule(styles, ".sidebar", {"position": "relative", "z-index": "4"})
     assert b".cookie-consent-dialog" in styles
@@ -926,6 +936,20 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"if (persistent === undefined) return session;" in preferences
     assert b"setSessionValue(name, persistent);" in preferences
     assert b'new CustomEvent("developermodechange"' in preferences
+    assert b'const unit = savedUnit === "cm" ? "cm" : "in";' in preferences
+    assert preferences.count(b"defaultChecked: true") == 4
+    assert b'id="distance-unit-toggle" type="checkbox" checked' in body
+    for optional_id in (
+        b"mercs-filter",
+        b"specops-filter",
+        b"teamops-filter",
+        b"reinforcement-filter",
+    ):
+        assert b'id="' + optional_id + b'" type="checkbox" checked' in body
+
+    status, _, navigation = request(app, "/static/navigation.js")
+    assert status == 200
+    assert b'menu.classList.contains("settings-menu")' in navigation
 
 
 def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> None:
@@ -2206,6 +2230,11 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"presentation?.group_id" in body
     assert b"presentation?.group_label" in body
     assert b"presentation?.group_order" in body
+    assert b"presentation?.relation_order" in body
+    assert b"left.presentation.relation_order - right.presentation.relation_order" in body
+    assert body.index(b"left.label.localeCompare(right.label)") < body.index(
+        b"left.record.name.localeCompare(right.record.name"
+    )
     assert b"groupHeading.textContent = relationGroup.label" in body
     assert b"relationLabels" not in body
     assert b"relationGroupOrder" not in body
@@ -2215,6 +2244,59 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body
 
+
+def test_072_detail_and_catalog_presentation_contract(
+    app: Callable, tmp_path: Path
+) -> None:
+    for path in (
+        "/units/ranger-prototype",
+        "/skills/11",
+        "/equipment/21",
+        "/weapons/31",
+        "/traits/suppressive-fire",
+    ):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b"intro-copy developer-only" in body
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+    status, _, body = request(rules_app, "/states/unconscious")
+    assert status == 200
+    assert b"intro-copy developer-only" in body
+
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    for code, label in (
+        (b"LI", b"Light Infantry"),
+        (b"MI", b"Medium Infantry"),
+        (b"HI", b"Heavy Infantry"),
+        (b"REM", b"Remote"),
+        (b"TAG", b"Tactical Armored Gear"),
+        (b"WB", b"Warband"),
+        (b"SK", b"Skirmisher"),
+        (b"VH", b"Vehicle"),
+    ):
+        assert code in unit_script
+        assert label in unit_script
+    assert b"troopTypeLabel(profile.type)" in unit_script
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".profile-symbol-link",
+        {"display": "inline-flex", "align-items": "center", "line-height": "0"},
+    )
+    assert_css_rule(
+        styles,
+        'body[data-catalog="equipment"] #catalog-table-container thead th:first-child, '
+        'body[data-catalog="weapons"] #catalog-table-container thead th:first-child, '
+        'body[data-catalog="traits"] #catalog-table-container thead th:first-child',
+        {"width": "68%"},
+    )
 
 def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-list.js")

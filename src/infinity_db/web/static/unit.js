@@ -11,6 +11,21 @@ const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.locat
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
+const troopTypeLabels = {
+  LI: "Light Infantry",
+  MI: "Medium Infantry",
+  HI: "Heavy Infantry",
+  REM: "Remote",
+  TAG: "Tactical Armored Gear",
+  WB: "Warband",
+  SK: "Skirmisher",
+  VH: "Vehicle",
+};
+
+function troopTypeLabel(value) {
+  return troopTypeLabels[value] || value;
+}
+
 function groupArmiesByFaction(armies) {
   const groups = new Map();
   for (const army of armies) {
@@ -485,7 +500,7 @@ function generalProfileTableRows(profiles) {
     rows.push(
       [
         { value: "Type", header: true, className: "data-label general-item-label" },
-        { value: profile.type, className: "general-item-list" },
+        { value: troopTypeLabel(profile.type), className: "general-item-list" },
       ],
       [
         { value: "Classification", header: true, className: "data-label general-item-label" },

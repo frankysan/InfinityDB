@@ -363,8 +363,11 @@ edges, so reciprocal rows are not maintained independently. Current edges must r
 current semantic record before `rules.db` can be published. Composed rule payloads add a
 `display_relations` graph projection with direction and resolved endpoint identity/Army
 links. The backend attaches the reviewed player-facing relation group and direction-aware
-label to that projection; the shared browser renderer consumes those semantics rather than
-translating raw relation types itself. Structural edges such as `variant-of` remain available
+label to that projection; it also supplies a semantic relation-order key so interactions
+that establish/provide/enable a condition can sort before cancellation or restriction within
+the same group. The shared browser renderer then sorts by group, semantic relation order,
+player-facing interaction label, and related-record name rather than translating raw relation
+types itself. Structural edges such as `variant-of` remain available
 to API consumers but intentionally receive no generic Related-rules presentation. Format v10 introduced the first gameplay-interaction edge,
 `reduces-modifiers-from`: Multispectral Visor authors that edge once toward Mimetism,
 and the Mimetism surface receives the derived inverse relationship automatically. Format

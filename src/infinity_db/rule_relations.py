@@ -120,6 +120,22 @@ RULE_RELATION_PRESENTATION: dict[str, dict[str, str] | None] = {
 
 RULE_RELATION_TYPES = frozenset(RULE_RELATION_PRESENTATION)
 
+# Relations that positively establish, provide, or enable a condition sort before
+# cancellation/restriction/modifier interactions within the same presentation group.
+# The browser then sorts by player-facing interaction label and related-record name.
+RELATION_ESTABLISHING_TYPES = frozenset(
+    {
+        "applies-effects-to",
+        "controller-eligible-for",
+        "causes-state",
+        "enters-state",
+        "enables-use-of",
+        "equips-with",
+        "has-subtype",
+        "uses-effects-of",
+    }
+)
+
 
 def relation_presentation(relation_type: str, direction: str) -> dict[str, Any] | None:
     """Return canonical player-facing metadata for one typed relation direction."""
@@ -135,5 +151,6 @@ def relation_presentation(relation_type: str, direction: str) -> dict[str, Any] 
         "group_id": semantics["group"],
         "group_label": group["label"],
         "group_order": group["order"],
+        "relation_order": 10 if relation_type in RELATION_ESTABLISHING_TYPES else 20,
         "label": semantics[direction],
     }
