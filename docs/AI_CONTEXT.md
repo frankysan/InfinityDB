@@ -1158,11 +1158,12 @@ compatibility references remain unambiguous JSON integers.
   raw artifact is planned. It now stores all 70 normalized source tables as queryable relational
   tables **and** exact JSON for every imported normalized row in `__infinity_raw_rows`, under the
   same pinned metadata as `infinity.db`.
-- The logical inventory remains 28 canonical application tables, 40 contextual application tables,
-  and 47 source/provenance-only normalized tables. Published `infinity.db` contains only
-  `__infinity_metadata` plus the 67 retained application tables; the 47 source-only tables are
-  physically absent. Foreign keys targeting raw-only tables are omitted from the published schema,
-  while retained-to-retained foreign keys remain enforced.
+- The logical inventory now contains 28 canonical application tables, 47 contextual application
+  tables, and 47 source/provenance-only normalized tables. Published `infinity.db` contains only
+  `__infinity_metadata` plus the 74 retained application tables; the 47 source-only tables are
+  physically absent. Schema 24 adds the seven structured-reference application tables without
+  changing the raw-source boundary. Foreign keys targeting raw-only tables are omitted from the
+  published schema, while retained-to-retained foreign keys remain enforced.
 - Normal repository/API/web serving and runtime `Database.validate()` do not open
   `infinity.raw.db` and have zero raw-only table reads. Source-dependent semantic checks
   remain mandatory during staging validation rather than being weakened or deleted. Runtime
@@ -1182,17 +1183,34 @@ compatibility references remain unambiguous JSON integers.
   inventory. It covers all 70 normalized source tables / 441 source fields and assigns
   semantic-provenance plus presentation-status classifications; schema growth must fail
   closed until new source constructs are reviewed.
-- The first complete pass records 10 confirmed gap families: Fireteams, includes,
+- The first complete pass recorded 10 confirmed gap families: Fireteams, includes,
   Peripheral/Controller links, selection/dependency relationships, Reinforcement parentage,
   declared faction membership, source-attributed Unit notes, top-level composite Unit
   options, Structure/Wounds labeling, and structured Hacking/Martial Arts/Booty/
-  MetaChemistry reference data. Their roadmap homes are 0.7.x, 0.8.x, and 0.9.x rather
-  than Milestone 2B implementation.
+  MetaChemistry reference data. Schema 24 / compatibility revision 32 closes the
+  structured-reference gap in 0.7.0, so the maintained inventory now reports 9 open
+  families; the remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
 - Milestone 2B shipped in 0.6.3. The next active milestone is 0.7.0 rules-enriched
   catalog data, not further canonicalization.
+
+## 0.7.0 structured Army reference projections (2026-09-25)
+
+- Schema 24 / compatibility revision 32 materializes Army's structured Hacking Program,
+  Martial Arts, Booty, and MetaChemistry metadata into seven derived application tables
+  while leaving the original normalized metadata tables in `infinity.raw.db`.
+- Hacking Program profiles preserve source order, Attack/Opponent MOD, PS, Burst, special
+  text, Device associations, targets, and declaration types. The Hacker Skill detail page
+  exposes the reference table without treating Programs as static Unit facts or inferring
+  Device ownership from names.
+- Martial Arts levels and Booty/MetaChemistry roll-result rows are exposed on their existing
+  Skill detail surfaces. Random outcomes remain deployment/session reference data rather
+  than being written onto Units or loadouts. Richer typed chart-result relationships remain
+  eligible for later domain work.
+- The source-to-presentation completeness audit therefore removes
+  `structured_reference_metadata` from the open gap families.
 
 ## 0.7.0 rules-enrichment contract foundation (2026-09-23)
 

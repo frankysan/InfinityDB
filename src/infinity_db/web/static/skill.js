@@ -48,6 +48,108 @@ function sourceVariantLabel(variant) {
   return null;
 }
 
+function referenceCell(value) {
+  const cell = document.createElement("td");
+  if (value instanceof Node) cell.append(value);
+  else cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
+  return cell;
+}
+
+function structuredTable(titleText, headers, rows) {
+  const section = document.createElement("section");
+  section.className = "detail-group";
+  const title = document.createElement("h2");
+  title.className = "detail-section-title";
+  title.textContent = titleText;
+  const container = document.createElement("div");
+  container.className = "table-container";
+  const table = document.createElement("table");
+  table.className = "data-table--compact";
+  const head = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  for (const label of headers) {
+    const header = document.createElement("th");
+    header.scope = "col";
+    header.textContent = label;
+    headRow.append(header);
+  }
+  head.append(headRow);
+  const body = document.createElement("tbody");
+  for (const values of rows) {
+    const row = document.createElement("tr");
+    row.append(...values.map(referenceCell));
+    body.append(row);
+  }
+  table.append(head, body);
+  container.append(table);
+  section.append(title, container);
+  return section;
+}
+
+function hackingDeviceLinks(devices) {
+  if (!devices?.length) return "Upgrade / source-specific";
+  const fragment = document.createDocumentFragment();
+  for (const [index, device] of devices.entries()) {
+    if (index) fragment.append(", ");
+    if (device.slug) {
+      const link = document.createElement("a");
+      link.href = `/equipment/${encodeURIComponent(device.slug)}`;
+      link.textContent = device.name;
+      fragment.append(link);
+    } else {
+      fragment.append(device.name);
+    }
+  }
+  return fragment;
+}
+
+function skillTypeLabel(value) {
+  const labels = {
+    "entire order": "Entire Order",
+    short: "Short Skill",
+    aro: "ARO",
+  };
+  return labels[value] || value;
+}
+
+function structuredReferenceSection(reference) {
+  if (!reference?.rows?.length) return null;
+  if (reference.kind === "hacking-programs") {
+    return structuredTable(
+      reference.title,
+      ["Program", "Attack MOD", "Opponent MOD", "PS", "B", "Target", "Skill type", "Device", "Special"],
+      reference.rows.map((row) => [
+        row.name,
+        row.attack_mod,
+        row.opponent_mod,
+        row.ps,
+        row.burst,
+        row.targets?.length ? row.targets.join(", ") : "—",
+        row.skill_types?.length ? row.skill_types.map(skillTypeLabel).join(", ") : "—",
+        hackingDeviceLinks(row.devices),
+        row.special,
+      ]),
+    );
+  }
+  if (reference.kind === "martial-arts") {
+    return structuredTable(
+      reference.title,
+      ["Level", "Attack MOD", "Opponent MOD", "PS MOD", "B MOD"],
+      reference.rows.map((row) => [
+        row.level, row.attack_mod, row.opponent_mod, row.ps_mod, row.burst_mod,
+      ]),
+    );
+  }
+  if (reference.kind === "random-chart") {
+    return structuredTable(
+      reference.title,
+      ["Roll", "Result"],
+      reference.rows.map((row) => [row.roll, row.result]),
+    );
+  }
+  return null;
+}
+
 function variantSection(variant, parameterSemantics) {
   const section = document.createElement("details");
   section.className = "explorer army-profile";
@@ -112,6 +214,8 @@ function render(skill) {
   sections.className = "detail-group usage-section-group";
   const children = [];
   if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
+  const structuredReference = structuredReferenceSection(skill.structured_reference);
+  if (structuredReference) children.push(structuredReference);
   children.push(sections);
   sections.append(...variants.map((variant) => variantSection(variant, skill.parameter_semantics)));
   content.replaceChildren(...children);

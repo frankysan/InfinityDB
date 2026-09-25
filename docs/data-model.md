@@ -1651,8 +1651,8 @@ database boundary**, not about whether the underlying game data is important:
   serving and therefore eligible to live only in `infinity.raw.db` once schema and
   validation dependencies are removed.
 
-On the reviewed 2026-09-18 application database this inventory contains **115
-project tables** including `__infinity_metadata`: **28 canonical application**, **40
+On the reviewed 2026-09-18 application database this inventory contains **122
+project tables** including `__infinity_metadata`: **28 canonical application**, **47
 contextual application**, and **47 source/provenance-only**. The 47 source-only tables
 contain 185,172 rows in this snapshot and no normal serving probe reads any of them.
 This class includes legacy profile/loadout source payloads, normalization-only filter
@@ -1662,14 +1662,16 @@ source-only classification is not a declaration that Fireteams or another constr
 lack player value; it means their current normalized source shape is not the
 application representation that should be deployed long-term.
 
-Schema 23 / compatibility revision 31 completes the physical split. Export now uses
-three database roles during one build:
+Schema 24 / compatibility revision 32 retains the physical split established in
+schema 23 and adds derived application projections for structured Hacking Program,
+Martial Arts, Booty, and MetaChemistry reference data. Export uses three database
+roles during one build:
 
 1. a temporary **relational staging database** containing the complete normalized source
    schema plus all derived application tables;
 2. `infinity.raw.db`, which contains all 70 queryable normalized source tables plus
    `__infinity_raw_rows` with the exact JSON for every imported normalized row; and
-3. the published `infinity.db`, which contains only `__infinity_metadata` plus the 67
+3. the published `infinity.db`, which contains only `__infinity_metadata` plus the 74
    retained application tables.
 
 All source-to-canonical validation runs against staging before publication. The 47
@@ -1718,7 +1720,7 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The first complete pass records **10 confirmed gap families** for later roadmap work:
+The maintained inventory now records **9 confirmed gap families** for later roadmap work:
 
 - Fireteam chart/type/member relationships;
 - profile/loadout/top-level Unit-option include relationships;
@@ -1727,9 +1729,17 @@ The first complete pass records **10 confirmed gap families** for later roadmap 
 - Reinforcement Section parentage;
 - broader source-declared faction membership distinct from concrete Army availability;
 - source-attributed Unit notes;
-- top-level composite Unit options;
-- Structure-versus-Wounds vitality labeling; and
-- structured Hacking Program, Martial Arts, Booty, and MetaChemistry reference data.
+- top-level composite Unit options; and
+- Structure-versus-Wounds vitality labeling.
+
+The former structured-reference-metadata gap is closed in schema 24 / compatibility
+revision 32. Source `metadata_hacking_programs`, `metadata_martial_arts`,
+`metadata_booty`, and `metadata_metachemistry` remain losslessly preserved in
+`infinity.raw.db`, while the published application database contains typed derived
+projections for Hacking Program profile/device/target/declaration context, Martial Arts
+levels, and Booty/MetaChemistry roll results. Those projections are served through the
+existing Hacker, Martial Arts, Booty, and MetaChemistry Skill detail surfaces rather
+than becoming static Unit facts.
 
 The reviewed production application database provides concrete evidence for the gaps
 that already have an application representation: **1,273** canonical include edges,
@@ -1737,8 +1747,8 @@ that already have an application representation: **1,273** canonical include edg
 selection constraints, **14** profile-group dependency constraints, **46**
 Reinforcement-parent links, **2,094** declared faction memberships, **30**
 source-attributed Unit-note occurrences, **18** top-level Unit options, and **299**
-canonical profile payloads marked `is_structure`. Fireteams and the structured lookup
-metadata remain raw-archive/source-model gaps rather than application-row gaps.
+canonical profile payloads marked `is_structure`. Fireteams remain a raw-archive/source-model gap rather than an application-row gap;
+the structured lookup metadata now has the application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being
 forced into a premature 1.0 requirement: **30** opaque `spectables` occurrences and
@@ -1902,6 +1912,15 @@ canonical payload while the included Loadout acquires an Army-contextual payload
 variant. Source-local target coordinates remain provenance in the retained source/raw
 representation; application relationships use canonical target identities while keeping
 all contextual parent attachment, quantity, and raw fallback data explicit.
+
+Schema version 24 / compatibility revision 32 adds seven derived
+structured-reference tables without publishing their raw metadata source tables.
+`application_hacking_programs` stores the Program profile fields using rules-native
+`ps` naming, with separate Device, target, and Skill-type relationship tables.
+`application_martial_arts_levels`, `application_booty_results`, and
+`application_metachemistry_results` retain their source ordering/ranges and results for
+existing Skill-detail presentation. The source rows remain authoritative provenance in
+`infinity.raw.db`; the derived tables are the runtime-serving application contract.
 
 Peripherals use a separate reviewed identity/relationship layer because Army combines
 several source mechanisms. The pinned 2026-09-18 snapshot has 279 embedded army-local
@@ -2275,8 +2294,8 @@ derived frontend tables so generated application structure cannot be supplied as
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 23 and the application
-compatibility revision is 31. Imports build temporary sibling files, check
+records its schema version. The current schema version is 24 and the application
+compatibility revision is 32. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite

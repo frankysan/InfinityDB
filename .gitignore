@@ -54,3 +54,6 @@ image_overrides/**/*
 # OS
 .DS_Store
 Thumbs.db
+.tmp.drivedownload/**/*
+.tmp.driveupload/**/*
+**/desktop.ini

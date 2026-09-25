@@ -288,13 +288,17 @@ requiring a new top-level browser surface in 0.7.0.
     the maintained profile-symbol encoding map. Unit API occurrences preserve the source
     characteristic symbol and attach the canonical Equipment reference; no textual Army
     Equipment row is invented.
-  - [ ] Consume Army's structured Hacking Program, Martial Arts, Booty, and
-    MetaChemistry reference rows through maintained application/rules models instead
-    of leaving them available only in the raw archive; preserve random-result and
-    Device/program semantics rather than flattening them into Unit facts.
+  - [x] Consume Army's structured Hacking Program, Martial Arts, Booty, and
+    MetaChemistry reference rows through maintained application models instead of
+    leaving them available only in the raw archive. Hacking Program Device/target/
+    declaration context is preserved structurally, Martial Arts levels retain their
+    profile MODs, and Booty/MetaChemistry remain roll-result reference data rather
+    than being flattened into Unit facts.
   - [ ] Surface the resulting enrichment through the existing API/detail/catalog
     experiences; enrichment required for 0.7.0 must not remain available only in
-    curated JSON, `rules.db`, raw source data, or developer tooling.
+    curated JSON, `rules.db`, raw source data, or developer tooling. The structured
+    Hacking Program, Martial Arts, Booty, and MetaChemistry references are now
+    presented on their existing Skill detail pages.
 
 0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
 every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
@@ -745,12 +749,11 @@ work against that contract.
     local participant data clearly separate from official records.
 - [ ] Post-0.7.0: add generated rules-reference projections that build on the
   enriched canonical data rather than duplicating its facts.
-  - [ ] Generate structured reference tables already preserved by Army metadata:
-    Martial Arts Levels, Booty results, and MetaChemistry results. Keep random
-    outcomes as deployment/session overlays, preserve conditional branches (for
-    example TAG versus other Troop Types), and cross-link resolvable outcomes to
-    canonical Skills, Equipment, Weapons, and Attributes without rewriting Unit
-    profiles.
+  - [ ] Add richer typed/cross-linked projections for the structured Martial Arts,
+    Booty, and MetaChemistry reference rows now served in 0.7.0. Keep random outcomes
+    as deployment/session overlays, preserve conditional branches (for example TAG
+    versus other Troop Types), and cross-link resolvable outcomes to canonical Skills,
+    Equipment, Weapons, and Attributes without rewriting Unit profiles.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and

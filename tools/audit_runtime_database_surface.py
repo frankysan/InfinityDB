@@ -97,6 +97,10 @@ _register(
         "application_army_reinforcement_parents",
         "application_catalog_items",
         "application_domain_slugs",
+        "application_hacking_programs",
+        "application_martial_arts_levels",
+        "application_metachemistry_results",
+        "application_booty_results",
     ],
     CANONICAL,
     reason=(
@@ -110,6 +114,18 @@ _register(
     reason=(
         "Reviewed source-to-application Army provenance mapping used to reconcile "
         "source occurrences without erasing source IDs."
+    ),
+)
+_register(
+    [
+        "application_hacking_program_devices",
+        "application_hacking_program_targets",
+        "application_hacking_program_skill_types",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Structured Hacking Program applicability preserves source Device, target, and "
+        "declaration-type context without flattening those relationships into Unit facts."
     ),
 )
 _register(
@@ -311,6 +327,10 @@ PROBED_DIRECT_METHODS = {
     "application_slug",
     "snapshot_downloaded_on",
     "list_armies",
+    "list_hacking_programs",
+    "list_martial_arts_levels",
+    "list_metachemistry_results",
+    "list_booty_results",
     "list_skill_extras",
     "list_catalog_items",
     "get_catalog_item",
@@ -433,6 +453,10 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     return [
         ("snapshot-metadata", lambda db: db.snapshot_downloaded_on()),
         ("armies", lambda db: db.list_armies()),
+        ("hacking-programs", lambda db: db.list_hacking_programs()),
+        ("martial-arts-reference", lambda db: db.list_martial_arts_levels()),
+        ("metachemistry-reference", lambda db: db.list_metachemistry_results()),
+        ("booty-reference", lambda db: db.list_booty_results()),
         ("unit-application-id", lambda db: db.application_domain_id("units", unit_id)),
         ("skill-extras", lambda db: db.list_skill_extras()),
         ("skills-list", lambda db: db.list_catalog_items("skills")),

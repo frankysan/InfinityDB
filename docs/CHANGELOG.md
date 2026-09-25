@@ -7,6 +7,11 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Surface Infinity Army's structured Hacking Program, Martial Arts, Booty, and
+  MetaChemistry reference data on the existing Skill detail pages. Preserve Hacking
+  Device applicability, targets, declaration types, PS/Burst/MOD profile fields, and
+  random chart outcomes as reference data instead of flattening them into static Unit
+  properties.
 - Normalize Cube and Cube 2.0 from Infinity Army's profile-symbol presentation into
   canonical rules-backed Equipment identities. Preserve the original characteristic
   occurrence while exposing Equipment catalog/detail usage, canonical Unit API references,

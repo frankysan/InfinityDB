@@ -313,6 +313,23 @@ class SkillCatalog:
             )
         return items
 
+    def _structured_reference_for_slug(self, slug: str | None) -> dict[str, Any] | None:
+        """Return source-structured reference data attached to an existing Skill surface."""
+
+        if slug == "hacker":
+            rows = self.database.list_hacking_programs()
+            return {"kind": "hacking-programs", "title": "Hacking Programs", "rows": rows}
+        if slug == "martial-arts":
+            rows = self.database.list_martial_arts_levels()
+            return {"kind": "martial-arts", "title": "Martial Arts chart", "rows": rows}
+        if slug == "booty":
+            rows = self.database.list_booty_results()
+            return {"kind": "random-chart", "title": "Booty chart", "rows": rows}
+        if slug == "metachemistry":
+            rows = self.database.list_metachemistry_results()
+            return {"kind": "random-chart", "title": "MetaChemistry chart", "rows": rows}
+        return None
+
     def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
         """Return one Army Skill reference enriched with curated declarations and rules."""
         item = self.database.get_skill(skill_ref)
@@ -421,6 +438,10 @@ class SkillCatalog:
                 variant_rules = source_rules.get(skill_id)
                 if variant_rules:
                     variant["rules"] = list(variant_rules.values())
+
+        structured_reference = self._structured_reference_for_slug(result.get("slug"))
+        if structured_reference is not None and structured_reference["rows"]:
+            result["structured_reference"] = structured_reference
         return result
 
     def list_skill_extras(self) -> list[dict[str, Any]]:

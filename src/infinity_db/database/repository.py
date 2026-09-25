@@ -1356,6 +1356,117 @@ class Database:
         return None if row is None or row["slug"] is None else str(row["slug"])
 
     @instance_lru_cache(maxsize=1)
+    def list_hacking_programs(self) -> list[dict[str, Any]]:
+        """Return structured Army Hacking Program reference rows."""
+
+        with self._connect() as connection:
+            programs = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT position, name, attack_mod, opponent_mod, ps, burst, special "
+                    "FROM application_hacking_programs "
+                    "ORDER BY position"
+                )
+            ]
+            device_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT program_position, position, source_equipment_id, "
+                    "source_equipment_name FROM application_hacking_program_devices "
+                    "ORDER BY program_position, position"
+                )
+            ]
+            target_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT program_position, position, target "
+                    "FROM application_hacking_program_targets "
+                    "ORDER BY program_position, position"
+                )
+            ]
+            skill_type_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT program_position, position, skill_type "
+                    "FROM application_hacking_program_skill_types "
+                    "ORDER BY program_position, position"
+                )
+            ]
+
+        devices_by_program: dict[int, list[dict[str, Any]]] = {}
+        equipment_graph = self._application_catalog_graph("equipment")
+        for row in device_rows:
+            source_id = int(row["source_equipment_id"])
+            application_id = equipment_graph["source_to_item"].get(source_id)
+            name = row.get("source_equipment_name")
+            slug = None
+            if application_id is not None:
+                application_item = equipment_graph["items"].get(application_id)
+                if application_item is not None:
+                    name = application_item["name"]
+                slug = self.application_slug("equipment", int(application_id))
+            devices_by_program.setdefault(int(row["program_position"]), []).append(
+                {
+                    "source_id": source_id,
+                    "id": application_id,
+                    "slug": slug,
+                    "name": name or f"Equipment #{source_id}",
+                }
+            )
+
+        targets_by_program: dict[int, list[str]] = {}
+        for row in target_rows:
+            targets_by_program.setdefault(int(row["program_position"]), []).append(
+                str(row["target"])
+            )
+        skill_types_by_program: dict[int, list[str]] = {}
+        for row in skill_type_rows:
+            skill_types_by_program.setdefault(int(row["program_position"]), []).append(
+                str(row["skill_type"])
+            )
+
+        for program in programs:
+            position = int(program["position"])
+            program["devices"] = devices_by_program.get(position, [])
+            program["targets"] = targets_by_program.get(position, [])
+            program["skill_types"] = skill_types_by_program.get(position, [])
+        return programs
+
+    @instance_lru_cache(maxsize=1)
+    def list_martial_arts_levels(self) -> list[dict[str, Any]]:
+        """Return the structured Army Martial Arts level chart."""
+
+        with self._connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT position, level, attack_mod, opponent_mod, ps_mod, burst_mod "
+                    "FROM application_martial_arts_levels ORDER BY position"
+                )
+            ]
+
+    def _list_random_reference_results(self, table_name: str) -> list[dict[str, Any]]:
+        with self._connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(
+                    f'SELECT id, roll, result FROM "{table_name}" ORDER BY id'
+                )
+            ]
+
+    @instance_lru_cache(maxsize=1)
+    def list_metachemistry_results(self) -> list[dict[str, Any]]:
+        """Return the structured Army MetaChemistry roll chart."""
+
+        return self._list_random_reference_results("application_metachemistry_results")
+
+    @instance_lru_cache(maxsize=1)
+    def list_booty_results(self) -> list[dict[str, Any]]:
+        """Return the structured Army Booty roll chart."""
+
+        return self._list_random_reference_results("application_booty_results")
+
+    @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
         """Return canonical application Armies with current logical-unit counts."""
         graph = self._application_army_graph()

@@ -2096,6 +2096,20 @@ def test_skill_detail_frontend_flags_exact_variant_rules_before_expansion(
     assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
 
 
+def test_skill_detail_frontend_renders_structured_reference_tables(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/skill.js")
+
+    assert status == 200
+    assert b"function structuredReferenceSection(reference)" in body
+    assert b'"hacking-programs"' in body
+    assert b'"martial-arts"' in body
+    assert b'"random-chart"' in body
+    assert b'"Hacking Programs"' not in body
+    assert b'hackingDeviceLinks(row.devices)' in body
+
+
 def test_catalog_usage_summaries_wrap_variant_context_on_narrow_layouts(
     app: Callable,
 ) -> None:

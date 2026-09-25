@@ -112,15 +112,15 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 29,
-        "runtimeTableCount": 62,
-        "runtimeFieldCount": 269,
+        "surfaceCount": 33,
+        "runtimeTableCount": 69,
+        "runtimeFieldCount": 298,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 269,
-        "role:canonical_application:fieldCount": 118,
-        "role:contextual_application:fieldCount": 128,
+        "issue:none:fieldCount": 298,
+        "role:canonical_application:fieldCount": 137,
+        "role:contextual_application:fieldCount": 138,
         "role:intentional_source_representation:fieldCount": 23,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
@@ -153,6 +153,11 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "application_army_sources", "source_army_id")["role"] == CONTEXTUAL
     assert _field(report, "application_catalog_items", "name")["role"] == CANONICAL
     assert _field(report, "application_domain_slugs", "slug")["role"] == CANONICAL
+    assert _field(report, "application_hacking_programs", "name")["role"] == CANONICAL
+    assert (
+        _field(report, "application_hacking_program_devices", "source_equipment_id")["role"]
+        == CONTEXTUAL
+    )
     assert _field(report, "application_catalog_sources", "source_item_id")["role"] == CONTEXTUAL
     assert _field(report, "application_peripheral_entities", "name")["role"] == CANONICAL
     assert (
@@ -197,7 +202,11 @@ def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
         "get_trait",
         "get_unit",
         "list_armies",
+        "list_booty_results",
         "list_catalog_items",
+        "list_hacking_programs",
+        "list_martial_arts_levels",
+        "list_metachemistry_results",
         "list_skill_extras",
         "list_traits",
         "list_units",

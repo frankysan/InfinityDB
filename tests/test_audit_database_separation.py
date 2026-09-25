@@ -30,15 +30,15 @@ def test_database_separation_audit_classifies_complete_frontend_schema(tmp_path:
     report = audit_database(path, project_root=ROOT)
 
     assert report["summary"]["canonicalApplicationTableCount"] == 28
-    assert report["summary"]["contextualApplicationTableCount"] == 40
+    assert report["summary"]["contextualApplicationTableCount"] == 47
     assert report["summary"]["sourceProvenanceOnlyTableCount"] == 47
     assert report["summary"]["runtimeSourceOnlyViolationCount"] == 0
     assert report["summary"]["foreignKeyBlockerCount"] == 0
     assert report["summary"]["validationSourceOnlyDependencyCount"] == 0
     assert report["summary"]["sourceOnlyStorageBytes"] == 0
-    assert len(report["inventory"]) == 115
-    assert report["database"]["tableCount"] == 68
-    assert report["database"]["logicalInventoryTableCount"] == 115
+    assert len(report["inventory"]) == 122
+    assert report["database"]["tableCount"] == 75
+    assert report["database"]["logicalInventoryTableCount"] == 122
 
     assert _item(report, "logical_units")["classification"] == CANONICAL
     assert _item(report, "application_army_sources")["classification"] == CONTEXTUAL

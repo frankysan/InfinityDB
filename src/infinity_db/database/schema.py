@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 23
+SCHEMA_VERSION = 24
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 31
+DATABASE_COMPATIBILITY_VERSION = 32
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -267,6 +267,37 @@ DERIVED_TABLES = {
     "application_domain_slugs": table(
         "domain application_id",
         "candidate_slug slug status",
+    ),
+    "application_hacking_programs": table(
+        "position",
+        "name attack_mod opponent_mod ps burst special source_extra_id",
+    ),
+    "application_hacking_program_devices": table(
+        "program_position position",
+        "source_equipment_id source_equipment_name",
+        ref("program_position", "application_hacking_programs", "position"),
+    ),
+    "application_hacking_program_targets": table(
+        "program_position position",
+        "target",
+        ref("program_position", "application_hacking_programs", "position"),
+    ),
+    "application_hacking_program_skill_types": table(
+        "program_position position",
+        "skill_type",
+        ref("program_position", "application_hacking_programs", "position"),
+    ),
+    "application_martial_arts_levels": table(
+        "position",
+        "level attack_mod opponent_mod ps_mod burst_mod",
+    ),
+    "application_metachemistry_results": table(
+        "id",
+        "roll result",
+    ),
+    "application_booty_results": table(
+        "id",
+        "roll result",
     ),
     "logical_units": table(
         "id",

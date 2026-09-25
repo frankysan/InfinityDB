@@ -3019,10 +3019,13 @@ two views of the Program model already established by the Combat audit. Army
 metadata also carries structured Hacking Program profile fields and explicit
 Device associations, which InfinityDB preserves in `metadata_hacking_programs`.
 
-InfinityDB should use that source structure for exact Program profile data while
-using reviewed rules identities/relationships to distinguish baseline Device
-Programs from Upgrade Programs. This produces a maintainable Hacking reference
-without inferring Program sets from Equipment display names.
+InfinityDB now projects that source structure into the application database for exact
+Program profile data, including Device associations, targets, declaration types, PS,
+Burst, and source special text. The existing Hacker Skill detail surface renders the
+complete reference table without treating those Programs as static Unit facts or
+inferring Program sets from Equipment display names. A future first-class Hacking
+domain may add richer reviewed Program identities/relationships, especially for
+Upgrade Programs, without replacing this source-backed profile projection.
 
 Sources:
 
@@ -3040,13 +3043,12 @@ Martial Arts, Booty, and MetaChemistry are presented as compact tables in Quick
 Reference. Army metadata already preserves their structured rows in
 `metadata_martial_arts`, `metadata_booty`, and `metadata_metachemistry`.
 
-These rows can support generated tables on the corresponding rule/Skill detail
-pages. Martial Arts rows describe the effects of explicit Levels; Booty and
-MetaChemistry rows describe random result outcomes. The latter may cross-link to
-Attributes, Skills, Equipment, or Weapons where reviewed, but the rolled outcome
-remains deployment/session state and must not be written back as a static Unit
-fact. Conditional outcomes such as TAG-versus-other-Troop-Type results must retain
-their predicate rather than be flattened into one value.
+These rows now drive generated tables on the corresponding Skill detail pages.
+Martial Arts rows describe the effects of explicit Levels; Booty and MetaChemistry
+rows describe random result outcomes. The latter remain reference/chart data rather
+than Unit facts: InfinityDB does not write a rolled result back onto a Unit or
+loadout. Conditional result text such as TAG-versus-other-Troop-Type outcomes is
+preserved intact until richer typed result semantics are reviewed.
 
 Sources:
 

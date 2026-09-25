@@ -55,16 +55,13 @@ class EquipmentCatalog:
         )
         if not logical_ids:
             return []
-        flags = {
-            "mercs": include_all_optional,
-            "specops": True,
-            "teamops": include_all_optional,
-            "reinforcement": include_all_optional,
-        }
         payload = self.database.list_units(
             limit=10_000,
+            mercs=include_all_optional,
+            specops=True,
+            teamops=include_all_optional,
+            reinforcement=include_all_optional,
             _unbounded=True,
-            **flags,
         )
         return [item for item in payload["items"] if item["id"] in logical_ids]
 
