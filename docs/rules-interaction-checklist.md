@@ -23,11 +23,11 @@ review. `declaration-category` projection records are excluded.
 
 ## Progress
 
-- **0.7.0 primary catalog: 180/180 complete (100.0%), 0 pending.**
-- Primary domains: Skill **95/95**; Equipment **28/28**; Trait **33/33**; State **24/24**.
+- **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
+- Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **28/28** complete, **0** pending.
-- Current authored outgoing relations: **252**.
-- Explicitly tracked future/deferred interactions: **130**.
+- Current authored outgoing relations: **255**.
+- Explicitly tracked future/deferred interactions: **132**.
 
 ## 0.7.0 primary catalog review
 
@@ -226,7 +226,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Mnemonica** (`skill:mnemonica`) — reviewed
   - `applies-effects-to` → Lieutenant (`skill:lieutenant`)
   - `enters-state` → Dead State (`state:dead`)
-  - future [post-0.7.0; deferred]: `relation type TBD` → `equipment:cube` — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Cube (`equipment:cube`) — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:troop-type:rem` — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
 - [x] **Morpho-scan** (`skill:morpho-scan`) — reviewed
   - `imposes-modifiers-on` → Reset (`skill:reset`)
@@ -383,7 +383,7 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities.
   - future [post-0.7.0; planned]: `negates-effects-of` → `skill:bs-attack-negative-modifier` — Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally.
 
-### Equipment (28/28)
+### Equipment (30/30)
 
 - [x] **360º Visor** (`equipment:360o-visor`) — reviewed
   - outgoing: none
@@ -403,6 +403,13 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → Discover (`skill:discover`)
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
   - `cancels-state` → Impersonation-1 State (`state:impersonation-1`)
+- [x] **Cube** (`equipment:cube`) — reviewed
+  - `modifies-rolls-for` → Doctor (`skill:doctor`)
+- [x] **Cube 2.0** (`equipment:cube-2`) — reviewed
+  - `uses-effects-of` → Cube (`equipment:cube`)
+  - `modifies-rolls-for` → Doctor (`skill:doctor`)
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor-plus` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
 - [x] **Dazer** (`equipment:dazer`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:difficult-terrain` — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
@@ -724,6 +731,8 @@ review. `declaration-category` projection records are excluded.
 
 ## Future interaction queue
 
+- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
+- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor-plus`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
@@ -794,7 +803,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
 - [ ] MetaChemistry (`skill:metachemistry`) → `rule:metachemistry-chart`; `uses-effects-of`; **post-0.7.0 / planned** — MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
-- [ ] Mnemonica (`skill:mnemonica`) → `equipment:cube`; `relation type TBD`; **post-0.7.0 / deferred** — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
+- [ ] Mnemonica (`skill:mnemonica`) → Cube (`equipment:cube`); `relation type TBD`; **post-0.7.0 / deferred** — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
 - [ ] Mnemonica (`skill:mnemonica`) → `rule:troop-type:rem`; `relation type TBD`; **post-0.7.0 / planned** — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
 - [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:bs`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
 - [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:cc`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.

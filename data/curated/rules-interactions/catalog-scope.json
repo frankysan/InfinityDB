@@ -411,6 +411,14 @@
         "name": "Biometric Visor"
       },
       {
+        "id": "cube",
+        "name": "Cube"
+      },
+      {
+        "id": "cube-2",
+        "name": "Cube 2.0"
+      },
+      {
         "id": "dazer",
         "name": "Dazer"
       },

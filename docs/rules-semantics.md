@@ -1653,9 +1653,11 @@ Cube 2.0 profile symbol.
 
 That symbol is therefore an Army presentation/source occurrence of the canonical
 Equipment concept, not evidence of a competing Army classification. InfinityDB
-should preserve the exact source-symbol occurrence and resolve it to the
-canonical Cube/Cube 2.0 Equipment identity rather than inventing a textual Army
-Equipment row or treating the symbol's asset grouping as a rules taxonomy.
+preserves the exact source-symbol occurrence and resolves it through the maintained
+`equipment-presentation-encodings.json` map to the canonical Cube/Cube 2.0 Equipment
+identity. The Equipment catalog, detail usage, Unit API references, and Equipment filter
+consume that mapping without inventing a textual Army Equipment row or treating the
+symbol's asset grouping as a rules taxonomy.
 
 Sources:
 

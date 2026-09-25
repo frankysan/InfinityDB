@@ -9,6 +9,18 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "equipment:cube",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-25"
+    },
+    {
+      "recordId": "equipment:cube-2",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-25"
+    },
+    {
       "recordId": "equipment:baggage",
       "targetRelease": "0.7.0",
       "status": "reviewed",
@@ -1259,6 +1271,22 @@
     }
   ],
   "futureInteractions": [
+    {
+      "sourceRecordId": "equipment:cube-2",
+      "targetRecordId": "weapon:sepsitor",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph."
+    },
+    {
+      "sourceRecordId": "equipment:cube-2",
+      "targetRecordId": "weapon:sepsitor-plus",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph."
+    },
     {
       "sourceRecordId": "hacking-program:white-noise",
       "targetRecordId": "skill:marksmanship",

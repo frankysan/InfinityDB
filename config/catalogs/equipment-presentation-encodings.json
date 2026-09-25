@@ -1,0 +1,16 @@
+{
+  "format": "InfinityDB equipment presentation encodings",
+  "formatVersion": 1,
+  "encodings": [
+    {
+      "equipment_id": "cube",
+      "characteristic": "Cube",
+      "reason": "Infinity Army represents Cube as a Unit Profile characteristic symbol rather than a textual Equipment occurrence."
+    },
+    {
+      "equipment_id": "cube-2",
+      "characteristic": "Cube 2.0",
+      "reason": "Infinity Army represents Cube 2.0 as a Unit Profile characteristic symbol rather than a textual Equipment occurrence."
+    }
+  ]
+}

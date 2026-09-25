@@ -11,6 +11,7 @@ from typing import Any
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
+from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -187,14 +188,10 @@ def _catalog_scope_from_databases(
         skills = SkillCatalog(database, rules).list_skills()
         traits = TraitCatalog(database, rules).list_traits()
         states = StateCatalog(rules).list_states()
-        equipment: list[dict[str, str]] = []
-        for item in database.list_catalog_items("equipment"):
-            slug = database.application_slug("equipment", int(item["id"]))
-            if slug is None:
-                raise RulesInteractionAuditError(
-                    f"Equipment catalog item {item['id']!r} has no public application slug"
-                )
-            equipment.append({"id": slug, "name": str(item["name"])})
+        equipment = [
+            {"id": str(item["slug"]), "name": str(item["name"])}
+            for item in EquipmentCatalog(database, rules).list_equipment()
+        ]
     except (OSError, ValueError) as exc:
         if isinstance(exc, RulesInteractionAuditError):
             raise

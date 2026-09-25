@@ -7,6 +7,10 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Normalize Cube and Cube 2.0 from Infinity Army's profile-symbol presentation into
+  canonical rules-backed Equipment identities. Preserve the original characteristic
+  occurrence while exposing Equipment catalog/detail usage, canonical Unit API references,
+  profile-symbol navigation, and Equipment filtering without inventing textual Army rows.
 - Promote the remaining catalog-to-catalog interactions that require only semantic links,
   adding precise relationships for State-entry prevention, Skill-use modification, and
   State-entry triggers. This makes Super-Jump/Jump, Perimeter/Place Deployable,

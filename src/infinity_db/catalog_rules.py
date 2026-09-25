@@ -51,14 +51,24 @@ class CatalogRules:
 
     @staticmethod
     def _application_refs(item: dict[str, Any]) -> tuple[ArmyLinkRef, ...]:
-        item_id = int(item["id"])
+        item_id = item["id"]
+        if type(item_id) is not int and not isinstance(item_id, str):
+            raise ValueError("catalog item id must be an integer or domain-local slug")
+        refs: list[ArmyLinkRef] = [item_id]
         slug = item.get("slug")
-        return (item_id, slug) if isinstance(slug, str) else (item_id,)
+        if isinstance(slug, str) and slug not in refs:
+            refs.append(slug)
+        return tuple(refs)
 
     @staticmethod
     def _source_ids(item: dict[str, Any]) -> tuple[int, ...]:
-        source_ids = {int(variant["item_id"]) for variant in item.get("variants", [])}
-        source_ids.add(int(item["id"]))
+        source_ids = {
+            variant["item_id"]
+            for variant in item.get("variants", [])
+            if type(variant.get("item_id")) is int
+        }
+        if type(item.get("id")) is int:
+            source_ids.add(item["id"])
         return tuple(sorted(source_ids))
 
     def _category_index(self, entity: str) -> dict[ArmyLinkRef, list[dict[str, Any]]]:
@@ -173,7 +183,9 @@ class CatalogRules:
             result["rules"] = records
         source_variants = self._source_variant_index(entity)
         for variant in result.get("variants", []):
-            source_id = int(variant["item_id"])
+            source_id = variant.get("item_id")
+            if type(source_id) is not int:
+                continue
             source_variant = source_variants.get(source_id)
             if source_variant is not None:
                 variant["source_variant"] = deepcopy(source_variant)

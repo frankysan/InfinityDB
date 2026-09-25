@@ -157,9 +157,11 @@ requiring a new top-level browser surface in 0.7.0.
     `Non-Hackable` remains in scope. States are now an explicit primary 0.7.0 domain rather
     than supporting-only semantics: the complete current N5.3 State vocabulary is modeled as
     24 canonical identities, with Impersonation intentionally split into IMP-1 and IMP-2.
-    The maintained 0.7.0 interaction-review gate is now complete at 180/180 catalog items
-    vetted (Skills 95/95, Equipment 28/28, Traits 33/33, States 24/24). 179 catalog identities
-    have current canonical definitions; Commlink is the single explicit release exception because
+    The maintained 0.7.0 interaction-review gate is now complete at 182/182 catalog items
+    vetted (Skills 95/95, Equipment 30/30, Traits 33/33, States 24/24). 181 catalog identities
+    have current canonical definitions; Cube and Cube 2.0 are now first-class Equipment identities
+    resolved from their Army profile-symbol occurrences, while Commlink is the single explicit
+    release exception because
     its authoritative rule belongs to Reinforcements Extra and remains deferred to separately
     scoped post-0.7.0 annex work. A final deferred-link audit promotes interactions that
     need only existing catalog identities: Camouflaged State constrains Place Deployable,
@@ -280,11 +282,12 @@ requiring a new top-level browser surface in 0.7.0.
     Combat rules: Army's source `damage` field remains intact for provenance/API
     compatibility, while the shared ranged/melee profile renderer now exposes the
     rules-native Possibility of Survival (`PS`) label instead of `DAM`.
-  - [ ] Normalize non-textual Army presentation encodings into canonical
-    relationships where appropriate. In particular, Unit Profiles never list Cube
-    or Cube 2.0 alongside textual Equipment; their dedicated symbols are the source
-    occurrence and must resolve to the canonical Cube/Cube 2.0 Automatic Equipment
-    identities without inventing a textual Army Equipment row.
+  - [x] Normalize non-textual Army presentation encodings into canonical
+    relationships where appropriate. Cube and Cube 2.0 are now canonical rules-backed
+    Equipment catalog identities whose Unit usage and Equipment filtering are derived from
+    the maintained profile-symbol encoding map. Unit API occurrences preserve the source
+    characteristic symbol and attach the canonical Equipment reference; no textual Army
+    Equipment row is invented.
   - [ ] Consume Army's structured Hacking Program, Martial Arts, Booty, and
     MetaChemistry reference rows through maintained application/rules models instead
     of leaving them available only in the raw archive; preserve random-result and

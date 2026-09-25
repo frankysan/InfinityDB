@@ -261,16 +261,24 @@ function lieutenantOrderCount(items) {
 }
 
 function characteristicSymbolTypes(profiles) {
-  const names = new Set(profiles.flatMap((profile) => (
-    (profile.characteristics || []).map((characteristic) => (
-      String(characteristic.name || "").toLowerCase()
-    ))
-  )));
+  const characteristics = new Map();
+  for (const profile of profiles) {
+    for (const characteristic of profile.characteristics || []) {
+      const name = String(characteristic.name || "").toLowerCase();
+      if (name && !characteristics.has(name)) characteristics.set(name, characteristic);
+    }
+  }
+  const symbol = (name, type) => {
+    const characteristic = characteristics.get(name);
+    if (!characteristic) return null;
+    const slug = characteristic.equipment_reference?.slug;
+    return slug ? { type, href: `/equipment/${encodeURIComponent(slug)}` } : type;
+  };
   return [
-    ...(names.has("hackable") ? ["hackable"] : []),
-    ...(names.has("cube") ? ["cube"] : []),
-    ...(names.has("cube 2.0") ? ["cube-2"] : []),
-  ];
+    symbol("hackable", "hackable"),
+    symbol("cube", "cube"),
+    symbol("cube 2.0", "cube-2"),
+  ].filter(Boolean);
 }
 
 function generalLieutenantOrderCount(profiles, loadouts) {
@@ -296,13 +304,23 @@ function nameWithOrderSymbols(nameText, symbolTypes) {
   if (!symbolTypes.length) return nameText;
   const name = document.createElement("span");
   name.className = "order-symbol-name";
-  for (const symbolType of symbolTypes) {
+  for (const descriptor of symbolTypes) {
+    const symbolType = typeof descriptor === "string" ? descriptor : descriptor.type;
     const symbol = document.createElement("img");
     symbol.className = "order-symbol";
     symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`;
-    symbol.alt = symbolLabels[symbolType];
+    symbol.alt = descriptor.href ? "" : symbolLabels[symbolType];
     symbol.title = symbolLabels[symbolType];
-    name.append(symbol);
+    if (descriptor.href) {
+      const link = document.createElement("a");
+      link.className = "profile-symbol-link";
+      link.href = descriptor.href;
+      link.setAttribute("aria-label", `${symbolLabels[symbolType]} equipment`);
+      link.append(symbol);
+      name.append(link);
+    } else {
+      name.append(symbol);
+    }
   }
   name.append(document.createTextNode(nameText));
   return name;

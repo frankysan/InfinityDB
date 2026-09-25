@@ -1458,6 +1458,8 @@ def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -
     assert b"function generalLieutenantOrderCount(profiles, loadouts)" in body
     assert b'Array(lieutenantOrderCount([loadout])).fill("lieutenant")' in body
     assert b"function characteristicSymbolTypes(profiles)" in body
+    assert b"characteristic.equipment_reference?.slug" in body
+    assert b"href: `/equipment/${encodeURIComponent(slug)}`" in body
     assert b"symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`" in body
     assert b"symbol.title = symbolLabels[symbolType]" in body
     assert b'"profile-summary loadout-start"' in body
@@ -1586,6 +1588,79 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     status, _, body = request(rules_app, "/api/states/not-a-state")
     assert status == 404
     assert json.loads(body)["error"] == "State not found"
+
+
+def test_cube_profile_characteristic_resolves_to_canonical_equipment(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "cube.db"
+    shutil.copy2(app_database_template, database_path)
+    with sqlite3.connect(database_path) as connection:
+        logical_unit_id = connection.execute(
+            "SELECT id FROM logical_units WHERE slug = ?", ("ranger-prototype",)
+        ).fetchone()[0]
+        profile_payload_id = connection.execute(
+            "SELECT id FROM profile_payloads WHERE logical_unit_id = ? ORDER BY id LIMIT 1",
+            (logical_unit_id,),
+        ).fetchone()[0]
+        connection.execute(
+            "INSERT INTO characteristics (id, name, source_defined) VALUES (?, ?, ?)",
+            (999, "Cube", 1),
+        )
+        position = connection.execute(
+            "SELECT COALESCE(MAX(position), 0) + 1 FROM profile_payload_characteristics "
+            "WHERE profile_payload_id = ?",
+            (profile_payload_id,),
+        ).fetchone()[0]
+        connection.execute(
+            "INSERT INTO profile_payload_characteristics "
+            "(profile_payload_id, position, characteristic_id) VALUES (?, ?, ?)",
+            (profile_payload_id, position, 999),
+        )
+    _refresh_published_content_checksum(database_path)
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(database_path, rules_path)
+
+    status, _, body = request(rules_app, "/api/equipment")
+    assert status == 200
+    equipment = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert equipment["cube"]["name"] == "Cube"
+    assert equipment["cube"]["use_count"] == 1
+    assert equipment["cube-2"]["name"] == "Cube 2.0"
+    assert equipment["cube-2"]["use_count"] == 0
+
+    status, _, body = request(rules_app, "/api/equipment/cube")
+    assert status == 200
+    cube = json.loads(body)
+    assert cube["id"] == "cube"
+    assert cube["slug"] == "cube"
+    assert cube["rules"][0]["id"] == "equipment:cube"
+    assert [unit["slug"] for unit in cube["variants"][0]["units"]] == [
+        "ranger-prototype"
+    ]
+
+    status, _, body = request(rules_app, "/api/units", query="equipment_id=cube")
+    assert status == 200
+    filtered = json.loads(body)
+    assert filtered["total"] == 1
+    assert [item["slug"] for item in filtered["items"]] == ["ranger-prototype"]
+
+    status, _, body = request(rules_app, "/api/units/ranger-prototype")
+    assert status == 200
+    unit = json.loads(body)
+    references = [
+        characteristic["equipment_reference"]
+        for army in unit["armies"]
+        for profile in army["profiles"]
+        for characteristic in profile["characteristics"]
+        if characteristic["name"] == "Cube"
+    ]
+    assert references
+    assert references[0] == {"id": "cube", "slug": "cube", "name": "Cube"}
+
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])

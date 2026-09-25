@@ -1523,6 +1523,29 @@ class Database:
             merged.append(public)
         return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
 
+    @instance_lru_cache(maxsize=32)
+    def logical_unit_ids_for_characteristic(self, characteristic_name: str) -> frozenset[int]:
+        """Return logical Units carrying one profile/loadout characteristic."""
+
+        if not isinstance(characteristic_name, str) or not characteristic_name.strip():
+            raise ValueError("characteristic_name must be a non-empty string")
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT DISTINCT p.logical_unit_id AS logical_unit_id "
+                "FROM profile_payloads AS p "
+                "JOIN profile_payload_characteristics AS pc ON pc.profile_payload_id = p.id "
+                "JOIN characteristics AS c ON c.id = pc.characteristic_id "
+                "WHERE c.name = ? COLLATE NOCASE "
+                "UNION "
+                "SELECT DISTINCT l.logical_unit_id AS logical_unit_id "
+                "FROM loadout_payloads AS l "
+                "JOIN loadout_payload_characteristics AS lc ON lc.loadout_payload_id = l.id "
+                "JOIN characteristics AS c ON c.id = lc.characteristic_id "
+                "WHERE c.name = ? COLLATE NOCASE",
+                (characteristic_name.strip(), characteristic_name.strip()),
+            ).fetchall()
+        return frozenset(int(row["logical_unit_id"]) for row in rows)
+
     @instance_lru_cache(maxsize=1)
     def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
         """Return raw Army profile properties mapped to the catalog items carrying them."""
@@ -1899,6 +1922,7 @@ class Database:
         reinforcement: bool = False,
         descending: bool = False,
         _unbounded: bool = False,
+        _logical_unit_ids: frozenset[int] | None = None,
     ) -> dict[str, Any]:
         unresolved_army_filter = False
         if army_id is not None:
@@ -1923,6 +1947,11 @@ class Database:
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
             raise ValueError("_unbounded must be a boolean")
+        if _logical_unit_ids is not None and (
+            not isinstance(_logical_unit_ids, frozenset)
+            or any(type(unit_id) is not int for unit_id in _logical_unit_ids)
+        ):
+            raise ValueError("_logical_unit_ids must be a frozenset of integer Unit ids")
         max_limit = 10_000 if _unbounded else 500
         if type(limit) is not int or not 1 <= limit <= max_limit:
             raise ValueError("limit must be an integer between 1 and 500")
@@ -1973,6 +2002,8 @@ class Database:
         matching_requirements: list[tuple[frozenset[str], ...]] = []
         for group in groups:
             if unresolved_army_filter:
+                continue
+            if _logical_unit_ids is not None and group["id"] not in _logical_unit_ids:
                 continue
             if any(
                 not set(group["source_ids"]).intersection(source_ids)

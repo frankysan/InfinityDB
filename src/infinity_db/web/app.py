@@ -23,6 +23,7 @@ from infinity_db.catalog_slugs import (
 )
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.domain_slugs import require_domain_slug
+from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -335,6 +336,7 @@ class Application:
         self.trait_catalog = TraitCatalog(self.database, self.rules_database)
         self.state_catalog = StateCatalog(self.rules_database)
         self.skill_catalog = SkillCatalog(self.database, self.rules_database)
+        self.equipment_catalog = EquipmentCatalog(self.database, self.rules_database)
         self.catalog_rules = CatalogRules(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
@@ -558,12 +560,12 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 catalog = path.removeprefix("/api/")
-                items = (
-                    self.skill_catalog.list_skills()
-                    if catalog == "skills"
-                    else self.database.list_catalog_items(catalog)
-                )
-                if catalog in {"equipment", "weapons"}:
+                if catalog == "skills":
+                    items = self.skill_catalog.list_skills()
+                elif catalog == "equipment":
+                    items = self.equipment_catalog.list_equipment()
+                else:
+                    items = self.database.list_catalog_items(catalog)
                     for item in items:
                         attach_public_catalog_slug(self.database, catalog, item)
                 payload = {"items": items}
@@ -611,12 +613,11 @@ class Application:
             try:
                 identifier = match.group("identifier")
                 item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.database.get_catalog_item("equipment", item_ref)
+                payload = self.equipment_catalog.get_equipment(item_ref)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
                 else:
-                    attach_public_catalog_slug(self.database, "equipment", payload)
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
@@ -714,6 +715,12 @@ class Application:
                 payload = {"error": str(exc)}
             else:
                 try:
+                    logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
+                        query.get("equipment_id")
+                    )
+                    if logical_unit_ids is not None:
+                        query["equipment_id"] = None
+                        query["_logical_unit_ids"] = logical_unit_ids
                     payload = self.database.list_units(**query)
                     payload = {
                         **payload,
@@ -735,6 +742,7 @@ class Application:
                 payload = self.database.get_unit(unit_ref)
                 if payload is not None:
                     payload = self.skill_catalog.enrich_unit(payload)
+                    payload = self.equipment_catalog.enrich_unit(payload)
                     payload = enrich_nested_catalog_slugs(
                         self.database,
                         payload,

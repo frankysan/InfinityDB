@@ -145,10 +145,12 @@ follow-ups.
 
 ## Catalog-wide consistency pass
 
-After the 0.7.0 interaction gate reached 180/180, the complete current primary
-rules catalog was reviewed as one set against the generated `rules.db`. The
-review covered 179 current canonical definitions (94 Skills, 28 Equipment items,
-33 Traits, and 24 States) plus the explicitly vetted Commlink release exception.
+The initial 0.7.0 interaction gate reached 180/180 before the subsequent Cube
+presentation-encoding normalization added Cube and Cube 2.0 as canonical Equipment.
+The current primary gate is therefore 182/182: 181 current canonical definitions
+(94 Skills, 30 Equipment items, 33 Traits, and 24 States) plus the explicitly vetted
+Commlink release exception. The complete primary rules catalog was reviewed as one set
+against the generated `rules.db`.
 Every current primary definition has a non-empty concise summary, at least one
 authoritative citation, and reviewed status.
 

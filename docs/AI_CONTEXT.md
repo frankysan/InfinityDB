@@ -1018,7 +1018,9 @@ compatibility references remain unambiguous JSON integers.
   they are not listed in the profile's textual Equipment block. Treat this as a
   source-presentation encoding, not an Army-versus-rules classification conflict.
   Preserve the symbol/source occurrence and resolve it to the canonical Equipment
-  identity without inventing a textual source row.
+  identity without inventing a textual source row. As of 0.7.0, the maintained
+  `equipment-presentation-encodings.json` mapping drives Cube/Cube 2.0 catalog usage,
+  Unit API references, detail navigation, and Equipment filtering.
 
 ### Milestone 2B Peripheral identity boundary (2026-09-22)
 
@@ -1359,8 +1361,9 @@ compatibility references remain unambiguous JSON integers.
 - `data/curated/rules-interactions/catalog-scope.json` is the maintained public-catalog
   denominator for interaction-review progress. For 0.7.0 it contains all public Skills,
   Equipment items, Traits, and States, including identities without a curated rule definition.
-  The current baseline is 95 Skills, 28 Equipment items, 33 rules-native Traits, and 24
-  canonical State identities. The State denominator follows the current N5.3 State vocabulary,
+  The current baseline is 95 Skills, 30 Equipment items, 33 rules-native Traits, and 24
+  canonical State identities. The Equipment denominator combines 28 textual Army catalog
+  identities with Cube and Cube 2.0, whose Army occurrences are encoded by profile symbols. The State denominator follows the current N5.3 State vocabulary,
   with Impersonation represented separately as IMP-1 and IMP-2. The Army
   skill-like source bucket contains 88 application identities, but six reviewed entries belong
   to other rules/presentation domains (`Bangbomb`, `GizmoKit`, `MediKit`, `Regular`, `BTS=3`,
