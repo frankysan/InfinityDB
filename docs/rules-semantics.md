@@ -1085,6 +1085,11 @@ Equipment can participate in the same action vocabulary. GizmoKit and MediKit
 are Equipment whose use is a Short Skill, and Deactivator also appears as a
 Short Skill in the current Orders/AROs reference.
 
+That declaration category describes the action exposed by the Equipment; it does
+not move the canonical identity into the Skill domain. InfinityDB therefore presents
+the action with the same declaration-category card language used for Skills while
+keeping the page, links, Army occurrence, and relation target as Equipment.
+
 A reusable declaration-category relation therefore needs at least:
 
 - the referenced rules/catalog domain;
@@ -1137,7 +1142,9 @@ all categories for rules-native Skills as well as Army-linked Skills. Linked
 Skills without a full definition and for Equipment. Curated format v20 additionally
 distinguishes rules that modify another rule's use, prohibit entry into a State, or
 trigger specifically on State entry, so those interactions no longer remain deferred
-solely because the older relation vocabulary was too coarse.
+solely because the older relation vocabulary was too coarse. Curated format v21 adds
+`equips-with` for a rule that explicitly gives its user a piece of Equipment without
+claiming that the source rule itself reuses the Equipment's effects.
 
 Sources:
 
@@ -3473,6 +3480,12 @@ outcome now that Dead is canonical. Remote Presence owns its GizmoKit recovery m
 `applies-effects-to`, while the canonical Tech-Recovery Skill now authors `applies-effects-to`
 toward GizmoKit and its reviewed State cancellations. This keeps Tech-Recovery eligibility/effects
 on the owning Skill instead of duplicating them on the Equipment record.
+
+Paramedic is a separate Automatic Special Skill. Its rule says that Paramedics are equipped
+with MediKits; it does not make Paramedic an alias for the MediKit action or reuse MediKit's
+effects as part of the Paramedic declaration. The graph therefore authors `equips-with` from
+Paramedic to the canonical `equipment:medikit` record. The inverse MediKit presentation reads
+"Provided by: Paramedic", while every link still resolves to the Equipment domain.
 
 Sources:
 

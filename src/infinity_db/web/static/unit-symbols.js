@@ -11,7 +11,8 @@ function slugify(name) {
 export function unitSymbolPath(unitName) {
   const slug = slugify(unitName);
   const symbol = unitSymbolSlug(slug) || slug;
-  const version = document.documentElement.dataset.appVersion;
+  const version = document.documentElement.dataset.staticVersion
+    || document.documentElement.dataset.appVersion;
   return symbol && `/static/units/${encodeURI(symbol)}.svg?v=${encodeURIComponent(version)}`;
 }
 

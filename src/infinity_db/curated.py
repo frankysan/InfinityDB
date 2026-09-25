@@ -10,7 +10,7 @@ from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_
 from infinity_db.rule_relations import RULE_RELATION_TYPES
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 20
+CURATED_FORMAT_VERSION = 21
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )

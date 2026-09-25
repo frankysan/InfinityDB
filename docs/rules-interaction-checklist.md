@@ -268,7 +268,7 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [x] **Paramedic** (`skill:paramedic`) — reviewed
-  - `uses-effects-of` → MediKit (`equipment:medikit`)
+  - `equips-with` → MediKit (`equipment:medikit`)
 - [x] **Peripheral** (`skill:peripheral`) — reviewed
   - `has-subtype` → Peripheral (Servant) (`rule:peripheral-type:servant`)
   - `has-subtype` → Peripheral (Synchronized) (`rule:peripheral-type:synchronized`)

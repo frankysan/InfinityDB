@@ -37,6 +37,18 @@ def test_variant_relationship_is_structural_and_not_generically_presented() -> N
     assert relation_presentation("variant-of", "inbound") is None
 
 
+def test_equips_with_preserves_equipment_provision_semantics() -> None:
+    outbound = relation_presentation("equips-with", "outbound")
+    inbound = relation_presentation("equips-with", "inbound")
+
+    assert outbound is not None
+    assert inbound is not None
+    assert outbound["label"] == "Equips with"
+    assert inbound["label"] == "Provided by"
+    assert outbound["group_id"] == "creates-enables"
+    assert inbound["group_id"] == "creates-enables"
+
+
 def test_rules_database_projects_curated_summaries_labels_and_relation_semantics(
     tmp_path: Path,
 ) -> None:

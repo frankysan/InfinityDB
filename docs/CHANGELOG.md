@@ -11,11 +11,19 @@ Entries describe meaningful release outcomes rather than detailed implementation
   operating systems: canonical text uses UTF-8/LF, validation ordering is stable, work
   archives normalize Git-managed text bytes, and CI compares representative artifact
   SHA-256 identities across Windows, Linux, and macOS.
+- Present declaration-bearing Equipment such as MediKit, GizmoKit, and Deactivator with the
+  same action-card/declaration-category language used for Skills while preserving their
+  canonical Equipment identity.
 
 ### Fixed
 
 - Preserve the checksum-bound symbol inventory and browser-map files byte-for-byte in Git
   so Windows line-ending conversion cannot invalidate a promoted publication manifest.
+- Model Paramedic as explicitly equipping its user with MediKit rather than generically
+  reusing MediKit effects, and keep MediKit/GizmoKit relation targets routed to Equipment.
+- Fingerprint immutable frontend assets by their static content as well as the application
+  version, preventing a late frontend rebuild under the same semantic version from leaving
+  browsers on an obsolete cached module graph.
 
 ## [0.7.0] - 2026-09-25
 
