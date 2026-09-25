@@ -7,6 +7,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ### Added
 
+- Complete the 0.7.0 rules-enrichment scope audit: all release-target catalog semantics are
+  reconciled and player-facing, while unresolved generic MOD/parameter interpretation remains
+  explicitly classified as later semantic work rather than an implicit release blocker.
 - Surface Infinity Army's structured Hacking Program, Martial Arts, Booty, and
   MetaChemistry reference data on the existing Skill detail pages. Preserve Hacking
   Device applicability, targets, declaration types, PS/Burst/MOD profile fields, and

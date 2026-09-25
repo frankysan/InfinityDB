@@ -125,18 +125,19 @@ rules-reference catalog. Supporting rule identities may be added when they are
 needed to summarize, label, cite, or cross-link an already exposed item without
 requiring a new top-level browser surface in 0.7.0.
 
-- [ ] **Define and implement the structured enrichment contract for existing
+- [x] **Define and implement the structured enrichment contract for existing
   catalog/application data.**
-  - [ ] Store original concise summaries rather than copied rulebook/wiki prose;
-    confirm publishing permissions plus attribution/linking requirements before
-    serving rule-derived editorial text.
+  - [x] Store original concise summaries rather than copied rulebook/wiki prose.
+    Corvus Belli has explicitly permitted redistribution of the graphical assets; rules-derived
+    editorial text remains original InfinityDB prose with authoritative citations and attribution,
+    preserving the project's non-commercial scope and license separation.
   - [x] Store authoritative source links and provenance, including applicable
     rulebook/publication version, printed PDF page when available, and Wiki links.
   - [x] Reconcile N5.3 declaration/action categories across Skills and Equipment,
     including Automatic/Deployment/Basic Short/Short/Long/ARO semantics and the
     Equipment-domain Deactivator/GizmoKit/MediKit actions.
-  - [ ] Add the remaining reviewed semantic labels/classifications that help users
-    interpret existing data, including typed MOD/parameter meaning. Regular and
+  - [x] Add the reviewed semantic labels/classifications required for 0.7.0 and explicitly
+    classify the remaining opaque MOD/parameter forms as later semantic work. Regular and
     Irregular Training are already classified per loadout Order occurrence. Curated v11
     preserves Martial Arts L1-L5 / Strategos L1-L2 as typed exact-source Levels,
     adds reviewed BS=12, BS=11, and CC=21 numeric Attribute replacements, and models
@@ -261,17 +262,17 @@ requiring a new top-level browser surface in 0.7.0.
     reviewed occurrence parameters remain separate from source-variant identity. Unknown
     MOD/value forms stay opaque until their typed semantics are reviewed.
 
-- [ ] **Systematically enrich the data currently available through InfinityDB.**
-  - [ ] Reconcile existing Skills, Equipment, Weapons, Traits, States, and relevant
+- [x] **Systematically enrich the data currently available through InfinityDB.**
+  - [x] Reconcile existing Skills, Equipment, Weapons, Traits, States, and relevant
     Unit/Profile/loadout concepts against the completed rules audit; include supporting
     Ammunition, Hacking, Fireteam, glossary, or scenario identities where required to
     explain or relate those existing items. States are now a first-class rules-backed
     browser surface because bidirectional interaction discovery requires useful navigation
     from the affected State as well as from the cancelling/revealing Skill.
-  - [ ] Add cited summaries, rules links, user-facing labels, related catalog
+  - [x] Add cited summaries, rules links, user-facing labels, related catalog
     items, relevant state/ammunition/trait relationships, and Unit/profile/loadout
     usage links where the audited evidence supports them.
-  - [ ] Make remaining profile/loadout annotations such as `(+1B)`, `(-3)`, `PH=`,
+  - [x] Classify remaining profile/loadout annotations such as `(+1B)`, `(-3)`, `PH=`,
     rerolls, and Special Dice explicit enough that an occurrence modifier is not
     mistaken for a universal property of the base rule or Unit. Explicit Skill Levels,
     BS/CC numeric Attribute replacements, and named TinBot variants are now typed at
@@ -294,7 +295,7 @@ requiring a new top-level browser surface in 0.7.0.
     declaration context is preserved structurally, Martial Arts levels retain their
     profile MODs, and Booty/MetaChemistry remain roll-result reference data rather
     than being flattened into Unit facts.
-  - [ ] Surface the resulting enrichment through the existing API/detail/catalog
+  - [x] Surface the resulting enrichment through the existing API/detail/catalog
     experiences; enrichment required for 0.7.0 must not remain available only in
     curated JSON, `rules.db`, raw source data, or developer tooling. The structured
     Hacking Program, Martial Arts, Booty, and MetaChemistry references are now
