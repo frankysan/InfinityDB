@@ -1242,6 +1242,14 @@ h1>span {
   width: 100%;
 }
 
+.usage-section-group {
+  width: min(760px, 100%);
+}
+
+.usage-section-group table.data-table--compact {
+  width: 100%;
+}
+
 .detail-section-title {
   margin: 0;
   color: #3a5547;

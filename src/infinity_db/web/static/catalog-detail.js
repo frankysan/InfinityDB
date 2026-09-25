@@ -86,25 +86,17 @@ function traitDescription(description) {
 }
 
 function rangeModifier(ranges, maximum) {
-  const matchingRange = Object.values(ranges || {})
+  const orderedRanges = Object.values(ranges || {})
     .filter((range) => range && typeof range === "object" && Number.isFinite(Number(range.max)))
-    .sort((left, right) => Number(left.max) - Number(right.max))
-    .find((range) => Number(range.max) >= maximum);
-  return matchingRange?.mod || "";
+    .sort((left, right) => Number(left.max) - Number(right.max));
+  if (!orderedRanges.length) return "";
+  const matchingRange = orderedRanges.find((range) => Number(range.max) >= maximum);
+  if (!matchingRange) return "--";
+  const modifier = matchingRange.mod;
+  return modifier === null || modifier === undefined ? "" : String(modifier);
 }
 
-function weaponRangeBands(variants) {
-  const maximums = new Set();
-  for (const variant of variants || []) {
-    for (const profile of variant.profiles || []) {
-      for (const range of Object.values(profile.ranges || {})) {
-        const maximum = Number(range?.max);
-        if (Number.isFinite(maximum) && maximum > 0) maximums.add(maximum);
-      }
-    }
-  }
-  return [...maximums].sort((left, right) => left - right);
-}
+const canonicalWeaponRangeBands = [20, 40, 60, 80, 100, 120, 240];
 
 function rangeBandLabel(maximum) {
   return distanceUnit() === "in" ? `${maximum / 2.5}"` : `${maximum} cm`;
@@ -155,7 +147,7 @@ function specialWeaponProfile(profile) {
 function weaponVariants(variants) {
   const section = document.createElement("section");
   section.className = "weapon-variants";
-  const rangeBands = weaponRangeBands(variants);
+  const rangeBands = canonicalWeaponRangeBands;
 
   for (const variant of variants) {
     const variantSection = document.createElement("section");

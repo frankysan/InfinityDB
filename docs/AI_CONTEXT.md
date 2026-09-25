@@ -718,8 +718,11 @@ compatibility references remain unambiguous JSON integers.
   matchers. Normalization consumes those validated build inputs and materializes
   their effects; the runtime repository does not load catalog configuration.
 - 2026-09-17: The remaining hard-coded-domain audit classified weapon range bands
-  as derivable presentation data, not configuration. Weapon detail rendering now
-  derives ordered range endpoints from imported profile `distance[].max` values.
+  as presentation data, not configuration. Weapon detail rendering uses the seven
+  standard N5 Weapon Chart endpoints (20/40/60/80/100/120/240 cm, corresponding to
+  8/16/24/32/40/48/96 inches) for every range table. Sparse imported
+  `distance[].max` values define modifier intervals across those columns, and bands
+  beyond the final source endpoint display `--`.
   Distance-skill handling is now source-driven: Army `extras.type` determines
   `DISTANCE` versus text, while curated skill `variantSemantics.occurrenceParameters`
   supplies only rule-derived sign-display behavior for Super-Jump and Forward Deployment.

@@ -1271,17 +1271,18 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
         assert b"data-surface-header" in body
 
 
-def test_weapon_range_bands_are_derived_from_profile_metadata(app: Callable) -> None:
+def test_weapon_range_tables_always_include_canonical_bands(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-detail.js")
 
     assert status == 200
-    assert b"function weaponRangeBands(variants)" in body
-    assert b"Object.values(profile.ranges || {})" in body
-    assert b"Number(range?.max)" in body
-    assert b"const rangeBands = weaponRangeBands(variants);" in body
+    assert b"const canonicalWeaponRangeBands = [20, 40, 60, 80, 100, 120, 240];" in body
+    assert b"const rangeBands = canonicalWeaponRangeBands;" in body
+    assert b".sort((left, right) => Number(left.max) - Number(right.max));" in body
+    assert b".find((range) => Number(range.max) >= maximum);" in body
+    assert b'if (!matchingRange) return "--";' in body
+    assert b"String(modifier)" in body
     assert b"maximum / 2.5" in body
-    for fixed_band in [b"maximum: 20", b"maximum: 40", b"maximum: 240"]:
-        assert fixed_band not in body
+    assert b"weaponRangeBands" not in body
 
 
 def test_catalog_detail_frontend_uses_backend_trait_references(
@@ -1390,8 +1391,20 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert status == 200
     assert b"surface surface--highlighted about-callout" in body
     assert b"surface about-principles" in body
+    assert b"<h3>Connectivity</h3>" in body
+    assert b"<h3>Connected data</h3>" not in body
     assert b"surface surface--subtle about-disclosure" in body
 
+    assert_css_rule(
+        styles,
+        ".usage-section-group",
+        {"width": "min(760px, 100%)"},
+    )
+    assert_css_rule(
+        styles,
+        ".usage-section-group table.data-table--compact",
+        {"width": "100%"},
+    )
     assert_css_rule(
         styles,
         ".usage-section-group thead th:first-child, .usage-section-group thead th:last-child",
@@ -1847,11 +1860,11 @@ def test_unit_api_adds_training_to_order_occurrences_only_when_rules_exist(
     )
 
 
-def test_unit_page_renders_occurrence_training_with_citations(app: Callable) -> None:
+def test_unit_page_hides_textual_training_rows(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b"training_reference" in body
-    assert b"rulesReferenceSection" in body
+    assert b"training_reference" not in body
+    assert b"Training rules" not in body
 
 
 def test_trait_apis_compose_army_usage_with_curated_rules(
