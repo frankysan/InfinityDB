@@ -39,6 +39,7 @@ from ..peripheral_identities import (
 from .application_armies import materialize_application_armies
 from .application_catalogs import materialize_application_catalogs
 from .application_domain_slugs import materialize_application_domain_slugs
+from .application_rule_references import materialize_application_rule_references
 from .include_relationships import materialize_include_relationships
 from .loadout_payloads import materialize_loadout_payloads
 from .logical_unit_payloads import materialize_logical_unit_payloads
@@ -443,6 +444,7 @@ def export_database(
                 materialize_application_catalogs(connection, identity_config)
                 materialize_logical_unit_payloads(connection)
                 materialize_application_domain_slugs(connection)
+                materialize_application_rule_references(connection)
                 materialize_profile_payloads(connection)
                 materialize_loadout_payloads(connection)
                 materialize_include_relationships(connection)

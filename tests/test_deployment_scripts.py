@@ -69,3 +69,12 @@ def test_docker_build_copies_curated_wheel_data_inputs() -> None:
     assert "COPY data/curated/identities /app/data/curated/identities" in dockerfile
     assert "COPY data/curated/peripherals /app/data/curated/peripherals" in dockerfile
     assert "rm -rf /app/config /app/data/curated" in dockerfile
+
+
+def test_container_verifier_separates_packaging_from_production_provenance() -> None:
+    verifier = _read("scripts/verify-container-image.sh")
+
+    assert "--packaged-assets|--published-assets" in verifier
+    assert 'if [ "$packaged_assets" -eq 1 ]; then' in verifier
+    assert 'if [ "$published_assets" -eq 1 ]; then' in verifier
+    assert "validate_database_symbol_provenance" in verifier

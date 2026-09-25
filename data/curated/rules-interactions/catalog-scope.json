@@ -1,0 +1,751 @@
+{
+  "format": "InfinityDB rules interaction catalog scope",
+  "formatVersion": 2,
+  "targetRelease": "0.7.0",
+  "catalogs": {
+    "skills": [
+      {
+        "id": "aerial",
+        "name": "Aerial"
+      },
+      {
+        "id": "alert",
+        "name": "Alert"
+      },
+      {
+        "id": "berserk",
+        "name": "Berserk"
+      },
+      {
+        "id": "booty",
+        "name": "Booty"
+      },
+      {
+        "id": "bs-attack",
+        "name": "BS Attack"
+      },
+      {
+        "id": "camouflage",
+        "name": "Camouflage"
+      },
+      {
+        "id": "cautious-movement",
+        "name": "Cautious Movement"
+      },
+      {
+        "id": "cc-attack",
+        "name": "CC Attack"
+      },
+      {
+        "id": "chain-of-command",
+        "name": "Chain of Command"
+      },
+      {
+        "id": "climb",
+        "name": "Climb"
+      },
+      {
+        "id": "climbing-plus",
+        "name": "Climbing Plus"
+      },
+      {
+        "id": "combat-instinct",
+        "name": "Combat Instinct"
+      },
+      {
+        "id": "combat-jump",
+        "name": "Combat Jump"
+      },
+      {
+        "id": "commlink",
+        "name": "Commlink"
+      },
+      {
+        "id": "counterintelligence",
+        "name": "Counterintelligence"
+      },
+      {
+        "id": "courage",
+        "name": "Courage"
+      },
+      {
+        "id": "cyberplug",
+        "name": "Cyberplug"
+      },
+      {
+        "id": "decoy",
+        "name": "Decoy"
+      },
+      {
+        "id": "discover",
+        "name": "Discover"
+      },
+      {
+        "id": "doctor",
+        "name": "Doctor"
+      },
+      {
+        "id": "dodge",
+        "name": "Dodge"
+      },
+      {
+        "id": "dogged",
+        "name": "Dogged"
+      },
+      {
+        "id": "engineer",
+        "name": "Engineer"
+      },
+      {
+        "id": "explode",
+        "name": "Explode"
+      },
+      {
+        "id": "exrah",
+        "name": "Exrah"
+      },
+      {
+        "id": "forward-deployment",
+        "name": "Forward Deployment"
+      },
+      {
+        "id": "forward-observer",
+        "name": "Forward Observer"
+      },
+      {
+        "id": "frenzy",
+        "name": "Frenzy"
+      },
+      {
+        "id": "ft-master",
+        "name": "FT Master"
+      },
+      {
+        "id": "g-jumper",
+        "name": "G: Jumper"
+      },
+      {
+        "id": "guard",
+        "name": "Guard"
+      },
+      {
+        "id": "hacker",
+        "name": "Hacker"
+      },
+      {
+        "id": "hidden-deployment",
+        "name": "Hidden Deployment"
+      },
+      {
+        "id": "idle",
+        "name": "Idle"
+      },
+      {
+        "id": "immunity",
+        "name": "Immunity"
+      },
+      {
+        "id": "impersonation",
+        "name": "Impersonation"
+      },
+      {
+        "id": "impetuous",
+        "name": "Impetuous"
+      },
+      {
+        "id": "infiltration",
+        "name": "Infiltration"
+      },
+      {
+        "id": "infinity-spec-ops",
+        "name": "Infinity Spec-Ops"
+      },
+      {
+        "id": "inspiring-leadership",
+        "name": "Inspiring Leadership"
+      },
+      {
+        "id": "intuitive-attack",
+        "name": "Intuitive Attack"
+      },
+      {
+        "id": "journalist",
+        "name": "Journalist"
+      },
+      {
+        "id": "jump",
+        "name": "Jump"
+      },
+      {
+        "id": "lieutenant",
+        "name": "Lieutenant"
+      },
+      {
+        "id": "limited-cover",
+        "name": "Limited Cover"
+      },
+      {
+        "id": "look-out",
+        "name": "Look Out"
+      },
+      {
+        "id": "marksmanship",
+        "name": "Marksmanship"
+      },
+      {
+        "id": "martial-arts",
+        "name": "Martial Arts"
+      },
+      {
+        "id": "metachemistry",
+        "name": "MetaChemistry"
+      },
+      {
+        "id": "mimetism",
+        "name": "Mimetism"
+      },
+      {
+        "id": "minelayer",
+        "name": "Minelayer"
+      },
+      {
+        "id": "mnemonica",
+        "name": "Mnemonica"
+      },
+      {
+        "id": "morpho-scan",
+        "name": "Morpho-scan"
+      },
+      {
+        "id": "move",
+        "name": "Move"
+      },
+      {
+        "id": "natural-born-warrior",
+        "name": "Natural Born Warrior"
+      },
+      {
+        "id": "nco",
+        "name": "NCO"
+      },
+      {
+        "id": "neurocinetics",
+        "name": "Neurocinetics"
+      },
+      {
+        "id": "no-cover",
+        "name": "No Cover"
+      },
+      {
+        "id": "no-wound-incapacitation",
+        "name": "No Wound Incapacitation"
+      },
+      {
+        "id": "non-hackable",
+        "name": "Non-Hackable"
+      },
+      {
+        "id": "number-2",
+        "name": "Number 2"
+      },
+      {
+        "id": "parachutist",
+        "name": "Parachutist"
+      },
+      {
+        "id": "paramedic",
+        "name": "Paramedic"
+      },
+      {
+        "id": "peripheral",
+        "name": "Peripheral"
+      },
+      {
+        "id": "place-deployable",
+        "name": "Place Deployable"
+      },
+      {
+        "id": "protheion",
+        "name": "Protheion"
+      },
+      {
+        "id": "regeneration",
+        "name": "Regeneration"
+      },
+      {
+        "id": "religious-troop",
+        "name": "Religious Troop"
+      },
+      {
+        "id": "reload",
+        "name": "Reload"
+      },
+      {
+        "id": "remdriver",
+        "name": "RemDriver"
+      },
+      {
+        "id": "remote-presence",
+        "name": "Remote Presence"
+      },
+      {
+        "id": "request-speedball",
+        "name": "Request Speedball"
+      },
+      {
+        "id": "reset",
+        "name": "Reset"
+      },
+      {
+        "id": "sapper",
+        "name": "Sapper"
+      },
+      {
+        "id": "sensor",
+        "name": "Sensor"
+      },
+      {
+        "id": "shasvastii",
+        "name": "Shasvastii"
+      },
+      {
+        "id": "sixth-sense",
+        "name": "Sixth Sense"
+      },
+      {
+        "id": "specialist-operative",
+        "name": "Specialist Operative"
+      },
+      {
+        "id": "speculative-attack",
+        "name": "Speculative Attack"
+      },
+      {
+        "id": "stealth",
+        "name": "Stealth"
+      },
+      {
+        "id": "strategic-deployment",
+        "name": "Strategic Deployment"
+      },
+      {
+        "id": "strategos",
+        "name": "Strategos"
+      },
+      {
+        "id": "super-jump",
+        "name": "Super-Jump"
+      },
+      {
+        "id": "suppressive-fire",
+        "name": "Suppressive Fire"
+      },
+      {
+        "id": "surprise-attack",
+        "name": "Surprise Attack"
+      },
+      {
+        "id": "tactical-awareness",
+        "name": "Tactical Awareness"
+      },
+      {
+        "id": "tagcom",
+        "name": "TAGCom"
+      },
+      {
+        "id": "tech-recovery",
+        "name": "Tech-recovery"
+      },
+      {
+        "id": "technorganic",
+        "name": "Technorganic"
+      },
+      {
+        "id": "terrain",
+        "name": "Terrain"
+      },
+      {
+        "id": "total-reaction",
+        "name": "Total Reaction"
+      },
+      {
+        "id": "transmutation",
+        "name": "Transmutation"
+      },
+      {
+        "id": "triangulated-fire",
+        "name": "Triangulated Fire"
+      },
+      {
+        "id": "vulnerability",
+        "name": "Vulnerability"
+      },
+      {
+        "id": "warhorse",
+        "name": "Warhorse"
+      }
+    ],
+    "equipment": [
+      {
+        "id": "360o-visor",
+        "name": "360º Visor"
+      },
+      {
+        "id": "ai-motorcycle",
+        "name": "AI Motorcycle"
+      },
+      {
+        "id": "albedo",
+        "name": "Albedo"
+      },
+      {
+        "id": "baggage",
+        "name": "Baggage"
+      },
+      {
+        "id": "bangbomb",
+        "name": "Bangbomb"
+      },
+      {
+        "id": "biometric-visor",
+        "name": "Biometric Visor"
+      },
+      {
+        "id": "cube",
+        "name": "Cube"
+      },
+      {
+        "id": "cube-2",
+        "name": "Cube 2.0"
+      },
+      {
+        "id": "dazer",
+        "name": "Dazer"
+      },
+      {
+        "id": "deactivator",
+        "name": "Deactivator"
+      },
+      {
+        "id": "deployable-cover",
+        "name": "Deployable Cover"
+      },
+      {
+        "id": "deployable-repeater",
+        "name": "Deployable Repeater"
+      },
+      {
+        "id": "ecm",
+        "name": "ECM"
+      },
+      {
+        "id": "escape-system",
+        "name": "Escape System"
+      },
+      {
+        "id": "evo-hacking-device",
+        "name": "EVO Hacking Device"
+      },
+      {
+        "id": "fastpanda",
+        "name": "FastPanda"
+      },
+      {
+        "id": "gizmokit",
+        "name": "GizmoKit"
+      },
+      {
+        "id": "hacking-device",
+        "name": "Hacking Device"
+      },
+      {
+        "id": "hacking-device-plus",
+        "name": "Hacking Device Plus"
+      },
+      {
+        "id": "holomask",
+        "name": "Holomask"
+      },
+      {
+        "id": "holoprojector",
+        "name": "Holoprojector"
+      },
+      {
+        "id": "killer-hacking-device",
+        "name": "Killer Hacking Device"
+      },
+      {
+        "id": "medikit",
+        "name": "MediKit"
+      },
+      {
+        "id": "motorcycle",
+        "name": "Motorcycle"
+      },
+      {
+        "id": "multispectral-visor",
+        "name": "Multispectral Visor"
+      },
+      {
+        "id": "nanoscreen",
+        "name": "Nanoscreen"
+      },
+      {
+        "id": "repeater",
+        "name": "Repeater"
+      },
+      {
+        "id": "symbiomate",
+        "name": "SymbioMate"
+      },
+      {
+        "id": "tinbot",
+        "name": "TinBot"
+      },
+      {
+        "id": "x-visor",
+        "name": "X Visor"
+      }
+    ],
+    "traits": [
+      {
+        "id": "anti-materiel",
+        "name": "Anti-materiel"
+      },
+      {
+        "id": "arm-0",
+        "name": "ARM = 0"
+      },
+      {
+        "id": "aro",
+        "name": "ARO"
+      },
+      {
+        "id": "bioweapon",
+        "name": "BioWeapon"
+      },
+      {
+        "id": "boost",
+        "name": "Boost"
+      },
+      {
+        "id": "bs-weapon-ph",
+        "name": "BS Weapon (PH)"
+      },
+      {
+        "id": "bs-weapon-wip",
+        "name": "BS Weapon (WIP)"
+      },
+      {
+        "id": "bts-0",
+        "name": "BTS = 0"
+      },
+      {
+        "id": "burst-b",
+        "name": "Burst (B)"
+      },
+      {
+        "id": "burst-single-target",
+        "name": "Burst: Single Target"
+      },
+      {
+        "id": "cc",
+        "name": "CC"
+      },
+      {
+        "id": "concealed",
+        "name": "Concealed"
+      },
+      {
+        "id": "continuous-damage",
+        "name": "Continuous Damage"
+      },
+      {
+        "id": "deployable",
+        "name": "Deployable"
+      },
+      {
+        "id": "direct-template",
+        "name": "Direct Template"
+      },
+      {
+        "id": "disposable-x",
+        "name": "Disposable (X)"
+      },
+      {
+        "id": "double-shot",
+        "name": "Double Shot"
+      },
+      {
+        "id": "impact-template",
+        "name": "Impact Template"
+      },
+      {
+        "id": "improvised",
+        "name": "Improvised"
+      },
+      {
+        "id": "indiscriminate",
+        "name": "Indiscriminate"
+      },
+      {
+        "id": "intuitive-attack",
+        "name": "Intuitive Attack"
+      },
+      {
+        "id": "non-lethal",
+        "name": "Non-Lethal"
+      },
+      {
+        "id": "non-reloadable",
+        "name": "Non-Reloadable"
+      },
+      {
+        "id": "perimeter",
+        "name": "Perimeter"
+      },
+      {
+        "id": "prior-deployment",
+        "name": "Prior Deployment"
+      },
+      {
+        "id": "reflective",
+        "name": "Reflective"
+      },
+      {
+        "id": "silent-x",
+        "name": "Silent (X)"
+      },
+      {
+        "id": "speculative-attack",
+        "name": "Speculative Attack"
+      },
+      {
+        "id": "state",
+        "name": "State"
+      },
+      {
+        "id": "suppressive-fire",
+        "name": "Suppressive Fire (SF)"
+      },
+      {
+        "id": "target-attribute",
+        "name": "Target (Attribute)"
+      },
+      {
+        "id": "targetless",
+        "name": "Targetless"
+      },
+      {
+        "id": "zone-of-control-zc",
+        "name": "Zone of Control (ZoC)"
+      }
+    ],
+    "states": [
+      {
+        "id": "camouflaged",
+        "name": "Camouflaged State"
+      },
+      {
+        "id": "dead",
+        "name": "Dead State"
+      },
+      {
+        "id": "decoy",
+        "name": "Decoy State"
+      },
+      {
+        "id": "disconnected",
+        "name": "Disconnected State"
+      },
+      {
+        "id": "engaged",
+        "name": "Engaged State"
+      },
+      {
+        "id": "foxhole",
+        "name": "Foxhole State"
+      },
+      {
+        "id": "hidden-deployment",
+        "name": "Hidden Deployment State"
+      },
+      {
+        "id": "holoecho",
+        "name": "Holoecho State"
+      },
+      {
+        "id": "holomask",
+        "name": "HoloMask State"
+      },
+      {
+        "id": "immobilized-a",
+        "name": "Immobilized-A State"
+      },
+      {
+        "id": "immobilized-b",
+        "name": "Immobilized-B State"
+      },
+      {
+        "id": "impersonation-1",
+        "name": "Impersonation-1 State"
+      },
+      {
+        "id": "impersonation-2",
+        "name": "Impersonation-2 State"
+      },
+      {
+        "id": "isolated",
+        "name": "Isolated State"
+      },
+      {
+        "id": "normal",
+        "name": "Normal State"
+      },
+      {
+        "id": "possessed",
+        "name": "Possessed State"
+      },
+      {
+        "id": "prone",
+        "name": "Prone State"
+      },
+      {
+        "id": "retreat",
+        "name": "Retreat! State"
+      },
+      {
+        "id": "sepsitorized",
+        "name": "Sepsitorized State"
+      },
+      {
+        "id": "stunned",
+        "name": "Stunned State"
+      },
+      {
+        "id": "suppressive-fire",
+        "name": "Suppressive Fire State"
+      },
+      {
+        "id": "targeted",
+        "name": "Targeted State"
+      },
+      {
+        "id": "unconscious",
+        "name": "Unconscious State"
+      },
+      {
+        "id": "unloaded",
+        "name": "Unloaded State"
+      }
+    ]
+  },
+  "releaseExceptions": [
+    {
+      "catalog": "skills",
+      "itemId": "commlink",
+      "targetRelease": "post-0.7.0",
+      "reason": "Commlink belongs to the official Reinforcements Extra rather than the N5 core rules. It is explicitly vetted for 0.7.0 but its canonical definition is deferred until the Reinforcements annex is modeled as a separately scoped collection."
+    }
+  ]
+}

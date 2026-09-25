@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.6.3** (2026-09-22).
+Current release: **0.7.0** (2026-09-25).
 
 ## Guiding principles
 
@@ -33,9 +33,11 @@ Current release: **0.6.3** (2026-09-22).
   summaries, classifications, special weapon data, and source citations.
 - Supports centimetre/inch display preferences and a Developer mode for
   inspecting database IDs and other review information.
-- Supports locally published army, unit, order, and characteristic SVG symbols.
-  Corvus Belli graphical assets are acquired separately and are not bundled with
-  InfinityDB source releases by default.
+- Supports published army, unit, order, and characteristic SVG symbols. Corvus
+  Belli has explicitly permitted InfinityDB to use and redistribute the graphical
+  assets used by this non-commercial community project, including processed SVGs
+  in public repositories and build packages. Those assets remain Corvus Belli
+  property and are not covered by InfinityDB's MIT License.
 - Uses reproducible source snapshots for Army, wiki, and symbol acquisition.
   Normal database builds do not make network requests.
 - Includes local development, validation, deployment, update, rollback, and
@@ -146,8 +148,14 @@ Symbol processing requires the `symbols` Python extras. Compression additionally
 requires SVGO v4+ and `resvg`; text conversion normally requires Inkscape.
 
 The symbol pipeline is resumable and records detailed local logs, reports,
-provenance, and publication state. See [architecture](docs/architecture.md) and
-[data storage and provenance](data/README.md) for its full contract.
+provenance, and publication state. Corvus Belli has granted explicit permission
+for InfinityDB to redistribute the processed graphical publication used by the
+project, provided the project remains non-commercial and the assets stay clearly
+separate from the MIT-licensed code. Raw Army, wiki, PDF, and source-symbol
+archives remain separate local/provenance inputs by project policy and are not
+committed merely because the processed graphical output may be distributed. See
+[third-party notices](THIRD_PARTY_NOTICES.md), [architecture](docs/architecture.md),
+and [data storage and provenance](data/README.md) for the full contract.
 
 The wiki snapshot downloader is also available independently:
 
@@ -194,8 +202,9 @@ prevents replacement.
 The supported Docker Compose deployment packages the application and validated
 runtime databases into an immutable image. Production has two explicit data paths:
 `install-or-update.sh` rebuilds runtime databases from raw source already present on
-the server, while `deploy-transferred.sh` deploys a commit-matched database/symbol
-artifact set transferred from a development checkout without rebuilding it.
+the server, while `deploy-transferred.sh` deploys commit-matched runtime databases and
+terminal symbol provenance transferred from a development checkout without rebuilding
+them. The processed symbol publication itself comes from that matching Git revision.
 
 ```sh
 # Server-rebuild deployment
@@ -311,7 +320,9 @@ ownership of those materials.
 ## License
 
 InfinityDB's original source code and documentation are released under the
-[MIT License](LICENSE). Downloaded Army data, symbols, wiki content, rules
-documents, and deployment dependencies retain their own rights and licenses;
-see [third-party notices](THIRD_PARTY_NOTICES.md) before redistributing a build
-that includes them.
+[MIT License](LICENSE). All Infinity artwork, logos, symbols, and game data are
+the property of Corvus Belli S.L. and are used with permission for this
+non-commercial community project. Corvus Belli graphical assets are distributed
+separately from the MIT License. Army data, wiki content, rules documents, fonts,
+and deployment dependencies retain their own rights and licenses; see
+[third-party notices](THIRD_PARTY_NOTICES.md).

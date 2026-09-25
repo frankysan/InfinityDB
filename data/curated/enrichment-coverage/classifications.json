@@ -1,0 +1,43 @@
+{
+  "format": "InfinityDB enrichment coverage classifications",
+  "formatVersion": 1,
+  "gapCodes": {
+    "ambiguous_family_mapping": {
+      "classification": "release-blocker",
+      "reason": "An exposed catalog identity must resolve to one reviewed family rule before 0.7.0 can claim deterministic enrichment."
+    },
+    "ambiguous_source_variant_mapping": {
+      "classification": "release-blocker",
+      "reason": "An exposed source variant must resolve to one reviewed exact-source rule before 0.7.0 can claim deterministic variant semantics."
+    },
+    "missing_citation": {
+      "classification": "release-blocker",
+      "reason": "Reviewed enrichment for an exposed item must retain authoritative source provenance and citations."
+    },
+    "missing_rule_definition": {
+      "classification": "release-blocker",
+      "reason": "A currently exposed catalog identity remains part of the 0.7.0 reconciliation surface until its absence is explicitly overridden as an accepted scope decision."
+    },
+    "stale_citation_source": {
+      "classification": "release-blocker",
+      "reason": "A citation tied to an older rules revision must be reviewed against the current publication before release."
+    },
+    "unresolved_related_item_link": {
+      "classification": "release-blocker",
+      "reason": "A reviewed relation from exposed enrichment must resolve to its intended application or supporting rules identity."
+    },
+    "unresolved_surface_rule": {
+      "classification": "release-blocker",
+      "reason": "Rules surfaced through the application must resolve back to the selected rules snapshot so coverage is reproducible."
+    },
+    "unreviewed_rule": {
+      "classification": "release-blocker",
+      "reason": "Draft or otherwise unreviewed contributions cannot satisfy the 0.7.0 reviewed-enrichment gate."
+    }
+  },
+  "supportingIdentity": {
+    "classification": "supporting-identity",
+    "reason": "The related rules identity supports an exposed item but does not require its own standalone browser surface for 0.7.0."
+  },
+  "overrides": []
+}

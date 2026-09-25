@@ -85,11 +85,11 @@ def test_curated_typed_ids_use_kind_as_the_domain_prefix() -> None:
     )
     assert (
         validate_typed_domain_id(
-            "skill-declaration-category:automatic:p86",
-            expected_domain="skill-declaration-category",
+            "declaration-category:automatic:p86",
+            expected_domain="declaration-category",
             context="record id",
         )
-        == "skill-declaration-category:automatic:p86"
+        == "declaration-category:automatic:p86"
     )
 
     with pytest.raises(ValueError, match="must start with 'skill'"):

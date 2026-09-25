@@ -68,6 +68,7 @@
   --color-logo-rim-default: #a8cd92;
   --color-logo-rim-shadow: #527b5d;
 
+  /* Faction colors used by Army. */
   --color-faction-panoceania-primary: #009fe4;
   --color-faction-panoceania-secondary: #004665;
   --color-faction-yu-jing-primary: #f1861d;
@@ -90,6 +91,16 @@
   --color-faction-o-12-secondary: #1c173b;
   --color-faction-jsa-primary: #e3f2f1;
   --color-faction-jsa-secondary: #4ca49e;
+
+  /* Skill category colors used by infinitythewiki.com. */
+  --color-skill-category-automatic: #000000;
+  --color-skill-category-deployment: #4b0082;
+  --color-skill-category-basic-short: #3278bd;
+  --color-skill-category-short: #228b22;
+  --color-skill-category-long: #b20000;
+  --color-skill-category-aro: #ffbf00;
+  --color-skill-category-on-dark: #ffffff;
+  --color-skill-category-on-aro: #382900;
 }
 
 * {
@@ -1231,6 +1242,14 @@ h1>span {
   width: 100%;
 }
 
+.usage-section-group {
+  width: min(760px, 100%);
+}
+
+.usage-section-group table.data-table--compact {
+  width: 100%;
+}
+
 .detail-section-title {
   margin: 0;
   color: #3a5547;
@@ -1251,6 +1270,7 @@ h1>span {
 
 .rules-reference {
   width: min(760px, 100%);
+  margin-bottom: var(--space-2);
 }
 
 .rules-reference>.detail-section {
@@ -1262,9 +1282,22 @@ h1>span {
 }
 
 .rules-reference h3,
+.rules-reference h4,
+.rules-reference h5,
 .rules-reference p,
 .rules-reference ul {
   margin: 0;
+}
+
+.detail-fact-group {
+  display: grid;
+  gap: 4px;
+}
+
+.detail-fact-heading {
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .detail-copy {
@@ -1278,11 +1311,92 @@ h1>span {
   gap: 6px;
 }
 
+.skill-category-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--color-text-secondary);
+  color: var(--color-text-on-inverse);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: .25px;
+  white-space: nowrap;
+}
+
+.skill-category-badge--automatic {
+  background: var(--color-skill-category-automatic);
+  color: var(--color-skill-category-on-dark);
+}
+
+.skill-category-badge--deployment {
+  background: var(--color-skill-category-deployment);
+  color: var(--color-skill-category-on-dark);
+}
+
+.skill-category-badge--basic-short {
+  background: var(--color-skill-category-basic-short);
+  color: var(--color-skill-category-on-dark);
+}
+
+.skill-category-badge--short {
+  background: var(--color-skill-category-short);
+  color: var(--color-skill-category-on-dark);
+}
+
+.skill-category-badge--long {
+  background: var(--color-skill-category-long);
+  color: var(--color-skill-category-on-dark);
+}
+
+.skill-category-badge--aro {
+  background: var(--color-skill-category-aro);
+  color: var(--color-skill-category-on-aro);
+}
+
+.skill-category-badge--unclassified {
+  background: var(--color-surface-data-header);
+  color: var(--color-text-secondary);
+  box-shadow: inset 0 0 0 1px var(--color-border-default);
+}
+
+.skill-category-cell {
+  min-width: 170px;
+}
+
+.skill-category-cell .skill-category-badge {
+  margin: 2px 4px 2px 0;
+}
+
 .detail-list {
   display: grid;
   gap: 4px;
   padding-left: 20px;
   color: var(--color-text-secondary);
+}
+
+.rules-relations {
+  gap: 8px;
+}
+
+.rules-relation-group {
+  display: grid;
+  gap: 4px;
+}
+
+.rules-relation-group-heading {
+  color: var(--color-text-tertiary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.rules-relation-label {
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .detail-source {
@@ -1444,6 +1558,20 @@ h1>span {
   color: #65716b;
   font-size: 14px;
   transition: transform .15s ease;
+}
+
+.usage-section-group .army-profile-title {
+  flex-wrap: wrap;
+}
+
+.usage-section-group .army-profile-title>h2 {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.usage-section-group .army-profile-title>.section-index {
+  margin-left: auto;
+  text-align: right;
 }
 
 .unit-detail .army-profile[open]>.army-profile-title::before {
@@ -3200,6 +3328,38 @@ tbody tr:hover {
 
   .page-footer {
     font-size: 9px;
+  }
+}
+
+@media (max-width: 400px) {
+  h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .unit-detail .general-profile .statline,
+  .unit-detail .general-profile .statline tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .unit-detail .general-profile .statline tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .unit-detail .general-profile .statline th,
+  .unit-detail .general-profile .statline td {
+    width: auto;
+  }
+
+  .unit-detail .general-profile .general-item-label,
+  .unit-detail .general-profile .profile-attributes-label {
+    padding: 10px 16px 4px;
+  }
+
+  .unit-detail .general-profile .general-item-list,
+  .unit-detail .general-profile .profile-attributes {
+    padding: 4px 16px 12px;
   }
 }
 

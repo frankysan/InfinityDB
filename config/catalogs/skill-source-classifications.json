@@ -1,0 +1,36 @@
+{
+  "format": "InfinityDB skill source classifications",
+  "formatVersion": 1,
+  "classifications": [
+    {
+      "skill_id": "bangbomb",
+      "classification": "equipment",
+      "reason": "Infinity Army exposes Bangbomb through the skill-like source bucket, while current N5.3 classifies Bangbomb as Equipment."
+    },
+    {
+      "skill_id": "bts-3",
+      "classification": "attribute-override",
+      "reason": "BTS=3 is a loadout-specific BTS Attribute override encoded through the Army skill-like source bucket, not a rules-defined Skill."
+    },
+    {
+      "skill_id": "gizmokit",
+      "classification": "equipment",
+      "reason": "Infinity Army exposes GizmoKit through the skill-like source bucket, while current N5.3 classifies GizmoKit as Equipment."
+    },
+    {
+      "skill_id": "infinity-team-ops",
+      "classification": "source-marker",
+      "reason": "Infinity Team-Ops is an Army source marker for Team-Ops profiles, not a current N5.3 Common or Special Skill."
+    },
+    {
+      "skill_id": "medikit",
+      "classification": "equipment",
+      "reason": "Infinity Army exposes MediKit through the skill-like source bucket, while current N5.3 classifies MediKit as Equipment."
+    },
+    {
+      "skill_id": "regular",
+      "classification": "training",
+      "reason": "Regular is a Training characteristic even though Infinity Army also exposes compatibility occurrences through the skill-like source bucket."
+    }
+  ]
+}

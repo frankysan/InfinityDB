@@ -31,7 +31,7 @@ jobs:
           infinity-db build tests/fixtures/deployment-smoke --output-dir "$RUNNER_TEMP/deployment-smoke/generated" --compact
           infinity-db build-rules --output "$RUNNER_TEMP/deployment-smoke/generated/rules.db"
 
-      - name: Build redistributable application image
+      - name: Build application image with tracked assets
         run: |
           cp -R . "$RUNNER_TEMP/deployment-smoke/context"
           mkdir -p "$RUNNER_TEMP/deployment-smoke/context/data/generated"
@@ -40,4 +40,4 @@ jobs:
           docker build --tag infinity-db:deployment-smoke "$RUNNER_TEMP/deployment-smoke/context"
 
       - name: Validate image and production startup
-        run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --redistributable
+        run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --packaged-assets

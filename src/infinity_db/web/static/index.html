@@ -1,47 +1,74 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light">
-    <meta name="description" content="InfinityDB is a searchable reference for Infinity units, skills, equipment, weapons, and traits.">
-    <title>InfinityDB · Your Infinity reference</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <script type="module" src="/static/preferences.js"></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <!-- navigation -->
-    <main id="main" class="main landing" tabindex="-1">
-      <!-- page-header -->
-      <section class="landing-hero" aria-labelledby="page-title">
-        <div class="landing-hero-copy">
-          <div class="landing-hero-heading">
-            <p class="eyebrow">Built for the Human Sphere</p>
-            <h1 id="page-title">Your Infinity reference,<br>in one place<span>.</span></h1>
-          </div>
-          <img class="landing-logo" src="/static/infinitydb-logo.svg" alt="" data-themed-logo>
-          <div class="landing-hero-content">
-          <p>InfinityDB turns Infinity Army snapshots and API metadata into a clear, searchable reference for planning lists, checking profiles, and understanding the rules that connect them.</p>
-            <a class="button button-primary" href="/units">Explore units <span aria-hidden="true">→</span></a>
-          </div>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description"
+    content="InfinityDB is an open-source community reference for Infinity units, skills, equipment, weapons, traits, states, and related rules.">
+  <title>InfinityDB · Your Infinity reference</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script type="module" src="/static/preferences.js"></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <!-- navigation -->
+  <main id="main" class="main landing" tabindex="-1">
+    <!-- page-header -->
+    <section class="landing-hero" aria-labelledby="page-title">
+      <div class="landing-hero-copy">
+        <div class="landing-hero-heading">
+          <p class="eyebrow">Open-source Infinity community reference</p>
+          <h1 id="page-title">Your Infinity reference,<br>in one place<span>.</span></h1>
         </div>
-      </section>
-      <section class="landing-links" aria-labelledby="explore-title">
-        <div class="section-heading"><h2 id="explore-title">Explore the database</h2><span class="section-index" aria-hidden="true">01 / START HERE</span></div>
-        <div class="landing-link-grid">
-          <a class="landing-link" href="/units"><span class="landing-link-number">01</span><span><strong>Unit explorer</strong><small>Browse by army, name, and profile rules.</small></span><b aria-hidden="true">→</b></a>
-          <a class="landing-link" href="/skills"><span class="landing-link-number">02</span><span><strong>Skills</strong><small>Trace skills to the units that use them.</small></span><b aria-hidden="true">→</b></a>
-          <a class="landing-link" href="/equipment"><span class="landing-link-number">03</span><span><strong>Equipment</strong><small>Find equipment and related unit profiles.</small></span><b aria-hidden="true">→</b></a>
-          <a class="landing-link" href="/weapons"><span class="landing-link-number">04</span><span><strong>Weapons</strong><small>Browse profiles, ranges, and usage.</small></span><b aria-hidden="true">→</b></a>
-          <a class="landing-link" href="/traits"><span class="landing-link-number">05</span><span><strong>Traits</strong><small>Read summaries and see where special rules apply.</small></span><b aria-hidden="true">→</b></a>
+        <img class="landing-logo" src="/static/infinitydb-logo.svg" alt="" data-themed-logo>
+        <div class="landing-hero-content">
+          <p>InfinityDB brings official Infinity Army data and maintained N5.3 rules context together in a connected,
+            searchable reference for exploring units, checking profiles, and following the rules that shape them.</p>
+          <a class="button button-primary" href="/units">Explore units <span aria-hidden="true">→</span></a>
         </div>
-      </section>
-      <aside class="landing-about" aria-labelledby="landing-about-title">
-        <div><p class="eyebrow">Independent project</p><h2 id="landing-about-title">Made for clearer game planning.</h2><p>See how InfinityDB is built, where its data comes from, and where the project is headed.</p></div>
-        <a class="button button-primary" href="/about">About InfinityDB <span aria-hidden="true">→</span></a>
-      </aside>
-      <!-- page-footer -->
-    </main>
-  </body>
+      </div>
+    </section>
+    <section class="landing-links" aria-labelledby="explore-title">
+      <div class="section-heading">
+        <h2 id="explore-title">Explore the database</h2><span class="section-index" aria-hidden="true">01 / START
+          HERE</span>
+      </div>
+      <div class="landing-link-grid">
+        <a class="landing-link" href="/units"><span class="landing-link-number">01</span><span><strong>Unit
+              explorer</strong><small>Browse armies, profiles, loadouts, and their rules.</small></span><b
+            aria-hidden="true">→</b></a>
+        <a class="landing-link" href="/skills"><span
+            class="landing-link-number">02</span><span><strong>Skills</strong><small>Read concise rules context and
+              trace related rules and units.</small></span><b aria-hidden="true">→</b></a>
+        <a class="landing-link" href="/equipment"><span
+            class="landing-link-number">03</span><span><strong>Equipment</strong><small>Follow equipment rules,
+              variants, relationships, and usage.</small></span><b aria-hidden="true">→</b></a>
+        <a class="landing-link" href="/weapons"><span
+            class="landing-link-number">04</span><span><strong>Weapons</strong><small>Browse weapon profiles, ranges,
+              traits, and usage.</small></span><b aria-hidden="true">→</b></a>
+        <a class="landing-link" href="/traits"><span
+            class="landing-link-number">05</span><span><strong>Traits</strong><small>See what weapon and rules traits
+              mean and where they apply.</small></span><b aria-hidden="true">→</b></a>
+        <a class="landing-link" href="/states"><span
+            class="landing-link-number">06</span><span><strong>States</strong><small>See State effects and what can
+              cause, cancel, or interact with them.</small></span><b aria-hidden="true">→</b></a>
+      </div>
+    </section>
+    <aside class="landing-about" aria-labelledby="landing-about-title">
+      <div>
+        <p class="eyebrow">Independent open-source community project</p>
+        <h2 id="landing-about-title">Built for the community.</h2>
+        <p>InfinityDB is a non-commercial open-source community project and is not affiliated with Corvus Belli S.L.
+          Corvus Belli has explicitly granted InfinityDB permission to use and redistribute the Infinity graphical
+          assets used by the project.</p>
+      </div>
+      <a class="button button-primary" href="/about">About InfinityDB <span aria-hidden="true">→</span></a>
+    </aside>
+    <!-- page-footer -->
+  </main>
+</body>
+
 </html>

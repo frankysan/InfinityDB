@@ -23,8 +23,10 @@ from infinity_db.catalog_slugs import (
 )
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.domain_slugs import require_domain_slug
+from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
 from infinity_db.unit_slugs import (
     attach_public_unit_slug,
@@ -52,6 +54,8 @@ ASSETS = {
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
+    "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
+    "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
     "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
 }
 ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
@@ -75,6 +79,8 @@ EQUIPMENT_API_PATH = re.compile(
 )
 WEAPON_PAGE_PATH = re.compile(rf"/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 WEAPON_API_PATH = re.compile(rf"/api/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+STATE_PAGE_PATH = re.compile(rf"/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+STATE_API_PATH = re.compile(rf"/api/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
@@ -165,6 +171,10 @@ def _page(
         .replace(
             "{{TRAITS_CURRENT}}",
             ' aria-current="page"' if active_page == "traits" else "",
+        )
+        .replace(
+            "{{STATES_CURRENT}}",
+            ' aria-current="page"' if active_page == "states" else "",
         )
         .replace(
             "{{SKILL_EXTRAS_CURRENT}}",
@@ -324,7 +334,9 @@ class Application:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
         self.trait_catalog = TraitCatalog(self.database, self.rules_database)
+        self.state_catalog = StateCatalog(self.rules_database)
         self.skill_catalog = SkillCatalog(self.database, self.rules_database)
+        self.equipment_catalog = EquipmentCatalog(self.database, self.rules_database)
         self.catalog_rules = CatalogRules(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
@@ -444,7 +456,7 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
                 catalog_tag="Reference data",
             )
-        elif path in {"/skills", "/equipment", "/weapons", "/traits"}:
+        elif path in {"/skills", "/equipment", "/weapons", "/traits", "/states"}:
             content_type = "text/html; charset=utf-8"
             catalog = path.removeprefix("/")
             body = _page(
@@ -507,6 +519,20 @@ class Application:
                 ),
                 catalog_tag="Reference data",
             )
+        elif STATE_PAGE_PATH.fullmatch(path):
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "states-detail.html",
+                active_page="states",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(
+                    ("Database", "/"),
+                    ("States", "/states"),
+                    ("Details", None),
+                ),
+                catalog_tag="Rules reference",
+            )
         elif path == "/about":
             content_type = "text/html; charset=utf-8"
             body = _page(
@@ -534,12 +560,12 @@ class Application:
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 catalog = path.removeprefix("/api/")
-                items = (
-                    self.skill_catalog.list_skills()
-                    if catalog == "skills"
-                    else self.database.list_catalog_items(catalog)
-                )
-                if catalog in {"equipment", "weapons"}:
+                if catalog == "skills":
+                    items = self.skill_catalog.list_skills()
+                elif catalog == "equipment":
+                    items = self.equipment_catalog.list_equipment()
+                else:
+                    items = self.database.list_catalog_items(catalog)
                     for item in items:
                         attach_public_catalog_slug(self.database, catalog, item)
                 payload = {"items": items}
@@ -555,6 +581,14 @@ class Application:
                 LOGGER.exception("Could not read traits")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The traits are unavailable. Please try again."}
+        elif path == "/api/states":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = {"items": self.state_catalog.list_states()}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read states")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The states are unavailable. Please try again."}
         elif match := SKILL_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
@@ -579,12 +613,11 @@ class Application:
             try:
                 identifier = match.group("identifier")
                 item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.database.get_catalog_item("equipment", item_ref)
+                payload = self.equipment_catalog.get_equipment(item_ref)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
                 else:
-                    attach_public_catalog_slug(self.database, "equipment", payload)
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
@@ -632,6 +665,17 @@ class Application:
                 LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The trait is unavailable. Please try again."}
+        elif match := STATE_API_PATH.fullmatch(path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = self.state_catalog.get_state(match.group("identifier"))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "State not found"}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read state")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The state is unavailable. Please try again."}
         elif path == "/api/armies":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
@@ -671,6 +715,12 @@ class Application:
                 payload = {"error": str(exc)}
             else:
                 try:
+                    logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
+                        query.get("equipment_id")
+                    )
+                    if logical_unit_ids is not None:
+                        query["equipment_id"] = None
+                        query["_logical_unit_ids"] = logical_unit_ids
                     payload = self.database.list_units(**query)
                     payload = {
                         **payload,
@@ -692,6 +742,7 @@ class Application:
                 payload = self.database.get_unit(unit_ref)
                 if payload is not None:
                     payload = self.skill_catalog.enrich_unit(payload)
+                    payload = self.equipment_catalog.enrich_unit(payload)
                     payload = enrich_nested_catalog_slugs(
                         self.database,
                         payload,

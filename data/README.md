@@ -30,9 +30,9 @@ provenance/state, and build outputs.
   publication but not in the incoming one. Publication creates these only as
   part of a successful replacement transaction. Ignored by Git.
 - `manifests/snapshots/` — downloader-generated snapshot provenance. Each JSON
-  record is labeled from the archive filename, bound to its immutable SHA-256,
-  and records the snapshot type, archive label/path when project-relative,
-  acquisition time, source URL,
+  record is labeled from the archive filename, records both the logical snapshot
+  content SHA-256 and exact archive SHA-256, and records the snapshot type,
+  archive label/path when project-relative, acquisition time, source URL,
   document count, optional language, and optional input-artifact provenance.
   Ignored by Git, excluded from Docker build context, and outside Python package
   data.
@@ -70,31 +70,44 @@ revisions remain URL-backed sources.
 
 ## Snapshot provenance contract
 
-Army, wiki, and symbol downloaders write version-1 `InfinityDB snapshot
-provenance` documents under `manifests/snapshots/`. Wiki acquisition is
-fail-closed for required content: if any required eligible URL discovered during
-the crawl cannot be fetched, the run reports the failed URLs, publishes neither
-a `WIKI-<language> ...zip` archive nor snapshot provenance, and preserves the
-partial crawl under `work/wiki/`. Optional site chrome/project links that are not
-part of the mirrored content contract—currently `/favicon.ico` and pages in the
-`Infinity:` MediaWiki project namespace—are reported as ignored rather than
-failures. Wiki crawls are language-scoped: English is the default, Spanish is
-selected explicitly, same-language pages are mirrored, and cross-language
-assets are included only when an included page references them. Only a complete
-successful crawl becomes an immutable wiki snapshot.
+Army, wiki, and symbol downloaders write version-2 `InfinityDB snapshot
+provenance` documents under `manifests/snapshots/`. Version-1 manifests remain
+valid historical provenance and continue to verify their exact archive SHA-256.
+Wiki acquisition is fail-closed for required content: if any required eligible
+URL discovered during the crawl cannot be fetched, the run reports the failed
+URLs, publishes neither a `WIKI-<language> ...zip` archive nor snapshot
+provenance, and preserves the partial crawl under `work/wiki/`. Optional site
+chrome/project links that are not part of the mirrored content contract—currently
+`/favicon.ico` and pages in the `Infinity:` MediaWiki project namespace—are
+reported as ignored rather than failures. Wiki crawls are language-scoped:
+English is the default, Spanish is selected explicitly, same-language pages are
+mirrored, and cross-language assets are included only when an included page
+references them. Only a complete successful crawl becomes an immutable wiki
+snapshot.
 
-The manifest filename
-mirrors the archive label with a `.json` suffix, while the archive's lowercase
-SHA-256 digest is stored inside the document and is the authoritative identity
-that can be revalidated against the archive. Generated JSON serialization is
-deterministic.
+The manifest filename mirrors the archive label with a `.json` suffix. Version 2
+stores two separate SHA-256 values:
+
+- `snapshot.contentSha256` identifies the logical snapshot from normalized
+  relative member paths plus member bytes. ZIP timestamps, permissions,
+  compression method/level, entry order, comments, and other container metadata
+  do not affect this identity.
+- `snapshot.archive.sha256` identifies the exact ZIP byte stream and remains the
+  integrity check for the physical artifact.
+
+Snapshot ZIP creation also normalizes member ordering, timestamps, permissions,
+comments, and extra fields and uses a fixed DEFLATE profile, so archives created
+by the same implementation from identical files are byte-for-byte reproducible.
+The logical content hash remains independent of compressor implementation details.
+Generated JSON serialization is deterministic.
 
 Persistent paths are stored only when the file is inside the project root, and
 then use portable project-relative POSIX form. Machine-specific absolute paths
-are never written. A repeated attempt to write identical provenance for the same manifest label
-is idempotent; conflicting provenance for that label fails instead of rewriting
-the record. Byte-identical archives acquired under different labels may have
-separate manifests with the same authoritative SHA-256.
+are never written. A repeated attempt to write identical provenance for the same
+manifest label is idempotent; conflicting provenance for that label fails instead
+of rewriting the record. Reacquiring the same logical content under a different
+archive label may therefore produce another provenance record with the same
+`contentSha256`, even if the exact archive SHA-256 differs.
 
 Symbol snapshot provenance also records the hash of the Army source artifact
 used by symbol acquisition. `tools/build_symbols.py` verifies the corresponding
@@ -120,8 +133,10 @@ versions 2 through 8 as valid historical/intermediate state for compatibility.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
-notes are keyed to the immutable snapshot SHA-256 rather than to an archive
-filename and are not application/runtime inputs.
+notes are not application/runtime inputs. Their current version-1 contract still
+uses the exact archive SHA-256; migrating that separate curated contract to the
+logical content identity can be done independently once the new snapshot identity
+has been exercised on real acquisitions.
 
 Army JSON `version` values are per-document Corvus Belli source revisions, not
 InfinityDB snapshot versions. Their evidence-backed interpretation and the
@@ -137,6 +152,8 @@ where local data classes live; it does not duplicate the complete processing
 algorithm or backlog.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
-Belli graphical assets are not automatically covered by InfinityDB's MIT
-License. Review the repository's [third-party notices](../THIRD_PARTY_NOTICES.md)
-before redistributing any snapshot or derived artifact that contains them.
+Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli
+has explicitly permitted InfinityDB to redistribute the processed graphical
+publication used by this non-commercial project; raw Army/wiki/PDF/source-symbol
+archives remain separate local/provenance inputs by project policy. Review the
+repository's [third-party notices](../THIRD_PARTY_NOTICES.md) for the full boundary.

@@ -5,7 +5,70 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
-_No unreleased changes._
+## [0.7.0] - 2026-09-25
+
+### Added
+
+- Complete the 0.7.0 rules/context enrichment gate across the public Skill, Equipment,
+  Trait, State, and supporting rules catalogs. The maintained interaction review now
+  covers all 182 primary release identities plus supporting identities, while genuinely
+  unresolved cross-domain or runtime-scoped interactions remain explicit future work.
+- Add the complete current State reference, including the deliberate IMP-1/IMP-2 split,
+  and expose reviewed typed relationships for State entry, cancellation, recovery,
+  restrictions, modifiers, and effect reuse with derived reverse navigation.
+- Expand the rules-backed Skill and Equipment reference with reviewed N5.3 Common/Special
+  Skills and Equipment semantics, including recovery, deployment, mobility, morale,
+  survivability, reaction/combat, Peripheral, and exact-variant interactions.
+- Surface Infinity Army's structured Hacking Program, Martial Arts, Booty, and
+  MetaChemistry reference data on Skill detail pages while preserving applicability,
+  declaration categories, profile fields, conditional/random outcomes, and provenance.
+- Normalize Cube and Cube 2.0 profile-symbol occurrences into canonical Equipment
+  identities without inventing textual Army rows, so their usage is available through
+  Equipment browsing, filtering, Unit references, and symbol navigation.
+- Add deterministic enrichment/presentation audits and the long-lived interaction ledger
+  so release-target coverage, source freshness, unresolved targets, supporting identities,
+  and explicitly deferred relationships fail closed or remain visibly classified.
+
+### Changed
+
+- Make rules presentation semantics backend-owned: curated summaries, labels, declaration
+  categories, exact-source variants, and direction-aware related-rule metadata now flow
+  through the maintained rules/application contracts instead of parallel browser logic.
+- Improve catalog readability with multi-category Skill types, explicit Requirements /
+  Effects / Restrictions, clearer related-rule grouping, exact variant labels, and stable
+  links from rules-only relation targets to their detail pages.
+- Present Army weapon-profile `damage` as N5 Possibility of Survival (`PS`) while preserving
+  the upstream field name in stored/application data for compatibility and provenance.
+- Rewrite the landing/About framing around InfinityDB's current rules-enriched scope and
+  roadmap, including prominent open-source/non-commercial/non-affiliation wording and the
+  explicit Corvus Belli graphical-asset permission.
+- Track the validated processed Corvus Belli SVG publication and `symbol-inventory.json` as
+  release content. Required source/package/container validation now checks the tracked
+  publication directly; transferred-artifact deployment sends only generated databases plus
+  the terminal symbol manifest while the matching Git revision supplies tracked symbols. Raw
+  Army/wiki/PDF/source-symbol archives remain local provenance inputs, and the checksum-pinned
+  external-bundle workflow remains supplementary.
+- Complete the post-vetting presentation consistency pass: normalize maintained rules
+  terminology, keep occurrence-only Army extras on their source rows, preserve source and
+  applicability context, and improve narrow-layout catalog/detail presentation.
+
+### Fixed
+
+- Keep very narrow Unit details readable: long titles may wrap within the viewport and
+  General-profile labels stack above their value areas at 400 px and below instead of
+  compressing the Attribute statline into overlapping columns.
+
+### Upgrade notes
+
+- Rebuild the generated Army databases before deploying 0.7.0. Schema 24 / compatibility
+  revision 32 adds the structured Hacking Program, Martial Arts, Booty, and MetaChemistry
+  application projections used by the enriched Skill surfaces.
+- Rebuild `rules.db` from the tracked curated rules collections so the deployed reference
+  includes the complete 0.7.0 Skill, Equipment, Trait, State, and interaction enrichment.
+- The processed Corvus Belli SVG publication and `symbol-inventory.json` are now tracked
+  release content. Raw Army/wiki/PDF/source-symbol archives remain local build/provenance
+  inputs; guarded production deployment still requires the local terminal symbol-build
+  manifest to bind the runtime Army database to the tracked publication.
 
 ## [0.6.3] - 2026-09-22
 

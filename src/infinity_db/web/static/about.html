@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <meta name="description"
-    content="Learn how InfinityDB turns Infinity Army snapshots and API metadata into a fast, local reference for units, rules, equipment, weapons, and traits.">
+    content="Learn how InfinityDB connects official Infinity Army data with maintained N5.3 rules context in an open-source community reference.">
   <title>About · InfinityDB</title>
   <link rel="stylesheet" href="/static/styles.css">
   <script type="module" src="/static/about.js"></script>
@@ -20,11 +20,9 @@
 
     <section class="intro about-intro" aria-labelledby="page-title">
       <div>
-        <p class="eyebrow">A local reference for Infinity</p>
+        <p class="eyebrow">An open-source community reference for Infinity</p>
         <h1 id="page-title">Know your options.<span></span></h1>
-        <p class="intro-copy">InfinityDB turns Infinity Army snapshots and API metadata into a clear, searchable
-          reference. It is made for the time between an idea and a game: exploring an army, checking a profile, and
-          understanding the rules, equipment, weapons, and traits that shape a list.</p>
+        <p class="intro-copy">InfinityDB connects official Infinity Army data with maintained N5.3 rules context so you can move between armies, profiles, equipment, weapons, Skills, Traits, States, and the rules that relate them without having to reconstruct those connections yourself.</p>
       </div>
       <img class="about-logo" src="/static/infinitydb-logo.svg" alt="" data-themed-logo>
     </section>
@@ -33,42 +31,30 @@
       <article class="about-feature">
         <span class="about-number" aria-hidden="true">01</span>
         <div>
-          <h2>Explore what you can field</h2>
-          <p>Choose an army to narrow the unit catalog to the troops it contains. Search by name or filter by skills,
-            equipment, and weapons; include optional availability such as mercenaries or reinforcements when useful;
-            then open a unit to see the profiles and loadouts available in each army.</p>
+          <h2>Explore the game data you already use</h2>
+          <p>Browse units by army, profile, availability, Skill, Equipment, and Weapon. Unit pages bring together profiles, loadouts, AVA, characteristics, and army-specific context, while the dedicated catalogs let you approach the same data from the rules or equipment side.</p>
         </div>
       </article>
       <article class="about-feature">
         <span class="about-number" aria-hidden="true">02</span>
         <div>
-          <h2>Follow details to their source</h2>
-          <p>Unit pages collect general and army-specific profiles, statistics, AVA, skills, equipment, weapons, and
-            loadouts in one place. Skills, Equipment, and Weapons catalogs let you work backwards from an item to the
-            units and loadouts that use it, while Traits adds concise summaries and shows where shared special rules
-            apply.</p>
+          <h2>Follow rules instead of hunting for them</h2>
+          <p>Skills, Equipment, Traits, and States include concise reviewed summaries, authoritative source links, structured classifications, and bidirectional related-rule links where the interaction can be represented accurately. The goal is not to replace the rules, but to make the relationships around the data easier to understand.</p>
         </div>
       </article>
       <article class="about-feature">
         <span class="about-number" aria-hidden="true">03</span>
         <div>
-          <h2>Data-driven from official sources</h2>
-          <p>InfinityDB derives its reference data from official Infinity Army snapshots and API metadata. It merges,
-            normalizes, and validates those sources before importing them into a local SQLite database, so the browser
-            can present connected game data through a small, read-only API.</p>
+          <h2>Keep source and interpretation visible</h2>
+          <p>InfinityDB imports, normalizes, validates, and reconciles its maintained sources before publishing a read-only application database. Source-native facts, curated rules context, and InfinityDB-specific interpretations are kept distinct so useful presentation does not erase provenance or uncertainty.</p>
         </div>
       </article>
     </section>
 
     <section class="surface surface--highlighted about-callout" aria-labelledby="about-callout-title">
-      <p class="eyebrow">Purpose and direction</p>
-      <h2 id="about-callout-title">Less hunting. More planning.</h2>
-      <p>InfinityDB is growing into a better companion for choosing, collecting, and playing your army. Alongside fast
-        unit and rules reference, including the first concise trait summaries, the roadmap includes fuller summaries
-        for skills, equipment, ammunition, and remaining traits; Fireteam eligibility and reference pages; model
-        imagery; and a personal collection tracker. Every
-        addition should help you spend less time hunting through data and more time making informed choices for the
-        table.</p>
+      <p class="eyebrow">Where the project is going</p>
+      <h2 id="about-callout-title">From reference data to a connected Infinity reference.</h2>
+      <p>Version 0.7 focuses on rules context for the catalogs InfinityDB already exposes. The next phase will identify and connect more of the game's structure, including relationships such as Fireteams, Peripherals and Controllers, loadout dependencies, and Reinforcement parentage. Later work will close remaining presentation gaps and improve search, navigation, mobile use, accessibility, and themes on the way to a player-data-complete 1.0 reference.</p>
       <a class="button button-primary" href="/units">Explore units <span aria-hidden="true">→</span></a>
     </section>
 
@@ -78,28 +64,24 @@
       <div class="about-principles-grid">
         <article>
           <h3>Accuracy</h3>
-          <p>InfinityDB uses official data sources and strives to represent them as accurately as possible. When a
-            source is incomplete or ambiguous, that uncertainty should remain visible.</p>
+          <p>InfinityDB uses maintained primary sources and aims to preserve what they actually say. When sources are incomplete, version-specific, or ambiguous, that uncertainty should remain visible rather than being silently guessed away.</p>
         </article>
         <article>
-          <h3>Flexibility</h3>
-          <p>InfinityDB should make its data easy to browse in more ways over time while staying simple, fast, and
-            customizable to the way you plan and play.</p>
+          <h3>Connectivity</h3>
+          <p>Useful facts should link to the other facts that give them context. InfinityDB prefers explicit, reviewed relationships over name matching or duplicated prose, while avoiding links that would imply more than the rules support.</p>
         </article>
         <article>
           <h3>Transparency</h3>
-          <p>InfinityDB is open source under the MIT License. Outside data, quoted text, and image assets belong to
-            their respective owners and are kept distinct from the project's own work.</p>
+          <p>InfinityDB is a non-commercial open-source community project and is not affiliated with Corvus Belli S.L. The Infinity artwork, logos, symbols, and game data remain the property of Corvus Belli, which has explicitly permitted InfinityDB to use and redistribute the graphical assets used by the project. Those materials are separate from InfinityDB's MIT-licensed original work.</p>
         </article>
       </div>
     </section>
 
     <section class="surface about-details" aria-labelledby="about-details-title">
       <div>
-        <p class="eyebrow">Independent project</p>
+        <p class="eyebrow">Independent community project</p>
         <h2 id="about-details-title">Made by Johannes "Franky" Haglund</h2>
-        <p>InfinityDB is created and maintained by Johannes "Franky" Haglund. Support questions, suggestions, or
-          feedback can be submitted on the project's GitHub page.</p>
+        <p>InfinityDB is created and maintained by Johannes "Franky" Haglund and developed in the open. Source code, issues, suggestions, and project history are available on GitHub.</p>
       </div>
       <a class="button button-secondary" href="https://github.com/frankysan/InfinityDB">View the project on GitHub <span
           aria-hidden="true">&rarr;</span></a>

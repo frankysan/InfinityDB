@@ -3,21 +3,23 @@
 This document records the InfinityDB continuous-integration and automated
 validation contract. Sections explicitly marked design direction remain planned;
 the deployment smoke, required cross-platform source workflow, installed-wheel
-smoke, local asset-test policy, and dispatch-only full-asset workflow are current
-behavior.
+smoke, tracked published-asset policy, and dispatch-only external-bundle full-asset
+workflow are current behavior.
 
 The goal is to make a clean checkout independently trustworthy while still
-supporting deeper validation against a complete local Corvus Belli graphical
-asset set when one is legitimately available.
+supporting deeper validation against a complete Corvus Belli graphical
+publication. Redistribution of that processed publication is explicitly permitted
+for InfinityDB's non-commercial scope; CI independence is an engineering choice,
+not a licensing requirement.
 
 ## Principles
 
 1. **Hermetic validation is the default.** Required push/pull-request checks must
-   not depend on Corvus Belli network availability, ignored local graphical
-   assets, or developer-machine state.
-2. **Full-asset validation remains supported.** Tests that genuinely exercise
-   the acquired/published symbol set are valuable, but they form an explicit
-   integration mode rather than a prerequisite for ordinary source validation.
+   not depend on Corvus Belli network availability, raw acquisition inputs, or
+   developer-machine state.
+2. **Published-asset validation is required.** The approved processed SVG publication
+   is tracked release content, so ordinary source validation verifies it directly. The
+   manual external-bundle workflow remains a supplementary independent validation path.
 3. **Acquisition is not routine CI.** Army, wiki, and symbol network refreshes
    remain explicit operations. Ordinary CI consumes tracked fixtures and other
    repository-owned inputs.
@@ -27,9 +29,11 @@ asset set when one is legitimately available.
 5. **Platform behavior is part of correctness.** Maintained Python tooling should
    be exercised on Windows, Ubuntu/Linux, and macOS where practical, especially
    filesystem/path-sensitive tooling.
-6. **Third-party graphical assets are not CI artifacts.** Public workflows must
-   not upload acquired Corvus Belli SVG trees or derived copies merely to make
-   testing convenient.
+6. **Raw third-party acquisition inputs are not routine CI artifacts.** Public
+   workflows must not upload Army/wiki/PDF/source-symbol archives merely to make
+   testing convenient. Corvus Belli has permitted redistribution of InfinityDB's
+   processed graphical publication, which is tracked release content; raw acquisition
+   archives remain excluded.
 
 ## Validation layers
 
@@ -37,8 +41,9 @@ asset set when one is legitimately available.
 
 The `Source checks` GitHub Actions workflow is configured to run on pull requests, pushes to
 `main`, and manual dispatch. Its matrix covers clean Windows, Ubuntu/Linux, and
-macOS runners at Python 3.11, plus Linux at Python 3.14. Third-party graphical
-assets are absent, and every leg delegates validation to `tools/run_checks.py`.
+macOS runners at Python 3.11, plus Linux at Python 3.14. The tracked processed
+graphical publication is present, and every leg delegates validation to
+`tools/run_checks.py` with `--assets required`.
 
 The Ubuntu/Python 3.11 leg is the primary source gate and runs `--all`: pytest,
 Ruff, Pyright, Army database construction, and curated rules database
@@ -55,13 +60,13 @@ stable. Linux and macOS CI use automatic worker selection.
 The tracked synthetic Army fixture supplies the explicit clean-checkout input
 for the Army build stage; ordinary source archives intentionally do not contain a
 real `data/raw/` snapshot. Every matrix leg installs `.[dev,symbols]`, so the
-hermetic pytest coverage still exercises the real fontTools, tinycss2/cssselect2,
+pytest coverage also exercises the real fontTools, tinycss2/cssselect2,
 and Pillow Python dependencies.
 
 Focused regression coverage for the maintained standalone tools is included in
-the hermetic suite. Routine validation of checked-in snapshot notes remains a
-follow-up item. A clean source archive is expected to be genuinely green; absent
-ignored graphical assets are not a known-failing state.
+the source suite. Routine validation of checked-in snapshot notes remains a
+follow-up item. A clean source archive is expected to contain and validate the
+complete tracked processed SVG publication.
 
 The workflow defines InfinityDB's required source-validation contract, while
 merge blocking remains a repository setting rather than a workflow-YAML property.
@@ -120,8 +125,9 @@ build/ingestion commands intentionally consume the packaged maintained data.
 ### Deployment smoke (configured)
 
 The configured `Deployment smoke test` is a distinct Linux/container layer.
-It builds synthetic `infinity.db` and tracked `rules.db`, builds the
-redistributable image, validates exact runtime database contents, starts the
+It builds synthetic `infinity.db` and tracked `rules.db`, builds the application
+image with the tracked processed SVG publication, validates exact runtime database
+contents and packaged assets, starts the
 application under its production restrictions, and exercises representative API
 behavior.
 
@@ -134,9 +140,9 @@ separately by the installed-wheel smoke layer.
 This layer verifies deployment packaging; it is not a substitute for general
 source CI or installed-wheel validation.
 
-### Full-asset integration mode (current local behavior and configured manual CI)
+### Tracked published-asset integration and external-bundle validation
 
-`tools/run_checks.py` has an explicit asset policy with three modes:
+`tools/run_checks.py` retains the explicit asset policy with three modes:
 
 ```text
 --assets off
@@ -146,59 +152,44 @@ source CI or installed-wheel validation.
 
 The implemented local semantics are:
 
-| Mode | Behavior |
-| --- | --- |
-| `off` | Do not use third-party graphical assets. Run the hermetic suite only. This is the default for required CI. |
-| `auto` | Use full-asset tests when a validated complete asset set is available. With no asset set, run hermetically. A detected partial/corrupt asset set is an error rather than a reason to silently downgrade. |
-| `required` | Require a validated complete asset set and run full-asset integration tests. Missing, partial, or invalid assets fail the check run. |
+- `off`: skip publication validation and `full_assets` pytest coverage.
+- `auto`: use full-asset coverage when a validated complete asset set is available;
+  a detected partial/corrupt set is an error rather than a silent downgrade.
+- `required`: require a validated complete asset set and include `full_assets`
+  integration coverage.
 
-A "complete asset set" is established by the generated publication inventory,
-not by the smaller set currently referenced by the browser and not by the mere
-presence of SVG files. Final symbol publication writes `symbol-inventory.json`
-with every published SVG path and SHA-256. The validator requires that complete
-inventory to be present, parseable, hash-correct, and free of unexpected SVGs.
-It then independently derives the browser-referenced subset from
-`army-symbols.js`, `unit-symbol-map.js`, and the current order/characteristic
-endpoints and verifies that subset is contained in the publication. Published
-variants that are not yet browser-referenced remain valid and required parts of
-the full asset set.
+The complete processed SVG publication and `symbol-inventory.json` are tracked release
+content, so required source CI now uses `--assets required` directly from a clean
+checkout. A complete asset set is established by the generated publication inventory,
+not merely by the presence of SVG files. The validator checks every published path and
+SHA-256, rejects unexpected SVGs, and independently verifies that the browser-referenced
+subset is contained in the publication. Published variants that are not yet
+browser-referenced remain valid and required parts of the complete publication.
 
-Asset-dependent pytest coverage is marked `full_assets` and separated from the
-hermetic suite. Direct pytest excludes `full_assets` by default. Hermetic web
-coverage uses project-owned temporary SVG fixtures for dynamic static serving,
-and version-display assertions consume the controlled application display
-version rather than relying on incidental `.git` state.
+Asset-dependent pytest coverage remains marked `full_assets`; direct pytest excludes it
+by default, while the project runner includes it in `required` mode. Network/external-tool
+symbol acquisition remains outside required CI: CI validates the approved processed
+publication rather than reconstructing it from raw source inputs.
 
-The dispatch-only `Full-asset checks` workflow defines the optional GitHub
-layer on a GitHub-hosted Ubuntu/Python 3.11 runner. It is restricted to the
-`main` ref and uses the `full-assets` GitHub environment so access to the private
-bundle can be controlled independently from ordinary source CI. That environment
-provides `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets. The
-URL must resolve over HTTPS, and the configured digest pins the exact bundle used
-by the run.
-
-`tools/stage_full_asset_bundle.py` downloads the bundle without printing its
-URL, enforces download/expanded-size limits, rejects path traversal, symlinks,
-encrypted members, case-colliding names, and files outside the
-`armies/`, `characteristics/`, `orders/`, and `units/` SVG trees plus the exact
-root `symbol-inventory.json`, then validates the complete publication inventory
-and the browser-referenced subset before replacing the ignored local asset
-directories/inventory. The private bundle therefore carries the same generated
-publication inventory as the local published tree. The workflow then runs:
+The dispatch-only `Full-asset checks` workflow is retained as a supplementary,
+independent validation path. It is restricted to `main` and uses the `full-assets`
+GitHub environment. `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` identify a
+checksum-pinned HTTPS ZIP. `tools/stage_full_asset_bundle.py` downloads that bundle
+without printing its URL, enforces download/expanded-size limits, rejects path traversal,
+symlinks, encrypted members, case-colliding names, and files outside the four published
+SVG namespaces plus the root `symbol-inventory.json`, then validates and stages that
+publication before running:
 
 ```text
 python tools/run_checks.py --all --assets required \
   --build-source tests/fixtures/deployment-smoke
 ```
 
-The bundle is deliberately supplied privately rather than reconstructed by CI.
-InfinityDB now has an authoritative publisher, but required/manual full-asset CI
-still avoids rerunning the network/external-tool-sensitive symbol acquisition and
-processing pipeline; it validates the already-published contract instead. The
-workflow has no push or pull-request trigger and does not upload the bundle or
-staged graphical tree as a GitHub Actions artifact. The environment secrets
-therefore remain an explicit repository-administration prerequisite before a
-manual run can succeed.
+The manual workflow no longer exists to supply assets that required source CI lacks; its
+purpose is to validate a separately supplied pinned publication bundle against the same
+contract. It has no push or pull-request trigger and does not upload the staged graphical
+tree as a GitHub Actions artifact. The environment secrets therefore remain an explicit
+repository-administration prerequisite only for this optional independent check.
 
 ## Network and scheduled workflows
 
@@ -213,17 +204,16 @@ networked or long-running benchmark.
 
 ## Remaining follow-up work
 
-The deployment-smoke runtime import boundary, local hermetic/full-asset test
-split, cross-platform source workflow, installed-wheel smoke, dispatch-only
-full-asset workflow, protected-`main` ruleset, and focused standalone-tool
-regression coverage are implemented or configured. Hosted workflow results and
-the private full-asset bundle remain release-evidence and repository-administration
-work; see the backlog. These layers remain the baseline for the Milestone 2
-consistency audit.
+The deployment-smoke runtime import boundary, tracked published-asset validation,
+cross-platform source workflow, installed-wheel smoke, dispatch-only external-bundle
+full-asset workflow, protected-`main` ruleset, and focused standalone-tool regression
+coverage are implemented or configured. Hosted workflow results and the optional
+external-bundle environment configuration remain release-evidence/repository-
+administration work; see the backlog. These layers remain the baseline for the
+Milestone 2 consistency audit.
 
-Non-blocking CI follow-up remains in the backlog: validate checked-in snapshot
-notes routinely, configure the `full-assets` environment secrets with an
-authorized checksum-pinned bundle and record one successful manual run, and
-retain release evidence for required hosted workflows. Scheduled/manual
-acquisition, performance, or other extended workflows should be added only where
-they provide a useful independent signal.
+Non-blocking CI follow-up remains in the backlog: validate checked-in snapshot notes
+routinely, configure the `full-assets` environment secrets with an authorized
+checksum-pinned bundle and record one successful manual run, and retain release evidence
+for required hosted workflows. Scheduled/manual acquisition, performance, or other
+extended workflows should be added only where they provide a useful independent signal.

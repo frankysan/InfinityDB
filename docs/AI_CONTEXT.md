@@ -64,10 +64,14 @@ and serves a read-only browser and same-origin HTTP API.
 - The separate rules-reference database is built from validated curated rules
   collections, not from raw PDFs or wiki snapshots.
 - Trait rule identity is owned by curated `trait` records in `rules.db`: Army
-  storage preserves raw trait labels/usage, and the application composes them
-  with curated canonical names, aliases, parameterized prefixes, summaries, and
-  citations. If `rules.db` is unavailable, raw traits remain usable without
-  invented canonical rule knowledge.
+  storage preserves raw profile-property labels/usage, but that source bucket is
+  not treated as the canonical Trait vocabulary. With `rules.db`, `TraitCatalog`
+  starts from all current curated Traits (including zero-use identities), folds
+  matching Army properties through canonical names/aliases/parameterized prefixes,
+  and keeps rules Labels plus generic signed Skill/Equipment modifier notation out
+  of Trait routes. Unresolved raw properties remain provisional. If `rules.db` is
+  unavailable, the raw source-derived catalog remains usable without invented
+  canonical rule knowledge.
 - `infinity_db.web` validates HTTP input, serializes repository results, and
   contains the native-module browser UI.
 - Read-only application/runtime imports must not pull build-time normalization or
@@ -82,13 +86,13 @@ and serves a read-only browser and same-origin HTTP API.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
 - Server migration distinguishes exact runtime transfer from rebuildability.
-  Exact runtime preservation copies the generated databases, terminal symbol
-  build manifest, and complete local published symbol inventory on the same Git
-  revision; reproducible rebuilds
-  additionally preserve immutable Army/SYMBOLS snapshots, generated provenance,
-  `army-symbol-build.json`, and local overrides. Cross-machine SVG regeneration
-  is not promised byte-identical because fonts and external processor versions
-  remain environment-sensitive; see `docs/server-migration.md`.
+  Exact runtime preservation checks out the same Git revision for the tracked
+  processed symbol publication and copies only the generated databases plus local
+  terminal symbol-build manifest; reproducible rebuilds additionally preserve
+  immutable Army/SYMBOLS snapshots, generated provenance, and local overrides.
+  Cross-machine SVG regeneration is not promised byte-identical because fonts and
+  external processor versions remain environment-sensitive; see
+  `docs/server-migration.md`.
 - Local tests separate hermetic and full-asset coverage explicitly.
   `run_checks.py --assets off|auto|required` validates the complete generated
   publication inventory (`symbol-inventory.json`, path + SHA-256 for every
@@ -105,8 +109,9 @@ and serves a read-only browser and same-origin HTTP API.
 - GitHub `Source checks` is configured to run hermetic checks on clean Windows,
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
-  uses the tracked synthetic Army fixture rather than live acquisition or ignored
-  graphical assets. Ubuntu/Python 3.11 owns the complete pytest/Ruff/Pyright/
+  uses the tracked synthetic Army fixture rather than live acquisition, while the
+  tracked processed graphical publication is validated directly. Ubuntu/Python 3.11
+  owns the complete pytest/Ruff/Pyright/
   build/rules gate; the other matrix legs retain pytest plus Army/rules build
   compatibility coverage without repeating lint/type checks. Hosted Windows
   Actions explicitly uses serial pytest (`--test-workers 0`) because automatic
@@ -121,13 +126,12 @@ and serves a read-only browser and same-origin HTTP API.
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases
   through the runtime application outside the checkout.
-- `Full-asset checks` is configured as dispatch-only, restricted to `main`, and stages a private
-  checksum-pinned published-asset ZIP from the existing `full-assets` GitHub
-  environment before running `run_checks.py --assets required`. It does not
-  upload the graphical tree as an artifact, and it intentionally does not rerun
-  the network/external-tool-sensitive symbol pipeline from raw inputs. The
-  environment exists, but its authorized bundle URL/digest secrets still must be
-  configured before the manual job can succeed. See `docs/ci.md`.
+- The processed SVG publication is tracked release content. Required `Source checks`
+  runs `run_checks.py --assets required` directly from the checkout and still does not
+  rerun network/external-tool symbol acquisition from raw inputs. The dispatch-only
+  `Full-asset checks` workflow remains available as an independent checksum-pinned
+  external-bundle validation path and still uses the `full-assets` environment. See
+  `docs/ci.md`.
 
 ## Non-obvious Army data invariants
 
@@ -415,9 +419,14 @@ concurrency must remain safe under the Windows `spawn` model.
 
 ### Current
 
-Downloaded Corvus Belli graphical assets remain outside the public repository
-unless redistribution permission clearly allows inclusion. Local corrected
-image overrides likewise remain ignored unless redistribution status changes.
+Corvus Belli granted InfinityDB explicit permission on 2026-09-24 to use and
+redistribute the requested graphical assets for the project's non-commercial scope,
+including public Git repository/build-package inclusion and technical SVG
+optimization. The processed publication may therefore be tracked and distributed,
+but it remains Corvus Belli property and outside the MIT License. Raw Army, wiki,
+PDF, and source-symbol archives remain outside the public repository by project
+policy. The processed SVG trees and publication inventory are now tracked
+release content; local corrected image overrides remain ignored build inputs.
 
 Army-symbol acquisition is now source-semantic and URL/reference based.
 `tools/download_army_symbols.py` discovers every
@@ -555,10 +564,14 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v3 rules contract includes collection/source metadata,
+The current curated-v20 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
-`vocabularySources`, typed records, Army links, related-record links, review
-state, and citations. Versions 1 and 2 must be migrated before ingestion. The
+`vocabularySources`, typed record contributions, Army links, typed related-record
+edges, composition role, review state, exact-source variant semantics, and citations.
+Curated v20 adds `modifies-use-of`, `prevents-state-entry`, and
+`triggered-by-state-entry` for transformations, State-entry prohibitions, and
+State-entry activation triggers that do not fit the earlier generic relation vocabulary.
+Older formats must be migrated before ingestion. The
 reserved `rules/example.json` template is excluded from directory ingestion.
 
 The rules database has its own schema/versioning and replacement lifecycle. It
@@ -627,11 +640,16 @@ compatibility references remain unambiguous JSON integers.
 
 ## Decision log
 
+- 2026-09-24: Corvus Belli granted explicit permission for InfinityDB to use and
+  redistribute the requested graphical assets for the project's non-commercial
+  scope, including processed SVGs in the public repository and build/deployment
+  packages. The assets remain outside MIT; raw Army/wiki/PDF/source-symbol archives
+  remain untracked by project policy.
 - 2026-09-18: CI/testing design separates required hermetic source checks from
-  explicit full-asset integration. Clean public CI must not depend on ignored
-  Corvus Belli graphical assets or live acquisition; full-asset runs require a
-  validated complete asset set and must not redistribute it. Installed-package,
-  deployment, and cross-platform checks are separate validation layers.
+  explicit published-asset integration. Clean public CI validates the tracked processed
+  graphical publication without live acquisition; asset-backed runs require a validated
+  complete asset set. Installed-package, deployment, and cross-platform checks are
+  separate validation layers.
 - 2026-09-12: Database builds require validated Army API metadata. The importer
   enforces this too, so metadata-free normalized data cannot bypass the build
   command and become a database.
@@ -700,11 +718,14 @@ compatibility references remain unambiguous JSON integers.
   matchers. Normalization consumes those validated build inputs and materializes
   their effects; the runtime repository does not load catalog configuration.
 - 2026-09-17: The remaining hard-coded-domain audit classified weapon range bands
-  as derivable presentation data, not configuration. Weapon detail rendering now
-  derives ordered range endpoints from imported profile `distance[].max` values.
+  as presentation data, not configuration. Weapon detail rendering uses the seven
+  standard N5 Weapon Chart endpoints (20/40/60/80/100/120/240 cm, corresponding to
+  8/16/24/32/40/48/96 inches) for every range table. Sparse imported
+  `distance[].max` values define modifier intervals across those columns, and bands
+  beyond the final source endpoint display `--`.
   Distance-skill handling is now source-driven: Army `extras.type` determines
-  `DISTANCE` versus text, while curated skill `parameterSemantics` supplies only
-  rule-derived sign-display behavior for Super-Jump and Forward Deployment.
+  `DISTANCE` versus text, while curated skill `variantSemantics.occurrenceParameters`
+  supplies only rule-derived sign-display behavior for Super-Jump and Forward Deployment.
   Reinforcement prefix normalization is now pinned in the identity config and
   unit-detail profile display names are backend-derived. Remaining audit targets
   are now limited to symbol-semantic name tables reserved for the symbol-pipeline
@@ -775,22 +796,24 @@ compatibility references remain unambiguous JSON integers.
   inputs.
 - 2026-09-19: Local production deployment with symbols is fail-closed. `deploy.sh`
   requires a terminal v8 `army-symbol-build.json` whose SHA-bound inventory and
-  browser maps match the local publication, verifies the complete published set,
-  then validates the exact built image in `--published-assets` mode before Compose
-  activation. Redistributable-image verification remains the inverse contract and
-  rejects third-party graphical trees.
-- 2026-09-19: Deployment artifact transfer is also commit-bound.
-  `tools/send_deployment_artifacts.py` sends only the ignored runtime databases,
-  terminal symbol manifest/inventory, and published SVG trees over one staged SSH
-  session, and refuses a remote checkout whose commit or tracked state differs from
-  the clean local checkout. Tracked browser maps travel through Git, not the artifact
-  transfer, so exact commit identity is part of the transfer contract.
+  browser maps match the publication, verifies the complete published set, then
+  validates the exact built image in `--published-assets` mode before Compose
+  activation. The 0.7.0 tracked-asset migration later replaced the old
+  asset-free/redistributable-image inverse contract with `--packaged-assets`
+  verification for distributable container smoke tests.
+- 2026-09-19: Deployment artifact transfer is commit-bound. The 0.7.0 tracked-asset
+  migration narrowed `tools/send_deployment_artifacts.py` to the ignored runtime
+  databases and terminal symbol manifest; the processed SVG publication, inventory,
+  and browser maps now travel through Git. The helper still uses one staged SSH
+  session and refuses a remote checkout whose commit or tracked state differs from
+  the clean local checkout.
 - 2026-09-20: Production deployment has two explicit data modes.
   `install-or-update.sh` is the server-rebuild path and may replace generated runtime
   databases from server-local raw source. `deploy-transferred.sh` is the no-rebuild
   path for the commit-matched artifact bundle produced by
-  `send_deployment_artifacts.py`; it must preserve that transferred database/symbol
-  pairing. `deploy-local-test.sh` reuses the no-rebuild path under a separate Compose
+  `send_deployment_artifacts.py`; it must preserve the transferred database/manifest
+  pairing with the tracked publication from that same commit. `deploy-local-test.sh`
+  reuses the no-rebuild path under a separate Compose
   project, binds only to `127.0.0.1`, and disables production image pruning.
   `stop-local-test.sh` is the matching teardown path: it always targets only the
   `infinitydb-test` Compose project and retains its named volumes by default.
@@ -914,10 +937,21 @@ compatibility references remain unambiguous JSON integers.
   duplicating curated rules identity into the Army database. Curated Traits already own
   stable typed IDs in `rules.db`; a simple `trait:<slug>` ID projects directly to the
   public Trait route and remains stable across display-name changes. Trait list/detail
-  payloads expose `slug` explicitly. Uncurated raw Traits use the complete Army Trait
+  payloads expose `slug` explicitly. Unresolved raw Army properties use the source-derived
   catalog's shared normalization/collision pass, and application cross-links must reuse
   that assigned slug rather than normalize individual labels independently. Qualified
   typed IDs are not flattened implicitly into route slugs.
+
+- 2026-09-24: The Army `metadata_weapons.properties` bucket is not a rules-native
+  Trait ontology. The reviewed snapshot mixes canonical Traits with rules Labels
+  (`Comms. Attack`, `No LoF`), generic modifier notation (`CC Attack (+3)`), and
+  legacy property spellings (`Technical Weapon`, `Throwing Weapon`). Rules-backed
+  Trait composition is therefore rooted in all 33 current curated Trait identities,
+  including zero-use Traits. Legacy spellings resolve through curated aliases to
+  `BS Weapon (WIP)` / `BS Weapon (PH)`; current Labels and signed modifiers remain
+  unlinked source properties; unknown raw properties retain provisional source
+  identities. The maintained 0.7.0 Trait interaction scope consequently measures
+  the 33 rules-native Traits rather than the raw Army property bucket.
 
 - 2026-09-20: Peripheral rule semantics belong in the existing curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
@@ -989,7 +1023,9 @@ compatibility references remain unambiguous JSON integers.
   they are not listed in the profile's textual Equipment block. Treat this as a
   source-presentation encoding, not an Army-versus-rules classification conflict.
   Preserve the symbol/source occurrence and resolve it to the canonical Equipment
-  identity without inventing a textual source row.
+  identity without inventing a textual source row. As of 0.7.0, the maintained
+  `equipment-presentation-encodings.json` mapping drives Cube/Cube 2.0 catalog usage,
+  Unit API references, detail navigation, and Equipment filtering.
 
 ### Milestone 2B Peripheral identity boundary (2026-09-22)
 
@@ -1095,8 +1131,9 @@ compatibility references remain unambiguous JSON integers.
   chart description and four team observations verbatim because chart notes can override/specialize
   general rules. Wildcards (52 teams / 51 Armies) have no Fireteam type rows. Bracketed equivalence
   wording appears on 406 member rows (453 references / 146 labels) and must not feed Unit identity.
-- `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this boundary.
-  First-class Fireteam repository/API/browser presentation remains a separate 1.0 completeness task.
+- `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this
+  boundary. First-class Fireteam repository/API/browser presentation remains a separate
+  0.8.x connected-data task within the 1.0 completeness program.
 
 ### Milestone 2B normalization-link boundary (2026-09-22)
 
@@ -1127,11 +1164,12 @@ compatibility references remain unambiguous JSON integers.
   raw artifact is planned. It now stores all 70 normalized source tables as queryable relational
   tables **and** exact JSON for every imported normalized row in `__infinity_raw_rows`, under the
   same pinned metadata as `infinity.db`.
-- The logical inventory remains 28 canonical application tables, 40 contextual application tables,
-  and 47 source/provenance-only normalized tables. Published `infinity.db` contains only
-  `__infinity_metadata` plus the 67 retained application tables; the 47 source-only tables are
-  physically absent. Foreign keys targeting raw-only tables are omitted from the published schema,
-  while retained-to-retained foreign keys remain enforced.
+- The logical inventory now contains 28 canonical application tables, 47 contextual application
+  tables, and 47 source/provenance-only normalized tables. Published `infinity.db` contains only
+  `__infinity_metadata` plus the 74 retained application tables; the 47 source-only tables are
+  physically absent. Schema 24 adds the seven structured-reference application tables without
+  changing the raw-source boundary. Foreign keys targeting raw-only tables are omitted from the
+  published schema, while retained-to-retained foreign keys remain enforced.
 - Normal repository/API/web serving and runtime `Database.validate()` do not open
   `infinity.raw.db` and have zero raw-only table reads. Source-dependent semantic checks
   remain mandatory during staging validation rather than being weakened or deleted. Runtime
@@ -1151,14 +1189,268 @@ compatibility references remain unambiguous JSON integers.
   inventory. It covers all 70 normalized source tables / 441 source fields and assigns
   semantic-provenance plus presentation-status classifications; schema growth must fail
   closed until new source constructs are reviewed.
-- The first complete pass records 10 confirmed gap families: Fireteams, includes,
+- The first complete pass recorded 10 confirmed gap families: Fireteams, includes,
   Peripheral/Controller links, selection/dependency relationships, Reinforcement parentage,
   declared faction membership, source-attributed Unit notes, top-level composite Unit
   options, Structure/Wounds labeling, and structured Hacking/Martial Arts/Booty/
-  MetaChemistry reference data. Their roadmap homes are 0.7.x, 0.8.x, and 0.9.x rather
-  than Milestone 2B implementation.
+  MetaChemistry reference data. Schema 24 / compatibility revision 32 closes the
+  structured-reference gap in 0.7.0, so the maintained inventory now reports 9 open
+  families; the remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
-- Milestone 2B shipped in 0.6.3. The next active milestone is 0.7.0 rules-enriched
-  catalog data, not further canonicalization.
+- Milestone 2B shipped in 0.6.3, and the rules-enriched catalog-data milestone shipped
+  in 0.7.0. The next active milestone is 0.8.0 connected game relationships, not further
+  canonicalization or expansion of the completed 0.7.0 release gate.
+
+## 0.7.0 structured Army reference projections (2026-09-25)
+
+- Schema 24 / compatibility revision 32 materializes Army's structured Hacking Program,
+  Martial Arts, Booty, and MetaChemistry metadata into seven derived application tables
+  while leaving the original normalized metadata tables in `infinity.raw.db`.
+- Hacking Program profiles preserve source order, Attack/Opponent MOD, PS, Burst, special
+  text, Device associations, targets, and declaration types. The Hacker Skill detail page
+  exposes the reference table without treating Programs as static Unit facts or inferring
+  Device ownership from names.
+- Martial Arts levels and Booty/MetaChemistry roll-result rows are exposed on their existing
+  Skill detail surfaces. Random outcomes remain deployment/session reference data rather
+  than being written onto Units or loadouts. Richer typed chart-result relationships remain
+  eligible for later domain work.
+- The source-to-presentation completeness audit therefore removes
+  `structured_reference_metadata` from the open gap families.
+
+## 0.7.0 rules-enrichment contract foundation (2026-09-23)
+
+- Curated rules format v6 requires every record to declare `scope.game`, a non-empty
+  `scope.seasons` list, and a review object containing `status` (`draft` or `reviewed`)
+  plus `reviewedOn`, together with a composition role of `definition` or `supplement`.
+  Applicability, review state, and contribution semantics are therefore explicit
+  build-time contract fields rather than optional free-form metadata.
+- Semantic record identity, applicability, and source/publication provenance remain
+  separate. `RulesDatabase` returns collection metadata with each record; citations
+  continue to carry source title/version/URL and location.
+- Army-linked rule lookup consumes only `current` collections by default. Historical
+  or superseded collections may coexist in `rules.db` and can be requested explicitly,
+  but they must not affect normal catalog enrichment merely because they were loaded.
+- Current multi-publication composition is additive and fail-closed: every semantic ID
+  must have exactly one definition, while additional current publications may contribute
+  scoped supplements. Supplement fields are not merged into the definition and no
+  precedence is inferred from load order, collection ID, or effective date.
+- Related-item navigation uses typed one-way semantic edges. Current targets must resolve
+  to current semantic IDs before export; `rules.db` derives reverse links from inbound
+  edges so reciprocal rows are not authored independently. The initial typed relation
+  set covers state entry/reveal and Peripheral subtype/controller-eligibility edges.
+- Skill, Trait, Equipment, and Weapon detail pages share one rules-reference renderer.
+  It displays existing curated summaries/classifications and source citations as links;
+  this is presentation of maintained enrichment, not a new source of rule semantics.
+
+## 0.7.0 variant-aware rules contract (2026-09-23)
+
+- Curated rules format v6 and `rules.db` schema/compatibility 4 make rule inheritance
+  across canonical Army catalog families explicit. Every Army-linked Skill, Equipment,
+  or Weapon definition declares `variantSemantics.inheritance` as `family` or `source`;
+  application catalog grouping alone is never evidence that rule facts are shared.
+- `family` contributions may be presented at the canonical catalog level. `source`
+  contributions require exactly one numeric Army source identity and exactly one typed
+  `variant-of` relation to a same-kind family definition; composition attaches those
+  rules only to the matching source variant. This is the required pattern for exact
+  Levels and named source variants whose rules differ.
+- Army routing belongs to definition contributions. Supplements inherit the definition's
+  routing and may not declare their own `armyLinks`; this prevents a scoped supplement
+  from silently changing family-versus-source applicability during composition.
+- Occurrence parameters remain independent of source-variant identity. Format v6 moves
+  the existing distance display semantics out of `facts` into
+  `variantSemantics.occurrenceParameters`; raw Army extras remain occurrence-scoped.
+  Only the audited `army-extra` / `distance` parameter is standardized initially.
+  Unknown MOD/value spellings must remain opaque until reviewed rather than being
+  generalized into universal base-rule facts.
+- Skill/Equipment/Weapon detail APIs retain canonical family rules separately from
+  source-specific variant rules, and the browser renders exact variant rules inside the
+  corresponding usage variant.
+
+## 0.7.0 Training classification (2026-09-23)
+
+- `Regular` and `Irregular` are rules-domain Training, not rule-defined Skills;
+  Army skill-like compatibility occurrences remain source data, not proof of
+  rules-domain classification.
+- Reviewed Training records are keyed to `regular`/`irregular` generated Order
+  occurrences at the loadout level and retain publication/citation provenance.
+  No application-wide or Unit-wide Training is inferred, and Tactical/Lieutenant
+  Order generation and temporary state effects remain distinct.
+- This additive kind uses curated format v7 and the existing rules DB schema 5;
+  published application DB schema and source normalization are unchanged.
+
+## 0.7.0 declaration-category reconciliation (2026-09-23)
+
+- Curated rules format v7 and `rules.db` schema/compatibility 5 replace the former
+  Skill-only `skill-declaration-category` record kind with generic
+  `declaration-category` records. They may classify Army Skills or Equipment while
+  preserving the catalog domain of the referenced item.
+- The six maintained N5.3 categories are Automatic, Deployment, Basic Short Skill,
+  Short Skill, Long Skill, and ARO. In the v7 contract, both full Skill definitions
+  and partial `declaration-category` records used singular `facts.typeId`; declaration
+  records additionally carried deterministic display order 10/20/30/40/50/60.
+  Curated v19 later moved full Skill definitions to ordered `facts.typeIds` while
+  retaining singular `facts.typeId` only for partial declarations. `Entire Order` is
+  not a seventh category.
+- The focused reconciliation corrected BS Attack/CC Attack/Dodge/Forward Observer,
+  Doctor/Engineer, Cyberplug/Paramedic, Parachutist, Triangulated Fire, and Berserk, and
+  added Equipment-domain Short Skill classifications for Deactivator, GizmoKit, and
+  MediKit.
+- Declaration records are composition metadata, not ordinary rule-summary records.
+  Skills without a reviewed declaration retain the uncited `Unclassified` fallback;
+  Equipment receives no invented fallback category.
+
+## 0.7.0 multi-category Skill definitions (2026-09-23)
+
+- Curated rules format v19 replaces singular Skill-definition `facts.typeId` with an
+  ordered non-empty `facts.typeIds` array. All full Skill definitions can therefore own
+  multiple action/declaration categories, including rules-native Skills with no Army
+  identity.
+- `declaration-category` records remain valid fallback metadata for Army Skills without
+  full curated definitions and for Equipment. Skill catalog composition prefers the full
+  definition when both exist. Fallback declaration categories are deliberately not required
+  to match a full definition: the reviewed rules definition owns the semantic classification
+  when Army presentation metadata disagrees (for example, Decoy). At application composition
+  time, equivalent numeric source IDs and canonical Skill slugs are still treated as one
+  identity, and conflicting multiple full definitions remain invalid.
+- `rules.db` keeps schema version 7 but advances compatibility to revision 8 because
+  older runtimes cannot interpret the multi-category Skill facts correctly.
+- Baggage/Reload is normalized as a complementary requirement: both the Baggage holder
+  and the affected/user Trooper must be non-Null.
+
+## 0.7.0 typed exact-source semantics (2026-09-23)
+
+- Curated rules format v17 and `rules.db` schema/compatibility 7 require every
+  `inheritance: source` definition to declare typed `variantSemantics.sourceVariant`.
+  Supported kinds are numeric `level`, explicit `named`, and numeric
+  `attribute-replacement`; family records may not declare source-variant metadata.
+- Martial Arts source IDs 19-23 are reviewed Level 1-5 variants of the canonical
+  `martial-arts` Skill family. Strategos source IDs 69-70 are reviewed Level 1-2
+  variants of `strategos`. The family remains the browsing identity while exact source
+  occurrences retain the Level that controls applicable rules.
+- `RulesDatabase.catalog_source_variant_semantics()` exposes exact-source semantics.
+  `SkillCatalog` attaches them as `source_variant` to matching Skill variants and Unit
+  occurrences, while `CatalogRules` does the same for Equipment/Weapon usage variants.
+  Browsers may label variants from structured data rather than inferring semantics from
+  display-name suffixes.
+- BS Attack source IDs 278 (`BS=12`) and 279 (`BS=11`), plus CC Attack source
+  ID 274 (`CC=21`), are reviewed numeric Attribute replacements and are exposed
+  through the same `source_variant` path. The UI renders their target/value from
+  structured data rather than parsing the display name.
+- TinBot is the first production use of the v9 `named` exact-source variant kind.
+  Equipment IDs 169 (Firewall), 188 (Neurocinetics), 193 (Albedo), 244 (Discover),
+  247 (ECM Guided), and 248 (Repeater) retain source-specific curated rules under the
+  canonical TinBot browsing family. Their occurrence extras remain independent raw
+  modifier data and are not interpreted by the named-variant classification.
+- This does not classify generic parenthetical MOD syntax. PH replacement forms, bare
+  signed values, rerolls, and Special Dice remain opaque until the owning rule supplies
+  reviewed target/operation semantics; source-variant identity and occurrence parameters
+  remain separate axes.
+  
+## 0.7.0 enrichment coverage audit (2026-09-23)
+
+- `tools/audit_enrichment_coverage.py` is the maintained gate for measuring how much of
+  the currently exposed Skill, Equipment, Weapon, Trait, and State application surface is
+  actually enriched by the selected `rules.db`. It consumes a specific generated
+  `infinity.db` plus `rules.db`; it does not infer coverage from curated JSON alone.
+- The audit follows the same composition paths as the API: `SkillCatalog` for Skills,
+  `CatalogRules` for Equipment/Weapons (including public catalog slugs before rules
+  composition), and `TraitCatalog` for Traits. This intentionally catches enrichment
+  that exists in rules storage but is not surfaced through the application contract.
+- Skill coverage is based on `SkillCatalog.list_skills()`: canonical Common Skills,
+  including common families without a base Army row, remain exposed rules identities.
+  Relation resolution therefore accepts any rule identity surfaced by that catalog rather
+  than requiring a direct Army occurrence.
+- Gap codes currently cover missing rule definitions, unreviewed current contributions,
+  missing citations, citation sources explicitly tied to an older N5 revision than
+  their current collection, ambiguous family or exact-source routing, unresolved
+  surfaced rule IDs, and related catalog/trait targets that do not resolve to an
+  exposed identity. Rules-only Training/etc. relation targets are counted as supporting identities rather
+  than false UI gaps. States are first-class audited surfaces through `StateCatalog`.
+- Default JSON detail lists include only catalog items with gaps;
+  `--include-complete` emits the full inventory. Report format v3 includes the rules-backed
+  States catalog and also consumes the maintained
+  `data/curated/enrichment-coverage/classifications.json` release-scope policy. Every known
+  gap code must have an explicit classification and reason; item/relation overrides may mark
+  reviewed exceptions as `intentional-omission`, `supporting-identity`, or
+  `later-product-work`. Overrides that no longer match the selected database pair fail closed.
+  Current defaults conservatively classify detected exposed-surface gaps as
+  `release-blocker`, while non-UI rules-only relation targets are classified separately as
+  supporting identities. This policy is release-planning metadata, not a second rules
+  ontology; semantic classifications remain owned by canonical application identity plus
+  curated rules data.
+
+## Long-lived rules interaction review ledger (2026-09-24)
+
+- `data/curated/rules-interactions/catalog-scope.json` is the maintained public-catalog
+  denominator for interaction-review progress. For 0.7.0 it contains all public Skills,
+  Equipment items, Traits, and States, including identities without a curated rule definition.
+  The current baseline is 95 Skills, 30 Equipment items, 33 rules-native Traits, and 24
+  canonical State identities. The Equipment denominator combines 28 textual Army catalog
+  identities with Cube and Cube 2.0, whose Army occurrences are encoded by profile symbols. The State denominator follows the current N5.3 State vocabulary,
+  with Impersonation represented separately as IMP-1 and IMP-2. The Army
+  skill-like source bucket contains 88 application identities, but six reviewed entries belong
+  to other rules/presentation domains (`Bangbomb`, `GizmoKit`, `MediKit`, `Regular`, `BTS=3`,
+  and `Infinity Team-Ops`). The rules-backed Skill catalog therefore contains 82 valid
+  source-backed Skill identities plus 12 rules-only Common Skills and the zero-use canonical
+  Special Skill `Non-Hackable`. `Request Reinforcements` remains scoped to the separately
+  modeled Reinforcements annex. The Trait denominator likewise comes from current curated
+  Trait identity rather than treating the mixed Army `properties` bucket as a rules vocabulary.
+  Refresh/validate this scope against the generated `infinity.db` + `rules.db` whenever the
+  application catalog snapshot changes.
+- `data/curated/rules-interactions/reviews.json` is the maintained semantic review ledger. It
+  remains planning/review metadata, not runtime ontology; authored `relations` in curated rules
+  are still the single source of truth for edges that currently exist. Every semantic rules
+  identity except `declaration-category` projection records must have one ledger entry.
+- The primary 0.7.0 progress figure is catalog-based, not curated-record-based. A public catalog
+  item is normally complete when its canonical typed rules identity exists and is reviewed. The
+  maintained scope may carry an explicit release exception when an item has been vetted but its
+  authoritative rule belongs to a distinct publication/domain intentionally deferred beyond the
+  release. Such items stay visible in the denominator as deferred; unclassified missing
+  definitions remain pending, and an exception is stale if a current curated definition later
+  exists. Commlink is the sole 0.7.0 exception: it remains a public Skill identity but its
+  canonical rule belongs to Reinforcements Extra and is deferred to the separately scoped
+  post-0.7.0 Reinforcements collection. Exact source variants plus independently modeled Rule,
+  Training, supporting Trait, and curated Weapon identities are reported separately as supporting
+  semantics so they cannot inflate the public-catalog completion percentage. States are primary
+  0.7.0 identities, not supporting-only records.
+- Review state is release-aware. `reviewed` means outgoing interactions were audited for the
+  entry's target release; `inherited` means an exact source variant reuses its family's
+  reviewed interaction semantics; `pending` remains release work. Zero outgoing edges are a
+  valid reviewed result and must not be inferred from edge count alone.
+- The initial 0.7.0 baseline backfills current sources of authored non-`variant-of` gameplay
+  edges as reviewed because those edges already have explicit semantic review decisions, marks
+  exact source variants as `inherited`, and leaves other identities pending. Zero-edge entries
+  become reviewed only after an explicit audit decision; Super-Jump and Perimeter are the first
+  such examples because their known interactions are deliberately deferred rather than absent.
+- Known later interactions stay in the policy's top-level `futureInteractions` queue with
+  source/target IDs, target release, status, and reason. This preserves post-0.7.0 research
+  while allowing the 0.7.0 gate to measure only entries targeted at 0.7.0. A future candidate
+  may omit `relationType` when the current vocabulary cannot express it precisely. The initial
+  queue retains Super-Jump -> Jump, Perimeter -> Place Deployable, and the documented White
+  Noise counter-interactions with Marksmanship and Multispectral Visor even though White Noise
+  does not yet have a 0.7.0 catalog identity.
+- `tools/audit_rules_interactions.py` combines catalog scope, the semantic ledger, and the
+  current curated graph to generate `docs/rules-interaction-checklist.md`. `--check-output`
+  detects a stale committed checklist; `--database` + `--rules-database` validate the maintained
+  scope against runtime catalogs; `--refresh-catalog-scope` updates it deliberately.
+  `--require-release <version>` fails while that release has pending primary catalog items or
+  supporting semantic reviews.
+
+- Rules-interaction relationships are a core 0.7.0 product feature. Author semantic
+  edges once, derive reverse navigation in `rules.db`, and present useful context from
+  both endpoints. Multispectral Visor/Mimetism is the first production example: MSV authors
+  `reduces-modifiers-from` toward Mimetism and the reverse relationship is derived for the
+  Mimetism surface. Curated v11 extends the same graph with `negates-effects-of` and
+  `ignores-modifiers-from`: Sixth Sense and Combat Instinct negate Stealth, while Combat
+  Instinct ignores Surprise Attack MODs. Curated v12 adds `modifies-rolls-for` and
+  `restricts-use-of`; Sensor uses them together with `reveals-state` and
+  `ignores-modifiers-from` so its interactions are navigable from Discover, Camouflage,
+  Camouflaged State, Hidden Deployment State, and Mimetism. Curated v13 adds
+  `applies-effects-to` and `imposes-modifiers-on`; Reflective and Albedo use them toward
+  Marksmanship and Multispectral Visor. Natural Born Warrior then reuses
+  `ignores-modifiers-from` toward Martial Arts and Surprise Attack, with reverse navigation
+  derived on both affected Skills while generic signed CC/weapon MOD semantics remain
+  intentionally unmodeled. Curated v14 adds `overrides-effects-of`: No Cover takes precedence over Limited Cover when both restrictions apply, with the inverse relation derived automatically. Curated v15 adds `cancels-state`: Doctor and Engineer author cancellation edges toward reviewed States, and the new rules-backed State pages expose the derived reverse navigation. Curated v16 adds `causes-state`: Forward Observer causes Targeted, Reset cancels Targeted/IMM-B, and Targeted itself projects roll/restriction interactions to BS Attack, Discover, Reset, Cautious Movement, and Stealth. Disposable (X) also causes item-specific Unloaded State without asserting that a Trooper is currently Unloaded. Curated v17 adds `enables-use-of`: reviewed Camouflaged and Hidden Deployment States satisfy Surprise Attack's documented state/form prerequisite, while Stealth uses the same relation toward Cautious Movement for its scoped ZoC/Hacking Area exception; remaining declaration requirements stay on the target rules. The same v17 contract now also models reviewed self-recovery without a grammar change: Dodge cancels IMM-A while IMM-A modifies that Dodge Roll; Reset cancels IMM-B and Isolated while those States modify the corresponding Reset Rolls. Curated v18 adds `uses-effects-of`: Concealed reuses Camouflaged State effects while retaining its distinct Silhouette 2 Marker behavior, so the graph does not falsely present it as a State-entry rule. Keep this separate from 0.8 structural application
+  relationships.

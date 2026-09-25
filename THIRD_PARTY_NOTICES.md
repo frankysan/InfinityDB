@@ -7,22 +7,41 @@ application.
 
 ## Corvus Belli Infinity materials
 
-InfinityDB can consume Army JSON snapshots and API metadata from the official
-[Infinity Army API](https://api.corvusbelli.com/army), and can acquire graphical
-assets from Corvus Belli asset hosts for local processing and browser use.
-Those data records, names, marks, and artwork remain subject to the rights and
-terms of their respective owners. InfinityDB does not relicense them under MIT.
+All Infinity artwork, logos, symbols, and game data are the property of Corvus
+Belli S.L. and are used with permission for this non-commercial community project.
+InfinityDB does not relicense those materials under the MIT License.
 
-Raw Army and symbol snapshots in `data/raw/`, generated databases in
-`data/generated/`, and any locally acquired Corvus Belli-derived graphical
-assets published under `src/infinity_db/web/static/` are replaceable data or
-assets rather than original MIT-licensed project material. Corvus Belli
-graphical assets are not included in InfinityDB source or redistributable
-release artifacts by default. Public availability from an asset host is not
-treated as permission to redistribute them; include such assets in a wheel,
-Docker image, release, or other distributed artifact only when permission for
-that distribution form has been established, while retaining any required
-attribution.
+On 2026-09-24, Corvus Belli S.L. explicitly granted InfinityDB permission to use
+and redistribute the graphical assets requested for this non-commercial community
+project: Infinity logos, unit/profile symbols, order icons, and characteristic
+icons. The permission covers web hosting, deployment/build packages, public Git
+repository inclusion, technical SVG processing such as text-to-path conversion,
+compression and renaming, and future mobile applications, provided the original
+artwork and meaning remain intact.
+
+That permission is subject to these project-facing conditions:
+
+- Corvus Belli ownership must be clearly attributed.
+- The permitted graphical assets remain separate from InfinityDB's MIT-licensed
+  original code and documentation.
+- The project must remain strictly non-commercial and non-monetized.
+- Technical processing may optimize the files but must not alter the original
+  artwork or its meaning.
+
+InfinityDB can consume Army JSON snapshots and API metadata from the official
+[Infinity Army API](https://api.corvusbelli.com/army), and its symbol pipeline can
+acquire source graphics from Corvus Belli asset hosts. The explicit redistribution
+permission above applies to the requested graphical assets; it is not a blanket
+grant to republish Infinity Army snapshot archives, wiki mirrors, rules PDFs, or
+other source/reference collections. InfinityDB therefore keeps raw Army, wiki,
+PDF, and source-symbol archives outside the public repository by project policy.
+
+The processed graphical publication used by InfinityDB is tracked in the public
+repository and may be included in wheels, Docker images, releases, deployment
+packages, or other non-commercial InfinityDB distributions under that permission.
+Generated databases, the local terminal symbol-build manifest, raw snapshots, and
+other acquisition/provenance inputs remain replaceable local data rather than
+original MIT-licensed project material.
 
 ## Infinity Wiki and rules documents
 

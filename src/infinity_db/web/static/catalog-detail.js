@@ -1,6 +1,7 @@
 import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
+import { rulesReferenceSection } from "./rules-reference.js";
 
 const catalog = document.body.dataset.catalog;
 const itemId = window.location.pathname.split("/").pop();
@@ -27,7 +28,7 @@ function displayWikiUrl(url) {
 }
 
 function withVisibleUnits(item, ids) {
-  return { ...item, variants: item.variants.map((variant) => ({
+  return { ...item, variants: (item.variants || []).map((variant) => ({
     ...variant, units: variant.units.filter((unit) => ids.has(unit.id)),
   })).filter((variant) => variant.units.length) };
 }
@@ -37,6 +38,17 @@ function label(item, variant) {
   return variant.extras.length
     ? `${variantName} (${variant.extras.map((extra) => extra.name).join(", ")})`
     : variantName;
+}
+
+function sourceVariantLabel(variant) {
+  const semantics = variant.source_variant;
+  if (!semantics) return null;
+  if (semantics.kind === "level") return `Level ${semantics.value}`;
+  if (semantics.kind === "named") return semantics.label;
+  if (semantics.kind === "attribute-replacement") {
+    return `${semantics.attribute} = ${semantics.value}`;
+  }
+  return null;
 }
 
 function text(value) {
@@ -74,25 +86,17 @@ function traitDescription(description) {
 }
 
 function rangeModifier(ranges, maximum) {
-  const matchingRange = Object.values(ranges || {})
+  const orderedRanges = Object.values(ranges || {})
     .filter((range) => range && typeof range === "object" && Number.isFinite(Number(range.max)))
-    .sort((left, right) => Number(left.max) - Number(right.max))
-    .find((range) => Number(range.max) >= maximum);
-  return matchingRange?.mod || "";
+    .sort((left, right) => Number(left.max) - Number(right.max));
+  if (!orderedRanges.length) return "";
+  const matchingRange = orderedRanges.find((range) => Number(range.max) >= maximum);
+  if (!matchingRange) return "--";
+  const modifier = matchingRange.mod;
+  return modifier === null || modifier === undefined ? "" : String(modifier);
 }
 
-function weaponRangeBands(variants) {
-  const maximums = new Set();
-  for (const variant of variants || []) {
-    for (const profile of variant.profiles || []) {
-      for (const range of Object.values(profile.ranges || {})) {
-        const maximum = Number(range?.max);
-        if (Number.isFinite(maximum) && maximum > 0) maximums.add(maximum);
-      }
-    }
-  }
-  return [...maximums].sort((left, right) => left - right);
-}
+const canonicalWeaponRangeBands = [20, 40, 60, 80, 100, 120, 240];
 
 function rangeBandLabel(maximum) {
   return distanceUnit() === "in" ? `${maximum / 2.5}"` : `${maximum} cm`;
@@ -143,7 +147,7 @@ function specialWeaponProfile(profile) {
 function weaponVariants(variants) {
   const section = document.createElement("section");
   section.className = "weapon-variants";
-  const rangeBands = weaponRangeBands(variants);
+  const rangeBands = canonicalWeaponRangeBands;
 
   for (const variant of variants) {
     const variantSection = document.createElement("section");
@@ -160,10 +164,10 @@ function weaponVariants(variants) {
 
     const statTable = document.createElement("table");
     statTable.className = "data-table--compact weapon-statline";
-    statTable.innerHTML = "<thead><tr><th>Ammunition</th><th>B</th><th>DAM</th><th>Saving</th></tr></thead>";
+    statTable.innerHTML = "<thead><tr><th>Ammunition</th><th>B</th><th>PS</th><th>Saving</th></tr></thead>";
     const statRow = document.createElement("tr");
     const saving = [profile.saving, profile.saving_num].filter((value) => value !== null && value !== undefined && value !== "").join(" × ");
-    for (const [statLabel, value] of [["Ammunition", profile.ammunition], ["B", profile.burst], ["DAM", profile.damage], ["Saving", saving]]) {
+    for (const [statLabel, value] of [["Ammunition", profile.ammunition], ["B", profile.burst], ["PS", profile.damage], ["Saving", saving]]) {
       const cell = document.createElement("td");
       cell.dataset.label = statLabel;
       cell.textContent = text(value);
@@ -237,7 +241,7 @@ function weaponVariants(variants) {
 }
 
 function usageSections(item) {
-  return [...item.variants]
+  return [...(item.variants || [])]
     .sort((a, b) => label(item, a).localeCompare(label(item, b), undefined, { numeric: true }))
     .map((variant) => {
       const section = document.createElement("details");
@@ -248,7 +252,11 @@ function usageSections(item) {
       title.textContent = label(item, variant);
       const count = document.createElement("span");
       count.className = "section-index";
-      count.textContent = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
+      const semanticLabel = sourceVariantLabel(variant);
+      const unitCount = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
+      const summaryParts = [semanticLabel, variant.rules?.length ? "Variant rules" : null, unitCount]
+        .filter(Boolean);
+      count.textContent = summaryParts.join(" · ");
       summary.append(title, count);
       section.append(summary);
       section.addEventListener("toggle", () => {
@@ -262,6 +270,9 @@ function usageSections(item) {
         const container = document.createElement("div");
         container.className = "table-container";
         container.append(table);
+        if (variant.rules?.length) {
+          section.append(rulesReferenceSection(variant.rules, "Variant rules"));
+        }
         section.append(container);
         section.dataset.loaded = "true";
       });
@@ -298,6 +309,7 @@ function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
   if (meta) {
+    const categories = (item.categories || []).map((category) => category.name).join(", ");
     if (item.wiki) {
       meta.classList.remove("developer-only");
       const link = document.createElement("a");
@@ -306,14 +318,22 @@ function render(item) {
       link.rel = "noopener noreferrer";
       link.textContent = displayWikiUrl(item.wiki);
       meta.replaceChildren(link);
+      if (categories) meta.append(` · ${categories}`);
     } else {
       meta.classList.add("developer-only");
-      meta.textContent = `${catalog === "equipment" ? "Equipment" : catalog === "weapons" ? "Weapon" : "Weapon trait"} #${item.id}`;
+      const domain = catalog === "equipment"
+        ? "Equipment"
+        : catalog === "weapons"
+          ? "Weapon"
+          : "Weapon trait";
+      meta.textContent = `${domain} #${item.id}${categories ? ` · ${categories}` : ""}`;
     }
   }
   const sections = usageSections(item);
   content.replaceChildren(
-    ...(catalog === "traits" && item.description ? [traitDescription(item.description)] : []),
+    ...(item.rules?.length ? [rulesReferenceSection(item.rules)] : []),
+    ...(catalog === "traits" && item.description && !item.rules?.length
+      ? [traitDescription(item.description)] : []),
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
     ...(catalog === "weapons" && item.weapon_variants?.length
       ? [weaponVariants(item.weapon_variants)] : []),
@@ -332,6 +352,7 @@ window.addEventListener("distanceunitchange", () => {
 getCatalogItem(catalog, itemId).then((item) => {
   currentItem = item;
   render(item);
+  if (catalog === "states") return null;
   return visibleUnitIds().then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
   name.firstChild.textContent = "Item unavailable";

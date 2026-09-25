@@ -1356,6 +1356,117 @@ class Database:
         return None if row is None or row["slug"] is None else str(row["slug"])
 
     @instance_lru_cache(maxsize=1)
+    def list_hacking_programs(self) -> list[dict[str, Any]]:
+        """Return structured Army Hacking Program reference rows."""
+
+        with self._connect() as connection:
+            programs = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT position, name, attack_mod, opponent_mod, ps, burst, special "
+                    "FROM application_hacking_programs "
+                    "ORDER BY position"
+                )
+            ]
+            device_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT program_position, position, source_equipment_id, "
+                    "source_equipment_name FROM application_hacking_program_devices "
+                    "ORDER BY program_position, position"
+                )
+            ]
+            target_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT program_position, position, target "
+                    "FROM application_hacking_program_targets "
+                    "ORDER BY program_position, position"
+                )
+            ]
+            skill_type_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT program_position, position, skill_type "
+                    "FROM application_hacking_program_skill_types "
+                    "ORDER BY program_position, position"
+                )
+            ]
+
+        devices_by_program: dict[int, list[dict[str, Any]]] = {}
+        equipment_graph = self._application_catalog_graph("equipment")
+        for row in device_rows:
+            source_id = int(row["source_equipment_id"])
+            application_id = equipment_graph["source_to_item"].get(source_id)
+            name = row.get("source_equipment_name")
+            slug = None
+            if application_id is not None:
+                application_item = equipment_graph["items"].get(application_id)
+                if application_item is not None:
+                    name = application_item["name"]
+                slug = self.application_slug("equipment", int(application_id))
+            devices_by_program.setdefault(int(row["program_position"]), []).append(
+                {
+                    "source_id": source_id,
+                    "id": application_id,
+                    "slug": slug,
+                    "name": name or f"Equipment #{source_id}",
+                }
+            )
+
+        targets_by_program: dict[int, list[str]] = {}
+        for row in target_rows:
+            targets_by_program.setdefault(int(row["program_position"]), []).append(
+                str(row["target"])
+            )
+        skill_types_by_program: dict[int, list[str]] = {}
+        for row in skill_type_rows:
+            skill_types_by_program.setdefault(int(row["program_position"]), []).append(
+                str(row["skill_type"])
+            )
+
+        for program in programs:
+            position = int(program["position"])
+            program["devices"] = devices_by_program.get(position, [])
+            program["targets"] = targets_by_program.get(position, [])
+            program["skill_types"] = skill_types_by_program.get(position, [])
+        return programs
+
+    @instance_lru_cache(maxsize=1)
+    def list_martial_arts_levels(self) -> list[dict[str, Any]]:
+        """Return the structured Army Martial Arts level chart."""
+
+        with self._connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT position, level, attack_mod, opponent_mod, ps_mod, burst_mod "
+                    "FROM application_martial_arts_levels ORDER BY position"
+                )
+            ]
+
+    def _list_random_reference_results(self, table_name: str) -> list[dict[str, Any]]:
+        with self._connect() as connection:
+            return [
+                dict(row)
+                for row in connection.execute(
+                    f'SELECT id, roll, result FROM "{table_name}" ORDER BY id'
+                )
+            ]
+
+    @instance_lru_cache(maxsize=1)
+    def list_metachemistry_results(self) -> list[dict[str, Any]]:
+        """Return the structured Army MetaChemistry roll chart."""
+
+        return self._list_random_reference_results("application_metachemistry_results")
+
+    @instance_lru_cache(maxsize=1)
+    def list_booty_results(self) -> list[dict[str, Any]]:
+        """Return the structured Army Booty roll chart."""
+
+        return self._list_random_reference_results("application_booty_results")
+
+    @instance_lru_cache(maxsize=1)
     def list_armies(self) -> list[dict[str, Any]]:
         """Return canonical application Armies with current logical-unit counts."""
         graph = self._application_army_graph()
@@ -1523,9 +1634,32 @@ class Database:
             merged.append(public)
         return sorted(merged, key=lambda item: (unit_sort_key(item["name"]), item["id"]))
 
+    @instance_lru_cache(maxsize=32)
+    def logical_unit_ids_for_characteristic(self, characteristic_name: str) -> frozenset[int]:
+        """Return logical Units carrying one profile/loadout characteristic."""
+
+        if not isinstance(characteristic_name, str) or not characteristic_name.strip():
+            raise ValueError("characteristic_name must be a non-empty string")
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT DISTINCT p.logical_unit_id AS logical_unit_id "
+                "FROM profile_payloads AS p "
+                "JOIN profile_payload_characteristics AS pc ON pc.profile_payload_id = p.id "
+                "JOIN characteristics AS c ON c.id = pc.characteristic_id "
+                "WHERE c.name = ? COLLATE NOCASE "
+                "UNION "
+                "SELECT DISTINCT l.logical_unit_id AS logical_unit_id "
+                "FROM loadout_payloads AS l "
+                "JOIN loadout_payload_characteristics AS lc ON lc.loadout_payload_id = l.id "
+                "JOIN characteristics AS c ON c.id = lc.characteristic_id "
+                "WHERE c.name = ? COLLATE NOCASE",
+                (characteristic_name.strip(), characteristic_name.strip()),
+            ).fetchall()
+        return frozenset(int(row["logical_unit_id"]) for row in rows)
+
     @instance_lru_cache(maxsize=1)
     def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
-        """Return raw Army trait labels mapped to the catalog items that carry them."""
+        """Return raw Army profile properties mapped to the catalog items carrying them."""
         with self._connect() as connection:
             source_rows = connection.execute(
                 "SELECT catalog, source_item_id, application_item_id "
@@ -1569,7 +1703,7 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def list_traits(self) -> list[dict[str, Any]]:
-        """Return distinct raw Army trait labels carried by catalogued profiles."""
+        """Return distinct raw Army profile properties from the source trait bucket."""
         traits = []
         usage = self.trait_usage_index()
         slugs = assign_domain_slugs(
@@ -1588,7 +1722,7 @@ class Database:
 
     @instance_lru_cache(maxsize=128)
     def get_trait(self, item_slug: str) -> dict[str, Any] | None:
-        """Return one raw Army trait label with matching visible unit usage."""
+        """Return one raw Army profile property with matching visible unit usage."""
         trait = next((item for item in self.list_traits() if item["id"] == item_slug), None)
         if trait is None:
             return None
@@ -1899,6 +2033,7 @@ class Database:
         reinforcement: bool = False,
         descending: bool = False,
         _unbounded: bool = False,
+        _logical_unit_ids: frozenset[int] | None = None,
     ) -> dict[str, Any]:
         unresolved_army_filter = False
         if army_id is not None:
@@ -1923,6 +2058,11 @@ class Database:
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
             raise ValueError("_unbounded must be a boolean")
+        if _logical_unit_ids is not None and (
+            not isinstance(_logical_unit_ids, frozenset)
+            or any(type(unit_id) is not int for unit_id in _logical_unit_ids)
+        ):
+            raise ValueError("_logical_unit_ids must be a frozenset of integer Unit ids")
         max_limit = 10_000 if _unbounded else 500
         if type(limit) is not int or not 1 <= limit <= max_limit:
             raise ValueError("limit must be an integer between 1 and 500")
@@ -1973,6 +2113,8 @@ class Database:
         matching_requirements: list[tuple[frozenset[str], ...]] = []
         for group in groups:
             if unresolved_army_filter:
+                continue
+            if _logical_unit_ids is not None and group["id"] not in _logical_unit_ids:
                 continue
             if any(
                 not set(group["source_ids"]).intersection(source_ids)

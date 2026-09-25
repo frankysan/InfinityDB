@@ -29,11 +29,13 @@ The named profiles are
 
 ## Graphical asset test modes
 
-The test stage has an explicit policy for the ignored Corvus Belli graphical
-asset tree:
+The test stage has an explicit policy for the tracked Corvus Belli graphical
+publication. The validated processed publication is release content under Corvus
+Belli's explicit non-commercial permission; raw acquisition archives remain excluded
+from Git:
 
 ```powershell
-# Hermetic tests only; suitable for clean/public CI
+# Hermetic tests only; explicitly skip asset-dependent integration coverage
 python tools/run_checks.py --stage test --assets off
 
 # Local default: use full-asset tests when a complete valid set exists
@@ -43,11 +45,13 @@ python tools/run_checks.py --stage test --assets auto
 python tools/run_checks.py --stage test --assets required
 ```
 
-`run_checks.py` defaults to `--assets auto`. With no third-party SVG tree,
-`auto` falls back to the hermetic suite. If any published third-party SVGs are
-present, `auto` requires the set to be complete and valid rather than silently
-ignoring a partial/corrupt installation. `required` always requires the complete
-set. The report header records the requested/effective asset mode.
+`run_checks.py` defaults to `--assets auto`. In a normal source checkout the tracked
+publication is present, so `auto` resolves to full-asset validation. In a specialized
+package/test layout with no third-party SVG tree, `auto` falls back to the hermetic
+suite. If any published third-party SVGs are present, `auto` requires the set to be
+complete and valid rather than silently ignoring a partial/corrupt installation.
+`required` always requires the complete set. The report header records the
+requested/effective asset mode.
 
 Completeness is checked against the generated `symbol-inventory.json` written
 by final symbol publication. Every inventoried SVG must exist, parse as SVG, and
@@ -70,7 +74,7 @@ Use `python -m pytest -m full_assets -q` only when debugging those integration
 tests directly. Normal development/handoff runs should prefer `run_checks.py`
 because it validates the asset set before enabling them. Hermetic web tests use
 project-owned temporary SVG fixtures to retain coverage of dynamic SVG serving
-without redistributing third-party artwork.
+without depending on the complete processed graphical publication.
 
 ## Parallel pytest execution
 
@@ -136,11 +140,12 @@ because it requires a Docker daemon. The configured GitHub Actions `Deployment s
 workflow builds the real application databases from a small synthetic Army
 fixture plus the tracked curated rules collection, builds the Docker image, and
 uses `scripts/verify-container-image.sh` to validate image contents and healthy
-production startup. `--redistributable` rejects locally acquired Corvus Belli
-graphical-asset trees. Local production deployment uses the complementary
-`--published-assets` mode after `tools/verify_deployment_assets.py` has bound the
-host publication to terminal symbol-build manifest state; it revalidates the
-installed inventory/hashes and live symbol routes before Compose activation.
+production startup. The smoke workflow uses `--packaged-assets` to verify that the tracked processed
+SVG publication survives Docker/package installation with exact inventory hashes and
+working live symbol routes. Local production deployment uses `--published-assets`,
+which performs the same package checks after `tools/verify_deployment_assets.py` has
+bound the host publication to terminal symbol-build manifest state and additionally
+revalidates that database/publication provenance before Compose activation.
 The workflow stages its fixture databases and Docker context under the runner
 temporary directory; it never writes fixture data into checkout deployment paths.
 
@@ -169,23 +174,22 @@ artwork. Ruff and Pyright run on the primary Ubuntu/Python 3.11 leg.
 
 The synthetic deployment fixture is the explicit Army build input because clean
 source checkouts intentionally contain no real raw Army snapshot. This workflow
-is hermetic: it does not acquire network data and does not require ignored
-Corvus Belli graphical assets.
+is network-hermetic: it does not acquire live data and validates the tracked processed
+Corvus Belli graphical publication directly from the checkout.
 
 The separate configured `Installed wheel smoke` workflow builds a real wheel, installs
 it into a fresh virtual environment, and exercises installed build CLIs plus
 runtime startup from outside the source checkout.
 
-`Full-asset checks` is a configured manual-only workflow for the complete ignored
-symbol set. It is restricted to `main`, uses the `full-assets` GitHub environment, stages a
-private checksum-pinned ZIP whose root contains only `armies/`,
-`characteristics/`, `orders/`, and `units/` SVG trees, and then invokes the same
-project runner with
-`--assets required`. Configure `FULL_ASSET_BUNDLE_URL` and
-`FULL_ASSET_BUNDLE_SHA256` as environment secrets before it can run successfully.
-The workflow does not upload the graphical tree as an artifact. See
-[the continuous integration strategy](ci.md) for the security and redistribution
-boundary.
+The processed SVG publication is tracked in the repository, so normal source CI now
+runs with `--assets required`. This validates the publication inventory and includes
+the `full_assets` pytest coverage directly from a clean checkout. The dispatch-only
+`Full-asset checks` workflow remains available as an independent validation of a
+checksum-pinned external publication bundle. It is restricted to `main`, uses the
+`full-assets` GitHub environment, stages the configured bundle through
+`tools/stage_full_asset_bundle.py`, and then runs the same required-asset project gate.
+Configure `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` before using that
+supplementary workflow.
 
 ## Reports
 

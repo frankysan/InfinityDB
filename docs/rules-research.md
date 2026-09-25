@@ -197,7 +197,7 @@ Sources:
 **Scope:** core N5.
 
 The 23 current States are not one uniform mechanic. The audit exposes recurring
-families that may be useful for a future State catalog or thesaurus:
+families that may be useful as the State catalog expands or for a future thesaurus:
 
 - representation/hidden-information States: Camouflaged, Decoy, Hidden
   Deployment, Holoecho, HoloMask, Impersonation;
@@ -207,9 +207,9 @@ families that may be useful for a future State catalog or thesaurus:
   Immobilized-B, Normal, Prone, Stunned, Suppressive Fire, Targeted;
 - item-availability state: Unloaded.
 
-These are research groupings, not source-native State categories. If a future
-catalog exposes them, mark them as InfinityDB classification metadata and keep
-the canonical State identities/rules primary.
+These are research groupings, not source-native State categories. If the State
+catalog exposes such groupings, mark them as InfinityDB classification metadata
+and keep the canonical State identities/rules primary.
 
 Sources:
 
@@ -334,9 +334,11 @@ links to Suppressive Fire State; `Concealed` invokes Camouflaged State effects;
 `Disposable (X)` leads to Unloaded State when uses are exhausted; and
 `Non-Reloadable` changes Unloaded cancellation.
 
-These are useful candidates for a future relationship graph between Traits,
-States, Weapons, Equipment, Skills, and Ammunition. The later domain audits should
-validate the complete edge set before materializing such a graph.
+These are useful candidates for a relationship graph between Traits, States,
+Weapons, Equipment, Skills, and Ammunition. The reviewed Concealed-to-Camouflaged-State
+edge is materialized as `uses-effects-of`, and Disposable-to-Unloaded-State is materialized
+as `causes-state`; the later domain audits should validate the remaining edge set before it
+is materialized.
 
 Sources:
 
@@ -452,10 +454,10 @@ InfinityDB does not depend on appearing as Army metadata records. They can still
 be targets of Traits, declaration-category help, cross-links, and play-aid
 content.
 
-A future rules thesaurus/catalog may therefore need identities whose source of
-existence is the ruleset rather than an Army catalog row. This is a useful test
-case for keeping application rule identity separate from Army occurrence
-identity.
+The rules-backed Skills catalog now carries all 18 core Common Skill identities
+whether or not they have Army occurrences, and presents them above Special Skills.
+This keeps rules identity separate from Army-profile occurrence and leaves distinct
+Scenario Skills and ITS Scenario Skills categories available for later scoped work.
 
 Sources:
 
@@ -1230,6 +1232,27 @@ InfinityDB catalog/reference responsibilities.
 Source:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+## Baggage and Reload
+
+### RR-BR-RELOAD-001 — Baggage and Reload state the prerequisite from opposite perspectives
+
+**Scope:** core N5.3 Baggage / Reload interaction.
+
+The Baggage rule states the requirement from the receiving Allied Trooper's
+perspective, while Reload states it from the Baggage holder's perspective. InfinityDB
+normalizes the combined interaction as requiring **both participants to be in non-Null
+States** when the Reload/Baggage effect is used. The curated records retain citations to
+both source formulations and state the combined requirement explicitly rather than
+discarding either side.
+
+**Resolution:** reviewed domain interpretation supplied 2026-09-23; encode both
+non-Null requirements as complementary prerequisites.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Baggage>, live N5.3 page, reviewed 2026-09-23
+- Wiki: <https://infinitythewiki.com/Reload>, live N5.3 page, reviewed 2026-09-23
 
 ## ITS FAQ
 

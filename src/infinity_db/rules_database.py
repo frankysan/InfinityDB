@@ -8,12 +8,15 @@ import sqlite3
 import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from infinity_db.rule_relations import relation_presentation
+
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 2
-RULES_COMPATIBILITY_VERSION = 2
+RULES_SCHEMA_VERSION = 7
+RULES_COMPATIBILITY_VERSION = 8
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -105,10 +108,12 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             kind TEXT NOT NULL,
             name TEXT NOT NULL,
             summary TEXT NOT NULL,
+            composition_role TEXT NOT NULL,
             aliases_json TEXT,
             label_ids_json TEXT,
             scope_json TEXT,
             facts_json TEXT,
+            variant_json TEXT,
             review_json TEXT,
             PRIMARY KEY (collection_id, id),
             FOREIGN KEY (collection_id) REFERENCES collections(id)
@@ -143,6 +148,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             collection_id TEXT NOT NULL,
             record_id TEXT NOT NULL,
             position INTEGER NOT NULL,
+            relation_type TEXT NOT NULL,
             related_record_id TEXT NOT NULL,
             PRIMARY KEY (collection_id, record_id, position),
             FOREIGN KEY (collection_id, record_id)
@@ -151,17 +157,82 @@ def _create_schema(connection: sqlite3.Connection) -> None:
         CREATE INDEX records_kind_name ON records(kind, name COLLATE NOCASE);
         CREATE INDEX record_citations_source ON record_citations(collection_id, source_id);
         CREATE INDEX record_army_links_entity ON record_army_links(entity, external_id);
+        CREATE INDEX record_relations_target ON record_relations(related_record_id);
         """
     )
 
 
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
     collection_ids: set[str] = set()
+    current_records: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
     for path, document in documents:
         collection_id = document["collection"]["id"]
         if collection_id in collection_ids:
             raise ValueError(f"Duplicate curated collection id {collection_id!r}: {path}")
         collection_ids.add(collection_id)
+        if document["collection"]["status"] != "current":
+            continue
+        for record in document["records"]:
+            current_records.setdefault(record["id"], []).append((path, record))
+
+    current_ids = set(current_records)
+    definitions_by_id: dict[str, tuple[Path, dict[str, Any]]] = {}
+    for record_id, contributions in current_records.items():
+        definitions = [
+            (path, record)
+            for path, record in contributions
+            if record["composition"]["role"] == "definition"
+        ]
+        if len(definitions) != 1:
+            sources = ", ".join(str(path) for path, _ in contributions)
+            raise ValueError(
+                f"Current rules record {record_id!r} requires exactly one definition "
+                f"contribution; found {len(definitions)} across {sources}"
+            )
+        definitions_by_id[record_id] = definitions[0]
+
+        for path, record in contributions:
+            for relation in record.get("relations", []):
+                target_id = relation["recordId"]
+                if target_id not in current_ids:
+                    raise ValueError(
+                        f"Current rules relation {record_id!r} -> {target_id!r} in {path} "
+                        "does not resolve to a current semantic record"
+                    )
+
+    for record_id, (path, definition) in definitions_by_id.items():
+        variant = definition.get("variantSemantics")
+        if not isinstance(variant, dict) or variant.get("inheritance") != "source":
+            continue
+        family_targets = [
+            relation["recordId"]
+            for relation in definition.get("relations", [])
+            if relation["type"] == "variant-of"
+        ]
+        if len(family_targets) != 1:
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} in {path} requires exactly "
+                "one 'variant-of' relation"
+            )
+        family_id = family_targets[0]
+        family_definition = definitions_by_id.get(family_id)
+        if family_definition is None:
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} references missing family "
+                f"definition {family_id!r}"
+            )
+        _, family = family_definition
+        if family["kind"] != definition["kind"]:
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} must reference a family "
+                "record of the same kind"
+            )
+        family_variant = family.get("variantSemantics")
+        if not isinstance(family_variant, dict) or family_variant.get("inheritance") != "family":
+            raise ValueError(
+                f"Source-specific rules record {record_id!r} requires family target "
+                f"{family_id!r} to declare family inheritance"
+            )
 
 
 def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -> None:
@@ -255,9 +326,9 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
     _insert_many(
         connection,
         "INSERT INTO records "
-        "(collection_id, id, kind, name, summary, aliases_json, label_ids_json, scope_json, "
-        "facts_json, review_json) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "(collection_id, id, kind, name, summary, composition_role, aliases_json, "
+        "label_ids_json, scope_json, facts_json, variant_json, review_json) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             (
                 collection_id,
@@ -265,10 +336,16 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
                 record["kind"],
                 record["name"],
                 record["summary"],
+                record["composition"]["role"],
                 _json_text(record["aliases"]) if "aliases" in record else None,
                 _json_text(record["labelIds"]) if "labelIds" in record else None,
                 _json_text(record["scope"]) if "scope" in record else None,
                 _json_text(record["facts"]) if "facts" in record else None,
+                (
+                    _json_text(record["variantSemantics"])
+                    if "variantSemantics" in record
+                    else None
+                ),
                 _json_text(record["review"]) if "review" in record else None,
             )
             for record in document["records"]
@@ -316,10 +393,17 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
         _insert_many(
             connection,
             "INSERT INTO record_relations "
-            "(collection_id, record_id, position, related_record_id) VALUES (?, ?, ?, ?)",
+            "(collection_id, record_id, position, relation_type, related_record_id) "
+            "VALUES (?, ?, ?, ?, ?)",
             [
-                (collection_id, record_id, position, related_id)
-                for position, related_id in enumerate(record.get("relatedRecords", []))
+                (
+                    collection_id,
+                    record_id,
+                    position,
+                    relation["type"],
+                    relation["recordId"],
+                )
+                for position, relation in enumerate(record.get("relations", []))
             ],
         )
 
@@ -344,7 +428,7 @@ def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Pa
                     _insert_document(connection, document)
                 metadata = {
                     "format": "InfinityDB curated rules database",
-                    "formatVersion": 2,
+                    "formatVersion": RULES_SCHEMA_VERSION,
                     "collectionCount": len(documents),
                     "databaseCompatibilityVersion": RULES_COMPATIBILITY_VERSION,
                 }
@@ -376,6 +460,28 @@ def _decode_json(value: str | None, default: Any) -> Any:
         return json.loads(value)
     except json.JSONDecodeError:
         return default
+
+
+def _variant_semantics(value: str | None) -> dict[str, Any] | None:
+    raw = _decode_json(value, None)
+    if not isinstance(raw, dict):
+        return None
+    parameters = []
+    for parameter in raw.get("occurrenceParameters", []):
+        item = {
+            "source": parameter["source"],
+            "kind": parameter["kind"],
+        }
+        if "positiveSign" in parameter:
+            item["positive_sign"] = parameter["positiveSign"]
+        parameters.append(item)
+    result: dict[str, Any] = {"inheritance": raw["inheritance"]}
+    if parameters:
+        result["occurrence_parameters"] = parameters
+    source_variant = raw.get("sourceVariant")
+    if isinstance(source_variant, dict):
+        result["source_variant"] = dict(source_variant)
+    return result
 
 
 class RulesDatabase:
@@ -419,17 +525,47 @@ class RulesDatabase:
         self, connection: sqlite3.Connection, rows: list[sqlite3.Row]
     ) -> list[dict[str, Any]]:
         records = []
+        collections: dict[str, dict[str, Any]] = {}
+        skill_type_category_names: dict[str, dict[str, str]] = {}
         for row in rows:
+            collection_id = str(row["collection_id"])
+            collection = collections.get(collection_id)
+            if collection is None:
+                collection_row = connection.execute(
+                    "SELECT id, title, domain, status, effective_from, authority "
+                    "FROM collections WHERE id = ?",
+                    (collection_id,),
+                ).fetchone()
+                if collection_row is None:
+                    raise ValueError(f"Rules record {row['id']!r} has no collection")
+                collection = dict(collection_row)
+                collections[collection_id] = collection
+            if collection_id not in skill_type_category_names:
+                category_names: dict[str, str] = {}
+                for category_row in connection.execute(
+                    "SELECT name, facts_json FROM records "
+                    "WHERE collection_id = ? AND kind = 'declaration-category' "
+                    "ORDER BY id",
+                    (collection_id,),
+                ).fetchall():
+                    category_facts = _decode_json(category_row["facts_json"], {})
+                    type_id = category_facts.get("typeId")
+                    if isinstance(type_id, str):
+                        category_names.setdefault(type_id, category_row["name"])
+                skill_type_category_names[collection_id] = category_names
             record = {
                 "id": row["id"],
                 "kind": row["kind"],
                 "name": row["name"],
                 "summary": row["summary"],
+                "composition": {"role": row["composition_role"]},
                 "aliases": _decode_json(row["aliases_json"], []),
                 "label_ids": _decode_json(row["label_ids_json"], []),
                 "scope": _decode_json(row["scope_json"], None),
                 "facts": _decode_json(row["facts_json"], None),
+                "variant_semantics": _variant_semantics(row["variant_json"]),
                 "review": _decode_json(row["review_json"], None),
+                "collection": dict(collection),
             }
             label_ids = record["label_ids"]
             if label_ids:
@@ -441,19 +577,53 @@ class RulesDatabase:
                 ).fetchall()
                 record["labels"] = [dict(label) for label in label_rows]
             facts = record["facts"]
-            if isinstance(facts, dict) and facts.get("typeId"):
-                skill_type = connection.execute(
-                    "SELECT id, name, labels_json, descriptions_json FROM skill_types "
-                    "WHERE collection_id = ? AND id = ?",
-                    (row["collection_id"], facts["typeId"]),
-                ).fetchone()
-                if skill_type is not None:
-                    record["skill_type"] = {
-                        "id": skill_type["id"],
-                        "name": skill_type["name"],
-                        "labels": _decode_json(skill_type["labels_json"], []),
-                        "descriptions": _decode_json(skill_type["descriptions_json"], {}),
-                    }
+            if isinstance(facts, dict):
+                type_ids = facts.get("typeIds")
+                if isinstance(type_ids, list) and type_ids:
+                    skill_types = []
+                    for type_id in type_ids:
+                        skill_type = connection.execute(
+                            "SELECT id, name, labels_json, descriptions_json FROM skill_types "
+                            "WHERE collection_id = ? AND id = ?",
+                            (row["collection_id"], type_id),
+                        ).fetchone()
+                        if skill_type is not None:
+                            skill_types.append(
+                                {
+                                    "id": skill_type["id"],
+                                    "name": skill_type["name"],
+                                    "category_name": skill_type_category_names[collection_id].get(
+                                        skill_type["id"], skill_type["name"]
+                                    ),
+                                    "labels": _decode_json(skill_type["labels_json"], []),
+                                    "descriptions": _decode_json(
+                                        skill_type["descriptions_json"], {}
+                                    ),
+                                }
+                            )
+                    if skill_types:
+                        record["skill_types"] = skill_types
+                        # Compatibility projection for API consumers that only know the
+                        # former primary-category field. New code must use skill_types.
+                        record["skill_type"] = skill_types[0]
+                elif facts.get("typeId"):
+                    skill_type = connection.execute(
+                        "SELECT id, name, labels_json, descriptions_json FROM skill_types "
+                        "WHERE collection_id = ? AND id = ?",
+                        (row["collection_id"], facts["typeId"]),
+                    ).fetchone()
+                    if skill_type is not None:
+                        record["skill_type"] = {
+                            "id": skill_type["id"],
+                            "name": skill_type["name"],
+                            "category_name": skill_type_category_names[collection_id].get(
+                                skill_type["id"], skill_type["name"]
+                            ),
+                            "labels": _decode_json(skill_type["labels_json"], []),
+                            "descriptions": _decode_json(
+                                skill_type["descriptions_json"], {}
+                            ),
+                        }
             record["citations"] = [
                 dict(citation)
                 for citation in connection.execute(
@@ -465,36 +635,314 @@ class RulesDatabase:
                     (row["collection_id"], row["id"]),
                 ).fetchall()
             ]
-            record["related_records"] = [
-                relation["related_record_id"]
+            record["relations"] = [
+                {
+                    "type": relation["relation_type"],
+                    "record_id": relation["related_record_id"],
+                }
                 for relation in connection.execute(
-                    "SELECT related_record_id FROM record_relations "
+                    "SELECT relation_type, related_record_id FROM record_relations "
                     "WHERE collection_id = ? AND record_id = ? ORDER BY position",
                     (row["collection_id"], row["id"]),
                 ).fetchall()
             ]
+            record["related_records"] = [
+                relation["record_id"] for relation in record["relations"]
+            ]
             records.append(record)
         return records
 
-    def records_for_army_link(
-        self, entity: str, external_id: ArmyLinkRef
-    ) -> list[dict[str, Any]]:
-        with self._connect() as connection:
+    @staticmethod
+    def _compose_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for record in records:
+            grouped.setdefault(record["id"], []).append(record)
+
+        result = []
+        for record_id in sorted(grouped):
+            contributions = grouped[record_id]
+            definitions = [
+                record
+                for record in contributions
+                if record["composition"]["role"] == "definition"
+            ]
+            if len(definitions) != 1:
+                raise ValueError(
+                    f"Current rules record {record_id!r} requires exactly one definition"
+                )
+            definition = deepcopy(definitions[0])
+            supplements = [
+                deepcopy(record)
+                for record in contributions
+                if record["composition"]["role"] == "supplement"
+            ]
+            supplements.sort(
+                key=lambda record: (
+                    record["collection"]["effective_from"],
+                    record["collection"]["id"],
+                )
+            )
+            if supplements:
+                definition["supplements"] = supplements
+
+            combined_relations: list[dict[str, Any]] = []
+            seen_relations: set[tuple[str, str, str]] = set()
+            for contribution in [definition, *supplements]:
+                collection_id = contribution["collection"]["id"]
+                for relation in contribution.get("relations", []):
+                    key = (relation["type"], relation["record_id"], collection_id)
+                    if key in seen_relations:
+                        continue
+                    seen_relations.add(key)
+                    combined_relations.append(
+                        {
+                            **relation,
+                            "collection_id": collection_id,
+                        }
+                    )
+            definition["relations"] = combined_relations
+            definition["related_records"] = list(
+                dict.fromkeys(relation["record_id"] for relation in combined_relations)
+            )
+            result.append(definition)
+        return result
+
+    @staticmethod
+    def _relation_endpoint_index(
+        connection: sqlite3.Connection, record_ids: set[str]
+    ) -> dict[str, dict[str, Any]]:
+        if not record_ids:
+            return {}
+        placeholders = ", ".join("?" for _ in record_ids)
+        rows = connection.execute(
+            "SELECT r.collection_id, r.id, r.kind, r.name "
+            "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+            "WHERE r.id IN (" + placeholders + ") "
+            "AND r.composition_role = 'definition' AND c.status = 'current' "
+            "ORDER BY r.id",
+            tuple(sorted(record_ids)),
+        ).fetchall()
+        endpoints: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            links: list[dict[str, str]] = []
+            for link in connection.execute(
+                "SELECT entity, external_id, external_name FROM record_army_links "
+                "WHERE collection_id = ? AND record_id = ? ORDER BY position",
+                (row["collection_id"], row["id"]),
+            ).fetchall():
+                item = {"entity": link["entity"]}
+                if link["external_id"] is not None:
+                    item["id"] = link["external_id"]
+                if link["external_name"] is not None:
+                    item["name"] = link["external_name"]
+                links.append(item)
+            endpoints[row["id"]] = {
+                "id": row["id"],
+                "kind": row["kind"],
+                "name": row["name"],
+                "army_links": links,
+            }
+        return endpoints
+
+    @classmethod
+    def _attach_reverse_relations(
+        cls, connection: sqlite3.Connection, records: list[dict[str, Any]]
+    ) -> None:
+        for record in records:
             rows = connection.execute(
-                "SELECT r.* FROM records AS r "
+                "SELECT rr.collection_id, rr.record_id, rr.relation_type "
+                "FROM record_relations AS rr JOIN collections AS c "
+                "ON c.id = rr.collection_id "
+                "WHERE rr.related_record_id = ? AND c.status = 'current' "
+                "ORDER BY rr.collection_id, rr.record_id, rr.position",
+                (record["id"],),
+            ).fetchall()
+            reverse_relations = [
+                {
+                    "type": row["relation_type"],
+                    "record_id": row["record_id"],
+                    "collection_id": row["collection_id"],
+                }
+                for row in rows
+            ]
+            if reverse_relations:
+                record["reverse_relations"] = reverse_relations
+
+            display_source = [
+                {**relation, "direction": "outbound"}
+                for relation in record.get("relations", [])
+            ] + [
+                {**relation, "direction": "inbound"}
+                for relation in reverse_relations
+            ]
+            endpoint_ids = {relation["record_id"] for relation in display_source}
+            endpoints = cls._relation_endpoint_index(connection, endpoint_ids)
+            display_relations = []
+            for relation in display_source:
+                endpoint = endpoints.get(relation["record_id"])
+                if endpoint is None:
+                    continue
+                item = {**relation, "record": endpoint}
+                presentation = relation_presentation(
+                    relation["type"], relation["direction"]
+                )
+                if presentation is not None:
+                    item["presentation"] = presentation
+                display_relations.append(item)
+            if display_relations:
+                record["display_relations"] = display_relations
+
+    def composed_records_for_army_link(
+        self,
+        entity: str,
+        external_id: ArmyLinkRef,
+    ) -> list[dict[str, Any]]:
+        """Return one current semantic record per Army-linked rules identity.
+
+        The Army link may live on any current contribution. Once a semantic record
+        ID is selected, all current contributions for that ID are composed without
+        field-wise precedence: one definition remains authoritative and any
+        supplements retain their own scope, collection provenance, facts, and
+        citations.
+        """
+        with self._connect() as connection:
+            linked_rows = connection.execute(
+                "SELECT DISTINCT r.id FROM records AS r "
+                "JOIN collections AS c ON c.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
                 "AND l.record_id = r.id "
-                "WHERE l.entity = ? AND l.external_id = ? "
-                "ORDER BY r.collection_id, r.id",
+                "WHERE l.entity = ? AND l.external_id = ? AND c.status = 'current' "
+                "ORDER BY r.id",
                 (entity, str(external_id)),
             ).fetchall()
+            record_ids = [row["id"] for row in linked_rows]
+            if not record_ids:
+                return []
+            placeholders = ", ".join("?" for _ in record_ids)
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                f"WHERE r.id IN ({placeholders}) AND c.status = 'current' "
+                "ORDER BY r.id, r.collection_id",
+                record_ids,
+            ).fetchall()
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+            return records
+
+    def composed_records_by_kind(self, kind: str) -> list[dict[str, Any]]:
+        """Return current semantic records of one kind with supplements attached."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                "WHERE r.kind = ? AND c.status = 'current' "
+                "ORDER BY r.id, r.collection_id",
+                (kind,),
+            ).fetchall()
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+            return records
+
+    def current_labels(self) -> list[dict[str, Any]]:
+        """Return labels from current rules collections with provenance."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.id, l.name, l.description, l.collection_id, "
+                "c.title AS collection_title "
+                "FROM labels AS l JOIN collections AS c ON c.id = l.collection_id "
+                "WHERE c.status = 'current' ORDER BY l.collection_id, l.id"
+            ).fetchall()
+            return [
+                {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "description": row["description"],
+                    "collection": {
+                        "id": row["collection_id"],
+                        "title": row["collection_title"],
+                    },
+                }
+                for row in rows
+            ]
+
+    def relations_for_record(
+        self, record_id: str, *, current_only: bool = True
+    ) -> list[dict[str, Any]]:
+        """Return authored outbound and derived reverse links for one semantic record."""
+        with self._connect() as connection:
+            status_clause = "AND c.status = 'current' " if current_only else ""
+            rows = connection.execute(
+                "SELECT rr.collection_id, rr.record_id, rr.relation_type, "
+                "rr.related_record_id, c.title AS collection_title, "
+                "c.status AS collection_status, c.effective_from "
+                "FROM record_relations AS rr JOIN collections AS c "
+                "ON c.id = rr.collection_id "
+                "WHERE (rr.record_id = ? OR rr.related_record_id = ?) "
+                + status_clause
+                + "ORDER BY rr.collection_id, rr.record_id, rr.position",
+                (record_id, record_id),
+            ).fetchall()
+            result = []
+            for row in rows:
+                outbound = row["record_id"] == record_id
+                result.append(
+                    {
+                        "type": row["relation_type"],
+                        "direction": "outbound" if outbound else "inbound",
+                        "record_id": (
+                            row["related_record_id"] if outbound else row["record_id"]
+                        ),
+                        "collection": {
+                            "id": row["collection_id"],
+                            "title": row["collection_title"],
+                            "status": row["collection_status"],
+                            "effective_from": row["effective_from"],
+                        },
+                    }
+                )
+            return result
+
+    def records_for_army_link(
+        self,
+        entity: str,
+        external_id: ArmyLinkRef,
+        *,
+        current_only: bool = True,
+    ) -> list[dict[str, Any]]:
+        """Return curated records linked to an Army identity.
+
+        Runtime composition uses current collections by default so superseded or
+        historical collections cannot affect catalog enrichment merely by being
+        present in the rules database.
+        """
+        with self._connect() as connection:
+            if current_only:
+                rows = connection.execute(
+                    "SELECT r.* FROM records AS r "
+                    "JOIN collections AS c ON c.id = r.collection_id "
+                    "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                    "AND l.record_id = r.id "
+                    "WHERE l.entity = ? AND l.external_id = ? AND c.status = 'current' "
+                    "ORDER BY r.collection_id, r.id",
+                    (entity, str(external_id)),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    "SELECT r.* FROM records AS r "
+                    "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                    "AND l.record_id = r.id "
+                    "WHERE l.entity = ? AND l.external_id = ? "
+                    "ORDER BY r.collection_id, r.id",
+                    (entity, str(external_id)),
+                ).fetchall()
             return self._records_from_rows(connection, rows)
 
     def skill_parameter_semantics(self) -> dict[ArmyLinkRef, dict[str, str]]:
         """Return curated skill parameter semantics keyed to authored Army refs."""
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT l.external_id AS skill_ref, r.facts_json "
+                "SELECT l.external_id AS skill_ref, r.variant_json "
                 "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
                 "AND l.record_id = r.id "
@@ -504,13 +952,24 @@ class RulesDatabase:
             ).fetchall()
             result: dict[ArmyLinkRef, dict[str, str]] = {}
             for row in rows:
-                facts = _decode_json(row["facts_json"], {})
-                semantics = facts.get("parameterSemantics") if isinstance(facts, dict) else None
-                if not isinstance(semantics, dict):
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                parameters = variant.get("occurrence_parameters", [])
+                semantics = next(
+                    (
+                        parameter
+                        for parameter in parameters
+                        if parameter.get("source") == "army-extra"
+                        and parameter.get("kind") == "distance"
+                    ),
+                    None,
+                )
+                if semantics is None:
                     continue
                 value = {
                     "kind": semantics["kind"],
-                    "positive_sign": semantics["positiveSign"],
+                    "positive_sign": semantics["positive_sign"],
                 }
                 skill_ref = _army_link_ref(row["skill_ref"])
                 existing = result.get(skill_ref)
@@ -521,11 +980,112 @@ class RulesDatabase:
                 result[skill_ref] = value
             return result
 
-    def skill_declaration_categories(self) -> list[dict[str, Any]]:
-        """Return curated skill declaration categories keyed to authored Army refs."""
+    def catalog_source_variant_semantics(
+        self, entity: str
+    ) -> dict[ArmyLinkRef, dict[str, Any]]:
+        """Return reviewed exact-source variant semantics for one catalog domain."""
+        if entity not in {"skill", "equipment", "weapon"}:
+            raise ValueError("Source variants support skill, equipment, or weapon entities")
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT l.external_id AS skill_ref, r.name, r.facts_json, "
+                "SELECT l.external_id AS army_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = ? AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = ? "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id",
+                (entity, entity),
+            ).fetchall()
+            result: dict[ArmyLinkRef, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict) or variant.get("inheritance") != "source":
+                    continue
+                source_variant = variant.get("source_variant")
+                if not isinstance(source_variant, dict):
+                    continue
+                army_ref = _army_link_ref(row["army_ref"])
+                existing = result.get(army_ref)
+                if existing is not None and existing != source_variant:
+                    raise ValueError(
+                        f"{entity.title()} {army_ref!r} has conflicting source variant semantics"
+                    )
+                result[army_ref] = dict(source_variant)
+            return result
+
+    def skill_definition_categories(self) -> list[dict[str, Any]]:
+        """Return ordered categories owned directly by current Skill definitions."""
+        with self._connect() as connection:
+            category_names: dict[tuple[str, str], str] = {}
+            for category_row in connection.execute(
+                "SELECT collection_id, name, facts_json FROM records "
+                "WHERE kind = 'declaration-category' ORDER BY collection_id, id"
+            ).fetchall():
+                category_facts = _decode_json(category_row["facts_json"], {})
+                type_id = category_facts.get("typeId")
+                if isinstance(type_id, str):
+                    category_names.setdefault(
+                        (category_row["collection_id"], type_id), category_row["name"]
+                    )
+            rows = connection.execute(
+                "SELECT l.external_id AS army_ref, r.collection_id, r.id, r.facts_json "
+                "FROM records AS r JOIN collections AS col ON col.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND r.composition_role = 'definition' "
+                "AND col.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result = []
+            for row in rows:
+                facts = _decode_json(row["facts_json"], {})
+                type_ids = facts.get("typeIds")
+                if not isinstance(type_ids, list) or not type_ids:
+                    continue
+                citation = connection.execute(
+                    "SELECT s.title AS source_title, s.version AS source_version, c.page "
+                    "FROM record_citations AS c JOIN sources AS s "
+                    "ON s.collection_id = c.collection_id AND s.id = c.source_id "
+                    "WHERE c.collection_id = ? AND c.record_id = ? "
+                    "ORDER BY (c.page IS NULL), c.position LIMIT 1",
+                    (row["collection_id"], row["id"]),
+                ).fetchone()
+                for order, type_id in enumerate(type_ids):
+                    skill_type = connection.execute(
+                        "SELECT name FROM skill_types WHERE collection_id = ? AND id = ?",
+                        (row["collection_id"], type_id),
+                    ).fetchone()
+                    if skill_type is None:
+                        continue
+                    result.append(
+                        {
+                            "skill_ref": _army_link_ref(row["army_ref"]),
+                            "type_id": type_id,
+                            "name": category_names.get(
+                                (row["collection_id"], type_id), skill_type["name"]
+                            ),
+                            "order": order,
+                            "source_title": (
+                                citation["source_title"] if citation is not None else None
+                            ),
+                            "source_version": (
+                                citation["source_version"] if citation is not None else None
+                            ),
+                            "page": citation["page"] if citation is not None else None,
+                        }
+                    )
+            return result
+
+    def declaration_categories(self, entity: str) -> list[dict[str, Any]]:
+        """Return current declaration categories for one Army catalog entity."""
+        if entity not in {"skill", "equipment"}:
+            raise ValueError("Declaration categories support skill or equipment entities")
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS army_ref, r.name, r.facts_json, "
                 "s.title AS source_title, s.version AS source_version, c.page "
                 "FROM records AS r JOIN collections AS col ON col.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
@@ -534,17 +1094,19 @@ class RulesDatabase:
                 "AND c.record_id = r.id "
                 "JOIN sources AS s ON s.collection_id = c.collection_id "
                 "AND s.id = c.source_id "
-                "WHERE r.kind = 'skill-declaration-category' "
-                "AND col.status = 'current' AND l.entity = 'skill' "
+                "WHERE r.kind = 'declaration-category' "
+                "AND col.status = 'current' AND l.entity = ? "
                 "AND l.external_id IS NOT NULL "
-                "ORDER BY l.external_id, r.collection_id, r.id, c.position"
+                "ORDER BY l.external_id, r.collection_id, r.id, c.position",
+                (entity,),
             ).fetchall()
             result = []
             for row in rows:
                 facts = _decode_json(row["facts_json"], {})
                 result.append(
                     {
-                        "skill_ref": _army_link_ref(row["skill_ref"]),
+                        "army_ref": _army_link_ref(row["army_ref"]),
+                        "type_id": facts["typeId"],
                         "name": row["name"],
                         "order": facts["order"],
                         "source_title": row["source_title"],
@@ -552,7 +1114,46 @@ class RulesDatabase:
                         "page": row["page"],
                     }
                 )
+            result.sort(
+                key=lambda item: (
+                    str(item["army_ref"]),
+                    item["order"],
+                    item["name"],
+                    item["page"] or 0,
+                )
+            )
             return result
+
+    def training_by_order_type(self) -> dict[str, dict[str, Any]]:
+        """Map reviewed Training to normal source Order-generation types only.
+
+        Tactical and Lieutenant Orders are distinct generated Order types, not
+        additional Training values. Multiple current Training identities claiming
+        one Order type fail closed rather than depending on publication order.
+        """
+        index: dict[str, dict[str, Any]] = {}
+        for record in self.composed_records_by_kind("training"):
+            order_type = record["facts"]["orderType"]
+            if order_type in index:
+                raise ValueError(
+                    f"Multiple current Training definitions for Order {order_type!r}"
+                )
+            index[order_type] = record
+        return index
+
+    def skill_declaration_categories(self) -> list[dict[str, Any]]:
+        """Return current Skill declaration categories keyed to authored Army refs."""
+        return [
+            {
+                "skill_ref": item["army_ref"],
+                "name": item["name"],
+                "order": item["order"],
+                "source_title": item["source_title"],
+                "source_version": item["source_version"],
+                "page": item["page"],
+            }
+            for item in self.declaration_categories("skill")
+        ]
 
     def records_by_kind(self, kind: str, *, current_only: bool = True) -> list[dict[str, Any]]:
         """Return curated records of one kind, preferring current collections."""

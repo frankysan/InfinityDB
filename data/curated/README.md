@@ -12,9 +12,18 @@ provenance under `data/manifests/`.
   during Army normalization.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
-  endpoints that cannot be resolved from the current Army snapshot alone. These categories
-  have separate schemas and loaders; no loader treats arbitrary JSON from another
-  curated category as valid input. Curated identifiers are stable project/domain identities.
+  endpoints that cannot be resolved from the current Army snapshot alone.
+- `enrichment-coverage/` contains maintained release-scope classifications consumed by
+  the rules-enrichment coverage audit; these decisions classify audit gaps without becoming
+  runtime game semantics.
+- `rules-interactions/` contains the long-lived outgoing-interaction review policy used to
+  track current-release progress and known deferred/future relation candidates without
+  becoming runtime game semantics.
+
+These curated categories have separate schemas and loaders; no loader treats arbitrary JSON
+from another curated category as valid input. Curated identifiers are stable project/domain
+identities.
+
 - `armyLinks` are cross-domain references rather than curated record identities: Skill,
   Equipment, and Weapon links may use either a positive numeric source ID or the owning
   application-domain slug, with slugs preferred in maintained rules data. Numeric references
@@ -30,6 +39,71 @@ notes associated with immutable snapshots by SHA-256. Those notes remain
 separate from generated snapshot provenance and are not rules-database inputs.
 Acquisition tooling never writes or consumes this subtree; see
 [`snapshot-notes/README.md`](snapshot-notes/README.md).
+
+### Rules-enrichment coverage classifications
+
+`enrichment-coverage/classifications.json` is the maintained release-scope policy for
+`tools/audit_enrichment_coverage.py`. Every gap code known to the audit must have an explicit
+default classification: `release-blocker`, `intentional-omission`, `supporting-identity`,
+or `later-product-work`. The checked-in 0.7.0 policy is deliberately conservative: detected
+user-facing coverage gaps block that release unless reviewed otherwise, while rules-only relation
+targets that already support an exposed item are classified separately as
+`supporting-identity`.
+
+Item- or relation-specific `overrides` record reviewed exceptions with a reason. Overrides
+must match a gap in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides
+fail the audit instead of silently surviving after the underlying data changes. The policy is
+release-planning metadata only. It must not be consumed as rules ontology or application
+runtime behavior.
+
+### Rules-interaction review policy
+
+`rules-interactions/catalog-scope.json` is the maintained public-catalog denominator for
+the interaction review. It lists every public Skill, Equipment item, and Trait targeted by
+the release named in that scope file, including catalog identities that do not yet have a
+curated rules definition. `rules-interactions/reviews.json` separately tracks every semantic
+rules identity other than `declaration-category` projection records. Entries record the target
+release whose outgoing interactions are being reviewed, whether that review is
+pending/reviewed/inherited, and known future interactions that should survive beyond that
+release. The top-level
+`futureInteractions` queue can also retain a provisional source/target ID that is not yet a
+current rules record, so future domain work does not lose already-reviewed interactions.
+
+A primary catalog item is normally complete only when its canonical typed rules identity exists
+and that identity's outgoing semantics are reviewed. `catalog-scope.json` may declare a
+`releaseExceptions` entry when an item has been explicitly vetted but its authoritative rule
+belongs to a different publication/domain that is deliberately outside the selected target release.
+Such items remain visible in the denominator as deferred rather than being misclassified as missing
+target-release rules. Unclassified missing definitions remain pending, and an exception becomes
+stale and fails the audit if a current curated definition is later added. Exact source variants
+and independently modeled supporting identities are reported separately.
+
+The ledger deliberately does not duplicate authored `relations`: the current curated rules
+graph remains authoritative for edges that exist now. `tools/audit_rules_interactions.py`
+combines the graph with the ledger and generates `docs/rules-interaction-checklist.md`. A
+source-specific variant may use `inherited` when its outgoing interaction semantics are
+fully inherited from its family; this does not prevent adding a future exact-variant review
+if a source exception is discovered. Deferred candidates may leave `relationType` null when
+the current relation vocabulary cannot represent the interaction precisely.
+
+Regenerate/check the maintained checklist with:
+
+```powershell
+python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md
+python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md
+```
+
+When the Army/application catalog snapshot changes, validate or refresh the maintained catalog
+scope against the generated databases:
+
+```powershell
+python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db
+python tools/audit_rules_interactions.py --database data/generated/infinity.db --rules-database data/generated/rules.db --refresh-catalog-scope --output docs/rules-interaction-checklist.md
+```
+
+A release gate may be inspected explicitly with `--require-release <version>`. Pending
+reviews make that command fail; future candidates targeting another release remain visible
+without blocking the selected release.
 
 ### Curated Peripheral identities
 
@@ -140,13 +214,13 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v3 contract
+### Current v20 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `3`
+- `formatVersion`: `20`
 - `collection`: collection identity/scope/authority
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
@@ -168,6 +242,29 @@ Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be
 blended accidentally.
 
+Every record declares `composition.role` as `definition` or `supplement`. Across
+current collections, each semantic record ID has exactly one definition; supplements
+retain their own scope, facts, citations, relations, and publication provenance rather
+than being field-merged by load order. Related concepts use typed one-way `relations`;
+reverse navigation is derived by `rules.db`. Format v10 introduced the gameplay-
+interaction edge `reduces-modifiers-from`; format v11 extends that closed vocabulary
+with `ignores-modifiers-from` and `negates-effects-of` so counter-rules can describe
+ignored MODs separately from effects that become ineffective. Format v12 adds
+`modifies-rolls-for` and `restricts-use-of` for rules such as Sensor that alter another
+Skill's Roll or constrain one specific use without implying that the whole target rule
+is negated. Format v13 adds `applies-effects-to` and `imposes-modifiers-on` so rules such
+as Reflective and Albedo can expose who they affect without collapsing those different
+mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state. Format v16 adds `causes-state` for explicit activation paths such as Forward Observer causing Targeted State and Disposable (X) causing the item-specific Unloaded State, while existing roll/restriction relations make the affected State useful from both directions. Format v17 adds `enables-use-of` when a reviewed rule or State satisfies a documented prerequisite for another rule without claiming that all of the target rule's requirements are met. Format v18 adds `uses-effects-of` when a rule reuses another rule's effects without claiming that it enters the target State; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior. Format v19 replaces the singular Skill-definition `facts.typeId` with ordered `facts.typeIds`, allowing every full Skill definition to own one or more declaration categories directly. Format v20 adds `modifies-use-of` for rules that change how another rule is used without simply enabling or restricting it, `prevents-state-entry` for explicit prohibitions on entering a State, and `triggered-by-state-entry` for rules that activate when a State is entered.
+
+Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
+`{"orderType": "irregular"}` and canonical IDs `training:regular` /
+`training:irregular`. They do **not** have Army Skill links. Ordinary Army
+loadout Order-generation entries reference these records in the Unit API and
+browser, with citations; Lieutenant/Tactical Orders and source skill-like
+compatibility rows must not be treated as further Training values. Training
+supplements may add scoped facts but cannot redefine `orderType`. This is an
+additive v7 record-kind contract; it does not alter the `rules.db` schema.
+
 ### Document shape
 
 The main collection structure is:
@@ -175,7 +272,7 @@ The main collection structure is:
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 3,
+    "formatVersion": 20,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -188,8 +285,20 @@ The main collection structure is:
         "skillTypes": [],
         "labels": []
     },
-    "skillTypes": [],
-    "labels": [],
+    "skillTypes": [
+        {
+            "id": "automatic",
+            "name": "Automatic Skills",
+            "labels": ["Automatic Skill", "Automatic Skills"],
+            "descriptions": {
+                "singular": "Automatic Skill description.",
+                "plural": "Automatic Skills description."
+            }
+        }
+    ],
+    "labels": [
+        {"id": "optional", "name": "Optional", "description": "Optional label."}
+    ],
     "sources": [
         {
             "id": "n5-core-v5.3-pdf",
@@ -205,32 +314,27 @@ The main collection structure is:
     ],
     "records": [
         {
-            "id": "rule:camouflaged-state",
-            "kind": "state",
-            "name": "Camouflaged State",
-            "aliases": ["Camouflage"],
+            "id": "skill:camouflage",
+            "kind": "skill",
+            "name": "Camouflage",
             "summary": "Concise human-written summary.",
             "scope": {"game": "N5", "seasons": ["current"]},
-            "facts": {
-                "category": "state",
-                "timing": ["States Phase"],
-                "effects": [],
-                "requirements": [],
-                "restrictions": [],
-                "interactions": ["rule:discover", "rule:surprise-attack"]
-            },
+            "facts": {"typeIds": ["automatic"]},
+            "labelIds": ["optional"],
             "armyLinks": [{"entity": "skill", "id": "camouflage"}],
-            "relatedRecords": ["rule:camouflage", "rule:marker-state"],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [],
             "citations": [
                 {"sourceId": "n5-core-v5.3-pdf", "page": 113, "section": "States"}
             ],
-            "review": {"status": "reviewed", "reviewedOn": "2026-09-15"}
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-15"},
+            "composition": {"role": "definition"}
         }
     ]
 }
 ```
 
-Supported record kinds include `rule`, `skill`, `skill-declaration-category`,
+Supported record kinds include `rule`, `skill`, `declaration-category`,
 `equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
 `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
@@ -241,22 +345,48 @@ profile stores ordered stat name/value pairs, equipment, skills, and a CC weapon
 the application composes it into the existing weapon-reference API only when a
 validated `rules.db` is available.
 
-Skill declaration category records represent rule-derived declaration labels that
-are absent from Army source data. They use `facts.order` for deterministic display
-ordering, link only to Army `skill` IDs, and require exactly one PDF citation with a
-positive printed page. The application treats the absence of such a record as
-`Unclassified`; do not create uncited category records to represent missing rules
-classification.
+Full Skill definitions own their declaration/action categories directly through an
+ordered, non-empty `facts.typeIds` array referencing the canonical `skillTypes`
+vocabulary. Multiple values are first-class semantics; the first value is the primary
+category only for compatibility projections that still expose singular `skill_type`.
 
-Skill records may use `facts.parameterSemantics` when a rule-derived parameter
-needs display behavior that Army source data does not encode. The current schema
-supports `{"kind": "distance", "positiveSign": "preserve|omit|force"}`. This
-field does not decide whether an Army extra is a distance: imported
-`extras.type == "DISTANCE"` remains authoritative for that source semantic.
+`declaration-category` records remain the partial-curation mechanism for Army Skills
+that do not yet have a full Skill definition, and for Equipment action categories. They
+use singular `facts.typeId` plus `facts.order`, may link to Army `skill` or `equipment`
+identities, and require exactly one PDF citation with a positive printed page. When an
+Army Skill has both a full definition and fallback declaration records under the same
+authored Army reference, their ordered category identities must agree; curated loading
+fails closed on drift. During application composition, equivalent numeric source IDs and
+canonical Skill slugs are cross-checked as the same identity as well, so category drift
+cannot be hidden by authoring the two representations under different reference forms.
+Skills without either a full definition or a curated declaration
+fall back to `Unclassified`; Equipment receives no invented fallback category. Do not create uncited category
+records to represent missing rules classification.
 
-Skill records always carry a `labelIds` array, but it may be empty when the reviewed
-rule does not assign any maintained rules Label. States still require at least one
-Label. Do not invent a Label merely to satisfy serialization.
+Army-linked Skill, Equipment, and Weapon definitions declare
+`variantSemantics.inheritance` as `family` or `source`. Family semantics may be
+presented for the canonical application family. Source semantics require exactly one
+numeric Army source identity, a typed `variant-of` relation to a same-kind family
+definition, and `variantSemantics.sourceVariant`. A numeric Level uses
+`{"kind": "level", "value": 2}`; a reviewed named variant uses
+`{"kind": "named", "label": "..."}`; and a reviewed numeric Attribute replacement uses
+`{"kind": "attribute-replacement", "attribute": "BS", "value": 12}`. These apply only
+to that exact source variant.
+Supplements inherit Army routing from their definition and therefore do not declare
+their own `armyLinks`.
+
+Rule-derived occurrence-parameter display behavior lives under
+`variantSemantics.occurrenceParameters`. The currently standardized parameter is an
+Army extra with `kind: "distance"` and `positiveSign: "preserve|omit|force"`. This
+does not decide whether an Army extra is a distance: imported
+`extras.type == "DISTANCE"` remains authoritative for that source semantic. Reviewed
+exact-source Attribute replacements are kept on `sourceVariant`, not as generic
+occurrence parameters. Other MOD/value forms remain opaque until their semantics are
+reviewed.
+
+Skill and State records always carry a `labelIds` array, but it may be empty when the reviewed
+rule does not assign any maintained rules Label. Do not invent a Label merely to satisfy
+serialization.
 
 Peripheral types remain ordinary `rule` records in this same collection. A Peripheral
 type uses `facts.category = "peripheral-type"` and a validated
@@ -308,8 +438,9 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Versions 1 and 2 curated-rule files are no longer accepted by the loader and
-must be migrated to the v3 source/citation contract before ingestion.
+Curated-rule files older than format v20 are no longer accepted by the loader and must
+be migrated to the current source/citation, composition, variant, declaration, and
+Training contracts before ingestion.
 
 The starter file `rules/example.json` is intentionally empty and is never an
 ingestion input. Directory ingestion skips that reserved filename. Validate all

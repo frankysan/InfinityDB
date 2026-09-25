@@ -1,0 +1,2333 @@
+{
+  "format": "InfinityDB rules interaction review policy",
+  "formatVersion": 1,
+  "records": [
+    {
+      "recordId": "equipment:albedo",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:cube",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-25"
+    },
+    {
+      "recordId": "equipment:cube-2",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-25"
+    },
+    {
+      "recordId": "equipment:baggage",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:multispectral-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:tinbot",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24",
+      "note": "TinBot is a family container; exact source variants carry their own reviewed interaction semantics."
+    },
+    {
+      "recordId": "equipment:tinbot-albedo",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:tinbot-discover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:tinbot-ecm-guided",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:tinbot-firewall",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:tinbot-neurocinetics",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:tinbot-repeater",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:peripheral-type:ancillary",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:peripheral-type:control",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:peripheral-type:cyberplug",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:peripheral-type:servant",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:peripheral-type:synchronized",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:alert",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:bs-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:bs-11",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:bs-12",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:camouflage",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:cautious-movement",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:cc-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:cc-21",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:climb",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:combat-instinct",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:cyberplug",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:discover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:doctor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:dodge",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:engineer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:forward-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:forward-observer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:hidden-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:idle",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:intuitive-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:jump",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:limited-cover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:look-out",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:marksmanship",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:martial-arts",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:martial-arts-l1",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l2",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l3",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l4",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:martial-arts-l5",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:mimetism",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:move",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:natural-born-warrior",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:non-hackable",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24",
+      "note": "No current graph edge: its targeting restriction depends on Hacking Attack Requirements and Unit Type predicates that are not yet canonical interaction targets."
+    },
+    {
+      "recordId": "skill:no-cover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:peripheral",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:place-deployable",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:reload",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:request-speedball",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:reset",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:sensor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:sixth-sense",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:speculative-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:stealth",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:strategos",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:strategos-l1",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:strategos-l2",
+      "targetRelease": "0.7.0",
+      "status": "inherited",
+      "reviewedOn": "2026-09-24",
+      "note": "Exact source variant inherits family interaction semantics; variant-of remains structural."
+    },
+    {
+      "recordId": "skill:super-jump",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:suppressive-fire",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:surprise-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:camouflaged",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:disconnected",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:hidden-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:immobilized-a",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:immobilized-b",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:isolated",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:stunned",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:targeted",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:unconscious",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:unloaded",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "training:irregular",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "training:regular",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:anti-materiel",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:arm-0",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:aro",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:bioweapon",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:boost",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:bs-weapon-ph",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:bs-weapon-wip",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:bts-0",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:burst-b",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:burst-single-target",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:cc",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:concealed",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:continuous-damage",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:deployable",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:direct-template",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:disposable-x",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:double-shot",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:impact-template",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:improvised",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:indiscriminate",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:intuitive-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:non-lethal",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:non-reloadable",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:perimeter",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:prior-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:reflective",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:silent-x",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:speculative-attack",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:state",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:suppressive-fire",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:target-attribute",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:targetless",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "trait:zone-of-control-zc",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "weapon:armed-turret",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:360o-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:nanoscreen",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:x-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:biometric-visor",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:dazer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:deactivator",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:deployable-cover",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:deployable-repeater",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:fastpanda",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:repeater",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:ai-motorcycle",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:bangbomb",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:ecm",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:escape-system",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:evo-hacking-device",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:gizmokit",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:hacking-device",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:hacking-device-plus",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:holomask",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:holoprojector",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:killer-hacking-device",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:medikit",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:motorcycle",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "equipment:symbiomate",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    }
+  ,
+    {
+      "recordId": "skill:combat-jump",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:decoy",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:impersonation",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:infiltration",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:minelayer",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:parachutist",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:sapper",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:strategic-deployment",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:decoy",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:impersonation-1",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:impersonation-2",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:foxhole",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:berserk",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:guard",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:neurocinetics",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:total-reaction",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+        "recordId": "skill:triangulated-fire",
+        "targetRelease": "0.7.0",
+        "status": "reviewed",
+        "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:aerial",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:climbing-plus",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:terrain",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:warhorse",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:courage",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:frenzy",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:impetuous",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:religious-troop",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:dead",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:engaged",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:holoecho",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:holomask",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:normal",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:prone",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:possessed",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:retreat",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:sepsitorized",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "state:suppressive-fire",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:dogged",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:no-wound-incapacitation",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:remote-presence",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:shasvastii",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:regeneration",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:protheion",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:loss-of-lieutenant",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:special-lieutenant-order",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:tactical-order",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:command-token-strategic-use",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:chain-of-command",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:counterintelligence",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:inspiring-leadership",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:lieutenant",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:mnemonica",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:nco",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:tactical-awareness",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:paramedic",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:tech-recovery",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:technorganic",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:ft-master",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:number-2",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:specialist-operative",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:journalist",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:tagcom",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:booty",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:metachemistry",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:explode",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:exrah",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:immunity",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:vulnerability",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:g-jumper",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:infinity-spec-ops",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:morpho-scan",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:remdriver",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:transmutation",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "skill:hacker",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
+    }
+  ],
+  "futureInteractions": [
+    {
+      "sourceRecordId": "equipment:cube-2",
+      "targetRecordId": "weapon:sepsitor",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph."
+    },
+    {
+      "sourceRecordId": "equipment:cube-2",
+      "targetRecordId": "weapon:sepsitor-plus",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph."
+    },
+    {
+      "sourceRecordId": "hacking-program:white-noise",
+      "targetRecordId": "skill:marksmanship",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first."
+    },
+    {
+      "sourceRecordId": "hacking-program:white-noise",
+      "targetRecordId": "equipment:multispectral-visor",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first."
+    },
+    {
+      "sourceRecordId": "skill:climb",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly."
+    },
+    {
+      "sourceRecordId": "skill:idle",
+      "targetRecordId": "rule:marker-form",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States."
+    },
+    {
+      "sourceRecordId": "skill:intuitive-attack",
+      "targetRecordId": "state:camouflaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge."
+    },
+    {
+      "sourceRecordId": "skill:jump",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first."
+    },
+    {
+      "sourceRecordId": "skill:stealth",
+      "targetRecordId": "skill:idle",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge."
+    },
+    {
+      "sourceRecordId": "skill:stealth",
+      "targetRecordId": "skill:move",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge."
+    },
+        {
+      "sourceRecordId": "equipment:dazer",
+      "targetRecordId": "rule:difficult-terrain",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation."
+    },
+    {
+      "sourceRecordId": "equipment:deactivator",
+      "targetRecordId": "trait:deployable",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation."
+    },
+    {
+      "sourceRecordId": "equipment:deactivator",
+      "targetRecordId": "rule:cover",
+      "relationType": "ignores-modifiers-from",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "equipment:deployable-cover",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "equipment:repeater",
+      "targetRecordId": "rule:hacking-area",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:carbonite",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:oblivion",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:spotlight",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device",
+      "targetRecordId": "hacking-program:total-control",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:carbonite",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:cybermask",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:oblivion",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:spotlight",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:total-control",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:hacking-device-plus",
+      "targetRecordId": "hacking-program:white-noise",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:killer-hacking-device",
+      "targetRecordId": "hacking-program:cybermask",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:killer-hacking-device",
+      "targetRecordId": "hacking-program:trinity",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:assisted-fire",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:controlled-jump",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:enhanced-reaction",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:evo-hacking-device",
+      "targetRecordId": "hacking-program:fairy-dust",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
+    },
+    {
+      "sourceRecordId": "equipment:tinbot-firewall",
+      "targetRecordId": "equipment:firewall",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule."
+    },
+    {
+      "sourceRecordId": "skill:limited-cover",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule."
+    },
+    {
+      "sourceRecordId": "skill:surprise-attack",
+      "targetRecordId": "rule:face-to-face-roll",
+      "relationType": "imposes-modifiers-on",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills."
+    },
+    {
+      "sourceRecordId": "rule:marker-form",
+      "targetRecordId": "skill:surprise-attack",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State."
+    },
+    {
+      "sourceRecordId": "trait:bioweapon",
+      "targetRecordId": "ammunition:da",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain."
+    },
+    {
+      "sourceRecordId": "trait:bioweapon",
+      "targetRecordId": "ammunition:shock",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain."
+    },
+    {
+      "sourceRecordId": "trait:bs-weapon-ph",
+      "targetRecordId": "skill:bs-attack-guided",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BS Attack (Guided) cannot use weapons with the BS Weapon (PH) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "trait:bs-weapon-wip",
+      "targetRecordId": "skill:bs-attack-guided",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "BS Attack (Guided) cannot use weapons with the BS Weapon (WIP) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "trait:bs-weapon-wip",
+      "targetRecordId": "skill:bs-attack-shock",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "The BS Weapon (WIP) Trait explicitly prevents use with BS Attack (Shock); retain the restriction until that exact BS Attack form has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "trait:continuous-damage",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Continuous Damage can continue forcing Saving Rolls until the target enters Dead State; the current relation vocabulary should not overstate that indirect transition as a simple causes-state edge."
+    },
+    {
+      "sourceRecordId": "trait:double-shot",
+      "targetRecordId": "trait:disposable-x",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Double Shot has a specific conditional interaction with Disposable (2), consuming both remaining uses and resulting in Unloaded State; the current relation vocabulary has no precise conditional Trait-to-Trait interaction edge."
+    },
+    {
+      "sourceRecordId": "trait:indiscriminate",
+      "targetRecordId": "state:camouflaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge."
+    },
+  {
+    "sourceRecordId": "state:stunned",
+    "targetRecordId": "rule:attack-declaration",
+    "relationType": "restricts-use-of",
+    "targetRelease": "post-0.7.0",
+    "status": "planned",
+    "reason": "Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical."
+  },
+  {
+    "sourceRecordId": "state:stunned",
+    "targetRecordId": "rule:roll",
+    "relationType": "modifies-rolls-for",
+    "targetRelease": "post-0.7.0",
+    "status": "planned",
+    "reason": "Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception."
+  },
+  {
+    "sourceRecordId": "state:isolated",
+    "targetRecordId": "state:disconnected",
+    "relationType": "causes-state",
+    "targetRelease": "post-0.7.0",
+    "status": "deferred",
+    "reason": "Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition."
+  },
+  {
+    "sourceRecordId": "rule:null-state",
+    "targetRecordId": "state:disconnected",
+    "relationType": "causes-state",
+    "targetRelease": "post-0.7.0",
+    "status": "deferred",
+    "reason": "A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role."
+  }
+  ,
+    {
+      "sourceRecordId": "skill:combat-jump",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely."
+    },
+    {
+      "sourceRecordId": "skill:parachutist",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely."
+    },
+    {
+      "sourceRecordId": "skill:infiltration",
+      "targetRecordId": "state:camouflaged",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation."
+    },
+    {
+      "sourceRecordId": "skill:infiltration",
+      "targetRecordId": "state:hidden-deployment",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction."
+    },
+    {
+      "sourceRecordId": "state:foxhole",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model."
+    },
+    {
+      "sourceRecordId": "skill:minelayer",
+      "targetRecordId": "trait:disposable-x",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge."
+    },
+    {
+        "sourceRecordId": "skill:triangulated-fire",
+        "targetRecordId": "rule:range-modifiers",
+        "relationType": "ignores-modifiers-from",
+        "targetRelease": "post-0.7.0",
+        "status": "deferred",
+        "reason": "Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity."
+    },
+    {
+        "sourceRecordId": "skill:triangulated-fire",
+        "targetRecordId": "rule:partial-cover",
+        "relationType": "ignores-modifiers-from",
+        "targetRelease": "post-0.7.0",
+        "status": "deferred",
+        "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
+    },
+    {
+      "sourceRecordId": "skill:climbing-plus",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation."
+    },
+    {
+      "sourceRecordId": "skill:climbing-plus",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:terrain",
+      "targetRecordId": "rule:movement-label",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations."
+    },
+    {
+      "sourceRecordId": "skill:terrain",
+      "targetRecordId": "rule:special-terrain",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge."
+    },
+    {
+      "sourceRecordId": "skill:warhorse",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities."
+    },
+    {
+      "sourceRecordId": "skill:warhorse",
+      "targetRecordId": "skill:bs-attack-negative-modifier",
+      "relationType": "negates-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally."
+    },
+    {
+      "sourceRecordId": "skill:courage",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:courage",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation."
+    },
+    {
+      "sourceRecordId": "skill:frenzy",
+      "targetRecordId": "rule:wound",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation."
+    },
+    {
+      "sourceRecordId": "skill:frenzy",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled."
+    },
+    {
+      "sourceRecordId": "skill:frenzy",
+      "targetRecordId": "rule:marker-form",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation."
+    },
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "rule:movement-label",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label."
+    },
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "rule:marker-form",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States."
+    },
+    {
+      "sourceRecordId": "skill:impetuous",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A player in Retreat does not carry out the Impetuous Phase; model this phase suppression when Retreat has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:religious-troop",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical."
+    },
+    {
+      "sourceRecordId": "skill:religious-troop",
+      "targetRecordId": "rule:retreat",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics."
+    }
+  ,
+    {
+      "sourceRecordId": "state:engaged",
+      "targetRecordId": "rule:close-combat-declaration-set",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Engaged State restricts declarations to a specific Close Combat/Engaged set; model this only after a canonical declaration-set abstraction can preserve the whitelist semantics."
+    },
+    {
+      "sourceRecordId": "state:holoecho",
+      "targetRecordId": "rule:roll",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Holoecho State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges."
+    },
+    {
+      "sourceRecordId": "state:holomask",
+      "targetRecordId": "rule:roll",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "HoloMask State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges."
+    },
+    {
+      "sourceRecordId": "state:prone",
+      "targetRecordId": "rule:movement-label",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Prone halves movement from every Movement-labelled Skill and from failed Guts Rolls; use a generic Movement-label target instead of incomplete Move/Dodge-only edges."
+    },
+    {
+      "sourceRecordId": "state:possessed",
+      "targetRecordId": "hacking-program:total-control",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Total Control can cancel Possessed State for the owning player, but the Hacking Program is not yet a canonical rules identity in the maintained graph."
+    },
+    {
+      "sourceRecordId": "state:retreat",
+      "targetRecordId": "rule:retreat-situation",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Retreat! State is entered and canceled through the army-level Retreat! situation; retain the distinction until that situation is modeled canonically."
+    },
+    {
+      "sourceRecordId": "state:suppressive-fire",
+      "targetRecordId": "rule:face-to-face-roll",
+      "relationType": "imposes-modifiers-on",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition."
+    },
+    {
+      "sourceRecordId": "skill:dogged",
+      "targetRecordId": "rule:healing",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules."
+    },
+    {
+      "sourceRecordId": "skill:dogged",
+      "targetRecordId": "ammunition:shock",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "skill:doctor",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "skill:engineer",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge."
+    },
+    {
+      "sourceRecordId": "skill:no-wound-incapacitation",
+      "targetRecordId": "ammunition:shock",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+    },
+    {
+      "sourceRecordId": "skill:remote-presence",
+      "targetRecordId": "state:dead",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation."
+    },
+    {
+      "sourceRecordId": "skill:remote-presence",
+      "targetRecordId": "rule:command-token",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target."
+    },
+    {
+      "sourceRecordId": "skill:shasvastii",
+      "targetRecordId": "rule:retreat-situation",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State."
+    },
+    {
+      "sourceRecordId": "skill:shasvastii",
+      "targetRecordId": "ammunition:shock",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+    },
+    {
+      "sourceRecordId": "skill:regeneration",
+      "targetRecordId": "rule:wound",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity."
+    },
+    {
+      "sourceRecordId": "skill:protheion",
+      "targetRecordId": "rule:wound",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets."
+    },
+    {
+      "sourceRecordId": "skill:inspiring-leadership",
+      "targetRecordId": "rule:retreat-situation",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet."
+    },
+    {
+      "sourceRecordId": "skill:inspiring-leadership",
+      "targetRecordId": "rule:fireteam-coherency",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation."
+    },
+    {
+      "sourceRecordId": "skill:mnemonica",
+      "targetRecordId": "equipment:cube",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement."
+    },
+    {
+      "sourceRecordId": "skill:mnemonica",
+      "targetRecordId": "rule:troop-type:rem",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific."
+    },
+    {
+      "sourceRecordId": "skill:ft-master",
+      "targetRecordId": "training:regular",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself."
+    },
+    {
+      "sourceRecordId": "skill:ft-master",
+      "targetRecordId": "rule:fireteam-coherency",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely."
+    },
+    {
+      "sourceRecordId": "skill:number-2",
+      "targetRecordId": "state:isolated",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Number 2 can take over when another participant, the current Fireteam Team Leader, enters Isolated State; the current graph cannot encode that participant-role trigger without implying that Isolated applies to the Number 2 user."
+    },
+    {
+      "sourceRecordId": "skill:number-2",
+      "targetRecordId": "rule:null-state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Number 2 can take over when the current Fireteam Team Leader enters any Null State; Null State still needs a canonical abstraction and the trigger belongs to another Fireteam participant."
+    },
+    {
+      "sourceRecordId": "skill:number-2",
+      "targetRecordId": "rule:fireteam-leader",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Number 2 changes the Fireteam Team Leader role rather than granting or modifying another Skill; model that role transition once Fireteam leadership has a canonical relationship identity."
+    },
+    {
+      "sourceRecordId": "skill:specialist-operative",
+      "targetRecordId": "rule:specialist-troop",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity."
+    },
+    {
+      "sourceRecordId": "skill:journalist",
+      "targetRecordId": "rule:guts-roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved."
+    },
+    {
+      "sourceRecordId": "skill:journalist",
+      "targetRecordId": "rule:cubevac-roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities."
+    },
+    {
+      "sourceRecordId": "skill:journalist",
+      "targetRecordId": "rule:promotion-roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities."
+    },
+    {
+      "sourceRecordId": "skill:tagcom",
+      "targetRecordId": "rule:troop-type:tag",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD."
+    },
+    {
+      "sourceRecordId": "skill:booty",
+      "targetRecordId": "rule:booty-chart",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit."
+    },
+    {
+      "sourceRecordId": "skill:metachemistry",
+      "targetRecordId": "rule:metachemistry-chart",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts."
+    },
+    {
+      "sourceRecordId": "skill:explode",
+      "targetRecordId": "ammunition:shock",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain."
+    },
+    {
+      "sourceRecordId": "skill:explode",
+      "targetRecordId": "rule:direct-template-attack",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:exrah",
+      "targetRecordId": "rule:healing",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Exrah prevents later healing by sending the Trooper directly from Unconscious to Dead State; model the general recovery prohibition once healing/recovery has a canonical interaction abstraction."
+    },
+    {
+      "sourceRecordId": "skill:immunity",
+      "targetRecordId": "rule:saving-roll",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:immunity",
+      "targetRecordId": "trait:state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "The State: Stunned Trait explicitly bypasses Immunity, but the current canonical State Trait identity does not preserve the Stunned parameter, so a generic Trait edge would be overbroad."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "state:isolated",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "rule:null-state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "skill:dodge",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "skill:reset",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role."
+    },
+    {
+      "sourceRecordId": "skill:g-jumper",
+      "targetRecordId": "rule:combat-group",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities."
+    },
+    {
+      "sourceRecordId": "skill:infinity-spec-ops",
+      "targetRecordId": "rule:spec-ops-chart",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts."
+    },
+    {
+      "sourceRecordId": "skill:infinity-spec-ops",
+      "targetRecordId": "skill:request-specball",
+      "relationType": "enables-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity."
+    },
+    {
+      "sourceRecordId": "skill:request-specball",
+      "targetRecordId": "skill:combat-jump",
+      "relationType": "uses-effects-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:vita",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:str",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:mov",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:cc",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:bs",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:morpho-scan",
+      "targetRecordId": "attribute:ph",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+    },
+    {
+      "sourceRecordId": "skill:remdriver",
+      "targetRecordId": "rule:troop-type:rem",
+      "relationType": "applies-effects-to",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values."
+    },
+    {
+      "sourceRecordId": "skill:remdriver",
+      "targetRecordId": "rule:null-state",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A RemDriver Token is removed when the RemDriver user enters any Null State; retain this trigger until Null State is modeled as a canonical umbrella concept with event/timing semantics."
+    },
+    {
+      "sourceRecordId": "skill:transmutation",
+      "targetRecordId": "state:possessed",
+      "relationType": "cancels-state",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X."
+    },
+    {
+      "sourceRecordId": "skill:transmutation",
+      "targetRecordId": "rule:movement-label",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity."
+    },
+    {
+      "sourceRecordId": "skill:transmutation",
+      "targetRecordId": "rule:unit-profile",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain."
+    },
+    {
+      "sourceRecordId": "skill:hacker",
+      "targetRecordId": "rule:hacking-area",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity."
+    },
+    {
+      "sourceRecordId": "skill:hacker",
+      "targetRecordId": "rule:upgrade-program",
+      "relationType": null,
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; preserve this until Hacking Programs and Upgrade Programs have canonical identities."
+    }
+  ]
+}

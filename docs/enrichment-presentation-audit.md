@@ -1,0 +1,216 @@
+# 0.7.0 player-facing enrichment presentation audit
+
+This audit is the presentation gate for the rules-enrichment work in 0.7.0.
+Coverage and schema correctness are necessary but are not sufficient: the added
+information must help an Infinity player understand the game data they are
+looking at.
+
+The audit deliberately evaluates the existing catalog and Unit experiences
+rather than proposing a separate rules-reference application. Supporting rules
+identities may remain without standalone pages when a contextual presentation is
+more useful.
+
+## Player questions
+
+For each enriched Skill, Equipment item, Weapon, Trait, State, and representative Unit
+occurrence, the browser should make the following questions easy to answer when
+the underlying data supports them:
+
+- What is this, and what does it do in play?
+- What must be true before I can use it, and what restrictions apply?
+- Does this specific Level, named variant, Attribute replacement, or occurrence
+  modifier change the base meaning?
+- Which Units use it, and in which Army contexts?
+- Which related game concepts matter to understanding or using it?
+- Where did InfinityDB get this interpretation, and where can I verify it?
+
+The first five questions are player-facing information. The final provenance
+question must remain available but should not dominate the normal reading order.
+
+## Review criteria
+
+The release audit checks the following.
+
+**Relevance and hierarchy.** Concise gameplay meaning, Requirements, Effects,
+Restrictions, declaration/action category, and applicable variant context should
+be scannable before internal IDs or publication mechanics. Do not surface data
+merely because it exists; a player-facing element should explain, distinguish,
+navigate, or verify something useful.
+
+**Context and scope.** Family rules, exact-source variants, supplements, and
+occurrence modifiers must remain distinguishable. An occurrence-specific `(+1B)`,
+`(-3)`, reroll, distance parameter, or similar value must not read as a universal
+property of the canonical Skill/Equipment identity.
+
+**Relationships.** Reviewed semantic relationships are a primary InfinityDB
+feature, not supporting metadata. A player should be able to start from either
+side of a gameplay interaction and discover the other side even when the source
+rule or Wiki page documents only one direction. The first production example is
+Multispectral Visor/Mimetism: curated data authors `reduces-modifiers-from` once
+from MSV to Mimetism, while `rules.db` derives the reverse relationship for the
+Mimetism surface. The Stealth counter cluster extends that model: Sixth Sense and Combat
+Instinct each author `negates-effects-of` toward Stealth, and Combat Instinct authors
+`ignores-modifiers-from` toward Surprise Attack; Stealth and Surprise Attack receive the
+reverse relationships automatically. Sensor is the first multi-edge hub: one Sensor
+definition links to Mimetism, Discover, Camouflage, Camouflaged State, and Hidden
+Deployment State, and every affected endpoint receives the derived reverse relationship.
+Natural Born Warrior extends the same pattern to a CC counter hub: one reviewed rule
+authors `ignores-modifiers-from` toward Martial Arts and Surprise Attack, while both Skill
+pages receive the reverse relationship without duplicating its CC-only requirements.
+The graph label communicates that an interaction exists; exact values and conditions such
+as Sensor's +6 WIP and Zone of Control restriction remain in the owning rule facts. Stealth
+also authors `enables-use-of` toward Cautious Movement for its documented ZoC/Hacking Area
+exception, while the remaining movement and ARO conditions stay in the owning rule facts.
+Future interactions should follow the same one-authored-edge model rather than maintaining
+reciprocal facts independently.
+No Cover extends the graph with explicit precedence: it authors `overrides-effects-of` toward Limited Cover, and Limited Cover receives the derived `Overridden by: No Cover` context. This is intentionally distinct from negation because the relationship is about which restriction wins when both apply.
+The recovery network extends the same principle to State pages. Doctor authors
+`cancels-state` toward Unconscious and Stunned; Engineer authors it toward Disconnected,
+IMM-A, IMM-B, Isolated, Stunned, Targeted, and Unconscious. Each affected State page derives
+`Cancelled by` navigation, while VITA/STR requirements and alternative cancellation methods
+remain in the owning rule facts.
+Targeted extends State pages from recovery-only navigation into a full interaction hub. Forward Observer authors `causes-state` toward Targeted; Reset authors cancellation edges toward Targeted and IMM-B; and Targeted itself authors roll/restriction relationships toward BS Attack, Discover, Reset, Cautious Movement, and Stealth. A player can therefore start from either the State or one of the affected Skills and discover the interaction without duplicating exact MOD values across records.
+
+Camouflaged State is now a reviewed lifecycle hub rather than a draft supporting record: Camouflage enters it, Discover and Sensor reveal it, and the State itself enables the documented Marker-form prerequisite for Surprise Attack. Hidden Deployment State authors the same `enables-use-of` relationship. Surprise Attack therefore exposes both enabling States in reverse while retaining its separate Active Turn and Attack-declaration requirements.
+
+Restrictive-State self-recovery is also modeled in both directions. IMM-A links to Dodge
+and its PH -6 recovery Roll; IMM-B and Isolated link to Reset and their WIP -3 / WIP -9
+recovery Rolls. Dodge and Reset therefore expose which States they can cancel and which
+States modify those Rolls, while the exact MOD values remain on the State definitions.
+
+Raw ontology edges are not themselves UI copy. Relationship types need
+player-language, direction-aware labels, target identities need useful navigation
+when a browser surface exists, and bookkeeping edges such as `variant-of` should
+not be duplicated when the variant presentation already communicates that
+relationship. Rules-only targets may remain contextual text when a standalone
+page would add no value. States are an explicit exception where reverse navigation is itself
+player value: the rules-backed States catalog lets affected-state pages expose recovery,
+reveal, and other interactions directly.
+
+**Provenance.** Official source links, publication/version, and page/section
+references should be easy to reach. Provenance is supporting evidence rather
+than the primary explanation of the rule.
+
+**Accessibility and responsive use.** Meaning must survive the current light theme,
+narrow layouts, keyboard navigation, and non-color presentation. Category colors
+may reinforce familiar Infinity/Wiki semantics but must always accompany readable
+text.
+
+## Initial source-level findings
+
+The first pass over the current browser renderers establishes these concrete
+follow-ups.
+
+- **Requirements / Effects / Restrictions were visually indistinguishable.**
+  `rules-reference.js` rendered each fact class as an unlabeled bullet list. The
+  0.7.0 presentation work now labels these groups explicitly and orders
+  Requirements before Effects before Restrictions.
+- **Declaration/action categories are too easy to miss.** Skill and Equipment
+  categories are currently appended to the metadata/source line. They are useful
+  gameplay semantics and should receive a scannable presentation. The stylesheet
+  already carries the maintained Wiki category colors; any use of those colors
+  must retain text labels.
+- **Reviewed related-rule edges need first-class presentation.** Curated rule
+  records author one-way typed edges and `rules.db` derives reverse relations.
+  The shared renderer receives resolved endpoint metadata and presents every
+  current player-facing relation type with direction-aware language while
+  suppressing bookkeeping edges such as `variant-of`. After the complete 0.7.0
+  interaction review and semantic-only deferred-link pass, relationships are
+  grouped by player meaning: creation/enabling, State interactions, MOD/change
+  interactions, and cancellation/restriction. The backend now owns those group
+  assignments and directional labels in the canonical relation contract; JavaScript
+  only renders the supplied presentation metadata. Supporting identities without a
+  browser surface remain readable text rather than dead links.
+- **Source/applicability context used to precede the concise summary.** The shared
+  renderer now leads with the gameplay summary, categories, facts, and related
+  rules, then presents collection/applicability context and citations as
+  supporting provenance. The complete browser audit still needs to verify this
+  hierarchy on representative composed pages and occurrence-heavy variants.
+- **Exact-source rule detail lives inside usage disclosures.** The typed variant
+  label is visible before expansion, and disclosures that contain dedicated exact-source
+  rules now say **Variant rules** in the collapsed summary. Full variant rules remain
+  inside that same disclosure so Level, named-variant, and Attribute-replacement context
+  stays attached to the Unit-usage occurrence instead of reading as a universal family
+  rule. Usage summaries wrap independently from their title on narrow layouts.
+- **Unit pages navigate to enrichment rather than explaining it inline.** Profile
+  Skills, Equipment, and Weapons link to their catalog detail pages, which avoids
+  duplicating rules prose. Army extras remain visible in parentheses on the specific
+  profile/loadout occurrence where Army supplied them, while canonical rule summaries
+  stay on the linked catalog surface. This preserves the base-rule versus occurrence
+  boundary without making the Unit page repeat the rules reference.
+- **Catalog list pages remain intentionally terse.** They currently prioritize
+  identity and use counts rather than rules summaries. The audit should decide
+  whether category/semantic cues improve scanning enough to justify adding them;
+  completeness alone is not a reason to make list rows denser.
+
+## Catalog-wide consistency pass
+
+The initial 0.7.0 interaction gate reached 180/180 before the subsequent Cube
+presentation-encoding normalization added Cube and Cube 2.0 as canonical Equipment.
+The current primary gate is therefore 182/182: 181 current canonical definitions
+(94 Skills, 30 Equipment items, 33 Traits, and 24 States) plus the explicitly vetted
+Commlink release exception. The complete primary rules catalog was reviewed as one set
+against the generated `rules.db`.
+Every current primary definition has a non-empty concise summary, at least one
+authoritative citation, and reviewed status.
+
+The pass found no additional primary-catalog semantic identity gap. The
+remaining deferred interaction ledger entries still require a missing domain,
+participant/runtime model, or more structured mechanic rather than another
+simple catalog edge.
+
+Three presentation consistency issues were actionable without broadening scope:
+
+- Infinity editorial prose now consistently capitalizes the defined game term
+  **Trooper** across maintained summaries, fact text, Skill-type descriptions,
+  Label descriptions, and Training summaries.
+- The Related rules grouping had become semantically inconsistent as relation
+  vocabulary expanded. State lifecycle links and MOD/change links now have
+  dedicated groups instead of being split between cancellation and a generic
+  catch-all.
+- Gameplay meaning now precedes collection/applicability provenance in the
+  shared rules-reference renderer.
+
+A follow-up structured-enrichment consistency audit confirmed that all current curated
+definition summaries and semantic Label IDs are projected through `rules.db` unchanged.
+The 126 Army links on the 126 Army-linked Skill/Equipment/Weapon definitions all use stable
+numeric source IDs or domain slugs; no catalog definition depends on a display-name-only
+relationship. The remaining duplicated ontology was relation presentation itself, which is
+now backend-owned and covered across every current relation type. Structural `variant-of`
+edges remain deliberately suppressed by the generic Related-rules renderer.
+
+This catalog-level consistency audit was followed by a composed-page review confirming
+the information hierarchy and exact-source/occurrence boundary across the shared catalog
+and Unit renderers: rule meaning precedes provenance, typed exact-source semantics remain
+on their usage disclosures, disclosures advertise dedicated Variant rules before
+expansion, and Army extras stay local to profile/loadout occurrences.
+
+## Full-dataset browser acceptance
+
+The final 0.7.0 presentation pass used a built application database from the current
+2026-09-18 Army snapshot: 58 Army source documents (36 at `7.26246.158` and 22 at
+`7.26246.159`), 925 source Unit rows normalized to 737 logical Units, and 5,020 profile
+occurrences. The catalog renderer was exercised across all 207 current composed rules
+records at 320 px, 390 px, and 1280 px widths. Representative Unit stress cases covered
+high-multiplicity Army availability, multiple General profiles, dense loadouts, exact-source
+variants, Team-Ops data, and relationship-heavy enrichment.
+
+The audit found no catalog-renderer horizontal-overflow blocker and confirmed that keyboard
+focus remains visible and reaches rules links and Unit disclosure controls in document
+order. Two very-narrow Unit presentation blockers were found at 320 px: long unbroken page
+titles could widen the document, and the General profile retained a desktop-style
+two-column row that compressed its Attribute grid. The narrow breakpoint now allows page
+titles to wrap and stacks each General-profile label above its value area at 400 px and
+below. The corrected layout was rechecked against the same full-data stress records at
+320 px and 390 px, with desktop controls retained at 1280 px.
+
+InfinityDB is currently light-theme only. Dark-theme implementation and acceptance remain
+part of the separately planned theme work rather than a 0.7.0 prerequisite.
+
+## Completion
+
+The 0.7.0 player-facing enrichment presentation audit is complete. Reviewed enrichment is
+not considered presented merely because it exists in an API payload: the completed gate
+now includes source semantics, composed-page hierarchy, exact-source/occurrence context,
+full-dataset responsive rendering, and keyboard navigation. No unresolved presentation
+issue from this audit remains classified as a 0.7.0 blocker.

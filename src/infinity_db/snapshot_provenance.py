@@ -5,15 +5,18 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import zipfile
 from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 SNAPSHOT_MANIFEST_FORMAT = "InfinityDB snapshot provenance"
-SNAPSHOT_MANIFEST_VERSION = 1
+SNAPSHOT_MANIFEST_VERSION = 2
 SNAPSHOT_NOTE_FORMAT = "InfinityDB snapshot note"
 SNAPSHOT_NOTE_VERSION = 1
 SNAPSHOT_TYPES = frozenset({"army", "wiki", "symbols"})
+_SUPPORTED_SNAPSHOT_MANIFEST_VERSIONS = frozenset({1, SNAPSHOT_MANIFEST_VERSION})
+_SNAPSHOT_CONTENT_HASH_HEADER = b"InfinityDB snapshot content v1\0"
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
 
@@ -27,6 +30,53 @@ def sha256_file(path: Path) -> str:
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
+    return digest.hexdigest()
+
+
+def snapshot_content_sha256(archive: Path) -> str:
+    """Hash normalized ZIP member paths and bytes while ignoring container metadata."""
+    if not archive.is_file() or not zipfile.is_zipfile(archive):
+        raise SnapshotProvenanceError(
+            f"Snapshot content hash requires a ZIP archive: {archive}"
+        )
+
+    digest = hashlib.sha256(_SNAPSHOT_CONTENT_HASH_HEADER)
+    with zipfile.ZipFile(archive) as source:
+        members: list[tuple[str, zipfile.ZipInfo]] = []
+        seen_names: set[str] = set()
+        seen_casefolded: dict[str, str] = {}
+        for info in source.infolist():
+            if info.is_dir():
+                continue
+            name = _snapshot_member_name(info.filename)
+            if name in seen_names:
+                raise SnapshotProvenanceError(
+                    f"Snapshot ZIP contains duplicate member path: {name}"
+                )
+            casefolded = name.casefold()
+            if previous := seen_casefolded.get(casefolded):
+                raise SnapshotProvenanceError(
+                    "Snapshot ZIP contains case-only member collision: "
+                    f"{previous!r} and {name!r}"
+                )
+            seen_names.add(name)
+            seen_casefolded[casefolded] = name
+            members.append((name, info))
+
+        for name, info in sorted(members, key=lambda item: item[0]):
+            name_bytes = name.encode("utf-8")
+            member_digest = hashlib.sha256()
+            member_size = 0
+            with source.open(info) as handle:
+                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                    member_digest.update(chunk)
+                    member_size += len(chunk)
+
+            digest.update(len(name_bytes).to_bytes(8, "big"))
+            digest.update(name_bytes)
+            digest.update(member_size.to_bytes(8, "big"))
+            digest.update(member_digest.digest())
+
     return digest.hexdigest()
 
 
@@ -72,6 +122,7 @@ def build_snapshot_manifest(
         "snapshot": {
             "type": snapshot_type,
             "archive": archive_record,
+            "contentSha256": snapshot_content_sha256(archive),
             "acquiredAt": acquired_at.isoformat(timespec="seconds"),
             "documentCount": document_count,
         },
@@ -87,7 +138,7 @@ def build_snapshot_manifest(
             input_record["path"] = input_path
         document["inputArtifact"] = input_record
 
-    validate_snapshot_manifest(document, archive=archive)
+    validate_snapshot_manifest(document)
     return document
 
 
@@ -133,7 +184,7 @@ def write_snapshot_manifest(
 
 
 def load_snapshot_manifest(path: Path, *, archive: Path | None = None) -> dict[str, Any]:
-    """Load and validate one snapshot manifest, optionally checking its archive hash."""
+    """Load and validate one snapshot manifest, optionally checking its archive hashes."""
     try:
         document = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -143,7 +194,7 @@ def load_snapshot_manifest(path: Path, *, archive: Path | None = None) -> dict[s
 
 
 def validate_snapshot_manifest(document: Any, *, archive: Path | None = None) -> None:
-    """Validate the version-1 generated snapshot provenance contract."""
+    """Validate generated snapshot provenance, including legacy version 1."""
     root = _object(document, "snapshot manifest")
     _only_keys(
         root,
@@ -154,17 +205,20 @@ def validate_snapshot_manifest(document: Any, *, archive: Path | None = None) ->
         raise SnapshotProvenanceError(
             f"snapshot manifest: 'format' must be {SNAPSHOT_MANIFEST_FORMAT!r}"
         )
-    if root.get("formatVersion") != SNAPSHOT_MANIFEST_VERSION:
+    format_version = root.get("formatVersion")
+    if (
+        type(format_version) is not int
+        or format_version not in _SUPPORTED_SNAPSHOT_MANIFEST_VERSIONS
+    ):
         raise SnapshotProvenanceError(
-            f"snapshot manifest: unsupported formatVersion {root.get('formatVersion')!r}"
+            f"snapshot manifest: unsupported formatVersion {format_version!r}"
         )
 
     snapshot = _object(root.get("snapshot"), "snapshot manifest.snapshot")
-    _only_keys(
-        snapshot,
-        {"type", "archive", "acquiredAt", "documentCount"},
-        "snapshot manifest.snapshot",
-    )
+    snapshot_keys = {"type", "archive", "acquiredAt", "documentCount"}
+    if format_version >= 2:
+        snapshot_keys.add("contentSha256")
+    _only_keys(snapshot, snapshot_keys, "snapshot manifest.snapshot")
     snapshot_type = _string(snapshot.get("type"), "snapshot manifest.snapshot.type")
     if snapshot_type not in SNAPSHOT_TYPES:
         choices = ", ".join(sorted(SNAPSHOT_TYPES))
@@ -177,6 +231,11 @@ def validate_snapshot_manifest(document: Any, *, archive: Path | None = None) ->
     if type(document_count) is not int or document_count < 0:
         raise SnapshotProvenanceError(
             "snapshot manifest.snapshot.documentCount must be a non-negative integer"
+        )
+    content_sha256 = None
+    if format_version >= 2:
+        content_sha256 = _sha256(
+            snapshot.get("contentSha256"), "snapshot manifest.snapshot.contentSha256"
         )
 
     archive_record = _artifact_record(
@@ -199,6 +258,13 @@ def validate_snapshot_manifest(document: Any, *, archive: Path | None = None) ->
                 "Snapshot archive SHA-256 mismatch: "
                 f"expected {archive_record['sha256']}, got {actual_sha256}"
             )
+        if content_sha256 is not None:
+            actual_content_sha256 = snapshot_content_sha256(archive)
+            if actual_content_sha256 != content_sha256:
+                raise SnapshotProvenanceError(
+                    "Snapshot content SHA-256 mismatch: "
+                    f"expected {content_sha256}, got {actual_content_sha256}"
+                )
 
 
 def validate_snapshot_note(
@@ -264,6 +330,22 @@ def load_snapshot_note(
         raise SnapshotProvenanceError(f"Could not load snapshot note {path}: {exc}") from exc
     validate_snapshot_note(document, snapshot_sha256=snapshot_sha256)
     return document
+
+
+def _snapshot_member_name(name: str) -> str:
+    path = PurePosixPath(name)
+    if (
+        not name
+        or "\\" in name
+        or path.is_absolute()
+        or "." in path.parts
+        or ".." in path.parts
+        or path.as_posix() != name
+    ):
+        raise SnapshotProvenanceError(
+            f"Snapshot ZIP member must be a normalized relative POSIX path: {name!r}"
+        )
+    return name
 
 
 def _artifact_record(value: Any, context: str) -> dict[str, Any]:

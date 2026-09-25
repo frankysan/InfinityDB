@@ -74,9 +74,9 @@ Each State defines its own effects and activation/cancellation rules, and
 multiple States can apply cumulatively.
 
 Static Army/Profile data can identify rules that interact with States, but it
-must not be interpreted as the Trooper's current in-game State. A future Game
-States catalog belongs in the rules/reference layer; actual per-game state would
-belong to a separate session/game model.
+must not be interpreted as the Trooper's current in-game State. The Game States catalog belongs in the rules/reference layer and now exposes reviewed
+State identities for navigation and interaction discovery; actual per-game state still
+belongs to a separate session/game model.
 
 Sources:
 
@@ -384,8 +384,8 @@ whole Order. The two Skills of one Order are resolved as simultaneous actions
 even though they are declared sequentially.
 
 This confirms the semantic basis of InfinityDB's curated
-`skill-declaration-category` records. Category labels are rule-derived metadata
-about Skills and should remain in `rules.db`, not be inferred from Army usage or
+`declaration-category` records. Category labels are rule-derived metadata
+about Skills or Equipment and should remain in `rules.db`, not be inferred from Army usage or
 hard-coded in browser code.
 
 Sources:
@@ -514,7 +514,7 @@ These forms affect different targets and phases and sometimes have additional
 constraints. InfinityDB should preserve the raw/exact source representation and
 attach rule-derived parameter semantics where needed rather than flattening all
 extras into a generic numeric modifier. This aligns with the existing curated
-`facts.parameterSemantics` boundary.
+`variantSemantics.occurrenceParameters` boundary.
 
 Sources:
 
@@ -573,7 +573,7 @@ player.
 InfinityDB should model this as a relationship from State identities to the
 `Null` Label rather than by duplicating `is_null` rules in consumers. The current
 curated `null` Label is therefore a useful reusable vocabulary entry for the
-planned State catalog.
+State catalog.
 
 Sources:
 
@@ -618,8 +618,8 @@ the affected Trooper to Dodge with a PH-6 MOD, while IMM-B uses Reset with a
 WIP-3 MOD. Both still provide Orders. Impersonation similarly has meaningful
 IMP-1 and IMP-2 levels with different interaction/reveal behavior.
 
-State canonicalization must preserve these distinctions. A future State catalog
-may expose family/group relationships such as `Immobilized` or `Impersonation`,
+State canonicalization must preserve these distinctions. The State catalog may expose
+family/group relationships such as `Immobilized` or `Impersonation`,
 but a normalized family name must never erase the source State/level that
 controls rules behavior.
 
@@ -630,9 +630,109 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Impersonation_State>
 - PDF: Infinity N5 V5.3, printed pages 164-167
 
+### RS-GSG-STATE-005A — State cancellation is a bidirectional rules relationship
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+Skills such as Doctor and Engineer explicitly cancel named States under their own
+requirements. InfinityDB should author that fact once as a typed `cancels-state` edge from
+the Skill to the State and derive the reverse navigation on the State page. The edge says
+that a cancellation path exists. Reviewed self-recovery paths such as Dodge or Reset may
+also be authored as `cancels-state` edges; exact Attribute MODs, declaration conditions,
+Roll outcomes, and automatic phase cancellation remain facts of the owning rules and must
+not be flattened into the edge itself.
+
+This is the first interaction family that requires State identities to be directly browsable:
+a player looking at Targeted, Immobilized-B, or Unconscious should be able to discover the
+relevant Engineer/Doctor rule without already knowing which Skill to search for.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Doctor>
+- Wiki: <https://infinitythewiki.com/Engineer>
+- Wiki: <https://infinitythewiki.com/States>
+
+### RS-GSG-STATE-005B — State activation and behavioral effects belong in the interaction graph
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+A State page should expose both how the State is caused or cancelled and which player-facing
+Skills it changes. These relationships should be authored only where the source rule owns
+them and then projected in reverse automatically.
+
+Targeted State is the canonical example:
+
+- Forward Observer explicitly causes Targeted State, represented by `causes-state`.
+- Reset cancels Targeted, Immobilized-B, and Isolated States, represented by `cancels-state`.
+- Targeted modifies rolls for BS Attack, Discover, and Reset.
+- Targeted prevents Cautious Movement and Stealth, represented by `restricts-use-of`.
+
+The graph edge communicates the interaction category, not the complete rule. Exact values
+such as Targeted's +3 and -3 MODs, Forward Observer's LoF requirement, and Reset's
+State-specific MODs remain facts of the owning definitions.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Targeted_State>
+- Wiki: <https://infinitythewiki.com/Forward_Observer>
+- Wiki: <https://infinitythewiki.com/Reset>
+- Wiki: <https://infinitythewiki.com/Cautious_Movement>
+
+### RS-GSG-STATE-005C — State prerequisites can enable another rule without making it legal by themselves
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+Some rules require the user to begin an Order in a particular State or presentation form.
+Surprise Attack explicitly requires Marker form (including Camouflaged State) or Hidden
+Deployment at the start of the Order, in addition to its Active Turn and Attack-declaration
+requirements.
+
+InfinityDB represents the State/form prerequisite with `enables-use-of` edges from reviewed
+Camouflaged State and Hidden Deployment State to Surprise Attack. The reverse projection lets
+players reading Surprise Attack discover those enabling States. The edge does **not** mean that
+being in one of those States is sufficient by itself: the remaining requirements stay on the
+Surprise Attack definition.
+
+This is distinct from `enters-state`: Camouflage and Hidden Deployment Skills describe how their
+States are entered, while `enables-use-of` describes a gameplay consequence of already being in
+the State.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Camouflaged>
+- Wiki: <https://infinitythewiki.com/Hidden_Deployment_State>
+- Wiki: <https://infinitythewiki.com/Surprise_Attack>
+
+### RS-GSG-STATE-005D — Self-recovery rolls are both cancellation and roll interactions
+
+**Classification:** source-native interaction with an InfinityDB presentation consequence.
+
+Some restrictive States provide a self-recovery Skill and modify the Roll used to escape
+the State. InfinityDB should model both facts when reviewed:
+
+- Immobilized-A allows Dodge as the exceptional declaration, applies PH -6 to that Dodge,
+  and a successful Dodge cancels the State.
+- Immobilized-B allows Reset as the exceptional declaration, applies WIP -3 to that Reset,
+  and a successful Reset cancels the State.
+- Isolated applies WIP -9 to Reset, and a successful Reset cancels the State.
+
+The cancellation capability is represented by `cancels-state`; the State-specific Roll
+interaction is represented separately by `modifies-rolls-for`. This lets a player discover
+the escape route from the State page and also see, from Dodge or Reset, which States alter
+that recovery Roll. Exact MOD values remain in the State facts rather than being encoded in
+the graph edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Dodge>
+- Wiki: <https://infinitythewiki.com/Reset>
+- Wiki: <https://infinitythewiki.com/Immobilized-A_State>
+- Wiki: <https://infinitythewiki.com/Immobilized-B_State>
+- Wiki: <https://infinitythewiki.com/Isolated_State>
+
 ### RS-GSG-STATE-006 — Unloaded is item-specific runtime state
 
-**Classification:** source-native with a future state-model consequence.
+**Classification:** source-native with rules-reference and future state-model consequences.
 
 Unloaded State is activated when the ammunition/uses of a relevant Disposable
 weapon or piece of Equipment are exhausted. Its effect is that the **relevant
@@ -643,8 +743,11 @@ whole.
 
 A future play/session model should therefore not assume every State is a simple
 boolean attached only to a Trooper ID. State instances may need affected-item or
-mode context. Static InfinityDB data should continue to model `Disposable (X)`
-and `Non-Reloadable` as rules/catalog semantics, not current ammunition state.
+mode context. The rules-backed catalog now exposes Unloaded State and authors one
+`causes-state` edge from `Disposable (X)` so both endpoints expose the activation
+path. This is reference navigation only: it does not assert that a particular
+Trooper or item is currently Unloaded. `Non-Reloadable` remains a separate rule
+about cancellation and is not flattened into this edge.
 
 Sources:
 
@@ -811,13 +914,31 @@ The current N5.3 Traits page defines 33 Traits. The curated N5 V5.3 rules file
 contains 33 `kind: "trait"` records with matching canonical names. Current Trait
 **identity/name coverage is therefore complete**.
 
-This finding is about vocabulary coverage, not full rules coverage. Attachment
+The Army metadata `properties` field is not equivalent to that rules-native Trait
+vocabulary. The reviewed snapshot includes `Comms. Attack` and `No LoF`, which are
+current Labels; `CC Attack (+3)`, which is generic modifier notation; and the legacy
+property spellings `Technical Weapon` / `Throwing Weapon`, whose current N5.3
+semantics are represented by `BS Weapon (WIP)` / `BS Weapon (PH)`. Conversely, current
+canonical Traits such as `ARM = 0`, `ARO`, `BTS = 0`, `Burst (B)`, and
+`Prior Deployment` may have no Army-profile occurrence in a particular snapshot.
+
+InfinityDB must therefore anchor the rules-backed Trait catalog in the curated current
+Trait vocabulary rather than treating `metadata_weapons.properties` as its ontology.
+Raw Army properties contribute usage through canonical names, curated aliases, and
+parameterized prefixes. Values that resolve to Labels or generic signed
+Skill/Equipment modifier notation remain source properties without acquiring a Trait
+route. Unresolved source properties remain visible provisionally rather than being
+discarded.
+
+This finding is about vocabulary/identity coverage, not full rules coverage. Attachment
 of Traits to every relevant Weapon/Equipment/Skill and all structured effect
 relationships still need validation during the later domain audits.
 
 Sources:
 
-- Wiki: <https://infinitythewiki.com/Traits>
+- Wiki Traits: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110>
+- Wiki Labels: <https://infinitythewiki.com/Labels>
+- Wiki Weapon Chart: <https://infinitythewiki.com/Weapon_Chart_N5>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 - Curated data: `data/curated/rules/n5-core-v5.3.json`
 
@@ -848,6 +969,66 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Traits>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 - Curated data: `data/curated/rules/n5-core-v5.3.json`
+
+### RS-GSG-TRAIT-003 — Silent exposes its Dodge modifier relationship
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+`Silent (X)` applies its bracketed MOD to Face to Face Dodge Rolls when the attack is
+declared inside the target's Zone of Control but outside LoF. The parameter value belongs
+to the Trait occurrence, while the affected declaration is the canonical Dodge Skill.
+
+InfinityDB therefore authors `imposes-modifiers-on` from Silent (X) toward Dodge.
+`rules.db` derives the inverse navigation so Dodge identifies Silent (X) as a possible
+modifier without duplicating the relationship. The exact MOD value and ZoC/LoF conditions
+remain on the Trait occurrence and curated Trait summary rather than on the relation edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110#Silent_(X)>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
+### RS-GSG-TRAIT-004 — Concealed uses Camouflaged State effects without entering it
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+`Concealed` gives its bearer the effects of Camouflaged State while retaining a distinct
+Silhouette 2 concealing Marker. It is not a generic transition into Camouflaged State, so
+representing it with `enters-state` would misstate the rule.
+
+InfinityDB therefore authors `uses-effects-of` from Concealed toward Camouflaged State.
+`rules.db` derives the reverse navigation so the State page identifies Concealed as a
+consumer of its effects without duplicating the Trait's Marker-specific behavior. The
+Marker Silhouette remains on the Trait, not the relation edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110#Concealed>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
+### RS-GSG-TRAIT-005 — Weapon Traits can enable same-named Common Skills
+
+**Classification:** source-native cross-domain prerequisite relationship.
+
+The Intuitive Attack and Speculative Attack Common Skills require the user to employ a BS
+Weapon with the corresponding same-named Trait. Suppressive Fire likewise requires the
+user to select a Weapon with the Suppressive Fire Trait. The Trait satisfies one explicit
+prerequisite for declaring the Skill, but does not by itself satisfy the Skill's remaining
+requirements.
+
+InfinityDB therefore authors `enables-use-of` from each Weapon Trait toward its Common
+Skill: Intuitive Attack, Speculative Attack, and Suppressive Fire. `rules.db` derives the
+reverse navigation so each Skill identifies the Trait that makes the declaration available.
+This is the same scoped prerequisite semantics already used for Stealth/Cautious Movement
+and State/Surprise Attack interactions; it does not mean possession of the Trait makes every
+declaration legal.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Intuitive_Attack>
+- Wiki: <https://infinitythewiki.com/Speculative_Attack>
+- Wiki: <https://infinitythewiki.com/Suppressive_Fire>
+- Wiki: <https://infinitythewiki.com/Traits>
 
 ## Skills and Equipment / Module semantics
 
@@ -918,22 +1099,22 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
 - PDF: Infinity N5 V5.3, printed pages 76, 111, 121, 123-124, and 191
 
-### RS-SE-CAT-002 — Existing declaration-category facts require N5 V5.3 reconciliation
+### RS-SE-CAT-002 — Declaration categories are reconciled against N5 V5.3
 
-**Classification:** confirmed InfinityDB curated-data correctness gap.
+**Classification:** resolved InfinityDB curated-data correctness requirement.
 
-The tracked `skillTypes` vocabulary correctly defines the six current categories:
-Automatic, Deployment, Basic Short, Short, Long, and ARO. The existing
-`skill-declaration-category` records do not consistently match those rules.
+The tracked `skillTypes` vocabulary defines the six current categories: Automatic,
+Deployment, Basic Short, Short, Long, and ARO. Curated format v7 uses generic
+`declaration-category` records whose `facts.typeId` resolves to that vocabulary, so the
+same typed classification can apply to Skills and Equipment without changing their
+catalog identity.
 
-Confirmed mismatches include current Short Skill / ARO rules stored as Basic
-Short Skill / ARO (`BS Attack`, `CC Attack`, `Dodge`, `Forward Observer`);
-current Short Skills stored as Basic Short Skill / ARO (`Doctor`, `Engineer`);
-Automatic Skills stored as Basic Short Skill / ARO (`Cyberplug`, `Paramedic`);
-`Parachutist` stored as Deployment rather than Long; and `Triangulated Fire`
-stored as Basic Short Skill / ARO rather than Long. The tracked `Entire Order`
-record for Berserk also uses a category name absent from the current six-category
-vocabulary.
+The 2026-09-23 reconciliation corrected the audited mismatches: BS Attack, CC Attack,
+Dodge, and Forward Observer are Short Skill / ARO; Doctor and Engineer are Short Skill;
+Cyberplug and Paramedic are Automatic; Parachutist and Triangulated Fire are Long Skill;
+and Berserk uses Long Skill rather than the obsolete `Entire Order` label. Deactivator,
+GizmoKit, and MediKit are represented as Equipment-domain Short Skill actions rather
+than pseudo-Skills.
 
 `Regular` requires a different interpretation. The rules classify
 Regular/Irregular as Training, but Army-derived data also exposes `Regular`
@@ -943,17 +1124,24 @@ evidence that the rules-domain concept itself is a Skill. InfinityDB can preserv
 the Army occurrence while classifying/presenting the semantic concept as
 Training.
 
-The Equipment cases expose an additional schema issue:
-`skill-declaration-category` validation and query code currently require
-`armyLinks.entity == "skill"`, so Short Skill actions supplied by GizmoKit,
-MediKit, or Deactivator cannot be represented in their actual Equipment domain.
+This distinction is now implemented using reviewed `training:regular` and
+`training:irregular` records whose typed `facts.orderType` matches source
+loadout Order-generation entries. They are presented per loadout with core
+N5.3 citations. Tactical and Lieutenant Orders remain separate facts, and no
+rule-engine or temporary Isolated/Loss-of-Lieutenant state is inferred.
 
-Consumers must not treat the current declaration-category dataset as fully
-audited N5 V5.3 truth until the focused backlog reconciliation is complete.
+Curated format v19 makes multi-category Skill classification intrinsic to full Skill
+definitions through ordered `facts.typeIds`. Browser/API composition therefore exposes
+all categories for rules-native Skills as well as Army-linked Skills. Linked
+`declaration-category` records remain only as the partial-classification path for Army
+Skills without a full definition and for Equipment. Curated format v20 additionally
+distinguishes rules that modify another rule's use, prohibit entry into a State, or
+trigger specifically on State entry, so those interactions no longer remain deferred
+solely because the older relation vocabulary was too coarse.
 
 Sources:
 
-- PDF: Infinity N5 V5.3, printed pages 76, 77-85, 86-118, 123-124, and 191
+- PDF: Infinity N5 V5.3, printed pages 76, 77-85, 86-118, 121, 123-124, and 191
 - Curated data: `data/curated/rules/n5-core-v5.3.json`
 - Validation/query ownership: `src/infinity_db/curated.py` and
   `src/infinity_db/rules_database.py`
@@ -979,6 +1167,14 @@ These rules refine `RS-BR-ROLL-001/002`. InfinityDB should preserve the exact
 source annotation and use typed parameter semantics for interpretation. A value
 such as `-3` is insufficient without the owning rule and semantic target.
 
+Curated format v9 introduced the reviewed exact-source Attribute-replacement subset:
+Army Skill IDs 278 (`BS=12`) and 279 (`BS=11`) are typed variants of BS Attack,
+and ID 274 (`CC=21`) is a typed variant of CC Attack. Their structured
+`source_variant` metadata carries `kind: attribute-replacement`, the target
+Attribute, and the replacement value. No runtime display-name parsing is used; PH
+replacement forms and the remaining MOD/reroll/Special Dice annotations stay opaque
+until reviewed separately.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module#Modifiers_Explained_.28MODs.29>
@@ -1000,6 +1196,11 @@ attached to the profile occurrence determines which rules apply.
 The existing canonical grouping of Martial Arts L1-L5 and Strategos L1-L2 is
 therefore compatible with the rules only while the source Level remains
 preserved and presentable.
+
+This was introduced in curated format v9: Martial Arts source IDs 19-23 are typed
+as Levels 1-5 and Strategos source IDs 69-70 as Levels 1-2. The application keeps the
+family browsing identity while exposing the exact Level as `source_variant` metadata on
+the matching source occurrence; no `L<number>` runtime name parsing is used.
 
 Sources:
 
@@ -1070,6 +1271,374 @@ Sources:
 - Wiki: <https://infinitythewiki.com/AI_Motorcycle>
 - PDF: Infinity N5 V5.3, printed pages 117 and 119
 
+### RS-SE-MIMETISM-001 — Mimetism exposes its affected declarations
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Mimetism imposes its listed negative MOD on enemy BS Attacks that require LoF and on
+Discover attempts against the user. Those are direct rule-to-rule interactions, not
+profile eligibility or derived Unit capabilities.
+
+InfinityDB therefore authors `imposes-modifiers-on` from Mimetism toward BS Attack and
+Discover. `rules.db` derives the inverse navigation so those declaration pages identify
+Mimetism as a possible modifier without duplicating the relationship. The actual MOD
+value and LoF/target conditions remain in Mimetism's facts and the Unit Profile.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Mimetism&oldid=3102>
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+
+### RS-SE-MSV-001 — Multispectral Visor reduces Mimetism MODs
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+Mimetism imposes its listed negative MOD on enemy BS Attacks requiring LoF and on
+Discover attempts against the user. Every Multispectral Visor Level changes that
+Mimetism interaction: Level 1 reduces Mimetism (-3) to 0 and Mimetism (-6) to -3,
+while Levels 2 and 3 reduce Mimetism MODs to 0. The exact Visor Level still owns
+its more detailed visibility, Smoke, Discover, Surprise Attack, and Camouflaged
+Marker effects.
+
+InfinityDB therefore models the family-level interaction as one authored
+`reduces-modifiers-from` edge from Multispectral Visor to Mimetism. This edge is
+valid for every Level without pretending that all Levels have identical effects.
+`rules.db` derives the inverse navigation, allowing a player reading Mimetism to
+discover that Multispectral Visor reduces its MODs even though Mimetism's own rule
+text does not need to maintain a reciprocal list. Level-specific detail remains in
+the Multispectral Visor rule facts rather than being duplicated onto the relation.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Mimetism&oldid=3102>
+- Wiki: <https://infinitythewiki.com/index.php?title=Multispectral_Visor&oldid=4111>
+
+### RS-SE-COUNTER-001 — Counter-rules are authored once and navigated from both endpoints
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Stealth explicitly becomes ineffective against Troopers with Sixth Sense or Combat
+Instinct. Combat Instinct also ignores Surprise Attack MODs imposed by attackers. These
+are direct gameplay interactions between otherwise independent Skill identities, and a
+player reading the affected Skill benefits from knowing which other rules counter it.
+
+InfinityDB therefore authors `negates-effects-of` from Sixth Sense and Combat Instinct
+toward Stealth, and `ignores-modifiers-from` from Combat Instinct toward Surprise Attack.
+`rules.db` derives the inverse navigation so Stealth lists both counters and Surprise
+Attack identifies Combat Instinct without maintaining reciprocal curated rows. The edge
+expresses only the documented interaction; activation requirements, exceptions, and the
+rest of each Skill remain in that Skill's own facts.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Stealth&oldid=3914>
+- Wiki: <https://infinitythewiki.com/index.php?title=Sixth_Sense&oldid=3901>
+- Wiki: <https://infinitythewiki.com/index.php?title=Combat_Instinct&oldid=3135>
+- Wiki: <https://infinitythewiki.com/index.php?title=Surprise_Attack&oldid=3943>
+
+### RS-SE-STEALTH-001 — Stealth enables a scoped Cautious Movement exception
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Cautious Movement normally generates AROs when it begins or ends inside an enemy Model or
+Marker's Zone of Control, and Hackable Models must also remain outside enemy Hacking Areas.
+Stealth explicitly changes that interaction: its user may declare Cautious Movement inside
+those enemy Zones of Control and Hacking Areas, while the rest of the Cautious Movement and
+Stealth requirements still apply.
+
+InfinityDB represents that documented exception with an `enables-use-of` edge from Stealth
+to Cautious Movement. The edge does not claim that Stealth makes every Cautious Movement
+legal or suppresses every ARO condition; it exposes the specific enabling relationship while
+leaving geometry, LoF, Active-Turn, Hackable, and other conditions in the owning rule facts.
+`rules.db` derives the reverse navigation so Cautious Movement can identify Stealth as a
+rule that expands where it may be used.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Stealth>
+- Wiki: <https://infinitythewiki.com/Cautious_Movement>
+
+### RS-SE-SENSOR-001 — Sensor is a multi-edge interaction hub
+
+**Classification:** source-native cross-rule and cross-state gameplay relationship semantics.
+
+Sensor is classified as a Short Skill in N5.3, not as a Basic Short Skill or ARO.
+InfinityDB therefore assigns only the `short-skill` declaration category to both the full
+Skill definition and its Army-linked fallback classification.
+
+Sensor interacts with several independent rules at once. Its Sensor Roll ignores Mimetism
+MODs, can Discover enemies in Camouflaged or Hidden Deployment State inside the user's
+Zone of Control, restricts enemies with Camouflage from regaining Camouflaged State in
+that Zone of Control, and grants +6 WIP to Discover against Camouflage Markers. These are
+not aliases or family relationships; they are separate gameplay interactions that players
+benefit from discovering from either endpoint.
+
+InfinityDB therefore authors Sensor's edges once: `ignores-modifiers-from` toward
+Mimetism, `modifies-rolls-for` toward Discover, `restricts-use-of` toward Camouflage, and
+`reveals-state` toward Camouflaged State and Hidden Deployment State. Hidden Deployment
+Skill separately authors `enters-state` toward Hidden Deployment State. `rules.db` derives
+the inverse navigation so the affected Skill/State pages identify Sensor automatically.
+The exact +6 value, Zone of Control restriction, and other conditions remain in Sensor's
+rule facts rather than being duplicated into the relation edge.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Sensor&oldid=3274>
+- Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment&oldid=3084>
+- Wiki: <https://infinitythewiki.com/index.php?title=Hidden_Deployment_State&oldid=3835>
+
+### RS-GSG-TRAIT-006 — Deployable and Peripheral (Ancillary) enable Place Deployable
+
+**Classification:** source-native cross-domain prerequisite relationship.
+
+Place Deployable requires the user to have a Weapon or piece of Equipment with the
+Deployable Label, or to have a Peripheral (Ancillary). The Peripheral rules likewise state
+that a Controller deploys an undeployed Peripheral (Ancillary) by performing Place
+Deployable. Each endpoint therefore satisfies one explicit prerequisite for the Common
+Skill without making every declaration automatically legal.
+
+InfinityDB authors `enables-use-of` from Deployable and Peripheral (Ancillary) toward Place
+Deployable. `rules.db` derives the reverse navigation so the Common Skill exposes both ways
+it can become available. Reactive-Turn LoF, placement geometry, Camouflage-Marker
+restrictions, and the Perimeter placement exception remain facts of the owning rules rather
+than being flattened into these edges.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Place_Deployable>
+- Wiki: <https://infinitythewiki.com/Peripheral>
+- Wiki: <https://infinitythewiki.com/Traits#Deployable>
+
+### RS-GSG-TRAIT-007 — BS Weapon Attribute substitution is a BS Attack roll interaction
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+`BS Weapon (PH)` and `BS Weapon (WIP)` are still BS Weapons, but they replace the
+Attribute used for their BS Attacks. Rules and MODs that normally affect BS instead affect
+PH or WIP for the corresponding weapon. InfinityDB therefore authors
+`modifies-rolls-for` from each Trait to the canonical BS Attack Skill; the exact replacement
+Attribute remains part of the Trait definition rather than being encoded in the edge.
+
+The additional prohibitions involving BS Attack (Guided), and BS Attack (Shock) for the WIP
+form, remain in the future-interaction ledger until those exact BS Attack forms have canonical
+rules identities. They must not be flattened into a restriction on ordinary BS Attack.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28PH.29>
+- Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28WIP.29>
+- Wiki: <https://infinitythewiki.com/BS_Attack#Guided_Mode>
+- PDF: Infinity N5 V5.3, printed pages 33 and 174
+
+### RS-GSG-TRAIT-008 — CC and Non-Reloadable expose direct Skill relationships
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+The `CC` Trait identifies a weapon that can be used when making CC Attacks. InfinityDB
+models that explicit capability as `enables-use-of` toward CC Attack, using the same scoped
+prerequisite semantics as other Trait-to-Skill edges: the relation does not satisfy the
+remaining declaration requirements by itself.
+
+`Non-Reloadable` explicitly prevents eligible Disposable uses from being recovered and
+prevents Unloaded State from being cancelled through Reload. InfinityDB therefore authors
+`restricts-use-of` toward Reload. The edge is deliberately Skill-facing rather than a generic
+State restriction: Unloaded State remains the condition that Reload would otherwise cancel.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits#CC>
+- Wiki: <https://infinitythewiki.com/Traits#Non-Reloadable>
+- Wiki: <https://infinitythewiki.com/Reload>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
+### RS-GSG-TRAIT-009 — Conditional Trait interactions must not be over-generalized
+
+**Classification:** source-native semantics with an interaction-modeling consequence.
+
+Several reviewed Traits have real cross-rule interactions that the current graph cannot yet
+represent without losing important conditions. The long-lived interaction ledger therefore
+retains them explicitly instead of creating broader current edges:
+
+- BioWeapon applies the combined effects of DA and Shock Special Ammunition, pending the
+  canonical Ammunition domain;
+- Double Shot has a specific interaction with Disposable (2) that consumes both remaining
+  uses and results in Unloaded State;
+- Indiscriminate bypasses the normal restriction created by Camouflage and Hiding Markers in
+  its Area of Effect; and
+- Continuous Damage can continue Saving Rolls until Dead State, but that indirect outcome is
+  not equivalent to an unconditional `causes-state` edge.
+
+This is the same fail-closed policy used elsewhere in the rules graph: keep exact behavior in
+the owning definition and preserve unresolved relationships in the future queue until both
+target identity and relation semantics are precise enough.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Traits>
+- PDF: Infinity N5 V5.3, printed pages 174-175
+
+### RS-GSG-STATE-004 — Broad State interactions stay fail-closed until generic targets exist
+
+**Classification:** source-native cross-domain semantics with an interaction-modeling consequence.
+
+Several reviewed States interact with broad game concepts rather than one specific Skill or
+Equipment identity. Stunned prevents every Attack declaration and applies a -3 MOD to every
+Roll except Saving Rolls. Disconnected is activated by Controller/Peripheral conditions, including
+Isolated and Null States, where the participant role is essential. Unconscious automatically puts
+eligible Troopers into Prone State and cancels that Prone State when Unconscious is cancelled.
+
+InfinityDB therefore does not approximate these rules with incomplete BS Attack / CC Attack or
+unconditional State-to-State edges. The interaction ledger retains Stunned toward generic Attack
+declaration and Roll abstractions, Unconscious toward Prone State, and the role-conditional
+Isolated / Null-State activation of Disconnected until the missing targets or participant-role
+semantics are canonical. Unloaded needs no new outbound edge: Disposable already causes the State,
+while Reload and Baggage cancel it and Non-Reloadable restricts that recovery path.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Stunned_State>
+- Wiki: <https://infinitythewiki.com/Disconnected_State>
+- Wiki: <https://infinitythewiki.com/Unconscious_State>
+- Wiki: <https://infinitythewiki.com/Unloaded_State>
+
+### RS-GSG-WEAPON-001 — Armed Turret composes existing rule identities
+
+**Classification:** source-native cross-domain gameplay relationship semantics.
+
+Armed Turret explicitly has Disposable (1), Deployable, Non-Reloadable, and Perimeter; its profile
+also has 360º Visor and Total Reaction, and the weapon reacts by declaring BS Attack or CC Attack
+under its own targeting conditions. These are existing rule dependencies rather than duplicated
+copies of those rules.
+
+InfinityDB therefore authors `uses-effects-of` from Armed Turret to the four canonical Trait
+families, 360º Visor, and Total Reaction, plus `enables-use-of` toward BS Attack and CC Attack.
+The exact Disposable value and all trigger/target conditions remain owned by the Armed Turret
+source rule; the Total Reaction edge reuses the canonical reviewed Skill rather than duplicating
+its Burst/ARO behavior.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/Armed_Turret>
+
+### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Some Automatic Special Skills directly change the Roll or MOD processing of a named Common
+Skill without enabling that Common Skill or replacing its declaration. In the reviewed N5.3
+set, Martial Arts supplies Attack/Opponent/Burst MODs when CC Attack is declared, Marksmanship
+changes which negative BS MODs are applied when BS Attack is declared, and Sixth Sense removes
+most negative MODs from Dodge and Reset.
+
+InfinityDB therefore authors `modifies-rolls-for` from Martial Arts to CC Attack, from
+Marksmanship to BS Attack, and from Sixth Sense to Dodge and Reset. Exact Level values, Cover/
+Nanoscreen scope, and Sixth Sense exceptions remain in the owning Skill facts rather than the
+graph edges. `rules.db` derives the inverse navigation so each affected Common Skill identifies
+the Special Skills that can change its Roll.
+
+Super-Jump is intentionally not included in this relation family. It transforms how Jump is
+declared and executed rather than modifying a Roll, and the current relation vocabulary does not
+express that transformation precisely. Do not substitute `enables-use-of` merely because
+Super-Jump permits a Short-Skill form of Jump; Jump is already usable without Super-Jump.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Martial_Arts>
+- Wiki: <https://infinitythewiki.com/Marksmanship>
+- Wiki: <https://infinitythewiki.com/Sixth_Sense>
+- Wiki: <https://infinitythewiki.com/Super-Jump>
+
+### RS-SE-ROLL-002 — Common Skills can expose downstream roll interactions
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Some Common Skills do not merely carry a source label; their own effects explicitly change
+how another reviewed Skill is rolled or which reviewed modifier source applies. Look Out!
+allows alerted Troopers to make Dodge Rolls at PH-3 in the same Order. Speculative Attack
+explicitly applies its own -6 MOD and Range MODs while excluding other negative MODs such as
+Mimetism.
+
+InfinityDB therefore authors `modifies-rolls-for` from Look Out to Dodge and
+`ignores-modifiers-from` from Speculative Attack to Mimetism. `rules.db` derives inverse
+navigation so Dodge and Mimetism expose those interactions without reciprocal curated rows.
+The exact PH-3 and Speculative Attack -6 values remain in the owning Skill facts.
+
+The BS Attack labels on Intuitive Attack and Speculative Attack remain source-native labels,
+not graph edges: the current relation vocabulary describes gameplay effects between records,
+not an `is-a` or label-membership relationship.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Look_Out>
+- Wiki: <https://infinitythewiki.com/Speculative_Attack>
+
+### RS-SE-MARKSMANSHIP-001 — Marksmanship and MSV have explicit counter-interactions
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Marksmanship ignores negative BS MODs from Partial Cover and Nanoscreen when used with
+a BS Attack. The current Marksmanship and Multispectral Visor rules also explicitly call
+out the same counter-elements: Albedo, Reflective effects, and White Noise Zones. Within
+the 0.7.0 catalog scope, Albedo and Reflective are directly representable as Equipment/
+Trait relationships; White Noise remains part of the planned post-0.7.0 Hacking Program
+expansion rather than being modeled prematurely as a catalog item.
+
+InfinityDB therefore authors `imposes-modifiers-on` from Albedo to Marksmanship and
+Multispectral Visor because Albedo applies its listed negative Attribute MOD when those
+users make the specified attacks or Discover attempts against the bearer. Reflective
+authors `applies-effects-to` toward the same two endpoints because the Trait explicitly
+extends the owning item's effects to them. `rules.db` derives the inverse navigation so
+Marksmanship and MSV identify both counters without maintaining reciprocal curated rows.
+Exact conditions and MOD values remain in the owning rule facts.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Marksmanship&oldid=3812>
+- Wiki: <https://infinitythewiki.com/index.php?title=Albedo&oldid=3163>
+- Wiki: <https://infinitythewiki.com/index.php?title=Traits&oldid=4110>
+
+### RS-SE-NBW-001 — Natural Born Warrior ignores opposing negative CC MODs
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Natural Born Warrior applies when its user is the target of a CC Attack and also declares
+a CC Attack. In the resulting CC Face to Face Roll, the user ignores all negative MODs
+imposed by the opposing Trooper. The current N5.3 example explicitly demonstrates this
+against Surprise Attack, Martial Arts, CC Attack (-3), and a PARA CC Weapon modifier.
+
+InfinityDB models the two already-reviewed catalog endpoints as
+`ignores-modifiers-from` edges from Natural Born Warrior to Martial Arts and Surprise
+Attack. `rules.db` derives the reverse navigation so those Skill pages identify Natural
+Born Warrior as a counter. Generic signed CC Attack parameters and weapon/ammunition MODs
+remain outside this edge set until their own parameter semantics are reviewed; the graph
+must not imply that Natural Born Warrior universally disables either Skill outside the
+CC Face to Face requirements recorded on the owning rule.
+
+Sources:
+
+- PDF: Infinity N5 V5.3, printed page 101
+- Wiki: <https://infinitythewiki.com/index.php?title=Natural_Born_Warrior&oldid=3109>
+
+### RS-SE-COVER-001 — No Cover takes precedence over Limited Cover
+
+**Classification:** source-native cross-rule gameplay relationship semantics.
+
+Limited Cover removes the -3 BS MOD normally granted by Partial Cover. No Cover is the
+more severe restriction: a Trooper with No Cover cannot benefit from any Partial Cover
+MODs, and the current N5.3 rules explicitly state that No Cover still applies when the
+Trooper also gains Limited Cover from another rule or Skill.
+
+InfinityDB therefore authors one `overrides-effects-of` edge from No Cover to Limited
+Cover. `rules.db` derives the inverse navigation so the Limited Cover page identifies
+No Cover as the overriding rule. This edge describes precedence only; it must not be
+rendered as if Limited Cover were globally disabled in situations where No Cover does not
+apply.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=No_Cover&oldid=3969>
+- Wiki: <https://infinitythewiki.com/index.php?title=Limited_Cover&oldid=3970>
+
 ### RS-SE-EQUIP-001 — Cube/Cube 2.0 are Equipment encoded by profile symbols
 
 **Classification:** source-native with a presentation-encoding consequence.
@@ -1081,9 +1650,11 @@ Cube 2.0 profile symbol.
 
 That symbol is therefore an Army presentation/source occurrence of the canonical
 Equipment concept, not evidence of a competing Army classification. InfinityDB
-should preserve the exact source-symbol occurrence and resolve it to the
-canonical Cube/Cube 2.0 Equipment identity rather than inventing a textual Army
-Equipment row or treating the symbol's asset grouping as a rules taxonomy.
+preserves the exact source-symbol occurrence and resolves it through the maintained
+`equipment-presentation-encodings.json` map to the canonical Cube/Cube 2.0 Equipment
+identity. The Equipment catalog, detail usage, Unit API references, and Equipment filter
+consume that mapping without inventing a textual Army Equipment row or treating the
+symbol's asset grouping as a rules taxonomy.
 
 Sources:
 
@@ -1106,6 +1677,14 @@ rules.
 
 This supports the current application/catalog policy of retaining
 `application_catalog_sources` and source labels alongside canonical identities.
+
+Curated format v9 introduced this distinction for the current TinBot identity group.
+The Firewall, Neurocinetics, Albedo, Discover, ECM Guided, and Repeater source records
+are typed `named` exact-source variants of the TinBot family. Their Army occurrence
+extras remain separate source data: this classification identifies the named advantage
+without interpreting a parenthetical `-3`, `+3`, or other modifier as part of the
+variant identity. The unqualified TinBot source record remains represented by the family
+rule because it carries no additional named advantage.
 
 Sources:
 
@@ -1225,16 +1804,17 @@ protection when determining the Saving-Roll Success Value.
 
 Infinity Army metadata currently reaches InfinityDB through a source field named
 `damage`; preserving that source key is provenance, not permission to present the
-N5 concept as `Damage`/`DAM`. The current Weapon detail UI labels the field `DAM`;
-rules-facing presentation should expose **PS** while retaining the upstream field
-name internally where required for compatibility.
+N5 concept as `Damage`/`DAM`. InfinityDB now renders that field as **PS** in the
+shared Weapon/Equipment profile UI while retaining the upstream `damage` key in
+application payloads for source fidelity and compatibility. The same renderer covers
+ranged and melee profiles, so the rules-native label is consistent across both.
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Possibility_of_Survival_%28PS%29>
 - Wiki: <https://infinitythewiki.com/Ranged_Weapon_Profile>
 - PDF: Infinity N5 V5.3, printed pages 37 and 46
-- Current presentation: `src/infinity_db/web/static/catalog-detail.js`
+- Presentation boundary: `src/infinity_db/web/static/catalog-detail.js`
 
 ### RS-CM-SR-001 — Saving-Roll profile fields encode typed expressions
 
@@ -1994,7 +2574,7 @@ Short Skill, ordinary Jump and Climb are Long Skills, and other rules can modify
 those categories while the action remains Movement.
 
 InfinityDB should keep the curated `movement` Label separate from
-`skill-declaration-category` facts. Label membership should be reviewed/cited
+`declaration-category` facts. Label membership should be reviewed/cited
 rather than inferred from a Skill name or from Basic Short/Short/Long/ARO
 classification.
 
@@ -2375,6 +2955,36 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Ammunition_Summary_Chart>
 - PDF: Infinity N5 V5.3, printed pages 176-188 and 193
 
+### RS-SE-CAT-003 — Army's skill-like source bucket is not the rules Skill ontology
+
+**Classification:** source-presentation encoding with a catalog-composition consequence.
+
+The reviewed Army application catalog contains several values in its skill-like source bucket
+that current N5.3 does not classify as Common or Special Skills. `Bangbomb`, `GizmoKit`, and
+`MediKit` are Equipment; `Regular` is Training; `BTS=3` is a loadout-specific Attribute
+override; and `Infinity Team-Ops` is a source marker for Team-Ops presentation. InfinityDB
+preserves those raw occurrences for provenance and compatibility but excludes their application
+identities from the rules-backed Skill catalog when a valid `rules.db` is available.
+
+Conversely, rules-native Skills do not need an Army occurrence to be catalog identities. The
+current core catalog therefore includes the canonical Special Skill `Non-Hackable` with zero
+Army uses, just as Common Skills can exist without profile rows. The Reinforcements-only
+`Request Reinforcements` Skill remains outside the core 0.7.0 denominator until the separately
+scoped Reinforcements annex is promoted into that catalog surface. Unknown future Army
+skill-like values remain visible provisionally rather than being silently dropped.
+
+The cross-domain source classifications are maintained in
+`config/catalogs/skill-source-classifications.json`; they are presentation/catalog policy, not
+rewrites of the preserved Army snapshot.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Skills_and_Equipment_Module>
+- Wiki: <https://infinitythewiki.com/Special_Skills>
+- Wiki: <https://infinitythewiki.com/Equipment>
+- Wiki: <https://infinitythewiki.com/Unit_Profile>
+- Wiki: <https://infinitythewiki.com/Non-Hackable>
+
 ### RS-QR-ACTION-001 — Orders/AROs is a cross-domain declaration-category matrix
 
 **Classification:** source-native relationship projection with a validation
@@ -2406,10 +3016,13 @@ two views of the Program model already established by the Combat audit. Army
 metadata also carries structured Hacking Program profile fields and explicit
 Device associations, which InfinityDB preserves in `metadata_hacking_programs`.
 
-InfinityDB should use that source structure for exact Program profile data while
-using reviewed rules identities/relationships to distinguish baseline Device
-Programs from Upgrade Programs. This produces a maintainable Hacking reference
-without inferring Program sets from Equipment display names.
+InfinityDB now projects that source structure into the application database for exact
+Program profile data, including Device associations, targets, declaration types, PS,
+Burst, and source special text. The existing Hacker Skill detail surface renders the
+complete reference table without treating those Programs as static Unit facts or
+inferring Program sets from Equipment display names. A future first-class Hacking
+domain may add richer reviewed Program identities/relationships, especially for
+Upgrade Programs, without replacing this source-backed profile projection.
 
 Sources:
 
@@ -2427,13 +3040,12 @@ Martial Arts, Booty, and MetaChemistry are presented as compact tables in Quick
 Reference. Army metadata already preserves their structured rows in
 `metadata_martial_arts`, `metadata_booty`, and `metadata_metachemistry`.
 
-These rows can support generated tables on the corresponding rule/Skill detail
-pages. Martial Arts rows describe the effects of explicit Levels; Booty and
-MetaChemistry rows describe random result outcomes. The latter may cross-link to
-Attributes, Skills, Equipment, or Weapons where reviewed, but the rolled outcome
-remains deployment/session state and must not be written back as a static Unit
-fact. Conditional outcomes such as TAG-versus-other-Troop-Type results must retain
-their predicate rather than be flattened into one value.
+These rows now drive generated tables on the corresponding Skill detail pages.
+Martial Arts rows describe the effects of explicit Levels; Booty and MetaChemistry
+rows describe random result outcomes. The latter remain reference/chart data rather
+than Unit facts: InfinityDB does not write a rolled result back onto a Unit or
+loadout. Conditional result text such as TAG-versus-other-Troop-Type outcomes is
+preserved intact until richer typed result semantics are reviewed.
 
 Sources:
 
@@ -2590,7 +3202,8 @@ also allows this bonus to combine with other effects that modify that maximum.
 
 The parenthetical value is therefore neither a Skill Level nor a generic MOD to
 an Attribute. A future annex-scoped Commlink record should encode the parameter
-as a typed `maximum Trooper count bonus` in `parameterSemantics` while preserving
+as a typed `maximum Trooper count bonus` in `variantSemantics.occurrenceParameters`
+while preserving
 the exact Army/source representation for provenance.
 
 Source:
@@ -2632,6 +3245,307 @@ reduced to an intrinsic Unit flag or a Reinforcement-only chart lookup.
 Source:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+### RS-EQ-CORE-001 — Equipment interaction review uses the same typed graph as Skills and Traits
+
+**Classification:** source-native Equipment interaction semantics.
+
+The 0.7.0 interaction audit covers public Equipment identities independently of Skill and Trait
+coverage. A reviewed Equipment definition may legitimately have no outgoing gameplay edge when
+its rule is self-contained, while Equipment that changes a named action authors the same typed
+relations used elsewhere in the graph.
+
+For the first full-catalog Equipment slice, 360º Visor is reviewed with no outgoing relation
+because its effect is entirely local to the user's LoF arc. Nanoscreen authors
+`imposes-modifiers-on` toward BS Attack because it directly applies a -3 MOD to eligible BS
+Attack Rolls. X-Visor authors `modifies-rolls-for` toward BS Attack, Discover, and Suppressive
+Fire because it changes the user's negative Range MOD processing for those ranged actions.
+Exact numerical and eligibility conditions remain in the Equipment facts rather than being
+duplicated on reverse edges.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=360º_Visor&oldid=3511>
+- Wiki: <https://infinitythewiki.com/index.php?title=Nanoscreen&oldid=3187>
+- Wiki: <https://infinitythewiki.com/index.php?title=X-Visor&oldid=3193>
+
+### RS-EQ-CORE-002 — Equipment review distinguishes direct graph edges from contained or deferred rules
+
+**Classification:** source-native Equipment interaction semantics.
+
+Biometric Visor directly changes Discover processing and ignores qualifying Surprise Attack MODs,
+so it authors `modifies-rolls-for` toward Discover and `ignores-modifiers-from` toward Surprise
+Attack. With Impersonation-1 now canonical, its successful-Discover cancellation also authors
+`cancels-state` toward that State. Deactivator likewise authors `ignores-modifiers-from` toward Mimetism, while
+its generic ability to remove deployed items and ignore Cover remains deferred until those target
+semantics have precise graph identities/relations.
+
+Deployable Repeater and FastPanda explicitly contain a Repeater. InfinityDB models that reuse with
+`uses-effects-of` toward the canonical Repeater Equipment definition instead of duplicating the
+Hacking Area behavior in each deployable item. Repeater itself is review-complete with its Hacking
+Area extension retained as future work because the current relation vocabulary has no precise
+network-extension edge. Dazer is similarly review-complete while its Difficult Terrain area remains
+deferred. Deployable Cover authors `modifies-rolls-for` toward BS Attack for its variant-specific
+Cover MOD handling; its underlying Partial Cover reuse remains queued until Partial Cover is a
+canonical rule identity.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Biometric_Visor>
+- Wiki: <https://infinitythewiki.com/Dazer>
+- Wiki: <https://infinitythewiki.com/Deactivator>
+- Wiki: <https://infinitythewiki.com/Deployable_Cover>
+- Wiki: <https://infinitythewiki.com/Deployable_Repeater>
+- Wiki: <https://infinitythewiki.com/FastPanda>
+- Wiki: <https://infinitythewiki.com/Repeater>
+
+### RS-SK-DEPLOY-001 — Deployment and arrival Skills keep State entry distinct from conditional failure effects
+
+**Classification:** source-native Skill/State interaction semantics.
+
+Combat Jump, Decoy, Impersonation, Infiltration, Minelayer, Parachutist, Sapper, and Strategic
+Deployment are canonical Skill definitions. State-producing rules author stable `enters-state`
+edges: Decoy enters Decoy State, Impersonation can enter its distinct IMP-1 or IMP-2 State according
+to the profile variant, and Sapper enters Foxhole State. IMP-1 and IMP-2 remain separate identities
+because their Discover transitions differ. Both Impersonation States can enable Surprise Attack,
+while Discover reveals Decoy and IMP-2; Biometric Visor carries the special cancellation edge for
+IMP-1.
+
+Request Speedball now authors `uses-effects-of` toward Combat Jump, and Strategic Deployment
+authors `enables-use-of` toward Forward Deployment. Conditional consequences that the current
+graph cannot state precisely remain in the maintained future ledger: failed Infiltration losing
+Marker/Hidden Deployment options, temporary loss of Partial Cover during airborne arrival,
+Foxhole's Partial Cover semantics, and Minelayer's item-dependent Disposable consumption.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Combat_Jump&oldid=3456>
+- Wiki: <https://infinitythewiki.com/index.php?title=Decoy&oldid=3069>
+- Wiki: <https://infinitythewiki.com/index.php?title=Decoy_State&oldid=4071>
+- Wiki: <https://infinitythewiki.com/index.php?title=Impersonation&oldid=3303>
+- Wiki: <https://infinitythewiki.com/index.php?title=Impersonation_State&oldid=3929>
+- Wiki: <https://infinitythewiki.com/index.php?title=Infiltration&oldid=3909>
+- Wiki: <https://infinitythewiki.com/index.php?title=Minelayer&oldid=4124>
+- Wiki: <https://infinitythewiki.com/index.php?title=Parachutist&oldid=4047>
+- Wiki: <https://infinitythewiki.com/index.php?title=Sapper&oldid=3286>
+- Wiki: <https://infinitythewiki.com/index.php?title=Foxhole_State&oldid=3834>
+- Wiki: <https://infinitythewiki.com/index.php?title=Strategic_Deployment&oldid=3137>
+
+### RS-SK-COMBAT-001 — Combat/reaction Skills reuse existing attack semantics without flattening conditional MOD scope
+
+**Classification:** source-native Skill interaction semantics.
+
+Berserk reuses Move and CC Attack as the two actions combined by its Long Skill. Guard enables
+CC Attack without the normal Silhouette-contact requirement, while its Aerial restriction remains
+queued until Aerial has a canonical Skill definition. Neurocinetics and Total Reaction both alter
+BS Attack Burst processing across Active/Reactive Turn contexts, so they author
+`modifies-rolls-for` toward BS Attack without turning their turn-specific conditions into universal
+BS Attack behavior.
+
+Triangulated Fire reuses BS Attack and explicitly ignores Mimetism MODs. Its broader suppression
+of Range and Cover MODs stays in the maintained future ledger because InfinityDB does not yet have
+canonical generic Range MOD / Partial Cover targets suitable for those edges. With canonical
+Neurocinetics and Total Reaction identities now available, the previously planned
+TinBot: Neurocinetics and Armed Turret dependencies are promoted to current `uses-effects-of`
+relationships.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Berserk&oldid=3236>
+- Wiki: <https://infinitythewiki.com/index.php?title=Guard&oldid=3952>
+- Wiki: <https://infinitythewiki.com/index.php?title=Neurocinetics&oldid=3111>
+- Wiki: <https://infinitythewiki.com/index.php?title=Total_Reaction&oldid=3147>
+- Wiki: <https://infinitythewiki.com/index.php?title=Triangulated_Fire&oldid=3873>
+
+### RS-SK-MOBILITY-001 — Mobility/environment Skills expose only stable cross-rule effects
+
+**Classification:** source-native Skill interaction semantics.
+
+Aerial directly prevents Cautious Movement, prevents Guard from being used against the active
+Aerial Trooper unless it is Unconscious, and stops Boost weapons from activating against it.
+Those interactions therefore author `restricts-use-of` toward Cautious Movement and Guard, and
+`negates-effects-of` toward Boost. The Aerial rule is the source endpoint for the Guard edge so
+reverse navigation on Guard correctly reads as being restricted by Aerial. Aerial's Prone and
+Engaged restrictions stay in the future ledger until those States and a precise prevents-state
+relation are modeled.
+
+Climbing Plus reuses Climb while changing its declaration timing, and explicitly extends its
+vertical-movement effects to Move and Dodge. It therefore authors `uses-effects-of` toward Climb
+and `applies-effects-to` toward Move and Dodge. Its failed-Guts movement and Partial Cover
+interactions stay deferred where the current graph lacks the required generic identity or
+benefit-suppression relation.
+
+Terrain and Warhorse are valid reviewed zero-edge definitions at the current graph boundary.
+Terrain's MOV bonus targets any Movement-labeled Skill and bypasses matching Special Terrain
+movement restrictions; Warhorse interacts with Loss of Lieutenant, Retreat, Isolated State, and
+the exact BS Attack (-X) modifier form. Those concepts are kept in the maintained future ledger
+rather than approximated with incomplete Skill-specific or State-effect edges.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Aerial&oldid=4040>
+- Wiki: <https://infinitythewiki.com/index.php?title=Climbing_Plus&oldid=3993>
+- Wiki: <https://infinitythewiki.com/index.php?title=Terrain&oldid=3146>
+- Wiki: <https://infinitythewiki.com/index.php?title=Warhorse&oldid=3155>
+
+### RS-SK-MORALE-001 — Morale/behavior Skills separate stable reuse from phase- and situation-scoped effects
+
+**Classification:** source-native Skill interaction semantics.
+
+Courage and Religious Troop both alter Guts Roll and Retreat behavior, but in materially different
+ways: Courage optionally lets its user pass a Guts Roll automatically, while Religious Troop
+automatically passes and allows a WIP Roll to apply failed-Guts effects. Both ignore the army-level
+Retreat situation while remaining affected by Loss of Lieutenant. Guts Roll and the Retreat
+situation are not yet canonical graph targets, so those interactions remain in the maintained
+future ledger rather than being approximated through unrelated Skills or States. Loss of Lieutenant
+is canonical, but these Skills do not negate it, so their explicit continued susceptibility remains
+a fact rather than a special graph edge. Foxhole State explicitly grants Courage, so that existing
+planned edge is now a current `uses-effects-of` relationship.
+
+Frenzy grants Impetuous and Limited Cover after its direct-Wound/Dead-State trigger, so it authors
+`uses-effects-of` edges to those canonical Skills. When Frenzy grants Impetuous it also cancels
+Marker States and prevents re-entry; InfinityDB authors `cancels-state` edges to the currently
+modeled Camouflaged, Decoy, and Impersonation-1/2 States while retaining the generic all-Marker
+State/prevention semantics in the future ledger. The Wound/Dead trigger also remains deferred until
+event-trigger relationships are modeled precisely.
+
+Impetuous is intentionally a reviewed zero-edge definition at the current graph boundary. Its
+allowed activation combinations, mandatory Movement-labelled behavior, Prone cancellation/re-entry
+restriction, Marker-State prohibition, and Retreat suppression are phase- or category-scoped
+semantics that the current relation vocabulary cannot represent without suggesting the Skill grants
+or universally disables the referenced declarations.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Courage&oldid=3600>
+- Wiki: <https://infinitythewiki.com/index.php?title=Frenzy&oldid=3806>
+- Wiki: <https://infinitythewiki.com/index.php?title=Impetuous&oldid=4039>
+- Wiki: <https://infinitythewiki.com/index.php?title=Religious_Troop&oldid=3601>
+
+### RS-SK-SURVIVAL-001 — Survivability Skills separate State overrides from conditional recovery outcomes
+
+**Classification:** source-native Skill and State interaction semantics.
+
+Dogged and No Wound Incapacitation both activate as the user enters Unconscious State, override
+that State's normal effects, and let the Trooper operate using Normal State behavior. InfinityDB
+therefore authors `overrides-effects-of` toward Unconscious and `uses-effects-of` toward Normal.
+Dogged additionally sends its user to Dead State automatically in the States Phase, so that stable
+transition authors `enters-state`; NWI's additional-Wound and failed-healing Dead outcomes remain
+future-tracked because they are conditional rather than automatic Skill transitions.
+
+Remote Presence changes Unconscious into a two-level progression for STR users and changes how
+Engineer and GizmoKit recovery removes Wounds, so it authors `overrides-effects-of` toward
+Unconscious and `applies-effects-to` toward Engineer and GizmoKit. Dogged and NWI each carry a
+Remote Presence-specific activation clause, represented by `applies-effects-to` toward Remote
+Presence. Command-Token rerolls and the modified Dead-entry threshold remain deferred until the
+graph has precise targets and relation semantics for those rules.
+
+Shasvastii overrides the normal Victory Point consequences of Unconscious State while the game is
+in progress, and therefore authors `overrides-effects-of` toward Unconscious. Regeneration has a
+stable successful path that cancels Unconscious State, so it authors `cancels-state`. Protheion is
+an Automatic CC Special Skill whose recovery/VITA effect is driven by Wounds inflicted through
+CC Attack, so it authors `applies-effects-to` toward CC Attack while Wound/VITA event semantics
+remain in the future ledger.
+
+Healing prevention, self-use exceptions, Shock interactions, Wound thresholds, and the Shasvastii
+Retreat calculation are deliberately not flattened into broader current edges: those interactions
+need participant-role, event, ammunition, or army-situation semantics that the current relation
+vocabulary does not yet encode safely.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/index.php?title=Dogged&oldid=3071>
+- Wiki: <https://infinitythewiki.com/index.php?title=No_Wound_Incapacitation&oldid=3813>
+- Wiki: <https://infinitythewiki.com/index.php?title=Remote_Presence&oldid=3126>
+- Wiki: <https://infinitythewiki.com/index.php?title=Shasvastii&oldid=3976>
+- Wiki: <https://infinitythewiki.com/index.php?title=Regeneration&oldid=3123>
+- Wiki: <https://infinitythewiki.com/index.php?title=Protheion&oldid=3908>
+
+### RS-EQ-CORE-003 — Recovery Equipment authors only stable current-State interactions
+
+**Classification:** source-native Equipment interaction semantics.
+
+MediKit and GizmoKit can both cancel Unconscious State through their successful recovery
+procedure, so each authors `cancels-state` toward the canonical Unconscious State identity.
+InfinityDB keeps remaining outcome semantics at their natural boundary instead of flattening
+them into the cancellation edge. MediKit's failed Roll already authors its direct Dead-State
+outcome now that Dead is canonical. Remote Presence owns its GizmoKit recovery modifier through
+`applies-effects-to`, while the canonical Tech-Recovery Skill now authors `applies-effects-to`
+toward GizmoKit and its reviewed State cancellations. This keeps Tech-Recovery eligibility/effects
+on the owning Skill instead of duplicating them on the Equipment record.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/MediKit>
+- Wiki: <https://infinitythewiki.com/GizmoKit>
+
+### RS-EQ-CORE-004 — Motorcycle restrictions and AI Motorcycle composition are separate semantics
+
+**Classification:** source-native Equipment interaction semantics.
+
+Motorcycle directly prevents use of Climb, upward Jump, and Cautious Movement while mounted, so
+it authors `restricts-use-of` edges toward those Skills. Its prohibition on entering Prone remains
+queued because the current relation vocabulary does not yet distinguish a restriction on entering
+a State from ordinary Skill-use restriction.
+
+AI Motorcycle reuses the Motorcycle rules while mounted and Peripheral (Synchronized) rules while
+dismounted, so it authors `uses-effects-of` edges toward those canonical identities. With
+Transmutation now canonical, the Transmutation (Auto) transition is also a current
+`uses-effects-of` edge rather than a queued dependency.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Motorcycle>
+- Wiki: <https://infinitythewiki.com/AI_Motorcycle>
+
+### RS-EQ-CORE-005 — TinBot family browsing does not erase exact-variant interactions
+
+**Classification:** source-native Equipment family/variant interaction semantics.
+
+TinBot is a browsing family whose actual gameplay effect is defined by the Equipment or MOD shown
+in the exact source variant. Exact variants therefore carry their own reviewed relationships rather
+than inheriting one generic TinBot interaction set. Current canonical targets allow TinBot Albedo
+to `uses-effects-of` Albedo, TinBot Discover to `modifies-rolls-for` Discover, TinBot ECM Guided to
+`uses-effects-of` ECM, and TinBot Repeater to `uses-effects-of` Repeater. Firewall and
+Neurocinetics variants remain queued until their target identities are canonically modeled.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/TinBot>
+
+### RS-EQ-CORE-006 — Hacking Devices are reviewed even while Hacking Programs remain deferred
+
+**Classification:** source-native Equipment-to-program semantics.
+
+Hacking Device, Hacking Device Plus, Killer Hacking Device, and EVO Hacking Device are valid
+reviewed Equipment identities in the 0.7.0 catalog. Their defining outgoing interactions are the
+Hacking Programs they grant, but the Hacking Program domain is outside the current 0.7.0 canonical
+rules set. Those grants therefore remain explicitly tracked in the future-interaction queue rather
+than being represented as unresolved current graph targets or omitted from the audit.
+
+Source:
+
+- Wiki: <https://infinitythewiki.com/Hacking_Device>
+
+### RS-EQ-CORE-007 — Self-contained or parameterized Equipment may review to zero current edges
+
+**Classification:** source-native Equipment interaction semantics.
+
+A reviewed Equipment item does not need an authored outgoing edge when its external semantics are
+not representable as one stable target. ECM is parameterized by the attack type and MOD listed in
+the Unit Profile, so InfinityDB must not invent one fixed affected Skill. HoloMask and Holoprojector
+are reviewed with their HoloMask/Holoecho State-entry interactions retained in the future queue.
+Escape System now authors its stable `uses-effects-of` edge to canonical Transmutation, and
+SymbioMate likewise authors its stable `uses-effects-of` edge to canonical Immunity; only
+conditional or not-yet-canonical parts of those rules remain deferred.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/ECM>
+- Wiki: <https://infinitythewiki.com/HoloMask>
+- Wiki: <https://infinitythewiki.com/Holoprojector>
+- Wiki: <https://infinitythewiki.com/Escape_System>
+- Wiki: <https://infinitythewiki.com/SymbioMate>
 
 ## ITS FAQ
 

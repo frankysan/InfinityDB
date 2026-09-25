@@ -635,6 +635,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'aria-label="Project navigation"' in body
     assert b'href="/units"' in body
     assert b'href="/traits"' in body
+    assert b'href="/states"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
     assert f'data-app-version="{__version__}"'.encode() in body
@@ -735,6 +736,19 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert f"Version {__display_version__}".encode() in body
 
 
+def test_landing_page_states_independence_and_asset_permission(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    assert b"Open-source Infinity community reference" in body
+    assert b"non-commercial open-source community project" in body
+    assert b"not affiliated with Corvus Belli S.L." in body
+    assert b"explicitly granted InfinityDB permission" in body
+    assert b"permission to use and redistribute" in body
+    assert b"Infinity graphical" in body
+    assert b"assets used by the project" in body
+
+
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
     status, _, body = request(app, "/")
 
@@ -818,6 +832,38 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
         {"grid-template-columns": "52px repeat(4, minmax(0, 1fr))"},
     )
 
+
+def test_very_narrow_detail_layout_wraps_titles_and_stacks_general_profiles(
+    app: Callable,
+) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+
+    assert status == 200
+    assert b"@media (max-width: 400px)" in styles
+    assert_css_rule(styles, "h1", {"overflow-wrap": "anywhere"})
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .statline, "
+        ".unit-detail .general-profile .statline tbody",
+        {"display": "block", "width": "100%"},
+    )
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .statline tr",
+        {"display": "grid", "grid-template-columns": "minmax(0, 1fr)"},
+    )
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .general-item-label, "
+        ".unit-detail .general-profile .profile-attributes-label",
+        {"padding": "10px 16px 4px"},
+    )
+    assert_css_rule(
+        styles,
+        ".unit-detail .general-profile .general-item-list, "
+        ".unit-detail .general-profile .profile-attributes",
+        {"padding": "4px 16px 12px"},
+    )
 
 def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     app: Callable,
@@ -934,12 +980,13 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"Know your options." in body
     assert b'Made by Johannes "Franky" Haglund' in body
     assert f"Version {__display_version__}".encode() in body
-    assert b"Support questions, suggestions, or" in body
-    assert b"feedback can be submitted on the project's GitHub page." in body
-    assert b"mailto:johannes@haglund.info" not in body
+    assert b"developed in the open" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
-    assert b"better companion for choosing, collecting, and playing your army" in body
+    assert b"Version 0.7 focuses on rules context" in body
+    assert b"player-data-complete 1.0 reference" in body
+    assert b"not affiliated with Corvus Belli S.L." in body
+    assert b"explicitly permitted InfinityDB to use and redistribute" in body
     assert b'href="/about" aria-current="page"' in body
     assert b"about.js" in body
 
@@ -1224,17 +1271,18 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
         assert b"data-surface-header" in body
 
 
-def test_weapon_range_bands_are_derived_from_profile_metadata(app: Callable) -> None:
+def test_weapon_range_tables_always_include_canonical_bands(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-detail.js")
 
     assert status == 200
-    assert b"function weaponRangeBands(variants)" in body
-    assert b"Object.values(profile.ranges || {})" in body
-    assert b"Number(range?.max)" in body
-    assert b"const rangeBands = weaponRangeBands(variants);" in body
+    assert b"const canonicalWeaponRangeBands = [20, 40, 60, 80, 100, 120, 240];" in body
+    assert b"const rangeBands = canonicalWeaponRangeBands;" in body
+    assert b".sort((left, right) => Number(left.max) - Number(right.max));" in body
+    assert b".find((range) => Number(range.max) >= maximum);" in body
+    assert b'if (!matchingRange) return "--";' in body
+    assert b"String(modifier)" in body
     assert b"maximum / 2.5" in body
-    for fixed_band in [b"maximum: 20", b"maximum: 40", b"maximum: 240"]:
-        assert fixed_band not in body
+    assert b"weaponRangeBands" not in body
 
 
 def test_catalog_detail_frontend_uses_backend_trait_references(
@@ -1286,6 +1334,9 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert status == 200
     assert b'card.className = "explorer surface weapon-profile"' in weapon_detail
     assert b"const profileTitle = profile.mode || profile.name || variant.name;" in weapon_detail
+    assert b"<th>Ammunition</th><th>B</th><th>PS</th><th>Saving</th>" in weapon_detail
+    assert b'["PS", profile.damage]' in weapon_detail
+    assert b"<th>DAM</th>" not in weapon_detail
     assert b'title.className = "data-surface-header";' in weapon_detail
     assert b"headingText" not in weapon_detail
     assert b"variantTitle" not in weapon_detail
@@ -1340,8 +1391,20 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert status == 200
     assert b"surface surface--highlighted about-callout" in body
     assert b"surface about-principles" in body
+    assert b"<h3>Connectivity</h3>" in body
+    assert b"<h3>Connected data</h3>" not in body
     assert b"surface surface--subtle about-disclosure" in body
 
+    assert_css_rule(
+        styles,
+        ".usage-section-group",
+        {"width": "min(760px, 100%)"},
+    )
+    assert_css_rule(
+        styles,
+        ".usage-section-group table.data-table--compact",
+        {"width": "100%"},
+    )
     assert_css_rule(
         styles,
         ".usage-section-group thead th:first-child, .usage-section-group thead th:last-child",
@@ -1408,6 +1471,8 @@ def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -
     assert b"function generalLieutenantOrderCount(profiles, loadouts)" in body
     assert b'Array(lieutenantOrderCount([loadout])).fill("lieutenant")' in body
     assert b"function characteristicSymbolTypes(profiles)" in body
+    assert b"characteristic.equipment_reference?.slug" in body
+    assert b"href: `/equipment/${encodeURIComponent(slug)}`" in body
     assert b"symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`" in body
     assert b"symbol.title = symbolLabels[symbolType]" in body
     assert b'"profile-summary loadout-start"' in body
@@ -1489,9 +1554,126 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b'from "./api.js"' in body
     assert b"getCatalogItems(page)" in body
     assert b"fetch(" not in body
-    assert b'["skills", "equipment", "weapons", "traits"].includes(page)' in body
+    assert b'["skills", "equipment", "weapons", "traits", "states"].includes(page)' in body
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
+
+
+def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Path) -> None:
+    status, headers, body = request(app, "/states")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"States catalog" in body
+    assert b'href="/states" aria-current="page"' in body
+    assert b'<th scope="col">Uses</th>' not in body
+
+    status, _, body = request(app, "/api/states")
+    assert status == 200
+    assert json.loads(body) == {"items": []}
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/states")
+    assert status == 200
+    states = {item["id"]: item for item in json.loads(body)["items"]}
+    assert len(states) == 24
+    assert states["unconscious"]["name"] == "Unconscious State"
+    assert states["targeted"]["name"] == "Targeted State"
+
+    status, headers, body = request(rules_app, "/states/unconscious")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"catalog-detail.js" in body
+
+    status, _, body = request(rules_app, "/api/states/unconscious")
+    assert status == 200
+    state = json.loads(body)
+    assert state["slug"] == "unconscious"
+    assert {
+        relation["record"]["name"]
+        for relation in state["rules"][0]["display_relations"]
+        if relation["type"] == "cancels-state" and relation["direction"] == "inbound"
+    } == {"Doctor", "Engineer", "GizmoKit", "MediKit", "Regeneration"}
+
+    status, _, body = request(rules_app, "/api/states/not-a-state")
+    assert status == 404
+    assert json.loads(body)["error"] == "State not found"
+
+
+def test_cube_profile_characteristic_resolves_to_canonical_equipment(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "cube.db"
+    shutil.copy2(app_database_template, database_path)
+    with sqlite3.connect(database_path) as connection:
+        logical_unit_id = connection.execute(
+            "SELECT id FROM logical_units WHERE slug = ?", ("ranger-prototype",)
+        ).fetchone()[0]
+        profile_payload_id = connection.execute(
+            "SELECT id FROM profile_payloads WHERE logical_unit_id = ? ORDER BY id LIMIT 1",
+            (logical_unit_id,),
+        ).fetchone()[0]
+        connection.execute(
+            "INSERT INTO characteristics (id, name, source_defined) VALUES (?, ?, ?)",
+            (999, "Cube", 1),
+        )
+        position = connection.execute(
+            "SELECT COALESCE(MAX(position), 0) + 1 FROM profile_payload_characteristics "
+            "WHERE profile_payload_id = ?",
+            (profile_payload_id,),
+        ).fetchone()[0]
+        connection.execute(
+            "INSERT INTO profile_payload_characteristics "
+            "(profile_payload_id, position, characteristic_id) VALUES (?, ?, ?)",
+            (profile_payload_id, position, 999),
+        )
+    _refresh_published_content_checksum(database_path)
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(database_path, rules_path)
+
+    status, _, body = request(rules_app, "/api/equipment")
+    assert status == 200
+    equipment = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert equipment["cube"]["name"] == "Cube"
+    assert equipment["cube"]["use_count"] == 1
+    assert equipment["cube-2"]["name"] == "Cube 2.0"
+    assert equipment["cube-2"]["use_count"] == 0
+
+    status, _, body = request(rules_app, "/api/equipment/cube")
+    assert status == 200
+    cube = json.loads(body)
+    assert cube["id"] == "cube"
+    assert cube["slug"] == "cube"
+    assert cube["rules"][0]["id"] == "equipment:cube"
+    assert [unit["slug"] for unit in cube["variants"][0]["units"]] == [
+        "ranger-prototype"
+    ]
+
+    status, _, body = request(rules_app, "/api/units", query="equipment_id=cube")
+    assert status == 200
+    filtered = json.loads(body)
+    assert filtered["total"] == 1
+    assert [item["slug"] for item in filtered["items"]] == ["ranger-prototype"]
+
+    status, _, body = request(rules_app, "/api/units/ranger-prototype")
+    assert status == 200
+    unit = json.loads(body)
+    references = [
+        characteristic["equipment_reference"]
+        for army in unit["armies"]
+        for profile in army["profiles"]
+        for characteristic in profile["characteristics"]
+        if characteristic["name"] == "Cube"
+    ]
+    assert references
+    assert references[0] == {"id": "cube", "slug": "cube", "name": "Cube"}
+
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
@@ -1502,6 +1684,10 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert b"catalog-list.js" in body
     assert f'href="/{catalog}" aria-current="page"'.encode() in body
     assert b'<th scope="col">Uses</th>' in body
+    if catalog == "skills":
+        assert b'<th scope="col">Type(s)</th>' in body
+    else:
+        assert b'<th scope="col">Type(s)</th>' not in body
     assert b"Reference</th>" not in body
 
     status, headers, body = request(app, f"/api/{catalog}")
@@ -1516,6 +1702,7 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "use_count": 1,
             "slug": "stealth",
             "categories": [{"name": "Unclassified", "source": None, "page": None}],
+            "category": "Special Skills",
         },
         "equipment": {
             "id": 21,
@@ -1637,6 +1824,49 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body)["error"] == "Skill not found"
 
 
+def test_unit_api_adds_training_to_order_occurrences_only_when_rules_exist(
+    app: Callable, tmp_path: Path
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/units/1")
+    assert status == 200
+    payload = json.loads(body)
+    orders = [
+        order
+        for army in payload["armies"]
+        for loadout in army["loadouts"]
+        for order in loadout["orders"]
+    ]
+    assert orders
+    assert all(order["training_reference"]["id"] == "training:regular" for order in orders)
+    assert all(order["training_reference"]["citations"][0]["page"] == 11 for order in orders)
+    assert not any(
+        "training_reference" in profile
+        for army in payload["armies"]
+        for profile in army["profiles"]
+    )
+
+    status, _, body = request(app, "/api/units/1")
+    assert status == 200
+    assert all(
+        "training_reference" not in order
+        for army in json.loads(body)["armies"]
+        for loadout in army["loadouts"]
+        for order in loadout["orders"]
+    )
+
+
+def test_unit_page_hides_textual_training_rows(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"training_reference" not in body
+    assert b"Training rules" not in body
+
+
 def test_trait_apis_compose_army_usage_with_curated_rules(
     app: Callable, tmp_path: Path
 ) -> None:
@@ -1693,14 +1923,19 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
     document = copy.deepcopy(documents[0][1])
-    skill_record = next(record for record in document["records"] if record["kind"] == "skill")
-    skill_record["id"] = "skill:stealth"
-    skill_record["name"] = "Stealth"
+    source_skill = next(
+        record for record in document["records"] if record["kind"] == "skill"
+    )
+    skill_record = copy.deepcopy(source_skill)
+    skill_record["id"] = "skill:test-stealth-fixture"
+    skill_record["name"] = "Test Stealth Fixture"
     skill_record["armyLinks"] = [{"entity": "skill", "id": 11}]
+    skill_record["relations"] = []
+    document["records"].append(skill_record)
     declaration = next(
         record
         for record in document["records"]
-        if record["id"] == "skill-declaration-category:automatic:p87"
+        if record["id"] == "declaration-category:automatic:p87"
     )
     declaration["armyLinks"].append({"entity": "skill", "id": 11})
     rules_path = tmp_path / "rules.db"
@@ -1712,10 +1947,11 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     payload = json.loads(body)
     assert payload["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
     ]
-    assert payload["rules"][0]["id"] == "skill:stealth"
+    assert payload["rules"][0]["id"] == "skill:test-stealth-fixture"
+    assert payload["rules"][0]["collection"]["id"] == "n5-core-v5.3"
+    assert payload["rules"][0]["scope"] == {"game": "N5", "seasons": ["current"]}
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
     assert payload["rules"][0]["citations"][0]["page"] == 87
 
@@ -1723,9 +1959,58 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     stealth = next(item for item in json.loads(body)["items"] if item["id"] == 11)
     assert stealth["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87},
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 112},
+        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
     ]
+
+    status, _, body = request(rules_app, "/api/skills/alert")
+    assert status == 200
+    alert = json.loads(body)
+    assert alert["id"] == "alert"
+    assert alert["category"] == "Common Skills"
+    assert alert["categories"] == [
+        {
+            "name": "Automatic",
+            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "page": None,
+        }
+    ]
+    assert alert["variants"] == []
+    assert [rule["id"] for rule in alert["rules"]] == ["skill:alert"]
+
+    status, _, body = request(rules_app, "/api/skills/reload")
+    assert status == 200
+    reload = json.loads(body)
+    assert [category["name"] for category in reload["categories"]] == [
+        "Short Skill",
+        "ARO",
+    ]
+    assert [
+        skill_type["category_name"]
+        for skill_type in reload["rules"][0]["skill_types"]
+    ] == ["Short Skill", "ARO"]
+
+
+
+def test_equipment_api_adds_curated_declaration_category(
+    app: Callable, tmp_path: Path
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/equipment/medikit")
+
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["categories"] == [
+        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 124}
+    ]
+
+    status, _, body = request(rules_app, "/static/catalog-detail.js")
+    assert status == 200
+    assert b'const categories = (item.categories || [])' in body
+    assert 'if (categories) meta.append(` · ${categories}`);'.encode() in body
 
 
 def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:
@@ -1802,6 +2087,65 @@ def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
+def test_catalog_detail_frontend_renders_typed_source_variant_labels(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"function sourceVariantLabel(variant)" in body
+    assert b'if (semantics.kind === "named") return semantics.label;' in body
+    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
+
+
+def test_skill_detail_frontend_flags_exact_variant_rules_before_expansion(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/skill.js")
+
+    assert status == 200
+    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
+
+
+def test_skill_detail_frontend_renders_structured_reference_tables(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/skill.js")
+
+    assert status == 200
+    assert b"function structuredReferenceSection(reference)" in body
+    assert b'"hacking-programs"' in body
+    assert b'"martial-arts"' in body
+    assert b'"random-chart"' in body
+    assert b'"Hacking Programs"' not in body
+    assert b'hackingDeviceLinks(row.devices)' in body
+
+
+def test_catalog_usage_summaries_wrap_variant_context_on_narrow_layouts(
+    app: Callable,
+) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".usage-section-group .army-profile-title",
+        {"flex-wrap": "wrap"},
+    )
+    assert_css_rule(
+        styles,
+        ".usage-section-group .army-profile-title>h2",
+        {"flex": "1 1 220px", "min-width": "0"},
+    )
+    assert_css_rule(
+        styles,
+        ".usage-section-group .army-profile-title>.section-index",
+        {"margin-left": "auto", "text-align": "right"},
+    )
+
+
 def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> None:
     status, _, body = request(app, "/static/skill.js")
 
@@ -1810,12 +2154,78 @@ def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
-def test_skill_details_frontend_renders_curated_rules_reference(app: Callable) -> None:
-    status, _, body = request(app, "/static/skill.js")
+def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:
+    for asset in ("skill.js", "catalog-detail.js"):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b'rulesReferenceSection' in body
+        assert b'from "./rules-reference.js"' in body
 
+    status, _, body = request(app, "/static/rules-reference.js")
     assert status == 200
-    assert b"rulesReferenceSection" in body
     assert b"Rules reference" in body
+    assert b"rule.collection?.title" in body
+    assert b"rule.supplements || []" in body
+    assert b"Additional rules context" in body
+    assert b'["requirements", "Requirements"]' in body
+    assert b'["effects", "Effects"]' in body
+    assert b'["restrictions", "Restrictions"]' in body
+    assert body.index(b'["requirements", "Requirements"]') < body.index(
+        b'["effects", "Effects"]'
+    )
+    assert body.index(b"summary.textContent = rule.summary") < body.index(
+        b"const applicability = applicabilityText(rule)"
+    )
+    assert b'detail-fact-heading' in body
+    assert b'heading.textContent = "Related rules"' in body
+    assert b"const presentation = relation.presentation;" in body
+    assert b"presentation?.group_id" in body
+    assert b"presentation?.group_label" in body
+    assert b"presentation?.group_order" in body
+    assert b"groupHeading.textContent = relationGroup.label" in body
+    assert b"relationLabels" not in body
+    assert b"relationGroupOrder" not in body
+    assert b"Creates & enables" not in body
+    assert b'"reduces-modifiers-from"' not in body
+    assert b"citation.source_url" in body
+    assert b'link.target = "_blank"' in body
+    assert b'link.rel = "noopener noreferrer"' in body
+
+
+def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) -> None:
+    status, _, body = request(app, "/static/catalog-list.js")
+    assert status == 200
+    assert b'from "./skill-categories.js"' in body
+    assert b'page === "skills" ? 4 : 3' in body
+    assert b'types.className = "skill-category-cell"' in body
+    assert b'types.append(skillCategoryBadge(category))' in body
+
+    status, _, body = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'from "./skill-categories.js"' in body
+    assert b'skillCategoryBadge(skillType' in body
+
+    status, _, body = request(app, "/static/skill-categories.js")
+    assert status == 200
+    for token in (b"automatic", b"deployment", b"basic-short", b"short", b"long", b"aro"):
+        assert token in body
+
+    status, _, body = request(app, "/static/styles.css")
+    assert status == 200
+    assert b".skill-category-badge--automatic" in body
+    assert b"var(--color-skill-category-automatic)" in body
+    assert b".skill-category-badge--deployment" in body
+    assert b"var(--color-skill-category-deployment)" in body
+    assert b".skill-category-badge--basic-short" in body
+    assert b"var(--color-skill-category-basic-short)" in body
+    assert b".skill-category-badge--short" in body
+    assert b"var(--color-skill-category-short)" in body
+    assert b".skill-category-badge--long" in body
+    assert b"var(--color-skill-category-long)" in body
+    assert b".skill-category-badge--aro" in body
+    assert b"var(--color-skill-category-aro)" in body
+    assert b".rules-reference" in body
+    assert b"margin-bottom: var(--space-2);" in body
 
 
 @pytest.mark.full_assets

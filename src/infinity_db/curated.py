@@ -7,14 +7,26 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.rule_relations import RULE_RELATION_TYPES
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 3
+CURATED_FORMAT_VERSION = 20
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
 REQUIRED_SOURCE_FIELDS = frozenset({"id", "kind", "title", "version", "authority"})
-REQUIRED_RECORD_FIELDS = frozenset({"id", "kind", "name", "summary", "citations"})
+REQUIRED_RECORD_FIELDS = frozenset(
+    {
+        "id",
+        "kind",
+        "name",
+        "summary",
+        "scope",
+        "citations",
+        "review",
+        "composition",
+    }
+)
 REQUIRED_SKILL_TYPE_FIELDS = frozenset({"id", "name", "labels", "descriptions"})
 REQUIRED_LABEL_FIELDS = frozenset({"id", "name", "description"})
 EXCLUDED_CURATED_FILENAMES = frozenset({"example.json"})
@@ -23,6 +35,124 @@ ARMY_LINK_SLUG_DOMAINS = {
     "equipment": "equipment",
     "weapon": "weapons",
 }
+CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
+VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
+VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
+VARIANT_PARAMETER_KINDS = frozenset({"distance"})
+SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
+TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
+
+
+def _validate_variant_semantics(
+    value: object, context: str, army_links: list[object]
+) -> str:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: must be an object")
+    allowed = {"inheritance", "occurrenceParameters", "sourceVariant"}
+    unknown = set(value) - allowed
+    if unknown:
+        raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
+    inheritance = value.get("inheritance")
+    if inheritance not in VARIANT_INHERITANCE_MODES:
+        raise ValueError(
+            f"{context}: 'inheritance' must be one of "
+            f"{sorted(VARIANT_INHERITANCE_MODES)}"
+        )
+
+    parameters = value.get("occurrenceParameters", [])
+    if not isinstance(parameters, list):
+        raise ValueError(f"{context}: 'occurrenceParameters' must be an array")
+    seen_parameters: set[tuple[str, str]] = set()
+    for index, parameter in enumerate(parameters):
+        parameter_context = f"{context}.occurrenceParameters[{index}]"
+        if not isinstance(parameter, dict):
+            raise ValueError(f"{parameter_context}: must be an object")
+        source = parameter.get("source")
+        kind = parameter.get("kind")
+        if source not in VARIANT_PARAMETER_SOURCES:
+            raise ValueError(
+                f"{parameter_context}: unsupported parameter source {source!r}; "
+                f"expected one of {sorted(VARIANT_PARAMETER_SOURCES)}"
+            )
+        if kind not in VARIANT_PARAMETER_KINDS:
+            raise ValueError(
+                f"{parameter_context}: unsupported parameter kind {kind!r}; "
+                f"expected one of {sorted(VARIANT_PARAMETER_KINDS)}"
+            )
+        expected_fields = {"source", "kind", "positiveSign"}
+        if set(parameter) != expected_fields:
+            raise ValueError(
+                f"{parameter_context}: distance parameters must contain only "
+                "'source', 'kind', and 'positiveSign'"
+            )
+        if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
+            raise ValueError(
+                f"{parameter_context}: 'positiveSign' must be one of "
+                "'preserve', 'omit', or 'force'"
+            )
+        key = (source, kind)
+        if key in seen_parameters:
+            raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")
+        seen_parameters.add(key)
+
+    source_variant = value.get("sourceVariant")
+    if inheritance == "source":
+        if len(army_links) != 1:
+            raise ValueError(
+                f"{context}: source-specific semantics require exactly one Army link"
+            )
+        link = army_links[0]
+        if not isinstance(link, dict) or type(link.get("id")) is not int:
+            raise ValueError(
+                f"{context}: source-specific semantics require an exact numeric Army source id"
+            )
+        if not isinstance(source_variant, dict):
+            raise ValueError(
+                f"{context}: source-specific semantics require 'sourceVariant'"
+            )
+        kind = source_variant.get("kind")
+        if kind not in SOURCE_VARIANT_KINDS:
+            raise ValueError(
+                f"{context}.sourceVariant: 'kind' must be one of "
+                f"{sorted(SOURCE_VARIANT_KINDS)}"
+            )
+        if kind == "level":
+            if set(source_variant) != {"kind", "value"}:
+                raise ValueError(
+                    f"{context}.sourceVariant: level variants must contain only "
+                    "'kind' and 'value'"
+                )
+            _require_positive_int(
+                source_variant.get("value"), "value", f"{context}.sourceVariant"
+            )
+        elif kind == "named":
+            if set(source_variant) != {"kind", "label"}:
+                raise ValueError(
+                    f"{context}.sourceVariant: named variants must contain only "
+                    "'kind' and 'label'"
+                )
+            _require_string(
+                source_variant.get("label"), "label", f"{context}.sourceVariant"
+            )
+        else:
+            if set(source_variant) != {"kind", "attribute", "value"}:
+                raise ValueError(
+                    f"{context}.sourceVariant: attribute-replacement variants must "
+                    "contain only 'kind', 'attribute', and 'value'"
+                )
+            _require_string(
+                source_variant.get("attribute"),
+                "attribute",
+                f"{context}.sourceVariant",
+            )
+            _require_positive_int(
+                source_variant.get("value"), "value", f"{context}.sourceVariant"
+            )
+    elif source_variant is not None:
+        raise ValueError(
+            f"{context}: family semantics must not declare 'sourceVariant'"
+        )
+    return inheritance
 
 
 def _require_string(value: Any, field: str, context: str) -> None:
@@ -33,6 +163,68 @@ def _require_string(value: Any, field: str, context: str) -> None:
 def _require_positive_int(value: Any, field: str, context: str) -> None:
     if type(value) is not int or value < 1:
         raise ValueError(f"{context}: '{field}' must be a positive integer")
+
+
+def _validate_scope(value: object, context: str) -> None:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: must be an object")
+    if set(value) != {"game", "seasons"}:
+        raise ValueError(f"{context}: must contain only 'game' and 'seasons'")
+    _require_string(value.get("game"), "game", context)
+    seasons = value.get("seasons")
+    if (
+        not isinstance(seasons, list)
+        or not seasons
+        or any(not isinstance(item, str) or not item.strip() for item in seasons)
+    ):
+        raise ValueError(f"{context}: 'seasons' must be a non-empty array of strings")
+    if len(set(seasons)) != len(seasons):
+        raise ValueError(f"{context}: 'seasons' must not contain duplicates")
+
+
+def _validate_review(value: object, context: str) -> None:
+    if not isinstance(value, dict):
+        raise ValueError(f"{context}: must be an object")
+    if set(value) != {"status", "reviewedOn"}:
+        raise ValueError(f"{context}: must contain only 'status' and 'reviewedOn'")
+    if value.get("status") not in {"draft", "reviewed"}:
+        raise ValueError(f"{context}: 'status' must be 'draft' or 'reviewed'")
+    _require_string(value.get("reviewedOn"), "reviewedOn", context)
+    reviewed_on = value["reviewedOn"]
+    parts = reviewed_on.split("-")
+    if (
+        len(parts) != 3
+        or any(not part.isdecimal() for part in parts)
+        or len(parts[0]) != 4
+        or len(parts[1]) != 2
+        or len(parts[2]) != 2
+    ):
+        raise ValueError(f"{context}: 'reviewedOn' must use YYYY-MM-DD")
+
+
+def _validate_composition(value: object, context: str) -> str:
+    if not isinstance(value, dict) or set(value) != {"role"}:
+        raise ValueError(f"{context}: must contain only 'role'")
+    role = value.get("role")
+    if role not in {"definition", "supplement"}:
+        raise ValueError(f"{context}: 'role' must be 'definition' or 'supplement'")
+    return role
+
+
+def _validate_rule_relation(value: object, context: str) -> None:
+    if not isinstance(value, dict) or set(value) != {"type", "recordId"}:
+        raise ValueError(f"{context}: must contain only 'type' and 'recordId'")
+    relation_type = value.get("type")
+    if relation_type not in RULE_RELATION_TYPES:
+        raise ValueError(
+            f"{context}: unsupported relation type {relation_type!r}; "
+            f"expected one of {sorted(RULE_RELATION_TYPES)}"
+        )
+    record_id = value.get("recordId")
+    _require_string(record_id, "recordId", context)
+    assert isinstance(record_id, str)
+    domain = record_id.split(":", 1)[0]
+    validate_typed_domain_id(record_id, expected_domain=domain, context=f"{context}.recordId")
 
 
 def _validate_army_link_id(entity: str, value: Any, context: str) -> None:
@@ -172,7 +364,6 @@ def _validate_weapon_special_profile(profile: object, context: str) -> None:
         ):
             raise ValueError(f"{context}.{field}: must be an array of non-empty strings")
     _require_string(profile["ccWeapon"], "ccWeapon", context)
-
 
 
 def _validate_controller_eligibility(value: object, context: str) -> set[str]:
@@ -369,6 +560,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
     record_ids: set[str] = set()
     record_kind_by_id: dict[str, str] = {}
     peripheral_type_skill_refs: dict[str, set[str]] = {}
+    skill_definition_type_ids: dict[int | str, tuple[str, ...]] = {}
     for index, record in enumerate(records):
         context = f"records[{index}]"
         if not isinstance(record, dict):
@@ -383,47 +575,66 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         )
         if not isinstance(record["citations"], list) or not record["citations"]:
             raise ValueError(f"{context}: 'citations' must be a non-empty array")
-        for optional_list in ("aliases", "relatedRecords"):
+        for optional_list in ("aliases",):
             if optional_list in record and (
                 not isinstance(record[optional_list], list)
                 or any(not isinstance(value, str) for value in record[optional_list])
             ):
                 raise ValueError(f"{context}: '{optional_list}' must be an array of strings")
-        for optional_object in ("scope", "facts", "review"):
-            if optional_object in record and not isinstance(record[optional_object], dict):
-                raise ValueError(f"{context}: '{optional_object}' must be an object")
+        if "relatedRecords" in record:
+            raise ValueError(
+                f"{context}: 'relatedRecords' was replaced by typed 'relations' in format v6"
+            )
+        composition_role = _validate_composition(
+            record["composition"], f"{context}.composition"
+        )
+        relations = record.get("relations", [])
+        if not isinstance(relations, list):
+            raise ValueError(f"{context}: 'relations' must be an array")
+        relation_keys: set[tuple[str, str]] = set()
+        for relation_index, relation in enumerate(relations):
+            _validate_rule_relation(
+                relation, f"{context}.relations[{relation_index}]"
+            )
+            relation_key = (relation["type"], relation["recordId"])
+            if relation_key in relation_keys:
+                raise ValueError(
+                    f"{context}.relations[{relation_index}]: duplicate relation "
+                    f"{relation_key!r}"
+                )
+            relation_keys.add(relation_key)
+        _validate_scope(record["scope"], f"{context}.scope")
+        _validate_review(record["review"], f"{context}.review")
+        if "facts" in record and not isinstance(record["facts"], dict):
+            raise ValueError(f"{context}: 'facts' must be an object")
         if record["kind"] == "skill":
             facts = record.get("facts")
-            if not isinstance(facts, dict) or facts.get("typeId") not in skill_type_ids:
-                raise ValueError(f"{context}: skill 'facts.typeId' must reference skillTypes")
-            parameter_semantics = facts.get("parameterSemantics")
-            if parameter_semantics is not None:
-                if not isinstance(parameter_semantics, dict):
-                    raise ValueError(
-                        f"{context}: skill 'facts.parameterSemantics' must be an object"
+            if composition_role == "definition":
+                type_ids = facts.get("typeIds") if isinstance(facts, dict) else None
+                if (
+                    not isinstance(type_ids, list)
+                    or not type_ids
+                    or any(
+                        not isinstance(type_id, str) or type_id not in skill_type_ids
+                        for type_id in type_ids
                     )
-                if set(parameter_semantics) != {"kind", "positiveSign"}:
+                ):
                     raise ValueError(
-                        f"{context}: skill 'facts.parameterSemantics' must contain only "
-                        "'kind' and 'positiveSign'"
+                        f"{context}: skill 'facts.typeIds' must be a non-empty array "
+                        "referencing skillTypes"
                     )
-                if parameter_semantics["kind"] != "distance":
+                if len(type_ids) != len(set(type_ids)):
                     raise ValueError(
-                        f"{context}: skill parameter semantics 'kind' must be 'distance'"
+                        f"{context}: skill 'facts.typeIds' must not contain duplicates"
                     )
-                if parameter_semantics["positiveSign"] not in {"preserve", "omit", "force"}:
+                if isinstance(facts, dict) and "typeId" in facts:
                     raise ValueError(
-                        f"{context}: skill parameter semantics 'positiveSign' must be one of "
-                        "'preserve', 'omit', or 'force'"
+                        f"{context}: skill definitions must use 'facts.typeIds', "
+                        "not singular 'facts.typeId'"
                     )
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict) and facts.get("category") == "peripheral-type":
-                related = record.get("relatedRecords")
-                if not isinstance(related, list) or "skill:peripheral" not in related:
-                    raise ValueError(
-                        f"{context}: Peripheral type must relate to 'skill:peripheral'"
-                    )
                 peripheral_type_skill_refs[record["id"]] = _validate_peripheral_type_facts(
                     facts, f"{context}.facts"
                 )
@@ -456,37 +667,69 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         )
         if record["kind"] == "weapon":
             facts = record.get("facts")
-            if not isinstance(facts, dict):
+            if composition_role == "definition" and not isinstance(facts, dict):
                 raise ValueError(f"{context}: weapon 'facts' must be an object")
-            if "specialProfile" in facts:
+            if isinstance(facts, dict) and "specialProfile" in facts:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
                 )
-        if record["kind"] == "skill-declaration-category":
-            facts = record.get("facts")
-            if not isinstance(facts, dict) or set(facts) != {"order"}:
+        if record["kind"] == "training":
+            facts = record.get("facts", {})
+            if composition_role == "definition":
+                if not isinstance(facts, dict) or set(facts) != {"orderType"}:
+                    raise ValueError(
+                        f"{context}: Training definition facts must contain only 'orderType'"
+                    )
+                order_type = facts["orderType"]
+                if order_type not in TRAINING_ORDER_TYPES:
+                    raise ValueError(
+                        f"{context}: unsupported Training orderType {order_type!r}"
+                    )
+                if record["id"] != f"training:{order_type}":
+                    raise ValueError(
+                        f"{context}: Training id must match its orderType"
+                    )
+            elif isinstance(facts, dict) and "orderType" in facts:
                 raise ValueError(
-                    f"{context}: skill declaration category 'facts' must contain only 'order'"
+                    f"{context}: Training supplements must not redefine 'orderType'"
+                )
+            if record.get("armyLinks"):
+                raise ValueError(
+                    f"{context}: Training is sourced from regular/irregular Order "
+                    "types and must not link to an Army Skill"
+                )
+        if record["kind"] == "declaration-category":
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or set(facts) != {"typeId", "order"}:
+                raise ValueError(
+                    f"{context}: declaration category 'facts' must contain only "
+                    "'typeId' and 'order'"
+                )
+            if facts["typeId"] not in skill_type_ids:
+                raise ValueError(
+                    f"{context}: declaration category 'facts.typeId' must reference "
+                    "skillTypes"
                 )
             if type(facts["order"]) is not int or facts["order"] < 0:
                 raise ValueError(
-                    f"{context}: skill declaration category 'facts.order' must be "
+                    f"{context}: declaration category 'facts.order' must be "
                     "a non-negative integer"
                 )
             links = record.get("armyLinks")
             if not isinstance(links, list) or not links:
                 raise ValueError(
-                    f"{context}: skill declaration category requires non-empty 'armyLinks'"
+                    f"{context}: declaration category requires non-empty 'armyLinks'"
                 )
             for link in links:
-                if not isinstance(link, dict) or link.get("entity") != "skill":
+                if not isinstance(link, dict) or link.get("entity") not in {"skill", "equipment"}:
                     raise ValueError(
-                        f"{context}: skill declaration category armyLinks must reference skills"
+                        f"{context}: declaration category armyLinks must reference "
+                        "skills or equipment"
                     )
-                _validate_army_link_id("skill", link.get("id"), context)
+                _validate_army_link_id(link["entity"], link.get("id"), context)
             if len(record["citations"]) != 1:
                 raise ValueError(
-                    f"{context}: skill declaration category requires exactly one citation"
+                    f"{context}: declaration category requires exactly one citation"
                 )
             citation_source = record["citations"][0].get("sourceId")
             citation_kind = next(
@@ -495,18 +738,17 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             )
             if citation_kind != "pdf":
                 raise ValueError(
-                    f"{context}: skill declaration category citation must reference a PDF"
+                    f"{context}: declaration category citation must reference a PDF"
                 )
-        if record["kind"] in {"skill", "state"}:
+        if composition_role == "definition" and record["kind"] in {"skill", "state"}:
             record_labels = record.get("labelIds")
             if not isinstance(record_labels, list):
                 raise ValueError(f"{context}: '{record['kind']}' requires a 'labelIds' array")
-            if record["kind"] == "state" and not record_labels:
-                raise ValueError(f"{context}: 'state' requires non-empty 'labelIds'")
             if any(label_id not in label_ids for label_id in record_labels):
                 raise ValueError(f"{context}: 'labelIds' must reference labels")
         if "armyLinks" in record and not isinstance(record["armyLinks"], list):
             raise ValueError(f"{context}: 'armyLinks' must be an array")
+        army_links = record.get("armyLinks", [])
         if record["id"] in record_ids:
             raise ValueError(f"{context}: duplicate record id {record['id']!r}")
         record_ids.add(record["id"])
@@ -532,6 +774,71 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             if "id" in link:
                 _validate_army_link_id(link["entity"], link["id"], link_context)
 
+        if composition_role == "supplement" and army_links:
+            raise ValueError(
+                f"{context}: supplement contributions inherit Army routing from their "
+                "definition and must not declare 'armyLinks'"
+            )
+        if composition_role == "definition" and record["kind"] in CATALOG_RULE_KINDS:
+            for link in army_links:
+                if link["entity"] != record["kind"]:
+                    raise ValueError(
+                        f"{context}: {record['kind']} definitions may only link to "
+                        f"Army {record['kind']} identities"
+                    )
+                if "id" not in link:
+                    raise ValueError(
+                        f"{context}: Army-linked {record['kind']} definitions require "
+                        "a stable numeric source id or domain slug; name-only links are "
+                        "not canonical catalog relationships"
+                    )
+
+        variant_semantics = record.get("variantSemantics")
+        requires_variant_semantics = (
+            composition_role == "definition"
+            and record["kind"] in CATALOG_RULE_KINDS
+            and bool(army_links)
+        )
+        if requires_variant_semantics and variant_semantics is None:
+            raise ValueError(
+                f"{context}: Army-linked {record['kind']} definitions require "
+                "'variantSemantics'"
+            )
+        if variant_semantics is not None:
+            if composition_role != "definition":
+                raise ValueError(
+                    f"{context}: only definition contributions may declare 'variantSemantics'"
+                )
+            if record["kind"] not in CATALOG_RULE_KINDS:
+                raise ValueError(
+                    f"{context}: 'variantSemantics' is only supported for "
+                    f"{sorted(CATALOG_RULE_KINDS)} records"
+                )
+            _validate_variant_semantics(
+                variant_semantics, f"{context}.variantSemantics", army_links
+            )
+
+        if record["kind"] == "skill" and composition_role == "definition":
+            facts = record.get("facts")
+            if isinstance(facts, dict):
+                type_ids = facts.get("typeIds")
+                if isinstance(type_ids, list):
+                    normalized_type_ids = tuple(
+                        type_id for type_id in type_ids if isinstance(type_id, str)
+                    )
+                    for link in army_links:
+                        if link.get("entity") != "skill" or "id" not in link:
+                            continue
+                        skill_ref = link["id"]
+                        if not isinstance(skill_ref, (int, str)):
+                            continue
+                        existing = skill_definition_type_ids.get(skill_ref)
+                        if existing is not None and existing != normalized_type_ids:
+                            raise ValueError(
+                                f"{context}: Army Skill {skill_ref!r} has conflicting "
+                                "full-definition declaration categories"
+                            )
+                        skill_definition_type_ids[skill_ref] = normalized_type_ids
     for record_id, skill_refs in peripheral_type_skill_refs.items():
         for skill_id in skill_refs:
             if record_kind_by_id.get(skill_id) != "skill":
@@ -539,5 +846,33 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                     f"Peripheral type {record_id!r} controller eligibility references "
                     f"unknown skill {skill_id!r}"
                 )
+            controller_record = next(record for record in records if record["id"] == skill_id)
+            controller_relations = {
+                (relation["type"], relation["recordId"])
+                for relation in controller_record.get("relations", [])
+            }
+            if ("controller-eligible-for", record_id) not in controller_relations:
+                raise ValueError(
+                    f"Peripheral type {record_id!r} controller eligibility requires a "
+                    f"'controller-eligible-for' relation from {skill_id!r}"
+                )
+
+        peripheral_record = next(
+            (record for record in records if record["id"] == "skill:peripheral"),
+            None,
+        )
+        if peripheral_record is None:
+            raise ValueError(
+                f"Peripheral type {record_id!r} requires canonical 'skill:peripheral'"
+            )
+        peripheral_relations = {
+            (relation["type"], relation["recordId"])
+            for relation in peripheral_record.get("relations", [])
+        }
+        if ("has-subtype", record_id) not in peripheral_relations:
+            raise ValueError(
+                f"Peripheral type {record_id!r} requires a 'has-subtype' relation "
+                "from 'skill:peripheral'"
+            )
 
     return document

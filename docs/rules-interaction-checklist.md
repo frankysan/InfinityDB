@@ -1,0 +1,865 @@
+# Rules interaction review checklist
+
+This file is generated from the maintained public-catalog scope, interaction-review
+policy, and current curated rules graph. Do not edit it by hand. Regenerate it with:
+
+```powershell
+python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md
+```
+
+The **0.7.0 progress gate is catalog-based**: every public Skill, Equipment item,
+Trait, and State is listed, including entries that do not yet have a curated rules
+definition.
+A catalog item is complete when its canonical rules identity exists and its outgoing
+interaction semantics have been reviewed, or when a maintained release exception
+explicitly defers an out-of-scope publication/domain to later work. Unclassified
+missing definitions remain visibly pending instead of disappearing from the denominator.
+
+Exact source variants plus independently modeled Rule, Training, supporting Trait,
+and curated Weapon identities are tracked separately as supporting semantics.
+Ordinary Weapon catalog rows are covered through their Skill/Trait behavior rather than
+audited one-by-one; a Weapon with its own curated rules definition remains in supporting
+review. `declaration-category` projection records are excluded.
+
+## Progress
+
+- **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
+- Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
+- Supporting semantic identities: **28/28** complete, **0** pending.
+- Current authored outgoing relations: **255**.
+- Explicitly tracked future/deferred interactions: **132**.
+
+## 0.7.0 primary catalog review
+
+### Skill (95/95)
+
+- [x] **Aerial** (`skill:aerial`) — reviewed
+  - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
+  - `restricts-use-of` → Guard (`skill:guard`)
+  - `negates-effects-of` → Boost (`trait:boost`)
+  - `prevents-state-entry` → Prone State (`state:prone`)
+  - `prevents-state-entry` → Engaged State (`state:engaged`)
+- [x] **Alert** (`skill:alert`) — reviewed
+  - outgoing: none
+- [x] **Berserk** (`skill:berserk`) — reviewed
+  - `uses-effects-of` → Move (`skill:move`)
+  - `uses-effects-of` → CC Attack (`skill:cc-attack`)
+- [x] **Booty** (`skill:booty`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:booty-chart` — Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit.
+- [x] **BS Attack** (`skill:bs-attack`) — reviewed
+  - outgoing: none
+- [x] **Camouflage** (`skill:camouflage`) — reviewed
+  - `enters-state` → Camouflaged State (`state:camouflaged`)
+- [x] **Cautious Movement** (`skill:cautious-movement`) — reviewed
+  - outgoing: none
+- [x] **CC Attack** (`skill:cc-attack`) — reviewed
+  - outgoing: none
+- [x] **Chain of Command** (`skill:chain-of-command`) — reviewed
+  - `uses-effects-of` → Lieutenant (`skill:lieutenant`)
+  - `negates-effects-of` → Loss of Lieutenant (`rule:loss-of-lieutenant`)
+- [x] **Climb** (`skill:climb`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
+- [x] **Climbing Plus** (`skill:climbing-plus`) — reviewed
+  - `uses-effects-of` → Climb (`skill:climb`)
+  - `applies-effects-to` → Move (`skill:move`)
+  - `applies-effects-to` → Dodge (`skill:dodge`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
+- [x] **Combat Instinct** (`skill:combat-instinct`) — reviewed
+  - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
+  - `negates-effects-of` → Stealth (`skill:stealth`)
+- [x] **Combat Jump** (`skill:combat-jump`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
+- [x] **Commlink** (`skill:commlink`) — deferred: Commlink belongs to the official Reinforcements Extra rather than the N5 core rules. It is explicitly vetted for 0.7.0 but its canonical definition is deferred until the Reinforcements annex is modeled as a separately scoped collection.
+  - rules definition: intentionally deferred to post-0.7.0 by maintained scope decision
+- [x] **Counterintelligence** (`skill:counterintelligence`) — reviewed
+  - `applies-effects-to` → Command Token: Strategic Use (`rule:command-token-strategic-use`)
+- [x] **Courage** (`skill:courage`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
+- [x] **Cyberplug** (`skill:cyberplug`) — reviewed
+  - `controller-eligible-for` → Peripheral (Cyberplug) (`rule:peripheral-type:cyberplug`)
+- [x] **Decoy** (`skill:decoy`) — reviewed
+  - `enters-state` → Decoy State (`state:decoy`)
+- [x] **Discover** (`skill:discover`) — reviewed
+  - `reveals-state` → Camouflaged State (`state:camouflaged`)
+  - `reveals-state` → Decoy State (`state:decoy`)
+  - `reveals-state` → Impersonation-2 State (`state:impersonation-2`)
+  - `reveals-state` → Holoecho State (`state:holoecho`)
+  - `reveals-state` → HoloMask State (`state:holomask`)
+- [x] **Doctor** (`skill:doctor`) — reviewed
+  - `controller-eligible-for` → Peripheral (Servant) (`rule:peripheral-type:servant`)
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+  - `cancels-state` → Stunned State (`state:stunned`)
+- [x] **Dodge** (`skill:dodge`) — reviewed
+  - `cancels-state` → Immobilized-A State (`state:immobilized-a`)
+  - `cancels-state` → Engaged State (`state:engaged`)
+- [x] **Dogged** (`skill:dogged`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `uses-effects-of` → Normal State (`state:normal`)
+  - `enters-state` → Dead State (`state:dead`)
+  - `applies-effects-to` → Remote Presence (`skill:remote-presence`)
+  - `negates-effects-of` → Explode (`skill:explode`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:healing` — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
+  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [x] **Engineer** (`skill:engineer`) — reviewed
+  - `controller-eligible-for` → Peripheral (Servant) (`rule:peripheral-type:servant`)
+  - `cancels-state` → Disconnected State (`state:disconnected`)
+  - `cancels-state` → Immobilized-A State (`state:immobilized-a`)
+  - `cancels-state` → Immobilized-B State (`state:immobilized-b`)
+  - `cancels-state` → Isolated State (`state:isolated`)
+  - `cancels-state` → Stunned State (`state:stunned`)
+  - `cancels-state` → Targeted State (`state:targeted`)
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+- [x] **Explode** (`skill:explode`) — reviewed
+  - `enters-state` → Dead State (`state:dead`)
+  - `triggered-by-state-entry` → Unconscious State (`state:unconscious`)
+  - future [post-0.7.0; planned]: `uses-effects-of` → `ammunition:shock` — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain.
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:direct-template-attack` — Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity.
+- [x] **Exrah** (`skill:exrah`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `enters-state` → Dead State (`state:dead`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:healing` — Exrah prevents later healing by sending the Trooper directly from Unconscious to Dead State; model the general recovery prohibition once healing/recovery has a canonical interaction abstraction.
+- [x] **Forward Deployment** (`skill:forward-deployment`) — reviewed
+  - outgoing: none
+- [x] **Forward Observer** (`skill:forward-observer`) — reviewed
+  - `causes-state` → Targeted State (`state:targeted`)
+- [x] **Frenzy** (`skill:frenzy`) — reviewed
+  - `uses-effects-of` → Impetuous (`skill:impetuous`)
+  - `uses-effects-of` → Limited Cover (`skill:limited-cover`)
+  - `cancels-state` → Camouflaged State (`state:camouflaged`)
+  - `cancels-state` → Decoy State (`state:decoy`)
+  - `cancels-state` → Impersonation-1 State (`state:impersonation-1`)
+  - `cancels-state` → Impersonation-2 State (`state:impersonation-2`)
+  - `cancels-state` → Holoecho State (`state:holoecho`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:wound` — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
+- [x] **FT Master** (`skill:ft-master`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `applies-effects-to` → Regular (`training:regular`) — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:fireteam-coherency` — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
+- [x] **G: Jumper** (`skill:g-jumper`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Isolated State (`state:isolated`) — G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dodge (`skill:dodge`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Reset (`skill:reset`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:combat-group` — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
+- [x] **Guard** (`skill:guard`) — reviewed
+  - `enables-use-of` → CC Attack (`skill:cc-attack`)
+- [x] **Hacker** (`skill:hacker`) — reviewed
+  - `enables-use-of` → Hacking Device (`equipment:hacking-device`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:hacking-area` — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:upgrade-program` — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; preserve this until Hacking Programs and Upgrade Programs have canonical identities.
+- [x] **Hidden Deployment** (`skill:hidden-deployment`) — reviewed
+  - `enters-state` → Hidden Deployment State (`state:hidden-deployment`)
+- [x] **Idle** (`skill:idle`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
+- [x] **Immunity** (`skill:immunity`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:saving-roll` — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.
+  - future [post-0.7.0; deferred]: `relation type TBD` → State (`trait:state`) — The State: Stunned Trait explicitly bypasses Immunity, but the current canonical State Trait identity does not preserve the Stunned parameter, so a generic Trait edge would be overbroad.
+- [x] **Impersonation** (`skill:impersonation`) — reviewed
+  - `enters-state` → Impersonation-1 State (`state:impersonation-1`)
+  - `enters-state` → Impersonation-2 State (`state:impersonation-2`)
+- [x] **Impetuous** (`skill:impetuous`) — reviewed
+  - `cancels-state` → Prone State (`state:prone`)
+  - `cancels-state` → Holoecho State (`state:holoecho`)
+  - `cancels-state` → HoloMask State (`state:holomask`)
+  - `prevents-state-entry` → Prone State (`state:prone`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:movement-label` — Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:marker-form` — Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — A player in Retreat does not carry out the Impetuous Phase; model this phase suppression when Retreat has a canonical rules identity.
+- [x] **Infiltration** (`skill:infiltration`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Hidden Deployment State (`state:hidden-deployment`) — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
+- [x] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:spec-ops-chart` — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
+  - future [post-0.7.0; planned]: `enables-use-of` → `skill:request-specball` — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
+- [x] **Inspiring Leadership** (`skill:inspiring-leadership`) — reviewed
+  - `uses-effects-of` → Regular (`training:regular`)
+  - `uses-effects-of` → Courage (`skill:courage`)
+  - `applies-effects-to` → Special Lieutenant Order (`rule:special-lieutenant-order`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat-situation` — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:fireteam-coherency` — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
+- [x] **Intuitive Attack** (`skill:intuitive-attack`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
+- [x] **Journalist** (`skill:journalist`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:guts-roll` — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:cubevac-roll` — Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:promotion-roll` — Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
+- [x] **Jump** (`skill:jump`) — reviewed
+  - `cancels-state` → Prone State (`state:prone`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
+- [x] **Lieutenant** (`skill:lieutenant`) — reviewed
+  - `applies-effects-to` → Special Lieutenant Order (`rule:special-lieutenant-order`)
+  - `enables-use-of` → Inspiring Leadership (`skill:inspiring-leadership`)
+  - `enables-use-of` → Strategos (`skill:strategos`)
+- [x] **Limited Cover** (`skill:limited-cover`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
+- [x] **Look Out** (`skill:look-out`) — reviewed
+  - `modifies-rolls-for` → Dodge (`skill:dodge`)
+- [x] **Marksmanship** (`skill:marksmanship`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+- [x] **Martial Arts** (`skill:martial-arts`) — reviewed
+  - `modifies-rolls-for` → CC Attack (`skill:cc-attack`)
+- [x] **MetaChemistry** (`skill:metachemistry`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:metachemistry-chart` — MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts.
+- [x] **Mimetism** (`skill:mimetism`) — reviewed
+  - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
+  - `imposes-modifiers-on` → Discover (`skill:discover`)
+- [x] **Minelayer** (`skill:minelayer`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Disposable (X) (`trait:disposable-x`) — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
+- [x] **Mnemonica** (`skill:mnemonica`) — reviewed
+  - `applies-effects-to` → Lieutenant (`skill:lieutenant`)
+  - `enters-state` → Dead State (`state:dead`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Cube (`equipment:cube`) — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:troop-type:rem` — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
+- [x] **Morpho-scan** (`skill:morpho-scan`) — reviewed
+  - `imposes-modifiers-on` → Reset (`skill:reset`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:vita` — Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:str` — Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:mov` — Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:cc` — Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:bs` — Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:ph` — Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [x] **Move** (`skill:move`) — reviewed
+  - outgoing: none
+- [x] **Natural Born Warrior** (`skill:natural-born-warrior`) — reviewed
+  - `ignores-modifiers-from` → Martial Arts (`skill:martial-arts`)
+  - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
+- [x] **NCO** (`skill:nco`) — reviewed
+  - `overrides-effects-of` → Special Lieutenant Order (`rule:special-lieutenant-order`)
+  - `uses-effects-of` → Tactical Order (`rule:tactical-order`)
+- [x] **Neurocinetics** (`skill:neurocinetics`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+- [x] **No Cover** (`skill:no-cover`) — reviewed
+  - `overrides-effects-of` → Limited Cover (`skill:limited-cover`)
+- [x] **No Wound Incapacitation** (`skill:no-wound-incapacitation`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `uses-effects-of` → Normal State (`state:normal`)
+  - `applies-effects-to` → Remote Presence (`skill:remote-presence`)
+  - `negates-effects-of` → Explode (`skill:explode`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Doctor (`skill:doctor`) — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Engineer (`skill:engineer`) — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
+  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [x] **Non-Hackable** (`skill:non-hackable`) — reviewed: No current graph edge: its targeting restriction depends on Hacking Attack Requirements and Unit Type predicates that are not yet canonical interaction targets.
+  - outgoing: none
+- [x] **Number 2** (`skill:number-2`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Isolated State (`state:isolated`) — Number 2 can take over when another participant, the current Fireteam Team Leader, enters Isolated State; the current graph cannot encode that participant-role trigger without implying that Isolated applies to the Number 2 user.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — Number 2 can take over when the current Fireteam Team Leader enters any Null State; Null State still needs a canonical abstraction and the trigger belongs to another Fireteam participant.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:fireteam-leader` — Number 2 changes the Fireteam Team Leader role rather than granting or modifying another Skill; model that role transition once Fireteam leadership has a canonical relationship identity.
+- [x] **Parachutist** (`skill:parachutist`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
+- [x] **Paramedic** (`skill:paramedic`) — reviewed
+  - `uses-effects-of` → MediKit (`equipment:medikit`)
+- [x] **Peripheral** (`skill:peripheral`) — reviewed
+  - `has-subtype` → Peripheral (Servant) (`rule:peripheral-type:servant`)
+  - `has-subtype` → Peripheral (Synchronized) (`rule:peripheral-type:synchronized`)
+  - `has-subtype` → Peripheral (Control) (`rule:peripheral-type:control`)
+  - `has-subtype` → Peripheral (Ancillary) (`rule:peripheral-type:ancillary`)
+  - `has-subtype` → Peripheral (Cyberplug) (`rule:peripheral-type:cyberplug`)
+- [x] **Place Deployable** (`skill:place-deployable`) — reviewed
+  - outgoing: none
+- [x] **Protheion** (`skill:protheion`) — reviewed
+  - `applies-effects-to` → CC Attack (`skill:cc-attack`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:wound` — Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets.
+- [x] **Regeneration** (`skill:regeneration`) — reviewed
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:wound` — Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity.
+- [x] **Religious Troop** (`skill:religious-troop`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
+- [x] **Reload** (`skill:reload`) — reviewed
+  - `cancels-state` → Unloaded State (`state:unloaded`)
+- [x] **RemDriver** (`skill:remdriver`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `applies-effects-to` → `rule:troop-type:rem` — RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — A RemDriver Token is removed when the RemDriver user enters any Null State; retain this trigger until Null State is modeled as a canonical umbrella concept with event/timing semantics.
+- [x] **Remote Presence** (`skill:remote-presence`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - `applies-effects-to` → Engineer (`skill:engineer`)
+  - `applies-effects-to` → GizmoKit (`equipment:gizmokit`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:command-token` — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
+- [x] **Request Speedball** (`skill:request-speedball`) — reviewed
+  - `uses-effects-of` → Combat Jump (`skill:combat-jump`)
+- [x] **Reset** (`skill:reset`) — reviewed
+  - `cancels-state` → Targeted State (`state:targeted`)
+  - `cancels-state` → Immobilized-B State (`state:immobilized-b`)
+  - `cancels-state` → Isolated State (`state:isolated`)
+- [x] **Sapper** (`skill:sapper`) — reviewed
+  - `enters-state` → Foxhole State (`state:foxhole`)
+- [x] **Sensor** (`skill:sensor`) — reviewed
+  - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+  - `restricts-use-of` → Camouflage (`skill:camouflage`)
+  - `reveals-state` → Camouflaged State (`state:camouflaged`)
+  - `reveals-state` → Hidden Deployment State (`state:hidden-deployment`)
+- [x] **Shasvastii** (`skill:shasvastii`) — reviewed
+  - `overrides-effects-of` → Unconscious State (`state:unconscious`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat-situation` — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
+  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [x] **Sixth Sense** (`skill:sixth-sense`) — reviewed
+  - `negates-effects-of` → Stealth (`skill:stealth`)
+  - `modifies-rolls-for` → Dodge (`skill:dodge`)
+  - `modifies-rolls-for` → Reset (`skill:reset`)
+- [x] **Specialist Operative** (`skill:specialist-operative`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:specialist-troop` — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
+- [x] **Speculative Attack** (`skill:speculative-attack`) — reviewed
+  - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
+- [x] **Stealth** (`skill:stealth`) — reviewed
+  - `enables-use-of` → Cautious Movement (`skill:cautious-movement`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Idle (`skill:idle`) — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Move (`skill:move`) — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
+- [x] **Strategic Deployment** (`skill:strategic-deployment`) — reviewed
+  - `enables-use-of` → Forward Deployment (`skill:forward-deployment`)
+- [x] **Strategos** (`skill:strategos`) — reviewed
+  - outgoing: none
+- [x] **Super-Jump** (`skill:super-jump`) — reviewed
+  - `modifies-use-of` → Jump (`skill:jump`)
+- [x] **Suppressive Fire** (`skill:suppressive-fire`) — reviewed
+  - `enters-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Surprise Attack** (`skill:surprise-attack`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `imposes-modifiers-on` → `rule:face-to-face-roll` — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
+- [x] **Tactical Awareness** (`skill:tactical-awareness`) — reviewed
+  - `uses-effects-of` → Tactical Order (`rule:tactical-order`)
+- [x] **TAGCom** (`skill:tagcom`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `applies-effects-to` → `rule:troop-type:tag` — TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD.
+- [x] **Tech-recovery** (`skill:tech-recovery`) — reviewed
+  - `applies-effects-to` → GizmoKit (`equipment:gizmokit`)
+  - `cancels-state` → Disconnected State (`state:disconnected`)
+  - `cancels-state` → Immobilized-A State (`state:immobilized-a`)
+  - `cancels-state` → Immobilized-B State (`state:immobilized-b`)
+  - `cancels-state` → Isolated State (`state:isolated`)
+  - `cancels-state` → Stunned State (`state:stunned`)
+  - `cancels-state` → Targeted State (`state:targeted`)
+- [x] **Technorganic** (`skill:technorganic`) — reviewed
+  - `applies-effects-to` → Doctor (`skill:doctor`)
+  - `applies-effects-to` → Engineer (`skill:engineer`)
+  - `applies-effects-to` → MediKit (`equipment:medikit`)
+  - `applies-effects-to` → GizmoKit (`equipment:gizmokit`)
+- [x] **Terrain** (`skill:terrain`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:movement-label` — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:special-terrain` — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
+- [x] **Total Reaction** (`skill:total-reaction`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+- [x] **Transmutation** (`skill:transmutation`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `cancels-state` → Possessed State (`state:possessed`) — Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X.
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:movement-label` — Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity.
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:unit-profile` — All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain.
+- [x] **Triangulated Fire** (`skill:triangulated-fire`) — reviewed
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+  - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
+  - future [post-0.7.0; deferred]: `ignores-modifiers-from` → `rule:range-modifiers` — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
+  - future [post-0.7.0; deferred]: `ignores-modifiers-from` → `rule:partial-cover` — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
+- [x] **Vulnerability** (`skill:vulnerability`) — reviewed
+  - `restricts-use-of` → Immunity (`skill:immunity`)
+- [x] **Warhorse** (`skill:warhorse`) — reviewed
+  - `negates-effects-of` → Loss of Lieutenant (`rule:loss-of-lieutenant`)
+  - `prevents-state-entry` → Isolated State (`state:isolated`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities.
+  - future [post-0.7.0; planned]: `negates-effects-of` → `skill:bs-attack-negative-modifier` — Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally.
+
+### Equipment (30/30)
+
+- [x] **360º Visor** (`equipment:360o-visor`) — reviewed
+  - outgoing: none
+- [x] **AI Motorcycle** (`equipment:ai-motorcycle`) — reviewed
+  - `uses-effects-of` → Motorcycle (`equipment:motorcycle`)
+  - `uses-effects-of` → Peripheral (Synchronized) (`rule:peripheral-type:synchronized`)
+  - `uses-effects-of` → Transmutation (`skill:transmutation`)
+- [x] **Albedo** (`equipment:albedo`) — reviewed
+  - `imposes-modifiers-on` → Multispectral Visor (`equipment:multispectral-visor`)
+  - `imposes-modifiers-on` → Marksmanship (`skill:marksmanship`)
+- [x] **Baggage** (`equipment:baggage`) — reviewed
+  - `enables-use-of` → Reload (`skill:reload`)
+  - `cancels-state` → Unloaded State (`state:unloaded`)
+- [x] **Bangbomb** (`equipment:bangbomb`) — reviewed
+  - `modifies-rolls-for` → Dodge (`skill:dodge`)
+- [x] **Biometric Visor** (`equipment:biometric-visor`) — reviewed
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+  - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
+  - `cancels-state` → Impersonation-1 State (`state:impersonation-1`)
+- [x] **Cube** (`equipment:cube`) — reviewed
+  - `modifies-rolls-for` → Doctor (`skill:doctor`)
+- [x] **Cube 2.0** (`equipment:cube-2`) — reviewed
+  - `uses-effects-of` → Cube (`equipment:cube`)
+  - `modifies-rolls-for` → Doctor (`skill:doctor`)
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor-plus` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
+- [x] **Dazer** (`equipment:dazer`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:difficult-terrain` — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
+- [x] **Deactivator** (`equipment:deactivator`) — reviewed
+  - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → Deployable (`trait:deployable`) — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
+  - future [post-0.7.0; planned]: `ignores-modifiers-from` → `rule:cover` — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
+- [x] **Deployable Cover** (`equipment:deployable-cover`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+  - future [post-0.7.0; planned]: `uses-effects-of` → `rule:partial-cover` — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
+- [x] **Deployable Repeater** (`equipment:deployable-repeater`) — reviewed
+  - `uses-effects-of` → Repeater (`equipment:repeater`)
+- [x] **ECM** (`equipment:ecm`) — reviewed
+  - outgoing: none
+- [x] **Escape System** (`equipment:escape-system`) — reviewed
+  - `uses-effects-of` → Transmutation (`skill:transmutation`)
+- [x] **EVO Hacking Device** (`equipment:evo-hacking-device`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:assisted-fire` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:controlled-jump` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:enhanced-reaction` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:fairy-dust` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [x] **FastPanda** (`equipment:fastpanda`) — reviewed
+  - `uses-effects-of` → Repeater (`equipment:repeater`)
+- [x] **GizmoKit** (`equipment:gizmokit`) — reviewed
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+- [x] **Hacking Device** (`equipment:hacking-device`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:carbonite` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:oblivion` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:spotlight` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:total-control` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [x] **Hacking Device Plus** (`equipment:hacking-device-plus`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:carbonite` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:cybermask` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:oblivion` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:spotlight` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:total-control` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:white-noise` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [x] **Holomask** (`equipment:holomask`) — reviewed
+  - `enters-state` → HoloMask State (`state:holomask`)
+- [x] **Holoprojector** (`equipment:holoprojector`) — reviewed
+  - `enters-state` → Holoecho State (`state:holoecho`)
+- [x] **Killer Hacking Device** (`equipment:killer-hacking-device`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:cybermask` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:trinity` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [x] **MediKit** (`equipment:medikit`) — reviewed
+  - `cancels-state` → Unconscious State (`state:unconscious`)
+  - `causes-state` → Dead State (`state:dead`)
+- [x] **Motorcycle** (`equipment:motorcycle`) — reviewed
+  - `restricts-use-of` → Climb (`skill:climb`)
+  - `restricts-use-of` → Jump (`skill:jump`)
+  - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
+  - `prevents-state-entry` → Prone State (`state:prone`)
+- [x] **Multispectral Visor** (`equipment:multispectral-visor`) — reviewed
+  - `reduces-modifiers-from` → Mimetism (`skill:mimetism`)
+- [x] **Nanoscreen** (`equipment:nanoscreen`) — reviewed
+  - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
+- [x] **Repeater** (`equipment:repeater`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:hacking-area` — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
+- [x] **SymbioMate** (`equipment:symbiomate`) — reviewed
+  - `uses-effects-of` → Immunity (`skill:immunity`)
+- [x] **TinBot** (`equipment:tinbot`) — reviewed: TinBot is a family container; exact source variants carry their own reviewed interaction semantics.
+  - outgoing: none
+- [x] **X Visor** (`equipment:x-visor`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+  - `modifies-rolls-for` → Suppressive Fire (`skill:suppressive-fire`)
+
+### Trait (33/33)
+
+- [x] **Anti-materiel** (`trait:anti-materiel`) — reviewed
+  - outgoing: none
+- [x] **ARM = 0** (`trait:arm-0`) — reviewed
+  - outgoing: none
+- [x] **ARO** (`trait:aro`) — reviewed
+  - outgoing: none
+- [x] **BioWeapon** (`trait:bioweapon`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `uses-effects-of` → `ammunition:da` — BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
+  - future [post-0.7.0; planned]: `uses-effects-of` → `ammunition:shock` — BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
+- [x] **Boost** (`trait:boost`) — reviewed
+  - outgoing: none
+- [x] **BS Weapon (PH)** (`trait:bs-weapon-ph`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+  - future [post-0.7.0; planned]: `restricts-use-of` → `skill:bs-attack-guided` — BS Attack (Guided) cannot use weapons with the BS Weapon (PH) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
+- [x] **BS Weapon (WIP)** (`trait:bs-weapon-wip`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+  - future [post-0.7.0; planned]: `restricts-use-of` → `skill:bs-attack-guided` — BS Attack (Guided) cannot use weapons with the BS Weapon (WIP) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
+  - future [post-0.7.0; planned]: `restricts-use-of` → `skill:bs-attack-shock` — The BS Weapon (WIP) Trait explicitly prevents use with BS Attack (Shock); retain the restriction until that exact BS Attack form has a canonical rules identity.
+- [x] **BTS = 0** (`trait:bts-0`) — reviewed
+  - outgoing: none
+- [x] **Burst (B)** (`trait:burst-b`) — reviewed
+  - outgoing: none
+- [x] **Burst: Single Target** (`trait:burst-single-target`) — reviewed
+  - outgoing: none
+- [x] **CC** (`trait:cc`) — reviewed
+  - `enables-use-of` → CC Attack (`skill:cc-attack`)
+- [x] **Concealed** (`trait:concealed`) — reviewed
+  - `uses-effects-of` → Camouflaged State (`state:camouflaged`)
+- [x] **Continuous Damage** (`trait:continuous-damage`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — Continuous Damage can continue forcing Saving Rolls until the target enters Dead State; the current relation vocabulary should not overstate that indirect transition as a simple causes-state edge.
+- [x] **Deployable** (`trait:deployable`) — reviewed
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+- [x] **Direct Template** (`trait:direct-template`) — reviewed
+  - outgoing: none
+- [x] **Disposable (X)** (`trait:disposable-x`) — reviewed
+  - `causes-state` → Unloaded State (`state:unloaded`)
+- [x] **Double Shot** (`trait:double-shot`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Disposable (X) (`trait:disposable-x`) — Double Shot has a specific conditional interaction with Disposable (2), consuming both remaining uses and resulting in Unloaded State; the current relation vocabulary has no precise conditional Trait-to-Trait interaction edge.
+- [x] **Impact Template** (`trait:impact-template`) — reviewed
+  - outgoing: none
+- [x] **Improvised** (`trait:improvised`) — reviewed
+  - outgoing: none
+- [x] **Indiscriminate** (`trait:indiscriminate`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge.
+- [x] **Intuitive Attack** (`trait:intuitive-attack`) — reviewed
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+- [x] **Non-Lethal** (`trait:non-lethal`) — reviewed
+  - `restricts-use-of` → Immunity (`skill:immunity`)
+- [x] **Non-Reloadable** (`trait:non-reloadable`) — reviewed
+  - `restricts-use-of` → Reload (`skill:reload`)
+- [x] **Perimeter** (`trait:perimeter`) — reviewed
+  - `modifies-use-of` → Place Deployable (`skill:place-deployable`)
+- [x] **Prior Deployment** (`trait:prior-deployment`) — reviewed
+  - outgoing: none
+- [x] **Reflective** (`trait:reflective`) — reviewed
+  - `applies-effects-to` → Multispectral Visor (`equipment:multispectral-visor`)
+  - `applies-effects-to` → Marksmanship (`skill:marksmanship`)
+- [x] **Silent (X)** (`trait:silent-x`) — reviewed
+  - `imposes-modifiers-on` → Dodge (`skill:dodge`)
+- [x] **Speculative Attack** (`trait:speculative-attack`) — reviewed
+  - `enables-use-of` → Speculative Attack (`skill:speculative-attack`)
+- [x] **State** (`trait:state`) — reviewed
+  - outgoing: none
+- [x] **Suppressive Fire (SF)** (`trait:suppressive-fire`) — reviewed
+  - `enables-use-of` → Suppressive Fire (`skill:suppressive-fire`)
+- [x] **Target (Attribute)** (`trait:target-attribute`) — reviewed
+  - outgoing: none
+- [x] **Targetless** (`trait:targetless`) — reviewed
+  - outgoing: none
+- [x] **Zone of Control (ZoC)** (`trait:zone-of-control-zc`) — reviewed
+  - outgoing: none
+
+### State (24/24)
+
+- [x] **Camouflaged State** (`state:camouflaged`) — reviewed
+  - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
+  - `restricts-use-of` → Place Deployable (`skill:place-deployable`)
+- [x] **Dead State** (`state:dead`) — reviewed
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Decoy State** (`state:decoy`) — reviewed
+  - outgoing: none
+- [x] **Disconnected State** (`state:disconnected`) — reviewed
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Engaged State** (`state:engaged`) — reviewed
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:close-combat-declaration-set` — Engaged State restricts declarations to a specific Close Combat/Engaged set; model this only after a canonical declaration-set abstraction can preserve the whitelist semantics.
+- [x] **Foxhole State** (`state:foxhole`) — reviewed
+  - `uses-effects-of` → Mimetism (`skill:mimetism`)
+  - `uses-effects-of` → Courage (`skill:courage`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model.
+- [x] **Hidden Deployment State** (`state:hidden-deployment`) — reviewed
+  - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
+- [x] **Holoecho State** (`state:holoecho`) — reviewed
+  - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:roll` — Holoecho State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges.
+- [x] **HoloMask State** (`state:holomask`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:roll` — HoloMask State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges.
+- [x] **Immobilized-A State** (`state:immobilized-a`) — reviewed
+  - `modifies-rolls-for` → Dodge (`skill:dodge`)
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Immobilized-B State** (`state:immobilized-b`) — reviewed
+  - `modifies-rolls-for` → Reset (`skill:reset`)
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Impersonation-1 State** (`state:impersonation-1`) — reviewed
+  - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
+- [x] **Impersonation-2 State** (`state:impersonation-2`) — reviewed
+  - `enables-use-of` → Surprise Attack (`skill:surprise-attack`)
+- [x] **Isolated State** (`state:isolated`) — reviewed
+  - `modifies-rolls-for` → Reset (`skill:reset`)
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+  - `restricts-use-of` → NCO (`skill:nco`)
+  - future [post-0.7.0; deferred]: `causes-state` → Disconnected State (`state:disconnected`) — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
+- [x] **Normal State** (`state:normal`) — reviewed
+  - outgoing: none
+- [x] **Possessed State** (`state:possessed`) — reviewed
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `hacking-program:total-control` — Total Control can cancel Possessed State for the owning player, but the Hacking Program is not yet a canonical rules identity in the maintained graph.
+- [x] **Prone State** (`state:prone`) — reviewed
+  - `cancels-state` → Foxhole State (`state:foxhole`)
+  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:movement-label` — Prone halves movement from every Movement-labelled Skill and from failed Guts Rolls; use a generic Movement-label target instead of incomplete Move/Dodge-only edges.
+- [x] **Retreat! State** (`state:retreat`) — reviewed
+  - `cancels-state` → Camouflaged State (`state:camouflaged`)
+  - `cancels-state` → Decoy State (`state:decoy`)
+  - `cancels-state` → Impersonation-1 State (`state:impersonation-1`)
+  - `cancels-state` → Impersonation-2 State (`state:impersonation-2`)
+  - `cancels-state` → Holoecho State (`state:holoecho`)
+  - `cancels-state` → HoloMask State (`state:holomask`)
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+  - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat-situation` — Retreat! State is entered and canceled through the army-level Retreat! situation; retain the distinction until that situation is modeled canonically.
+- [x] **Sepsitorized State** (`state:sepsitorized`) — reviewed
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Stunned State** (`state:stunned`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `restricts-use-of` → `rule:attack-declaration` — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:roll` — Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception.
+- [x] **Suppressive Fire State** (`state:suppressive-fire`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; planned]: `imposes-modifiers-on` → `rule:face-to-face-roll` — Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition.
+- [x] **Targeted State** (`state:targeted`) — reviewed
+  - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+  - `modifies-rolls-for` → Reset (`skill:reset`)
+  - `restricts-use-of` → Cautious Movement (`skill:cautious-movement`)
+  - `restricts-use-of` → Stealth (`skill:stealth`)
+- [x] **Unconscious State** (`state:unconscious`) — reviewed
+  - `causes-state` → Prone State (`state:prone`)
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Unloaded State** (`state:unloaded`) — reviewed
+  - outgoing: none
+
+## Supporting rules-identity review
+
+### 0.7.0
+
+#### Equipment (6/6)
+
+- [x] **TinBot: Albedo** (`equipment:tinbot-albedo`) — reviewed
+  - `variant-of` → TinBot (`equipment:tinbot`)
+  - `uses-effects-of` → Albedo (`equipment:albedo`)
+- [x] **TinBot: Discover** (`equipment:tinbot-discover`) — reviewed
+  - `variant-of` → TinBot (`equipment:tinbot`)
+  - `modifies-rolls-for` → Discover (`skill:discover`)
+- [x] **TinBot: ECM Guided** (`equipment:tinbot-ecm-guided`) — reviewed
+  - `variant-of` → TinBot (`equipment:tinbot`)
+  - `uses-effects-of` → ECM (`equipment:ecm`)
+- [x] **TinBot: Firewall** (`equipment:tinbot-firewall`) — reviewed
+  - `variant-of` → TinBot (`equipment:tinbot`)
+  - future [post-0.7.0; planned]: `uses-effects-of` → `equipment:firewall` — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
+- [x] **TinBot: Neurocinetics** (`equipment:tinbot-neurocinetics`) — reviewed
+  - `variant-of` → TinBot (`equipment:tinbot`)
+  - `uses-effects-of` → Neurocinetics (`skill:neurocinetics`)
+- [x] **TinBot: Repeater** (`equipment:tinbot-repeater`) — reviewed
+  - `variant-of` → TinBot (`equipment:tinbot`)
+  - `uses-effects-of` → Repeater (`equipment:repeater`)
+
+#### Rule (9/9)
+
+- [x] **Command Token: Strategic Use** (`rule:command-token-strategic-use`) — reviewed
+  - `causes-state` → Suppressive Fire State (`state:suppressive-fire`)
+  - `enables-use-of` → Request Speedball (`skill:request-speedball`)
+- [x] **Loss of Lieutenant** (`rule:loss-of-lieutenant`) — reviewed
+  - `uses-effects-of` → Irregular (`training:irregular`)
+  - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
+- [x] **Peripheral (Ancillary)** (`rule:peripheral-type:ancillary`) — reviewed
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+- [x] **Peripheral (Control)** (`rule:peripheral-type:control`) — reviewed
+  - outgoing: none
+- [x] **Peripheral (Cyberplug)** (`rule:peripheral-type:cyberplug`) — reviewed
+  - outgoing: none
+- [x] **Peripheral (Servant)** (`rule:peripheral-type:servant`) — reviewed
+  - outgoing: none
+- [x] **Peripheral (Synchronized)** (`rule:peripheral-type:synchronized`) — reviewed
+  - outgoing: none
+- [x] **Special Lieutenant Order** (`rule:special-lieutenant-order`) — reviewed
+  - outgoing: none
+- [x] **Tactical Order** (`rule:tactical-order`) — reviewed
+  - outgoing: none
+
+#### Skill (10/10)
+
+- [x] **BS=11** (`skill:bs-11`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → BS Attack (`skill:bs-attack`)
+- [x] **BS=12** (`skill:bs-12`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → BS Attack (`skill:bs-attack`)
+- [x] **CC=21** (`skill:cc-21`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → CC Attack (`skill:cc-attack`)
+- [x] **Martial Arts L1** (`skill:martial-arts-l1`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → Martial Arts (`skill:martial-arts`)
+- [x] **Martial Arts L2** (`skill:martial-arts-l2`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → Martial Arts (`skill:martial-arts`)
+- [x] **Martial Arts L3** (`skill:martial-arts-l3`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → Martial Arts (`skill:martial-arts`)
+- [x] **Martial Arts L4** (`skill:martial-arts-l4`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → Martial Arts (`skill:martial-arts`)
+- [x] **Martial Arts L5** (`skill:martial-arts-l5`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → Martial Arts (`skill:martial-arts`)
+- [x] **Strategos L1** (`skill:strategos-l1`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → Strategos (`skill:strategos`)
+- [x] **Strategos L2** (`skill:strategos-l2`) — inherited: Exact source variant inherits family interaction semantics; variant-of remains structural.
+  - `variant-of` → Strategos (`skill:strategos`)
+
+#### Training (2/2)
+
+- [x] **Irregular** (`training:irregular`) — reviewed
+  - `restricts-use-of` → Lieutenant (`skill:lieutenant`)
+- [x] **Regular** (`training:regular`) — reviewed
+  - outgoing: none
+
+#### Weapon (1/1)
+
+- [x] **Armed Turret** (`weapon:armed-turret`) — reviewed
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Non-Reloadable (`trait:non-reloadable`)
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → 360º Visor (`equipment:360o-visor`)
+  - `enables-use-of` → BS Attack (`skill:bs-attack`)
+  - `enables-use-of` → CC Attack (`skill:cc-attack`)
+  - `uses-effects-of` → Total Reaction (`skill:total-reaction`)
+
+## Future interaction queue
+
+- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
+- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor-plus`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
+- [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
+- [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
+- [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
+- [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:assisted-fire`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:controlled-jump`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:enhanced-reaction`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:fairy-dust`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:carbonite`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:oblivion`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:spotlight`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:total-control`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:carbonite`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:cybermask`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:oblivion`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:spotlight`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:total-control`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:white-noise`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Killer Hacking Device (`equipment:killer-hacking-device`) → `hacking-program:cybermask`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Killer Hacking Device (`equipment:killer-hacking-device`) → `hacking-program:trinity`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
+- [ ] Repeater (`equipment:repeater`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
+- [ ] TinBot: Firewall (`equipment:tinbot-firewall`) → `equipment:firewall`; `uses-effects-of`; **post-0.7.0 / planned** — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
+- [ ] `hacking-program:white-noise` → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
+- [ ] `hacking-program:white-noise` → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
+- [ ] `rule:marker-form` → Surprise Attack (`skill:surprise-attack`); `enables-use-of`; **post-0.7.0 / planned** — Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State.
+- [ ] `rule:null-state` → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role.
+- [ ] Booty (`skill:booty`) → `rule:booty-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit.
+- [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
+- [ ] Climbing Plus (`skill:climbing-plus`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
+- [ ] Climbing Plus (`skill:climbing-plus`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
+- [ ] Combat Jump (`skill:combat-jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
+- [ ] Courage (`skill:courage`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
+- [ ] Courage (`skill:courage`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
+- [ ] Dogged (`skill:dogged`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [ ] Dogged (`skill:dogged`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
+- [ ] Explode (`skill:explode`) → `ammunition:shock`; `uses-effects-of`; **post-0.7.0 / planned** — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain.
+- [ ] Explode (`skill:explode`) → `rule:direct-template-attack`; `uses-effects-of`; **post-0.7.0 / planned** — Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity.
+- [ ] Exrah (`skill:exrah`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Exrah prevents later healing by sending the Trooper directly from Unconscious to Dead State; model the general recovery prohibition once healing/recovery has a canonical interaction abstraction.
+- [ ] Frenzy (`skill:frenzy`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
+- [ ] Frenzy (`skill:frenzy`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy is triggered by directly inflicting a Wound, but Wound is not yet a canonical event/rules identity and trigger semantics need a dedicated relation.
+- [ ] Frenzy (`skill:frenzy`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
+- [ ] FT Master (`skill:ft-master`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
+- [ ] FT Master (`skill:ft-master`) → Regular (`training:regular`); `applies-effects-to`; **post-0.7.0 / deferred** — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
+- [ ] G: Jumper (`skill:g-jumper`) → `rule:combat-group`; `relation type TBD`; **post-0.7.0 / planned** — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
+- [ ] G: Jumper (`skill:g-jumper`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
+- [ ] G: Jumper (`skill:g-jumper`) → Dodge (`skill:dodge`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+- [ ] G: Jumper (`skill:g-jumper`) → Reset (`skill:reset`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
+- [ ] G: Jumper (`skill:g-jumper`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole.
+- [ ] Hacker (`skill:hacker`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / planned** — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+- [ ] Hacker (`skill:hacker`) → `rule:upgrade-program`; `relation type TBD`; **post-0.7.0 / planned** — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; preserve this until Hacking Programs and Upgrade Programs have canonical identities.
+- [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
+- [ ] Immunity (`skill:immunity`) → `rule:saving-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.
+- [ ] Immunity (`skill:immunity`) → State (`trait:state`); `relation type TBD`; **post-0.7.0 / deferred** — The State: Stunned Trait explicitly bypasses Immunity, but the current canonical State Trait identity does not preserve the Stunned parameter, so a generic Trait edge would be overbroad.
+- [ ] Impetuous (`skill:impetuous`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous Troopers cannot enter Marker States; model this with a generic Marker-form abstraction and a precise prevents-state-entry relation rather than enumerating only current Marker States.
+- [ ] Impetuous (`skill:impetuous`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Impetuous imposes mandatory movement priorities and full-MOV behavior on Movement-labelled Skills during the Impetuous Phase; this needs a phase-scoped modifier relation over the Movement Label.
+- [ ] Impetuous (`skill:impetuous`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — A player in Retreat does not carry out the Impetuous Phase; model this phase suppression when Retreat has a canonical rules identity.
+- [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
+- [ ] Infiltration (`skill:infiltration`) → Hidden Deployment State (`state:hidden-deployment`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
+- [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `rule:spec-ops-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
+- [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `skill:request-specball`; `enables-use-of`; **post-0.7.0 / planned** — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
+- [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
+- [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
+- [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
+- [ ] Journalist (`skill:journalist`) → `rule:cubevac-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
+- [ ] Journalist (`skill:journalist`) → `rule:guts-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
+- [ ] Journalist (`skill:journalist`) → `rule:promotion-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
+- [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
+- [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
+- [ ] MetaChemistry (`skill:metachemistry`) → `rule:metachemistry-chart`; `uses-effects-of`; **post-0.7.0 / planned** — MetaChemistry resolves its randomized Attribute MOD or Special Skill through the MetaChemistry Chart. Model the chart as a structured rules/reference identity before materializing this edge so rolled outcomes remain deployment/session state rather than static Unit facts.
+- [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
+- [ ] Mnemonica (`skill:mnemonica`) → Cube (`equipment:cube`); `relation type TBD`; **post-0.7.0 / deferred** — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
+- [ ] Mnemonica (`skill:mnemonica`) → `rule:troop-type:rem`; `relation type TBD`; **post-0.7.0 / planned** — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:bs`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:cc`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:mov`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:ph`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:str`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR.
+- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:vita`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Doctor (`skill:doctor`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Engineer (`skill:engineer`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
+- [ ] Number 2 (`skill:number-2`) → `rule:fireteam-leader`; `relation type TBD`; **post-0.7.0 / planned** — Number 2 changes the Fireteam Team Leader role rather than granting or modifying another Skill; model that role transition once Fireteam leadership has a canonical relationship identity.
+- [ ] Number 2 (`skill:number-2`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — Number 2 can take over when the current Fireteam Team Leader enters any Null State; Null State still needs a canonical abstraction and the trigger belongs to another Fireteam participant.
+- [ ] Number 2 (`skill:number-2`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — Number 2 can take over when another participant, the current Fireteam Team Leader, enters Isolated State; the current graph cannot encode that participant-role trigger without implying that Isolated applies to the Number 2 user.
+- [ ] Parachutist (`skill:parachutist`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
+- [ ] Protheion (`skill:protheion`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets.
+- [ ] Regeneration (`skill:regeneration`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity.
+- [ ] Religious Troop (`skill:religious-troop`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
+- [ ] Religious Troop (`skill:religious-troop`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
+- [ ] RemDriver (`skill:remdriver`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — A RemDriver Token is removed when the RemDriver user enters any Null State; retain this trigger until Null State is modeled as a canonical umbrella concept with event/timing semantics.
+- [ ] RemDriver (`skill:remdriver`) → `rule:troop-type:rem`; `applies-effects-to`; **post-0.7.0 / deferred** — RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values.
+- [ ] Remote Presence (`skill:remote-presence`) → `rule:command-token`; `relation type TBD`; **post-0.7.0 / planned** — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
+- [ ] Remote Presence (`skill:remote-presence`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
+- [ ] `skill:request-specball` → Combat Jump (`skill:combat-jump`); `uses-effects-of`; **post-0.7.0 / planned** — Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity.
+- [ ] Shasvastii (`skill:shasvastii`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+- [ ] Shasvastii (`skill:shasvastii`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
+- [ ] Specialist Operative (`skill:specialist-operative`) → `rule:specialist-troop`; `uses-effects-of`; **post-0.7.0 / planned** — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
+- [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
+- [ ] Stealth (`skill:stealth`) → Move (`skill:move`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge.
+- [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
+- [ ] TAGCom (`skill:tagcom`) → `rule:troop-type:tag`; `applies-effects-to`; **post-0.7.0 / deferred** — TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD.
+- [ ] Terrain (`skill:terrain`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
+- [ ] Terrain (`skill:terrain`) → `rule:special-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
+- [ ] Transmutation (`skill:transmutation`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity.
+- [ ] Transmutation (`skill:transmutation`) → `rule:unit-profile`; `relation type TBD`; **post-0.7.0 / planned** — All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain.
+- [ ] Transmutation (`skill:transmutation`) → Possessed State (`state:possessed`); `cancels-state`; **post-0.7.0 / deferred** — Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X.
+- [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:partial-cover`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule.
+- [ ] Triangulated Fire (`skill:triangulated-fire`) → `rule:range-modifiers`; `ignores-modifiers-from`; **post-0.7.0 / deferred** — Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity.
+- [ ] Warhorse (`skill:warhorse`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Warhorse makes the user unaffected by Retreat and prevents Retreat State; materialize this when Retreat has canonical rule/state identities.
+- [ ] Warhorse (`skill:warhorse`) → `skill:bs-attack-negative-modifier`; `negates-effects-of`; **post-0.7.0 / planned** — Warhorse makes BS Attack (-X) ineffective against the user; retain the exact modifier-form interaction until that BS Attack form has a canonical identity rather than negating BS Attack globally.
+- [ ] Engaged State (`state:engaged`) → `rule:close-combat-declaration-set`; `relation type TBD`; **post-0.7.0 / planned** — Engaged State restricts declarations to a specific Close Combat/Engaged set; model this only after a canonical declaration-set abstraction can preserve the whitelist semantics.
+- [ ] Foxhole State (`state:foxhole`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Foxhole State grants 360-degree Partial Cover, but Partial Cover is not yet a canonical rules identity and its directional semantics need a dedicated model.
+- [ ] Holoecho State (`state:holoecho`) → `rule:roll`; `relation type TBD`; **post-0.7.0 / deferred** — Holoecho State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges.
+- [ ] HoloMask State (`state:holomask`) → `rule:roll`; `relation type TBD`; **post-0.7.0 / deferred** — HoloMask State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges.
+- [ ] Isolated State (`state:isolated`) → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
+- [ ] Possessed State (`state:possessed`) → `hacking-program:total-control`; `relation type TBD`; **post-0.7.0 / planned** — Total Control can cancel Possessed State for the owning player, but the Hacking Program is not yet a canonical rules identity in the maintained graph.
+- [ ] Prone State (`state:prone`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Prone halves movement from every Movement-labelled Skill and from failed Guts Rolls; use a generic Movement-label target instead of incomplete Move/Dodge-only edges.
+- [ ] Retreat! State (`state:retreat`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Retreat! State is entered and canceled through the army-level Retreat! situation; retain the distinction until that situation is modeled canonically.
+- [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
+- [ ] Stunned State (`state:stunned`) → `rule:roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception.
+- [ ] Suppressive Fire State (`state:suppressive-fire`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition.
+- [ ] BioWeapon (`trait:bioweapon`) → `ammunition:da`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
+- [ ] BioWeapon (`trait:bioweapon`) → `ammunition:shock`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
+- [ ] BS Weapon (PH) (`trait:bs-weapon-ph`) → `skill:bs-attack-guided`; `restricts-use-of`; **post-0.7.0 / planned** — BS Attack (Guided) cannot use weapons with the BS Weapon (PH) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
+- [ ] BS Weapon (WIP) (`trait:bs-weapon-wip`) → `skill:bs-attack-guided`; `restricts-use-of`; **post-0.7.0 / planned** — BS Attack (Guided) cannot use weapons with the BS Weapon (WIP) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
+- [ ] BS Weapon (WIP) (`trait:bs-weapon-wip`) → `skill:bs-attack-shock`; `restricts-use-of`; **post-0.7.0 / planned** — The BS Weapon (WIP) Trait explicitly prevents use with BS Attack (Shock); retain the restriction until that exact BS Attack form has a canonical rules identity.
+- [ ] Continuous Damage (`trait:continuous-damage`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Continuous Damage can continue forcing Saving Rolls until the target enters Dead State; the current relation vocabulary should not overstate that indirect transition as a simple causes-state edge.
+- [ ] Double Shot (`trait:double-shot`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Double Shot has a specific conditional interaction with Disposable (2), consuming both remaining uses and resulting in Unloaded State; the current relation vocabulary has no precise conditional Trait-to-Trait interaction edge.
+- [ ] Indiscriminate (`trait:indiscriminate`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge.

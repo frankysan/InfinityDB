@@ -20,11 +20,11 @@ history retains implementation detail.
 
 ## Current milestone
 
-The current milestone is **0.7.0 — rules-enriched catalog data**, which applies the
-completed Wiki/PDF/FAQ research to data InfinityDB already exposes. Milestone 2B
-shipped in 0.6.3; its durable canonical-relationship, storage-boundary, and
-source-to-presentation conclusions are maintained in `docs/data-model.md` and
-`docs/CHANGELOG.md`.
+The current milestone is **0.8.0 — connected game relationships**. With 0.7.0's
+rules/context enrichment complete, the next work focuses on making already modeled
+structural relationships directly useful to players: Fireteams, Peripheral/Controller
+structure, profile/loadout includes, selection/dependency constraints, Reinforcement
+parentage, and useful cross-army navigation.
 
 General performance and storage experiments remain deferred unless they become
 necessary to establish semantic correctness, losslessness, or acceptable
@@ -38,11 +38,12 @@ sections below and the durable 1.0 acceptance gate remains in `docs/releasing.md
 
 - **0.7.x — Rules & context.** Enrich the existing catalogs and application data with
   concise rules summaries, official references, classifications, variant-aware
-  semantics, and reviewed related-item links.
-- **0.8.x — Connect the game.** Turn the relationship graph into first-class user
-  features: Fireteams, Peripheral/Controller links, profile/loadout includes,
-  selection/dependency relationships, Reinforcement parentage, and useful cross-army
-  navigation. Prefer connected views over duplicating the same facts in new silos.
+  semantics, and a first-class bidirectional graph of reviewed rules interactions.
+- **0.8.x — Connect the game structure.** Extend the same connected-data approach to
+  structural application relationships: Fireteams, Peripheral/Controller source
+  structure, profile/loadout includes, selection/dependency relationships,
+  Reinforcement parentage, and useful cross-army navigation. Prefer connected views
+  over duplicating the same facts in new silos.
 - **0.9.x — Complete & polish.** Use the completeness inventory and consistency audit
   to close remaining player-facing gaps, then improve search/navigation, mobile
   behavior, accessibility, themes, and overall presentation without redefining the
@@ -111,87 +112,6 @@ representation, normalization artifacts, provenance, and contextual variation.
 
 The detailed design and invariants are maintained in `docs/data-model.md`.
 
-## Release target 0.7.0 — rules-enriched catalog data
-
-0.7.0 is the first semantic-enrichment release. Its goal is to make the data
-InfinityDB already exposes materially more informative by applying the completed
-N5.3 Wiki/PDF/FAQ research through the existing curated-rules infrastructure and
-canonical application relationships.
-
-The release is deliberately **not** a requirement to implement a complete rules
-engine, scenario library, live-game state model, or every possible standalone
-rules-reference catalog. Supporting rule identities may be added when they are
-needed to summarize, label, cite, or cross-link an already exposed item without
-requiring a new top-level browser surface in 0.7.0.
-
-- [ ] **Define and implement the structured enrichment contract for existing
-  catalog/application data.**
-  - [ ] Store original concise summaries rather than copied rulebook/wiki prose;
-    confirm publishing permissions plus attribution/linking requirements before
-    serving rule-derived editorial text.
-  - [ ] Store authoritative source links and provenance, including applicable
-    rulebook/publication version, printed PDF page when available, and Wiki links.
-  - [ ] Add reviewed semantic labels/classifications that help users interpret
-    existing data, including declaration/action type, Automatic/Short/Long/ARO
-    semantics, rule-domain identity, and typed Level/MOD/parameter meaning where
-    relevant.
-  - [ ] Represent reviewed related-item relationships explicitly rather than
-    deriving them from display-name matching; support reverse links where useful.
-  - [ ] Keep semantic identity, source publication provenance, and applicability
-    scope separate so core, annex, FAQ, season, or scenario material can enrich the
-    same canonical item without duplication or collection-load-order semantics.
-  - [ ] Make enrichment variant-aware: base rule knowledge may be inherited only
-    where valid, while exact Levels, MODs, typed parameters, and source variants
-    retain their own meaning and provenance.
-
-- [ ] **Systematically enrich the data currently available through InfinityDB.**
-  - [ ] Reconcile existing Skills, Equipment, Weapons, Traits, and relevant
-    Unit/Profile/loadout concepts against the completed rules audit; include
-    supporting Ammunition, State, Hacking, Fireteam, glossary, or scenario
-    identities only where required to explain or relate those existing items.
-  - [ ] Add cited summaries, rules links, user-facing labels, related catalog
-    items, relevant state/ammunition/trait relationships, and Unit/profile/loadout
-    usage links where the audited evidence supports them.
-  - [ ] Make profile/loadout annotations such as Levels, `(+1B)`, `(-3)`, `PH=`,
-    rerolls, and Special Dice explicit enough that an occurrence modifier is not
-    mistaken for a universal property of the base rule or Unit.
-  - [ ] Reconcile N5 weapon-profile presentation terminology with the current
-    Combat rules: preserve Army's source field/provenance while exposing the
-    rules-native Possibility of Survival (`PS`) label rather than presenting the
-    value as `DAM`, for both ranged and melee profiles where applicable.
-  - [ ] Normalize non-textual Army presentation encodings into canonical
-    relationships where appropriate. In particular, Unit Profiles never list Cube
-    or Cube 2.0 alongside textual Equipment; their dedicated symbols are the source
-    occurrence and must resolve to the canonical Cube/Cube 2.0 Automatic Equipment
-    identities without inventing a textual Army Equipment row.
-  - [ ] Consume Army's structured Hacking Program, Martial Arts, Booty, and
-    MetaChemistry reference rows through maintained application/rules models instead
-    of leaving them available only in the raw archive; preserve random-result and
-    Device/program semantics rather than flattening them into Unit facts.
-  - [ ] Surface the resulting enrichment through the existing API/detail/catalog
-    experiences; enrichment required for 0.7.0 must not remain available only in
-    curated JSON, `rules.db`, raw source data, or developer tooling.
-
-- [ ] **Use the audited research as a controlled coverage process.**
-  - [ ] Add a coverage report for currently exposed data that identifies missing
-    enrichment, ambiguous identity/variant mappings, unresolved related-item links,
-    and citations whose source version is stale or unreviewed.
-  - [ ] Classify every remaining gap explicitly as a 0.7.0 blocker, intentional
-    omission, supporting identity without a standalone UI, or later product work;
-    do not silently treat absence as complete coverage.
-  - [ ] Validate summaries/labels/relationships against the maintained rules
-    semantics and canonical Army relationships rather than independently hard-
-    coding a second ontology into the frontend.
-
-0.7.0 does **not** require the complete ITS/scenario library, standalone pages for
-every State/Ammunition/Hacking/Fireteam/glossary concept, generated play-aid
-charts, saved-list guidance, organizer tooling, a live action-legality engine, or
-game/session state tracking. Those features may build on the same enrichment data
-later. The release is ready when every currently exposed catalog/application
-surface has been systematically reconciled with the relevant audited rules
-knowledge, useful reviewed enrichment is presented to users, and every remaining
-gap is explicitly classified.
-
 ## Release direction 0.8.0 — connected game relationships
 
 0.8.0 should make InfinityDB's already modeled relationships directly useful to
@@ -201,11 +121,26 @@ Reinforcement Section parentage, and cross-army relationship discovery. Exact sc
 should be chosen after 0.7.0 so the UI builds on stable canonical/rules semantics
 rather than duplicating source-specific interpretations.
 
+- [ ] **Start 0.8.0 with a rules-data/domain audit.** Review what useful structured
+  data exists in the maintained rules sources but InfinityDB does not yet present.
+  This does not need to inventory every individual rule; it should establish which
+  new canonical domains or browser surfaces are required for the next phase. Include
+  the current unresolved/deferred links and relations, and use the Wiki alongside
+  the maintained rule sources so already-known relationship gaps inform the domain
+  boundaries instead of being rediscovered later.
+
 The Milestone 2B completeness inventory currently makes these relationship families
 explicit 0.8.x candidates:
 
-- [ ] Add first-class Fireteam chart browsing/presentation from the audited source
-  semantics rather than exposing raw chart rows directly.
+- [ ] Add a rule-aware Fireteams feature from the audited source semantics rather
+  than exposing raw chart rows directly. Present each Army's current Army-data chart
+  as authoritative for membership restrictions, min/max requirements, FTO/Wildcard
+  notes, and source provenance; pair it with concise general Fireteam rules while
+  keeping Army-specific chart exceptions separate. Generate Fireteam Level bonuses
+  from the same curated general-rule facts rather than hard-coding a second Quick
+  Reference table, and make historical/community vocabulary such as `Linkable` and
+  `pure Fireteam` discoverable as provenance-aware aliases/help rather than current
+  N5 terminology.
 - [ ] Present canonical Peripheral attachments and Controller access pools with
   navigable links between Controllers and Peripheral targets.
 - [ ] Present profile/loadout/top-level Unit-option include relationships.
@@ -227,6 +162,33 @@ may still ship here when it does not displace completeness work.
 The Milestone 2B inventory also records non-relationship presentation gaps for this
 release-hardening pass:
 
+- [ ] Add a global search field spanning **every database domain**, targeted at 0.9.x and
+  retained in the 1.0 scope if it slips. Each result must show its domain explicitly and link
+  to the correct domain-specific detail surface, so identical or similar names across domains
+  remain unambiguous.
+
+- [ ] Add a simple wiki-like internal-link syntax for **all maintained text fields**,
+  tentatively targeted at 0.9.x but deferrable to 1.0 if completeness work takes
+  priority. A text value should be able to reference another semantic identity inline,
+  for example: `Apply the [[skill:speculative-attack]] -6 MOD and Range MODs; other
+  negative MODs such as [[skill:mimetism]], [[rule:partial-cover]], and
+  [[rule:visibility-zone:plural]] are not applied.` Display-form modifiers such as
+  `:plural` should be supported where useful. The exact namespace vocabulary still
+  needs design—the example `rule:` namespace is only a placeholder, not an accepted
+  ontology decision. Render resolved links with subtle visual emphasis and a
+  small summary tooltip/popover so users can inspect the target without leaving the
+  current context. Define escaping, unresolved-link validation, plural/display-text
+  behavior, accessibility/keyboard interaction, and which semantic identity resolver
+  owns each namespace before implementation.
+  - Treat dynamic distances as typed inline tokens handled by the same maintained-text
+    rendering layer, for example: `a successful Dodge may also move the user up to
+    [[distance:2:inch]].` Every distance embedded in a maintained text field must be marked
+    structurally rather than stored only as display text so it can render according to the
+    user's current cm/in toggle. Reuse the application's canonical distance-conversion and
+    formatting policy rather than introducing parser-local conversion rules. The eventual
+    migration should inventory existing text fields, convert literal distances to typed
+    tokens, and add validation that prevents newly maintained text from silently
+    reintroducing unmarked distance literals where they can be detected reliably.
 - [ ] Present source-attributed Unit notes, including meaningful variant-specific notes
   that do not belong only to the representative source Unit.
 - [ ] Resolve and present the semantics of the 18 current top-level composite
@@ -344,8 +306,8 @@ work is limited to:
   restructuring project.
   - [ ] Establish one pinned production audit baseline before inspecting behavior:
     the Git commit, Army snapshot/provenance, generated `infinity.db` and
-    `rules.db`, terminal symbol manifest/inventory, and locally published symbol
-    set. Verify that the runtime database and symbol publication derive from the
+    `rules.db`, local terminal symbol manifest, and the tracked release-matched
+    symbol publication/inventory. Verify that the runtime database and symbol publication derive from the
     same Army snapshot. Record the evidence and audit results in a durable audit
     document (for example, `docs/audits/web-consistency-YYYY-MM.md`); do not mix
     production observations with synthetic test fixtures.
@@ -381,21 +343,23 @@ work is limited to:
     deep-link state, cross-links, optional-unit behavior, source/rules links,
     catalog-item unit usage, and symbol identity. Use a deliberate manual browser
     pass unless lightweight browser automation is added for a concrete audit need.
-  - [ ] Treat Fireteams as preserved source data whose 1.0 presentation remains a
+  - [ ] Treat Fireteams as preserved source data whose 0.8.x presentation remains a
     separate implementation task. Verify their imported data is retained, record
     the current absence of a Fireteam repository/API/browser surface, and feed
-    confirmed player-relevant Fireteam information into the 1.0 completeness
-    backlog.
+    confirmed player-relevant Fireteam information into the connected-data backlog.
   - [ ] Exercise degraded states deliberately: rules database available versus
-    unavailable; clean redistributable source checkout without graphical assets;
-    complete local published assets; unknown unit/catalog/trait IDs; empty search
+    unavailable; asset validation disabled versus required; complete tracked published
+    assets versus an intentionally asset-free specialized package/test layout; unknown
+    unit/catalog/trait IDs; empty search
     or filter results; invalid query parameters; missing catalog enrichment;
     stale version/snapshot detection; and database/symbol snapshot mismatch.
-  - [ ] Verify the three supported runtime contexts independently: a clean source
-    checkout without redistributed Corvus Belli graphics, local development with
-    explicitly supplied generated artifacts, and production deployment that fails
-    closed for incomplete or mismatched databases/assets. Passing one context does
-    not establish the others.
+  - [ ] Verify the supported validation/runtime contexts independently: a normal
+    source checkout with the tracked processed publication, a specialized package/test
+    layout where the third-party SVG tree is deliberately absent and asset checks are
+    disabled or allowed to fall back, local development with explicitly supplied
+    generated runtime artifacts, and production deployment that fails closed for
+    incomplete or mismatched databases/assets. Passing one context does not establish
+    the others.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
     coverage where practical. Record intentional deferrals in the audit document
     and TODO rather than silently leaving them unresolved. Keep CI hardening,
@@ -504,21 +468,12 @@ work against that contract.
       profile fields and generate the Hacking Device -> baseline Program matrix
       from explicit source associations after semantic reconciliation; keep
       Upgrade Programs distinct and cross-link Program targets/States/effects.
-  - [ ] Reconcile the existing declaration-category records with the current N5
-    V5.3 Skills and Equipment rules before expanding that dataset: remove stale
-    category names/mappings, refresh printed-page citations, and generalize the
-    link contract so actions supplied by Equipment are not represented as Skills.
-    Preserve Army-derived compatibility/source shapes such as `Regular` appearing
-    in skill-like data without treating those shapes as the rules-domain
-    classification; `Regular`/`Irregular` remain Training semantics in InfinityDB.
-    Validate authored category names against the canonical `skillTypes` vocabulary
-    and resolve links against the correct Army catalog domain.
-    - [ ] Once reconciled, generate an Orders/AROs declaration matrix from these
-      cross-domain relationships and use it as a completeness check for missing,
-      invalid, or contradictory declaration categories rather than maintaining a
-      second hard-coded chart. Make the projection source/scope-aware so
-      scenario-only Skills/AROs can be represented without appearing in the core
-      N5 matrix or being flagged as missing core categories.
+  - [ ] Generate an Orders/AROs declaration matrix from the reconciled cross-domain
+    relationships and use it as a completeness check for missing, invalid, or
+    contradictory declaration categories rather than maintaining a second hard-coded
+    chart. Make the projection source/scope-aware so scenario-only Skills/AROs can be
+    represented without appearing in the core N5 matrix or being flagged as missing
+    core categories.
   - [ ] Model Ammunition rules as first-class cited identities and relationships.
     Distinguish the eleven base Ammunition types from source-defined combined
     forms, preserve component relationships for combined Ammunition, and keep
@@ -606,12 +561,11 @@ work against that contract.
     local participant data clearly separate from official records.
 - [ ] Post-0.7.0: add generated rules-reference projections that build on the
   enriched canonical data rather than duplicating its facts.
-  - [ ] Generate structured reference tables already preserved by Army metadata:
-    Martial Arts Levels, Booty results, and MetaChemistry results. Keep random
-    outcomes as deployment/session overlays, preserve conditional branches (for
-    example TAG versus other Troop Types), and cross-link resolvable outcomes to
-    canonical Skills, Equipment, Weapons, and Attributes without rewriting Unit
-    profiles.
+  - [ ] Add richer typed/cross-linked projections for the structured Martial Arts,
+    Booty, and MetaChemistry reference rows now served in 0.7.0. Keep random outcomes
+    as deployment/session overlays, preserve conditional branches (for example TAG
+    versus other Troop Types), and cross-link resolvable outcomes to canonical Skills,
+    Equipment, Weapons, and Attributes without rewriting Unit profiles.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
@@ -633,28 +587,9 @@ work against that contract.
     the General profile.
   - [ ] Also mark the General profile stat with a small superscript `*` and a
     descriptive tooltip whenever one or more Army profiles differ from it.
-- [ ] Build a rule-aware Fireteams feature covering both unit eligibility and
-  army Fireteam list/detail views.
-  - [ ] The imported schema already retains `fireteams`, types, members, and
-    descriptions, but the browser does not expose them. Present each army's
-    current Army-data chart as authoritative, with membership restrictions,
-    min/max requirements, FTO/wildcard notes, and source-data provenance.
-  - [ ] Pair it with concise general Fireteam rules while clearly separating general
-    rules from army-specific chart exceptions and retaining Infinity Army as the
-    current chart authority. Generate the Fireteam Level -> bonuses matrix from the
-    same curated general-rule facts rather than hard-coding the Quick Reference
-    chart separately.
-  - [ ] Make historically/community-significant Fireteam vocabulary discoverable
-    without presenting it as current N5 terminology. In particular, map historical
-    official `Linkable` and community `pure Fireteam` usage to the current
-    chart-eligibility / Fireteam-Level concepts with provenance-aware aliases/help.
-- [ ] Add a Game States reference catalog and contextual state links.
-  - [ ] Create cited state pages and link them from skills, equipment, weapon
-    traits, and future Fireteam guidance.
-  - [ ] Surface interactions that affect the existing UI's concepts, especially
-    marker forms, Hidden Deployment, Suppressive Fire, Isolated, Unconscious,
-    Possessed, and Peripherals; do not infer a unit's current in-game state
-    from its static Army profile.
+- [ ] Extend the completed Game States reference catalog with any remaining contextual
+  state links needed by later Fireteam, Hacking, weapon/ammunition, and scenario guidance;
+  do not infer a Unit's current in-game State from its static Army profile.
 - [ ] Add a weapon-and-ammunition quick-reference view built from existing
   weapon profiles plus curated rules data.
   - [ ] Normalize display of multi-mode/multi-ammunition profiles, link ammunition

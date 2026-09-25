@@ -96,6 +96,22 @@ _register(
     ),
 )
 _register(
+    [
+        "metadata_hacking_programs",
+        "metadata_martial_arts",
+        "metadata_metachemistry",
+        "metadata_booty",
+    ],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Structured rules-reference metadata is projected into maintained application tables "
+        "and presented on the existing Hacker, Martial Arts, Booty, and MetaChemistry Skill "
+        "detail surfaces."
+    ),
+    location=DOC_RULES,
+)
+_register(
     ["metadata_factions", "metadata_skills", "metadata_equipment", "ammunition"],
     REDUNDANT,
     SOURCE_PROVENANCE,
@@ -148,10 +164,6 @@ _register(
         "relation_dependencies",
         "profile_includes",
         "option_includes",
-        "metadata_hacking_programs",
-        "metadata_martial_arts",
-        "metadata_metachemistry",
-        "metadata_booty",
     ],
     UNREPRESENTED,
     SOURCE_RELATIONSHIP,
@@ -361,21 +373,6 @@ CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
             "W for every profile."
         ),
     },
-    {
-        "id": "structured_reference_metadata",
-        "target": "0.7.x",
-        "layer": "raw_source_only",
-        "tables": [
-            "metadata_hacking_programs",
-            "metadata_martial_arts",
-            "metadata_metachemistry",
-            "metadata_booty",
-        ],
-        "reason": (
-            "Army preserves structured Hacking/Martial Arts/Booty/MetaChemistry "
-            "reference data with no current maintained application presentation."
-        ),
-    },
 )
 
 REVIEW_QUEUE: tuple[dict[str, Any], ...] = (
@@ -457,6 +454,10 @@ def _gap_evidence(connection: sqlite3.Connection) -> dict[str, int | None]:
         "unitNoteOccurrenceCount": _count(connection, "logical_unit_notes"),
         "unitOptionCount": _count(connection, "unit_options"),
         "structureProfilePayloadCount": _count(connection, "profile_payloads", "is_structure = 1"),
+        "hackingProgramReferenceCount": _count(connection, "application_hacking_programs"),
+        "martialArtsReferenceCount": _count(connection, "application_martial_arts_levels"),
+        "metachemistryReferenceCount": _count(connection, "application_metachemistry_results"),
+        "bootyReferenceCount": _count(connection, "application_booty_results"),
         "spectablesOccurrenceCount": _count(connection, "logical_unit_spectables"),
         "disabledLoadoutPayloadCount": _count(connection, "loadout_payloads", "disabled = 1"),
         "zeroMiniLoadoutPayloadCount": _count(connection, "loadout_payloads", "minis = 0"),

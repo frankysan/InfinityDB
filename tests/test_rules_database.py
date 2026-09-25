@@ -1,13 +1,18 @@
+import copy
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from infinity_db.curated import load_curated_directory
+from infinity_db.database import Database
 from infinity_db.rules_database import (
     RULES_APPLICATION_ID,
     RULES_SCHEMA_VERSION,
     RulesDatabase,
     export_rules_database,
 )
+from infinity_db.skill_catalog import SkillCatalog
 
 
 def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path: Path) -> None:
@@ -21,7 +26,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 112
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 269
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -46,13 +51,17 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute(
             "SELECT url FROM sources WHERE id = 'n5-core-v5.3-pdf'"
         ).fetchone()[0] == "https://experience.corvusbelli.com/en/infinity/resources"
-        assert (
-            connection.execute(
-                "SELECT related_record_id FROM record_relations "
-                "WHERE record_id = 'state:camouflaged' ORDER BY position LIMIT 1"
-            ).fetchone()[0]
-            == "skill:camouflage"
-        )
+        assert connection.execute(
+            "SELECT relation_type, related_record_id FROM record_relations "
+            "WHERE record_id = 'skill:camouflage' ORDER BY position LIMIT 1"
+        ).fetchone() == ("enters-state", "state:camouflaged")
+        assert connection.execute(
+            "SELECT relation_type, related_record_id FROM record_relations "
+            "WHERE record_id = 'equipment:baggage' ORDER BY position"
+        ).fetchall() == [
+            ("enables-use-of", "skill:reload"),
+            ("cancels-state", "state:unloaded"),
+        ]
         assert connection.execute(
             "SELECT source_id, page FROM record_citations "
             "WHERE record_id = 'state:camouflaged' AND page IS NOT NULL "
@@ -72,6 +81,11 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
 
     assert len(traits) == 33
     assert traits["trait:suppressive-fire"]["aliases"] == ["Suppressive Fire"]
+    assert traits["trait:bs-weapon-ph"]["aliases"] == ["Throwing Weapon"]
+    assert traits["trait:bs-weapon-wip"]["aliases"] == ["Technical Weapon"]
+    labels = {label["id"]: label for label in database.current_labels()}
+    assert labels["comms-attack"]["name"] == "Comms Attack"
+    assert labels["no-lof"]["name"] == "No LoF"
     assert traits["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
         "Disposable ("
     ]
@@ -81,6 +95,14 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     assert traits["trait:continuous-damage"]["citations"][0]["source_url"] == (
         "https://infinitythewiki.com/index.php?title=Traits&oldid=4110"
     )
+    assert traits["trait:continuous-damage"]["collection"] == {
+        "id": "n5-core-v5.3",
+        "title": "N5 Core Rules v5.3",
+        "domain": "core-rules",
+        "status": "current",
+        "effective_from": "2026-08-10",
+        "authority": "primary",
+    }
     camouflaged = database.records_by_kind("state")[0]
     archived = next(
         citation
@@ -89,6 +111,60 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     )
     assert archived["member"] == "Camouflaged_State"
     assert archived["source_url"] == "https://infinitythewiki.com/"
+
+
+def test_training_classifies_normal_order_types_without_conflating_tactical_orders(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+    training = database.training_by_order_type()
+    assert set(training) == {"regular", "irregular"}
+    assert {item["id"] for item in training.values()} == {
+        "training:regular",
+        "training:irregular",
+    }
+    assert all(item["kind"] == "training" for item in training.values())
+    assert all(item["citations"][0]["page"] == 11 for item in training.values())
+    assert all(item["collection"]["status"] == "current" for item in training.values())
+
+    with sqlite3.connect(output) as connection:
+        connection.execute("UPDATE collections SET status = 'superseded'")
+    assert database.training_by_order_type() == {}
+
+
+def test_training_enrichment_preserves_all_other_orders(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    catalog = SkillCatalog(Database(tmp_path / "unused.db"), RulesDatabase(output))
+    unit = {
+        "armies": [
+            {
+                "loadouts": [
+                    {
+                        "orders": [
+                            {"type": "regular", "list": 1},
+                            {"type": "irregular", "list": 1},
+                            {"type": "tactical", "list": 1},
+                            {"type": "lieutenant", "list": 1},
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    enriched = catalog.enrich_unit(unit)
+    orders = enriched["armies"][0]["loadouts"][0]["orders"]
+    assert [order.get("training_reference", {}).get("id") for order in orders] == [
+        "training:regular", "training:irregular", None, None
+    ]
+    assert all(
+        "training_reference" not in order
+        for order in unit["armies"][0]["loadouts"][0]["orders"]
+    )
 
 
 def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> None:
@@ -101,6 +177,7 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
     records = database.records_for_army_link("weapon", "armed-turret")
 
     assert [record["id"] for record in records] == ["weapon:armed-turret"]
+    assert records[0]["variant_semantics"] == {"inheritance": "family"}
     assert records[0]["facts"]["specialProfile"] == {
         "stats": [
             ["MOV", "--"],
@@ -131,6 +208,45 @@ def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> Non
         "forward-deployment": {"kind": "distance", "positive_sign": "force"},
     }
 
+
+def test_rules_database_returns_reviewed_source_variant_semantics(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+
+    variants = RulesDatabase(output).catalog_source_variant_semantics("skill")
+
+    assert variants[19] == {"kind": "level", "value": 1}
+    assert variants[23] == {"kind": "level", "value": 5}
+    assert variants[69] == {"kind": "level", "value": 1}
+    assert variants[70] == {"kind": "level", "value": 2}
+    assert variants[278] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 12,
+    }
+    assert variants[279] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 11,
+    }
+    assert variants[274] == {
+        "kind": "attribute-replacement",
+        "attribute": "CC",
+        "value": 21,
+    }
+
+    equipment_variants = RulesDatabase(output).catalog_source_variant_semantics(
+        "equipment"
+    )
+    assert equipment_variants[169] == {"kind": "named", "label": "Firewall"}
+    assert equipment_variants[188] == {"kind": "named", "label": "Neurocinetics"}
+    assert equipment_variants[193] == {"kind": "named", "label": "Albedo"}
+    assert equipment_variants[244] == {"kind": "named", "label": "Discover"}
+    assert equipment_variants[247] == {"kind": "named", "label": "ECM Guided"}
+    assert equipment_variants[248] == {"kind": "named", "label": "Repeater"}
+
+
 def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
@@ -156,9 +272,1629 @@ def test_rules_database_returns_skill_declaration_categories(tmp_path: Path) -> 
         {
             "skill_ref": "sapper",
             "name": "Long Skill",
-            "order": 40,
+            "order": 50,
             "source_title": "N5 Core Rules",
             "source_version": "5.3",
             "page": 111,
         },
     ]
+
+
+
+def test_rules_database_returns_equipment_declaration_categories(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+
+    categories = RulesDatabase(output).declaration_categories("equipment")
+
+    assert [
+        {
+            "army_ref": category["army_ref"],
+            "type_id": category["type_id"],
+            "name": category["name"],
+            "order": category["order"],
+            "page": category["page"],
+        }
+        for category in categories
+    ] == [
+        {
+            "army_ref": "deactivator",
+            "type_id": "short-skill",
+            "name": "Short Skill",
+            "order": 40,
+            "page": 121,
+        },
+        {
+            "army_ref": "gizmokit",
+            "type_id": "short-skill",
+            "name": "Short Skill",
+            "order": 40,
+            "page": 123,
+        },
+        {
+            "army_ref": "medikit",
+            "type_id": "short-skill",
+            "name": "Short Skill",
+            "order": 40,
+            "page": 124,
+        },
+    ]
+
+    with pytest.raises(ValueError, match="skill or equipment"):
+        RulesDatabase(output).declaration_categories("weapon")
+
+
+def test_current_declaration_categories_match_reviewed_n5_3_semantics(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    skill_categories: dict[object, list[str]] = {}
+    for category in database.declaration_categories("skill"):
+        skill_categories.setdefault(category["army_ref"], []).append(category["name"])
+
+    assert skill_categories["bs-attack"] == ["Short Skill", "ARO"]
+    assert skill_categories["cc-attack"] == ["Short Skill", "ARO"]
+    assert skill_categories["dodge"] == ["Short Skill", "ARO"]
+    assert skill_categories["forward-observer"] == ["Short Skill", "ARO"]
+    assert skill_categories["doctor"] == ["Short Skill"]
+    assert skill_categories["engineer"] == ["Short Skill"]
+    assert skill_categories["cyberplug"] == ["Automatic"]
+    assert skill_categories["paramedic"] == ["Automatic"]
+    assert skill_categories["parachutist"] == ["Long Skill"]
+    assert skill_categories["triangulated-fire"] == ["Long Skill"]
+    assert skill_categories["berserk"] == ["Long Skill"]
+
+    reload = next(
+        record
+        for record in database.composed_records_by_kind("skill")
+        if record["id"] == "skill:reload"
+    )
+    assert [skill_type["id"] for skill_type in reload["skill_types"]] == [
+        "short-skill",
+        "aro",
+    ]
+    assert reload["skill_type"]["id"] == "short-skill"
+
+
+def test_army_link_records_use_current_collections_by_default(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    superseded = copy.deepcopy(current)
+    superseded["collection"] = {
+        **superseded["collection"],
+        "id": "n5-core-v5.2",
+        "title": "N5 Core Rules v5.2",
+        "status": "superseded",
+        "effectiveFrom": "2026-01-01",
+    }
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        [(current_path, current), (root / "n5-core-v5.2.json", superseded)],
+        output,
+    )
+
+    database = RulesDatabase(output)
+    current_records = database.records_for_army_link("skill", "camouflage")
+    all_records = database.records_for_army_link(
+        "skill", "camouflage", current_only=False
+    )
+
+    assert current_records
+    assert {record["collection"]["status"] for record in current_records} == {"current"}
+    assert len(all_records) == len(current_records) * 2
+    assert {record["collection"]["status"] for record in all_records} == {
+        "current",
+        "superseded",
+    }
+
+
+def test_composed_records_attach_current_supplements_without_field_merging(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    supplement = copy.deepcopy(current)
+    supplement["collection"] = {
+        **supplement["collection"],
+        "id": "n5-faq-v0.1",
+        "title": "N5 FAQ v0.1",
+        "domain": "faq",
+        "effectiveFrom": "2026-09-01",
+    }
+    supplement["records"] = [
+        {
+            "id": "skill:camouflage",
+            "kind": "skill",
+            "name": "Camouflage",
+            "summary": "A scoped FAQ clarification for Camouflage.",
+            "composition": {"role": "supplement"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 87}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+        }
+    ]
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        [(current_path, current), (root / "n5-faq-v0.1.json", supplement)], output
+    )
+
+    raw = RulesDatabase(output).records_for_army_link("skill", "camouflage")
+    composed = RulesDatabase(output).composed_records_for_army_link(
+        "skill", "camouflage"
+    )
+
+    raw_camouflage = [record for record in raw if record["id"] == "skill:camouflage"]
+    composed_camouflage = next(
+        record for record in composed if record["id"] == "skill:camouflage"
+    )
+    assert len(raw_camouflage) == 1
+    assert composed_camouflage["summary"] == next(
+        record["summary"]
+        for record in current["records"]
+        if record["id"] == "skill:camouflage"
+    )
+    assert [item["summary"] for item in composed_camouflage["supplements"]] == [
+        "A scoped FAQ clarification for Camouflage."
+    ]
+    assert composed_camouflage["supplements"][0]["collection"]["id"] == "n5-faq-v0.1"
+
+
+def test_export_rejects_ambiguous_current_definitions(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    duplicate = copy.deepcopy(current)
+    duplicate["collection"] = {
+        **duplicate["collection"],
+        "id": "n5-annex-current",
+        "title": "N5 Annex",
+        "domain": "annex",
+    }
+    duplicate["records"] = [
+        next(record for record in duplicate["records"] if record["id"] == "skill:camouflage")
+    ]
+
+    with pytest.raises(ValueError, match="exactly one definition contribution"):
+        export_rules_database(
+            [(current_path, current), (root / "annex.json", duplicate)],
+            tmp_path / "rules.db",
+        )
+
+
+def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+
+    database = RulesDatabase(output)
+    relations = database.relations_for_record("state:camouflaged")
+
+    assert {
+        (item["type"], item["direction"], item["record_id"])
+        for item in relations
+    } == {
+        ("enables-use-of", "outbound", "skill:surprise-attack"),
+        ("restricts-use-of", "outbound", "skill:place-deployable"),
+        ("enters-state", "inbound", "skill:camouflage"),
+        ("reveals-state", "inbound", "skill:discover"),
+        ("reveals-state", "inbound", "skill:sensor"),
+        ("uses-effects-of", "inbound", "trait:concealed"),
+        ("cancels-state", "inbound", "skill:frenzy"),
+        ("cancels-state", "inbound", "state:retreat"),
+    }
+
+    camouflage = next(
+        record
+        for record in database.composed_records_for_army_link("skill", "camouflage")
+        if record["id"] == "skill:camouflage"
+    )
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in camouflage["display_relations"]
+    } == {
+        ("enters-state", "outbound", "Camouflaged State"),
+        ("restricts-use-of", "inbound", "Sensor"),
+    }
+
+    camouflaged = next(
+        record
+        for record in database.composed_records_by_kind("state")
+        if record["id"] == "state:camouflaged"
+    )
+    assert {
+        (
+            relation["type"],
+            relation["direction"],
+            relation["record"]["name"],
+            tuple(
+                (link["entity"], link.get("id"))
+                for link in relation["record"]["army_links"]
+            ),
+        )
+        for relation in camouflaged["display_relations"]
+    } == {
+        ("enables-use-of", "outbound", "Surprise Attack", (("skill", "surprise-attack"),)),
+        ("restricts-use-of", "outbound", "Place Deployable", ()),
+        ("enters-state", "inbound", "Camouflage", (("skill", "camouflage"),)),
+        ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
+        ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
+        ("uses-effects-of", "inbound", "Concealed", ()),
+        ("cancels-state", "inbound", "Frenzy", (("skill", "frenzy"),)),
+        ("cancels-state", "inbound", "Retreat! State", ()),
+    }
+
+
+
+def test_reviewed_trait_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record
+        for kind in ("trait", "skill")
+        for record in database.composed_records_by_kind(kind)
+    }
+    expected = {
+        ("trait:bs-weapon-ph", "modifies-rolls-for", "skill:bs-attack"),
+        ("trait:bs-weapon-wip", "modifies-rolls-for", "skill:bs-attack"),
+        ("trait:cc", "enables-use-of", "skill:cc-attack"),
+        ("trait:non-reloadable", "restricts-use-of", "skill:reload"),
+    }
+
+    for source_id, relation_type, target_id in expected:
+        source = records[source_id]
+        target = records[target_id]
+        source_name = source["name"]
+        target_name = target["name"]
+
+        assert (relation_type, "outbound", target_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert (relation_type, "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
+def test_weapon_trait_skill_prerequisites_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(kind: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_by_kind(kind)
+            if item["id"] == record_id
+        )
+
+    expected_pairs = {
+        "trait:intuitive-attack": "skill:intuitive-attack",
+        "trait:speculative-attack": "skill:speculative-attack",
+        "trait:suppressive-fire": "skill:suppressive-fire",
+    }
+
+    for trait_id, skill_id in expected_pairs.items():
+        trait = record("trait", trait_id)
+        skill = record("skill", skill_id)
+        skill_name = skill["name"]
+        trait_name = trait["name"]
+
+        assert ("enables-use-of", "outbound", skill_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in trait["display_relations"]
+        }
+        assert ("enables-use-of", "inbound", trait_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in skill["display_relations"]
+        }
+
+
+def test_skill_roll_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record for record in database.composed_records_by_kind("skill")
+    }
+    expected_pairs = {
+        ("skill:martial-arts", "skill:cc-attack"),
+        ("skill:marksmanship", "skill:bs-attack"),
+        ("skill:sixth-sense", "skill:dodge"),
+        ("skill:sixth-sense", "skill:reset"),
+    }
+
+    for source_id, target_id in expected_pairs:
+        source = records[source_id]
+        target = records[target_id]
+        source_name = source["name"]
+        target_name = target["name"]
+
+        assert ("modifies-rolls-for", "outbound", target_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert ("modifies-rolls-for", "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
+def test_place_deployable_prerequisites_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record
+        for kind in ("trait", "rule", "skill")
+        for record in database.composed_records_by_kind(kind)
+    }
+    place_deployable = records["skill:place-deployable"]
+    expected_sources = {
+        "trait:deployable": "Deployable",
+        "rule:peripheral-type:ancillary": "Peripheral (Ancillary)",
+    }
+
+    for source_id, source_name in expected_sources.items():
+        source = records[source_id]
+        assert ("enables-use-of", "outbound", "Place Deployable") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert ("enables-use-of", "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in place_deployable["display_relations"]
+        }
+
+
+def test_common_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        record["id"]: record for record in database.composed_records_by_kind("skill")
+    }
+    expected_pairs = {
+        ("skill:look-out", "modifies-rolls-for", "skill:dodge"),
+        ("skill:speculative-attack", "ignores-modifiers-from", "skill:mimetism"),
+    }
+
+    for source_id, relation_type, target_id in expected_pairs:
+        source = records[source_id]
+        target = records[target_id]
+        source_name = source["name"]
+        target_name = target["name"]
+
+        assert (relation_type, "outbound", target_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+        assert (relation_type, "inbound", source_name) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
+def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            record
+            for record in database.composed_records_for_army_link("skill", slug)
+            if record["id"] == record_id
+        )
+
+    msv = next(
+        record
+        for record in database.composed_records_for_army_link(
+            "equipment", "multispectral-visor"
+        )
+        if record["id"] == "equipment:multispectral-visor"
+    )
+    mimetism = skill_rule("mimetism", "skill:mimetism")
+    bs_attack = skill_rule("bs-attack", "skill:bs-attack")
+    discover = skill_rule("discover", "skill:discover")
+
+    assert (
+        "reduces-modifiers-from",
+        "outbound",
+        "Mimetism",
+    ) in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in msv["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in mimetism["display_relations"]
+    } == {
+        ("imposes-modifiers-on", "outbound", "BS Attack"),
+        ("imposes-modifiers-on", "outbound", "Discover"),
+        ("reduces-modifiers-from", "inbound", "Multispectral Visor"),
+        ("uses-effects-of", "inbound", "Foxhole State"),
+        ("ignores-modifiers-from", "inbound", "Deactivator"),
+        ("ignores-modifiers-from", "inbound", "Sensor"),
+        ("ignores-modifiers-from", "inbound", "Speculative Attack"),
+        ("ignores-modifiers-from", "inbound", "Triangulated Fire"),
+    }
+    for target in (bs_attack, discover):
+        assert (
+            "imposes-modifiers-on",
+            "inbound",
+            "Mimetism",
+        ) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
+def test_mobility_environment_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(record_id: str) -> dict:
+        kind = record_id.split(":", 1)[0]
+        return next(
+            candidate
+            for candidate in database.composed_records_by_kind(kind)
+            if candidate["id"] == record_id
+        )
+
+    aerial = record("skill:aerial")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in aerial["display_relations"]
+    } == {
+        ("restricts-use-of", "outbound", "skill:cautious-movement"),
+        ("restricts-use-of", "outbound", "skill:guard"),
+        ("negates-effects-of", "outbound", "trait:boost"),
+        ("prevents-state-entry", "outbound", "state:prone"),
+        ("prevents-state-entry", "outbound", "state:engaged"),
+    }
+    assert ("restricts-use-of", "inbound", "skill:aerial") in {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in record("skill:guard")["display_relations"]
+    }
+
+    climbing = record("skill:climbing-plus")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in climbing["display_relations"]
+    } == {
+        ("uses-effects-of", "outbound", "skill:climb"),
+        ("applies-effects-to", "outbound", "skill:move"),
+        ("applies-effects-to", "outbound", "skill:dodge"),
+    }
+
+
+def test_morale_behavior_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(record_id: str) -> dict:
+        kind = record_id.split(":", 1)[0]
+        return next(
+            candidate
+            for candidate in database.composed_records_by_kind(kind)
+            if candidate["id"] == record_id
+        )
+
+    frenzy = record("skill:frenzy")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in frenzy["display_relations"]
+    } == {
+        ("uses-effects-of", "outbound", "skill:impetuous"),
+        ("uses-effects-of", "outbound", "skill:limited-cover"),
+        ("cancels-state", "outbound", "state:camouflaged"),
+        ("cancels-state", "outbound", "state:decoy"),
+        ("cancels-state", "outbound", "state:impersonation-1"),
+        ("cancels-state", "outbound", "state:impersonation-2"),
+        ("cancels-state", "outbound", "state:holoecho"),
+    }
+    foxhole = record("state:foxhole")
+    assert ("uses-effects-of", "outbound", "skill:courage") in {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in foxhole["display_relations"]
+    }
+    assert ("uses-effects-of", "inbound", "state:foxhole") in {
+        (relation["type"], relation["direction"], relation["record"]["id"])
+        for relation in record("skill:courage")["display_relations"]
+    }
+
+
+def test_silent_dodge_modifier_interaction_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    silent = next(
+        item
+        for item in database.composed_records_by_kind("trait")
+        if item["id"] == "trait:silent-x"
+    )
+    dodge = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "dodge")
+        if item["id"] == "skill:dodge"
+    )
+
+    assert ("imposes-modifiers-on", "outbound", "Dodge") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in silent["display_relations"]
+    }
+    assert ("imposes-modifiers-on", "inbound", "Silent (X)") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in dodge["display_relations"]
+    }
+
+
+def test_disposable_causes_item_specific_unloaded_state(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    disposable = next(
+        item
+        for item in database.composed_records_by_kind("trait")
+        if item["id"] == "trait:disposable-x"
+    )
+    unloaded = next(
+        item
+        for item in database.composed_records_by_kind("state")
+        if item["id"] == "state:unloaded"
+    )
+
+    assert ("causes-state", "outbound", "Unloaded State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in disposable["display_relations"]
+    }
+    assert ("causes-state", "inbound", "Disposable (X)") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in unloaded["display_relations"]
+    }
+
+
+def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            record
+            for record in database.composed_records_for_army_link("skill", slug)
+            if record["id"] == record_id
+        )
+
+    combat_instinct = skill_rule("combat-instinct", "skill:combat-instinct")
+    sixth_sense = skill_rule("sixth-sense", "skill:sixth-sense")
+    stealth = skill_rule("stealth", "skill:stealth")
+    cautious_movement = skill_rule("cautious-movement", "skill:cautious-movement")
+    surprise_attack = skill_rule("surprise-attack", "skill:surprise-attack")
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in combat_instinct["display_relations"]
+    } == {
+        ("ignores-modifiers-from", "outbound", "Surprise Attack"),
+        ("negates-effects-of", "outbound", "Stealth"),
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in sixth_sense["display_relations"]
+    } == {
+        ("modifies-rolls-for", "outbound", "Dodge"),
+        ("modifies-rolls-for", "outbound", "Reset"),
+        ("negates-effects-of", "outbound", "Stealth"),
+    }
+    stealth_relations = {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in stealth["display_relations"]
+    }
+    assert ("negates-effects-of", "inbound", "Combat Instinct") in stealth_relations
+    assert ("negates-effects-of", "inbound", "Sixth Sense") in stealth_relations
+    assert ("enables-use-of", "outbound", "Cautious Movement") in stealth_relations
+    assert ("enables-use-of", "inbound", "Stealth") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in cautious_movement["display_relations"]
+    }
+    surprise_relations = {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in surprise_attack["display_relations"]
+    }
+    assert (
+        "ignores-modifiers-from",
+        "inbound",
+        "Combat Instinct",
+    ) in surprise_relations
+    assert ("enables-use-of", "inbound", "Camouflaged State") in surprise_relations
+    assert ("enables-use-of", "inbound", "Hidden Deployment State") in surprise_relations
+
+
+def test_sensor_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(kind: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_by_kind(kind)
+            if item["id"] == record_id
+        )
+
+    sensor = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "sensor")
+        if item["id"] == "skill:sensor"
+    )
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in sensor["display_relations"]
+    } == {
+        ("ignores-modifiers-from", "outbound", "Mimetism"),
+        ("modifies-rolls-for", "outbound", "Discover"),
+        ("restricts-use-of", "outbound", "Camouflage"),
+        ("reveals-state", "outbound", "Camouflaged State"),
+        ("reveals-state", "outbound", "Hidden Deployment State"),
+    }
+
+    discover = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "discover")
+        if item["id"] == "skill:discover"
+    )
+    assert ("modifies-rolls-for", "inbound", "Sensor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in discover["display_relations"]
+    }
+
+    camouflage = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "camouflage")
+        if item["id"] == "skill:camouflage"
+    )
+    assert ("restricts-use-of", "inbound", "Sensor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in camouflage["display_relations"]
+    }
+
+    hidden_deployment = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "hidden-deployment")
+        if item["id"] == "skill:hidden-deployment"
+    )
+    assert ("enters-state", "outbound", "Hidden Deployment State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in hidden_deployment["display_relations"]
+    }
+
+    hidden_state = record("state", "state:hidden-deployment")
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in hidden_state["display_relations"]
+    } == {
+        ("enables-use-of", "outbound", "Surprise Attack"),
+        ("enters-state", "inbound", "Hidden Deployment"),
+        ("reveals-state", "inbound", "Sensor"),
+    }
+
+
+def test_marksmanship_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    marksmanship = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "marksmanship")
+        if item["id"] == "skill:marksmanship"
+    )
+    msv = next(
+        item
+        for item in database.composed_records_for_army_link(
+            "equipment", "multispectral-visor"
+        )
+        if item["id"] == "equipment:multispectral-visor"
+    )
+    albedo = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "albedo")
+        if item["id"] == "equipment:albedo"
+    )
+    reflective = next(
+        item
+        for item in database.composed_records_by_kind("trait")
+        if item["id"] == "trait:reflective"
+    )
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in albedo["display_relations"]
+    } == {
+        ("imposes-modifiers-on", "outbound", "Marksmanship"),
+        ("imposes-modifiers-on", "outbound", "Multispectral Visor"),
+        ("uses-effects-of", "inbound", "TinBot: Albedo"),
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in reflective["display_relations"]
+    } == {
+        ("applies-effects-to", "outbound", "Marksmanship"),
+        ("applies-effects-to", "outbound", "Multispectral Visor"),
+    }
+    for target in (marksmanship, msv):
+        assert {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+            if relation["record"]["name"] in {"Albedo", "Reflective"}
+        } == {
+            ("applies-effects-to", "inbound", "Reflective"),
+            ("imposes-modifiers-on", "inbound", "Albedo"),
+        }
+
+def test_natural_born_warrior_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    natural_born_warrior = skill_rule(
+        "natural-born-warrior", "skill:natural-born-warrior"
+    )
+    martial_arts = skill_rule("martial-arts", "skill:martial-arts")
+    surprise_attack = skill_rule("surprise-attack", "skill:surprise-attack")
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in natural_born_warrior["display_relations"]
+    } == {
+        ("ignores-modifiers-from", "outbound", "Martial Arts"),
+        ("ignores-modifiers-from", "outbound", "Surprise Attack"),
+    }
+    for target in (martial_arts, surprise_attack):
+        assert (
+            "ignores-modifiers-from",
+            "inbound",
+            "Natural Born Warrior",
+        ) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
+
+def test_no_cover_override_interaction_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    no_cover = skill_rule("no-cover", "skill:no-cover")
+    limited_cover = skill_rule("limited-cover", "skill:limited-cover")
+
+    assert ("overrides-effects-of", "outbound", "Limited Cover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in no_cover["display_relations"]
+    }
+    assert ("overrides-effects-of", "inbound", "No Cover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in limited_cover["display_relations"]
+    }
+
+def test_state_recovery_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    doctor = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "doctor")
+        if item["id"] == "skill:doctor"
+    )
+    engineer = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "engineer")
+        if item["id"] == "skill:engineer"
+    )
+    paramedic = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "paramedic")
+        if item["id"] == "skill:paramedic"
+    )
+    tech_recovery = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "tech-recovery")
+        if item["id"] == "skill:tech-recovery"
+    )
+    technorganic = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "technorganic")
+        if item["id"] == "skill:technorganic"
+    )
+    gizmokit = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "gizmokit")
+        if item["id"] == "equipment:gizmokit"
+    )
+    medikit = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "medikit")
+        if item["id"] == "equipment:medikit"
+    )
+    states = {item["id"]: item for item in database.composed_records_by_kind("state")}
+
+    assert ("cancels-state", "outbound", "Unconscious State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in doctor["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in engineer["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Doctor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in states["state:unconscious"]["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Engineer") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in states["state:targeted"]["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "MediKit") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in paramedic["display_relations"]
+    }
+    assert ("uses-effects-of", "inbound", "Paramedic") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in medikit["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tech_recovery["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Unconscious State") not in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tech_recovery["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Tech-Recovery") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in states["state:targeted"]["display_relations"]
+    }
+    assert ("applies-effects-to", "inbound", "Tech-Recovery") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in gizmokit["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in technorganic["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("applies-effects-to", "outbound", "Doctor"),
+        ("applies-effects-to", "outbound", "Engineer"),
+        ("applies-effects-to", "outbound", "GizmoKit"),
+        ("applies-effects-to", "outbound", "MediKit"),
+    }
+
+
+def test_fireteam_and_scenario_support_skills_are_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        slug: next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+        for slug, record_id in {
+            "ft-master": "skill:ft-master",
+            "number-2": "skill:number-2",
+            "specialist-operative": "skill:specialist-operative",
+            "journalist": "skill:journalist",
+            "tagcom": "skill:tagcom",
+        }.items()
+    }
+
+    assert records["ft-master"]["label_ids"] == ["obligatory"]
+    assert "Regular" in " ".join(records["ft-master"]["facts"]["effects"])
+    assert records["number-2"]["label_ids"] == ["optional"]
+    assert "Isolated State" in " ".join(records["number-2"]["facts"]["requirements"])
+    assert "Specialist Troop" in " ".join(records["specialist-operative"]["facts"]["effects"])
+    assert "Guts Rolls" in " ".join(records["journalist"]["facts"]["effects"])
+    assert "Combat Group" in " ".join(records["tagcom"]["facts"]["effects"])
+    assert all(not record.get("display_relations") for record in records.values())
+
+
+def test_profile_runtime_identity_skills_are_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        slug: next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+        for slug, record_id in {
+            "g-jumper": "skill:g-jumper",
+            "infinity-spec-ops": "skill:infinity-spec-ops",
+            "morpho-scan": "skill:morpho-scan",
+            "remdriver": "skill:remdriver",
+            "transmutation": "skill:transmutation",
+        }.items()
+    }
+    ai_motorcycle = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "ai-motorcycle")
+        if item["id"] == "equipment:ai-motorcycle"
+    )
+    escape_system = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "escape-system")
+        if item["id"] == "equipment:escape-system"
+    )
+
+    assert records["g-jumper"]["label_ids"] == ["obligatory"]
+    assert "Proxies" in " ".join(records["g-jumper"]["facts"]["effects"])
+    assert records["infinity-spec-ops"]["label_ids"] == ["optional"]
+    assert "Enhanced Profile" in " ".join(records["infinity-spec-ops"]["facts"]["effects"])
+    assert records["morpho-scan"]["label_ids"] == ["comms-attack", "no-roll", "optional"]
+    assert ("imposes-modifiers-on", "outbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["morpho-scan"]["display_relations"]
+    }
+    assert records["remdriver"]["facts"]["typeIds"] == ["deployment-skill"]
+    assert "Null State" in " ".join(records["remdriver"]["facts"]["restrictions"])
+    assert records["transmutation"]["facts"]["typeIds"] == ["automatic"]
+    assert ("uses-effects-of", "inbound", "AI Motorcycle") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["transmutation"]["display_relations"]
+    }
+    assert ("uses-effects-of", "inbound", "Escape System") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["transmutation"]["display_relations"]
+    }
+    for equipment in (ai_motorcycle, escape_system):
+        assert ("uses-effects-of", "outbound", "Transmutation") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in equipment["display_relations"]
+        }
+
+
+def test_final_semantic_link_cleanup_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def record(record_id: str) -> dict:
+        kind = record_id.split(":", 1)[0]
+        return next(
+            candidate
+            for candidate in database.composed_records_by_kind(kind)
+            if candidate["id"] == record_id
+        )
+
+    expected = [
+        ("state:camouflaged", "restricts-use-of", "skill:place-deployable"),
+        ("skill:warhorse", "negates-effects-of", "rule:loss-of-lieutenant"),
+        ("skill:super-jump", "modifies-use-of", "skill:jump"),
+        ("trait:perimeter", "modifies-use-of", "skill:place-deployable"),
+        ("equipment:motorcycle", "prevents-state-entry", "state:prone"),
+        ("skill:aerial", "prevents-state-entry", "state:prone"),
+        ("skill:aerial", "prevents-state-entry", "state:engaged"),
+        ("skill:warhorse", "prevents-state-entry", "state:isolated"),
+        ("skill:impetuous", "prevents-state-entry", "state:prone"),
+        ("skill:explode", "triggered-by-state-entry", "state:unconscious"),
+        ("trait:non-lethal", "restricts-use-of", "skill:immunity"),
+        ("skill:hacker", "enables-use-of", "equipment:hacking-device"),
+    ]
+    for source_id, relation_type, target_id in expected:
+        assert (relation_type, "outbound", target_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in record(source_id)["display_relations"]
+        }
+        assert (relation_type, "inbound", source_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in record(target_id)["display_relations"]
+        }
+
+
+def test_hacker_skill_is_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    hacker = next(
+        item
+        for item in database.composed_records_for_army_link("skill", "hacker")
+        if item["id"] == "skill:hacker"
+    )
+
+    assert hacker["label_ids"] == ["obligatory"]
+    assert hacker["facts"]["typeIds"] == ["automatic"]
+    effects = " ".join(hacker["facts"]["effects"])
+    assert "Hacking Device" in effects
+    assert "Upgrade Programs" in effects
+    assert "Null State" in effects
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in hacker["display_relations"]
+    } == {("enables-use-of", "outbound", "Hacking Device")}
+
+
+def test_damage_resilience_skills_are_composed(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        slug: next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+        for slug, record_id in {
+            "explode": "skill:explode",
+            "exrah": "skill:exrah",
+            "immunity": "skill:immunity",
+            "vulnerability": "skill:vulnerability",
+        }.items()
+    }
+    symbiomate = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", "symbiomate")
+        if item["id"] == "equipment:symbiomate"
+    )
+
+    assert records["explode"]["label_ids"] == ["attack", "obligatory"]
+    assert ("enters-state", "outbound", "Dead State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["explode"]["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["exrah"]["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("enters-state", "outbound", "Dead State"),
+        ("overrides-effects-of", "outbound", "Unconscious State"),
+    }
+    assert ("restricts-use-of", "outbound", "Immunity") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["vulnerability"]["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Immunity") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in symbiomate["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in records["immunity"]["display_relations"]
+        if relation["direction"] == "inbound"
+    } >= {
+        ("restricts-use-of", "inbound", "Vulnerability"),
+        ("uses-effects-of", "inbound", "SymbioMate"),
+    }
+
+
+def test_rules_database_preserves_variant_inheritance_and_variant_links(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    document = copy.deepcopy(current)
+    common = {
+        "kind": "skill",
+        "summary": "Variant contract test.",
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "facts": {"category": "special-skill", "typeIds": ["automatic"]},
+        "labelIds": [],
+        "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 76}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+    }
+    document["records"].extend(
+        [
+            {
+                **common,
+                "id": "skill:variant-family-test",
+                "name": "Variant Family Test",
+                "armyLinks": [{"entity": "skill", "id": "variant-family-test"}],
+                "variantSemantics": {"inheritance": "family"},
+            },
+            {
+                **common,
+                "id": "skill:variant-family-test-l2",
+                "name": "Variant Family Test L2",
+                "armyLinks": [{"entity": "skill", "id": 92020}],
+                "variantSemantics": {
+                    "inheritance": "source",
+                    "sourceVariant": {"kind": "named", "label": "test variant"},
+                },
+                "relations": [
+                    {"type": "variant-of", "recordId": "skill:variant-family-test"}
+                ],
+            },
+        ]
+    )
+    output = tmp_path / "rules.db"
+    export_rules_database([(current_path, document)], output)
+
+    database = RulesDatabase(output)
+    family = database.composed_records_for_army_link("skill", "variant-family-test")
+    exact = database.composed_records_for_army_link("skill", 92020)
+
+    assert family[0]["variant_semantics"] == {"inheritance": "family"}
+    assert exact[0]["variant_semantics"] == {
+        "inheritance": "source",
+        "source_variant": {"kind": "named", "label": "test variant"},
+    }
+    assert exact[0]["relations"] == [
+        {
+            "type": "variant-of",
+            "record_id": "skill:variant-family-test",
+            "collection_id": "n5-core-v5.3",
+        }
+    ]
+    assert {
+        (relation["type"], relation["direction"], relation["record_id"])
+        for relation in database.relations_for_record("skill:variant-family-test")
+        if relation["type"] == "variant-of"
+    } == {("variant-of", "inbound", "skill:variant-family-test-l2")}
+
+
+def test_export_rejects_source_specific_variant_without_family_relation(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    document = copy.deepcopy(current)
+    document["records"].append(
+        {
+            "id": "skill:orphan-variant-test",
+            "kind": "skill",
+            "name": "Orphan Variant Test",
+            "summary": "Invalid source-specific variant.",
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {"category": "special-skill", "typeIds": ["automatic"]},
+            "labelIds": [],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 76}],
+            "composition": {"role": "definition"},
+            "review": {"status": "reviewed", "reviewedOn": "2026-09-23"},
+            "armyLinks": [{"entity": "skill", "id": 20}],
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {"kind": "named", "label": "test variant"},
+            },
+        }
+    )
+
+    with pytest.raises(ValueError, match="requires exactly one 'variant-of' relation"):
+        export_rules_database([(current_path, document)], tmp_path / "rules.db")
+
+def test_targeted_interaction_hub_is_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    forward_observer = skill("forward-observer", "skill:forward-observer")
+    reset = skill("reset", "skill:reset")
+    bs_attack = skill("bs-attack", "skill:bs-attack")
+    cautious_movement = skill("cautious-movement", "skill:cautious-movement")
+    states = {item["id"]: item for item in database.composed_records_by_kind("state")}
+    targeted = states["state:targeted"]
+    immobilized_b = states["state:immobilized-b"]
+
+    assert ("causes-state", "outbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in forward_observer["display_relations"]
+    }
+    assert ("causes-state", "inbound", "Forward Observer") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in targeted["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in reset["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in immobilized_b["display_relations"]
+    }
+    assert ("modifies-rolls-for", "inbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in bs_attack["display_relations"]
+    }
+    assert ("restricts-use-of", "inbound", "Targeted State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in cautious_movement["display_relations"]
+    }
+
+
+def test_state_self_recovery_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def skill(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    dodge = skill("dodge", "skill:dodge")
+    reset = skill("reset", "skill:reset")
+    states = {item["id"]: item for item in database.composed_records_by_kind("state")}
+    immobilized_a = states["state:immobilized-a"]
+    immobilized_b = states["state:immobilized-b"]
+    isolated = states["state:isolated"]
+
+    assert ("cancels-state", "outbound", "Immobilized-A State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in dodge["display_relations"]
+    }
+    assert ("modifies-rolls-for", "inbound", "Immobilized-A State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in dodge["display_relations"]
+    }
+    assert ("cancels-state", "inbound", "Dodge") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in immobilized_a["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in immobilized_b["display_relations"]
+    }
+    assert ("cancels-state", "outbound", "Isolated State") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in reset["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "Reset") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in isolated["display_relations"]
+    }
+
+
+def test_equipment_roll_interactions_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def equipment_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("equipment", slug)
+            if item["id"] == record_id
+        )
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    nanoscreen = equipment_rule("nanoscreen", "equipment:nanoscreen")
+    x_visor = equipment_rule("x-visor", "equipment:x-visor")
+    bs_attack = skill_rule("bs-attack", "skill:bs-attack")
+    discover = skill_rule("discover", "skill:discover")
+    suppressive_fire = next(
+        item
+        for item in database.composed_records_by_kind("skill")
+        if item["id"] == "skill:suppressive-fire"
+    )
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in nanoscreen["display_relations"]
+    } == {("imposes-modifiers-on", "outbound", "BS Attack")}
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in x_visor["display_relations"]
+    } == {
+        ("modifies-rolls-for", "outbound", "BS Attack"),
+        ("modifies-rolls-for", "outbound", "Discover"),
+        ("modifies-rolls-for", "outbound", "Suppressive Fire"),
+    }
+    assert (
+        "imposes-modifiers-on",
+        "inbound",
+        "Nanoscreen",
+    ) in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in bs_attack["display_relations"]
+    }
+    for target in (bs_attack, discover, suppressive_fire):
+        assert (
+            "modifies-rolls-for",
+            "inbound",
+            "X-Visor",
+        ) in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in target["display_relations"]
+        }
+
+
+def test_second_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def equipment_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("equipment", slug)
+            if item["id"] == record_id
+        )
+
+    def skill_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("skill", slug)
+            if item["id"] == record_id
+        )
+
+    biometric = equipment_rule("biometric-visor", "equipment:biometric-visor")
+    deactivator = equipment_rule("deactivator", "equipment:deactivator")
+    cover = equipment_rule("deployable-cover", "equipment:deployable-cover")
+    deployable_repeater = equipment_rule(
+        "deployable-repeater", "equipment:deployable-repeater"
+    )
+    fastpanda = equipment_rule("fastpanda", "equipment:fastpanda")
+    repeater = equipment_rule("repeater", "equipment:repeater")
+    discover = skill_rule("discover", "skill:discover")
+    surprise_attack = skill_rule("surprise-attack", "skill:surprise-attack")
+    mimetism = skill_rule("mimetism", "skill:mimetism")
+    bs_attack = skill_rule("bs-attack", "skill:bs-attack")
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in biometric["display_relations"]
+    } == {
+        ("modifies-rolls-for", "outbound", "Discover"),
+        ("ignores-modifiers-from", "outbound", "Surprise Attack"),
+        ("cancels-state", "outbound", "Impersonation-1 State"),
+    }
+    assert ("modifies-rolls-for", "inbound", "Biometric Visor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in discover["display_relations"]
+    }
+    assert ("ignores-modifiers-from", "inbound", "Biometric Visor") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in surprise_attack["display_relations"]
+    }
+    assert ("ignores-modifiers-from", "outbound", "Mimetism") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in deactivator["display_relations"]
+    }
+    assert ("ignores-modifiers-from", "inbound", "Deactivator") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in mimetism["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "BS Attack") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in cover["display_relations"]
+    }
+    assert ("modifies-rolls-for", "inbound", "Deployable Cover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in bs_attack["display_relations"]
+    }
+    for source in (deployable_repeater, fastpanda):
+        assert ("uses-effects-of", "outbound", "Repeater") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in repeater["display_relations"]
+    } == {
+        ("uses-effects-of", "inbound", "Deployable Repeater"),
+        ("uses-effects-of", "inbound", "FastPanda"),
+        ("uses-effects-of", "inbound", "TinBot: Repeater"),
+    }
+
+
+def test_remaining_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    def equipment_rule(slug: str, record_id: str) -> dict:
+        return next(
+            item
+            for item in database.composed_records_for_army_link("equipment", slug)
+            if item["id"] == record_id
+        )
+
+    bangbomb = equipment_rule("bangbomb", "equipment:bangbomb")
+    gizmokit = equipment_rule("gizmokit", "equipment:gizmokit")
+    medikit = equipment_rule("medikit", "equipment:medikit")
+    motorcycle = equipment_rule("motorcycle", "equipment:motorcycle")
+    ai_motorcycle = equipment_rule("ai-motorcycle", "equipment:ai-motorcycle")
+
+    assert ("modifies-rolls-for", "outbound", "Dodge") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in bangbomb["display_relations"]
+    }
+    for source in (gizmokit, medikit):
+        assert ("cancels-state", "outbound", "Unconscious State") in {
+            (relation["type"], relation["direction"], relation["record"]["name"])
+            for relation in source["display_relations"]
+        }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in motorcycle["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("restricts-use-of", "outbound", "Cautious Movement"),
+        ("restricts-use-of", "outbound", "Climb"),
+        ("restricts-use-of", "outbound", "Jump"),
+        ("prevents-state-entry", "outbound", "Prone State"),
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in ai_motorcycle["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("uses-effects-of", "outbound", "Motorcycle"),
+        ("uses-effects-of", "outbound", "Peripheral (Synchronized)"),
+        ("uses-effects-of", "outbound", "Transmutation"),
+    }
+
+    tinbot_albedo = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 193)
+        if item["id"] == "equipment:tinbot-albedo"
+    )
+    tinbot_discover = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 244)
+        if item["id"] == "equipment:tinbot-discover"
+    )
+    tinbot_ecm = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 247)
+        if item["id"] == "equipment:tinbot-ecm-guided"
+    )
+    tinbot_repeater = next(
+        item
+        for item in database.composed_records_for_army_link("equipment", 248)
+        if item["id"] == "equipment:tinbot-repeater"
+    )
+    assert ("uses-effects-of", "outbound", "Albedo") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_albedo["display_relations"]
+    }
+    assert ("modifies-rolls-for", "outbound", "Discover") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_discover["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "ECM") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_ecm["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Repeater") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tinbot_repeater["display_relations"]
+    }
+
+def test_command_order_skill_relations_are_bidirectional(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+
+    records = {
+        item["id"]: item
+        for kind in ("skill", "rule", "training", "state")
+        for item in database.composed_records_by_kind(kind)
+    }
+
+    chain = records["skill:chain-of-command"]
+    lieutenant = records["skill:lieutenant"]
+    nco = records["skill:nco"]
+    tactical_awareness = records["skill:tactical-awareness"]
+    loss = records["rule:loss-of-lieutenant"]
+    strategic_use = records["rule:command-token-strategic-use"]
+    isolated = records["state:isolated"]
+
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in chain["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("uses-effects-of", "outbound", "Lieutenant"),
+        ("negates-effects-of", "outbound", "Loss of Lieutenant"),
+    }
+    assert ("uses-effects-of", "inbound", "Chain of Command") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in lieutenant["display_relations"]
+    }
+    assert ("restricts-use-of", "outbound", "NCO") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in isolated["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Tactical Order") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in tactical_awareness["display_relations"]
+    }
+    assert ("overrides-effects-of", "outbound", "Special Lieutenant Order") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in nco["display_relations"]
+    }
+    assert ("uses-effects-of", "outbound", "Irregular") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in loss["display_relations"]
+    }
+    assert {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in strategic_use["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("causes-state", "outbound", "Suppressive Fire State"),
+        ("enables-use-of", "outbound", "Request Speedball"),
+    }

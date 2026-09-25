@@ -583,6 +583,75 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     assert detail["rules"][0]["citations"][0]["heading"] == "Continuous Damage"
 
 
+def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["tables"]["metadata_weapons"] = [
+        {
+            "position": 1,
+            "id": 1,
+            "type": "BS",
+            "name": "Source Properties",
+            "properties": [
+                "Technical Weapon",
+                "Throwing Weapon",
+                "Comms. Attack",
+                "No LoF",
+                "CC Attack (+3)",
+            ],
+        }
+    ]
+    database_path = tmp_path / "army.sqlite3"
+    export_database(data, database_path)
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    assert catalog.reference("Technical Weapon") == {
+        "label": "Technical Weapon",
+        "name": "BS Weapon (WIP)",
+        "slug": "bs-weapon-wip",
+    }
+    assert catalog.reference("Throwing Weapon") == {
+        "label": "Throwing Weapon",
+        "name": "BS Weapon (PH)",
+        "slug": "bs-weapon-ph",
+    }
+    assert catalog.reference("Comms. Attack") == {
+        "label": "Comms. Attack",
+        "name": "Comms Attack",
+        "slug": None,
+    }
+    assert catalog.reference("No LoF") == {
+        "label": "No LoF",
+        "name": "No LoF",
+        "slug": None,
+    }
+    assert catalog.reference("CC Attack (+3)") == {
+        "label": "CC Attack (+3)",
+        "name": "CC Attack (+3)",
+        "slug": None,
+    }
+
+    traits = {item["id"]: item for item in catalog.list_traits()}
+    assert len(traits) == 33
+    assert "technical-weapon" not in traits
+    assert "throwing-weapon" not in traits
+    assert "comms-attack" not in traits
+    assert "no-lof" not in traits
+    assert "cc-attack-3" not in traits
+    assert traits["arm-0"]["use_count"] == 0
+    assert traits["bs-weapon-ph"]["use_count"] == 1
+    assert traits["bs-weapon-wip"]["use_count"] == 1
+
+    arm_zero = catalog.get_trait("arm-0")
+    assert arm_zero is not None
+    assert arm_zero["variants"] == []
+    assert arm_zero["rules"][0]["id"] == "trait:arm-0"
+
 def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     tmp_path: Path, normalized: dict
 ) -> None:
@@ -2669,9 +2738,17 @@ def test_skill_catalog_uses_curated_declaration_categories(
             {"id": 201, "name": "BS Attack", "source_defined": True},
             {"id": 278, "name": "BS=12", "source_defined": True},
             {"id": 279, "name": "BS=11", "source_defined": True},
+            {"id": 240, "name": "CC Attack", "source_defined": True},
+            {"id": 274, "name": "CC=21", "source_defined": True},
             {"id": 260, "name": "Unclassified Example", "source_defined": True},
         ]
     )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = 278
+    for occurrence in normalized["tables"]["option_skills"]:
+        occurrence["item_id"] = 279
+    for occurrence in normalized["tables"]["unit_option_skills"]:
+        occurrence["item_id"] = 274
     database_path = tmp_path / "army.sqlite3"
     export_database(normalized, database_path)
     root = Path(__file__).parents[1]
@@ -2690,19 +2767,98 @@ def test_skill_catalog_uses_curated_declaration_categories(
     ]
     multi = next(item for item in catalog.list_skills() if item["id"] == 89)
     assert multi["categories"] == [
-        {"name": "Deployment", "source": "N5 Core Rules v5.3", "page": 111},
-        {"name": "Long Skill", "source": "N5 Core Rules v5.3", "page": 111},
+        {
+            "name": "Deployment",
+            "source": "Infinity Wiki — Sapper revision 3286 vN5.3 / oldid 3286",
+            "page": None,
+        },
+        {
+            "name": "Long Skill",
+            "source": "Infinity Wiki — Sapper revision 3286 vN5.3 / oldid 3286",
+            "page": None,
+        },
     ]
     mixed = catalog.get_skill(278)
     assert mixed is not None
     assert mixed["categories"] == [
-        {"name": "Basic Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
+        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
         {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
     ]
+    bs_variants = {
+        int(variant["skill_id"]): variant
+        for variant in mixed["variants"]
+    }
+    assert bs_variants[278]["source_variant"] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 12,
+    }
+    assert bs_variants[279]["source_variant"] == {
+        "kind": "attribute-replacement",
+        "attribute": "BS",
+        "value": 11,
+    }
+
+    cc = catalog.get_skill(274)
+    assert cc is not None
+    assert cc["categories"] == [
+        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 45},
+        {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 45},
+    ]
+    cc_variant = next(
+        variant for variant in cc["variants"] if int(variant["skill_id"]) == 274
+    )
+    assert cc_variant["source_variant"] == {
+        "kind": "attribute-replacement",
+        "attribute": "CC",
+        "value": 21,
+    }
+
     unclassified = next(item for item in catalog.list_skills() if item["id"] == 260)
     assert unclassified["categories"] == [
         {"name": "Unclassified", "source": None, "page": None}
     ]
+
+
+def test_skill_catalog_full_definition_overrides_fallback_across_equivalent_army_refs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    database = Database(database_path)
+    assert database.application_slug("skills", 1) == "skills"
+
+    root = Path(__file__).parents[1]
+    documents = copy.deepcopy(load_curated_directory(root / "data" / "curated"))
+    _, document = documents[0]
+
+    definition = copy.deepcopy(
+        next(record for record in document["records"] if record["id"] == "skill:alert")
+    )
+    definition["id"] = "skill:cross-reference-test"
+    definition["name"] = "skills"
+    definition["armyLinks"] = [{"entity": "skill", "id": "skills"}]
+    definition["variantSemantics"] = {"inheritance": "family"}
+    document["records"].append(definition)
+
+    fallback = copy.deepcopy(
+        next(
+            record
+            for record in document["records"]
+            if record["id"] == "declaration-category:short-skill:p90"
+        )
+    )
+    fallback["id"] = "declaration-category:short-skill:cross-ref-test"
+    fallback["armyLinks"] = [{"entity": "skill", "id": 1}]
+    document["records"].append(fallback)
+
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(documents, rules_path)
+    catalog = SkillCatalog(database, RulesDatabase(rules_path))
+
+    detail = catalog.get_skill(1)
+    assert detail is not None
+    assert [category["name"] for category in detail["categories"]] == ["Automatic"]
 
 
 def test_skill_catalog_adds_curated_distance_parameter_semantics(
@@ -2765,6 +2921,70 @@ def test_skill_catalog_without_rules_keeps_source_distance_typing(
     extra = catalog.list_skill_extras()[0]
     assert extra["is_distance"] is True
     assert "parameter_semantics" not in extra
+
+def test_skill_catalog_rules_view_excludes_known_non_skills_and_adds_rules_only_special_skill(
+    tmp_path: Path, normalized: dict
+) -> None:
+    source_items = [
+        (501, "Bangbomb"),
+        (502, "BTS=3"),
+        (503, "GizmoKit"),
+        (504, "Infinity Team-Ops"),
+        (505, "MediKit"),
+        (506, "Regular"),
+    ]
+    normalized["tables"]["skills"].extend(
+        {"id": item_id, "name": name, "source_defined": True}
+        for item_id, name in source_items
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
+
+    items = {item["slug"]: item for item in catalog.list_skills()}
+    for excluded_slug in {
+        "bangbomb",
+        "bts-3",
+        "gizmokit",
+        "infinity-team-ops",
+        "medikit",
+        "regular",
+    }:
+        assert excluded_slug not in items
+        assert catalog.get_skill(excluded_slug) is None
+
+    non_hackable = items["non-hackable"]
+    assert non_hackable["name"] == "Non-Hackable"
+    assert non_hackable["category"] == "Special Skills"
+    assert non_hackable["use_count"] == 0
+    detail = catalog.get_skill("non-hackable")
+    assert detail is not None
+    assert detail["categories"] == [
+        {
+            "name": "Automatic",
+            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "page": None,
+        }
+    ]
+    assert [rule["id"] for rule in detail["rules"]] == ["skill:non-hackable"]
+
+
+def test_skill_catalog_without_rules_keeps_army_skill_like_source_rows(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 501, "name": "Bangbomb", "source_defined": True}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    catalog = SkillCatalog(Database(database_path), None)
+
+    assert any(item["slug"] == "bangbomb" for item in catalog.list_skills())
+    assert catalog.get_skill("bangbomb") is not None
+
 
 def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
     tmp_path: Path, normalized: dict
@@ -3340,3 +3560,62 @@ def test_database_materializes_and_exposes_reviewed_embedded_peripheral(
             "quantity": 1,
         }
     ]
+
+
+def test_skill_catalog_keeps_source_specific_rules_on_matching_variant(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].extend(
+        [
+            {"id": 19, "name": "Martial Arts L1", "source_defined": True},
+            {"id": 20, "name": "Martial Arts L2", "source_defined": True},
+            {"id": 21, "name": "Martial Arts L3", "source_defined": True},
+            {"id": 22, "name": "Martial Arts L4", "source_defined": True},
+            {"id": 23, "name": "Martial Arts L5", "source_defined": True},
+        ]
+    )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = 20
+
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+
+    catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
+    detail = catalog.get_skill(20)
+
+    assert detail is not None
+    assert [rule["id"] for rule in detail["rules"]] == ["skill:martial-arts"]
+    variant = next(item for item in detail["variants"] if item["skill_id"] == 20)
+    assert variant["source_variant"] == {"kind": "level", "value": 2}
+    assert [rule["id"] for rule in variant["rules"]] == ["skill:martial-arts-l2"]
+
+    raw_unit = Database(database_path).get_unit(1)
+    assert raw_unit is not None
+    enriched = catalog.enrich_unit(raw_unit)
+    skill = enriched["armies"][0]["profiles"][0]["skills"][0]
+    assert skill["source_variant"] == {"kind": "level", "value": 2}
+
+
+def test_skill_catalog_attaches_common_rule_to_same_named_army_skill(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 24, "name": "Climb", "source_defined": True}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+
+    catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
+    detail = catalog.get_skill(24)
+
+    assert detail is not None
+    assert [rule["id"] for rule in detail["rules"]] == ["skill:climb"]
+    assert next(item for item in catalog.list_skills() if item["id"] == 24)[
+        "category"
+    ] == "Common Skills"

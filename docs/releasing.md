@@ -74,6 +74,11 @@ player-relevant information required by this definition.
 
 - [ ] Confirm the target version and the intended release scope.
 - [ ] Complete the release-specific requirements recorded in `docs/TODO.md`.
+- [ ] For releases with a maintained rules-interaction review target, run the interaction
+  audit with both `--check-output docs/rules-interaction-checklist.md` and
+  `--require-release <version>`, then resolve every pending entity for that release. Deferred
+  candidates explicitly targeting later releases remain tracked and do not block the current
+  release.
 - [ ] Resolve known release-blocking defects. Explicitly defer non-blocking work to
   `docs/TODO.md` rather than leaving its status ambiguous.
 - [ ] Confirm that any schema, compatibility, data-rebuild, deployment, or asset
@@ -146,9 +151,10 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   reproducibility checks required by `docs/TODO.md` or the affected subsystem docs.
 - [ ] Confirm the required hosted workflows are green for the exact release commit.
   `Source checks`, `Deployment smoke test`, and `Installed wheel smoke` provide the
-  normal clean-source/package/deployment evidence; use `Full-asset checks` where the
-  release scope requires that private asset-backed validation. See `docs/ci.md` for
-  the authoritative workflow contract.
+  normal clean-source/package/deployment evidence. Source checks now validate the tracked
+  processed SVG publication with required asset coverage; use `Full-asset checks` when
+  release evidence should also cover the configured checksum-pinned external bundle.
+  See `docs/ci.md` for the authoritative workflow contract.
 - [ ] Confirm the working tree contains only the intentional release-preparation
   changes before creating the release commit.
 
