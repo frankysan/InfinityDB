@@ -56,4 +56,3 @@ image_overrides/**/*
 Thumbs.db
 .tmp.drivedownload/**/*
 .tmp.driveupload/**/*
-**/desktop.ini
