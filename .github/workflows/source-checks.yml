@@ -12,28 +12,32 @@ permissions:
 
 jobs:
   source-checks:
-    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    name: ${{ matrix.os }} / Python ${{ matrix.label }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
             python: "3.11.9"
+            label: "3.11"
             check_args: "--all"
             test_workers: "auto"
             determinism: true
           - os: windows-latest
             python: "3.11.9"
+            label: "3.11"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "0"
             determinism: true
           - os: macos-latest
             python: "3.11.9"
+            label: "3.11"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "auto"
             determinism: true
           - os: ubuntu-latest
             python: "3.14"
+            label: "3.14"
             check_args: "--stage test --stage build --stage rules"
             test_workers: "auto"
             determinism: false

@@ -20,7 +20,7 @@ history retains implementation detail.
 
 ## Current milestone
 
-The current milestone is **0.7.1 — deterministic cross-platform outputs**. Before
+The current milestone is **0.7.2 — UI/presentation cleanup**. Before
 starting the 0.8.0 feature work, generated artifacts and helper archives must be
 byte-identical across Windows, Linux, and macOS for the same inputs, configuration,
 InfinityDB revision, and declared tool versions. This is a correctness/portability
@@ -31,24 +31,6 @@ issue.
 maintenance gate. General performance and storage experiments remain deferred unless
 they become necessary to establish semantic correctness, losslessness, or acceptable
 application behavior.
-
-### 0.7.1 deterministic-output gate
-
-- [ ] Complete the deterministic-output portability release.
-  - [x] Canonicalize persistent generated text/JSON to UTF-8 + LF rather than host
-    newline defaults.
-  - [x] Make validation-report ordering deterministic rather than dependent on Python
-    hash/set iteration order.
-  - [x] Canonicalize Git text bytes in work archives while preserving byte-exact
-    binary assets.
-  - [x] Mark the checksum-bound symbol inventory/browser maps as byte-exact Git
-    release artifacts alongside the published SVG trees.
-  - [x] Add a Windows/Linux/macOS SHA-256 comparison gate covering representative
-    Army/rules databases, JSON outputs, snapshot/work archives, and publication metadata.
-  - [ ] Confirm the hosted cross-platform determinism comparison is green for the
-    release candidate; resolve any remaining archive, SQLite, or external-tool byte drift.
-  - [ ] Add `Cross-platform deterministic outputs` to the hosted `Protect main` required
-    checks after its first successful run establishes the check context.
 
 ### 0.7.2 UI/presentation cleanup
 
@@ -78,6 +60,9 @@ application behavior.
     `Caused by: Unconscious State`; `Cancelled by: Impetuous`; `Cancelled by: Jump`;
     `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
     `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
+  - [ ] Measure the SQLite canonical-finalization cost under pytest-xdist, especially on
+    Linux CI, and avoid repeated `VACUUM` work in tests that do not need byte-level artifact
+    finalization while preserving the release-build determinism guarantee.
 
 ## Release roadmap through 1.0
 
