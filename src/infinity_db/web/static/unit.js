@@ -82,7 +82,7 @@ function attributeStatline(stats, generalStats = null, includeAvailability = fal
     const attributeValue = document.createElement("span");
     attributeValue.className = "attribute-value";
     const value = displayStatlineValue(read(stats));
-    attributeLabel.textContent = label;
+    attributeLabel.textContent = statLabel(label, stats);
     attributeValue.textContent = text(value);
     attribute.append(attributeLabel, attributeValue);
     if (generalStats && differsFromGeneral(stats, generalStats, label)) {
@@ -142,13 +142,21 @@ const statColumns = [
   ["CC", (profile) => profile.cc], ["BS", (profile) => profile.bs],
   ["PH", (profile) => profile.ph], ["WIP", (profile) => profile.wip],
   ["ARM", (profile) => profile.arm], ["BTS", (profile) => profile.bts],
-  ["W", (profile) => profile.vitality], ["S", (profile) => profile.silhouette],
+  ["VITA", (profile) => profile.vitality], ["S", (profile) => profile.silhouette],
 ];
 
 const statProperties = {
   CC: "cc", BS: "bs", PH: "ph", WIP: "wip", ARM: "arm", BTS: "bts",
-  W: "vitality", S: "silhouette",
+  VITA: "vitality", S: "silhouette",
 };
+
+function isStructureProfile(profile) {
+  return profile.is_structure === true || Number(profile.is_structure) === 1;
+}
+
+function statLabel(label, profile) {
+  return label === "VITA" && isStructureProfile(profile) ? "STR" : label;
+}
 
 function mostCommon(profiles, property) {
   const counts = new Map();
@@ -177,6 +185,7 @@ function inches(centimeters) {
 function generalStats(profiles) {
   return {
     move_1: mostCommon(profiles, "move_1"), move_2: mostCommon(profiles, "move_2"),
+    is_structure: mostCommon(profiles, "is_structure"),
     ...Object.fromEntries(Object.values(statProperties).map((property) => [
       property, mostCommon(profiles, property),
     ])),
@@ -199,6 +208,7 @@ function displayAvailability(value) {
 }
 
 function identicalStatline(left, right) {
+  if (isStructureProfile(left) !== isStructureProfile(right)) return false;
   const rightStatline = generalStatline(right);
   return generalStatline(left).every((value, index) => value === rightStatline[index]);
 }
@@ -457,6 +467,9 @@ function visibleGeneralProfiles(rows) {
 function differsFromGeneral(profile, general, label) {
   if (label.startsWith("MOV")) {
     return profile.move_1 !== general.move_1 || profile.move_2 !== general.move_2;
+  }
+  if (label === "VITA" && isStructureProfile(profile) !== isStructureProfile(general)) {
+    return true;
   }
   return profile[statProperties[label]] !== general[statProperties[label]];
 }

@@ -1263,6 +1263,16 @@ def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable
     assert b"attributeStatline(profile, generalStatsForProfile, true)" in body
 
 
+def test_unit_details_frontend_labels_vitality_as_vita_or_str(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'["VITA", (profile) => profile.vitality]' in body
+    assert b'["W", (profile) => profile.vitality]' not in body
+    assert b'profile.is_structure === true || Number(profile.is_structure) === 1' in body
+    assert b'label === "VITA" && isStructureProfile(profile) ? "STR" : label' in body
+    assert b'is_structure: mostCommon(profiles, "is_structure")' in body
+
+
 def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200

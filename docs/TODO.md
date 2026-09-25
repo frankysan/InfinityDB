@@ -43,6 +43,8 @@ application behavior.
     names are not unnecessarily compressed.
   - [x] Present Unit troop-type codes using their long forms in the UI, for example
     `LI` as `Light Infantry`, while preserving the source code in stored/API data.
+  - [x] Label Unit health attributes as `VITA` by default and `STR` for Structure
+    profiles, using the canonical `is_structure` source flag rather than a fixed `W` label.
   - [x] Make Settings collapsible in the sidebar. When no persisted browser preferences
     exist, default distances to inches and enable all optional Unit types; existing saved
     preferences continue to override those defaults.

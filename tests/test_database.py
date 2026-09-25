@@ -1132,6 +1132,18 @@ def test_unit_details_expose_backend_profile_display_name(
         assert profile["profile_identity"] == "trooper"
 
 
+def test_unit_details_expose_profile_structure_flag(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["profiles"][0]["is_structure"] = 1
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    assert details["armies"][0]["profiles"][0]["is_structure"] == 1
+
+
 def test_unit_details_flag_distance_skill_extras(tmp_path: Path, normalized: dict) -> None:
     normalized["tables"]["extras"].append(
         {"id": 2, "name": "+5", "type": "DISTANCE", "source_defined": True}

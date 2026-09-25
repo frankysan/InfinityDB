@@ -237,13 +237,6 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         DOC_DATA_MODEL,
         "Opaque spectables are preserved but require scope/semantic review before presentation.",
     ),
-    ("profiles", "is_structure"): _policy(
-        UNREPRESENTED,
-        SOURCE_FACT,
-        DOC_DATA_MODEL,
-        "Structure/Wounds identity is preserved canonically but the Unit UI currently "
-        "labels vitality as W.",
-    ),
     ("profiles", "notes"): _policy(
         UNREPRESENTED,
         SOURCE_FACT,
@@ -361,16 +354,6 @@ CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
         "reason": (
             "Composite Unit options are used for search/catalog support but their "
             "selectable bundle semantics are not presented."
-        ),
-    },
-    {
-        "id": "structure_vitality_label",
-        "target": "0.9.x",
-        "layer": "canonical_database_only",
-        "tables": ["profile_payloads"],
-        "reason": (
-            "is_structure is preserved but the Unit UI labels the vitality column "
-            "W for every profile."
         ),
     },
 )

@@ -12,8 +12,9 @@ Entries describe meaningful release outcomes rather than detailed implementation
   of scope, with the current Gunicorn access log tracked for replacement.
 - Improve 0.7.2 presentation defaults and consistency: Settings is collapsible on the
   desktop sidebar, first-use preferences default to inches and all optional Unit types,
-  Unit troop-type abbreviations expand to their rules-facing names, and detail metadata is
-  Developer-mode only.
+  Unit troop-type abbreviations expand to their rules-facing names, Unit health attributes
+  use `VITA` or `STR` from canonical profile semantics, and detail metadata is Developer-mode
+  only.
 - Improve catalog and rules presentation with wider Equipment/Weapon/Trait name columns,
   aligned linked characteristic symbols, and deterministic semantic relation ordering.
 

@@ -21,7 +21,7 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
 
     assert report["summary"]["sourceTableCount"] == 70
     assert report["summary"]["sourceFieldCount"] == 441
-    assert report["summary"]["confirmedGapCount"] == 9
+    assert report["summary"]["confirmedGapCount"] == 8
     assert report["summary"]["reviewQueueCount"] == 2
     assert sum(report["summary"]["fieldStatusCounts"].values()) == 441
     assert report["rawEvidence"]["status"] == "available"
@@ -29,7 +29,7 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
 
     assert _field(report, "profiles", "move_1")["status"] == audit.EXPLICIT
     assert _field(report, "units", "notes")["status"] == audit.UNREPRESENTED
-    assert _field(report, "profiles", "is_structure")["status"] == audit.UNREPRESENTED
+    assert _field(report, "profiles", "is_structure")["status"] == audit.EXPLICIT
     assert (
         _field(report, "metadata_hacking_programs", "position")["status"]
         == audit.EXPLICIT
@@ -48,7 +48,6 @@ def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path)
         "peripheral_controller_links",
         "reinforcement_parentage",
         "selection_dependencies",
-        "structure_vitality_label",
         "unit_notes",
         "unit_options",
     }
