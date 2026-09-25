@@ -133,32 +133,44 @@ function appendRuleRelations(container, rule) {
   container.append(group);
 }
 
-function appendRuleDetails(container, rule) {
+function ruleBadgeRow(rule) {
+  const skillTypes = rule.skill_types || (rule.skill_type ? [rule.skill_type] : []);
+  const declarationCategories = rule.declaration_categories || [];
+  const categories = [];
+  const seenCategories = new Set();
+  for (const category of [...skillTypes, ...declarationCategories]) {
+    const key = category?.id || category?.category_name || category?.name;
+    if (!key || seenCategories.has(key)) continue;
+    seenCategories.add(key);
+    categories.push(category);
+  }
+  const labels = (rule.labels || []).map((label) => label.name);
+  if (!categories.length && !labels.length) return null;
+
+  const badgeRow = document.createElement("p");
+  badgeRow.className = "detail-badges";
+  for (const category of categories) {
+    badgeRow.append(
+      skillCategoryBadge(category, category.category_name || category.name)
+    );
+  }
+  for (const label of labels) {
+    const element = document.createElement("span");
+    element.className = "badge";
+    element.textContent = label;
+    badgeRow.append(element);
+  }
+  return badgeRow;
+}
+
+function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
   const summary = document.createElement("p");
   summary.className = "detail-copy";
   summary.textContent = rule.summary;
   container.append(summary);
 
-  const skillTypes = rule.skill_types || (rule.skill_type ? [rule.skill_type] : []);
-  const labels = (rule.labels || []).map((label) => label.name);
-  if (skillTypes.length || labels.length) {
-    const badgeRow = document.createElement("p");
-    badgeRow.className = "detail-badges";
-    for (const skillType of skillTypes) {
-      if (skillType?.category_name || skillType?.name) {
-        badgeRow.append(
-          skillCategoryBadge(skillType, skillType.category_name || skillType.name)
-        );
-      }
-    }
-    for (const label of labels) {
-      const element = document.createElement("span");
-      element.className = "badge";
-      element.textContent = label;
-      badgeRow.append(element);
-    }
-    container.append(badgeRow);
-  }
+  const badgeRow = includeBadges ? ruleBadgeRow(rule) : null;
+  if (badgeRow) container.append(badgeRow);
 
   const facts = rule.facts || {};
   for (const [key, label] of [
@@ -215,10 +227,15 @@ export function rulesReferenceSection(rules, headingText = "Rules reference") {
   for (const rule of rules) {
     const article = document.createElement("article");
     article.className = "detail-section";
+    const header = document.createElement("header");
+    header.className = "rules-card-header";
     const title = document.createElement("h3");
     title.textContent = rule.name;
-    article.append(title);
-    appendRuleDetails(article, rule);
+    header.append(title);
+    const badgeRow = ruleBadgeRow(rule);
+    if (badgeRow) header.append(badgeRow);
+    article.append(header);
+    appendRuleDetails(article, rule, { includeBadges: false });
 
     for (const supplement of rule.supplements || []) {
       const supplemental = document.createElement("div");

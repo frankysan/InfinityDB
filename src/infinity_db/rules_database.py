@@ -13,6 +13,11 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.rule_relations import relation_presentation
+from infinity_db.sqlite_determinism import (
+    configure_deterministic_sqlite,
+    normalize_sqlite_header,
+    vacuum_deterministic_sqlite,
+)
 
 RULES_APPLICATION_ID = 0x49445231
 RULES_SCHEMA_VERSION = 7
@@ -421,6 +426,7 @@ def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Pa
     try:
         connection = sqlite3.connect(temporary)
         try:
+            configure_deterministic_sqlite(connection)
             connection.execute("PRAGMA foreign_keys = ON")
             with connection:
                 _create_schema(connection)
@@ -438,8 +444,10 @@ def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Pa
                     [(key, _json_text(value)) for key, value in metadata.items()],
                 )
                 connection.execute("ANALYZE")
+            vacuum_deterministic_sqlite(connection)
         finally:
             connection.close()
+        normalize_sqlite_header(temporary)
         check = sqlite3.connect(temporary)
         try:
             if check.execute("PRAGMA quick_check").fetchone()[0] != "ok":

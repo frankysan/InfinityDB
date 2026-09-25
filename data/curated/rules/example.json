@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 20,
+    "formatVersion": 21,
     "collection": {
         "id": "example",
         "title": "Curated reference example",

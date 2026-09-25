@@ -177,6 +177,13 @@ source checkouts intentionally contain no real raw Army snapshot. This workflow
 is network-hermetic: it does not acquire live data and validates the tracked processed
 Corvus Belli graphical publication directly from the checkout.
 
+For Python 3.11, each operating-system leg also builds a deterministic-output manifest.
+The manifest hashes representative Army and rules databases, normalized JSON/report
+outputs, a metadata-normalized snapshot archive, the work-archive export, and the
+checksum-bound publication metadata. A final Ubuntu job downloads the Windows/Linux/
+macOS manifests and fails if any artifact SHA-256 differs. This is the maintained
+byte-level portability gate; ordinary semantic equality is not sufficient.
+
 The separate configured `Installed wheel smoke` workflow builds a real wheel, installs
 it into a fresh virtual environment, and exercises installed build CLIs plus
 runtime startup from outside the source checkout.

@@ -54,13 +54,30 @@
 9. **Separate stages and responsibilities.** Acquisition, validation,
    normalization, processing, publishing, and deployment should remain
    independently understandable and testable.
-10. **Be deterministic and portable.** Given the same inputs and configuration,
-   the project should produce the same logical result on Windows, Linux, and
-   macOS.
+10. **Be deterministic and portable.** Given the same inputs, configuration,
+   InfinityDB revision, and declared tool versions, persistent generated artifacts
+   must be byte-identical on Windows, Linux, and macOS. Canonical text output uses
+   UTF-8 with LF line endings; archive member ordering/metadata and database/export
+   ordering must likewise be explicit rather than inherited from the host platform.
 
 These principles are the canonical engineering decision criteria for the
 project. `AGENTS.md` contains immediate operational instructions, while
 `docs/AI_CONTEXT.md` records durable invariants and non-obvious decisions.
+
+Cross-platform determinism is enforced as an artifact contract, not only as logical
+equality. Git attributes protect checksum-bound release files from checkout
+rewrites, but generators themselves remain responsible for canonical bytes. Required
+CI builds representative Army/rules databases, JSON reports, snapshot/work archives,
+and publication metadata on all three supported operating systems and compares their
+SHA-256 identities. The cross-platform comparison pins the same exact CPython patch
+version on every runner; floating minor-version selectors are not a valid determinism
+test because they can resolve to different Python/SQLite toolchains by platform.
+Repository-managed text is checked out with LF line endings on every supported platform
+so the compared fixtures are byte-identical inputs. Generated SQLite artifacts likewise use
+explicit page/file settings, are repacked with `VACUUM`, and normalize SQLite's
+transaction-history-only file-change/version-valid-for header counters after the database is
+closed. The normalized counters remain equal so SQLite can still trust the in-header database
+size; schema/user/application version fields and database contents are not rewritten.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in
@@ -333,7 +350,7 @@ existing `reveals-state` and `ignores-modifiers-from` edges so Discover, Camoufl
 Camouflaged State, Hidden Deployment State, and Mimetism all expose the reverse
 interaction automatically. Format v13 adds `applies-effects-to` and
 `imposes-modifiers-on`; Reflective and Albedo use those edges toward Marksmanship and
-Multispectral Visor so both affected surfaces receive the reverse interaction. Format v14 adds `overrides-effects-of`; No Cover authors that precedence edge toward Limited Cover so the latter exposes the derived inverse relationship. Format v15 adds `cancels-state`; Doctor and Engineer author recovery edges once and State pages receive the derived inverse navigation. Format v16 adds `causes-state`; Forward Observer authors the Targeted activation edge once, while Targeted itself links the Skills whose rolls or declarations it changes; Disposable (X) also uses it for the item-specific Unloaded State. Format v17 adds `enables-use-of`; reviewed Camouflaged and Hidden Deployment States author that prerequisite edge toward Surprise Attack, and Stealth authors it toward Cautious Movement for the documented ZoC/Hacking Area exception. Both targets receive inverse navigation automatically without treating the edge as sufficient to satisfy all remaining requirements. Format v18 adds `uses-effects-of`; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior, so it does not incorrectly claim to enter that State. Format v19 makes full Skill definitions own ordered declaration categories through `facts.typeIds`. Format v20 adds `modifies-use-of`, `prevents-state-entry`, and `triggered-by-state-entry` so declaration transformations, State-entry prohibitions, and State-entry triggers can be linked without flattening those mechanics into generic enable/negate edges.
+Multispectral Visor so both affected surfaces receive the reverse interaction. Format v14 adds `overrides-effects-of`; No Cover authors that precedence edge toward Limited Cover so the latter exposes the derived inverse relationship. Format v15 adds `cancels-state`; Doctor and Engineer author recovery edges once and State pages receive the derived inverse navigation. Format v16 adds `causes-state`; Forward Observer authors the Targeted activation edge once, while Targeted itself links the Skills whose rolls or declarations it changes; Disposable (X) also uses it for the item-specific Unloaded State. Format v17 adds `enables-use-of`; reviewed Camouflaged and Hidden Deployment States author that prerequisite edge toward Surprise Attack, and Stealth authors it toward Cautious Movement for the documented ZoC/Hacking Area exception. Both targets receive inverse navigation automatically without treating the edge as sufficient to satisfy all remaining requirements. Format v18 adds `uses-effects-of`; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior, so it does not incorrectly claim to enter that State. Format v19 makes full Skill definitions own ordered declaration categories through `facts.typeIds`. Format v20 adds `modifies-use-of`, `prevents-state-entry`, and `triggered-by-state-entry` so declaration transformations, State-entry prohibitions, and State-entry triggers can be linked without flattening those mechanics into generic enable/negate edges. Format v21 adds `equips-with` so a rule can explicitly provide Equipment without implying that the rule itself reuses the Equipment action or effects.
 
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions
@@ -1163,7 +1180,7 @@ application-facing representation of facts researched from PDFs or the wiki.
 by application code; `infinity_db.curated.load_curated_document` validates the
 rules intermediary contract before the rules importer consumes it.
 
-The current curated-v20 rules contract stores collection scope, source metadata,
+The current curated-v21 rules contract stores collection scope, source metadata,
 typed records, maintained vocabularies, Army catalog links, typed related-rule edges,
 explicit variant inheritance and exact-source variant semantics, composition role, review
 state, and source-specific citations. PDF sources carry both the local
@@ -1173,7 +1190,7 @@ members, while pinned historical wiki revisions stay URL-backed.
 `vocabularySources` follows the same locator rules.
 
 No collection may silently combine current, historical, FAQ, and season rules.
-Curated-rule files older than format v20 must be migrated before ingestion.
+Curated-rule files older than format v21 must be migrated before ingestion.
 
 ## HTTP API
 
@@ -1181,15 +1198,17 @@ All routes are same-origin and read-only. `GET` returns JSON or a static asset;
 `HEAD` returns the corresponding headers without a body.
 
 HTML is revalidated on each request. API representations have
-snapshot-specific ETags and short shared-cache lifetimes; fingerprinted static
-assets are immutable for a release. Pages compare both the application version
-and snapshot revision with the version endpoint, then reload through a fresh URL
-after a deployment or data refresh.
+snapshot-specific ETags and short shared-cache lifetimes. Static assets use a
+content-derived revision in addition to the semantic application version before
+receiving immutable cache headers, so rebuilding frontend files under an unchanged
+version cannot strand browsers on an older module graph. Pages compare application,
+static, and snapshot revisions with the version endpoint, then reload through a fresh
+URL after a code deployment or data refresh.
 
 ### `GET /api/version`
 
-Returns `{ "version": "<application version>", "snapshot_revision": "..." }`. The
-browser uses it to detect application or imported-snapshot changes.
+Returns `{ "version": "<application version>", "static_revision": "...", "snapshot_revision": "..." }`. The
+browser uses it to detect application, browser-static, or imported-snapshot changes.
 
 ### `GET /api/armies`
 

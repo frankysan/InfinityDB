@@ -5,6 +5,39 @@ Entries describe meaningful release outcomes rather than detailed implementation
 
 ## Unreleased
 
+## [0.7.1] - 2026-09-25
+
+### Changed
+
+- Make generated build/report/archive outputs portable at the byte level across supported
+  operating systems: canonical text uses UTF-8/LF, validation ordering is stable, work
+  archives normalize Git-managed text bytes, and CI compares representative artifact
+  SHA-256 identities across Windows, Linux, and macOS.
+- Canonicalize generated SQLite artifacts after build so database page layout and
+  transaction-history header fields do not vary between supported host platforms.
+- Present declaration-bearing Equipment such as MediKit, GizmoKit, and Deactivator with the
+  same action-card/declaration-category language used for Skills while preserving their
+  canonical Equipment identity.
+
+### Fixed
+
+- Preserve the checksum-bound symbol inventory and browser-map files byte-for-byte in Git
+  so Windows line-ending conversion cannot invalidate a promoted publication manifest.
+- Model Paramedic as explicitly equipping its user with MediKit rather than generically
+  reusing MediKit effects, and keep MediKit/GizmoKit relation targets routed to Equipment.
+- Fingerprint immutable frontend assets by their static content as well as the application
+  version, preventing a late frontend rebuild under the same semantic version from leaving
+  browsers on an obsolete cached module graph.
+
+### Upgrade notes
+
+- Rebuild `rules.db` from the tracked curated rules before deployment. Curated rules format
+  v21 adds the `equips-with` relation used for Paramedic → MediKit; the `rules.db` schema
+  remains version 7 / compatibility revision 8.
+- No Army database schema or compatibility rebuild is required solely for 0.7.1. Existing
+  runtime Army data remains compatible, while newly generated artifacts use the canonical
+  cross-platform output rules.
+
 ## [0.7.0] - 2026-09-25
 
 ### Added

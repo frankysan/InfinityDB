@@ -103,3 +103,21 @@ def test_default_name_marks_dirty_worktree_with_content_fingerprint(tmp_path: Pa
     (root / "tracked.txt").write_text("changed again", encoding="utf-8")
     changed_again = create_work_archive(root)
     assert changed_again.name != dirty.name
+
+
+def test_work_archive_normalizes_git_text_line_endings_but_preserves_binary(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    (root / ".gitattributes").write_text("* text=auto\n*.bin binary\n", encoding="utf-8")
+    (root / "tracked.txt").write_bytes(b"line one\nline two\n")
+    (root / "payload.bin").write_bytes(b"binary\r\npayload")
+    _git(root, "add", ".gitattributes", "tracked.txt", "payload.bin")
+    _git(root, "commit", "-m", "attributes")
+
+    lf_archive = create_work_archive(root, tmp_path / "lf.zip")
+    (root / "tracked.txt").write_bytes(b"line one\r\nline two\r\n")
+    crlf_archive = create_work_archive(root, tmp_path / "crlf.zip")
+
+    assert lf_archive.read_bytes() == crlf_archive.read_bytes()
+    with zipfile.ZipFile(crlf_archive) as archive:
+        assert archive.read("tracked.txt") == b"line one\nline two\n"
+        assert archive.read("payload.bin") == b"binary\r\npayload"

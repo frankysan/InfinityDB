@@ -684,6 +684,7 @@ def main(argv: list[str] | None = None) -> int:
         args.output.write_text(
             json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
             encoding="utf-8",
+            newline="\n",
         )
         print(f"Report: {args.output}")
     return 0

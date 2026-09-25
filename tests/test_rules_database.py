@@ -1184,14 +1184,31 @@ def test_state_recovery_interactions_are_bidirectional(tmp_path: Path) -> None:
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in states["state:targeted"]["display_relations"]
     }
-    assert ("uses-effects-of", "outbound", "MediKit") in {
+    assert ("equips-with", "outbound", "MediKit") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in paramedic["display_relations"]
     }
-    assert ("uses-effects-of", "inbound", "Paramedic") in {
+    assert ("equips-with", "inbound", "Paramedic") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in medikit["display_relations"]
     }
+    paramedic_medikit = next(
+        relation
+        for relation in paramedic["display_relations"]
+        if relation["type"] == "equips-with"
+    )
+    assert paramedic_medikit["presentation"]["label"] == "Equips with"
+    assert paramedic_medikit["record"]["army_links"] == [
+        {"entity": "equipment", "id": "medikit"}
+    ]
+    tech_recovery_gizmokit = next(
+        relation
+        for relation in tech_recovery["display_relations"]
+        if relation["type"] == "applies-effects-to"
+    )
+    assert tech_recovery_gizmokit["record"]["army_links"] == [
+        {"entity": "equipment", "id": "gizmokit"}
+    ]
     assert ("cancels-state", "outbound", "Targeted State") in {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in tech_recovery["display_relations"]

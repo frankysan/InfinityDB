@@ -20,15 +20,49 @@ history retains implementation detail.
 
 ## Current milestone
 
-The current milestone is **0.8.0 — connected game relationships**. With 0.7.0's
-rules/context enrichment complete, the next work focuses on making already modeled
-structural relationships directly useful to players: Fireteams, Peripheral/Controller
-structure, profile/loadout includes, selection/dependency constraints, Reinforcement
-parentage, and useful cross-army navigation.
+The current milestone is **0.7.2 — UI/presentation cleanup**. Before
+starting the 0.8.0 feature work, generated artifacts and helper archives must be
+byte-identical across Windows, Linux, and macOS for the same inputs, configuration,
+InfinityDB revision, and declared tool versions. This is a correctness/portability
+maintenance release prompted by the 0.7.0 checksum-bound publication deployment
+issue.
 
-General performance and storage experiments remain deferred unless they become
-necessary to establish semantic correctness, losslessness, or acceptable
-application behavior during this work.
+0.8.0 — connected game relationships remains the next feature milestone after this
+maintenance gate. General performance and storage experiments remain deferred unless
+they become necessary to establish semantic correctness, losslessness, or acceptable
+application behavior.
+
+### 0.7.2 UI/presentation cleanup
+
+- [ ] Complete a focused UI/presentation maintenance pass after 0.7.1.
+  - [ ] Align Cube/Cube 2.0 characteristic symbols with the order-symbol row so the
+    symbols share a consistent baseline and spacing.
+  - [ ] Remove the remaining inline-script dependency that violates the current CSP;
+    keep the restrictive same-origin policy rather than adding `unsafe-inline`, a nonce,
+    or a fixed hash unless a concrete requirement makes that necessary. Add regression
+    coverage for the affected page shell/static loading path.
+  - [ ] Widen the Name column for Equipment, Weapons, and Traits so ordinary catalog
+    names are not unnecessarily compressed.
+  - [ ] Present Unit troop-type codes using their long forms in the UI, for example
+    `LI` as `Light Infantry`, while preserving the source code in stored/API data.
+  - [ ] Make Settings collapsible in the sidebar. When no persisted browser preferences
+    exist, default distances to inches and enable all optional Unit types; existing saved
+    preferences continue to override those defaults.
+  - [ ] Make the entire secondary metadata line beneath detail-page titles Developer-mode
+    only, rather than showing the line normally and hiding only its optional IDs.
+  - [ ] Raise the smallest UI font sizes and reduce unnecessary size variation across
+    ordinary body, metadata, table, and detail text; keep page titles intentionally
+    distinct.
+  - [ ] Make catalog relation ordering semantic and deterministic: relationships that
+    enable, cause, enter, or otherwise positively establish a condition come first;
+    within the remaining presentation groups sort alphabetically by interaction label,
+    then by related-record name. Preserve the intended result for the reviewed example:
+    `Caused by: Unconscious State`; `Cancelled by: Impetuous`; `Cancelled by: Jump`;
+    `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
+    `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
+  - [ ] Measure the SQLite canonical-finalization cost under pytest-xdist, especially on
+    Linux CI, and avoid repeated `VACUUM` work in tests that do not need byte-level artifact
+    finalization while preserving the release-build determinism guarantee.
 
 ## Release roadmap through 1.0
 

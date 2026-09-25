@@ -544,7 +544,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     report = audit_database(args.database)
     if args.output:
         args.output.write_text(
-            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
         )
     print(FORMAT)
     print(

@@ -31,6 +31,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .deterministic_io import write_json_lf
+
 SOURCE_NAME_RE = re.compile(r"^(?P<id>\d+)-(?P<slug>.+)\.json$", re.IGNORECASE)
 VARIANT_UNIT_FIELDS = frozenset({"profileGroups", "filters"})
 
@@ -258,15 +260,7 @@ def validate_master(master: dict[str, Any], sources: Iterable[SourceDocument]) -
 
 
 def write_json(path: Path, data: Any, compact: bool) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp_path = path.with_suffix(path.suffix + ".tmp")
-    with temp_path.open("w", encoding="utf-8", newline="\n") as handle:
-        if compact:
-            json.dump(data, handle, ensure_ascii=False, separators=(",", ":"))
-        else:
-            json.dump(data, handle, ensure_ascii=False, indent=2)
-            handle.write("\n")
-    temp_path.replace(path)
+    write_json_lf(path, data, compact=compact, atomic=True)
 
 
 def build_parser() -> argparse.ArgumentParser:

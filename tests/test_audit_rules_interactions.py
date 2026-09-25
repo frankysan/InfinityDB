@@ -398,7 +398,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         items["equipment:symbiomate"]["relations"]
     )
     assert set(items["skill:paramedic"]["relations"]) == {
-        ("uses-effects-of", "equipment:medikit")
+        ("equips-with", "equipment:medikit")
     }
     assert set(items["skill:tech-recovery"]["relations"]) == {
         ("applies-effects-to", "equipment:gizmokit"),

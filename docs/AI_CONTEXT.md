@@ -564,13 +564,15 @@ the authoritative English `WIKI-en 20260918-130233.zip` snapshot.
 The wiki downloader is fail-closed for required content, language-scoped, and
 preserves incomplete work for inspection without publishing a snapshot.
 
-The current curated-v20 rules contract includes collection/source metadata,
+The current curated-v21 rules contract includes collection/source metadata,
 maintained `skillTypes` and `labels` vocabularies with source-specific
 `vocabularySources`, typed record contributions, Army links, typed related-record
 edges, composition role, review state, exact-source variant semantics, and citations.
 Curated v20 adds `modifies-use-of`, `prevents-state-entry`, and
 `triggered-by-state-entry` for transformations, State-entry prohibitions, and
 State-entry activation triggers that do not fit the earlier generic relation vocabulary.
+Curated v21 adds `equips-with` for rules such as Paramedic that explicitly provide
+Equipment without collapsing the Equipment-provided action into the Skill domain.
 Older formats must be migrated before ingestion. The
 reserved `rules/example.json` template is excluded from directory ingestion.
 
@@ -640,6 +642,22 @@ compatibility references remain unambiguous JSON integers.
 
 ## Decision log
 
+- 2026-09-25: MediKit and GizmoKit remain canonical Equipment even though each exposes
+  a Short Skill action. Declaration category describes the Equipment-provided action; it
+  does not create duplicate `skill:medikit` / `skill:gizmokit` identities. Paramedic
+  explicitly `equips-with` MediKit; rules that merely modify GizmoKit interactions keep
+  separate relation semantics. Shared action-card presentation may span domains without
+  collapsing those identities.
+- 2026-09-25: Immutable browser-static cache identity is content-derived in addition to
+  semantic application version. Same-version frontend changes must produce a new static
+  token, and `/api/version` exposes that static revision so an already-open browser can
+  reload when application code/assets change without an application-version bump.
+- 2026-09-25: Cross-platform reproducibility is a byte-level artifact invariant, not
+  only logical equivalence. For identical inputs, configuration, InfinityDB revision,
+  and declared tool versions, maintained generators must emit identical persistent
+  bytes on Windows, Linux, and macOS. Canonical text is UTF-8/LF; ordering and archive
+  metadata must be explicit; checksum-bound tracked publication files are byte-exact;
+  required CI compares SHA-256 manifests across all three platforms.
 - 2026-09-24: Corvus Belli granted explicit permission for InfinityDB to use and
   redistribute the requested graphical assets for the project's non-commercial
   scope, including processed SVGs in the public repository and build/deployment

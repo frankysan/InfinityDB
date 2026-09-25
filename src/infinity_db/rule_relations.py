@@ -45,6 +45,11 @@ RULE_RELATION_PRESENTATION: dict[str, dict[str, str] | None] = {
         "outbound": "Enables use of",
         "inbound": "Enabled by",
     },
+    "equips-with": {
+        "group": "creates-enables",
+        "outbound": "Equips with",
+        "inbound": "Provided by",
+    },
     "has-subtype": {
         "group": "creates-enables",
         "outbound": "Includes subtype",

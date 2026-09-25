@@ -191,7 +191,7 @@ def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(
-            json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+            json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
         )
         print(f"Coverage report: {args.output}")
     if validation["status"] != "valid":

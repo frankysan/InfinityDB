@@ -1,4 +1,7 @@
-const logoUrl = "/static/infinitydb-logo.svg";
+const staticVersion = document.documentElement.dataset.staticVersion;
+const logoUrl = staticVersion
+  ? `/static/infinitydb-logo.svg?v=${encodeURIComponent(staticVersion)}`
+  : "/static/infinitydb-logo.svg";
 let logoMarkup;
 
 async function getLogoMarkup() {

@@ -85,13 +85,35 @@ STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
 )
+STATIC_REVISION_FILES = tuple(
+    sorted({filename for filename, _ in ASSETS.values()} | {"symbol-inventory.json"})
+)
+
+
+def _static_asset_revision() -> str:
+    """Fingerprint every cache-immutable browser asset and the symbol inventory."""
+
+    static = files("infinity_db.web").joinpath("static")
+    digest = sha256()
+    for filename in STATIC_REVISION_FILES:
+        digest.update(filename.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(sha256(static.joinpath(filename).read_bytes()).digest())
+    return digest.hexdigest()[:16]
+
+
+STATIC_ASSET_REVISION = _static_asset_revision()
+STATIC_ASSET_VERSION = f"{__version__}-{STATIC_ASSET_REVISION}"
 
 
 def _version_static_urls(document: str) -> str:
-    """Give page assets a new URL for each application release."""
+    """Give page assets a content-derived immutable URL."""
 
     return STATIC_URL.sub(
-        lambda match: f"{match.group(0)[:-1]}?v={__version__}{match.group('quote')}", document
+        lambda match: (
+            f"{match.group(0)[:-1]}?v={STATIC_ASSET_VERSION}{match.group('quote')}"
+        ),
+        document,
     )
 
 
@@ -99,7 +121,7 @@ def _asset_cache_control(query: str) -> str:
     """Cache fingerprinted assets forever and imported modules briefly."""
 
     version = parse_qs(query).get("v")
-    if version == [__version__]:
+    if version == [STATIC_ASSET_VERSION]:
         return "public, max-age=31536000, immutable"
     return "public, max-age=300, stale-while-revalidate=600"
 
@@ -110,7 +132,7 @@ def _version_module_imports(source: str) -> str:
     return MODULE_IMPORT_URL.sub(
         lambda match: (
             f"{match.group('prefix')}{match.group('quote')}"
-            f"{match.group('path')}?v={__version__}{match.group('quote')}"
+            f"{match.group('path')}?v={STATIC_ASSET_VERSION}{match.group('quote')}"
         ),
         source,
     )
@@ -222,12 +244,15 @@ def _page(
         document.replace(
             '<html lang="en">',
             f'<html lang="en" data-app-version="{__version__}" '
+            f'data-static-version="{STATIC_ASSET_VERSION}" '
+            f'data-static-revision="{STATIC_ASSET_REVISION}" '
             f'data-snapshot-revision="{snapshot_revision}">',
         )
         .replace(
             "</head>",
             (
-                f'<script type="module" src="/static/version-check.js?v={__version__}"></script>'
+                '<script type="module" '
+                f'src="/static/version-check.js?v={STATIC_ASSET_VERSION}"></script>'
                 "</head>"
             ),
         )
@@ -393,7 +418,7 @@ class Application:
             filename, content_type = ASSETS[path]
             body = files("infinity_db.web").joinpath("static", filename).read_bytes()
             version = parse_qs(environ.get("QUERY_STRING", "")).get("v")
-            if filename.endswith(".js") and version == [__version__]:
+            if filename.endswith(".js") and version == [STATIC_ASSET_VERSION]:
                 body = _version_module_imports(body.decode("utf-8")).encode("utf-8")
             cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
         elif ARMY_SYMBOL_PATH.fullmatch(path):
@@ -544,7 +569,11 @@ class Application:
                 catalog_tag="Player reference",
             )
         elif path == "/api/version":
-            payload = {"version": __version__, "snapshot_revision": self.snapshot_revision}
+            payload = {
+                "version": __version__,
+                "static_revision": STATIC_ASSET_REVISION,
+                "snapshot_revision": self.snapshot_revision,
+            }
             cache_control = "no-store"
         elif path == "/api/skill-extras":
             cache_control = "public, max-age=300, stale-while-revalidate=600"

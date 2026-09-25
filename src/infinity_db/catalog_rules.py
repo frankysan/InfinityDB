@@ -179,6 +179,12 @@ class CatalogRules:
                 collect_rules(army_ref, None)
 
         records = list(family_rules.values())
+        if entity == "equipment" and categories:
+            slug = result.get("slug")
+            canonical_record_id = f"equipment:{slug}" if isinstance(slug, str) else None
+            for record in records:
+                if record["id"] == canonical_record_id:
+                    record["declaration_categories"] = deepcopy(categories)
         if records:
             result["rules"] = records
         source_variants = self._source_variant_index(entity)

@@ -26,6 +26,7 @@ from infinity_db.database.publication import (
 )
 from infinity_db.rules_database import export_rules_database
 from infinity_db.web import create_app
+from infinity_db.web.app import STATIC_ASSET_REVISION, STATIC_ASSET_VERSION
 
 
 def _refresh_published_content_checksum(path: Path) -> None:
@@ -639,12 +640,14 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
     assert f'data-app-version="{__version__}"'.encode() in body
+    assert f'data-static-version="{STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'data-static-revision="{STATIC_ASSET_REVISION}"'.encode() in body
     assert b'data-snapshot-revision="' in body
-    assert f"/static/version-check.js?v={__version__}".encode() in body
+    assert f"/static/version-check.js?v={STATIC_ASSET_VERSION}".encode() in body
     assets = re.findall(r'(?:src|href)=["\'](/static/[^"\']+)', body.decode())
     assert assets
     for asset in assets:
-        assert asset.endswith(f"?v={__version__}")
+        assert asset.endswith(f"?v={STATIC_ASSET_VERSION}")
         status, headers, body = request(app, asset)
         assert status == 200
         assert body
@@ -681,6 +684,7 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert headers["cache-control"] == "no-store"
     version = json.loads(body)
     assert version["version"] == __version__
+    assert version["static_revision"] == STATIC_ASSET_REVISION
     assert len(version["snapshot_revision"]) == 64
     assert int(version["snapshot_revision"], 16) >= 0
 
@@ -689,8 +693,11 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert b'from "./api.js"' in script
     assert b"getVersion()" in script
     assert b"snapshot_revision: snapshotRevision" in script
+    assert b"static_revision: staticRevision" in script
+    assert b"currentStaticRevision" in script
     assert b"currentSnapshotRevision" in script
     assert b'freshUrl.searchParams.set("app-version", version || currentVersion)' in script
+    assert b'freshUrl.searchParams.set("static-revision", staticRevision)' in script
     assert b'freshUrl.searchParams.set("snapshot-revision", snapshotRevision)' in script
     assert b"window.location.replace(freshUrl)" in script
 
@@ -926,11 +933,13 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
 
     assert status == 200
     assert (
-        f'<script type="module" src="/static/navigation.js?v={__version__}"></script>'.encode()
+        f'<script type="module" '
+        f'src="/static/navigation.js?v={STATIC_ASSET_VERSION}"></script>'.encode()
         in body
     )
     assert (
-        f'<script type="module" src="/static/page-navigation.js?v={__version__}"></script>'.encode()
+        f'<script type="module" '
+        f'src="/static/page-navigation.js?v={STATIC_ASSET_VERSION}"></script>'.encode()
         in body
     )
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
@@ -1046,9 +1055,13 @@ def test_army_symbol_is_served(app: Callable) -> None:
 
 
 def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -> None:
-    status, headers, _ = request(app, f"/static/styles.css?v={__version__}")
+    status, headers, _ = request(app, f"/static/styles.css?v={STATIC_ASSET_VERSION}")
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
+
+    status, headers, _ = request(app, f"/static/styles.css?v={__version__}")
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
 
     status, headers, _ = request(app, "/static/unit-list.js")
     assert status == 200
@@ -1106,16 +1119,16 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
-    status, headers, body = request(app, f"/static/unit.js?v={__version__}")
+    status, headers, body = request(app, f"/static/unit.js?v={STATIC_ASSET_VERSION}")
 
     assert status == 200
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
-    assert f'from "./api.js?v={__version__}"'.encode() in body
-    assert f'from "./preferences.js?v={__version__}"'.encode() in body
+    assert f'from "./api.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
 
-    status, _, body = request(app, f"/static/api.js?v={__version__}")
+    status, _, body = request(app, f"/static/api.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
-    assert f'import("./preferences.js?v={__version__}")'.encode() in body
+    assert f'import("./preferences.js?v={STATIC_ASSET_VERSION}")'.encode() in body
     assert b'cache: "no-store"' in body
 
     status, headers, _ = request(app, "/api/armies")
@@ -2006,11 +2019,17 @@ def test_equipment_api_adds_curated_declaration_category(
     assert payload["categories"] == [
         {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 124}
     ]
+    assert payload["rules"][0]["declaration_categories"] == payload["categories"]
 
     status, _, body = request(rules_app, "/static/catalog-detail.js")
     assert status == 200
     assert b'const categories = (item.categories || [])' in body
     assert 'if (categories) meta.append(` · ${categories}`);'.encode() in body
+
+    status, _, body = request(rules_app, "/static/rules-reference.js")
+    assert status == 200
+    assert b"rule.declaration_categories || []" in body
+    assert b'className = "rules-card-header"' in body
 
 
 def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:
@@ -2179,6 +2198,11 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'detail-fact-heading' in body
     assert b'heading.textContent = "Related rules"' in body
     assert b"const presentation = relation.presentation;" in body
+    assert (
+        b'const catalogs = { skill: "skills", equipment: "equipment", '
+        b'weapon: "weapons" };' in body
+    )
+    assert b"return `/${catalog}/${encodeURIComponent(link.id)}`;" in body
     assert b"presentation?.group_id" in body
     assert b"presentation?.group_label" in body
     assert b"presentation?.group_order" in body
@@ -2203,7 +2227,7 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
     status, _, body = request(app, "/static/rules-reference.js")
     assert status == 200
     assert b'from "./skill-categories.js"' in body
-    assert b'skillCategoryBadge(skillType' in body
+    assert b'skillCategoryBadge(category' in body
 
     status, _, body = request(app, "/static/skill-categories.js")
     assert status == 200

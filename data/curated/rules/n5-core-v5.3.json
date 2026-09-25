@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 20,
+    "formatVersion": 21,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -12637,7 +12637,7 @@
             ],
             "relations": [
                 {
-                    "type": "uses-effects-of",
+                    "type": "equips-with",
                     "recordId": "equipment:medikit"
                 }
             ],
