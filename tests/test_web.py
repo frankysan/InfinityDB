@@ -254,6 +254,60 @@ def app(tmp_path: Path, app_database_template: Path) -> Callable:
     return create_app(database_path)
 
 
+def test_internal_metrics_use_bounded_normalized_route_labels(app: Callable) -> None:
+    status, _, _ = request(
+        app,
+        "/api/units/ranger-prototype",
+        query="search=private-search-term&visitor=private-id",
+    )
+    assert status == 200
+    status, _, _ = request(
+        app,
+        "/api/units/not-a-unit",
+        query="search=another-private-term",
+    )
+    assert status == 404
+
+    status, headers, body = request(app, "/internal/metrics")
+    assert status == 200
+    assert headers["content-type"].startswith("text/plain; version=0.0.4")
+    assert headers["cache-control"] == "no-store"
+    assert (
+        b'infinitydb_http_requests_total{route="/api/units/:id",status_class="2xx"} 1'
+        in body
+    )
+    assert (
+        b'infinitydb_http_requests_total{route="/api/units/:id",status_class="4xx"} 1'
+        in body
+    )
+    assert b'infinitydb_http_request_duration_seconds_bucket{route="/api/units/:id"' in body
+    assert b'infinitydb_http_response_size_bytes_bucket{route="/api/units/:id"' in body
+    assert b"ranger-prototype" not in body
+    assert b"not-a-unit" not in body
+    assert b"private-search-term" not in body
+    assert b"private-id" not in body
+    assert b"another-private-term" not in body
+
+
+def test_internal_health_and_metrics_do_not_instrument_themselves(app: Callable) -> None:
+    status, _, before = request(app, "/internal/metrics")
+    assert status == 200
+
+    status, headers, body = request(app, "/internal/health")
+    assert status == 200
+    assert headers["cache-control"] == "no-store"
+    assert body == b"ok\n"
+
+    status, headers, body = request(app, "/internal/metrics", method="POST")
+    assert status == 405
+    assert headers["allow"] == "GET, HEAD"
+    assert body == b"method not allowed\n"
+
+    status, _, after = request(app, "/internal/metrics")
+    assert status == 200
+    assert after == before
+
+
 def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
     assert status == 200

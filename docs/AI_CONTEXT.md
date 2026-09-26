@@ -657,8 +657,10 @@ compatibility references remain unambiguous JSON integers.
 ## Decision log
 
 - 2026-09-25: Production observability must be privacy-preserving and aggregate-first.
-  Normal monitoring may use normalized-route request counts, status/latency/response-size
-  metrics, version identity, and host/container resource measurements, but must not collect
+  Normal monitoring uses a shared fixed-cardinality WSGI request registry exposed only at the
+  Docker-internal `/internal/metrics` endpoint; routine Gunicorn access logging is disabled.
+  Monitoring may use normalized-route request counts, status/latency/response-size metrics,
+  active requests, version identity, and host/container resource measurements, but must not collect
   IP/geolocation, user-agent fingerprints, referrers, cookies/session/preference values,
   query/search terms, persistent visitor IDs, or per-user histories. Raw request logging is
   exceptional, minimized/sanitized, access-restricted, and short-retained.

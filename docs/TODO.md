@@ -34,10 +34,9 @@ application behavior.
 
 ### 0.7.2 UI/presentation cleanup
 
-**Project domains:** Web frontend, Web backend, Data processing, Deployment,
-Project infrastructure
+**Project domains:** Web frontend, Web backend, Deployment
 
-- [ ] Complete a focused UI/presentation maintenance pass after 0.7.1.
+- [x] Complete a focused UI/presentation maintenance pass after 0.7.1.
   - [x] **Web frontend:** Align Cube/Cube 2.0 characteristic symbols with the
     order-symbol row so the symbols share a consistent baseline and spacing.
   - [x] **Web backend + Web frontend:** Keep the browser page shell free of inline-script
@@ -67,10 +66,10 @@ Project infrastructure
     result for the reviewed example: `Caused by: Unconscious State`; `Cancelled by: Impetuous`;
     `Cancelled by: Jump`; `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
     `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
-  - [ ] **Deployment:** Replace the current routine raw Gunicorn access log with
-    privacy-preserving aggregate request instrumentation before expanding production usage
-    monitoring. Preserve operational error diagnostics without creating visitor-identifying
-    telemetry.
+  - [x] **Deployment:** Replace the routine raw Gunicorn access log with shared,
+    privacy-preserving aggregate request instrumentation. The internal metrics surface uses
+    bounded normalized routes and exposes request/status counts, latency/response-size
+    histograms, active requests, and build identity without visitor-identifying telemetry.
 
 ## Release roadmap through 1.0
 
@@ -461,16 +460,16 @@ work against that contract.
     and network utilization; retain Docker restart/OOM events and sanitized Caddy/Gunicorn
     error diagnostics. Alert on sustained CPU saturation, memory pressure or OOM kills,
     low disk space, elevated 5xx responses, and failed health checks.
-  - [ ] Publish aggregate request counters/histograms using normalized bounded route
-    labels: request rate, status class, latency, response size, and active requests. Keep
-    dashboards split between static assets and `/api/` requests where useful.
-  - [ ] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
+  - [x] Publish aggregate request counters/histograms using normalized bounded route
+    labels: request rate, status class, latency, response size, and active requests. Static
+    assets and `/api/` requests remain separately identifiable for future dashboards.
+  - [x] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
     preference values, query/search terms, persistent visitor IDs, unique/returning-user
-    analytics, or per-user navigation histories. Do not place raw URLs or unbounded request
-    values in metric labels.
-  - [ ] Disable or replace the current routine Gunicorn access-log stream. If raw request
-    logging is temporarily required for a concrete incident, minimize/sanitize its fields,
-    restrict access, and define short retention before enabling it.
+    analytics, or per-user navigation histories. Raw URLs and unbounded request values are
+    excluded from metric labels.
+  - [x] Disable the routine Gunicorn access-log stream while retaining stderr error logs.
+    If raw request logging is temporarily required for a concrete incident, minimize/sanitize
+    its fields, restrict access, and define short retention before enabling it.
   - [ ] Define a representative load-test scenario: browse the unit list, search,
     open unit/catalog details, and fetch API endpoints using a current
     production-like SQLite snapshot. Include a warm-cache steady-state run and

@@ -12,6 +12,7 @@ from html import escape
 from http import HTTPStatus
 from importlib.resources import files
 from pathlib import Path
+from time import perf_counter
 from urllib.parse import parse_qs
 
 from infinity_db import __display_version__, __version__
@@ -33,6 +34,7 @@ from infinity_db.unit_slugs import (
     enrich_nested_unit_slugs,
     enrich_unit_items,
 )
+from infinity_db.web.metrics import RequestMetrics
 
 LOGGER = logging.getLogger(__name__)
 ASSETS = {
@@ -81,6 +83,8 @@ WEAPON_PAGE_PATH = re.compile(rf"/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIE
 WEAPON_API_PATH = re.compile(rf"/api/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATE_PAGE_PATH = re.compile(rf"/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATE_API_PATH = re.compile(rf"/api/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+TRAIT_PAGE_PATH = re.compile(rf"/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+TRAIT_API_PATH = re.compile(rf"/api/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
@@ -88,6 +92,62 @@ MODULE_IMPORT_URL = re.compile(
 STATIC_REVISION_FILES = tuple(
     sorted({filename for filename, _ in ASSETS.values()} | {"symbol-inventory.json"})
 )
+
+
+def _metric_route(path: str) -> str:
+    """Normalize one request path to the fixed observability route vocabulary."""
+
+    if path in {
+        "/",
+        "/about",
+        "/units",
+        "/skills",
+        "/equipment",
+        "/weapons",
+        "/traits",
+        "/states",
+        "/skill-extras",
+        "/api/version",
+        "/api/armies",
+        "/api/units",
+        "/api/visible-unit-ids",
+        "/api/skills",
+        "/api/equipment",
+        "/api/weapons",
+        "/api/traits",
+        "/api/states",
+        "/api/skill-extras",
+    }:
+        return path
+    for pattern, normalized in (
+        (UNIT_PAGE_PATH, "/units/:id"),
+        (SKILL_PAGE_PATH, "/skills/:id"),
+        (EQUIPMENT_PAGE_PATH, "/equipment/:id"),
+        (WEAPON_PAGE_PATH, "/weapons/:id"),
+        (TRAIT_PAGE_PATH, "/traits/:id"),
+        (STATE_PAGE_PATH, "/states/:id"),
+        (UNIT_API_PATH, "/api/units/:id"),
+        (SKILL_API_PATH, "/api/skills/:id"),
+        (EQUIPMENT_API_PATH, "/api/equipment/:id"),
+        (WEAPON_API_PATH, "/api/weapons/:id"),
+        (TRAIT_API_PATH, "/api/traits/:id"),
+        (STATE_API_PATH, "/api/states/:id"),
+    ):
+        if pattern.fullmatch(path):
+            return normalized
+    if path in ASSETS:
+        return "/static/:asset"
+    if any(
+        pattern.fullmatch(path)
+        for pattern in (
+            ARMY_SYMBOL_PATH,
+            UNIT_SYMBOL_PATH,
+            ORDER_SYMBOL_PATH,
+            CHARACTERISTIC_SYMBOL_PATH,
+        )
+    ):
+        return "/static/:symbol"
+    return "/other"
 
 
 def _static_asset_revision() -> str:
@@ -372,6 +432,7 @@ class Application:
         self.snapshot_revision = sha256(
             f"{_snapshot_revision(self.database.path)}:{rules_revision}".encode()
         ).hexdigest()
+        self.request_metrics = RequestMetrics()
 
     def _snapshot_etag(self, path: str, query: str) -> str:
         """Return a snapshot validator scoped to one requested representation."""
@@ -380,6 +441,93 @@ class Application:
         return f'"{__version__}-{self.snapshot_revision}-{representation}"'
 
     def __call__(self, environ: dict, start_response):
+        method = environ.get("REQUEST_METHOD", "GET")
+        path = environ.get("PATH_INFO", "/")
+
+        if path in {"/internal/metrics", "/internal/health"} and method not in {"GET", "HEAD"}:
+            body = b"method not allowed\n"
+            start_response(
+                "405 Method Not Allowed",
+                [
+                    ("Content-Type", "text/plain; charset=utf-8"),
+                    ("Content-Length", str(len(body))),
+                    ("Cache-Control", "no-store"),
+                    ("Allow", "GET, HEAD"),
+                    ("X-Content-Type-Options", "nosniff"),
+                ],
+            )
+            return [body]
+
+        if path == "/internal/metrics":
+            body = self.request_metrics.render_prometheus(
+                version=__display_version__, snapshot_revision=self.snapshot_revision
+            )
+            start_response(
+                "200 OK",
+                [
+                    ("Content-Type", "text/plain; version=0.0.4; charset=utf-8"),
+                    ("Content-Length", str(len(body))),
+                    ("Cache-Control", "no-store"),
+                    ("X-Content-Type-Options", "nosniff"),
+                ],
+            )
+            return [] if method == "HEAD" else [body]
+
+        if path == "/internal/health":
+            try:
+                self.database.list_armies()
+                if self.rules_database is not None:
+                    self.state_catalog.list_states()
+            except (OSError, ValueError, sqlite3.Error):
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                body = b"unavailable\n"
+            else:
+                status = HTTPStatus.OK
+                body = b"ok\n"
+            start_response(
+                f"{status.value} {status.phrase}",
+                [
+                    ("Content-Type", "text/plain; charset=utf-8"),
+                    ("Content-Length", str(len(body))),
+                    ("Cache-Control", "no-store"),
+                    ("X-Content-Type-Options", "nosniff"),
+                ],
+            )
+            return [] if method == "HEAD" else [body]
+
+        route = _metric_route(path)
+        started = perf_counter()
+        response_status = HTTPStatus.INTERNAL_SERVER_ERROR.value
+        response_size = 0
+        worker_slot = self.request_metrics.start_request()
+
+        def instrumented_start_response(status: str, headers, exc_info=None):
+            nonlocal response_status, response_size
+            response_status = int(status.split()[0])
+            if method != "HEAD":
+                for name, value in headers:
+                    if name.lower() == "content-length":
+                        response_size = int(value)
+                        break
+            return start_response(status, headers, exc_info)
+
+        try:
+            result = self._serve_request(environ, instrumented_start_response)
+        except BaseException:
+            self.request_metrics.finish_request(
+                worker_slot,
+                route,
+                HTTPStatus.INTERNAL_SERVER_ERROR.value,
+                perf_counter() - started,
+                0,
+            )
+            raise
+        self.request_metrics.finish_request(
+            worker_slot, route, response_status, perf_counter() - started, response_size
+        )
+        return result
+
+    def _serve_request(self, environ: dict, start_response):
         method = environ.get("REQUEST_METHOD", "GET")
         path = environ.get("PATH_INFO", "/")
         extra_headers = []
@@ -530,7 +678,7 @@ class Application:
                 ),
                 catalog_tag="Reference data",
             )
-        elif re.fullmatch(r"/traits/[a-z0-9-]+", path):
+        elif TRAIT_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
             body = _page(
                 "traits-detail.html",
@@ -680,10 +828,10 @@ class Application:
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The reference item is unavailable. Please try again."}
-        elif match := re.fullmatch(r"/api/traits/([a-z0-9-]+)", path):
+        elif match := TRAIT_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
-                payload = self.trait_catalog.get_trait(match.group(1))
+                payload = self.trait_catalog.get_trait(match.group("identifier"))
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Trait not found"}

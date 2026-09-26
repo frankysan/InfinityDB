@@ -14,10 +14,11 @@ New or materially revised entries use the project-domain labels defined in
   by default. On the primary Windows development machine, the 182-test database/rules
   xdist comparison improved from 19.45 seconds to 17.56 seconds wall time (9.7%), with
   all tests passing in both modes.
-- **Deployment:** Define privacy-preserving, aggregate-only production observability as the
-  project policy;
-  visitor-identifying telemetry and long-lived raw access-log analytics are explicitly out
-  of scope, with the current Gunicorn access log tracked for replacement.
+- **Deployment + Web backend:** Replace routine Gunicorn access logging with shared,
+  privacy-preserving aggregate request metrics. Production workers expose bounded normalized
+  route/status counters, latency and response-size histograms, active-request counts, and build
+  identity on a Docker-internal metrics endpoint; Caddy blocks the internal surface publicly,
+  while Gunicorn error logging remains available for operational diagnostics.
 - **Web backend + Web frontend:** Improve 0.7.2 presentation defaults and consistency:
   Settings is collapsible on the
   desktop sidebar, first-use preferences default to inches and all optional Unit types,

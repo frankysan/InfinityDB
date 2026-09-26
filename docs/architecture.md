@@ -108,6 +108,14 @@ incident, sanitized where practical, access-restricted, and retained only briefl
 Operational dashboards should derive from aggregate counters/histograms rather than from
 long-lived access-log archives.
 
+The production WSGI app implements this policy with a fixed-cardinality shared request
+registry. Gunicorn preloads the app before forking workers so counters are shared across the
+worker processes; routine Gunicorn access logging is disabled. `/internal/metrics` renders
+Prometheus text from the aggregate registry and `/internal/health` provides an uninstrumented
+health probe. Both are reachable on the app container network only because the public Caddy
+configuration rejects `/internal/*`. No dynamic identifier, raw URL, query value, or request
+header is admitted to the metric label vocabulary.
+
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in
 `tools/` keep their own dedicated regression coverage under `tests/` so their
