@@ -116,11 +116,15 @@ No independent "Includes" catalog is warranted.
 
 The existing 96 Unit selection constraints and 14 profile-group dependency constraints
 are relationship objects whose purpose is to explain how existing choices depend on or
-exclude one another. They need player-facing explanatory rendering, stable endpoint
-links, and provenance, but not an independently browsable catalog.
+exclude one another. Unit detail now renders the reviewed whole-Unit cardinality families with
+stable links to affected Units and renders deterministic same-Unit dependency edges with links
+to the exact profile groups and option-scoped loadouts. Army relation IDs remain developer
+provenance.
 
-0.8.0 must keep the presentation descriptive. InfinityDB should explain the maintained
-constraint without becoming a complete army-list legality engine.
+The presentation stays descriptive rather than becoming a legality engine. Dependency direction
+is normalized, but source selector parameters whose broader list-building meaning is not yet
+normalized are shown with their source field names instead of being reinterpreted. No independent
+selection/dependency catalog is warranted.
 
 ### Reinforcement Sections and parentage: reuse the Army domain
 

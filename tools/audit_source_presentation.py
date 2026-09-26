@@ -130,6 +130,17 @@ _register(
     ),
 )
 _register(
+    ["relations", "relation_units", "relation_dependencies"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Reviewed selection-safe relation families and deterministic same-Unit profile-group "
+        "dependencies are projected into application relationship tables and presented on Unit "
+        "detail surfaces. Selector-ambiguous and reviewed-stale source rows remain intentional "
+        "source context rather than guessed application semantics."
+    ),
+)
+_register(
     ["profile_peripherals", "option_peripherals"],
     EXPLICIT,
     SOURCE_RELATIONSHIP,
@@ -179,9 +190,6 @@ _register(
         "unit_option_weapon_extras",
         "unit_option_characteristics",
         "unit_option_orders",
-        "relations",
-        "relation_units",
-        "relation_dependencies",
     ],
     UNREPRESENTED,
     SOURCE_RELATIONSHIP,
@@ -280,23 +288,17 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         DOC_DATA_MODEL,
         "The API retains the source disabled flag but the Unit UI does not interpret it.",
     ),
+    ("relation_dependencies", "raw"): _policy(
+        REDUNDANT,
+        SOURCE_PROVENANCE,
+        DOC_DATA_MODEL,
+        "Opaque raw dependency residue remains provenance; maintained dependency fields are "
+        "materialized and presented explicitly.",
+    ),
 }
 
 
 CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
-    {
-        "id": "selection_dependencies",
-        "target": "0.8.x",
-        "layer": "repository_api_only",
-        "tables": [
-            "application_unit_constraints",
-            "application_unit_group_dependency_constraints",
-        ],
-        "reason": (
-            "Selection constraints and profile-group dependencies are returned by "
-            "get_unit() but not rendered."
-        ),
-    },
     {
         "id": "reinforcement_parentage",
         "target": "0.8.x",

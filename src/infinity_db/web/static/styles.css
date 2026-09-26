@@ -1250,6 +1250,10 @@ h1>span {
   width: min(760px, 100%);
 }
 
+.selection-relationships {
+  width: min(760px, 100%);
+}
+
 .connected-unit-surface {
   padding: 14px 16px;
 }
@@ -1270,6 +1274,21 @@ h1>span {
 
 .connected-unit-context {
   color: var(--color-text-secondary);
+}
+
+.selection-relationship-intro,
+.selection-relationship-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.selection-source-parameters {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.unit-detail [id^="profile-group-"] {
+  scroll-margin-top: 20px;
 }
 
 .usage-section-group table.data-table--compact {

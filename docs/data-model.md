@@ -1731,9 +1731,8 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The maintained inventory now records **5 confirmed gap families** for later roadmap work:
+The maintained inventory now records **4 confirmed gap families** for later roadmap work:
 
-- selection constraints and profile-group dependencies;
 - Reinforcement Section parentage;
 - broader source-declared faction membership distinct from concrete Army availability;
 - source-attributed Unit notes;
@@ -1754,8 +1753,9 @@ Peripheral occurrences plus **8** Controller-target edges, **96** Unit selection
 **14** profile-group dependency constraints, **46** Reinforcement-parent links, **2,094**
 declared faction memberships, **30** source-attributed Unit-note occurrences, **18** top-level
 Unit options, and **299** canonical profile payloads marked `is_structure`. Fireteam,
-Peripheral/Controller, and include source facts are no longer open presentation gaps: their
-maintained application relationships are now consumed by player-facing browser/API surfaces.
+Peripheral/Controller, include, and selection/dependency source facts are no longer open
+presentation gaps: their maintained application relationships are now consumed by player-facing
+browser/API surfaces.
 The structured lookup metadata has the application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being
@@ -2079,8 +2079,12 @@ Schema 23 retains them through `application_unit_group_dependency_constraints`,
 source Unit and canonical logical-Unit identity, the resolved profile-group IDs, relation
 cardinality, `perParent`, the dependency's separate source `group` selector, `min`,
 `minDependant`, and validated dependency option IDs. Unit detail reads expose the result as
-`group_dependencies`. The auxiliary source fields are preserved context, not promoted to intrinsic
-logical-Unit properties.
+`group_dependencies`. The browser links each deterministic member/target edge to its rendered
+profile-group context and, when an explicit dependency option subset exists, to those exact
+loadouts. Relation/member/dependency cardinality and selector fields that lack broader normalized
+semantics remain labeled source parameters rather than being translated into list-legality rules.
+The auxiliary source fields are preserved context, not promoted to intrinsic logical-Unit
+properties.
 
 The other eight cross-Unit selector-bearing relations remain source/context data by design. Seven
 repeat the Traktor Mul / Dozer / Kuryer grouping across Army contexts, but their `profile` values do

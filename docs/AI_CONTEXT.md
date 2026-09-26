@@ -1247,9 +1247,9 @@ compatibility references remain unambiguous JSON integers.
   MetaChemistry reference data. Schema 24 / compatibility revision 32 closed the
   structured-reference gap in 0.7.0, and 0.7.2 closed the Structure/VITA-versus-STR
   presentation gap. The first 0.8 Fireteam browser closes the Fireteam source-presentation
-  family; the subsequent Unit-detail work closes Peripheral/Controller and include presentation,
-  so the maintained inventory now reports 5 open families. The remaining gaps belong to
-  0.8.x/0.9.x work rather than Milestone 2B.
+  family; the subsequent Unit-detail work closes Peripheral/Controller, include, and reviewed
+  selection/dependency presentation, so the maintained inventory now reports 4 open families.
+  The remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
@@ -1269,6 +1269,12 @@ compatibility references remain unambiguous JSON integers.
   Unit-option bundle semantics, which remain a later completeness item.
 - The runtime-surface audit now classifies all three derived include tables as intentional
   contextual application dependencies; raw include tables remain outside normal serving.
+- Unit detail presents all 96 reviewed whole-Unit selection constraints with Army context and
+  stable Unit links, plus the 14 deterministic same-Unit profile-group dependencies with direct
+  profile-group/loadout anchors. Whole-Unit cardinality families are rendered semantically;
+  dependency direction is rendered directly, while still-opaque source selectors such as
+  `perParent`, dependency `group`, `min`, and `minDependant` remain visibly labeled source
+  parameters instead of being promoted into a general Army-list legality model.
 
 ## 0.8.0 Fireteam application projection (2026-09-26)
 

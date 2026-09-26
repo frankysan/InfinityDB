@@ -32,6 +32,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web backend + Web frontend:** Present reviewed Unit selection constraints and same-Unit
+  profile-group dependencies on Unit details. Whole-Unit constraints link their affected Units;
+  dependency edges link directly to the relevant profile groups and constrained loadouts while
+  preserving still-opaque Army selector parameters without pretending to validate complete lists.
 - **Web backend + Web frontend:** Present Profile, Loadout, and shared Unit-option include
   relationships on Unit detail surfaces. Included canonical Loadouts retain quantity and Army
   context and link to their rendered Loadout rows, while shared Unit options expose only their

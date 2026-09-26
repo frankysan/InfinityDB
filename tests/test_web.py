@@ -1930,6 +1930,34 @@ def test_unit_details_frontend_presents_include_relationships(app: Callable) -> 
     assert b'section.append(subheading("Included loadouts"));' in unit_js
 
 
+def test_unit_details_frontend_presents_selection_relationships(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+
+    assert status == 200
+    assert b"function renderSelectionRelationships(unit, armies)" in unit_js
+    assert b'heading("Selection relationships")' in unit_js
+    assert b'if (relation.family === "same-logical-cross-context-exclusive")' in unit_js
+    assert b'else if (relation.family === "cross-logical-shared-cardinality")' in unit_js
+    assert b'else if (relation.family === "single-logical-cardinality")' in unit_js
+    assert b"appendUnitLinks(item, members);" in unit_js
+    assert b'profileGroupLink(army, member.group_id)' in unit_js
+    assert b'profileGroupLink(army, target.group_id)' in unit_js
+    assert b"dependencyOptionLinks(army, target)" in unit_js
+    assert b"Source parameters:" in unit_js
+    assert b"InfinityDB does not validate complete Army Lists" in unit_js
+    assert b"profilesHeading.id = groupAnchor" in unit_js
+    assert b"if (!groupAnchored) loadoutsHeading.id = groupAnchor" in unit_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".selection-relationships", {"width": "min(760px, 100%)"})
+    assert_css_rule(
+        styles,
+        ".selection-source-parameters",
+        {"color": "var(--color-text-secondary)", "font-size": "12px"},
+    )
+
+
 def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) -> None:
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200

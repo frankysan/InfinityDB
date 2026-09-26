@@ -21,7 +21,7 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
 
     assert report["summary"]["sourceTableCount"] == 70
     assert report["summary"]["sourceFieldCount"] == 441
-    assert report["summary"]["confirmedGapCount"] == 5
+    assert report["summary"]["confirmedGapCount"] == 4
     assert report["summary"]["reviewQueueCount"] == 2
     assert sum(report["summary"]["fieldStatusCounts"].values()) == 441
     assert report["rawEvidence"]["status"] == "available"
@@ -40,6 +40,9 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
     assert _field(report, "profile_includes", "target_group_id")["status"] == audit.EXPLICIT
     assert _field(report, "option_includes", "target_option_id")["status"] == audit.EXPLICIT
     assert _field(report, "unit_option_includes", "quantity")["status"] == audit.EXPLICIT
+    assert _field(report, "relations", "min_count")["status"] == audit.EXPLICIT
+    assert _field(report, "relation_dependencies", "min_dependant")["status"] == audit.EXPLICIT
+    assert _field(report, "relation_dependencies", "raw")["status"] == audit.REDUNDANT
     assert _field(report, "profile_peripherals", "item_id")["status"] == audit.EXPLICIT
     assert _field(report, "option_peripherals", "item_id")["status"] == audit.EXPLICIT
     assert _field(report, "peripherals", "mercs")["status"] == audit.REDUNDANT
@@ -52,7 +55,6 @@ def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path)
     assert gap_ids == {
         "declared_faction_membership",
         "reinforcement_parentage",
-        "selection_dependencies",
         "unit_notes",
         "unit_options",
     }

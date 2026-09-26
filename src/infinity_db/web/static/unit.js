@@ -655,6 +655,224 @@ function appendPeripheralRows(rows, item, colSpan = null) {
   }
 }
 
+function profileGroupAnchorId(anchorScope, groupId) {
+  return `profile-group-${anchorScope}-${groupId}`;
+}
+
+function profileGroupLabel(army, groupId) {
+  const names = [];
+  const addName = (value) => {
+    if (value && !names.includes(value)) names.push(value);
+  };
+  for (const profile of army?.profiles || []) {
+    if (Number(profile.group_id) === Number(groupId)) {
+      addName(profile.display_name || profile.name);
+    }
+  }
+  if (!names.length) {
+    for (const loadout of army?.loadouts || []) {
+      if (Number(loadout.group_id) === Number(groupId)) addName(loadout.name);
+    }
+  }
+  return names.length ? names.join(" / ") : `Profile group ${groupId}`;
+}
+
+function openRelationshipTarget(link, targetId) {
+  link.addEventListener("click", () => {
+    const target = document.getElementById(targetId);
+    const details = target?.closest("details");
+    if (details) details.open = true;
+  });
+}
+
+function profileGroupLink(army, groupId) {
+  const label = profileGroupLabel(army, groupId);
+  if (!army) return document.createTextNode(label);
+  const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
+  const targetId = profileGroupAnchorId(anchorScope, groupId);
+  const link = document.createElement("a");
+  link.href = `#${targetId}`;
+  link.textContent = label;
+  openRelationshipTarget(link, targetId);
+  return link;
+}
+
+function dependencyOptionLinks(army, target) {
+  const optionIds = new Set((target.options || []).map(Number));
+  if (!army || !optionIds.size) return null;
+  const loadouts = (army.loadouts || []).filter((loadout) => (
+    Number(loadout.group_id) === Number(target.group_id)
+      && optionIds.has(Number(loadout.option_id))
+  ));
+  if (!loadouts.length) return null;
+  const result = document.createDocumentFragment();
+  const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
+  loadouts.forEach((loadout, index) => {
+    if (index) result.append(", ");
+    const payloadId = (loadout.loadout_payload_ids || [])[0];
+    if (payloadId == null) {
+      result.append(document.createTextNode(loadout.name || `Option ${loadout.option_id}`));
+      return;
+    }
+    result.append(includeTargetLink({
+      loadout_payload_id: payloadId,
+      name: loadout.name || `Option ${loadout.option_id}`,
+    }, anchorScope));
+  });
+  return result;
+}
+
+function selectionInstruction(minCount, maxCount) {
+  const minimum = minCount == null ? null : Number(minCount);
+  const maximum = maxCount == null ? null : Number(maxCount);
+  if (minimum != null && maximum != null && minimum === maximum) {
+    return `Select exactly ${minimum}`;
+  }
+  if (minimum != null && maximum != null) return `Select ${minimum}–${maximum}`;
+  if (maximum != null) return `Select at most ${maximum}`;
+  if (minimum != null && minimum > 0) return `Select at least ${minimum}`;
+  return "Selection applies";
+}
+
+function uniqueConstraintMembers(members) {
+  const unique = new Map();
+  for (const member of members || []) {
+    if (!unique.has(member.logical_unit_id)) unique.set(member.logical_unit_id, member);
+  }
+  return [...unique.values()];
+}
+
+function appendUnitLinks(parent, members) {
+  members.forEach((member, index) => {
+    if (index) parent.append(index === members.length - 1 ? " and " : ", ");
+    parent.append(unitLink({
+      id: member.logical_unit_id,
+      slug: member.slug,
+      name: member.name,
+    }));
+  });
+}
+
+function sourceDependencyParameters(relation, member, target) {
+  const values = [];
+  if (relation.min_count != null) values.push(`relation min ${relation.min_count}`);
+  if (relation.max_count != null) values.push(`relation max ${relation.max_count}`);
+  if (member.per_parent != null) values.push(`perParent ${text(member.per_parent)}`);
+  if (target.source_group_selector != null) {
+    values.push(`group selector ${target.source_group_selector}`);
+  }
+  if (target.min_count != null) values.push(`dependency min ${target.min_count}`);
+  if (target.min_dependant != null) values.push(`minDependant ${target.min_dependant}`);
+  return values;
+}
+
+function appendRelationProvenance(item, relation) {
+  const provenance = document.createElement("span");
+  provenance.className = "developer-only";
+  provenance.textContent = ` · Army relation #${relation.relation_id}`;
+  item.append(provenance);
+}
+
+function renderSelectionRelationships(unit, armies) {
+  const visibleArmyIds = new Set(armies.map((army) => Number(army.id)));
+  const constraints = (unit.selection_constraints || []).filter((relation) => (
+    visibleArmyIds.has(Number(relation.army_id))
+  ));
+  const dependencies = (unit.group_dependencies || []).filter((relation) => (
+    visibleArmyIds.has(Number(relation.army_id))
+  ));
+  if (!constraints.length && !dependencies.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "detail-group selection-relationships";
+  const title = heading("Selection relationships");
+  title.className = "detail-section-title detail-section-title--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "explorer connected-unit-surface selection-relationship-surface";
+  const intro = document.createElement("p");
+  intro.className = "selection-relationship-intro";
+  intro.textContent = "These source-defined relationships explain linked choices only; "
+    + "InfinityDB does not validate complete Army Lists.";
+  surface.append(intro);
+
+  if (constraints.length) {
+    surface.append(subheading("Selection constraints"));
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const relation of constraints) {
+      const item = document.createElement("li");
+      const army = armies.find((candidate) => Number(candidate.id) === Number(relation.army_id));
+      const armyName = army?.name || `Army ${relation.army_id}`;
+      const context = document.createElement("strong");
+      context.textContent = `${armyName}: `;
+      item.append(context);
+      const members = uniqueConstraintMembers(relation.members);
+      if (relation.family === "same-logical-cross-context-exclusive") {
+        item.append("Select exactly 1 occurrence of ");
+        appendUnitLinks(item, members);
+        item.append(" across its linked selection contexts.");
+      } else if (relation.family === "cross-logical-shared-cardinality") {
+        item.append(`${selectionInstruction(relation.min_count, relation.max_count)} total from `);
+        appendUnitLinks(item, members);
+        item.append(".");
+      } else if (relation.family === "single-logical-cardinality") {
+        item.append(`${selectionInstruction(relation.min_count, relation.max_count)} of `);
+        appendUnitLinks(item, members);
+        item.append(".");
+      } else {
+        item.append(`${selectionInstruction(relation.min_count, relation.max_count)} across `);
+        appendUnitLinks(item, members);
+        item.append(".");
+      }
+      appendRelationProvenance(item, relation);
+      list.append(item);
+    }
+    surface.append(list);
+  }
+
+  if (dependencies.length) {
+    surface.append(subheading("Profile-group dependencies"));
+    const explanation = document.createElement("p");
+    explanation.className = "selection-relationship-note";
+    explanation.textContent = "Dependency direction is normalized; source selector parameters are shown "
+      + "verbatim where InfinityDB does not yet assign broader list-building semantics.";
+    surface.append(explanation);
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const relation of dependencies) {
+      const army = armies.find((candidate) => Number(candidate.id) === Number(relation.army_id));
+      const armyName = army?.name || `Army ${relation.army_id}`;
+      for (const member of relation.members || []) {
+        for (const target of member.dependencies || []) {
+          const item = document.createElement("li");
+          const context = document.createElement("strong");
+          context.textContent = `${armyName}: `;
+          item.append(context, profileGroupLink(army, member.group_id), " depends on ",
+            profileGroupLink(army, target.group_id));
+          const optionLinks = dependencyOptionLinks(army, target);
+          if (optionLinks) item.append(" for ", optionLinks);
+          item.append(".");
+          const parameters = sourceDependencyParameters(relation, member, target);
+          if (parameters.length) {
+            const sourceParameters = document.createElement("span");
+            sourceParameters.className = "selection-source-parameters";
+            sourceParameters.textContent = ` Source parameters: ${parameters.join(" · ")}.`;
+            item.append(sourceParameters);
+          }
+          appendRelationProvenance(item, relation);
+          list.append(item);
+        }
+      }
+    }
+    surface.append(list);
+  }
+
+  section.append(surface);
+  return section;
+}
+
 function renderPeripheralRelationships(unit) {
   const typeIds = unit.peripheral_type_ids || [];
   const controllers = unit.peripheral_controllers || [];
@@ -859,11 +1077,15 @@ function sharedItemsForProfileGroup(profiles, generalByName) {
 function profileLoadoutGroups(army) {
   const groups = new Map();
   for (const profile of army.profiles) {
-    if (!groups.has(profile.group_id)) groups.set(profile.group_id, { profiles: [], loadouts: [] });
+    if (!groups.has(profile.group_id)) {
+      groups.set(profile.group_id, { id: profile.group_id, profiles: [], loadouts: [] });
+    }
     groups.get(profile.group_id).profiles.push(profile);
   }
   for (const loadout of army.loadouts) {
-    if (!groups.has(loadout.group_id)) groups.set(loadout.group_id, { profiles: [], loadouts: [] });
+    if (!groups.has(loadout.group_id)) {
+      groups.set(loadout.group_id, { id: loadout.group_id, profiles: [], loadouts: [] });
+    }
     groups.get(loadout.group_id).loadouts.push(loadout);
   }
   return [...groups.values()];
@@ -950,9 +1172,13 @@ function renderArmyProfile(army, generalByName, expanded) {
   }
   const anchoredPayloads = new Set();
   for (const group of profileLoadoutGroups(army)) {
+    const groupAnchor = profileGroupAnchorId(anchorScope, group.id);
+    let groupAnchored = false;
     if (group.profiles.length) {
       const profilesHeading = subheading("Profiles");
       profilesHeading.className = "army-profiles-heading";
+      profilesHeading.id = groupAnchor;
+      groupAnchored = true;
       section.append(profilesHeading);
       section.append(table(
         [],
@@ -961,7 +1187,9 @@ function renderArmyProfile(army, generalByName, expanded) {
       ));
     }
     if (group.loadouts.length) {
-      section.append(subheading("Loadouts"));
+      const loadoutsHeading = subheading("Loadouts");
+      if (!groupAnchored) loadoutsHeading.id = groupAnchor;
+      section.append(loadoutsHeading);
       section.append(loadoutTable(
         group.loadouts,
         sharedItemsForProfileGroup(group.profiles, generalByName),
@@ -1040,6 +1268,8 @@ function render(unit) {
   content.append(generalProfilesSection);
   const peripheralRelationships = renderPeripheralRelationships(unit);
   if (peripheralRelationships) content.append(peripheralRelationships);
+  const selectionRelationships = renderSelectionRelationships(unit, armies);
+  if (selectionRelationships) content.append(selectionRelationships);
   let standardArmyExpanded = false;
   for (const group of groupArmiesByFaction(armies)) {
     const section = document.createElement("section");
