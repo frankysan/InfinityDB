@@ -1050,11 +1050,12 @@ compatibility references remain unambiguous JSON integers.
   candidates plus raw relation/dependency adjacency remain review evidence rather than automatic
   Controller mappings.
 
-- 2026-09-22: **Release direction through 1.0.** Milestone 2B shipped in 0.6.3:
+- 2026-09-26: **Release direction through 1.0 rebalanced.** Milestone 2B shipped in 0.6.3:
   canonical relationships, the raw/application split, and the Army completeness
   inventory are validated. 0.7.x adds rules/context to existing data; 0.8.x
-  exposes connected game relationships; 0.9.x closes remaining player-facing gaps and
-  focuses on search/navigation/mobile/accessibility/themes; 1.0.0 is the player-data-
+  exposes connected game relationships; 0.9.x closes remaining application-data gaps and
+  focuses on search/navigation/discoverability; 0.10.x audits the completed application model,
+  finishes frontend/theme architecture, and hardens CI/operations; 1.0.0 is the player-data-
   complete reference gate defined in `docs/releasing.md`. Minor-release scope is directional,
   while the 1.0 acceptance criteria are durable.
 - 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data

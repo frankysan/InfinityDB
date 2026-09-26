@@ -226,8 +226,8 @@ The audit does not expand 0.8.0 into:
 - a redesign of existing Skill/Equipment/Weapon/Trait/State identity.
 
 These boundaries keep the release aligned with the public roadmap: 0.8 connects the data;
-0.9 closes remaining presentation/search gaps; 1.0 completes the maintained player-data
-reference.
+0.9 closes remaining application presentation/search gaps; 0.10 audits and hardens the
+resulting application; 1.0 completes the maintained player-data reference.
 
 ## Source references
 

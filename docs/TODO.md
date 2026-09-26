@@ -1,9 +1,9 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **0.8.0**, **0.9.0**, **1.0.0**, or **post-1.0**. The buckets are
-planning commitments, not a promise that a minor release cannot move a low-risk item
-earlier or defer a non-gating item when evidence changes.
+one release bucket: **0.8.0**, **0.9.0**, **0.10.0**, **1.0.0**, or **post-1.0**.
+The buckets are planning commitments, not a promise that a minor release cannot move a
+low-risk item earlier or defer a non-gating item when evidence changes.
 
 This file does not define current application behavior. Current behavior belongs in
 the relevant reference documentation; lasting design direction belongs in
@@ -34,9 +34,12 @@ post-1.0 unless they become necessary to correct a release-blocking defect.
 
 - **0.8.x — Connect the game structure.** Finish Fireteams and expose the structural
   relationships already present in the canonical application data.
-- **0.9.x — Complete, audit, and polish.** Close remaining player-facing application
-  gaps, run the end-to-end consistency audit, improve search/navigation/filtering,
-  finish the intended frontend/theme architecture, and harden CI/operations.
+- **0.9.x — Complete and make discoverable.** Close remaining player-facing
+  application-data gaps and make the resulting data searchable, navigable, and
+  understandable.
+- **0.10.x — Audit, present, and harden.** Run the end-to-end consistency audit,
+  finish the intended frontend/theme architecture, and harden CI/operations without
+  adding another major game-data domain.
 - **1.0.0 — Player data-complete.** Close the remaining current rules/reference gaps
   and pass the final source-to-storage-to-browser completeness gate. A full ITS
   scenario library, list builder, and other broader product tooling are not part of
@@ -46,7 +49,8 @@ post-1.0 unless they become necessary to correct a release-blocking defect.
   refactors, and performance/storage experiments.
 
 The concise public framing remains: **0.6 built the foundation → 0.7 adds context →
-0.8 connects the data → 0.9 closes the gaps → 1.0 completes the reference.**
+0.8 connects the data → 0.9 closes application gaps → 0.10 hardens and polishes →
+1.0 completes the reference.**
 
 ## 0.8.0 — connected game relationships
 
@@ -60,11 +64,12 @@ No open implementation items remain in the 0.8.0 connected-data milestone. The m
 source-presentation and interaction audits have been rerun; their remaining player-facing gaps
 are explicitly assigned to later release buckets below.
 
-## 0.9.0 — completeness, consistency, and polish
+## 0.9.0 — application completeness and discoverability
 
-0.9.0 is the release-hardening pass: close remaining application presentation gaps,
-audit semantic consistency end to end, improve navigation and discoverability, and
-finish the web/operations work that should be stable before the 1.0 completeness gate.
+0.9.0 closes the remaining application-data presentation gaps and makes the resulting
+data searchable, navigable, and understandable. It should finish the player-facing
+application model without absorbing the separate consistency, visual-architecture, and
+operations hardening work reserved for 0.10.0.
 
 ### Player-facing completeness and navigation
 
@@ -126,6 +131,13 @@ finish the web/operations work that should be stable before the 1.0 completeness
 
 - [ ] Rules-reference cross-links from profiles, loadouts, skills, equipment,
   and traits to their catalog detail pages.
+
+## 0.10.0 — consistency, presentation, and release hardening
+
+0.10.0 is the stabilization pass before 1.0: audit the completed application model end
+to end, finish the frontend/theme architecture, and harden release/operations workflows.
+It should avoid introducing another major game-data domain; correctness fixes discovered
+by the audit remain in scope.
 
 ### End-to-end application consistency
 
@@ -235,10 +247,6 @@ finish the web/operations work that should be stable before the 1.0 completeness
   build step. Promote recurring patterns to shared primitives and preserve the
   established shared shell, navigation, detail, table-density, badge, and Settings
   behavior during the migration.
-
-- [ ] Before retiring or redirecting numeric routes, define and implement the
-  per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
-  compatibility policy documented as future work in `docs/architecture.md`.
 
 ### Release hardening, CI, and operations
 
@@ -424,6 +432,12 @@ it should not introduce a large new product surface.
 
 These items are intentionally outside the 1.0 completeness gate. They may move earlier
 only when required to fix correctness, reproducibility, or release reliability.
+
+### Routing and long-term compatibility
+
+- [ ] Before retiring or redirecting numeric routes, define and implement the
+  per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
+  compatibility policy documented as future work in `docs/architecture.md`.
 
 ### Performance, storage, and build tooling
 
