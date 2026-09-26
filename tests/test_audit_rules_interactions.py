@@ -426,6 +426,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }
 
     expected = render_markdown(report)
+    assert "**Project domain:** Data processing" in expected
     assert "Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**" in expected
     assert "**360º Visor** (`equipment:360o-visor`)" in expected
     actual = DEFAULT_CHECKLIST_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")

@@ -129,10 +129,15 @@ Remove-Item Env:INFINITYDB_TEST_FINALIZE_SQLITE
 python tools/run_checks.py --stage test --test-workers auto tests/test_database.py tests/test_rules_database.py
 ```
 
+On the primary Windows development machine, the 182-test database/rules comparison
+with `--test-workers auto` and xdist `worksteal` measured 19.45 seconds with canonical
+finalization forced and 17.56 seconds with the semantic-test fast path: a 1.89-second,
+9.7% reduction in check-run wall time. Pytest's own reported duration improved from
+19.05 to 17.18 seconds (9.8%). Both runs passed all 182 tests.
+
 Treat these timings as diagnostic evidence, not a pass/fail performance threshold.
-Shared CI runners can vary substantially, so record the platform, Python/SQLite
-versions, worker setting, and both measured durations when closing a performance
-audit.
+Shared CI runners can vary substantially, so future comparisons should record the platform,
+worker setting, and both measured durations.
 
 ## Targeted checks
 

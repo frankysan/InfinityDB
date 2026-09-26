@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Data processing + Project infrastructure:** Reduce repeated SQLite physical-file
+  finalization in export-heavy semantic tests while keeping release/CLI exports canonical
+  by default. On the primary Windows development machine, the 182-test database/rules
+  xdist comparison improved from 19.45 seconds to 17.56 seconds wall time (9.7%), with
+  all tests passing in both modes.
 - **Deployment:** Define privacy-preserving, aggregate-only production observability as the
   project policy;
   visitor-identifying telemetry and long-lived raw access-log analytics are explicitly out
