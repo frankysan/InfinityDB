@@ -24,6 +24,11 @@ model.
 - `README.md` is the user-facing project introduction, setup, and operations
   guide.
 - `docs/TODO.md` is the maintained backlog of unimplemented work.
+- `docs/080-connected-domain-audit.md` records the accepted 0.8.x game-data domain
+  boundary: Fireteams are the new first-class application domain; Hacking Programs may
+  be promoted from their existing structured projection; Peripherals, includes,
+  constraints/dependencies, Reinforcement parentage, and cross-Army membership remain
+  relationships among existing identities.
 - `docs/CHANGELOG.md` records released and unreleased changes.
 
 Before changing a boundary or persistence behavior, read

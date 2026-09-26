@@ -1763,6 +1763,15 @@ Rules-context work belongs to 0.7.x, connected relationship presentation to 0.8.
 remaining presentation/scope cleanup to 0.9.x. The final source-by-source acceptance
 audit in `docs/releasing.md` remains the authoritative 1.0 gate.
 
+The 0.8.0 follow-up audit in `docs/080-connected-domain-audit.md` converts that
+inventory into application-domain decisions. Fireteams require a new canonical
+application projection and first-class surface. Hacking Programs already have a typed
+application projection and may be promoted to a first-class rules/reference surface.
+The other connected-data gap families above remain relationship presentation over
+existing Unit/Army/Profile/Loadout identities rather than new catalogs. The deferred
+rules-interaction ledger is used as a boundary check, not as a mandate to create one
+domain per target type.
+
 ### Army/faction semantic boundary audit
 
 The 0.6.1 army/faction audit treats Infinity Army and InfinityDB as different

@@ -314,6 +314,8 @@ profile definitions, asset modes, reports, and exit codes.
   documentation labels for project work.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
+- [0.8 connected-data domain audit](docs/080-connected-domain-audit.md) — accepted
+  canonical-domain and relationship-surface boundaries for the connected-data milestone.
 - [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
   concrete InfinityDB consumer.
 - [Rules research](docs/rules-research.md) — verified source findings retained for possible

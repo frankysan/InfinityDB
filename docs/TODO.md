@@ -122,18 +122,18 @@ Reinforcement Section parentage, and cross-army relationship discovery. Exact sc
 should be chosen after 0.7.0 so the UI builds on stable canonical/rules semantics
 rather than duplicating source-specific interpretations.
 
-- [ ] **Start 0.8.0 with a rules-data/domain audit.** Review what useful structured
-  data exists in the maintained rules sources but InfinityDB does not yet present.
-  This does not need to inventory every individual rule; it should establish which
-  new canonical domains or browser surfaces are required for the next phase. Include
-  the current unresolved/deferred links and relations, and use the Wiki alongside
-  the maintained rule sources so already-known relationship gaps inform the domain
-  boundaries instead of being rediscovered later.
+The completed 0.8.0 connected-data domain audit is maintained in
+`docs/080-connected-domain-audit.md`. It establishes Fireteams as the one new
+first-class application domain required by the structural milestone, identifies
+Hacking Programs as an existing projection suitable for first-class rules/reference
+promotion, and keeps the remaining relationship families attached to their existing
+Unit/Army/Profile/Loadout identities.
 
-The Milestone 2B completeness inventory currently makes these relationship families
-explicit 0.8.x candidates:
+The Milestone 2B completeness inventory makes these implementation families explicit
+0.8.x work:
 
-- [ ] Add a rule-aware Fireteams feature from the audited source semantics rather
+- [ ] **Data processing + Web backend + Web frontend:** Add a rule-aware Fireteams
+  feature from the audited source semantics rather
   than exposing raw chart rows directly. Present each Army's current Army-data chart
   as authoritative for membership restrictions, min/max requirements, FTO/Wildcard
   notes, and source provenance; pair it with concise general Fireteam rules while
@@ -142,13 +142,22 @@ explicit 0.8.x candidates:
   Reference table, and make historical/community vocabulary such as `Linkable` and
   `pure Fireteam` discoverable as provenance-aware aliases/help rather than current
   N5 terminology.
-- [ ] Present canonical Peripheral attachments and Controller access pools with
+- [ ] **Web backend + Web frontend:** Present canonical Peripheral attachments and
+  Controller access pools with
   navigable links between Controllers and Peripheral targets.
-- [ ] Present profile/loadout/top-level Unit-option include relationships.
-- [ ] Present selection constraints and profile-group dependency relationships in a
+- [ ] **Web backend + Web frontend:** Present profile/loadout/top-level Unit-option
+  include relationships.
+- [ ] **Web backend + Web frontend:** Present selection constraints and profile-group
+  dependency relationships in a
   way that explains the restriction without turning InfinityDB into a legality engine.
-- [ ] Present Reinforcement Section parentage and broader declared faction membership
+- [ ] **Web backend + Web frontend:** Present Reinforcement Section parentage and broader
+  declared faction membership
   as navigable cross-Army relationships distinct from concrete list availability.
+- [ ] **Data processing + Web backend + Web frontend:** Promote the existing structured
+  Hacking Program projection into first-class rules/reference identities and browser
+  navigation, reusing the maintained Device/target/declaration data rather than creating
+  a parallel Program dataset. Connect reviewed Device/Skill/Program relationships as
+  their target semantics become canonical.
 
 0.8.0 should not become an army-list legality engine or live game-state model.
 
@@ -194,8 +203,6 @@ release-hardening pass:
   that do not belong only to the representative source Unit.
 - [ ] Resolve and present the semantics of the 18 current top-level composite
   `unit_options` rather than using their names only for search/catalog support.
-- [ ] Carry profile `is_structure` through the API/browser so vitality is labelled
-  correctly as W or STR instead of always using W.
 - [ ] Review opaque `spectables` and loadout `disabled` / `minis` semantics, then either
   present the in-scope information or document why it is deliberately outside 1.0.
 

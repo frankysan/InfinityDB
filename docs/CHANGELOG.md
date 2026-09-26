@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing:** Complete the 0.8.0 connected-data domain audit: establish
+  Fireteams as the new first-class structural application domain, identify Hacking
+  Programs for promotion from their existing typed projection, and keep Peripherals,
+  includes, selection/dependency constraints, Reinforcement parentage, and cross-Army
+  membership as relationships over existing identities rather than duplicate catalogs.
 - **Deployment:** Add a narrow, loopback-by-default Caddy metrics listener that can be bound to a
   specific trusted LAN interface without publishing the application port or `/internal/*`; persist
   the bind/port in deployment configuration and add a dependency-free workstation CLI that turns

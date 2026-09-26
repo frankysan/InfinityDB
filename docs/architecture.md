@@ -406,6 +406,24 @@ interaction automatically. Format v13 adds `applies-effects-to` and
 `imposes-modifiers-on`; Reflective and Albedo use those edges toward Marksmanship and
 Multispectral Visor so both affected surfaces receive the reverse interaction. Format v14 adds `overrides-effects-of`; No Cover authors that precedence edge toward Limited Cover so the latter exposes the derived inverse relationship. Format v15 adds `cancels-state`; Doctor and Engineer author recovery edges once and State pages receive the derived inverse navigation. Format v16 adds `causes-state`; Forward Observer authors the Targeted activation edge once, while Targeted itself links the Skills whose rolls or declarations it changes; Disposable (X) also uses it for the item-specific Unloaded State. Format v17 adds `enables-use-of`; reviewed Camouflaged and Hidden Deployment States author that prerequisite edge toward Surprise Attack, and Stealth authors it toward Cautious Movement for the documented ZoC/Hacking Area exception. Both targets receive inverse navigation automatically without treating the edge as sufficient to satisfy all remaining requirements. Format v18 adds `uses-effects-of`; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior, so it does not incorrectly claim to enter that State. Format v19 makes full Skill definitions own ordered declaration categories through `facts.typeIds`. Format v20 adds `modifies-use-of`, `prevents-state-entry`, and `triggered-by-state-entry` so declaration transformations, State-entry prohibitions, and State-entry triggers can be linked without flattening those mechanics into generic enable/negate edges. Format v21 adds `equips-with` so a rule can explicitly provide Equipment without implying that the rule itself reuses the Equipment action or effects.
 
+### Design direction: 0.8.0 connected-data domains
+
+The 0.8.0 domain audit is maintained in `docs/080-connected-domain-audit.md`. Its
+accepted boundary is intentionally narrow: Fireteams become a new first-class
+application domain because their Army-local chart identity, composition rules, member
+semantics, FTO/Wildcard context, notes, and Reinforcement interaction cannot be reduced
+to Unit edges. Hacking Programs may be promoted from their existing structured
+application projection to a first-class rules/reference surface without duplicating
+that data.
+
+Peripheral/Controller relationships, profile/loadout/unit-option includes, selection
+constraints, profile-group dependencies, Reinforcement parentage, and broader
+faction/cross-Army membership remain relationships among existing application
+identities and should be presented through those existing surfaces. Generic rules
+concepts, Attributes, Ammunition, and Training may remain supporting link targets unless
+a later completeness audit demonstrates an independent player-facing catalog need.
+A relationship target is not, by itself, justification for a new domain.
+
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions
 directly from `rules.db`, preserving the boundary between static rules identities and any
