@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Acquisition + Web backend + Web frontend:** Move Unit artwork from the detail-page
+  title into the General profile cards and preserve source profile-logo provenance through the
+  Unit API. Extend generated Unit symbol mappings with profile-specific overrides so secondary
+  and Army-contextual artwork resolves to the General profile it belongs to; the current
+  processed publication is now fully browser-addressable at 806/806 SVGs.
 - **Web frontend:** Keep ordinary Fireteam cards compact in non-Developer mode while
   retaining the full-width chart layout when Developer-only columns are visible.
 - **Project infrastructure:** Restructure the implementation backlog into explicit 0.8,

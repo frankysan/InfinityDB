@@ -904,6 +904,11 @@ profile_payload_weapon_extras
 rows. Its composite source key remains `(army_id, unit_id, group_id,
 profile_id)` and references exactly one reusable payload. The source `profiles`
 and nested source tables remain unchanged for provenance and lossless auditing.
+The Unit-detail repository projection carries the non-empty occurrence `logo` values
+forward as an ordered, deduplicated `logo_urls` list on each merged profile. This is a
+presentation projection only: the generated browser symbol map resolves profile-logo
+overrides to published SVGs, while the reusable profile payload and its semantic identity
+remain independent of logo differences.
 
 The nested payload tables use payload-relative ordering rather than copying the
 source `occurrence_id` surrogate into the canonical layer. Extras remain linked
@@ -1602,12 +1607,14 @@ reconstructed from canonical logical-unit fields plus explicit name aliases.
 Top-level `unit_option_*` occurrences stay source-contextual by design.
 
 The current 0.8 Fireteam-serving trace covers **35 serving probes**, **76 tables**, and
-**348 distinct table-field pairs**. The role totals are **146 canonical-application
-fields**, **179 explicit contextual-application fields**, and **23 intentional-source
+**349 distinct table-field pairs**. The role totals are **146 canonical-application
+fields**, **180 explicit contextual-application fields**, and **23 intentional-source
 fields**. The larger contextual total now includes the Army-scoped Fireteam chart/provenance,
 membership, FTO-loadout, and equivalence projections alongside the earlier Peripheral,
 selection-constraint, and group-dependency relationships; it is not a regression to legacy
-payload reads. All **348 / 348 observed fields have no open semantic issue**.
+payload reads. Profile-logo provenance adds one contextual field to the Unit-detail projection; it
+remains presentation context rather than canonical profile identity. All **349 / 349
+observed fields have no open semantic issue**.
 
 The application Army tables provide canonical identity/hierarchy and reviewed source
 mappings, while `application_catalog_items` / `application_catalog_sources` provide

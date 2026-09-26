@@ -1079,7 +1079,13 @@ modules: the HTTP Content Security Policy explicitly restricts scripts to `self`
 page-shell templates must not introduce inline script bodies or event-handler attributes.
 When Corvus Belli graphical symbols are
 published, army and unit symbols are addressed by stable ID-and-slug paths while
-JavaScript maps source identities to those paths. Corvus Belli has explicitly
+JavaScript maps source identities to those paths. The Unit map also records only the
+profile-logo overrides whose published artwork differs from a Unit's primary symbol.
+Unit-detail responses preserve the contextual source profile-logo URLs as `logo_urls`;
+the browser resolves those values through the generated overrides and falls back to the
+Unit's primary mapping, allowing secondary artwork to stay attached to its General
+profile without making logo context part of canonical gameplay identity. The current
+processed publication is fully browser-addressable (806/806 SVGs). Corvus Belli has explicitly
 permitted InfinityDB to redistribute the processed graphical publication in the
 public repository and release/build packages for this non-commercial project. The
 assets remain Corvus Belli property and outside the MIT License. Raw acquisition
@@ -1097,9 +1103,10 @@ Local test execution now separates hermetic and full-asset coverage explicitly.
 symbol inventory before enabling `full_assets` tests; direct pytest excludes
 those tests by default. Publication writes a generated `symbol-inventory.json`
 that binds every published SVG path to its SHA-256. Validation separately derives
-the currently browser-referenced subset from the army/unit maps and static
-endpoints, so intentionally preserved future-use variants remain required parts
-of a complete publication even before the browser consumes them. A detected
+the browser-referenced subset from the army/unit maps and static endpoints. The
+current processed publication is fully browser-addressable (806/806 SVGs); the
+separate subset check remains part of the publication contract so future preserved
+variants cannot weaken full-set validation. A detected
 partial/corrupt local asset tree is an error in `auto`/`required`, while a
 completely absent tree is valid for hermetic testing.
 

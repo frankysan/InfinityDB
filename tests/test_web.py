@@ -1499,6 +1499,29 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b"profileIdentityIgnoredWords" not in body
 
 
+def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
+    app: Callable,
+) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'unitProfileSymbolPath' in unit_js
+    assert b'profile.logo_urls || []' in unit_js
+    assert b'general-profile-symbols' in unit_js
+    assert b'general-profile--with-symbols' in unit_js
+    assert b'unitSymbol(unit.slug || unit.isc || unit.name' not in unit_js
+
+    status, _, symbol_js = request(app, "/static/unit-symbols.js")
+    assert status == 200
+    assert b'unitProfileSymbolSlug' in symbol_js
+    assert b'export function unitProfileSymbolPath' in symbol_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b'.general-profile-symbols' in styles
+    assert b'.general-profile-unit-symbol' in styles
+    assert b'.unit-symbol-detail' not in styles
+
+
 def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200

@@ -1483,8 +1483,31 @@ h1>span {
 }
 
 .unit-detail .general-profile {
+  position: relative;
+  overflow: visible;
   border: 2px solid var(--color-border-strong);
   box-shadow: 0 8px 20px #203b3512;
+}
+
+.general-profile-symbols {
+  position: absolute;
+  z-index: 2;
+  top: -18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.general-profile-unit-symbol {
+  width: 48px;
+  height: 48px;
+  padding: 3px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  background: var(--color-surface-default);
+  box-shadow: 0 5px 12px #203b3520;
 }
 
 .data-label {
@@ -2095,6 +2118,10 @@ table {
   font-weight: 600;
 }
 
+.unit-detail .general-profile--with-symbols .profile-title {
+  padding-right: 138px;
+}
+
 @supports (color: color-mix(in srgb, white, transparent)) {
   .unit-detail .general-profile-group[class*="general-profile-group--faction-"] .general-profile .profile-title {
     background: linear-gradient(90deg, color-mix(in srgb, var(--color-general-profile-primary) 22%, transparent), color-mix(in srgb, var(--color-general-profile-secondary) 11%, transparent) 48%, transparent 78%), var(--color-surface-highlight);
@@ -2406,13 +2433,6 @@ tbody tr:hover {
   height: 24px;
   flex: 0 0 auto;
   object-fit: contain;
-}
-
-.unit-symbol-detail {
-  width: 42px;
-  height: 42px;
-  margin-right: 12px;
-  vertical-align: -6px;
 }
 
 .army-symbol.display-army-symbol {
@@ -3148,12 +3168,6 @@ tbody tr:hover {
     height: 21px;
   }
 
-  .unit-symbol-detail {
-    width: 34px;
-    height: 34px;
-    margin-right: 9px;
-  }
-
   .army-symbol.display-army-symbol {
     width: 25px;
     height: 25px;
@@ -3224,6 +3238,23 @@ tbody tr:hover {
   .unit-detail .general-profile .profile-title {
     padding: 16px 16px 9px;
     font-size: 15px;
+  }
+
+  .unit-detail .general-profile--with-symbols .profile-title {
+    padding-right: 112px;
+  }
+
+  .general-profile-symbols {
+    top: -14px;
+    right: 12px;
+    gap: 4px;
+  }
+
+  .general-profile-unit-symbol {
+    width: 40px;
+    height: 40px;
+    padding: 2px;
+    border-radius: 8px;
   }
 
   .unit-detail .general-profile .profile-title .order-symbol {

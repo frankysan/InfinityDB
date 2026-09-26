@@ -112,7 +112,8 @@ and serves a read-only browser and same-origin HTTP API.
   `run_checks.py --assets off|auto|required` validates the complete generated
   publication inventory (`symbol-inventory.json`, path + SHA-256 for every
   published SVG) before enabling `full_assets`; it separately reports the
-  browser-referenced subset derived from current mappings/endpoints. Direct
+  browser-referenced subset derived from current mappings/endpoints; the current
+  processed publication is fully browser-addressable at 806/806 SVGs. Direct
   pytest is hermetic by default. `auto` may fall back only when the asset tree
   is entirely absent, never when it is partial/corrupt.
   Test stages use pytest-xdist `worksteal` scheduling with `--test-workers auto`
@@ -551,7 +552,11 @@ the generated browser maps into build state. Unit source profile slot
 `unit-symbol-map.js`; distinct later profile slots use deterministic one-based
 `--<group>-<profile>` suffixes. Distinct non-owner-army artwork is namespaced
 with `--army-<army-id>` before any profile suffix, while exact duplicates continue
-to share one canonical published file.
+to share one canonical published file. The same generated map now includes profile-logo
+overrides whenever an authoritative source profile resolves to artwork other than its
+Unit's primary browser symbol. Runtime Unit detail payloads preserve occurrence-level
+profile-logo URLs and use those overrides only for presentation; logo variation remains
+context, not canonical gameplay identity.
 
 The established processing direction is `resvg` for visual duplicate and
 compression validation, persistent `inkscape --shell` workers for text-to-path

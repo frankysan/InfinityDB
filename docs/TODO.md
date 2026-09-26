@@ -56,14 +56,6 @@ directly useful without becoming an Army-list legality engine or live game-state
 
 ### Fireteams and connected application data
 
-- [ ] **Web frontend:** Move Unit symbols out of the Unit-detail title and into the
-  General profile presentation. Place the primary symbol at the top-right of the General
-  profile card, preferably overlapping the card edge without obscuring profile data, and use
-  the same placement model for currently unused secondary Unit symbols. Each secondary symbol
-  must appear on the General profile it is associated with rather than being collected into a
-  title-level symbol row. Keep the layout responsive and accessible, and avoid duplicating the
-  same symbol in both the title and profile presentation.
-
 - [ ] **Web backend + Web frontend:** Present canonical Peripheral attachments and
   Controller access pools with
   navigable links between Controllers and Peripheral targets.

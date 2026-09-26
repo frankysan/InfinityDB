@@ -922,3 +922,43 @@ const unitSymbolSlugs = new Map([
 export function unitSymbolSlug(unitSlug) {
   return unitSymbolSlugs.get(unitSlug);
 }
+
+const unitProfileSymbolSlugs = new Map([
+  ["https://assets.corvusbelli.net/army/img/logo/units/avatar-2-1.svg", "combined-army/500-avatar--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/blur-spec-ops-2-1.svg", "next-wave/1921-blur-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/carlota-kowalsky-tomcats-sergeant-2-1.svg", "nomads/427-carlota-kowalsky-tomcats-sergeant--army-502-2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/chandra-spec-ops-2-1.svg", "aleph/1922-chandra-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/coyotes-recon-and-maneuver-team-2-1.svg", "nomads/1896-coyotes--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/coyotes-recon-and-maneuver-team-3-1.svg", "nomads/1896-coyotes--3-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/gecko-squad-2-1.svg", "nomads/432-gecko-squad--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/gu-feng-spec-ops-2-1.svg", "yu-jing/1914-gu-feng-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/guijia-squadrons-2-1.svg", "yu-jing/133-guijia-squadrons--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/hatail-spec-ops-2-1.svg", "tohaa/1908-hatail-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/husam-spec-ops-2-1.svg", "haqqislam/1916-husam-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/indigo-spec-ops-2-1.svg", "panoceania/1912-indigo-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/intel-spec-ops-2-1.svg", "ariadna/1915-intel-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/intel-spec-ops-usa-version.svg", "ariadna/1915-intel-spec-ops--army-304"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/jazz-billie-2.svg", "nomads/1551-jazz-and-billie-tactical-hacking-team--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/juggernauts-armored-assault-cavalry-2-1.svg", "next-wave/1882-juggernauts-armored-assault-cavalry--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/maghariba-guard-2-1.svg", "haqqislam/309-maghariba-guard--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/nexus-7-spec-ops-2-1.svg", "combined-army/1918-nexus-7-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/o-yoroi-kidobutai-2-1.svg", "jsa/156-o-yoroi-kidobutai--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/rumbler-spec-ops-2-1.svg", "non-aligned-armies/1925-rumbler-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/scarface-and-cordelia-2-1.svg", "unassigned/380-scarface-and-cordelia--army-401-2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/scarface-and-cordelia-3-1.svg", "unassigned/380-scarface-and-cordelia--army-401-3-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/scylla-steel-phalanx-s-nco-2-1.svg", "shock-army-of-acontecimento/721-scylla--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/shasvastii-corax-spec-ops-2-1.svg", "shasvastii/1920-shasvastii-corax-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/shasvastii-seed-soldiers-1-2.svg", "combined-army/512-shasvastii-seed-soldiers--1-2"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/tikbalangs-2-1.svg", "panoceania/33-tikbalangs--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/tomcats-2-1.svg", "nomads/415-tomcats--army-502-2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/treitak-spec-ops-2-1.svg", "combined-army/1919-treitak-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/tyrok-hunters-2-1.svg", "combined-army/1571-tyrok-hunters--army-602-2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/vortex-spec-ops-2-1.svg", "nomads/1917-vortex-spec-ops--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/zeta-unit-2-1.svg", "o-12/1458-zeta-unit--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/zoe-and-p-well-2-1.svg", "nomads/413-zoe-and-p-well--2-1"],
+  ["https://assets.corvusbelli.net/army/img/logo/units/zondnautica-rapid-offensive-unit-3-1.svg", "nomads/1091-zondnautica-rapid-offensive-unit--3-1"],
+]);
+
+export function unitProfileSymbolSlug(profileLogo) {
+  return unitProfileSymbolSlugs.get(profileLogo);
+}

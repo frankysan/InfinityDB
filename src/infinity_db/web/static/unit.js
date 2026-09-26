@@ -1,6 +1,6 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
-import { unitSymbol } from "./unit-symbols.js";
+import { unitProfileSymbolPath } from "./unit-symbols.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
@@ -361,6 +361,33 @@ function profileTitle(profile) {
   return title;
 }
 
+function generalProfileSymbols(profile, unitName) {
+  const paths = new Set();
+  const profileLogos = profile.logoUrls.length ? profile.logoUrls : [null];
+  for (const profileLogo of profileLogos) {
+    const path = unitProfileSymbolPath(profileLogo, unitName);
+    if (path) paths.add(path);
+  }
+  if (!paths.size) return null;
+
+  const symbols = document.createElement("div");
+  symbols.className = "general-profile-symbols";
+  symbols.setAttribute("aria-hidden", "true");
+  for (const path of paths) {
+    const icon = document.createElement("img");
+    icon.className = "unit-symbol general-profile-unit-symbol";
+    icon.src = path;
+    icon.alt = "";
+    icon.width = 48;
+    icon.height = 48;
+    icon.loading = "lazy";
+    icon.decoding = "async";
+    icon.addEventListener("error", () => icon.remove(), { once: true });
+    symbols.append(icon);
+  }
+  return symbols;
+}
+
 function generalProfiles(profiles, loadouts) {
   const byName = new Map();
   for (const profile of profiles) {
@@ -389,6 +416,7 @@ function generalProfiles(profiles, loadouts) {
       classification: mostCommon(matchingProfiles, "classification"),
       occurrenceCount: matchingProfiles.length,
       reinforcement: matchingProfiles.every((profile) => profile.reinforcement),
+      logoUrls: [...new Set(matchingProfiles.flatMap((profile) => profile.logo_urls || []))],
       sharedItems: {
         skills: generalProfileSkills(matchingProfiles, matchingLoadouts),
         equipment: commonProfileItems(matchingProfiles, "equipment"),
@@ -736,8 +764,6 @@ function render(unit) {
   content.replaceChildren();
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
-  const icon = unitSymbol(unit.slug || unit.isc || unit.name, "unit-symbol-detail");
-  name.prepend(icon);
   const displayArmySymbol = armySymbolPath(unit.display_army_id);
   if (displayArmySymbol) {
     const displayIcon = document.createElement("img");
@@ -787,6 +813,13 @@ function render(unit) {
   for (const profile of displayedGeneralProfiles) {
     const generalProfile = document.createElement("section");
     generalProfile.className = "explorer general-profile";
+    const profileSymbols = generalProfileSymbols(
+      profile, unit.slug || unit.isc || unit.name,
+    );
+    if (profileSymbols) {
+      generalProfile.classList.add("general-profile--with-symbols");
+      generalProfile.append(profileSymbols);
+    }
     generalProfile.append(profileTitle(profile), table(
       [],
       generalProfileTableRows([profile]),

@@ -177,3 +177,13 @@ def test_required_mode_requires_complete_published_and_browser_sets(tmp_path: Pa
     assert "published SVGs" in selection.description()
     assert "browser-referenced" in selection.description()
     assert "1 published not yet browser-referenced" in selection.description()
+
+
+def test_tracked_symbol_publication_is_fully_browser_addressable() -> None:
+    static = Path("src/infinity_db/web/static")
+
+    validation = validate_asset_set(static)
+
+    assert validation.complete
+    assert validation.browser_expected_count == validation.expected_count == 806
+    assert validation.unreferenced_published_count == 0

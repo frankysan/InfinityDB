@@ -1234,6 +1234,28 @@ def test_unit_details_expose_backend_profile_display_name(
         assert profile["profile_identity"] == "trooper"
 
 
+def test_unit_details_expose_profile_logo_urls(
+    tmp_path: Path, normalized: dict
+) -> None:
+    expected: dict[int, str] = {}
+    for profile in normalized["tables"]["profiles"]:
+        if profile["unit_id"] != 1:
+            continue
+        logo = f"https://example.invalid/unit-{profile['army_id']}.svg"
+        profile["logo"] = logo
+        expected[profile["army_id"]] = logo
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    assert {
+        army["id"]: army["profiles"][0]["logo_urls"]
+        for army in details["armies"]
+    } == {army_id: [logo] for army_id, logo in expected.items()}
+
+
 def test_unit_details_expose_profile_structure_flag(
     tmp_path: Path, normalized: dict
 ) -> None:

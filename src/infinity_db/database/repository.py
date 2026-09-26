@@ -2487,7 +2487,8 @@ class Database:
                 by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
             profile_rows = connection.execute(
-                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, pp.name, "
+                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
+                "ppo.logo, pp.name, "
                 "t.name AS type, c.name AS classification, pp.move_1, pp.move_2, "
                 "pp.cc, pp.bs, pp.ph, pp.wip, pp.arm, pp.bts, pp.vitality, pp.silhouette, "
                 "pp.is_structure, ppo.ava "
@@ -2513,8 +2514,15 @@ class Database:
                 profile_item = {
                     key: profile[key]
                     for key in profile.keys()
-                    if key not in {"army_id", "unit_id"}
+                    if key
+                    not in {
+                        "army_id",
+                        "unit_id",
+                        "logo",
+                    }
                 }
+                profile_logo = profile["logo"]
+                profile_item["logo_urls"] = [profile_logo] if profile_logo else []
                 profile_item["display_name"] = strip_reinforcement_prefix(
                     profile["name"], identity_config
                 )
@@ -2542,6 +2550,9 @@ class Database:
                     merged_profiles[profile_key] = profile_item
                 else:
                     merge_profile_availability(existing, profile_item)
+                    for profile_logo in profile_item["logo_urls"]:
+                        if profile_logo not in existing["logo_urls"]:
+                            existing["logo_urls"].append(profile_logo)
             for occurrence_table, catalog_table, property_name, extras_table in (
                 (
                     "profile_payload_skills",

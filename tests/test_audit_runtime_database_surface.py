@@ -131,13 +131,13 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert report["summary"] == {
         "surfaceCount": 35,
         "runtimeTableCount": 76,
-        "runtimeFieldCount": 348,
+        "runtimeFieldCount": 349,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 348,
+        "issue:none:fieldCount": 349,
         "role:canonical_application:fieldCount": 146,
-        "role:contextual_application:fieldCount": 179,
+        "role:contextual_application:fieldCount": 180,
         "role:intentional_source_representation:fieldCount": 23,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
@@ -167,6 +167,7 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "logical_units", "display_army_id")["role"] == CONTEXTUAL
     assert _field(report, "logical_units", "name")["role"] == CANONICAL
     assert _field(report, "profile_payloads", "is_structure")["role"] == CANONICAL
+    assert _field(report, "profile_payload_occurrences", "logo")["role"] == CONTEXTUAL
     assert _field(report, "application_armies", "name")["role"] == CANONICAL
     assert _field(report, "application_army_sources", "source_army_id")["role"] == CONTEXTUAL
     assert _field(report, "application_catalog_items", "name")["role"] == CANONICAL
