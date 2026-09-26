@@ -117,6 +117,26 @@ _register(
     ),
 )
 _register(
+    ["application_fireteams"],
+    CANONICAL,
+    reason="Army-scoped Fireteam application identities used by chart browsing.",
+)
+_register(
+    [
+        "application_fireteam_charts",
+        "application_fireteam_chart_limits",
+        "application_fireteam_types",
+        "application_fireteam_members",
+        "application_fireteam_member_loadouts",
+        "application_fireteam_member_equivalence_labels",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Army-scoped Fireteam chart provenance, composition constraints, membership, "
+        "FTO eligibility, and equivalence context used by Fireteam browsing."
+    ),
+)
+_register(
     [
         "application_hacking_program_devices",
         "application_hacking_program_targets",
@@ -134,6 +154,18 @@ _register(
     reason=(
         "Reviewed canonical Peripheral application identity used by normal Unit-detail "
         "serving."
+    ),
+)
+_register(
+    [
+        "profile_occurrence_includes",
+        "loadout_occurrence_includes",
+        "unit_option_include_targets",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Canonical include targets retain exact Profile, Loadout, or shared Unit-option "
+        "parent context while resolving the included Loadout to application payload identity."
     ),
 )
 _register(
@@ -327,6 +359,8 @@ PROBED_DIRECT_METHODS = {
     "application_slug",
     "snapshot_downloaded_on",
     "list_armies",
+    "list_fireteam_armies",
+    "get_fireteam_chart",
     "list_hacking_programs",
     "list_martial_arts_levels",
     "list_metachemistry_results",
@@ -453,6 +487,11 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     return [
         ("snapshot-metadata", lambda db: db.snapshot_downloaded_on()),
         ("armies", lambda db: db.list_armies()),
+        ("fireteam-armies", lambda db: db.list_fireteam_armies()),
+        (
+            "fireteam-chart",
+            lambda db: db.get_fireteam_chart(int(playable["id"])),
+        ),
         ("hacking-programs", lambda db: db.list_hacking_programs()),
         ("martial-arts-reference", lambda db: db.list_martial_arts_levels()),
         ("metachemistry-reference", lambda db: db.list_metachemistry_results()),

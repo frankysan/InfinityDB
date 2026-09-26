@@ -75,17 +75,18 @@ The current direction is deliberately incremental:
 - **0.8.x — Connect the game:** expose first-class relationships such as Fireteams,
   Peripherals/Controllers, linked profiles/includes, selection/dependency constraints,
   Reinforcement parentage, and useful cross-army navigation.
-- **0.9.x — Complete & polish:** close the remaining player-data/presentation gaps and
-  improve search, navigation, mobile behavior, accessibility, and theming on the way
-  to the final completeness audit.
+- **0.9.x — Complete & discover:** close the remaining application-data presentation
+  gaps and make the result searchable, navigable, and understandable.
+- **0.10.x — Stabilize & harden:** audit the completed application model end to end,
+  finish the frontend/theme architecture, and harden release and operations workflows.
 - **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
   InfinityDB has a maintained representation and a meaningful, usable place in the
   web reference.
 
 In short: **0.6 builds the foundation → 0.7 adds context → 0.8 connects the data →
-0.9 closes the gaps → 1.0 completes the reference.** Exact minor-release scope may
-move as audits discover dependencies; the durable 1.0 gate is defined in
-[release process](docs/releasing.md).
+0.9 closes application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
+Exact minor-release scope may move as audits discover dependencies; the durable 1.0 gate is
+defined in [release process](docs/releasing.md).
 
 ## Requirements and setup
 
@@ -314,6 +315,8 @@ profile definitions, asset modes, reports, and exit codes.
   documentation labels for project work.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
+- [0.8 connected-data domain audit](docs/080-connected-domain-audit.md) — accepted
+  canonical-domain and relationship-surface boundaries for the connected-data milestone.
 - [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
   concrete InfinityDB consumer.
 - [Rules research](docs/rules-research.md) — verified source findings retained for possible

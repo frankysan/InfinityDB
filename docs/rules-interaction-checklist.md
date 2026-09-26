@@ -27,9 +27,9 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **28/28** complete, **0** pending.
-- Current authored outgoing relations: **255**.
-- Explicitly tracked future/deferred interactions: **132**.
+- Supporting semantic identities: **42/42** complete, **0** pending.
+- Current authored outgoing relations: **262**.
+- Explicitly tracked future/deferred interactions: **115**.
 
 ## 0.7.0 primary catalog review
 
@@ -430,36 +430,20 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Transmutation (`skill:transmutation`)
 - [x] **EVO Hacking Device** (`equipment:evo-hacking-device`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:assisted-fire` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:controlled-jump` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:enhanced-reaction` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:fairy-dust` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
 - [x] **FastPanda** (`equipment:fastpanda`) — reviewed
   - `uses-effects-of` → Repeater (`equipment:repeater`)
 - [x] **GizmoKit** (`equipment:gizmokit`) — reviewed
   - `cancels-state` → Unconscious State (`state:unconscious`)
 - [x] **Hacking Device** (`equipment:hacking-device`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:carbonite` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:oblivion` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:spotlight` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:total-control` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
 - [x] **Hacking Device Plus** (`equipment:hacking-device-plus`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:carbonite` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:cybermask` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:oblivion` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:spotlight` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:total-control` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:white-noise` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
 - [x] **Holomask** (`equipment:holomask`) — reviewed
   - `enters-state` → HoloMask State (`state:holomask`)
 - [x] **Holoprojector** (`equipment:holoprojector`) — reviewed
   - `enters-state` → Holoecho State (`state:holoecho`)
 - [x] **Killer Hacking Device** (`equipment:killer-hacking-device`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:cybermask` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-  - future [post-0.7.0; planned]: `enables-use-of` → `hacking-program:trinity` — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
 - [x] **MediKit** (`equipment:medikit`) — reviewed
   - `cancels-state` → Unconscious State (`state:unconscious`)
   - `causes-state` → Dead State (`state:dead`)
@@ -607,7 +591,6 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Possessed State** (`state:possessed`) — reviewed
   - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
-  - future [post-0.7.0; planned]: `relation type TBD` → `hacking-program:total-control` — Total Control can cancel Possessed State for the owning player, but the Hacking Program is not yet a canonical rules identity in the maintained graph.
 - [x] **Prone State** (`state:prone`) — reviewed
   - `cancels-state` → Foxhole State (`state:foxhole`)
   - future [post-0.7.0; planned]: `applies-effects-to` → `rule:movement-label` — Prone halves movement from every Movement-labelled Skill and from failed Guts Rolls; use a generic Movement-label target instead of incomplete Move/Dodge-only edges.
@@ -731,6 +714,45 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
   - `uses-effects-of` → Total Reaction (`skill:total-reaction`)
 
+### 0.8.0
+
+#### Hacking-Program (12/12)
+
+- [x] **Assisted Fire** (`hacking-program:assisted-fire`) — reviewed
+  - outgoing: none
+- [x] **Carbonite** (`hacking-program:carbonite`) — reviewed
+  - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **Controlled Jump** (`hacking-program:controlled-jump`) — reviewed
+  - `modifies-rolls-for` → Combat Jump (`skill:combat-jump`)
+- [x] **Cybermask** (`hacking-program:cybermask`) — reviewed
+  - `enters-state` → Impersonation-2 State (`state:impersonation-2`)
+- [x] **Enhanced Reaction** (`hacking-program:enhanced-reaction`) — reviewed
+  - outgoing: none
+- [x] **Fairy Dust** (`hacking-program:fairy-dust`) — reviewed
+  - outgoing: none
+- [x] **Oblivion** (`hacking-program:oblivion`) — reviewed
+  - `causes-state` → Isolated State (`state:isolated`)
+- [x] **Spotlight** (`hacking-program:spotlight`) — reviewed
+  - `causes-state` → Targeted State (`state:targeted`)
+- [x] **Total Control** (`hacking-program:total-control`) — reviewed
+  - `causes-state` → Possessed State (`state:possessed`)
+  - `cancels-state` → Possessed State (`state:possessed`)
+- [x] **Trinity** (`hacking-program:trinity`) — reviewed
+  - outgoing: none
+- [x] **White Noise** (`hacking-program:white-noise`) — reviewed
+  - outgoing: none
+  - future [post-0.7.0; deferred]: `relation type TBD` → Marksmanship (`skill:marksmanship`) — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Multispectral Visor (`equipment:multispectral-visor`) — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
+- [x] **Zero Pain** (`hacking-program:zero-pain`) — reviewed
+  - outgoing: none
+
+#### Rule (2/2)
+
+- [x] **Fireteam Level and Bonuses** (`rule:fireteam-level-bonuses`) — reviewed
+  - outgoing: none
+- [x] **Fireteams: General Rules** (`rule:fireteam-general`) — reviewed
+  - outgoing: none
+
 ## Future interaction queue
 
 - [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
@@ -739,26 +761,10 @@ review. `declaration-category` projection records are excluded.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
 - [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
-- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:assisted-fire`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:controlled-jump`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:enhanced-reaction`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] EVO Hacking Device (`equipment:evo-hacking-device`) → `hacking-program:fairy-dust`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:carbonite`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:oblivion`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:spotlight`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device (`equipment:hacking-device`) → `hacking-program:total-control`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:carbonite`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:cybermask`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:oblivion`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:spotlight`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:total-control`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Hacking Device Plus (`equipment:hacking-device-plus`) → `hacking-program:white-noise`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Killer Hacking Device (`equipment:killer-hacking-device`) → `hacking-program:cybermask`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
-- [ ] Killer Hacking Device (`equipment:killer-hacking-device`) → `hacking-program:trinity`; `enables-use-of`; **post-0.7.0 / planned** — The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized.
 - [ ] Repeater (`equipment:repeater`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
 - [ ] TinBot: Firewall (`equipment:tinbot-firewall`) → `equipment:firewall`; `uses-effects-of`; **post-0.7.0 / planned** — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
-- [ ] `hacking-program:white-noise` → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
-- [ ] `hacking-program:white-noise` → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first.
+- [ ] White Noise (`hacking-program:white-noise`) → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
+- [ ] White Noise (`hacking-program:white-noise`) → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
 - [ ] `rule:marker-form` → Surprise Attack (`skill:surprise-attack`); `enables-use-of`; **post-0.7.0 / planned** — Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State.
 - [ ] `rule:null-state` → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role.
 - [ ] Booty (`skill:booty`) → `rule:booty-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit.
@@ -851,7 +857,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] Holoecho State (`state:holoecho`) → `rule:roll`; `relation type TBD`; **post-0.7.0 / deferred** — Holoecho State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges.
 - [ ] HoloMask State (`state:holomask`) → `rule:roll`; `relation type TBD`; **post-0.7.0 / deferred** — HoloMask State is canceled by broad declaration and Roll conditions; keep the generic cancellation semantics deferred until declaration/Roll abstractions can represent the rule without incomplete Skill-specific edges.
 - [ ] Isolated State (`state:isolated`) → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
-- [ ] Possessed State (`state:possessed`) → `hacking-program:total-control`; `relation type TBD`; **post-0.7.0 / planned** — Total Control can cancel Possessed State for the owning player, but the Hacking Program is not yet a canonical rules identity in the maintained graph.
 - [ ] Prone State (`state:prone`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Prone halves movement from every Movement-labelled Skill and from failed Guts Rolls; use a generic Movement-label target instead of incomplete Move/Dodge-only edges.
 - [ ] Retreat! State (`state:retreat`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Retreat! State is entered and canceled through the army-level Retreat! situation; retain the distinction until that situation is modeled canonically.
 - [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.

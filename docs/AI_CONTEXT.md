@@ -24,6 +24,11 @@ model.
 - `README.md` is the user-facing project introduction, setup, and operations
   guide.
 - `docs/TODO.md` is the maintained backlog of unimplemented work.
+- `docs/080-connected-domain-audit.md` records the accepted 0.8.x game-data domain
+  boundary: Fireteams are the new first-class application domain; Hacking Programs are
+  promoted from their existing structured projection into a first-class rules/reference surface; Peripherals, includes,
+  constraints/dependencies, Reinforcement parentage, and cross-Army membership remain
+  relationships among existing identities.
 - `docs/CHANGELOG.md` records released and unreleased changes.
 
 Before changing a boundary or persistence behavior, read
@@ -107,7 +112,8 @@ and serves a read-only browser and same-origin HTTP API.
   `run_checks.py --assets off|auto|required` validates the complete generated
   publication inventory (`symbol-inventory.json`, path + SHA-256 for every
   published SVG) before enabling `full_assets`; it separately reports the
-  browser-referenced subset derived from current mappings/endpoints. Direct
+  browser-referenced subset derived from current mappings/endpoints; the current
+  processed publication is fully browser-addressable at 806/806 SVGs. Direct
   pytest is hermetic by default. `auto` may fall back only when the asset tree
   is entirely absent, never when it is partial/corrupt.
   Test stages use pytest-xdist `worksteal` scheduling with `--test-workers auto`
@@ -546,7 +552,11 @@ the generated browser maps into build state. Unit source profile slot
 `unit-symbol-map.js`; distinct later profile slots use deterministic one-based
 `--<group>-<profile>` suffixes. Distinct non-owner-army artwork is namespaced
 with `--army-<army-id>` before any profile suffix, while exact duplicates continue
-to share one canonical published file.
+to share one canonical published file. The same generated map now includes profile-logo
+overrides whenever an authoritative source profile resolves to artwork other than its
+Unit's primary browser symbol. Runtime Unit detail payloads preserve occurrence-level
+profile-logo URLs and use those overrides only for presentation; logo variation remains
+context, not canonical gameplay identity.
 
 The established processing direction is `resvg` for visual duplicate and
 compression validation, persistent `inkscape --shell` workers for text-to-path
@@ -618,8 +628,14 @@ compatibility references remain unambiguous JSON integers.
 - Every browser route uses the shared server-rendered page shell. New static
   page documents retain the navigation/header/footer markers expected by
   `_page()`.
+- Same-origin soft navigation keeps the shared shell mounted and replaces only
+  `main#main`; it must synchronize title/description/body state and keep the parent
+  navigation item active for detail routes. Transient page modules bind fetch and
+  window-listener lifetime to `infinity:beforenavigation` so repeated soft navigation
+  cannot accumulate stale handlers.
 - Shared menus use the inline-sidebar / compact-topbar pattern.
-- User-selected browser settings persist for the current tab/session through
+- User-selected browser settings (distance unit, optional Unit categories, Fireteam Wildcard
+  inclusion, Developer mode, and cache bypass) persist for the current tab/session through
   `sessionStorage`; values loaded from persistent cookies must be mirrored into the session
   store before use. The **Remember settings** consent path additionally mirrors values to
   one-year SameSite cookies for later sessions; turning persistence off removes those
@@ -1040,11 +1056,12 @@ compatibility references remain unambiguous JSON integers.
   candidates plus raw relation/dependency adjacency remain review evidence rather than automatic
   Controller mappings.
 
-- 2026-09-22: **Release direction through 1.0.** Milestone 2B shipped in 0.6.3:
+- 2026-09-26: **Release direction through 1.0 rebalanced.** Milestone 2B shipped in 0.6.3:
   canonical relationships, the raw/application split, and the Army completeness
   inventory are validated. 0.7.x adds rules/context to existing data; 0.8.x
-  exposes connected game relationships; 0.9.x closes remaining player-facing gaps and
-  focuses on search/navigation/mobile/accessibility/themes; 1.0.0 is the player-data-
+  exposes connected game relationships; 0.9.x closes remaining application-data gaps and
+  focuses on search/navigation/discoverability; 0.10.x audits the completed application model,
+  finishes frontend/theme architecture, and hardens CI/operations; 1.0.0 is the player-data-
   complete reference gate defined in `docs/releasing.md`. Minor-release scope is directional,
   while the 1.0 acceptance criteria are durable.
 - 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
@@ -1172,8 +1189,9 @@ compatibility references remain unambiguous JSON integers.
   general rules. Wildcards (52 teams / 51 Armies) have no Fireteam type rows. Bracketed equivalence
   wording appears on 406 member rows (453 references / 146 labels) and must not feed Unit identity.
 - `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this
-  boundary. First-class Fireteam repository/API/browser presentation remains a separate
-  0.8.x connected-data task within the 1.0 completeness program.
+  boundary. The first-class `/api/fireteams` + `/fireteams` Army-chart surface now consumes
+  that canonical projection; general Fireteam rules and generated Level-bonus reference data
+  remain separate 0.8.x follow-up work within the 1.0 completeness program.
 
 ### Milestone 2B normalization-link boundary (2026-09-22)
 
@@ -1233,9 +1251,12 @@ compatibility references remain unambiguous JSON integers.
   Peripheral/Controller links, selection/dependency relationships, Reinforcement parentage,
   declared faction membership, source-attributed Unit notes, top-level composite Unit
   options, Structure/Wounds labeling, and structured Hacking/Martial Arts/Booty/
-  MetaChemistry reference data. Schema 24 / compatibility revision 32 closes the
-  structured-reference gap in 0.7.0, so the maintained inventory now reports 9 open
-  families; the remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
+  MetaChemistry reference data. Schema 24 / compatibility revision 32 closed the
+  structured-reference gap in 0.7.0, and 0.7.2 closed the Structure/VITA-versus-STR
+  presentation gap. The first 0.8 Fireteam browser closes the Fireteam source-presentation
+  family; the subsequent Unit-detail work closes Peripheral/Controller, include, and reviewed
+  selection/dependency presentation, so the maintained inventory now reports 4 open families.
+  The remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
@@ -1243,15 +1264,65 @@ compatibility references remain unambiguous JSON integers.
   in 0.7.0. The next active milestone is 0.8.0 connected game relationships, not further
   canonicalization or expansion of the completed 0.7.0 release gate.
 
+## 0.8.0 connected Unit relationships (2026-09-26)
+
+- Unit detail now presents reviewed Peripheral attachments and Controller access pools in both
+  directions without inventing fixed ownership.
+- Profile, Loadout, and shared Unit-option include relationships are served exclusively from the
+  schema-23 derived relationship tables. Profile/Loadout edges retain occurrence context; shared
+  Unit-option edges are projected per target Army; targets resolve by canonical Loadout payload.
+  Visible merged Loadout rows retain contributing payload IDs only for browser target navigation.
+  This does not make Includes part of payload identity and does not promote the broader top-level
+  Unit-option bundle semantics, which remain a later completeness item.
+- The runtime-surface audit now classifies all three derived include tables as intentional
+  contextual application dependencies; raw include tables remain outside normal serving.
+- Unit detail presents all 96 reviewed whole-Unit selection constraints with Army context and
+  stable Unit links, plus the 14 deterministic same-Unit profile-group dependencies with direct
+  profile-group/loadout anchors. Whole-Unit cardinality families are rendered semantically;
+  dependency direction is rendered directly, while still-opaque source selectors such as
+  `perParent`, dependency `group`, `min`, and `minDependant` remain visibly labeled source
+  parameters instead of being promoted into a general Army-list legality model.
+- Unit/API Army references now expose canonical Reinforcement Section parent/child relationships
+  in both directions. Unit detail keeps those links separate from profile-level concrete Army
+  availability and routes them back to the existing Army-filtered Unit Explorer.
+- Unit detail also exposes broader source-declared faction membership from `unit_factions`. A
+  dedicated `declared_faction_id` Unit Explorer filter follows that relationship independently of
+  `army_id`; source faction IDs with no current Army List remain numeric source identities rather
+  than being promoted into selectable application Armies.
+
+## 0.8.0 Fireteam application projection (2026-09-26)
+
+- Schema 25 / compatibility revision 33 materializes the audited Fireteam source semantics
+  into seven application-owned tables. One preferred Army-list source is selected per
+  application Army; non-selected source aliases remain losslessly in `infinity.raw.db`.
+- The projection preserves selected chart source/provenance, raw and normalized type limits,
+  team/type/member order, observations, min/max/required-choice context, Wildcard identity,
+  logical-Unit resolution, ordered Fireteam-Level equivalence labels, and Army-local FTO
+  eligibility resolved to canonical loadout payload occurrences.
+- Reinforcement parent/type/count context is deliberately not flattened into the Fireteam
+  rows. `application_army_reinforcement_parents` remains the canonical parent graph, so later
+  presentation combines the Section chart with the selected parent's limits without merging
+  Main- and Reinforcement-section member pools or implementing a legality engine.
+- Shared FTO/Wildcard/equivalence parsing now lives in `infinity_db.fireteam_semantics` and is
+  consumed by both the maintained Fireteam audit and the application materializer, preventing
+  audit/runtime semantic drift. `/api/fireteams` and `/fireteams` expose the Army-scoped chart
+  from that projection. `rules.db` separately owns curated `rule:fireteam-general` and
+  `rule:fireteam-level-bonuses` identities; the API composes those optional rules facts with the
+  chart and the browser generates the Level-bonus quick reference, sources, and provenance-aware
+  historical/community terminology from them rather than hard-coding a parallel rules table.
+
 ## 0.7.0 structured Army reference projections (2026-09-25)
 
 - Schema 24 / compatibility revision 32 materializes Army's structured Hacking Program,
   Martial Arts, Booty, and MetaChemistry metadata into seven derived application tables
   while leaving the original normalized metadata tables in `infinity.raw.db`.
 - Hacking Program profiles preserve source order, Attack/Opponent MOD, PS, Burst, special
-  text, Device associations, targets, and declaration types. The Hacker Skill detail page
-  exposes the reference table without treating Programs as static Unit facts or inferring
-  Device ownership from names.
+  text, Device associations, targets, declaration types, and source Upgrade-extra provenance.
+  0.8 promotes those rows to `/hacking-programs` identities by composing them with reviewed
+  `hacking-program:*` records in `rules.db`. Army metadata remains authoritative for exact
+  profile fields and the baseline Device matrix; rules data supplies semantic effects/relations.
+  Hacker and Hacking Device surfaces cross-link the same identities, and Upgrade/source-specific
+  access remains distinct from baseline Device availability.
 - Martial Arts levels and Booty/MetaChemistry roll-result rows are exposed on their existing
   Skill detail surfaces. Random outcomes remain deployment/session reference data rather
   than being written onto Units or loadouts. Richer typed chart-result relationships remain

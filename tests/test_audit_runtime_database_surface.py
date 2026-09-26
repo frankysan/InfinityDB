@@ -44,7 +44,7 @@ def _runtime_database(tmp_path: Path) -> Path:
         "options": [
             {
                 "id": 1,
-                "name": "Loadout",
+                "name": "Unit FTO",
                 "points": 10,
                 "swc": "0",
                 **nested,
@@ -79,6 +79,23 @@ def _runtime_database(tmp_path: Path) -> Path:
                 "_meta": {"slug": "army", "kind": "army"},
                 "unitIds": [1],
                 "filters": filters,
+                "fireteamChart": {
+                    "spec": {"CORE": 1},
+                    "teams": [
+                        {
+                            "name": "Unit Team",
+                            "type": ["Core"],
+                            "units": [
+                                {
+                                    "slug": "unit",
+                                    "name": "Unit FTO",
+                                    "comment": "FTO (Line Troops)",
+                                    "min": 1,
+                                }
+                            ],
+                        }
+                    ],
+                },
             }
         },
         "units": {
@@ -112,16 +129,16 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 33,
-        "runtimeTableCount": 69,
-        "runtimeFieldCount": 299,
+        "surfaceCount": 35,
+        "runtimeTableCount": 79,
+        "runtimeFieldCount": 372,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 299,
-        "role:canonical_application:fieldCount": 138,
-        "role:contextual_application:fieldCount": 138,
-        "role:intentional_source_representation:fieldCount": 23,
+        "issue:none:fieldCount": 372,
+        "role:canonical_application:fieldCount": 147,
+        "role:contextual_application:fieldCount": 200,
+        "role:intentional_source_representation:fieldCount": 25,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
     assert report["openIssues"]["semanticOverlapTables"] == []
@@ -150,10 +167,23 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "logical_units", "display_army_id")["role"] == CONTEXTUAL
     assert _field(report, "logical_units", "name")["role"] == CANONICAL
     assert _field(report, "profile_payloads", "is_structure")["role"] == CANONICAL
+    assert _field(report, "profile_payload_occurrences", "logo")["role"] == CONTEXTUAL
+    assert _field(report, "profile_occurrence_includes", "quantity")["role"] == CONTEXTUAL
+    assert _field(report, "loadout_occurrence_includes", "quantity")["role"] == CONTEXTUAL
+    assert _field(report, "unit_option_include_targets", "target_army_id")["role"] == CONTEXTUAL
     assert _field(report, "application_armies", "name")["role"] == CANONICAL
     assert _field(report, "application_army_sources", "source_army_id")["role"] == CONTEXTUAL
     assert _field(report, "application_catalog_items", "name")["role"] == CANONICAL
     assert _field(report, "application_domain_slugs", "slug")["role"] == CANONICAL
+    assert _field(report, "application_fireteams", "name")["role"] == CANONICAL
+    assert (
+        _field(report, "application_fireteam_members", "logical_unit_id")["role"]
+        == CONTEXTUAL
+    )
+    assert (
+        _field(report, "application_fireteam_charts", "source_army_id")["role"]
+        == CONTEXTUAL
+    )
     assert _field(report, "application_hacking_programs", "name")["role"] == CANONICAL
     assert (
         _field(report, "application_hacking_program_devices", "source_equipment_id")["role"]
@@ -203,6 +233,8 @@ def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
         "get_trait",
         "get_unit",
         "list_armies",
+        "list_fireteam_armies",
+        "get_fireteam_chart",
         "list_booty_results",
         "list_catalog_items",
         "list_hacking_programs",

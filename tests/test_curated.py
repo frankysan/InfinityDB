@@ -1717,3 +1717,27 @@ def test_checked_in_n5_collection_models_remaining_catalog_equipment_slice() -> 
         (relation["type"], relation["recordId"])
         for relation in records["equipment:tinbot-repeater"]["relations"]
     }
+
+
+def test_checked_in_n5_collection_models_fireteam_general_reference() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    general = records["rule:fireteam-general"]
+    assert general["facts"]["memberLimits"] == {"min": 2, "max": 5}
+    assert general["facts"]["types"] == [
+        {"type": "DUO", "min": 2, "max": 2},
+        {"type": "HARIS", "min": 3, "max": 3},
+        {"type": "CORE", "min": 3, "max": 5},
+    ]
+    assert {item["term"]: item["provenance"] for item in general["facts"]["terminology"]} == {
+        "Linkable": "historical-official",
+        "pure Fireteam": "community-historical",
+    }
+
+    levels = records["rule:fireteam-level-bonuses"]["facts"]
+    assert levels["cumulative"] is True
+    assert [item["level"] for item in levels["levels"]] == [1, 2, 3, 4, 5]
+    assert levels["levels"][1]["bonuses"] == ["BS Attack (+1 SD)"]
+    assert levels["levels"][4]["bonuses"] == ["Sixth Sense"]

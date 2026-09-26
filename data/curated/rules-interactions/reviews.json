@@ -1268,6 +1268,90 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:fireteam-general",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "rule:fireteam-level-bonuses",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:assisted-fire",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:carbonite",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:controlled-jump",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:cybermask",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:enhanced-reaction",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:fairy-dust",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:oblivion",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:spotlight",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:total-control",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:trinity",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:white-noise",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "hacking-program:zero-pain",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
     }
   ],
   "futureInteractions": [
@@ -1293,7 +1377,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "deferred",
-      "reason": "White Noise is a documented Marksmanship counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first."
+      "reason": "White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation."
     },
     {
       "sourceRecordId": "hacking-program:white-noise",
@@ -1301,7 +1385,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "deferred",
-      "reason": "White Noise is a documented Multispectral Visor counter-interaction, but Hacking Programs are outside the 0.7.0 catalog scope and need their own canonical domain first."
+      "reason": "White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation."
     },
     {
       "sourceRecordId": "skill:climb",
@@ -1390,134 +1474,6 @@
       "targetRelease": "post-0.7.0",
       "status": "deferred",
       "reason": "Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device",
-      "targetRecordId": "hacking-program:carbonite",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device",
-      "targetRecordId": "hacking-program:oblivion",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device",
-      "targetRecordId": "hacking-program:spotlight",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device",
-      "targetRecordId": "hacking-program:total-control",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device-plus",
-      "targetRecordId": "hacking-program:carbonite",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device-plus",
-      "targetRecordId": "hacking-program:cybermask",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device-plus",
-      "targetRecordId": "hacking-program:oblivion",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device-plus",
-      "targetRecordId": "hacking-program:spotlight",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device-plus",
-      "targetRecordId": "hacking-program:total-control",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:hacking-device-plus",
-      "targetRecordId": "hacking-program:white-noise",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:killer-hacking-device",
-      "targetRecordId": "hacking-program:cybermask",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:killer-hacking-device",
-      "targetRecordId": "hacking-program:trinity",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:evo-hacking-device",
-      "targetRecordId": "hacking-program:assisted-fire",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:evo-hacking-device",
-      "targetRecordId": "hacking-program:controlled-jump",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:evo-hacking-device",
-      "targetRecordId": "hacking-program:enhanced-reaction",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
-    },
-    {
-      "sourceRecordId": "equipment:evo-hacking-device",
-      "targetRecordId": "hacking-program:fairy-dust",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "The Hacking Device explicitly grants access to this Hacking Program; retain the interaction until the Hacking Program domain is materialized."
     },
     {
       "sourceRecordId": "equipment:tinbot-firewall",
@@ -1872,14 +1828,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Prone halves movement from every Movement-labelled Skill and from failed Guts Rolls; use a generic Movement-label target instead of incomplete Move/Dodge-only edges."
-    },
-    {
-      "sourceRecordId": "state:possessed",
-      "targetRecordId": "hacking-program:total-control",
-      "relationType": null,
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Total Control can cancel Possessed State for the owning player, but the Hacking Program is not yet a canonical rules identity in the maintained graph."
     },
     {
       "sourceRecordId": "state:retreat",

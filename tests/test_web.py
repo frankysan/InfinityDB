@@ -323,6 +323,159 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
 
 
+def test_fireteam_chart_page_and_api_use_application_projection(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            "UPDATE application_fireteam_charts SET description = ? "
+            "WHERE application_army_id = 101",
+            ("Current chart note",),
+        )
+        connection.execute(
+            "INSERT INTO application_fireteam_chart_limits "
+            "(application_army_id, fireteam_type, position, raw_limit) "
+            "VALUES (101, 'CORE', 1, 1)"
+        )
+        connection.execute(
+            "INSERT INTO application_fireteams "
+            "(application_army_id, fireteam_id, position, name, observation, source_army_id, "
+            "source_fireteam_id, is_wildcard) "
+            "VALUES (101, 1, 1, 'Ranger Team', 'No Wildcards', 101, 1, 0)"
+        )
+        connection.execute(
+            "INSERT INTO application_fireteam_types "
+            "(application_army_id, fireteam_id, position, fireteam_type) "
+            "VALUES (101, 1, 1, 'CORE')"
+        )
+        connection.execute(
+            "INSERT INTO application_fireteam_members "
+            "(application_army_id, fireteam_id, member_id, position, source_army_id, "
+            "source_fireteam_id, source_member_id, slug, name, comment, min_count, max_count, "
+            "required, source_unit_id, logical_unit_id, resolution, fto_marker) "
+            "VALUES (101, 1, 1, 1, 101, 1, 1, 'ranger-prototype', 'Alpha Ranger', "
+            "'Line Trooper', 1, 2, 1, 1, 1, 'army', NULL)"
+        )
+    _refresh_published_content_checksum(database_path)
+    fireteam_app = create_app(database_path)
+
+    status, _, body = request(fireteam_app, "/fireteams")
+    assert status == 200
+    assert b"Fireteams" in body
+    assert b'/static/fireteams.js?v=' in body
+    assert b'href="/fireteams" aria-current="page"' in body
+
+    status, _, body = request(fireteam_app, "/api/fireteams")
+    assert status == 200
+    fireteam_index = json.loads(body)
+    assert fireteam_index["reference"] is None
+    armies = fireteam_index["items"]
+    assert [(item["id"], item["public_slug"], item["fireteam_count"]) for item in armies] == [
+        (101, "zulu-company", 1)
+    ]
+
+    status, _, body = request(
+        fireteam_app, "/api/fireteams", query="army_id=zulu-company"
+    )
+    assert status == 200
+    chart = json.loads(body)
+    assert chart["reference"] is None
+    assert chart["army"]["public_slug"] == "zulu-company"
+    assert chart["description"] == "Current chart note"
+    assert chart["limits"] == [{"type": "CORE", "position": 1, "max_count": 1}]
+    assert chart["teams"][0]["name"] == "Ranger Team"
+    assert chart["teams"][0]["types"] == ["CORE"]
+    member = chart["teams"][0]["members"][0]
+    assert member["unit"]["slug"] == "ranger-prototype"
+    assert member["required"] is True
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(database_path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/fireteams", query="army_id=zulu-company")
+    assert status == 200
+    reference = json.loads(body)["reference"]
+    assert reference["general"]["facts"]["category"] == "fireteam-general"
+    assert reference["general"]["facts"]["memberLimits"] == {"min": 2, "max": 5}
+    assert [item["type"] for item in reference["general"]["facts"]["types"]] == [
+        "DUO",
+        "HARIS",
+        "CORE",
+    ]
+    assert {
+        term["term"]: term["provenance"]
+        for term in reference["general"]["facts"]["terminology"]
+    } == {
+        "Linkable": "historical-official",
+        "pure Fireteam": "community-historical",
+    }
+    levels = reference["levels"]["facts"]
+    assert levels["cumulative"] is True
+    assert [level["level"] for level in levels["levels"]] == [1, 2, 3, 4, 5]
+    assert levels["levels"][1]["bonuses"] == ["BS Attack (+1 SD)"]
+    assert levels["levels"][4]["bonuses"] == ["Sixth Sense"]
+    assert any(
+        citation.get("source_url") and "Fireteam_Bonuses" in citation["source_url"]
+        for citation in reference["levels"]["citations"]
+    )
+
+    status, _, script = request(fireteam_app, "/static/fireteams.js")
+    assert status == 200
+    assert b"getFireteamArmies" in script
+    assert b"getFireteamChart" in script
+    assert b"Counts as:" in script
+    assert b"Authoritative" in script
+    assert b'army.role === "reinforcement"' in script
+    assert b'army.role === "sectorial" || army.role === "non_aligned"' in script
+    assert b"value === 256" in script
+    assert b'`${limit.type}: unlimited`' in script
+    assert b'element.classList.add("developer-only")' in script
+    assert b'["FTO Profiles", true]' in script
+    assert b'["Notes", true]' in script
+    assert script.count(b'fto.classList.add("developer-only")') == 1
+    assert script.count(b'note.classList.add("developer-only")') == 1
+    assert b"fireteamsIncludeWildcards" in script
+    assert b"const wildcardTeams = teams.filter((team) => team.is_wildcard);" in script
+    assert b"if (wildcardTeams.length !== 1) return teams;" in script
+    assert b".filter((team) => !team.is_wildcard)" in script
+    assert b"wildcard_members: wildcardMembers" in script
+    assert b'if (wildcard) name.append(badge("Wildcard"));' in script
+    assert b'appendMemberRow(member, { wildcard: true })' in script
+    assert b'window.addEventListener("fireteamswildcardschange"' in script
+    assert b"function renderReference(reference)" in script
+    assert b"for (const level of levelFacts.levels || [])" in script
+    assert b"Historical official term" in script
+    assert b"Community / historical shorthand" in script
+
+    status, _, page = request(fireteam_app, "/fireteams")
+    assert status == 200
+    assert b'id="fireteam-reference"' in page
+    assert b'id="fireteam-reference-content"' in page
+
+    status, _, styles = request(fireteam_app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".fireteam-card", {"width": "min(640px, 100%)"})
+    assert_css_rule(
+        styles,
+        'html[data-developer-mode="true"] .fireteam-card',
+        {"width": "100%"},
+    )
+    assert_css_rule(styles, ".fireteam-member-table table", {"min-width": "520px"})
+    assert_css_rule(
+        styles,
+        'html[data-developer-mode="true"] .fireteam-member-table table',
+        {"min-width": "760px"},
+    )
+    assert_css_rule(
+        styles,
+        ".fireteam-member-table th:first-child .skill-category-badge",
+        {"margin-left": "8px", "vertical-align": "middle"},
+    )
+
+
 def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> None:
     unit = {"id": 1, "name": "Shared Unit", "canonical": 101, "factions": [101]}
     documents = [
@@ -371,6 +524,17 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     assert armies[102]["group_id"] == 101
     assert armies[198]["role"] == "reinforcement"
     assert armies[198]["parent_army_ids"] == [101]
+    assert armies[198]["parent_armies"] == [
+        {"id": 101, "name": "Main Army", "slug": "main", "public_slug": "main"}
+    ]
+    assert armies[101]["reinforcement_sections"] == [
+        {
+            "id": 198,
+            "name": "Reinforcements",
+            "slug": "main-reinforcements",
+            "public_slug": "main-reinforcements",
+        }
+    ]
     assert armies[902]["role"] == "non_aligned"
     assert armies[902]["group_id"] == 901
     assert armies[901]["role"] == "grouping"
@@ -391,6 +555,23 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
         901: "non-aligned",
         902: "independent",
     }
+
+    status, _, body = request(role_app, "/api/units/1")
+    assert status == 200
+    detail = json.loads(body)
+    detail_armies = {army["id"]: army for army in detail["armies"]}
+    assert detail_armies[198]["role"] == "reinforcement"
+    assert detail_armies[198]["parent_armies"] == [
+        {"id": 101, "name": "Main Army", "slug": "main", "public_slug": "main"}
+    ]
+    assert detail_armies[101]["reinforcement_sections"] == [
+        {
+            "id": 198,
+            "name": "Reinforcements",
+            "slug": "main-reinforcements",
+            "public_slug": "main-reinforcements",
+        }
+    ]
 
     for army_ref in ("901", "non-aligned"):
         status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
@@ -417,6 +598,67 @@ def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
         assert {army["id"] for army in shared["armies"]} == {101, 201}
 
 
+def test_declared_faction_membership_is_distinct_and_navigable(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "declared-membership.db"
+    shutil.copy2(app_database_template, database_path)
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            "INSERT INTO unit_factions (unit_id, faction_id, position) VALUES (?, ?, ?)",
+            (3, 907, 2),
+        )
+    _refresh_published_content_checksum(database_path)
+    membership_app = create_app(database_path)
+
+    status, _, body = request(membership_app, "/api/units/3")
+    assert status == 200
+    unit = json.loads(body)
+    memberships = {item["source_faction_id"]: item for item in unit["declared_factions"]}
+    assert memberships[201] == {
+        "source_faction_id": 201,
+        "source_unit_ids": [3],
+        "application_army_id": 201,
+        "name": "Alpha Company",
+        "has_army_list": True,
+        "available": False,
+    }
+    assert memberships[907] == {
+        "source_faction_id": 907,
+        "source_unit_ids": [3],
+        "application_army_id": None,
+        "name": "Faction 907",
+        "has_army_list": False,
+        "available": False,
+    }
+
+    status, _, body = request(
+        membership_app, "/api/units", query="declared_faction_id=201&mercs=1"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert {item["id"] for item in payload["items"]} == {2, 3}
+    assert payload["declared_faction"] == {
+        "source_faction_id": 201,
+        "application_army_id": 201,
+        "name": "Alpha Company",
+        "has_army_list": True,
+    }
+
+    status, _, body = request(
+        membership_app, "/api/units", query="declared_faction_id=907&mercs=1"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert [item["id"] for item in payload["items"]] == [3]
+    assert payload["declared_faction"] == {
+        "source_faction_id": 907,
+        "application_army_id": None,
+        "name": "Faction 907",
+        "has_army_list": False,
+    }
+
+
 def test_global_pagination_counts_unique_units(app: Callable) -> None:
     status, _, body = request(app, "/api/units")
     assert status == 200
@@ -439,6 +681,82 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="order=desc")
     assert status == 200
     assert [item["id"] for item in json.loads(body)["items"]] == list(reversed(expected_ids))
+
+
+def test_unit_details_api_exposes_include_relationships(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
+
+    with sqlite3.connect(database_path) as connection:
+        payload_id = connection.execute(
+            "SELECT loadout_payload_id FROM loadout_payload_occurrences "
+            "WHERE army_id = 101 AND unit_id = 1 AND group_id = 1 AND option_id = 1"
+        ).fetchone()[0]
+        connection.execute(
+            "INSERT INTO profile_occurrence_includes "
+            "(army_id, unit_id, group_id, profile_id, position, "
+            "target_loadout_payload_id, quantity, raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (101, 1, 1, 1, 1, payload_id, 2, None),
+        )
+        connection.execute(
+            "INSERT INTO loadout_occurrence_includes "
+            "(army_id, unit_id, group_id, option_id, position, "
+            "target_loadout_payload_id, quantity, raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (101, 1, 1, 1, 1, payload_id, 1, None),
+        )
+        connection.execute(
+            "INSERT INTO unit_options "
+            "(unit_id, option_id, position, name) VALUES (?, ?, ?, ?)",
+            (1, 7, 1, "Ranger pair"),
+        )
+        connection.execute(
+            "INSERT INTO unit_option_include_targets "
+            "(unit_id, option_id, position, target_army_id, "
+            "target_loadout_payload_id, quantity, raw) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (1, 7, 1, 101, payload_id, 1, None),
+        )
+    _refresh_published_content_checksum(database_path)
+
+    include_app = create_app(database_path)
+    status, _, body = request(include_app, "/api/units/ranger-prototype")
+
+    assert status == 200
+    unit = json.loads(body)
+    army = next(item for item in unit["armies"] if item["id"] == 101)
+    assert army["profiles"][0]["includes"] == [
+        {
+            "loadout_payload_id": payload_id,
+            "name": "Rifle loadout",
+            "quantity": 2,
+            "army_id": 101,
+        }
+    ]
+    assert army["loadouts"][0]["includes"] == [
+        {
+            "loadout_payload_id": payload_id,
+            "name": "Rifle loadout",
+            "quantity": 1,
+            "army_id": 101,
+        }
+    ]
+    assert army["loadouts"][0]["loadout_payload_ids"] == [payload_id]
+    assert army["unit_option_includes"] == [
+        {
+            "option_id": 7,
+            "name": "Ranger pair",
+            "source_unit_id": 1,
+            "includes": [
+                {
+                    "loadout_payload_id": payload_id,
+                    "name": "Rifle loadout",
+                    "quantity": 1,
+                    "army_id": 101,
+                }
+            ],
+        }
+    ]
 
 
 def test_unit_rule_filters_match_profiles_and_loadouts(app: Callable) -> None:
@@ -608,6 +926,77 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert json.loads(body)["error"] == "Unit not found"
 
 
+def test_unit_details_expose_bidirectional_peripheral_controller_links(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
+    peripheral_app = create_app(database_path)
+
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            "INSERT INTO application_peripheral_unit_sources "
+            "(source_unit_id, logical_unit_id, type_id, source_id, source_name) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (2, 2, "rule:peripheral-type:cyberplug", "test-source", "Beta Scout"),
+        )
+        connection.execute(
+            "INSERT INTO application_peripheral_controller_access "
+            "(id, source_id, controller_kind, army_id, unit_id, group_id, parent_id, "
+            "source_name, type_id, relationship) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                "peripheral-controller-access:test",
+                "test-source",
+                "loadout",
+                101,
+                1,
+                1,
+                1,
+                "Alpha Ranger",
+                "rule:peripheral-type:cyberplug",
+                "access-pool",
+            ),
+        )
+        connection.execute(
+            "INSERT INTO application_peripheral_controller_targets "
+            "(access_id, target_logical_unit_id) VALUES (?, ?)",
+            ("peripheral-controller-access:test", 2),
+        )
+
+    status, _, body = request(peripheral_app, "/api/units/ranger-prototype")
+    assert status == 200
+    controller = json.loads(body)
+    army = next(item for item in controller["armies"] if item["id"] == 101)
+    assert army["loadouts"][0]["peripheral_access"] == [
+        {
+            "id": "peripheral-controller-access:test",
+            "type_id": "rule:peripheral-type:cyberplug",
+            "relationship": "access-pool",
+            "targets": [{"id": 2, "slug": "beta-scout", "name": "Beta Scout"}],
+        }
+    ]
+
+    status, _, body = request(peripheral_app, "/api/units/2")
+    assert status == 200
+    target = json.loads(body)
+    assert target["peripheral_type_ids"] == ["rule:peripheral-type:cyberplug"]
+    assert target["peripheral_controllers"] == [
+        {
+            "id": "peripheral-controller-access:test",
+            "type_id": "rule:peripheral-type:cyberplug",
+            "relationship": "access-pool",
+            "controller_kind": "loadout",
+            "controller_option_name": "Rifle loadout",
+            "army": {"id": 101, "name": "Zulu Company"},
+            "controller": {
+                "id": 1,
+                "slug": "ranger-prototype",
+                "name": "Alpha Ranger",
+            },
+        }
+    ]
+
+
 @pytest.mark.parametrize(
     ("unit_id", "expected_flags"),
     [
@@ -691,6 +1080,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/units"' in body
     assert b'href="/traits"' in body
     assert b'href="/states"' in body
+    assert b'href="/hacking-programs"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
     assert f'data-app-version="{__version__}"'.encode() in body
@@ -758,10 +1148,14 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
 
 def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> None:
     for asset, helper in (
-        ("catalog-list.js", b"getCatalogItems(page)"),
-        ("catalog-detail.js", b"getCatalogItem(catalog, itemId)"),
-        ("skill.js", b'getCatalogItem("skills", skillId)'),
-        ("skill-extras.js", b"getSkillExtras()"),
+        ("catalog-list.js", b"getCatalogItems(page, pageController.signal)"),
+        ("catalog-detail.js", b"getCatalogItem(catalog, itemId, pageController.signal)"),
+        (
+            "hacking-program-detail.js",
+            b'getCatalogItem("hacking-programs", itemId, pageController.signal)',
+        ),
+        ("skill.js", b'getCatalogItem("skills", skillId, pageController.signal)'),
+        ("skill-extras.js", b"getSkillExtras(pageController.signal)"),
         ("version-check.js", b"getVersion()"),
     ):
         status, _, body = request(app, f"/static/{asset}")
@@ -783,6 +1177,13 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         "/equipment/1",
         "/weapons",
         "/weapons/1",
+        "/traits",
+        "/traits/example",
+        "/states",
+        "/states/example",
+        "/hacking-programs",
+        "/hacking-programs/example",
+        "/fireteams",
         "/skill-extras",
         "/about",
     ],
@@ -797,6 +1198,91 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert f"Version {__display_version__}".encode() in body
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/skills",
+        "/skills/example",
+        "/equipment",
+        "/equipment/example",
+        "/weapons",
+        "/weapons/example",
+        "/traits",
+        "/traits/example",
+        "/states",
+        "/states/example",
+        "/hacking-programs",
+        "/hacking-programs/example",
+    ],
+)
+def test_rules_reference_pages_share_the_same_shell_classification(
+    app: Callable, path: str
+) -> None:
+    status, _, body = request(app, path)
+
+    assert status == 200
+    assert (
+        b'<span class="catalog-tag"><span aria-hidden="true"></span> '
+        b'Rules reference</span>' in body
+    )
+
+
+@pytest.mark.parametrize(
+    ("path", "active_href"),
+    [
+        ("/units", "/units"),
+        ("/units/example", "/units"),
+        ("/skills", "/skills"),
+        ("/skills/example", "/skills"),
+        ("/equipment", "/equipment"),
+        ("/equipment/example", "/equipment"),
+        ("/weapons", "/weapons"),
+        ("/weapons/example", "/weapons"),
+        ("/traits", "/traits"),
+        ("/traits/example", "/traits"),
+        ("/states", "/states"),
+        ("/states/example", "/states"),
+        ("/hacking-programs", "/hacking-programs"),
+        ("/hacking-programs/example", "/hacking-programs"),
+        ("/fireteams", "/fireteams"),
+        ("/about", "/about"),
+    ],
+)
+def test_browser_routes_keep_their_parent_navigation_active(
+    app: Callable, path: str, active_href: str
+) -> None:
+    status, _, body = request(app, path)
+
+    assert status == 200
+    assert f'href="{active_href}" aria-current="page"'.encode() in body
+
+
+def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
+    for path in (
+        "/",
+        "/units",
+        "/units/example",
+        "/skills",
+        "/skills/example",
+        "/equipment",
+        "/equipment/example",
+        "/weapons",
+        "/weapons/example",
+        "/traits",
+        "/traits/example",
+        "/states",
+        "/states/example",
+        "/hacking-programs",
+        "/hacking-programs/example",
+        "/fireteams",
+        "/skill-extras",
+        "/about",
+    ):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<meta name="description"' in body
+
+
 def test_landing_page_states_independence_and_asset_permission(app: Callable) -> None:
     status, _, body = request(app, "/")
 
@@ -808,6 +1294,24 @@ def test_landing_page_states_independence_and_asset_permission(app: Callable) ->
     assert b"permission to use and redistribute" in body
     assert b"Infinity graphical" in body
     assert b"assets used by the project" in body
+
+
+def test_landing_database_links_match_primary_navigation_order(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    navigation_links = re.findall(rb'<a class="nav-item" href="([^"]+)"', body)
+    landing_links = re.findall(rb'<a class="landing-link" href="([^"]+)"', body)
+    assert navigation_links[:-1] == landing_links
+    assert navigation_links[-1] == b"/about"
+
+
+def test_landing_page_links_to_fireteams(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    assert b'<a class="landing-link" href="/fireteams">' in body
+    assert b'<strong>Fireteams</strong>' in body
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
@@ -934,8 +1438,12 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert status == 200
     assert b'id="developer-mode-toggle"' in body
     assert b'id="remember-settings-toggle"' in body
+    assert b'id="fireteams-include-wildcards-toggle" type="checkbox" checked' in body
     assert b'id="cookie-consent-dialog"' in body
     assert b"Allow cookies" in body
+    assert b"Remember settings with browser cookies" in body
+    assert b"Fireteam Wildcard" in body
+    assert b"InfinityDB / Player reference" in body
     assert b'<div class="menu settings-menu" data-menu>' in body
     assert b'aria-controls="settings-menu"' in body
     assert b'>Settings <span aria-hidden="true">' in body
@@ -977,6 +1485,13 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert status == 200
     assert b'const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";' in preferences
     assert b'const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";' in preferences
+    assert (
+        b'const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";'
+        in preferences
+    )
+    assert b"function initializeFireteamsIncludeWildcardsToggle()" in preferences
+    assert b"function fireteamsIncludeWildcards()" in preferences
+    assert b'new CustomEvent("fireteamswildcardschange"' in preferences
     assert b"function initializeDeveloperModeToggle()" in preferences
     assert b"function initializeRememberSettingsToggle()" in preferences
     assert b"dialog.showModal()" in preferences
@@ -1022,6 +1537,9 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         "/traits/suppressive-fire",
         "/states",
         "/states/unconscious",
+        "/hacking-programs",
+        "/hacking-programs/carbonite",
+        "/fireteams",
         "/about",
     )
     expected_csp = (
@@ -1101,6 +1619,35 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     assert b'window.addEventListener("pageshow", closeMenu)' in navigation
 
 
+def test_soft_navigation_preserves_shell_state_and_disposes_page_handlers(
+    app: Callable,
+) -> None:
+    status, _, page_navigation = request(app, "/static/page-navigation.js")
+    assert status == 200
+    assert b'pathname.startsWith(`${linkPath}/`)' in page_navigation
+    assert b"syncDescription(nextDocument)" in page_navigation
+    assert b'document.querySelector(\'meta[name="description"]\')' in page_navigation
+
+    for asset in (
+        "catalog-list.js",
+        "catalog-detail.js",
+        "skill.js",
+        "skill-extras.js",
+        "unit.js",
+        "fireteams.js",
+        "hacking-program-detail.js",
+    ):
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"infinity:beforenavigation" in script
+        assert b"pageController.abort()" in script
+
+    for asset in ("catalog-detail.js", "skill.js", "skill-extras.js", "unit.js", "fireteams.js"):
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"signal: pageController.signal" in script
+
+
 def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     status, headers, body = request(app, "/about")
 
@@ -1112,8 +1659,10 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"developed in the open" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
-    assert b"Version 0.7 focuses on rules context" in body
-    assert b"player-data-complete 1.0 reference" in body
+    assert b"Version 0.8 connects more of the game" in body
+    assert b"Version 0.9 closes the remaining application-presentation gaps" in body
+    assert b"0.10 is the consistency, presentation, and release-hardening pass" in body
+    assert b"1.0 completes the current rules/reference coverage" in body
     assert b"not affiliated with Corvus Belli S.L." in body
     assert b"explicitly permitted InfinityDB to use and redistribute" in body
     assert b'href="/about" aria-current="page"' in body
@@ -1336,6 +1885,36 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b"function profileIdentity(" not in body
     assert b"profileIdentityWordAliases" not in body
     assert b"profileIdentityIgnoredWords" not in body
+
+
+def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
+    app: Callable,
+) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'unitProfileSymbolPath' in unit_js
+    assert b'profile.logo_urls || []' in unit_js
+    assert b'general-profile-symbols' in unit_js
+    assert b'profileTitle(profile, profileSymbols)' in unit_js
+    assert b'unitSymbol(unit.slug || unit.isc || unit.name' not in unit_js
+
+    status, _, symbol_js = request(app, "/static/unit-symbols.js")
+    assert status == 200
+    assert b'unitProfileSymbolSlug' in symbol_js
+    assert b'export function unitProfileSymbolPath' in symbol_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b'.general-profile-symbols' in styles
+    assert b'.general-profile-unit-symbol' in styles
+    assert_css_rule(
+        styles,
+        ".unit-symbol.general-profile-unit-symbol",
+        {"width": "56px", "height": "56px"},
+    )
+    assert b'--profile-symbol-title-space' not in unit_js
+    assert b'general-profile--with-symbols' not in unit_js
+    assert b'.unit-symbol-detail' not in styles
 
 
 def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None:
@@ -1578,6 +2157,97 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
     assert b"link.href = `/${catalog}/${encodeURIComponent(routeId)}`" in body
 
 
+def test_unit_details_frontend_presents_include_relationships(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+
+    assert status == 200
+    assert b"function includeTargetLink(target, anchorScope)" in unit_js
+    assert b'{ value: "Includes", header: true' in unit_js
+    assert b"loadout.loadout_payload_ids || []" in unit_js
+    assert b"anchoredPayloads.has(payloadId)" in unit_js
+    assert b'[army.id, ...(army.availability_flags || [])].join("-")' in unit_js
+    assert b"details.open = true" in unit_js
+    assert b"function unitOptionIncludeTable(options, anchorScope)" in unit_js
+    assert b'section.append(subheading("Included loadouts"));' in unit_js
+
+
+def test_unit_frontend_presents_army_relationships_and_declared_membership_filter(
+    app: Callable,
+) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function renderArmyRelationships(unit, armies)" in unit_js
+    assert b'heading("Army relationships")' in unit_js
+    assert b'link.href = `/units?army_id=${encodeURIComponent(identifier)}`;' in unit_js
+    assert (
+        b'link.href = `/units?declared_faction_id='
+        b'${encodeURIComponent(membership.source_faction_id)}`;' in unit_js
+    )
+    assert b"broader source-declared faction membership separately" in unit_js
+    assert b"this faction identity has no current Army list" in unit_js
+
+    status, _, app_js = request(app, "/static/app.js")
+    assert status == 200
+    assert b'declaredFactionId = params.get("declared_faction_id") || ""' in app_js
+    assert b'url.searchParams.set("declared_faction_id", state.declaredFactionId)' in app_js
+    assert b"renderDeclaredMembershipContext(data)" in app_js
+    assert b"broader than concrete current Army-list availability" in app_js
+
+    status, _, api_js = request(app, "/static/api.js")
+    assert status == 200
+    assert b'params.set("declared_faction_id", declaredFactionId)' in api_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".army-relationships", {"width": "min(760px, 100%)"})
+
+
+def test_unit_details_frontend_presents_selection_relationships(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+
+    assert status == 200
+    assert b"function renderSelectionRelationships(unit, armies)" in unit_js
+    assert b'heading("Selection relationships")' in unit_js
+    assert b'if (relation.family === "same-logical-cross-context-exclusive")' in unit_js
+    assert b'else if (relation.family === "cross-logical-shared-cardinality")' in unit_js
+    assert b'else if (relation.family === "single-logical-cardinality")' in unit_js
+    assert b"appendUnitLinks(item, members);" in unit_js
+    assert b'profileGroupLink(army, member.group_id)' in unit_js
+    assert b'profileGroupLink(army, target.group_id)' in unit_js
+    assert b"dependencyOptionLinks(army, target)" in unit_js
+    assert b"Source parameters:" in unit_js
+    assert b"InfinityDB does not validate complete Army Lists" in unit_js
+    assert b"profilesHeading.id = groupAnchor" in unit_js
+    assert b"if (!groupAnchored) loadoutsHeading.id = groupAnchor" in unit_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".selection-relationships", {"width": "min(760px, 100%)"})
+    assert_css_rule(
+        styles,
+        ".selection-source-parameters",
+        {"color": "var(--color-text-secondary)", "font-size": "12px"},
+    )
+
+
+def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function appendPeripheralRows(rows, item, colSpan = null)" in unit_js
+    assert b'{ value: "Peripherals", header: true' in unit_js
+    assert b'{ value: "Controller access", header: true' in unit_js
+    assert b"group.append(unitLink(target));" in unit_js
+    assert b"function renderPeripheralRelationships(unit)" in unit_js
+    assert b"const controllers = unit.peripheral_controllers || [];" in unit_js
+    assert b"item.append(unitLink(access.controller));" in unit_js
+    assert b"no fixed ownership is implied" in unit_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".peripheral-relationships", {"width": "min(760px, 100%)"})
+    assert_css_rule(styles, ".connected-unit-surface", {"padding": "14px 16px"})
+
+
 @pytest.mark.full_assets
 @pytest.mark.parametrize(
     "symbol",
@@ -1602,8 +2272,8 @@ def test_characteristic_symbols_are_served(app: Callable, symbol: str) -> None:
 def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b"function profileTitle(profile)" in body
-    assert b"generalProfile.append(profileTitle(profile), table(" in body
+    assert b"function profileTitle(profile, profileSymbols = null)" in body
+    assert b"generalProfile.append(profileTitle(profile, profileSymbols), table(" in body
     assert b"nameWithOrderSymbols(loadout.name, symbolTypes)" in body
     assert b"function generalProfileOrderType(profiles, loadouts)" in body
     assert b'hasSkill(loadouts, "regular")' in body
@@ -1695,11 +2365,36 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-list.js")
     assert status == 200
     assert b'from "./api.js"' in body
-    assert b"getCatalogItems(page)" in body
+    assert b"getCatalogItems(page, pageController.signal)" in body
     assert b"fetch(" not in body
-    assert b'["skills", "equipment", "weapons", "traits", "states"].includes(page)' in body
+    assert (
+        b'["skills", "equipment", "weapons", "traits", "states", "hacking-programs"]'
+        b'.includes(page)' in body
+    )
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
+
+
+def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
+    status, headers, body = request(app, "/hacking-programs")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"Hacking Program catalog" in body
+    assert b'href="/hacking-programs" aria-current="page"' in body
+    assert b'<th scope="col">Uses</th>' not in body
+
+    status, _, body = request(app, "/api/hacking-programs")
+    assert status == 200
+    assert json.loads(body) == {"items": []}
+
+    status, headers, body = request(app, "/hacking-programs/carbonite")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"hacking-program-detail.js" in body
+
+    status, _, body = request(app, "/api/hacking-programs/carbonite")
+    assert status == 404
+    assert json.loads(body)["error"] == "Hacking Program not found"
 
 
 def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Path) -> None:

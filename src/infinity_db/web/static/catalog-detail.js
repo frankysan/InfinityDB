@@ -16,6 +16,7 @@ const rangeModifierClasses = {
   "-6": "range-modifier-minus-6",
 };
 let currentItem;
+const pageController = new AbortController();
 
 function displayWikiUrl(url) {
   try {
@@ -305,6 +306,27 @@ function traitUsageSectionGroup(item) {
   return group;
 }
 
+
+function hackingProgramsSection(programs) {
+  const section = document.createElement("section");
+  section.className = "detail-group";
+  const heading = document.createElement("h2");
+  heading.className = "detail-section-title";
+  heading.textContent = "Baseline Hacking Programs";
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const program of programs) {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = `/hacking-programs/${encodeURIComponent(program.slug || program.id)}`;
+    link.textContent = program.name;
+    item.append(link);
+    list.append(item);
+  }
+  section.append(heading, list);
+  return section;
+}
+
 function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
@@ -337,25 +359,38 @@ function render(item) {
       ? [weaponVariants(item.weapon_variants)] : []),
     ...(catalog === "equipment" && item.profiles?.length
       ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
+    ...(catalog === "equipment" && item.hacking_programs?.length
+      ? [hackingProgramsSection(item.hacking_programs)] : []),
     ...(sections.length ? [catalog === "traits" ? traitUsageSectionGroup(item) : usageSectionGroup(sections)] : []),
   );
   content.hidden = false;
   status.hidden = true;
 }
 
+document.addEventListener(
+  "infinity:beforenavigation",
+  () => pageController.abort(),
+  { once: true },
+);
 initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
-});
-getCatalogItem(catalog, itemId).then((item) => {
+}, { signal: pageController.signal });
+getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
   if (catalog === "states") return null;
-  return visibleUnitIds().then((ids) => render(withVisibleUnits(item, ids)));
+  return visibleUnitIds(pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
+  if (error.name === "AbortError") return;
   name.firstChild.textContent = "Item unavailable";
   status.textContent = error.message || "Could not load this item.";
 });
 window.addEventListener("optionalunitschange", () => {
-  if (currentItem) visibleUnitIds().then((ids) => render(withVisibleUnits(currentItem, ids)));
-});
+  if (!currentItem) return;
+  visibleUnitIds(pageController.signal)
+    .then((ids) => render(withVisibleUnits(currentItem, ids)))
+    .catch((error) => {
+      if (error.name !== "AbortError") throw error;
+    });
+}, { signal: pageController.signal });

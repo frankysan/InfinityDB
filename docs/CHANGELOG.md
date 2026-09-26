@@ -7,6 +7,87 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+### Changed
+
+- **Web backend + Web frontend:** Complete a focused 0.8 web-consistency closeout pass:
+  align the shared shell and About page with the current connected-reference scope, classify
+  all rules catalog list/detail pages consistently, keep detail-page navigation active during
+  soft navigation,
+  synchronize page descriptions, and dispose transient page listeners/requests when the main
+  content is replaced.
+- **Acquisition + Web backend + Web frontend:** Move Unit artwork from the detail-page
+  title into the General profile header row and preserve source profile-logo provenance through
+  the Unit API. Extend generated Unit symbol mappings with profile-specific overrides so secondary
+  and Army-contextual artwork resolves to the General profile it belongs to; the current
+  processed publication is now fully browser-addressable at 806/806 SVGs.
+- **Web frontend:** Keep ordinary Fireteam cards compact in non-Developer mode while
+  retaining the full-width chart layout when Developer-only columns are visible.
+- **Project infrastructure:** Rebalance the pre-1.0 roadmap into explicit 0.8, 0.9, 0.10,
+  1.0, and post-1.0 release buckets. Keep 0.9 focused on application completeness and
+  discoverability; move the end-to-end consistency audit, frontend/theme restructuring, and
+  release/operations hardening into a dedicated 0.10 stabilization milestone; keep conditional
+  numeric-route retirement outside the 1.0 critical path.
+- **Web frontend:** Refine the Fireteam chart browser: mirror the Unit Explorer Army hierarchy
+  in the selector, present the Army source sentinel `256` as an unlimited Fireteam type
+  allowance, and move unavailable type limits plus FTO-profile/Notes columns behind Developer
+  mode so the ordinary member table stays focused and more compact.
+- **Web frontend:** Add a persistent **Fireteams include Wildcards** setting, enabled by
+  default. When a chart has one Wildcard set, hide its standalone entry and append those members
+  to the bottom of every ordinary Fireteam table with a Wildcard indicator; disabling the setting
+  restores the source-style standalone table. Preserve multiple context-specific Wildcard sets as
+  separate entries rather than merging distinct source contexts.
+
+### Added
+
+- **Data processing + Web backend + Web frontend:** Promote Hacking Programs to a first-class
+  rules/reference surface. Program statlines, targets, declaration types, and baseline Hacking
+  Device associations remain generated from structured Army metadata; reviewed N5.3 semantic
+  records add effects and typed Skill/State relationships. Program pages cross-link baseline
+  Devices, Hacker's structured table links to Program details, and Hacking Device pages expose
+  the reverse baseline-Program matrix while Upgrade/source-specific availability remains distinct.
+- **Web backend + Web frontend:** Expose Reinforcement Section parent/child Army relationships and
+  broader source-declared faction membership on Unit details. Reinforcement links navigate through
+  existing Army filters, while declared membership has its own cross-Unit filter so faction IDs
+  without a current Army List remain discoverable without being treated as concrete availability.
+- **Web backend + Web frontend:** Present reviewed Unit selection constraints and same-Unit
+  profile-group dependencies on Unit details. Whole-Unit constraints link their affected Units;
+  dependency edges link directly to the relevant profile groups and constrained loadouts while
+  preserving still-opaque Army selector parameters without pretending to validate complete lists.
+- **Web backend + Web frontend:** Present Profile, Loadout, and shared Unit-option include
+  relationships on Unit detail surfaces. Included canonical Loadouts retain quantity and Army
+  context and link to their rendered Loadout rows, while shared Unit options expose only their
+  include relationship pending the broader composite-option review.
+- **Web backend + Web frontend:** Present canonical Peripheral attachments and Controller access
+  pools on Unit profile/loadout surfaces. Controller access targets now link directly to their Unit
+  details, while Unit-backed Peripheral targets expose the reverse Controller occurrences with Army
+  and profile/loadout context without implying fixed ownership.
+- **Data processing + Web backend + Web frontend:** Add curated N5 Fireteam general rules and
+  cumulative Fireteam Level bonuses to `rules.db`, expose them as an optional reference payload
+  alongside the canonical Army chart, and generate the `/fireteams` quick reference from those
+  facts. Historical `Linkable` and community `pure Fireteam` terminology remains discoverable
+  with explicit provenance instead of being presented as current N5 terminology.
+- **Web backend + Web frontend:** Add first-class Army-scoped Fireteam browsing on
+  `/fireteams` and `/api/fireteams`, backed only by the canonical schema-25 Fireteam projection.
+  The browser presents authoritative chart limits, membership requirements, FTO-eligible
+  loadouts, Wildcards, equivalence labels, notes, source provenance, and links to resolved Units
+  without reading the raw normalized Fireteam tables at runtime.
+- **Data processing:** Materialize the first-class Fireteam application projection for
+  0.8.0: select one provenance-bound source chart per application Army, preserve chart
+  limits/types/members/notes, resolve members to logical Units, link FTO rows to canonical
+  Army-local loadouts, retain Wildcard/equivalence context, and keep Reinforcement parent
+  limits separate through the existing application Army graph. This advances the Army
+  application database to schema 25 / compatibility revision 33, so generated databases
+  from 0.7.x must be rebuilt before running the 0.8 development branch.
+- **Data processing:** Complete the 0.8.0 connected-data domain audit: establish
+  Fireteams as the new first-class structural application domain, identify Hacking
+  Programs for promotion from their existing typed projection, and keep Peripherals,
+  includes, selection/dependency constraints, Reinforcement parentage, and cross-Army
+  membership as relationships over existing identities rather than duplicate catalogs.
+- **Deployment:** Add a narrow, loopback-by-default Caddy metrics listener that can be bound to a
+  specific trusted LAN interface without publishing the application port or `/internal/*`; persist
+  the bind/port in deployment configuration and add a dependency-free workstation CLI that turns
+  the aggregate Prometheus metrics into a compact operator report.
+
 ## [0.7.2] - 2026-09-26
 
 ### Changed

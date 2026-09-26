@@ -173,8 +173,9 @@ content, so required source CI now uses `--assets required` directly from a clea
 checkout. A complete asset set is established by the generated publication inventory,
 not merely by the presence of SVG files. The validator checks every published path and
 SHA-256, rejects unexpected SVGs, and independently verifies that the browser-referenced
-subset is contained in the publication. Published variants that are not yet
-browser-referenced remain valid and required parts of the complete publication.
+subset is contained in the publication. The current processed publication is fully
+browser-addressable (806/806 SVGs); the separate subset contract still permits future
+preserved variants without excluding them from complete-publication validation.
 
 Asset-dependent pytest coverage remains marked `full_assets`; direct pytest excludes it
 by default, while the project runner includes it in `required` mode. Network/external-tool

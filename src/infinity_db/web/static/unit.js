@@ -1,12 +1,13 @@
 import { getUnit } from "./api.js";
 import { armySymbolPath } from "./army-symbols.js";
-import { unitSymbol } from "./unit-symbols.js";
+import { unitProfileSymbolPath } from "./unit-symbols.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
 const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
+const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
@@ -354,11 +355,42 @@ function generalProfileName(profile) {
   return nameWithOrderSymbols(profile.profileName, profile.symbolTypes);
 }
 
-function profileTitle(profile) {
+function profileTitle(profile, profileSymbols = null) {
   const title = document.createElement("h3");
   title.className = "profile-title";
-  title.append(generalProfileName(profile));
+  const name = document.createElement("span");
+  name.className = "profile-title-name";
+  name.append(generalProfileName(profile));
+  title.append(name);
+  if (profileSymbols) title.append(profileSymbols);
   return title;
+}
+
+function generalProfileSymbols(profile, unitName) {
+  const paths = new Set();
+  const profileLogos = profile.logoUrls.length ? profile.logoUrls : [null];
+  for (const profileLogo of profileLogos) {
+    const path = unitProfileSymbolPath(profileLogo, unitName);
+    if (path) paths.add(path);
+  }
+  if (!paths.size) return null;
+
+  const symbols = document.createElement("div");
+  symbols.className = "general-profile-symbols";
+  symbols.setAttribute("aria-hidden", "true");
+  for (const path of paths) {
+    const icon = document.createElement("img");
+    icon.className = "unit-symbol general-profile-unit-symbol";
+    icon.src = path;
+    icon.alt = "";
+    icon.width = 56;
+    icon.height = 56;
+    icon.loading = "lazy";
+    icon.decoding = "async";
+    icon.addEventListener("error", () => icon.remove(), { once: true });
+    symbols.append(icon);
+  }
+  return symbols;
 }
 
 function generalProfiles(profiles, loadouts) {
@@ -389,6 +421,7 @@ function generalProfiles(profiles, loadouts) {
       classification: mostCommon(matchingProfiles, "classification"),
       occurrenceCount: matchingProfiles.length,
       reinforcement: matchingProfiles.every((profile) => profile.reinforcement),
+      logoUrls: [...new Set(matchingProfiles.flatMap((profile) => profile.logo_urls || []))],
       sharedItems: {
         skills: generalProfileSkills(matchingProfiles, matchingLoadouts),
         equipment: commonProfileItems(matchingProfiles, "equipment"),
@@ -507,6 +540,492 @@ function profileItems(items, catalog, fallbackLabel) {
   return result;
 }
 
+const peripheralTypeLabels = {
+  "rule:peripheral-type:servant": "Servant",
+  "rule:peripheral-type:synchronized": "Synchronized",
+  "rule:peripheral-type:control": "Control",
+  "rule:peripheral-type:ancillary": "Ancillary",
+  "rule:peripheral-type:cyberplug": "Cyberplug",
+};
+
+function peripheralTypeLabel(typeId) {
+  return peripheralTypeLabels[typeId] || String(typeId || "Peripheral").split(":").at(-1);
+}
+
+function unitLink(unit) {
+  const link = document.createElement("a");
+  const routeId = unit.slug || unit.id;
+  link.href = `/units/${encodeURIComponent(routeId)}`;
+  link.textContent = unit.name || `Unit #${text(unit.id)}`;
+  return link;
+}
+
+function loadoutAnchorId(anchorScope, payloadId) {
+  return `loadout-${anchorScope}-${payloadId}`;
+}
+
+function includeTargetLink(target, anchorScope) {
+  const link = document.createElement("a");
+  link.href = `#${loadoutAnchorId(anchorScope, target.loadout_payload_id)}`;
+  const quantity = target.quantity != null && Number(target.quantity) !== 1
+    ? ` ×${target.quantity}`
+    : "";
+  link.textContent = `${target.name || "Loadout"}${quantity}`;
+  link.addEventListener("click", () => {
+    const targetElement = document.getElementById(
+      loadoutAnchorId(anchorScope, target.loadout_payload_id),
+    );
+    const details = targetElement?.closest("details");
+    if (details) details.open = true;
+  });
+  return link;
+}
+
+function includeItems(items, anchorScope) {
+  const result = document.createDocumentFragment();
+  items.forEach((item, index) => {
+    if (index) result.append(", ");
+    result.append(includeTargetLink(item, anchorScope));
+  });
+  return result;
+}
+
+function appendIncludeRows(rows, item, anchorScope, colSpan = null) {
+  if (!(item.includes || []).length) return;
+  rows.push([
+    { value: "Includes", header: true, className: "data-label profile-item-label" },
+    {
+      content: includeItems(item.includes, anchorScope),
+      className: "profile-item-list",
+      ...(colSpan ? { colSpan } : {}),
+    },
+  ]);
+}
+
+function peripheralItems(items) {
+  const result = document.createDocumentFragment();
+  items.forEach((item, index) => {
+    const quantity = item.quantity != null && Number(item.quantity) !== 1
+      ? ` ×${item.quantity}`
+      : "";
+    const label = `${item.name || "Peripheral"}${quantity} (${peripheralTypeLabel(item.type_id)})`;
+    if (index) result.append(", ");
+    result.append(document.createTextNode(label));
+  });
+  return result;
+}
+
+function peripheralAccessItems(accessItems) {
+  const result = document.createDocumentFragment();
+  accessItems.forEach((access, accessIndex) => {
+    if (accessIndex) result.append("; ");
+    const group = document.createElement("span");
+    if (access.relationship === "access-pool") {
+      group.title = "Access pool; this does not assign fixed Controller ownership.";
+    }
+    group.append(`${peripheralTypeLabel(access.type_id)}: `);
+    (access.targets || []).forEach((target, targetIndex) => {
+      if (targetIndex) group.append(", ");
+      group.append(unitLink(target));
+    });
+    result.append(group);
+  });
+  return result;
+}
+
+function appendPeripheralRows(rows, item, colSpan = null) {
+  if ((item.peripherals || []).length) {
+    rows.push([
+      { value: "Peripherals", header: true, className: "data-label profile-item-label" },
+      {
+        content: peripheralItems(item.peripherals),
+        className: "profile-item-list",
+        ...(colSpan ? { colSpan } : {}),
+      },
+    ]);
+  }
+  if ((item.peripheral_access || []).length) {
+    rows.push([
+      { value: "Controller access", header: true, className: "data-label profile-item-label" },
+      {
+        content: peripheralAccessItems(item.peripheral_access),
+        className: "profile-item-list",
+        ...(colSpan ? { colSpan } : {}),
+      },
+    ]);
+  }
+}
+
+function profileGroupAnchorId(anchorScope, groupId) {
+  return `profile-group-${anchorScope}-${groupId}`;
+}
+
+function profileGroupLabel(army, groupId) {
+  const names = [];
+  const addName = (value) => {
+    if (value && !names.includes(value)) names.push(value);
+  };
+  for (const profile of army?.profiles || []) {
+    if (Number(profile.group_id) === Number(groupId)) {
+      addName(profile.display_name || profile.name);
+    }
+  }
+  if (!names.length) {
+    for (const loadout of army?.loadouts || []) {
+      if (Number(loadout.group_id) === Number(groupId)) addName(loadout.name);
+    }
+  }
+  return names.length ? names.join(" / ") : `Profile group ${groupId}`;
+}
+
+function openRelationshipTarget(link, targetId) {
+  link.addEventListener("click", () => {
+    const target = document.getElementById(targetId);
+    const details = target?.closest("details");
+    if (details) details.open = true;
+  });
+}
+
+function profileGroupLink(army, groupId) {
+  const label = profileGroupLabel(army, groupId);
+  if (!army) return document.createTextNode(label);
+  const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
+  const targetId = profileGroupAnchorId(anchorScope, groupId);
+  const link = document.createElement("a");
+  link.href = `#${targetId}`;
+  link.textContent = label;
+  openRelationshipTarget(link, targetId);
+  return link;
+}
+
+function dependencyOptionLinks(army, target) {
+  const optionIds = new Set((target.options || []).map(Number));
+  if (!army || !optionIds.size) return null;
+  const loadouts = (army.loadouts || []).filter((loadout) => (
+    Number(loadout.group_id) === Number(target.group_id)
+      && optionIds.has(Number(loadout.option_id))
+  ));
+  if (!loadouts.length) return null;
+  const result = document.createDocumentFragment();
+  const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
+  loadouts.forEach((loadout, index) => {
+    if (index) result.append(", ");
+    const payloadId = (loadout.loadout_payload_ids || [])[0];
+    if (payloadId == null) {
+      result.append(document.createTextNode(loadout.name || `Option ${loadout.option_id}`));
+      return;
+    }
+    result.append(includeTargetLink({
+      loadout_payload_id: payloadId,
+      name: loadout.name || `Option ${loadout.option_id}`,
+    }, anchorScope));
+  });
+  return result;
+}
+
+function selectionInstruction(minCount, maxCount) {
+  const minimum = minCount == null ? null : Number(minCount);
+  const maximum = maxCount == null ? null : Number(maxCount);
+  if (minimum != null && maximum != null && minimum === maximum) {
+    return `Select exactly ${minimum}`;
+  }
+  if (minimum != null && maximum != null) return `Select ${minimum}–${maximum}`;
+  if (maximum != null) return `Select at most ${maximum}`;
+  if (minimum != null && minimum > 0) return `Select at least ${minimum}`;
+  return "Selection applies";
+}
+
+function uniqueConstraintMembers(members) {
+  const unique = new Map();
+  for (const member of members || []) {
+    if (!unique.has(member.logical_unit_id)) unique.set(member.logical_unit_id, member);
+  }
+  return [...unique.values()];
+}
+
+function appendUnitLinks(parent, members) {
+  members.forEach((member, index) => {
+    if (index) parent.append(index === members.length - 1 ? " and " : ", ");
+    parent.append(unitLink({
+      id: member.logical_unit_id,
+      slug: member.slug,
+      name: member.name,
+    }));
+  });
+}
+
+function sourceDependencyParameters(relation, member, target) {
+  const values = [];
+  if (relation.min_count != null) values.push(`relation min ${relation.min_count}`);
+  if (relation.max_count != null) values.push(`relation max ${relation.max_count}`);
+  if (member.per_parent != null) values.push(`perParent ${text(member.per_parent)}`);
+  if (target.source_group_selector != null) {
+    values.push(`group selector ${target.source_group_selector}`);
+  }
+  if (target.min_count != null) values.push(`dependency min ${target.min_count}`);
+  if (target.min_dependant != null) values.push(`minDependant ${target.min_dependant}`);
+  return values;
+}
+
+function appendRelationProvenance(item, relation) {
+  const provenance = document.createElement("span");
+  provenance.className = "developer-only";
+  provenance.textContent = ` · Army relation #${relation.relation_id}`;
+  item.append(provenance);
+}
+
+function armyExplorerLink(army) {
+  const link = document.createElement("a");
+  const identifier = army.public_slug || army.slug || army.id;
+  link.href = `/units?army_id=${encodeURIComponent(identifier)}`;
+  link.textContent = army.name || `Army ${army.id}`;
+  return link;
+}
+
+function declaredFactionLink(membership) {
+  const link = document.createElement("a");
+  link.href = `/units?declared_faction_id=${encodeURIComponent(membership.source_faction_id)}`;
+  link.textContent = membership.name || `Faction ${membership.source_faction_id}`;
+  return link;
+}
+
+function renderArmyRelationships(unit, armies) {
+  const uniqueArmies = [...new Map(armies.map((army) => [Number(army.id), army])).values()];
+  const reinforcementRelations = uniqueArmies.filter((army) => (
+    (army.parent_armies || []).length || (army.reinforcement_sections || []).length
+  ));
+  const declaredFactions = unit.declared_factions || [];
+  if (!reinforcementRelations.length && !declaredFactions.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "detail-group army-relationships";
+  const title = heading("Army relationships");
+  title.className = "detail-section-title detail-section-title--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "explorer connected-unit-surface army-relationship-surface";
+  const intro = document.createElement("p");
+  intro.className = "army-relationship-intro";
+  intro.textContent = "Army availability is shown in the profile sections below. These links show "
+    + "Reinforcement parentage and broader source-declared faction membership separately.";
+  surface.append(intro);
+
+  if (reinforcementRelations.length) {
+    surface.append(subheading("Reinforcement Sections"));
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const army of reinforcementRelations) {
+      if ((army.parent_armies || []).length) {
+        const item = document.createElement("li");
+        item.append(armyExplorerLink(army), " is a Reinforcement Section for ");
+        army.parent_armies.forEach((parent, index) => {
+          if (index) item.append(index === army.parent_armies.length - 1 ? " and " : ", ");
+          item.append(armyExplorerLink(parent));
+        });
+        item.append(".");
+        list.append(item);
+      }
+      if ((army.reinforcement_sections || []).length) {
+        const item = document.createElement("li");
+        item.append(armyExplorerLink(army), " uses ");
+        army.reinforcement_sections.forEach((reinforcement, index) => {
+          if (index) {
+            item.append(index === army.reinforcement_sections.length - 1 ? " and " : ", ");
+          }
+          item.append(armyExplorerLink(reinforcement));
+        });
+        item.append(army.reinforcement_sections.length === 1
+          ? " as its Reinforcement Section."
+          : " as its Reinforcement Sections.");
+        list.append(item);
+      }
+    }
+    surface.append(list);
+  }
+
+  if (declaredFactions.length) {
+    surface.append(subheading("Declared faction membership"));
+    const explanation = document.createElement("p");
+    explanation.className = "army-relationship-note";
+    explanation.textContent = "This source relationship is broader than current Army-list "
+      + "availability. Follow a faction link to find other Units with the same declaration.";
+    surface.append(explanation);
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const membership of declaredFactions) {
+      const item = document.createElement("li");
+      item.append(declaredFactionLink(membership));
+      if (!membership.has_army_list) {
+        item.append(" — declared membership; this faction identity has no current Army list.");
+      } else if (!membership.available) {
+        item.append(" — declared membership only; no concrete current list occurrence for this Unit.");
+      } else {
+        item.append(" — also represented by current list availability below.");
+      }
+      const provenance = document.createElement("span");
+      provenance.className = "developer-only";
+      provenance.textContent = ` · Source faction #${membership.source_faction_id}`;
+      item.append(provenance);
+      list.append(item);
+    }
+    surface.append(list);
+  }
+
+  section.append(surface);
+  return section;
+}
+
+function renderSelectionRelationships(unit, armies) {
+  const visibleArmyIds = new Set(armies.map((army) => Number(army.id)));
+  const constraints = (unit.selection_constraints || []).filter((relation) => (
+    visibleArmyIds.has(Number(relation.army_id))
+  ));
+  const dependencies = (unit.group_dependencies || []).filter((relation) => (
+    visibleArmyIds.has(Number(relation.army_id))
+  ));
+  if (!constraints.length && !dependencies.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "detail-group selection-relationships";
+  const title = heading("Selection relationships");
+  title.className = "detail-section-title detail-section-title--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "explorer connected-unit-surface selection-relationship-surface";
+  const intro = document.createElement("p");
+  intro.className = "selection-relationship-intro";
+  intro.textContent = "These source-defined relationships explain linked choices only; "
+    + "InfinityDB does not validate complete Army Lists.";
+  surface.append(intro);
+
+  if (constraints.length) {
+    surface.append(subheading("Selection constraints"));
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const relation of constraints) {
+      const item = document.createElement("li");
+      const army = armies.find((candidate) => Number(candidate.id) === Number(relation.army_id));
+      const armyName = army?.name || `Army ${relation.army_id}`;
+      const context = document.createElement("strong");
+      context.textContent = `${armyName}: `;
+      item.append(context);
+      const members = uniqueConstraintMembers(relation.members);
+      if (relation.family === "same-logical-cross-context-exclusive") {
+        item.append("Select exactly 1 occurrence of ");
+        appendUnitLinks(item, members);
+        item.append(" across its linked selection contexts.");
+      } else if (relation.family === "cross-logical-shared-cardinality") {
+        item.append(`${selectionInstruction(relation.min_count, relation.max_count)} total from `);
+        appendUnitLinks(item, members);
+        item.append(".");
+      } else if (relation.family === "single-logical-cardinality") {
+        item.append(`${selectionInstruction(relation.min_count, relation.max_count)} of `);
+        appendUnitLinks(item, members);
+        item.append(".");
+      } else {
+        item.append(`${selectionInstruction(relation.min_count, relation.max_count)} across `);
+        appendUnitLinks(item, members);
+        item.append(".");
+      }
+      appendRelationProvenance(item, relation);
+      list.append(item);
+    }
+    surface.append(list);
+  }
+
+  if (dependencies.length) {
+    surface.append(subheading("Profile-group dependencies"));
+    const explanation = document.createElement("p");
+    explanation.className = "selection-relationship-note";
+    explanation.textContent = "Dependency direction is normalized; source selector parameters are shown "
+      + "verbatim where InfinityDB does not yet assign broader list-building semantics.";
+    surface.append(explanation);
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const relation of dependencies) {
+      const army = armies.find((candidate) => Number(candidate.id) === Number(relation.army_id));
+      const armyName = army?.name || `Army ${relation.army_id}`;
+      for (const member of relation.members || []) {
+        for (const target of member.dependencies || []) {
+          const item = document.createElement("li");
+          const context = document.createElement("strong");
+          context.textContent = `${armyName}: `;
+          item.append(context, profileGroupLink(army, member.group_id), " depends on ",
+            profileGroupLink(army, target.group_id));
+          const optionLinks = dependencyOptionLinks(army, target);
+          if (optionLinks) item.append(" for ", optionLinks);
+          item.append(".");
+          const parameters = sourceDependencyParameters(relation, member, target);
+          if (parameters.length) {
+            const sourceParameters = document.createElement("span");
+            sourceParameters.className = "selection-source-parameters";
+            sourceParameters.textContent = ` Source parameters: ${parameters.join(" · ")}.`;
+            item.append(sourceParameters);
+          }
+          appendRelationProvenance(item, relation);
+          list.append(item);
+        }
+      }
+    }
+    surface.append(list);
+  }
+
+  section.append(surface);
+  return section;
+}
+
+function renderPeripheralRelationships(unit) {
+  const typeIds = unit.peripheral_type_ids || [];
+  const controllers = unit.peripheral_controllers || [];
+  if (!typeIds.length && !controllers.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "detail-group peripheral-relationships";
+  const title = heading("Peripheral relationships");
+  title.className = "detail-section-title detail-section-title--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "explorer connected-unit-surface";
+  if (typeIds.length) {
+    const type = document.createElement("p");
+    type.className = "connected-unit-type";
+    const label = typeIds.map(peripheralTypeLabel).join(", ");
+    type.textContent = `Peripheral type: ${label}`;
+    surface.append(type);
+  }
+  if (controllers.length) {
+    surface.append(subheading("Controllers"));
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const access of controllers) {
+      const item = document.createElement("li");
+      item.append(unitLink(access.controller));
+      const context = [
+        access.army?.name,
+        access.controller_option_name
+          ? `${access.controller_kind === "profile" ? "Profile" : "Loadout"}: ${access.controller_option_name}`
+          : null,
+      ].filter(Boolean);
+      if (context.length) {
+        const detail = document.createElement("span");
+        detail.className = "connected-unit-context";
+        detail.textContent = ` — ${context.join(" · ")}`;
+        item.append(detail);
+      }
+      if (access.relationship === "access-pool") {
+        item.title = "This Controller can select this Peripheral from its access pool; no fixed ownership is implied.";
+      }
+      list.append(item);
+    }
+    surface.append(list);
+  }
+  section.append(surface);
+  return section;
+}
+
 function generalProfileTableRows(profiles) {
   const rows = [];
   for (const profile of profiles) {
@@ -542,7 +1061,7 @@ function generalProfileTableRows(profiles) {
   return rows;
 }
 
-function profileTableRows(profiles, generalByName) {
+function profileTableRows(profiles, generalByName, anchorScope) {
   return profiles.flatMap((profile) => {
     const generalProfile = generalByName.get(profile.name || "");
     const generalStatsForProfile = generalProfile.stats;
@@ -571,6 +1090,8 @@ function profileTableRows(profiles, generalByName) {
         },
       ]);
     }
+    appendIncludeRows(rows, profile, anchorScope);
+    appendPeripheralRows(rows, profile);
     return rows;
   });
 }
@@ -592,7 +1113,7 @@ function profileNameWithDivisionBadge(profile) {
   return title;
 }
 
-function loadoutTable(loadouts, sharedItems, generalOrderType) {
+function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anchoredPayloads) {
   return table(
     ["Name", "Points", "SWC"],
     loadouts.flatMap((loadout, index) => {
@@ -603,7 +1124,17 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
         ...(hasSkill([loadout], "tactical awareness") ? ["tactical"] : []),
         ...Array(lieutenantOrderCount([loadout])).fill("lieutenant"),
       ].filter(Boolean);
-      const loadoutName = nameWithOrderSymbols(loadout.name, symbolTypes);
+      const loadoutName = document.createDocumentFragment();
+      for (const payloadId of loadout.loadout_payload_ids || []) {
+        if (anchoredPayloads.has(payloadId)) continue;
+        anchoredPayloads.add(payloadId);
+        const anchor = document.createElement("span");
+        anchor.id = loadoutAnchorId(anchorScope, payloadId);
+        anchor.className = "loadout-anchor";
+        anchor.setAttribute("aria-hidden", "true");
+        loadoutName.append(anchor);
+      }
+      loadoutName.append(nameWithOrderSymbols(loadout.name, symbolTypes));
       const loadoutRow = [{ content: loadoutName }, loadout.points, loadout.swc];
       loadoutRow.className = index ? "profile-summary loadout-start" : "profile-summary";
       const rows = [loadoutRow];
@@ -623,6 +1154,8 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
           },
         ]);
       }
+      appendIncludeRows(rows, loadout, anchorScope, 2);
+      appendPeripheralRows(rows, loadout, 2);
       return rows;
     }),
     "data-table--compact loadout-table",
@@ -647,11 +1180,15 @@ function sharedItemsForProfileGroup(profiles, generalByName) {
 function profileLoadoutGroups(army) {
   const groups = new Map();
   for (const profile of army.profiles) {
-    if (!groups.has(profile.group_id)) groups.set(profile.group_id, { profiles: [], loadouts: [] });
+    if (!groups.has(profile.group_id)) {
+      groups.set(profile.group_id, { id: profile.group_id, profiles: [], loadouts: [] });
+    }
     groups.get(profile.group_id).profiles.push(profile);
   }
   for (const loadout of army.loadouts) {
-    if (!groups.has(loadout.group_id)) groups.set(loadout.group_id, { profiles: [], loadouts: [] });
+    if (!groups.has(loadout.group_id)) {
+      groups.set(loadout.group_id, { id: loadout.group_id, profiles: [], loadouts: [] });
+    }
     groups.get(loadout.group_id).loadouts.push(loadout);
   }
   return [...groups.values()];
@@ -687,8 +1224,31 @@ function isEnabledArmy(army) {
   return (army.availability_flags || []).every((flag) => filters[flag]);
 }
 
+function unitOptionIncludeTable(options, anchorScope) {
+  return table(
+    ["Option", "Includes"],
+    options.map((option) => {
+      const optionName = document.createDocumentFragment();
+      optionName.append(document.createTextNode(text(option.name)));
+      const sourceId = document.createElement("span");
+      sourceId.className = "developer-only";
+      sourceId.textContent = ` (Unit #${option.source_unit_id}, option #${option.option_id})`;
+      optionName.append(sourceId);
+      return [
+        { content: optionName },
+        {
+          content: includeItems(option.includes || [], anchorScope),
+          className: "profile-item-list",
+        },
+      ];
+    }),
+    "data-table--compact unit-option-includes-table",
+  );
+}
+
 function renderArmyProfile(army, generalByName, expanded) {
   const section = document.createElement("details");
+  const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
   section.className = "explorer army-profile";
   section.open = expanded;
   const armyHeading = document.createElement("summary");
@@ -709,23 +1269,36 @@ function renderArmyProfile(army, generalByName, expanded) {
   }
   armyHeading.append(availabilityBadges(army.availability_flags));
   section.append(armyHeading);
+  if ((army.unit_option_includes || []).length) {
+    section.append(subheading("Included loadouts"));
+    section.append(unitOptionIncludeTable(army.unit_option_includes, anchorScope));
+  }
+  const anchoredPayloads = new Set();
   for (const group of profileLoadoutGroups(army)) {
+    const groupAnchor = profileGroupAnchorId(anchorScope, group.id);
+    let groupAnchored = false;
     if (group.profiles.length) {
       const profilesHeading = subheading("Profiles");
       profilesHeading.className = "army-profiles-heading";
+      profilesHeading.id = groupAnchor;
+      groupAnchored = true;
       section.append(profilesHeading);
       section.append(table(
         [],
-        profileTableRows(group.profiles, generalByName),
+        profileTableRows(group.profiles, generalByName, anchorScope),
         "data-table--compact profile-details-table",
       ));
     }
     if (group.loadouts.length) {
-      section.append(subheading("Loadouts"));
+      const loadoutsHeading = subheading("Loadouts");
+      if (!groupAnchored) loadoutsHeading.id = groupAnchor;
+      section.append(loadoutsHeading);
       section.append(loadoutTable(
         group.loadouts,
         sharedItemsForProfileGroup(group.profiles, generalByName),
         generalByName.get(group.profiles[0]?.name || "")?.orderType,
+        anchorScope,
+        anchoredPayloads,
       ));
     }
   }
@@ -736,8 +1309,6 @@ function render(unit) {
   content.replaceChildren();
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
-  const icon = unitSymbol(unit.slug || unit.isc || unit.name, "unit-symbol-detail");
-  name.prepend(icon);
   const displayArmySymbol = armySymbolPath(unit.display_army_id);
   if (displayArmySymbol) {
     const displayIcon = document.createElement("img");
@@ -787,7 +1358,10 @@ function render(unit) {
   for (const profile of displayedGeneralProfiles) {
     const generalProfile = document.createElement("section");
     generalProfile.className = "explorer general-profile";
-    generalProfile.append(profileTitle(profile), table(
+    const profileSymbols = generalProfileSymbols(
+      profile, unit.slug || unit.isc || unit.name,
+    );
+    generalProfile.append(profileTitle(profile, profileSymbols), table(
       [],
       generalProfileTableRows([profile]),
       "statline",
@@ -795,6 +1369,12 @@ function render(unit) {
     generalProfilesSection.append(generalProfile);
   }
   content.append(generalProfilesSection);
+  const armyRelationships = renderArmyRelationships(unit, unit.armies);
+  if (armyRelationships) content.append(armyRelationships);
+  const peripheralRelationships = renderPeripheralRelationships(unit);
+  if (peripheralRelationships) content.append(peripheralRelationships);
+  const selectionRelationships = renderSelectionRelationships(unit, armies);
+  if (selectionRelationships) content.append(selectionRelationships);
   let standardArmyExpanded = false;
   for (const group of groupArmiesByFaction(armies)) {
     const section = document.createElement("section");
@@ -815,16 +1395,26 @@ function render(unit) {
   content.hidden = false;
 }
 
+document.addEventListener(
+  "infinity:beforenavigation",
+  () => pageController.abort(),
+  { once: true },
+);
 initializeDistanceUnitToggle();
 
 if (!unitIdentifier) {
   status.textContent = "The requested unit address is invalid.";
 } else {
-  getUnit(unitIdentifier).then((unit) => {
+  getUnit(unitIdentifier, pageController.signal).then((unit) => {
     render(unit);
-    window.addEventListener("distanceunitchange", () => render(unit));
-    window.addEventListener("optionalunitschange", () => render(unit));
+    window.addEventListener("distanceunitchange", () => render(unit), {
+      signal: pageController.signal,
+    });
+    window.addEventListener("optionalunitschange", () => render(unit), {
+      signal: pageController.signal,
+    });
   }).catch((error) => {
+    if (error.name === "AbortError") return;
     name.textContent = "Unit unavailable";
     status.textContent = error.message || "Could not load this unit.";
   });

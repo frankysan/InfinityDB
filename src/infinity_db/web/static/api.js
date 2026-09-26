@@ -34,6 +34,15 @@ export function getArmies(signal) {
   return get("/api/armies", signal);
 }
 
+export function getFireteamArmies(signal) {
+  return get("/api/fireteams", signal);
+}
+
+export function getFireteamChart(armyId, signal) {
+  const params = new URLSearchParams({ army_id: armyId });
+  return get(`/api/fireteams?${params}`, signal);
+}
+
 export function getCatalogItems(catalog, signal) {
   return get(`/api/${encodeURIComponent(catalog)}`, signal);
 }
@@ -50,9 +59,10 @@ export function getVersion(signal) {
   return get("/api/version", signal);
 }
 
-export function getUnits({ armyId, search, skillId, equipmentId, weaponId, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
+export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
+  if (declaredFactionId) params.set("declared_faction_id", declaredFactionId);
   if (search) params.set("search", search);
   if (skillId) params.set("skill_id", skillId);
   if (equipmentId) params.set("equipment_id", equipmentId);

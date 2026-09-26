@@ -60,10 +60,10 @@ by final symbol publication. Every inventoried SVG must exist, parse as SVG, and
 match its published SHA-256, and unlisted SVGs inside the generated asset
 categories are rejected. The validator separately derives the currently
 browser-referenced subset from `army-symbols.js`, `unit-symbol-map.js`, and the
-order/characteristic endpoints. This distinction is intentional: published
-profile/army variants that the browser does not yet consume remain part of the
-complete asset set. Check output therefore reports both the full published count
-and the browser-referenced count.
+order/characteristic endpoints. This distinction is intentional even though the current processed publication is
+fully browser-addressable (806/806 SVGs): future preserved variants must remain
+part of the complete asset set rather than weakening validation. Check output
+therefore reports both the full published count and the browser-referenced count.
 
 Asset-dependent tests carry the `full_assets` pytest marker. Direct pytest runs
 exclude that marker by default, so a clean checkout is green:

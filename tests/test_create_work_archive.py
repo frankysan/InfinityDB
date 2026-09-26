@@ -105,6 +105,40 @@ def test_default_name_marks_dirty_worktree_with_content_fingerprint(tmp_path: Pa
     assert changed_again.name != dirty.name
 
 
+def test_default_name_reuses_identical_existing_archive_without_replace(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = _repo(tmp_path)
+    (root / "tracked.txt").write_text("changed", encoding="utf-8")
+    first = create_work_archive(root)
+    original_replace = Path.replace
+
+    def reject_existing_destination(path: Path, target: Path) -> Path:
+        if target.exists():
+            raise PermissionError("simulated Windows existing-destination lock")
+        return original_replace(path, target)
+
+    monkeypatch.setattr(Path, "replace", reject_existing_destination)
+
+    second = create_work_archive(root)
+
+    assert second == first
+    assert second.read_bytes() == first.read_bytes()
+
+
+def test_default_name_refuses_different_existing_archive(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    archive = create_work_archive(root)
+    archive.write_bytes(b"not the deterministic archive")
+
+    try:
+        create_work_archive(root)
+    except RuntimeError as exc:
+        assert "Refusing to replace existing work archive with different content" in str(exc)
+    else:
+        raise AssertionError("expected mismatched existing archive to be rejected")
+
+
 def test_work_archive_normalizes_git_text_line_endings_but_preserves_binary(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     (root / ".gitattributes").write_text("* text=auto\n*.bin binary\n", encoding="utf-8")

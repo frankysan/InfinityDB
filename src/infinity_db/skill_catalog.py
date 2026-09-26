@@ -8,6 +8,7 @@ from typing import Any
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
 from infinity_db.domain_references import public_slug_for_reference
+from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.skill_config import load_skill_source_config
 
@@ -318,6 +319,12 @@ class SkillCatalog:
 
         if slug == "hacker":
             rows = self.database.list_hacking_programs()
+            slugs = assign_domain_slugs(
+                ((int(row["position"]), row["name"]) for row in rows),
+                domain="hacking-programs",
+            )
+            for row in rows:
+                row["slug"] = slugs[int(row["position"])]
             return {"kind": "hacking-programs", "title": "Hacking Programs", "rows": rows}
         if slug == "martial-arts":
             rows = self.database.list_martial_arts_levels()

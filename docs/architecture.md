@@ -112,9 +112,11 @@ The production WSGI app implements this policy with a fixed-cardinality shared r
 registry. Gunicorn preloads the app before forking workers so counters are shared across the
 worker processes; routine Gunicorn access logging is disabled. `/internal/metrics` renders
 Prometheus text from the aggregate registry and `/internal/health` provides an uninstrumented
-health probe. Both are reachable on the app container network only because the public Caddy
-configuration rejects `/internal/*`. No dynamic identifier, raw URL, query value, or request
-header is admitted to the metric label vocabulary.
+health probe. The public Caddy site rejects `/internal/*`. A separate Caddy listener may expose
+only `/metrics` and `/health` on a specifically bound host/LAN interface; it defaults to host
+loopback and deployment tooling refuses wildcard metric binds. This narrow facade never publishes
+the application port or any other application route. No dynamic identifier, raw URL, query value,
+or request header is admitted to the metric label vocabulary.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in
@@ -404,6 +406,41 @@ interaction automatically. Format v13 adds `applies-effects-to` and
 `imposes-modifiers-on`; Reflective and Albedo use those edges toward Marksmanship and
 Multispectral Visor so both affected surfaces receive the reverse interaction. Format v14 adds `overrides-effects-of`; No Cover authors that precedence edge toward Limited Cover so the latter exposes the derived inverse relationship. Format v15 adds `cancels-state`; Doctor and Engineer author recovery edges once and State pages receive the derived inverse navigation. Format v16 adds `causes-state`; Forward Observer authors the Targeted activation edge once, while Targeted itself links the Skills whose rolls or declarations it changes; Disposable (X) also uses it for the item-specific Unloaded State. Format v17 adds `enables-use-of`; reviewed Camouflaged and Hidden Deployment States author that prerequisite edge toward Surprise Attack, and Stealth authors it toward Cautious Movement for the documented ZoC/Hacking Area exception. Both targets receive inverse navigation automatically without treating the edge as sufficient to satisfy all remaining requirements. Format v18 adds `uses-effects-of`; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior, so it does not incorrectly claim to enter that State. Format v19 makes full Skill definitions own ordered declaration categories through `facts.typeIds`. Format v20 adds `modifies-use-of`, `prevents-state-entry`, and `triggered-by-state-entry` so declaration transformations, State-entry prohibitions, and State-entry triggers can be linked without flattening those mechanics into generic enable/negate edges. Format v21 adds `equips-with` so a rule can explicitly provide Equipment without implying that the rule itself reuses the Equipment action or effects.
 
+### Design direction: 0.8.0 connected-data domains
+
+The 0.8.0 domain audit is maintained in `docs/080-connected-domain-audit.md`. Its
+accepted boundary is intentionally narrow: Fireteams become a new first-class
+application domain because their Army-local chart identity, composition rules, member
+semantics, FTO/Wildcard context, notes, and Reinforcement interaction cannot be reduced
+to Unit edges. Hacking Programs are now promoted from their existing structured
+application projection to a first-class rules/reference surface without duplicating
+that data: Army metadata owns exact Program profiles and baseline Device associations,
+while `rules.db` owns reviewed semantic identity/effects and typed rules relationships.
+
+Peripheral/Controller relationships, profile/loadout/unit-option includes, selection
+constraints, profile-group dependencies, Reinforcement parentage, and broader
+faction/cross-Army membership remain relationships among existing application
+identities and should be presented through those existing surfaces. Generic rules
+concepts, Attributes, Ammunition, and Training may remain supporting link targets unless
+a later completeness audit demonstrates an independent player-facing catalog need.
+A relationship target is not, by itself, justification for a new domain.
+
+Schema 25 / compatibility revision 33 implements that Fireteam boundary.
+`application_fireteam_charts` selects one provenance-bound Army-list source per application
+Army; related derived tables preserve type limits, team/type/member structure, logical-Unit
+resolution, Army-local FTO loadout eligibility, Wildcard identity, Fireteam-Level equivalence
+labels, and rule-bearing chart/team notes. `/api/fireteams` and `/fireteams` now read that
+application projection directly and never return to the raw normalized Fireteam tables during
+normal serving. Reinforcement parent limits remain separate in
+`application_army_reinforcement_parents`, so the projection/browser does not pretend to be an
+army-list legality engine or merge Main- and Reinforcement-section member pools. General
+Fireteam rules remain rules-domain data: `rules.db` owns `rule:fireteam-general` and
+`rule:fireteam-level-bonuses`, while `/api/fireteams` composes their bounded reference payload
+with each Army chart. The browser generates type/member guidance, cumulative Level bonuses,
+source links, and provenance-aware historical/community terminology from those curated facts;
+older compatible deployments without those rules records keep the Army chart and omit only the
+reference block.
+
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions
 directly from `rules.db`, preserving the boundary between static rules identities and any
@@ -438,7 +475,10 @@ projection or the broader faction registry. Normal repository serving now reads
 that layer for Army identity, source-alias resolution, hierarchy, playability,
 unit faction/group presentation, and reinforcement relationships. Concrete
 availability still comes from `army_units`; `unit_factions` remains the separate
-game-wide declared-membership relation. The only normal-serving dependency on
+game-wide declared-membership relation. Unit detail presents that relation explicitly and the
+Unit Explorer's `declared_faction_id` filter follows it without reclassifying membership as Army
+availability; source faction IDs with no current list remain source-only identities. The only
+normal-serving dependency on
 `army_lists` is the legacy source-shape `kind` value, retained for API compatibility
 and as a reinforcement fallback for incomplete/legacy source relationships.
 `metadata_factions` is no longer a normal-serving dependency. Browser code
@@ -623,8 +663,10 @@ Application Army identities and application catalog identities extend the model
 further into Army/faction presentation and rule-reference catalog serving. Milestone 2B
 completed the next relationship/storage boundary: include targets, reviewed Peripheral
 relationships, selection-safe Unit constraints, and profile-group dependencies are
-materialized; Fireteams and remaining source/context relationships stay explicit until
-their later application presentation/model is justified.
+materialized. Schema 25 / compatibility revision 33 extends that boundary with the
+Army-scoped Fireteam application projection; its repository/API/browser presentation is
+the next 0.8.0 layer. Remaining source/context relationships stay explicit until their
+application presentation/model is justified.
 
 Runtime-performance evidence for this work is collected separately from semantic
 acceptance. `tools/benchmark_runtime.py` measures representative repository read
@@ -1018,6 +1060,8 @@ this non-commercial project, not a change in ownership or MIT-license scope.
 | Data processing | `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
 | Data processing | `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
 | Data processing | `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
+| Data processing | `infinity_db.fireteam_semantics` | Shared source-label semantics for FTO, Wildcards, Fireteam-Level labels, and chart limits | Future reviewed Fireteam source-shape changes |
+| Data processing | `infinity_db.database.fireteam_relationships` | Materialize the Army-scoped canonical Fireteam projection | Fireteam repository/API presentation and future reviewed identity refinements |
 | Data processing | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
 | Web backend | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
 | Web backend | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
@@ -1039,7 +1083,13 @@ modules: the HTTP Content Security Policy explicitly restricts scripts to `self`
 page-shell templates must not introduce inline script bodies or event-handler attributes.
 When Corvus Belli graphical symbols are
 published, army and unit symbols are addressed by stable ID-and-slug paths while
-JavaScript maps source identities to those paths. Corvus Belli has explicitly
+JavaScript maps source identities to those paths. The Unit map also records only the
+profile-logo overrides whose published artwork differs from a Unit's primary symbol.
+Unit-detail responses preserve the contextual source profile-logo URLs as `logo_urls`;
+the browser resolves those values through the generated overrides and falls back to the
+Unit's primary mapping, allowing secondary artwork to stay attached to its General
+profile without making logo context part of canonical gameplay identity. The current
+processed publication is fully browser-addressable (806/806 SVGs). Corvus Belli has explicitly
 permitted InfinityDB to redistribute the processed graphical publication in the
 public repository and release/build packages for this non-commercial project. The
 assets remain Corvus Belli property and outside the MIT License. Raw acquisition
@@ -1057,9 +1107,10 @@ Local test execution now separates hermetic and full-asset coverage explicitly.
 symbol inventory before enabling `full_assets` tests; direct pytest excludes
 those tests by default. Publication writes a generated `symbol-inventory.json`
 that binds every published SVG path to its SHA-256. Validation separately derives
-the currently browser-referenced subset from the army/unit maps and static
-endpoints, so intentionally preserved future-use variants remain required parts
-of a complete publication even before the browser consumes them. A detected
+the browser-referenced subset from the army/unit maps and static endpoints. The
+current processed publication is fully browser-addressable (806/806 SVGs); the
+separate subset check remains part of the publication contract so future preserved
+variants cannot weaken full-set validation. A detected
 partial/corrupt local asset tree is an error in `auto`/`required`, while a
 completely absent tree is valid for hermetic testing.
 
@@ -1108,6 +1159,13 @@ footer receives the application version. New pages should use the
 `<!-- navigation -->`, `<!-- page-header -->`, and `<!-- page-footer -->`
 markers so their shell stays synchronized with existing pages.
 
+Same-origin browser navigation keeps that shared shell mounted and replaces only
+`main#main`. The navigation layer synchronizes the document title, description
+metadata, body data attributes, and active parent navigation item before loading
+the next page module. Transient page modules that own fetches or window-level event
+listeners must dispose them on `infinity:beforenavigation`; persistent shell modules
+are intentionally exempt because their DOM survives the replacement.
+
 `static/styles.css` is the browser design-system entry point. Its root tokens
 define shared color roles, surfaces, borders, spacing, radii, control height,
 focus treatment, and shadows. Reuse these tokens and established components
@@ -1128,9 +1186,10 @@ colors as accents. Keep those accents within the shared token and gradient
 system so catalog-specific styling remains legible and consistent.
 
 Browser preferences are stored locally. User-selected distance-unit, optional-unit,
-Developer-mode, and cache-bypass values are stored in browser `sessionStorage`; values
-loaded from persistent cookies are mirrored there before use. Disabling persistent settings
-therefore does not reset them during the current tab/session. When the user enables
+**Fireteams include Wildcards**, Developer-mode, and cache-bypass values are stored in
+browser `sessionStorage`; values loaded from persistent cookies are mirrored there before
+use. Disabling persistent settings therefore does not reset them during the current
+tab/session. When the user enables
 **Remember settings** and accepts the cookie prompt, the same values are mirrored to
 one-year SameSite cookies for reuse in later browser sessions; disabling that option
 removes the persistent cookies without clearing the current session values. The Settings
@@ -1218,8 +1277,8 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 24 and database compatibility revision
-32; it rejects incompatible databases with a rebuild instruction. The importer
+application database has schema version 25 and database compatibility revision
+33; it rejects incompatible databases with a rebuild instruction. The importer
 validates a complete relational staging database, publishes a self-contained
 application database and a lossless sibling raw archive, creates read-path indexes
 after loading, and persists SQLite planner statistics. Migration of

@@ -29,19 +29,21 @@ def test_database_separation_audit_classifies_complete_frontend_schema(tmp_path:
 
     report = audit_database(path, project_root=ROOT)
 
-    assert report["summary"]["canonicalApplicationTableCount"] == 28
-    assert report["summary"]["contextualApplicationTableCount"] == 47
+    assert report["summary"]["canonicalApplicationTableCount"] == 29
+    assert report["summary"]["contextualApplicationTableCount"] == 53
     assert report["summary"]["sourceProvenanceOnlyTableCount"] == 47
     assert report["summary"]["runtimeSourceOnlyViolationCount"] == 0
     assert report["summary"]["foreignKeyBlockerCount"] == 0
     assert report["summary"]["validationSourceOnlyDependencyCount"] == 0
     assert report["summary"]["sourceOnlyStorageBytes"] == 0
-    assert len(report["inventory"]) == 122
-    assert report["database"]["tableCount"] == 75
-    assert report["database"]["logicalInventoryTableCount"] == 122
+    assert len(report["inventory"]) == 129
+    assert report["database"]["tableCount"] == 82
+    assert report["database"]["logicalInventoryTableCount"] == 129
 
     assert _item(report, "logical_units")["classification"] == CANONICAL
     assert _item(report, "application_army_sources")["classification"] == CONTEXTUAL
+    assert _item(report, "application_fireteams")["classification"] == CANONICAL
+    assert _item(report, "application_fireteam_charts")["classification"] == CONTEXTUAL
     assert _item(report, "army_units")["classification"] == CONTEXTUAL
     assert _item(report, "units")["classification"] == CONTEXTUAL
     assert _item(report, "profiles")["classification"] == SOURCE_ONLY
@@ -61,7 +63,7 @@ def test_database_separation_audit_validates_lossless_raw_sibling(tmp_path: Path
     assert raw["status"] == "complete"
     assert raw["supportedNormalizedTableCount"] == 70
     assert raw["relationalNormalizedTableCount"] == 70
-    assert raw["importedNormalizedTableCount"] == 54
+    assert raw["importedNormalizedTableCount"] == 57
     assert raw["storedRowCount"] == sum(raw["losslessTableRowCounts"].values())
     assert raw["tableRowCounts"] == raw["losslessTableRowCounts"]
     assert raw["metadataMatchesApplication"] is True
