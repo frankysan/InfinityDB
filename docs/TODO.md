@@ -147,6 +147,13 @@ The Milestone 2B completeness inventory makes these implementation families expl
     than hard-coding a second Quick Reference table, and make historical/community vocabulary
     such as `Linkable` and `pure Fireteam` discoverable as provenance-aware aliases/help rather
     than current N5 terminology.
+- [ ] **Web frontend:** Move Unit symbols out of the Unit-detail title and into the
+  General profile presentation. Place the primary symbol at the top-right of the General
+  profile card, preferably overlapping the card edge without obscuring profile data, and use
+  the same placement model for currently unused secondary Unit symbols. Each secondary symbol
+  must appear on the General profile it is associated with rather than being collected into a
+  title-level symbol row. Keep the layout responsive and accessible, and avoid duplicating the
+  same symbol in both the title and profile presentation.
 - [ ] **Web backend + Web frontend:** Present canonical Peripheral attachments and
   Controller access pools with
   navigable links between Controllers and Peripheral targets.
@@ -561,6 +568,31 @@ work against that contract.
     options, and scenario-specific rules/elements.
   - [ ] Scenario pages should expose the selected season prominently and link
     season-specific terms to the relevant rules/state references.
+- [ ] **Post-1.0 — Data processing + Web frontend:** Add a deployment-map SVG
+  generator for scenario maps. The first iteration should accept a validated JSON map
+  definition and generate deterministic SVGs for the three standard table-size presets: 2×3
+  ft (24×36 in), 3×4 ft (36×48 in), and 4×4 ft (48×48 in). Keep the renderer itself
+  dimension-agnostic because archived ITS seasons also use sizes such as 24×32 and 32×48 in,
+  and future/scenario-specific formats must not require renderer changes.
+  - [ ] Define a flexible coordinate/geometry model with absolute and relative anchors to
+    table edges, center lines, other objects, and repeated/mirrored placements; allow
+    per-table-size overrides where geometry genuinely differs rather than scaling blindly.
+  - [ ] Support layered map primitives for Deployment Zones, Exclusion/Hazard/Scoring areas,
+    center or dividing lines, rectangular and circular regions, access/opening lines, objective
+    markers and scenery elements, labels, measurements, player-side/Attacker/Defender context,
+    legends, and scenario-specific icons. Styling should support fills, opacity, strokes, hatching,
+    symbols, and reusable semantic styles without baking one ITS season's artwork into the schema.
+  - [ ] Research current and archived ITS scenario maps before freezing the schema. Cover examples
+    with changing Deployment Zone depths, central Exclusion Zones, hazardous areas such as
+    Biotechvore regions, exact Console/Server placements, asymmetric roles, and maps containing
+    special access lines or scenario-specific objective markers. Preserve season/scenario source
+    provenance for any definitions derived from official material.
+  - [ ] Validate generated geometry and metadata deterministically: table bounds, dimensions,
+    required references/anchors, stable element order/IDs, reproducible SVG bytes where practical,
+    and readable output at print and screen sizes. Keep the JSON schema versioned so map
+    definitions can evolve without silently changing old output.
+  - [ ] Later, build a web-based editor/preview UI over the same schema and rendering engine rather
+    than creating a separate browser-only map format.
 - [ ] Add mission-aware list capability guidance once saved-list support exists.
   - [ ] Derive a transparent checklist from the selected ITS scenario and the
     imported profile data: ITS Specialist Troops, relevant equipment/skills,
